@@ -43,13 +43,13 @@ gulp.task('watch', () => {
           .pipe(gulp.dest('theme/js/dist/'))
     })
 
-    watch('scss/solway-scss/scss/*.scss', () => {
+    watch('scss/**/*.scss', () => {
       const notCompile = [
         'test',
         'test2',
       ].join()
       setTimeout(() => {
-          gulp.src(['scss/solway-scss/scss/**/*.scss', `!scss/solway-scss/scss/**/{${notCompile}}.scss`])
+          gulp.src(['scss/**/*.scss', `!scss/**/{${notCompile}}.scss`])
               .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
               .pipe(gulp.dest('theme/css/'))
       }, 500)
