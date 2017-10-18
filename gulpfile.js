@@ -131,10 +131,7 @@ gulp.task('es6Rename', () => {
 
 gulp.task('es6JsDel', () => del(['solway_necloud_es6/myJs/**/*.js']).then(paths => console.log('Deleted files and folders:\n', paths.join('\n'))))
 
-gulp.task('delReplaceFile', () => {
-  del(['tpl/blocks/**']).then(() => console.log('del tpl/blocks/**'))
-  del(['tpl/app.jsp']).then(() => console.log('del tpl/app.jsp'))
-})
+gulp.task('delReplaceFile', () => del(['tpl/blocks/**']).then(() => del(['tpl/app.jsp']).then(() => console.log('delReplaceFile'))))
 
 gulp.task('svnCommit', () => cmd.run('svn update' 
     + ' && cd theme && svn add * --force && svn commit -m ""'
