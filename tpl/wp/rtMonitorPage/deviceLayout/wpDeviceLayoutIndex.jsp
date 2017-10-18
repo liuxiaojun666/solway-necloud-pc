@@ -93,7 +93,7 @@
 		$scope.initDeviceData();
 		
 		//当前非正常设备的信息
-		$scope.allDevStatus = new Map();
+		$scope.allDevStatus = new MapDef();
 		
 		/*故障总数 3.2*/
 		$scope.getStationFault=function($scope, $http) {

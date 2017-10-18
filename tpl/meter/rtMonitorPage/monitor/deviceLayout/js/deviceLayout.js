@@ -227,16 +227,16 @@ var v2 = 0;
 reFlashDraggSVGDevCore2 = function(result,flag ,oldMapMap){
 	var oldMap = oldMapMap.get("status");
 	if(!oldMap){
-		oldMap = new Map();
+		oldMap = new MapDef();
 	}
 	var oldMapsh = oldMapMap.get("shade");
 	if(!oldMapsh){
-		oldMapsh = new Map();
+		oldMapsh = new MapDef();
 	}
-	var map = new Map();
-	var mapst = new Map();
-	var mapsh = new Map();
-	var mapsd = new Map();
+	var map = new MapDef();
+	var mapst = new MapDef();
+	var mapsh = new MapDef();
+	var mapsd = new MapDef();
 	//cleanNecloud_dev2(flag);
 	/**var b_alertNum = 0, b_errorNum = 0, b_breakNum = 0, b_normalNum = 0,
 	i_alertNum = 0, i_errorNum = 0, i_breakNum = 0, i_normalNum = 0,
@@ -385,7 +385,7 @@ reFlashDraggSVGDevCore2 = function(result,flag ,oldMapMap){
 		//var index = $.inArray($(this).attr("id"), arr3);
 		//console.log(index);
 	});
-	var mapsd = new Map();
+	var mapsd = new MapDef();
 	var narr1 = [];
 	var narr2 = [];
 	var narr2i = [];
@@ -424,7 +424,7 @@ reFlashDraggSVGDevCore2 = function(result,flag ,oldMapMap){
 		$("input[name=inverterRtDataBatchListNum_all]").val(narr1.length);
 	}
 	i_normalNum = $("input[name=inverterRtDataBatchListNum_all]").val() - i_alertNum - i_errorNum - i_breakNum;*/
-	var mapsd = new Map();
+	var mapsd = new MapDef();
 	var xarr1 = [];
 	var xarr2 = [];
 	var xarr2i = [];
@@ -461,7 +461,7 @@ reFlashDraggSVGDevCore2 = function(result,flag ,oldMapMap){
 	
 	var reStr = "";
 	v2 += 1;
-	var remap = new Map(); 
+	var remap = new MapDef(); 
 	remap.put("status",map);
 	remap.put("shade",mapsh);
 	return remap;

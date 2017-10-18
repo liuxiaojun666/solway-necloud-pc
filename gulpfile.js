@@ -103,7 +103,7 @@ gulp.task('dev', gulpSequence('svnUpdate', 'replaceToDev', 'watch', 'proxy', 'op
 
 /****************************************生产环境构建************************************** */
 // gulp.task('build', gulpSequence('replaceToProduction', 'es6Rename', 'es6JsDel'))
-gulp.task('build', gulpSequence('replaceToProduction', 'es6Rename', 'es6JsDel', 'svnCommit', 'delBlocks'))
+gulp.task('build', gulpSequence('replaceToProduction', 'es6Rename', 'es6JsDel', 'svnCommit', 'delBlocks', 'gitPush'))
 
 gulp.task('replaceToProduction', () => {
   gulp.src(['theme/js/config.router.js'])
@@ -140,6 +140,11 @@ gulp.task('es6JsDel', () => del(['solway_necloud_es6/myJs/**/*.js']).then(paths 
 gulp.task('delBlocks', () => del(['tpl/blocks/**']).then(paths => cmd.run('svn update')))
 
 gulp.task('svnCommit', () => cmd.run('svn update' 
-  + ' && cd theme && svn add * --force && svn commit -m ""'
-  // + ' && cd ../tpl && svn add * --force && svn commit -m ""'
-  + ' && cd ../solway_necloud_es6/myJs && svn update && svn add * --force && svn commit -m ""'))
+    + ' && cd theme && svn add * --force && svn commit -m ""'
+    // + ' && cd ../tpl && svn add * --force && svn commit -m ""'
+    + ' && cd ../solway_necloud_es6/myJs && svn update && svn add * --force && svn commit -m ""'
+))
+
+gulp.task('gitPush', () => {
+  setTimeout(() => cmd.run('git add . && git commit -m "line update" && git push'), 5000)
+})

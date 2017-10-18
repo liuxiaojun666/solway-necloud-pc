@@ -359,7 +359,7 @@
 <script type="text/javascript">
 	$("#mapdata").css("height",$(window).height()-50)
 	$(".modal-backdrop").css("display","none")
-	var stationIdMap = new Map();
+	var stationIdMap = new MapDef();
 	var curIndx = 0;
 	var doubleClick=false;
 	var mapType = [ 'china',
@@ -585,7 +585,7 @@
 					timeout : 5000
 				}).success(function(result) {
 				if (result) {
-					stationMap = new Map();
+					stationMap = new MapDef();
 					stationDatas = result;
 					for (var i = 0; i < stationDatas.length; i++) {
 						var st = stationDatas[i];

@@ -4,8 +4,8 @@ const express = require('express'),
     bodyParser = require('body-parser'),
     app = express()
 
-// const { HOST = 'http://114.112.96.220', PORT = '3001' } = process.env
-const { HOST = 'http://172.10.1.11:9999', PORT = '3001' } = process.env
+const { HOST = 'http://114.112.96.220', PORT = '3001' } = process.env
+// const { HOST = 'http://172.10.1.11:9999', PORT = '3001' } = process.env
 // const { HOST = 'http://127.0.0.1:8080', PORT = '3001' } = process.env
 const TIME_OUT = 30 * 1e3
 app.set('port', PORT)

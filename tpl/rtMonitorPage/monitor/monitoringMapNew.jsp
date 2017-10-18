@@ -587,8 +587,8 @@ function refreshMap(){
 			async : false,
 			success : function(result) {
 				//console.log(result);
-					stationMap = new Map();
-					stationClassMap = new Map();
+					stationMap = new MapDef();
+					stationClassMap = new MapDef();
 					var op = myChart.getOption();
 					if(result){
 						$("#normalStNum").html(result.normalNum);

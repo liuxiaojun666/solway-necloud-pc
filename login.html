@@ -10,23 +10,25 @@
 <body style="text-align: center;">
     <h1>登录</h1>
 
-    <label for="myUsername">自定义账号</label>
-    <input type="text" id="myUsername" value=""><br><br>
-
-    <label for="username">选择账号：</label>
-    <select name="" id="username">
-        <option value="gkdemo" selected>gkdemo</option>
-        <option value="15010158381">15010158381</option>
-        <option value="18611897671">18611897671</option>
-    </select><br><br>
-
-    <label for="password">密    码：</label>
-    <input type="text" id="password" value="123456"><br><br>
-
-    <img style="vertical-align: middle;" src="/Login/randomValidateCode.htm" onclick="this.src='/Login/randomValidateCode.htm?' + Math.random()" alt="">
-    <input type="text" id="code" placeholder="请输入验证码"><br><br>
-
-    <button onclick="login()">登录</button>
+    <form action="" onsubmit="login()">
+        <label for="myUsername">自定义账号</label>
+        <input type="text" id="myUsername" value=""><br><br>
+    
+        <label for="username">选择账号：</label>
+        <select name="" id="username">
+            <option value="gkdemo" selected>gkdemo</option>
+            <option value="15010158381">15010158381</option>
+            <option value="18611897671">18611897671</option>
+        </select><br><br>
+    
+        <label for="password">密    码：</label>
+        <input type="text" id="password" value="123456"><br><br>
+    
+        <img style="vertical-align: middle;" src="/Login/randomValidateCode.htm" onclick="this.src='/Login/randomValidateCode.htm?' + Math.random()" alt="">
+        <input type="text" id="code" placeholder="请输入验证码"><br><br>
+    
+        <button onclick="login()">登录</button>
+    </form>
 
     <script>
         function login () {
@@ -39,10 +41,12 @@
                     window.localStorage.hasComInvite = 1
                     window.location.href = "/index.html"
                 } else {
+                    alert(msg.status)
                     $('img').attr('src', '/Login/randomValidateCode.htm?' + Math.random())
                     $('#code').val('').focus()
                 }
             })
+            return false
         }
     </script>
 </body>

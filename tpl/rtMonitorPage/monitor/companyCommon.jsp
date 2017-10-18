@@ -371,7 +371,7 @@
 			</div>
 <script>
 //组织机构下辖电站id，key:机构id，value：以,隔开的电站id字符串，如1,2,3
-var stationIdMap = new Map();
+var stationIdMap = new MapDef();
 //改变table 的样式
 function fullScreen() {
 	$("#first-div").slideUp("slow", function(){

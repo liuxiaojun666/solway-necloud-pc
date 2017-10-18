@@ -93,7 +93,7 @@
 			$("#comm_initDev").hide();
 			$("#response_respStatus").hide();
 			$("#response_respStatusnull").hide();
-			$scope.abnormalDev = new Map();
+			$scope.abnormalDev = new MapDef();
 			$scope.currentDataName = data.dataName;
 			$scope.powerStationId = data.dataId;
 			$scope.parentId = data.dataId;
@@ -293,7 +293,7 @@
 		//获取设备静态数据信息
 		$scope.getDeviceLayout($scope, $http, $scope.powerStationId);
 		//当前非正常设备的信息
-		$scope.abnormalDev = new Map();
+		$scope.abnormalDev = new MapDef();
 		var isTimer = false;
 		$scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
 			//渲染页面//

@@ -233,7 +233,7 @@ function arrFromNullToEmpty(arr) {
 	}
 }
 //增加map
-function Map(){
+function MapDef(){
 	//初始化map_，给map_对象增加方法，使map_像个Map
     var map_=new Object();
     //属性加个特殊字符，以区别方法名，统一加下划线_

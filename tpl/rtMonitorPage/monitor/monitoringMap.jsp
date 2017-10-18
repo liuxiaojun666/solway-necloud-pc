@@ -735,8 +735,8 @@
 				url : "${ctx}/MobileRtmDeviceMonitor/getPowerStationStatusDataNew.htm",
 				async : false,
 				success : function(result) {
-						stationMap = new Map();
-						stationClassMap = new Map();
+						stationMap = new MapDef();
+						stationClassMap = new MapDef();
 						var sumStNum = 0;
 						var normalStNum = 0;
 						var faultStNum = 0;

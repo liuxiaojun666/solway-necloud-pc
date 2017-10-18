@@ -752,8 +752,8 @@ app.controller('dtNewMonitorCtrl', function($scope,$rootScope,$http, $state, $st
 			//async : false,
 			data : {'buildSTList':buildSTList},
 			success : function(result) {
-					stationMap = new Map();
-					stationClassMap = new Map();
+					stationMap = new MapDef();
+					stationClassMap = new MapDef();
 					var op = provinceMapChart.getOption();
 					if(result){
 						$("#normalStNum").html(result.normalNum);
