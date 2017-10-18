@@ -145,6 +145,4 @@ gulp.task('svnCommit', () => cmd.run('svn update'
     + ' && cd ../solway_necloud_es6/myJs && svn update && svn add * --force && svn commit -m ""'
 ))
 
-gulp.task('gitPush', () => {
-  setTimeout(() => cmd.run('git add . && git commit -m "line update" && git push'), 5000)
-})
+gulp.task('gitPush', () => setTimeout(() => cmd.run('git add . && git commit -m "line update" && git push'), 5000))
