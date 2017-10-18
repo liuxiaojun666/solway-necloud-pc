@@ -1,0 +1,31 @@
+ <div ng-controller="commonCtrl">
+  <!-- -->
+  <toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+  <!-- navbar -->  <div data-ng-include=" 'tpl/blocks/header.jsp' " class="app-header navbar">
+  </div>
+  <!-- / navbar -->
+
+  <!-- menu -->
+  <div data-ng-include=" 'tpl/blocks/aside.jsp' " class="app-aside hidden-xs {{app.settings.asideColor}}">
+  </div>
+  <!-- / menu -->
+  <!-- / menu -->
+
+  <!-- view -->
+  <div class="app-content" ng-class="{'m-n': app.hideAside, 'h-full': app.hideFooter }">
+    <div class="app-content-body app-content-full fade-in-up" ng-class="{'h-full': app.hideFooter }" ui-view>
+    </div>
+  </div>
+  <!-- / view -->
+ </div>
+ 
+   <script>
+// success   info    wait   warning   error
+var promptObj;
+app.controller('commonCtrl', ['$scope', 'toaster','$http', function($scope, toaster,$http) {
+	promptObj=$scope.getPrompt = function(type,title,message){
+        toaster.pop(type,title,message);
+    };
+ 
+}]);
+</script>

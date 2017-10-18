@@ -1,0 +1,374 @@
+/*************************************  注意   看这里  *******************************************
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * 
+ *
+ *
+ * 
+ *
+ *
+ * 
+ *                         若要修改此文件，请先更改baseUrl  为  注释内容
+ * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * 
+ *
+ *
+ * 
+ *
+ * 
+ * *************************************  注意   看这里  *******************************************
+ */
+
+let baseUrl = ''/*document.getElementById('routerJS').getAttribute('param')*/
+/**
+ * [loding动画]
+ * params{d-loding="true/false"}
+ */
+app.directive('dLoding', [() => ({
+    restrict: 'A',
+    transclude: !0,
+    replace: !0,
+    scope: {
+        dLoding: '='
+    },
+    template: `
+<div>
+    <div ng-transclude class="clearfix" style="height:100%;"></div>
+    <div class="loding-view" ng-if="dLoding" style="position:absolute;width:100%;height:100%;top:0;left:0;z-index:9999;text-align:center;background:rgba(255,255,255,.8)">
+    <div class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+    </div>
+    </div>
+</div>`,
+    link ($scope, $element) {
+        $($element).css('position', 'relative')
+    }
+})])
+/**
+ * [未选择时显示  未选择图片]
+ * params{has-content="data"} data为假  显示图片
+ */
+app.directive('hasContent', [() => ({
+    restrict: 'A',
+    replace: !0,
+    transclude: !0,
+    scope: {
+        hasContent: '='
+    },
+    template: `
+<div style="height:100%;">
+    <div ng-transclude ng-if="hasContent" class="clearfix" style="height:100%;"></div>
+    <div ng-if="!hasContent" style="text-align:center;height: 100%;position:relative">
+        <img style="position:absolute;top:50%;left:50%;margin-left:-124px;margin-top:-124px;" src="${baseUrl}/theme/images/noMessage.png" alt="" />
+    </div>
+</div>`,
+})])
+
+/**
+ * [分页]
+ * params{
+ * get-data="接口自定义名.getData",  
+ * paging="接口返回数据中包含分页信息部分"    
+ * pageSize="none"} pageSize为none时不显示每页多少条默认10条
+ */
+app.directive('myPaging', [() => ({
+    restrict: 'E',
+    replace: !1,
+    templateUrl: baseUrl + '/tpl/publicComponent/paging.jsp',
+    scope: {
+        getData: '=',
+        paging: '=',
+        pageSize: '@'
+    },
+    controller ($scope, $element) {
+        $scope.showPageSize = 10
+        $scope.mygetData = (obj, arg2) => {
+            if (arg2) return
+            $scope.getData(obj)
+        }
+    }
+})])
+
+
+/**
+ * [表格]
+ * column: '=',   列
+    datasource: '=',   行
+    trClick: '=',    tr-click='点击行要执行的函数'  可不传
+    scrollY: '=',   滚动部分的高度  不传不滚动
+    trackBy: '@',   默认根据哪个字段排序   不传不排序
+   beforeCreate: '=',       类vue生命周期
+    created: '=',           类vue生命周期
+    beforeMount: '=',       类vue生命周期
+    mounted: '=',           类vue生命周期
+    beforeUpdate: '=',      类vue生命周期
+    updated: '=',           类vue生命周期
+    beforeDestroy: '=',     类vue生命周期
+    destroyed: '=',         类vue生命周期
+ */
+app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: {
+        column: '=',
+        datasource: '=',
+        trClick: '=',
+        scrollY: '=',
+        trackBy: '@',
+        beforeCreate: '=',
+        created: '=',
+        beforeMount: '=',
+        mounted: '=',
+        beforeUpdate: '=',
+        updated: '=',
+        beforeDestroy: '=',
+        destroyed: '=',
+    },
+    templateUrl: baseUrl + '/tpl/publicComponent/myTable.jsp',
+    link ($scope, $element) {
+        $scope.beforeMount && $scope.beforeMount($scope, $element)
+        $timeout(() => {
+            $scope.mounted && $scope.mounted($scope, $element)
+            $scope.isMounted = !0
+        }, 0)
+    },
+    controller ($scope, $element) {
+        $scope.beforeCreate && $scope.beforeCreate($scope, $element)
+
+        $scope.orderBy = !0
+        $scope.sort = (sort, dataIndex) => {
+            if (void 0 === $scope.datasource[0]) return
+            if (!sort) return
+            if (dataIndex !== $scope.orderByDataIndex) {
+                $scope.orderByDataIndex = dataIndex
+                $scope.orderBy = !0
+            }
+            if (typeof $scope.datasource[0][dataIndex] === 'number') {
+                $scope.datasource.sort( (a, b) => {
+                    return $scope.orderBy ? a[dataIndex] - b[dataIndex] : b[dataIndex] - a[dataIndex]
+                })
+            } else {
+                $scope.orderBy && $scope.datasource.sort((a, b) => {
+                    return do {
+                        if (null === a[dataIndex] || null === b[dataIndex]) -1
+                        else if (a[dataIndex].length == b[dataIndex].length) b[dataIndex].localeCompare(a[dataIndex])
+                        else b[dataIndex].length - a[dataIndex].length
+                    }
+                })
+                $scope.datasource.reverse()
+            }
+            $scope.gen.next($scope.orderByDataIndex)
+            $scope.orderBy = !$scope.orderBy
+        }
+        
+        $scope.$watch('datasource', (newValue, oldValue) => {
+            $scope.gen = (function * () {
+                $scope.orderByDataIndex = void 0
+                $scope.orderByDataIndex = yield
+            })()
+            $scope.gen.next()
+            $timeout(() => {
+                if ($scope.orderByDataIndex) return
+                $scope.gen.next(void 0)
+                if ($scope.trackBy) $scope.sort(!0, $scope.trackBy)
+                if ($scope.scrollY) {
+                    const _$element = $($element)
+                    if (_$element.find('.my-table-body').height() > _$element.find('.my-table-body table').height()) {
+                        _$element.find('.my-table-head').css('padding-right', '0px')
+                    } else {
+                        _$element.find('.my-table-head').css('padding-right', '17px')
+                    }
+                }
+            }, 0)
+        })
+
+        $scope.$watchGroup(['datasource', 'column'], async (newValue, oldValue, $scope) => {
+            if (!$scope.isMounted) return
+            $scope.beforeUpdate && $scope.beforeUpdate($scope, $element)
+            await myAjaxData.timeout(0)
+            $scope.updated && $scope.updated($scope, $element)
+        })
+
+        $element.on('$destroy', async () => {
+            $scope.beforeDestroy && $scope.beforeDestroy($scope, $element)
+            await myAjaxData.timeout(0)
+            $scope.destroyed && $scope.destroyed($scope, $element)
+        })
+
+        $scope.created && $scope.created($scope, $element)
+    }
+})])
+
+/**
+ * [切换电站头]
+ */
+app.directive('switchPower', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: !0,
+    templateUrl: baseUrl + '/tpl/publicComponent/switchPower.jsp',
+    controller ($scope) {
+        $scope.getCurrentDataName('00', 0, (result) => {
+            $scope.currentDataName = result.currentDataName
+            myAjaxData.setCurrentStationData(result)
+        })
+        $scope.$on('broadcastSwitchStation',(event, data) => {
+            $scope.currentDataName = data.dataName
+            myAjaxData.setCurrentStationData({currentDataName: data.dataName, currentSTID: data.dataId})
+            $scope.reload()
+        })
+    }
+})])
+
+/**
+ * [日历时间]    input样式手动设置
+ * dateTime: '=',       初始显示时间
+    endDate: '=',       结束时间
+    startDate: '=',     开始时间
+    calendarType: '@'   日历类型   (yyyy-MM-dd   yyyy-MM  yyyy等)
+    showArrow           是否显示左右箭头
+ */
+app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: {
+        dateTime: '=',
+        endDate: '=',
+        startDate: '=',
+        calendarType: '@',
+        showArrow: '='
+    },
+    template: `
+    <div class="calendar">
+        <span ng-if="showArrow" ng-click="changeDateTime(-1)"><i class="fa fa-angle-left"></i></span>
+        <input type="text" value="{{showDate}}" ng-model="showDate">
+        <span ng-if="showArrow" ng-click="changeDateTime(1)"><i class="fa fa-angle-right"></i></span>
+    </div>`,
+    link ($scope, $element) {
+        const calendarMap = {
+            'yyyy-MM-dd': {
+                minView : 2,
+            },
+            'yyyy-MM': {
+                minView : 3,
+                startView: 3,
+            },
+            'yyyy': {
+                minView : 4,
+                startView: 4,
+            }
+        }
+        $scope.randomId = (Math.random() + '').substr(2, 10)
+        $($element).find('input').attr('id', $scope.randomId)
+        $ocLazyLoad.load([
+                baseUrl + '/vendor/bootstrap/css/bootstrap-datetimepicker.min.css',
+                baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.js'
+            ]).then( () => $ocLazyLoad.load([
+                baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
+                baseUrl + '/vendor/libs/moment.min.js'
+            ])).then( () => {
+                $('#' + $scope.randomId).datetimepicker({
+                    format: $scope.calendarType.toLocaleLowerCase(),
+                    language: 'zh-CN',
+                    todayHighlight:!0,
+                    todayBtn: !0,
+                    autoclose: !0,
+                    endDate: $scope.endDate || new Date,
+                    startDate: $scope.startDate || new Date('1970', '01', '01'),
+                    ...calendarMap[$scope.calendarType],
+                    initialDate: $scope.dateTime,
+                    pickerPosition: "bottom-left"
+                })
+                .on('hide', ev => {
+                    $scope.dateTime = ev.date
+                    $scope.$apply()
+                })
+                .on('changeDate', ev => {
+                    $scope.showArrow && $scope.disabled()
+                })
+            })
+        $timeout(() => $scope.showArrow && $scope.disabled(), 0)
+    },
+    controller ($scope, $element) {
+        $scope.disabled = (noChange) => {
+            const showDateLastNumber = +$scope.showDate.split('-').slice(-1)
+            let startLastNumber = '', 
+                endLastNumber = '', 
+                startDate = $scope.startDate || new Date('1970', '01', '01'),
+                endDate = $scope.endDate || new Date
+            switch ($scope.calendarType.substr(-1, 1)) {
+                case 'y':
+                    startLastNumber = startDate.getFullYear()
+                    endLastNumber = endDate.getFullYear()
+                    break
+                case 'M':
+                    startLastNumber = startDate.getMonth() + 1
+                    endLastNumber = endDate.getMonth() + 1
+                    break
+                case 'd':
+                    startLastNumber = startDate.getDate()
+                    endLastNumber = endDate.getDate()
+                    break
+            }
+            let num = 0
+            if (showDateLastNumber === startLastNumber) {
+                if (noChange) num = -1
+                else $($element).find('.fa-angle-left').parent().addClass('disabled')
+            } else {
+                if (!noChange) $($element).find('.fa-angle-left').parent().removeClass('disabled')
+            }
+            if (showDateLastNumber === endLastNumber) {
+                if (noChange) num = 1
+                else $($element).find('.fa-angle-right').parent().addClass('disabled')
+            } else {
+                if (!noChange) $($element).find('.fa-angle-right').parent().removeClass('disabled')
+            }
+            return num
+        }
+        $scope.$watch('showDate', (newValue, oldValue) => {
+            if (void 0 === window.moment) return
+            if (newValue != oldValue) {
+                const newDateTime = moment(newValue)._d
+                if ((newDateTime + '').toLocaleLowerCase() == "invalid date") {
+                    return promptObj("error", "", "error" + "\n" + "您输入的日期或时间格式错误")
+                }
+                $scope.dateTime = newDateTime
+            }
+        })
+        $scope.$watch('dateTime', (newValue, oldValue) => {
+            $scope.showDate = $scope.dateTime.Format($scope.calendarType)
+        })
+        $scope.$watch('startDate', (newValue, oldValue) => {
+            if (newValue != oldValue) $('#' + $scope.randomId).datetimepicker('setStartDate', newValue.Format($scope.calendarType))
+        })
+        $scope.$watch('endDate', (newValue, oldValue) => {
+            if (newValue != oldValue) $('#' + $scope.randomId).datetimepicker('setEndDate', newValue.Format($scope.calendarType))
+        })
+        $scope.changeDateTime = num => {
+            if (num === $scope.disabled(true)) return
+            $scope.dateTime = moment($scope.dateTime).add(num, $scope.calendarType.substr(-1, 1))._d
+            $timeout(() => $scope.disabled(), 0)
+        }
+    }
+})])
