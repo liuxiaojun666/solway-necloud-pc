@@ -125,8 +125,7 @@ gulp.task('es6Rename', () => {
     .pipe(rename(path => {
       path.basename += ".js"
       path.extname = ".bak"
-    }))
-    .pipe(gulp.dest('solway_necloud_es6/myJs/'))
+    })).pipe(gulp.dest('solway_necloud_es6/myJs/'))
 })
 
 gulp.task('es6JsDel', () => del(['solway_necloud_es6/myJs/**/*.js']).then(paths => console.log('Deleted files and folders:\n', paths.join('\n'))))
@@ -137,18 +136,19 @@ gulp.task('delReplaceFile', () =>
     .then(() => console.log('delReplaceFile'))
 )
 
-gulp.task('commit', () => cmd.run('svn update' 
-    + ' && git add . && git commit -m "line update" && git push'
-    + ' && cd theme && svn add * --force && svn commit -m ""'
-    + ' && cd ../tpl && svn add * --force && svn commit -m ""'
-    + ' && cd ../solway_necloud_es6/myJs && svn update && svn add * --force && svn commit -m ""'
-))
+// gulp.task('commit', () => cmd.run('svn update' 
+//     + ' && git add . && git commit -m "line update" && git push'
+//     + ' && cd theme && svn add * --force && svn commit -m ""'
+//     + ' && cd ../tpl && svn add * --force && svn commit -m ""'
+//     + ' && cd ../solway_necloud_es6/myJs && svn update && svn add * --force && svn commit -m ""'
+// ))
 
-gulp.task('cmdGet', [], () => {
+gulp.task('commit', [], () => {
 
   cmd.get(`svn update`, (err, data, stderr) => {
-    
+
     if (err) return console.log('svn update webapp error :\n\n', err, data, stderr)
+    if (data.includes('conflicts:')) return console.log('等等， webapp 文件有冲突，\n', data, '冲突修改后，执行  “gulp commit” 提交代码')
     console.log('webapp svn update dong', data, stderr)
 
     cmd.run(`cd theme && svn add * --force && svn commit -m ""`)
@@ -157,12 +157,13 @@ gulp.task('cmdGet', [], () => {
   })
 
   
-  cmd.get(`cd solway_necloud_es6/myJs && svn update`, (err, data, stderr) => {
+  cmd.get(`cd solway_necloud_es6 && svn update`, (err, data, stderr) => {
 
     if (err) return console.log(`svn update es6 error\n`, err, data, stderr)
+    if (data.includes('conflicts:')) return console.log('等等， es6 文件有冲突，\n', data, '冲突修改后，执行  “gulp commit” 提交代码')
     console.log('es6 svn update dong', data, stderr)
 
-    cmd.run('cd solway_necloud_es6/myJs && svn add * --force && svn commit -m ""')
+    cmd.run('cd solway_necloud_es6 && svn add * --force && svn commit -m ""')
   })
 
 
