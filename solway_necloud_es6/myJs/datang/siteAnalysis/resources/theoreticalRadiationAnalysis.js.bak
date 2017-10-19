@@ -1,126 +1,122 @@
-app.directive('colorBlock', ['myAjaxData', myAjaxData => {
-    return {
-        restrict: 'E',
-        template: $('#color-block').html(),
-        replace: true,
-        scope: {
-            title: "@",
-            background: '@',
-            icon: '@',
-            content: '@'
-        },
+app.directive('traColorBlock', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    template: $('#color-block').html(),
+    replace: true,
+    scope: {
+        title: "@",
+        background: '@',
+        num: '@',
+        company: '@'
     }
-}])
+})])
 
-app.directive('cleaningAdviceChart', ['myAjaxData', (myAjaxData) => {
-    return{
-        restrict: 'E',
-        scope: {
-            detail: '='
-        },
+app.directive('traChart', ['myAjaxData', (myAjaxData) => ({
+    restrict: 'E',
+    scope: {
+        detail: '='
+    },
 
-        link ($scope, $element, $attrs) {
-            const setWidthHeight = () => {
-                $($element).width( ((window.innerWidth - 220) < 800) ? 800 : window.innerWidth - 220)
-                        .height( ((window.innerHeight - 250) < 300) ? 300 : window.innerHeight - 250)
-            }
-            setWidthHeight()
-            const myChart = echarts.init($element[0])
-            window.addEventListener('resize', () => {
-                setWidthHeight()
-                myChart.resize()
-            })
-
-            const renderChart = resData => {
-                const data = Array.apply(null, { length: 30 }).map((v, i) => {
-                    if (i ==5 ) {
-                        return {
-                            value: Math.random() * 20,
-                            symbol: 'image://' + 'http://img7.doubanio.com/view/movie_poster_cover/ipst/public/p2497756471.jpg',
-                            symbolSize: ['48.75', '75'],
-                            name: 'name'
-                        }
-                    }
-                    return Math.random() * 20
-                })
-                const option = {
-                    title: {
-                        text: '电站积灰指数'
-                    },
-                    color: ['#2cc6ff'],
-                    tooltip : {
-                        trigger: 'axis',
-                    },
-                    grid: {
-                        top: '80',
-                        left: '20',
-                        right: '20',
-                        bottom: '20',
-                        containLabel: true
-                    },
-                    xAxis : [
-                        {
-                            name: '',
-                            type : 'category',
-                            data : Array.apply(null, { length: 30 }).map((v, i) => i + 1 + '')
-                        }
-                    ],
-                    yAxis : [
-                        {
-                            name: '积灰指数',
-                            splitLine: {
-                                show: false
-                            },
-                            type : 'value'
-                        }
-                    ],
-                    series : [
-                        {
-                            name:'积灰指数',
-                            type:'bar',
-                            barWidth: '20',
-                            // markPoint : {
-                            //     data : [
-                            //         {
-                            //             type : 'max', 
-                            //             name: '最大值',
-                            //             symbolSize: 1,
-                            //             label: {
-                            //                 normal: {
-                            //                     position: 'top',
-                            //                     formatter: function(param){
-                            //                         return `hello`
-                            //                     }
-                            //                 }
-                            //             }
-                            //         },
-                            //         {type : 'min', name: '最小值'}
-                            //     ]
-                            // },
-                            itemStyle: {
-                                normal: {
-                                    color: function(params) {
-                                        return params.data > 10 ? '#2cc6ff' : '#7d8284'
-                                    }
-                                }
-                            },
-                            data
-                        }, 
-                        // {
-                        //     type: 'pictorialBar',
-                        //     symbolPosition: 'end',
-                        //     // symbolRotate: 165,
-                        //     symbolOffset: ['20%', '100%'],
-                        //     data
-                        // }
-                    ]
-                }
-                myChart.setOption(option)
-            }
-            renderChart()
+    link ($scope, $element, $attrs) {
+        const setWidthHeight = () => {
+            $($element).width( ((window.innerWidth - 220) < 800) ? 800 : window.innerWidth - 220)
+                    .height( ((window.innerHeight - 300) < 300) ? 300 : window.innerHeight - 300)
         }
+        setWidthHeight()
+        const myChart = echarts.init($element[0])
+        window.addEventListener('resize', () => {
+            setWidthHeight()
+            myChart.resize()
+        })
+
+        const renderChart = resData => {
+            const data = Array.apply(null, { length: 30 }).map((v, i) => {
+                if (i ==5 ) {
+                    return {
+                        value: Math.random() * 20,
+                        symbol: 'image://' + 'http://img7.doubanio.com/view/movie_poster_cover/ipst/public/p2497756471.jpg',
+                        symbolSize: ['48.75', '75'],
+                        name: 'name'
+                    }
+                }
+                return Math.random() * 20
+            })
+            const option = {
+                title: {
+                    text: '电站积灰指数'
+                },
+                color: ['#2cc6ff'],
+                tooltip : {
+                    trigger: 'axis',
+                },
+                grid: {
+                    top: '80',
+                    left: '20',
+                    right: '20',
+                    bottom: '20',
+                    containLabel: true
+                },
+                xAxis : [
+                    {
+                        name: '',
+                        type : 'category',
+                        data : Array.apply(null, { length: 30 }).map((v, i) => i + 1 + '')
+                    }
+                ],
+                yAxis : [
+                    {
+                        name: '积灰指数',
+                        splitLine: {
+                            show: false
+                        },
+                        type : 'value'
+                    }
+                ],
+                series : [
+                    {
+                        name:'积灰指数',
+                        type:'bar',
+                        barWidth: '20',
+                        // markPoint : {
+                        //     data : [
+                        //         {
+                        //             type : 'max', 
+                        //             name: '最大值',
+                        //             symbolSize: 1,
+                        //             label: {
+                        //                 normal: {
+                        //                     position: 'top',
+                        //                     formatter: function(param){
+                        //                         return `hello`
+                        //                     }
+                        //                 }
+                        //             }
+                        //         },
+                        //         {type : 'min', name: '最小值'}
+                        //     ]
+                        // },
+                        itemStyle: {
+                            normal: {
+                                color: function(params) {
+                                    return params.data > 10 ? '#2cc6ff' : '#7d8284'
+                                }
+                            }
+                        },
+                        data
+                    }, 
+                    // {
+                    //     type: 'pictorialBar',
+                    //     symbolPosition: 'end',
+                    //     // symbolRotate: 165,
+                    //     symbolOffset: ['20%', '100%'],
+                    //     data
+                    // }
+                ]
+            }
+            myChart.setOption(option)
+        }
+        renderChart()
     }
-}])
+})])
 
 
 ajaxData({
@@ -142,7 +138,7 @@ ajaxData({
             data: {}
         }
 },{
-})('cleaningAdviceCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+})('theoreticalRadiationAnalysisCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
     $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
     $scope.dateTime2 = new Date
 })

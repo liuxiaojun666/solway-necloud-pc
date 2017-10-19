@@ -2,7 +2,7 @@
 
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
-app.directive('colorBlock', ['myAjaxData', function (myAjaxData) {
+app.directive('traColorBlock', ['myAjaxData', function (myAjaxData) {
     _newArrowCheck(void 0, void 0);
 
     return {
@@ -12,13 +12,13 @@ app.directive('colorBlock', ['myAjaxData', function (myAjaxData) {
         scope: {
             title: "@",
             background: '@',
-            icon: '@',
-            content: '@'
+            num: '@',
+            company: '@'
         }
     };
 }.bind(void 0)]);
 
-app.directive('cleaningAdviceChart', ['myAjaxData', function (myAjaxData) {
+app.directive('traChart', ['myAjaxData', function (myAjaxData) {
     _newArrowCheck(void 0, void 0);
 
     return {
@@ -33,7 +33,7 @@ app.directive('cleaningAdviceChart', ['myAjaxData', function (myAjaxData) {
                     setWidthHeight = function () {
                     _newArrowCheck(this, _this);
 
-                    $($element).width(window.innerWidth - 220 < 800 ? 800 : window.innerWidth - 220).height(window.innerHeight - 250 < 300 ? 300 : window.innerHeight - 250);
+                    $($element).width(window.innerWidth - 220 < 800 ? 800 : window.innerWidth - 220).height(window.innerHeight - 300 < 300 ? 300 : window.innerHeight - 300);
                 }.bind(this);
 
                 setWidthHeight();
@@ -140,7 +140,7 @@ ajaxData({
         name: 'GETgetDeviceType',
         data: {}
     }
-}, {})('cleaningAdviceCtrl', ['$scope', 'myAjaxData'], function ($scope, myAjaxData) {
+}, {})('theoreticalRadiationAnalysisCtrl', ['$scope', 'myAjaxData'], function ($scope, myAjaxData) {
     _newArrowCheck(void 0, void 0);
 
     $scope.dateTime1 = new Date(new Date().setDate(new Date().getDate() - 7));

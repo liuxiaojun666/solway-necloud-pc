@@ -178,10 +178,16 @@ gulp.task('commit', [], async () => {
   await new Promise(resolve => setTimeout(() => resolve(), 1000))
       
   cmd.run(`cd theme && svn add * --force && svn commit -m ""`)
+
+  await new Promise(resolve => setTimeout(() => resolve(), 100))
   
   cmd.run(`cd tpl && svn add * --force && svn commit -m ""`)
 
+  await new Promise(resolve => setTimeout(() => resolve(), 100))
+
   cmd.run('cd solway_necloud_es6 && svn add * --force && svn commit -m ""')
+
+  await new Promise(resolve => setTimeout(() => resolve(), 100))
 
   cmd.get(`git add . && git commit -m "auto update" && git pull`, (err, data, stderr) => {
     
@@ -190,5 +196,7 @@ gulp.task('commit', [], async () => {
 
     cmd.run('git push')
   })
+
+  cmd.run('explorer %cd%')
 
 })

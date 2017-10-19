@@ -4160,7 +4160,7 @@ angular.module('app')
 			//资源 理论辐射分析
 			.state('app.theoreticalRadiationAnalysis', {
 				 url: '/theoreticalRadiationAnalysis',
-				 templateUrl: /* @ */'tpl/datang/siteAnalysis/theoreticalRadiationAnalysis.jsp',
+				 templateUrl: /* @ */'tpl/datang/siteAnalysis/resources/theoreticalRadiationAnalysis.html',
 				 resolve : {
 					deps : [
 						'$ocLazyLoad',
