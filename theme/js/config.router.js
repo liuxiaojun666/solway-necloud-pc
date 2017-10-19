@@ -4157,6 +4157,27 @@ angular.module('app')
 				}
 			})
 
+			//资源 理论辐射分析
+			.state('app.theoreticalRadiationAnalysis', {
+				 url: '/theoreticalRadiationAnalysis',
+				 templateUrl: /* @ */'tpl/datang/siteAnalysis/theoreticalRadiationAnalysis.jsp',
+				 resolve : {
+					deps : [
+						'$ocLazyLoad',
+						function($ocLazyLoad) {
+							return $ocLazyLoad.load(allApi).then(function () {
+									return $ocLazyLoad.load(newFile)
+								}).then(function() {
+									return $ocLazyLoad.load([
+										'theme/css/datang/theoreticalRadiationAnalysis.css',
+										'theme/js/dist/datang/siteAnalysis/resources/theoreticalRadiationAnalysis.js',
+									])
+								})
+						}
+					]
+				}
+			})
+
 			//事故预想记录
 			.state('app.accidentPrediction', {
 				  url: '/accidentPrediction',
