@@ -145,7 +145,7 @@ gulp.task('delReplaceFile', () =>
 
 gulp.task('commit', [], async () => {
 
-  await new Promise(resolve => setTimeout(() => resolve(), 5000))
+  await new Promise(resolve => setTimeout(() => resolve(), 3000))
 
   await new Promise(resolve => {
     let svnCommitDong = 0
@@ -176,6 +176,8 @@ gulp.task('commit', [], async () => {
         })
 
   })
+  
+  await new Promise(resolve => setTimeout(() => resolve(), 3000))
   
   cmd.get(`git add . && git commit -m "auto update" && git pull`, (err, data, stderr) => {
     
