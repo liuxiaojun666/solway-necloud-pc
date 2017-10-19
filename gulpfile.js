@@ -144,35 +144,35 @@ gulp.task('commit', () => cmd.run('svn update'
     + ' && cd ../solway_necloud_es6/myJs && svn update && svn add * --force && svn commit -m ""'
 ))
 
-gulp.task('cmdGet', [], () => 
+gulp.task('cmdGet', [], () => {
 
-  cmd.get(`svn update`), (err, data, stderr) => {
-    if (err) return console.log('the node-cmd cloned dir contains these files :\n\n',data)
+  cmd.get(`svn update`, (err, data, stderr) => {
     
-    cmd.get(`
-    cd theme
-    svn add * --force
-    svn commit -m ""
-    `, (err, data, stderr) => {
-      if (err) console.log('the node-cmd cloned dir contains these files :\n\n',data)
+    if (err) return console.log('svn update webapp error :\n\n', err, data, stderr)
+    console.log('webapp svn update dong', data, stderr)
 
-      cmd.get(`
-      cd tpl
-      svn add * --force
-      svn commit -m ""
-      `, (err, data, stderr) => {
-        if (err) console.log('the node-cmd cloned dir contains these files :\n\n',data)
+    cmd.run(`cd theme && svn add * --force && svn commit -m ""`)
 
-        cmd.get(`
-        cd solway_necloud_es6/myJs
-        svn update
-        svn add * --force
-        svn commit -m ""
-        `, (err, data, stderr) => {
-          if (err) console.log('the node-cmd cloned dir contains these files :\n\n',data)
+    cmd.run(`cd tpl && svn add * --force && svn commit -m ""`)
+  })
 
-        })
-      })
-    })
+  
+  cmd.get(`cd solway_necloud_es6/myJs && svn update`, (err, data, stderr) => {
+
+    if (err) return console.log(`svn update es6 error\n`, err, data, stderr)
+    console.log('es6 svn update dong', data, stderr)
+
+    cmd.run('cd solway_necloud_es6/myJs && svn add * --force && svn commit -m ""')
+  })
+
+
+  cmd.get(`git add . && git commit -m "auto update" && git pull`, (err, data, stderr) => {
+
+    if (err) return console.log(`git pull error\n`, err, data, stderr)
+    console.log('git pull dong', data, stderr)
+
+    cmd.run('git push')
+  })
+
 
 })
