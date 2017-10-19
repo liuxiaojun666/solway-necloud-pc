@@ -87,7 +87,33 @@ gulp.task('proxy', () => require('./proxy') )
 
 gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:3001/login.html'))
 
-gulp.task('svnUpdate', () => cmd.run('svn update && cd solway_necloud_es6/myJs && svn update'))
+gulp.task('svnUpdate', () => svnUpdate())
+
+function svnUpdate () {
+  return new Promise(resolve => {
+    let svnCommitDong = 0
+    const svnCommitAdd = () => {
+      if(Object.is(++svnCommitDong, 2)) resolve()
+    }
+
+    cmd.get(`svn update`, (err, data, stderr) => {
+  
+      if (err) return console.log('svn update webapp error :\n\n', err, data, stderr)
+      if (data.includes('conflicts:')) return console.log('等等， webapp 文件有冲突，\n', data, '冲突修改后，执行  “gulp commit” 提交代码')
+      console.log('webapp svn update dong', data, stderr)
+      svnCommitAdd()
+    })
+  
+    cmd.get(`cd solway_necloud_es6 && svn update`, (err, data, stderr) => {
+  
+      if (err) return console.log(`svn update es6 error\n`, err, data, stderr)
+      if (data.includes('conflicts:')) return console.log('等等， es6 文件有冲突，\n', data, '冲突修改后，执行  “gulp commit” 提交代码')
+      console.log('es6 svn update dong', data, stderr)
+      svnCommitAdd()
+    })
+
+  })
+}
 
 
 
@@ -147,37 +173,15 @@ gulp.task('commit', [], async () => {
 
   await new Promise(resolve => setTimeout(() => resolve(), 1000))
 
-  await new Promise(resolve => {
-    let svnCommitDong = 0
-    const svnCommitAdd = () => {
-      if(Object.is(++svnCommitDong, 2)) resolve()
-    }
-    cmd.get(`svn update`, (err, data, stderr) => {
-      
-          if (err) return console.log('svn update webapp error :\n\n', err, data, stderr)
-          if (data.includes('conflicts:')) return console.log('等等， webapp 文件有冲突，\n', data, '冲突修改后，执行  “gulp commit” 提交代码')
-          console.log('webapp svn update dong', data, stderr)
-          svnCommitAdd()
-      
-          cmd.run(`cd theme && svn add * --force && svn commit -m ""`)
-      
-          cmd.run(`cd tpl && svn add * --force && svn commit -m ""`)
-        })
-      
-        
-        cmd.get(`cd solway_necloud_es6 && svn update`, (err, data, stderr) => {
-      
-          if (err) return console.log(`svn update es6 error\n`, err, data, stderr)
-          if (data.includes('conflicts:')) return console.log('等等， es6 文件有冲突，\n', data, '冲突修改后，执行  “gulp commit” 提交代码')
-          console.log('es6 svn update dong', data, stderr)
-          svnCommitAdd()
-      
-          cmd.run('cd solway_necloud_es6 && svn add * --force && svn commit -m ""')
-        })
-
-  })
+  await svnUpdate()
   
   await new Promise(resolve => setTimeout(() => resolve(), 1000))
+      
+  cmd.run(`cd theme && svn add * --force && svn commit -m ""`)
+  
+  cmd.run(`cd tpl && svn add * --force && svn commit -m ""`)
+
+  cmd.run('cd solway_necloud_es6 && svn add * --force && svn commit -m ""')
 
   cmd.get(`git add . && git commit -m "auto update" && git pull`, (err, data, stderr) => {
     
