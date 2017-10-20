@@ -20,8 +20,14 @@ app.directive('traColorBlock', ['myAjaxData', function (myAjaxData) {
         },
         link: function () {
             function link($scope, $element) {
-                $element.find('i.icon');
-                debugger;
+                if ($scope.help) {
+                    $('<div></div>').html($scope.help).addClass('popup').appendTo($element);
+                    $element.find('i.icon').on('click', function () {
+                        $(this).toggleClass('active');
+                        $element.find('.popup').toggle(200);
+                        return !1;
+                    });
+                }
             }
 
             return link;

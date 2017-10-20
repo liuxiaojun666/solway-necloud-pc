@@ -179,7 +179,7 @@ gulp.task('commit', [], async () => {
       
   cmd.run(`cd theme && svn update && svn add * --force && svn commit -m ""`)
   
-  cmd.run(`cd tpl && svn update && svn add * --force && svn commit -m ""`)
+  cmd.run(`cd tpl && svn add * --force && svn commit -m ""`)
 
   cmd.run('cd solway_necloud_es6 && svn update && svn add * --force && svn commit -m ""')
 
