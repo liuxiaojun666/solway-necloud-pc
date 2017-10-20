@@ -44,8 +44,8 @@ gulp.task('watch', () => {
     })
 
     watch('scss/**/*.scss', () => {
-      const { notCompileScss } = require('./myConfig.js')
       setTimeout(() => {
+          const { notCompileScss } = require('./myConfig.js')
           gulp.src(['scss/**/*.scss', `!scss/**/{${notCompileScss}}.scss`])
               .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
               .pipe(gulp.dest('theme/css/'))
