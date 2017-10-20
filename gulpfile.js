@@ -176,11 +176,11 @@ gulp.task('commit', [], async () => {
 
   await svnUpdate()
   
-  await new Promise(resolve => setTimeout(() => resolve(), 1000))
+  await new Promise(resolve => setTimeout(() => resolve(), 3000))
       
-  cmd.run(`cd theme && svn update && svn add * --force && svn commit -m ""`)
+  cmd.run(`cd theme && svn update && svn add * --force && svn commit -m "auto commit"`)
   
-  cmd.run(`cd tpl && svn add * --force && svn commit -m "" && svn update && svn add * --force && svn commit -m ""`)
+  cmd.run(`cd tpl && svn add * --force && svn commit -m "auto commit"`)
 
   cmd.run('cd solway_necloud_es6 && svn update && svn add * --force && svn commit -m ""')
 
