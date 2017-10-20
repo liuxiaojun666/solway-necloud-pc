@@ -191,6 +191,8 @@ gulp.task('commit', [], async () => {
     cmd.run('git push')
   })
 
+  await new Promise(resolve => setTimeout(() => resolve(), 5000))
+
   cmd.run('explorer %cd%')
 
 })

@@ -6,7 +6,12 @@ app.directive('traColorBlock', ['myAjaxData', myAjaxData => ({
         title: "@",
         background: '@',
         num: '@',
-        company: '@'
+        company: '@',
+        help: '@'
+    },
+    link ($scope, $element) {
+        $element.find('i.icon')
+        debugger
     }
 })])
 
@@ -29,24 +34,19 @@ app.directive('traChart', ['myAjaxData', (myAjaxData) => ({
         })
 
         const renderChart = resData => {
-            const data = Array.apply(null, { length: 30 }).map((v, i) => {
-                if (i ==5 ) {
-                    return {
-                        value: Math.random() * 20,
-                        symbol: 'image://' + 'http://img7.doubanio.com/view/movie_poster_cover/ipst/public/p2497756471.jpg',
-                        symbolSize: ['48.75', '75'],
-                        name: 'name'
-                    }
-                }
-                return Math.random() * 20
-            })
+            const legend = ['理论辐射小时数', '实际辐射小时数', '实际发电小时数']
             const option = {
-                title: {
-                    text: '电站积灰指数'
-                },
                 color: ['#2cc6ff'],
-                tooltip : {
+                tooltip: {
                     trigger: 'axis',
+                },
+                legend: {
+                    data: [{name: '理论辐射小时数'}, {name: '实际辐射小时数'}, {name: '实际发电小时数'}, {name: '光效比'}, {name: '能效比'}],
+                    itemWidth: 25,
+                    itemGap: 40,
+                    height: 15,
+                    left: 40,
+                    top: 20
                 },
                 grid: {
                     top: '80',
@@ -55,61 +55,101 @@ app.directive('traChart', ['myAjaxData', (myAjaxData) => ({
                     bottom: '20',
                     containLabel: true
                 },
-                xAxis : [
+                xAxis: [
                     {
                         name: '',
                         type : 'category',
-                        data : Array.apply(null, { length: 30 }).map((v, i) => i + 1 + '')
+                        axisLine : {
+                            lineStyle : {
+                                color : '#a4a4a4',
+                                width : 1
+                            }
+                        },
+                        data : Array.apply(null, { length: 12 }).map((v, i) => i + 1 + '')
                     }
                 ],
                 yAxis : [
                     {
-                        name: '积灰指数',
+                        name: 'h',
+                        type : 'value',
+                        axisLine : {
+                            lineStyle : {
+                                color : '#a4a4a4',
+                                width : 1
+                            }
+                        },
+                        axisTick:{
+                            show:false
+                        },
                         splitLine: {
                             show: false
+                        }
+                    },{
+                        name: '能效比/光效比',
+                        type : 'value',
+                        axisLine : {
+                            lineStyle : {
+                                color : '#a4a4a4',
+                                width : 1
+                            }
                         },
-                        type : 'value'
+                        axisTick:{
+                            show:false
+                        },
+                        splitLine: {
+                            show: false
+                        }
                     }
                 ],
                 series : [
-                    {
-                        name:'积灰指数',
+                    ...legend.map((v, i) => ({
+                        name: v,
                         type:'bar',
                         barWidth: '20',
-                        // markPoint : {
-                        //     data : [
-                        //         {
-                        //             type : 'max', 
-                        //             name: '最大值',
-                        //             symbolSize: 1,
-                        //             label: {
-                        //                 normal: {
-                        //                     position: 'top',
-                        //                     formatter: function(param){
-                        //                         return `hello`
-                        //                     }
-                        //                 }
-                        //             }
-                        //         },
-                        //         {type : 'min', name: '最小值'}
-                        //     ]
-                        // },
+                        yAxisIndex: 0,
                         itemStyle: {
                             normal: {
-                                color: function(params) {
-                                    return params.data > 10 ? '#2cc6ff' : '#7d8284'
-                                }
+                                color: ['#58c7db', '#5896db', '#3954de'][i]
                             }
                         },
-                        data
-                    }, 
-                    // {
-                    //     type: 'pictorialBar',
-                    //     symbolPosition: 'end',
-                    //     // symbolRotate: 165,
-                    //     symbolOffset: ['20%', '100%'],
-                    //     data
-                    // }
+                        data: Array.apply(null, { length: 12 }).map((v, i) => Math.random() * 20)
+                    })),
+                    {
+                        name: '光效比',
+                        type: 'line',
+                        // smooth: true,
+                        symbol: 'circle',
+                        yAxisIndex: 1,
+                        symbolSize:10,
+                        showSymbol: true,
+                        itemStyle: {
+                            normal: {
+                                color: '#22b269',
+                            },
+                        },
+                       data: [220, 182, 191, 134, 150, 120, 110, 125, 145, 122, 165, 122]
+                    },
+                      {
+                        name: '能效比',
+                        type: 'line',
+                        // smooth: true,
+                        symbol: 'circle',
+                        yAxisIndex: 1,
+                        symbolSize: 10,
+                        showSymbol: true,
+                        lineStyle: {
+                            normal: {
+                                width: 2,
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: '#f39b1e'
+                
+                            }
+                        },
+                        data: [120, 110, 125, 145, 122, 165, 122, 220, 182, 191, 134, 150]
+                    }
                 ]
             }
             myChart.setOption(option)

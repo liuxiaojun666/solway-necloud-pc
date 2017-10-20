@@ -1,5 +1,7 @@
 'use strict';
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 app.directive('traColorBlock', ['myAjaxData', function (myAjaxData) {
@@ -13,8 +15,17 @@ app.directive('traColorBlock', ['myAjaxData', function (myAjaxData) {
             title: "@",
             background: '@',
             num: '@',
-            company: '@'
-        }
+            company: '@',
+            help: '@'
+        },
+        link: function () {
+            function link($scope, $element) {
+                $element.find('i.icon');
+                debugger;
+            }
+
+            return link;
+        }()
     };
 }.bind(void 0)]);
 
@@ -48,26 +59,19 @@ app.directive('traChart', ['myAjaxData', function (myAjaxData) {
                 var renderChart = function (resData) {
                     _newArrowCheck(this, _this);
 
-                    var data = Array.apply(null, { length: 30 }).map(function (v, i) {
-                        _newArrowCheck(this, _this);
-
-                        if (i == 5) {
-                            return {
-                                value: Math.random() * 20,
-                                symbol: 'image://' + 'http://img7.doubanio.com/view/movie_poster_cover/ipst/public/p2497756471.jpg',
-                                symbolSize: ['48.75', '75'],
-                                name: 'name'
-                            };
-                        }
-                        return Math.random() * 20;
-                    }.bind(this)),
+                    var legend = ['理论辐射小时数', '实际辐射小时数', '实际发电小时数'],
                         option = {
-                        title: {
-                            text: '电站积灰指数'
-                        },
                         color: ['#2cc6ff'],
                         tooltip: {
                             trigger: 'axis'
+                        },
+                        legend: {
+                            data: [{ name: '理论辐射小时数' }, { name: '实际辐射小时数' }, { name: '实际发电小时数' }, { name: '光效比' }, { name: '能效比' }],
+                            itemWidth: 25,
+                            itemGap: 40,
+                            height: 15,
+                            left: 40,
+                            top: 20
                         },
                         grid: {
                             top: '80',
@@ -79,37 +83,103 @@ app.directive('traChart', ['myAjaxData', function (myAjaxData) {
                         xAxis: [{
                             name: '',
                             type: 'category',
-                            data: Array.apply(null, { length: 30 }).map(function (v, i) {
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#a4a4a4',
+                                    width: 1
+                                }
+                            },
+                            data: Array.apply(null, { length: 12 }).map(function (v, i) {
                                 _newArrowCheck(this, _this);
 
                                 return i + 1 + '';
                             }.bind(this))
                         }],
                         yAxis: [{
-                            name: '积灰指数',
-                            splitLine: {
-                                show: !1
-                            },
-                            type: 'value'
-                        }],
-                        series: [{
-                            name: '积灰指数',
-                            type: 'bar',
-                            barWidth: '20',
-
-                            itemStyle: {
-                                normal: {
-                                    color: function () {
-                                        function color(params) {
-                                            return params.data > 10 ? '#2cc6ff' : '#7d8284';
-                                        }
-
-                                        return color;
-                                    }()
+                            name: 'h',
+                            type: 'value',
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#a4a4a4',
+                                    width: 1
                                 }
                             },
-                            data: data
-                        }]
+                            axisTick: {
+                                show: !1
+                            },
+                            splitLine: {
+                                show: !1
+                            }
+                        }, {
+                            name: '能效比/光效比',
+                            type: 'value',
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#a4a4a4',
+                                    width: 1
+                                }
+                            },
+                            axisTick: {
+                                show: !1
+                            },
+                            splitLine: {
+                                show: !1
+                            }
+                        }],
+                        series: [].concat(_toConsumableArray(legend.map(function (v, i) {
+                            _newArrowCheck(this, _this);
+
+                            return {
+                                name: v,
+                                type: 'bar',
+                                barWidth: '20',
+                                yAxisIndex: 0,
+                                itemStyle: {
+                                    normal: {
+                                        color: ['#58c7db', '#5896db', '#3954de'][i]
+                                    }
+                                },
+                                data: Array.apply(null, { length: 12 }).map(function (v, i) {
+                                    _newArrowCheck(this, _this);
+
+                                    return Math.random() * 20;
+                                }.bind(this))
+                            };
+                        }.bind(this))), [{
+                            name: '光效比',
+                            type: 'line',
+
+                            symbol: 'circle',
+                            yAxisIndex: 1,
+                            symbolSize: 10,
+                            showSymbol: !0,
+                            itemStyle: {
+                                normal: {
+                                    color: '#22b269'
+                                }
+                            },
+                            data: [220, 182, 191, 134, 150, 120, 110, 125, 145, 122, 165, 122]
+                        }, {
+                            name: '能效比',
+                            type: 'line',
+
+                            symbol: 'circle',
+                            yAxisIndex: 1,
+                            symbolSize: 10,
+                            showSymbol: !0,
+                            lineStyle: {
+                                normal: {
+                                    width: 2
+                                }
+                            },
+                            itemStyle: {
+                                normal: {
+                                    color: '#f39b1e'
+
+                                }
+                            },
+                            data: [120, 110, 125, 145, 122, 165, 122, 220, 182, 191, 134, 150]
+                        }])
                     };
 
                     myChart.setOption(option);
