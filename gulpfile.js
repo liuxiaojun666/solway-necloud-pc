@@ -44,13 +44,9 @@ gulp.task('watch', () => {
     })
 
     watch('scss/**/*.scss', () => {
-      const notCompile = [
-        'test',
-        'test2',
-        'theoreticalRadiationAnalysis',
-      ].join()
+      const { notCompileScss } = require('./myConfig.js')
       setTimeout(() => {
-          gulp.src(['scss/**/*.scss', `!scss/**/{${notCompile}}.scss`])
+          gulp.src(['scss/**/*.scss', `!scss/**/{${notCompileScss}}.scss`])
               .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
               .pipe(gulp.dest('theme/css/'))
       }, 500)
@@ -171,7 +167,7 @@ gulp.task('delReplaceFile', () =>
 // ))
 
 gulp.task('commit', [], async () => {
-
+  // return
   await new Promise(resolve => setTimeout(() => resolve(), 1000))
 
   await svnUpdate()
@@ -203,3 +199,4 @@ gulp.task('commit', [], async () => {
   })
 
 })
+
