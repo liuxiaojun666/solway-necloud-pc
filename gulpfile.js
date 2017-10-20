@@ -47,6 +47,7 @@ gulp.task('watch', () => {
       const notCompile = [
         'test',
         'test2',
+        'theoreticalRadiationAnalysis',
       ].join()
       setTimeout(() => {
           gulp.src(['scss/**/*.scss', `!scss/**/{${notCompile}}.scss`])
@@ -181,6 +182,8 @@ gulp.task('commit', [], async () => {
   
   cmd.run(`cd tpl && svn add * --force && svn commit -m ""`)
 
+  cmd.run(`cd tpl && svn add * --force && svn commit -m ""`)
+
   cmd.run('cd solway_necloud_es6 && svn update && svn add * --force && svn commit -m ""')
 
   cmd.get(`git add . && git commit -m "auto update" && git pull`, (err, data, stderr) => {
@@ -193,6 +196,10 @@ gulp.task('commit', [], async () => {
 
   await new Promise(resolve => setTimeout(() => resolve(), 5000))
 
-  cmd.run('explorer %cd%')
+  cmd.get('svn status', (err, data, stderr) => {
+    if(err) return console.log(`svn status error\n`, err, data, stderr)
+
+    console.log(data, stderr)
+  })
 
 })

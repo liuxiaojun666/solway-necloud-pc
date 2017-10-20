@@ -4139,7 +4139,7 @@ angular.module('app')
 			//发电稳定度分析
 			.state('app.powerGenerationStability', {
 				 url: '/powerGenerationStability',
-				 templateUrl: /* @ */'tpl/datang/siteAnalysis/powerGenerationStability.jsp',
+				 templateUrl: /* @ */'tpl/datang/siteAnalysis/powerGenerationStability.html',
 				 resolve : {
 					deps : [
 						'$ocLazyLoad',
@@ -4169,8 +4169,29 @@ angular.module('app')
 									return $ocLazyLoad.load(newFile)
 								}).then(function() {
 									return $ocLazyLoad.load([
-										'theme/css/datang/theoreticalRadiationAnalysis.css',
+										'theme/css/datang/siteAnalysis/theoreticalRadiationAnalysis.css',
 										'theme/js/dist/datang/siteAnalysis/resources/theoreticalRadiationAnalysis.js',
+									])
+								})
+						}
+					]
+				}
+			})
+
+			//电量 损失电量分析
+			.state('app.lossOfPower', {
+				 url: '/lossOfPower',
+				 templateUrl: /* @ */'tpl/datang/siteAnalysis/electricity/lossOfPower.html',
+				 resolve : {
+					deps : [
+						'$ocLazyLoad',
+						function($ocLazyLoad) {
+							return $ocLazyLoad.load(allApi).then(function () {
+									return $ocLazyLoad.load(newFile)
+								}).then(function() {
+									return $ocLazyLoad.load([
+										'theme/css/datang/siteAnalysis/lossOfPower.css',
+										'theme/js/dist/datang/siteAnalysis/electricity/lossOfPower.js',
 									])
 								})
 						}
