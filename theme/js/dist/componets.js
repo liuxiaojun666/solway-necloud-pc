@@ -72,6 +72,41 @@ app.directive('myPaging', [function () {
     };
 }.bind(void 0)]);
 
+app.directive('dropDown', ['myAjaxData', function (myAjaxData) {
+    _newArrowCheck(void 0, void 0);
+
+    return {
+        restrict: 'E',
+        templateUrl: baseUrl + '/tpl/publicComponent/dropDown.html',
+        replace: !0,
+        scope: {
+            options: '=',
+            selected: '='
+        },
+        link: function () {
+            function link($scope, $element) {
+                var _this2 = this;
+
+                $element.find('.selected').on('click', function () {
+                    $(this).next('.options').slideToggle(200);
+                    return !1;
+                });
+                $(document).on('click', function () {
+                    _newArrowCheck(this, _this2);
+
+                    $element.find('.options').slideUp(200);
+                }.bind(this));
+                $element.on('click', 'li', function () {
+                    $scope.selected = $(this).text();
+                    $scope.$apply();
+                });
+            }
+
+            return link;
+        }()
+    };
+}.bind(void 0)]);
+
 app.directive('myTable', ['$timeout', 'myAjaxData', function ($timeout, myAjaxData) {
     _newArrowCheck(void 0, void 0);
 
@@ -97,11 +132,11 @@ app.directive('myTable', ['$timeout', 'myAjaxData', function ($timeout, myAjaxDa
         templateUrl: baseUrl + '/tpl/publicComponent/myTable.jsp',
         link: function () {
             function link($scope, $element) {
-                var _this2 = this;
+                var _this3 = this;
 
                 $scope.beforeMount && $scope.beforeMount($scope, $element);
                 $timeout(function () {
-                    _newArrowCheck(this, _this2);
+                    _newArrowCheck(this, _this3);
 
                     $scope.mounted && $scope.mounted($scope, $element);
                     $scope.isMounted = !0;
@@ -112,13 +147,13 @@ app.directive('myTable', ['$timeout', 'myAjaxData', function ($timeout, myAjaxDa
         }(),
         controller: function () {
             function controller($scope, $element) {
-                var _this3 = this;
+                var _this4 = this;
 
                 $scope.beforeCreate && $scope.beforeCreate($scope, $element);
 
                 $scope.orderBy = !0;
                 $scope.sort = function (sort, dataIndex) {
-                    _newArrowCheck(this, _this3);
+                    _newArrowCheck(this, _this4);
 
                     if (void 0 === $scope.datasource[0]) return;
                     if (!sort) return;
@@ -128,13 +163,13 @@ app.directive('myTable', ['$timeout', 'myAjaxData', function ($timeout, myAjaxDa
                     }
                     if (typeof $scope.datasource[0][dataIndex] == 'number') {
                         $scope.datasource.sort(function (a, b) {
-                            _newArrowCheck(this, _this3);
+                            _newArrowCheck(this, _this4);
 
                             return $scope.orderBy ? a[dataIndex] - b[dataIndex] : b[dataIndex] - a[dataIndex];
                         }.bind(this));
                     } else {
                         $scope.orderBy && $scope.datasource.sort(function (a, b) {
-                            _newArrowCheck(this, _this3);
+                            _newArrowCheck(this, _this4);
 
                             return null === a[dataIndex] || null === b[dataIndex] ? -1 : a[dataIndex].length == b[dataIndex].length ? b[dataIndex].localeCompare(a[dataIndex]) : b[dataIndex].length - a[dataIndex].length;
                         }.bind(this));
@@ -145,7 +180,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', function ($timeout, myAjaxDa
                 }.bind(this);
 
                 $scope.$watch('datasource', function (newValue, oldValue) {
-                    _newArrowCheck(this, _this3);
+                    _newArrowCheck(this, _this4);
 
                     $scope.gen = regeneratorRuntime.mark(function () {
                         function _callee() {
@@ -176,7 +211,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', function ($timeout, myAjaxDa
                     }())();
                     $scope.gen.next();
                     $timeout(function () {
-                        _newArrowCheck(this, _this3);
+                        _newArrowCheck(this, _this4);
 
                         if ($scope.orderByDataIndex) return;
                         $scope.gen.next(void 0);
@@ -193,7 +228,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', function ($timeout, myAjaxDa
                 }.bind(this));
 
                 $scope.$watchGroup(['datasource', 'column'], function () {
-                    _newArrowCheck(this, _this3);
+                    _newArrowCheck(this, _this4);
 
                     var _ref = _asyncToGenerator(regeneratorRuntime.mark(function () {
                         function _callee2(newValue, oldValue, $scope) {
@@ -202,7 +237,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', function ($timeout, myAjaxDa
                                     while (1) {
                                         switch (_context2.prev = _context2.next) {
                                             case 0:
-                                                _newArrowCheck(this, _this3);
+                                                _newArrowCheck(this, _this4);
 
                                                 if ($scope.isMounted) {
                                                     _context2.next = 3;
@@ -245,7 +280,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', function ($timeout, myAjaxDa
                                 while (1) {
                                     switch (_context3.prev = _context3.next) {
                                         case 0:
-                                            _newArrowCheck(this, _this3);
+                                            _newArrowCheck(this, _this4);
 
                                             $scope.beforeDestroy && $scope.beforeDestroy($scope, $element);
                                             _context3.next = 4;
@@ -287,16 +322,16 @@ app.directive('switchPower', ['myAjaxData', function (myAjaxData) {
         templateUrl: baseUrl + '/tpl/publicComponent/switchPower.jsp',
         controller: function () {
             function controller($scope) {
-                var _this4 = this;
+                var _this5 = this;
 
                 $scope.getCurrentDataName('00', 0, function (result) {
-                    _newArrowCheck(this, _this4);
+                    _newArrowCheck(this, _this5);
 
                     $scope.currentDataName = result.currentDataName;
                     myAjaxData.setCurrentStationData(result);
                 }.bind(this));
                 $scope.$on('broadcastSwitchStation', function (event, data) {
-                    _newArrowCheck(this, _this4);
+                    _newArrowCheck(this, _this5);
 
                     $scope.currentDataName = data.dataName;
                     myAjaxData.setCurrentStationData({ currentDataName: data.dataName, currentSTID: data.dataId });
@@ -326,7 +361,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', function ($ocLazyLoad, $ti
         template: '\n    <div class="calendar">\n        <span ng-if="showArrow" ng-click="changeDateTime(-1)"><i class="fa fa-angle-left"></i></span>\n        <input type="text" value="{{showDate}}" ng-model="showDate">\n        <span ng-if="showArrow" ng-click="changeDateTime(1)"><i class="fa fa-angle-right"></i></span>\n    </div>',
         link: function () {
             function link($scope, $element) {
-                var _this5 = this,
+                var _this6 = this,
                     calendarMap = {
                     "yyyy-MM-dd": {
                         minView: 2
@@ -344,11 +379,11 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', function ($ocLazyLoad, $ti
                 $scope.randomId = (Math.random() + '').substr(2, 10);
                 $($element).find('input').attr('id', $scope.randomId);
                 $ocLazyLoad.load([baseUrl + '/vendor/bootstrap/css/bootstrap-datetimepicker.min.css', baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.js']).then(function () {
-                    _newArrowCheck(this, _this5);
+                    _newArrowCheck(this, _this6);
 
                     return $ocLazyLoad.load([baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js', baseUrl + '/vendor/libs/moment.min.js']);
                 }.bind(this)).then(function () {
-                    _newArrowCheck(this, _this5);
+                    _newArrowCheck(this, _this6);
 
                     $('#' + $scope.randomId).datetimepicker(_extends({
                         format: $scope.calendarType.toLocaleLowerCase(),
@@ -362,18 +397,18 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', function ($ocLazyLoad, $ti
                         initialDate: $scope.dateTime,
                         pickerPosition: "bottom-left"
                     })).on('hide', function (ev) {
-                        _newArrowCheck(this, _this5);
+                        _newArrowCheck(this, _this6);
 
                         $scope.dateTime = ev.date;
                         $scope.$apply();
                     }.bind(this)).on('changeDate', function (ev) {
-                        _newArrowCheck(this, _this5);
+                        _newArrowCheck(this, _this6);
 
                         $scope.showArrow && $scope.disabled();
                     }.bind(this));
                 }.bind(this));
                 $timeout(function () {
-                    _newArrowCheck(this, _this5);
+                    _newArrowCheck(this, _this6);
 
                     return $scope.showArrow && $scope.disabled();
                 }.bind(this), 0);
@@ -383,10 +418,10 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', function ($ocLazyLoad, $ti
         }(),
         controller: function () {
             function controller($scope, $element) {
-                var _this6 = this;
+                var _this7 = this;
 
                 $scope.disabled = function (noChange) {
-                    _newArrowCheck(this, _this6);
+                    _newArrowCheck(this, _this7);
 
                     var showDateLastNumber = +$scope.showDate.split('-').slice(-1),
                         startLastNumber = '',
@@ -422,7 +457,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', function ($ocLazyLoad, $ti
                     return num;
                 }.bind(this);
                 $scope.$watch('showDate', function (newValue, oldValue) {
-                    _newArrowCheck(this, _this6);
+                    _newArrowCheck(this, _this7);
 
                     if (void 0 === window.moment) return;
                     if (newValue != oldValue) {
@@ -434,27 +469,27 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', function ($ocLazyLoad, $ti
                     }
                 }.bind(this));
                 $scope.$watch('dateTime', function (newValue, oldValue) {
-                    _newArrowCheck(this, _this6);
+                    _newArrowCheck(this, _this7);
 
                     $scope.showDate = $scope.dateTime.Format($scope.calendarType);
                 }.bind(this));
                 $scope.$watch('startDate', function (newValue, oldValue) {
-                    _newArrowCheck(this, _this6);
+                    _newArrowCheck(this, _this7);
 
                     if (newValue != oldValue) $('#' + $scope.randomId).datetimepicker('setStartDate', newValue.Format($scope.calendarType));
                 }.bind(this));
                 $scope.$watch('endDate', function (newValue, oldValue) {
-                    _newArrowCheck(this, _this6);
+                    _newArrowCheck(this, _this7);
 
                     if (newValue != oldValue) $('#' + $scope.randomId).datetimepicker('setEndDate', newValue.Format($scope.calendarType));
                 }.bind(this));
                 $scope.changeDateTime = function (num) {
-                    _newArrowCheck(this, _this6);
+                    _newArrowCheck(this, _this7);
 
                     if (num === $scope.disabled(!0)) return;
                     $scope.dateTime = moment($scope.dateTime).add(num, $scope.calendarType.substr(-1, 1))._d;
                     $timeout(function () {
-                        _newArrowCheck(this, _this6);
+                        _newArrowCheck(this, _this7);
 
                         return $scope.disabled();
                     }.bind(this), 0);

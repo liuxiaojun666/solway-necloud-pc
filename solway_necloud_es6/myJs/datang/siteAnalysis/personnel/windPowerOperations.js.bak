@@ -1,0 +1,136 @@
+app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
+    restrict: 'E',
+    scope: {
+        detail: '='
+    },
+
+    link ($scope, $element, $attrs) {
+        const setWidthHeight = () => {
+            $($element).width( ((window.innerWidth - 630) < 300) ? 300 : window.innerWidth - 630)
+                    .height( ((window.innerHeight - 140) < 470) ? 470 : window.innerHeight - 140)
+        }
+        setWidthHeight()
+        const myChart = echarts.init($element[0])
+        window.addEventListener('resize', () => {
+            setWidthHeight()
+            myChart.resize()
+        })
+
+        $ocLazyLoad.load([
+            document.getElementById('routerJS').getAttribute('param') 
+            + '/vendor/echarts/china.js',
+        ]).then(() => {
+            const option = {
+                // geo: {
+                //     map: 'china',
+                //     label: {
+                //         emphasis: {
+                //             show: true
+                //         }
+                //     },
+                //     roam: true,
+                //     layoutCenter: ['50%', '53%'],
+                //     layoutSize: "108%",
+                //     itemStyle: {
+                //         normal: {
+                //             color: '#60b4a4',
+                //             borderColor: 'rgba(255,255,255,0.5)'
+                //         },
+                //         emphasis: {
+                //             color: '#20668e'
+                //         }
+                //     }
+                // },
+            
+                series: [{
+                    name: 'chinaMap',
+                    type: 'map',
+                    mapType: 'china',
+                    roam:true,
+                    label: {
+                        normal: {
+                            show: false
+                        },
+                        emphasis: {
+                            show: false
+                        }
+                    },
+                    itemStyle:{
+                        normal: {
+                            borderWidth: .5,//区域边框宽度
+                            borderColor: '#fff',//区域边框颜色
+                            areaColor:"#60b4a4",//区域颜色
+                        },
+                        emphasis: {
+                            borderWidth: .5,//区域边框宽度
+                            borderColor: '#fff',//区域边框颜色
+                            areaColor:"#60b4a4",//区域颜色
+                        }
+                    },
+                    data:[
+                        ...[
+                            { name: '山西', value: 1},
+                            { name: '新疆', value: 1},
+                            { name: '内蒙古', value: 1},
+                            { name: '北京', value: 1},
+                            { name: '广东', value: 1},
+                        ].map(v => ({
+                            name: v.name,
+                            value: v.value,
+                            selected: false,
+                            itemStyle: {
+                                normal: {
+                                    areaColor:"#20668e",//区域颜色
+                                },
+                                emphasis: {
+                                    areaColor:"#20668e",//区域颜色
+                                }
+                            }
+                        })),
+                        {
+                            name: '南海诸岛',
+                            itemStyle: {
+                                normal: {
+                                    opacity:0
+                                }
+                            },
+                            label: {
+                                normal: {
+                                    show: false
+                                }
+                            }
+                        }
+                    ],
+                    zlevel:3
+                }]
+            }
+            myChart.setOption(option)
+        })
+
+    }
+})])
+
+
+ajaxData({
+    pageList: {
+        name: 'GETanalysisPage',
+        data: {
+            pageIndex:0,
+            pageSize:10,
+            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
+            endDate: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+    detail: {
+        name: 'GETselectEqPaintingData',
+        later: true
+    },
+    deviceType: {
+        name: 'GETgetDeviceType',
+        data: {}
+    }
+},{
+})('windPowerOperationsCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+$scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
+$scope.dateTime2 = new Date
+})

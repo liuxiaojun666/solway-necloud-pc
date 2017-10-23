@@ -4199,6 +4199,27 @@ angular.module('app')
 				}
 			})
 
+			//人员 风电运维
+			.state('app.windPowerOperations', {
+				 url: '/windPowerOperations',
+				 templateUrl: /* @ */'tpl/datang/siteAnalysis/personnel/windPowerOperations.html',
+				 resolve : {
+					deps : [
+						'$ocLazyLoad',
+						function($ocLazyLoad) {
+							return $ocLazyLoad.load(allApi).then(function () {
+									return $ocLazyLoad.load(newFile)
+								}).then(function() {
+									return $ocLazyLoad.load([
+										'theme/css/datang/siteAnalysis/windPowerOperations.css',
+										'theme/js/dist/datang/siteAnalysis/personnel/windPowerOperations.js',
+									])
+								})
+						}
+					]
+				}
+			})
+
 			//事故预想记录
 			.state('app.accidentPrediction', {
 				  url: '/accidentPrediction',

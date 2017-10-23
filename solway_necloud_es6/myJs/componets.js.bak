@@ -109,6 +109,34 @@ app.directive('myPaging', [() => ({
 
 
 /**
+ * 下拉
+ */
+app.directive('dropDown', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    templateUrl: baseUrl + '/tpl/publicComponent/dropDown.html',
+    replace: true,
+    scope: {
+        options: '=',
+        selected: '='
+    },
+    link ($scope, $element) {
+        $element.find('.selected').on('click', function () {
+            $(this).next('.options').slideToggle(200)
+            return false;
+        })
+        $(document).on('click', () => {
+            $element.find('.options').slideUp(200)
+        })
+        $element.on('click', 'li', function () {
+            $scope.selected = $(this).text()
+            $scope.$apply()
+            // $(this).addClass('active').sliblings().removeClass('active')
+        })
+    }
+})])
+
+
+/**
  * [表格]
  * column: '=',   列
     datasource: '=',   行

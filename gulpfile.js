@@ -7,12 +7,16 @@ let gulp = require('gulp'),
     watch = require('gulp-watch'),
     cmd = require('node-cmd'),
     sass = require('gulp-sass'),
+    less = require('gulp-less'),
+    cssmin = require('gulp-minify-css'),
     plumber = require('gulp-plumber'),
     notify = require('gulp-notify'),
     rename = require("gulp-rename"),
-    del = require('del')
+    del = require('del'),
+    fs = require('fs'),
+    path = require('path')
 
-gulp.task('watch', () => {
+gulp.task('watch', [], () => {
   livereload.listen()
   setTimeout(() => {
     watch(['solway_necloud_es6/myJs/**'], () => {
@@ -44,12 +48,24 @@ gulp.task('watch', () => {
     })
 
     watch('scss/**/*.scss', () => {
-      setTimeout(() => {
-          let { notCompileScss } = require('./myConfig')
-          gulp.src(['scss/**/*.scss', `!scss/**/{${notCompileScss}}.scss`])
-              .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
-              .pipe(gulp.dest('theme/css/'))
-      }, 500)
+      fs.readFile(__dirname + "/myConfig.json",(err,data) => {
+          if (err) throw err
+          setTimeout(() => {
+              gulp.src(JSON.parse(data.toString()).compileScss.map(v => `scss/**/${ v }.scss`))
+                  .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
+                  .pipe(gulp.dest('theme/css/'))
+          }, 500)
+      })
+    })
+
+    watch('theme/css/**/*.less', () => {
+      fs.readFile(__dirname + "/myConfig.json",(err,data) => {
+          if (err) throw err
+          gulp.src(JSON.parse(data.toString()).compileLess.map(v => `theme/css/**/${ v }.less`))
+            .pipe(less())
+            .pipe(cssmin())
+            .pipe(gulp.dest('theme/css/'))
+      })
     })
 
     watch(['theme/**', 'tpl/**', '!{theme/css}/**/*.less'], (event) => livereload.changed(event.path) )
