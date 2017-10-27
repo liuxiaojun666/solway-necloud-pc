@@ -4285,6 +4285,27 @@ angular.module('app')
 				}
 			})
 
+			//人员 专家库
+			.state('app.expertLibrary', {
+				 url: '/expertLibrary',
+				 templateUrl: /* @ */'tpl/datang/siteAnalysis/personnel/expertLibrary.html',
+				 resolve : {
+					deps : [
+						'$ocLazyLoad',
+						function($ocLazyLoad) {
+							return $ocLazyLoad.load(allApi).then(function () {
+									return $ocLazyLoad.load(newFile)
+								}).then(function() {
+									return $ocLazyLoad.load([
+										'theme/css/datang/siteAnalysis/expertLibrary.css',
+										'theme/js/dist/datang/siteAnalysis/personnel/expertLibrary.js',
+									])
+								})
+						}
+					]
+				}
+			})
+
 			//事故预想记录
 			.state('app.accidentPrediction', {
 				  url: '/accidentPrediction',

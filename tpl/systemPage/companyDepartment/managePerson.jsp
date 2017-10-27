@@ -64,7 +64,7 @@
 															data-username="{{vo.phone}}" data-id="{{vo.id}}" href="javascript:;">修改</a> -->
 															<a ng-show="vo.istautsNum=='01'" class="text-success ml5 rootAuthBtn" data-realname="{{vo.realname}}"
 															data-username="{{vo.phone}}" data-id="{{vo.id}}" href="javascript:;">授权</a>
-															<a class="text-success ml5 recallAuthBtn" ng-show="vo.istautsNum=='00'" data-id="{{vo.id}}">撤回</a>
+															<a class="text-success ml5 recallAuthBtn" ng-show="vo.istautsNum=='00' && 0 == 1" data-id="{{vo.id}}">撤回</a>
 														</td>
 													</tr>
 												</tbody>

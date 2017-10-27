@@ -83,5 +83,6 @@
   <script type="text/javascript" src="vendor/echarts/echarts3.js"></script>
   <!--   <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=aBsOf0A0mp32b7M6A15dvByz"></script> -->
   <!-- Lazy loading -->
+  <div ng-include="'${ctx}/tpl/blocks/monitorVideo.jsp'"></div>
 </body>
 </html>
