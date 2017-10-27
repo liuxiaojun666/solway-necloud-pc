@@ -138,7 +138,7 @@ gulp.task('dev', gulpSequence('svnUpdate', 'replaceToDev', 'watch', 'proxy', 'op
 
 /****************************************生产环境构建************************************** */
 // gulp.task('build', gulpSequence('replaceToProduction', 'es6Rename', 'es6JsDel'))
-gulp.task('build', gulpSequence('replaceToProduction', 'es6Rename', 'es6JsDel', 'delReplaceFile', 'commit'))
+gulp.task('build', gulpSequence('replaceToProduction', 'es6Rename', 'es6JsDel', 'delReplaceFile'))
 
 gulp.task('replaceToProduction', () => {
   gulp.src(['theme/js/config.router.js'])
@@ -183,8 +183,6 @@ gulp.task('delReplaceFile', () =>
 // ))
 
 gulp.task('commit', [], async () => {
-  await new Promise(resolve => setTimeout(() => resolve(), 1000))
-
   await svnUpdate()
   
   await new Promise(resolve => setTimeout(() => resolve(), 1000))

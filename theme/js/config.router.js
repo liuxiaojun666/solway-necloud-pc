@@ -4264,6 +4264,27 @@ angular.module('app')
 				}
 			})
 
+			//人员 风云榜
+			.state('app.fengyunList', {
+				 url: '/fengyunList',
+				 templateUrl: /* @ */'tpl/datang/siteAnalysis/personnel/fengyunList.html',
+				 resolve : {
+					deps : [
+						'$ocLazyLoad',
+						function($ocLazyLoad) {
+							return $ocLazyLoad.load(allApi).then(function () {
+									return $ocLazyLoad.load(newFile)
+								}).then(function() {
+									return $ocLazyLoad.load([
+										'theme/css/datang/siteAnalysis/fengyunList.css',
+										'theme/js/dist/datang/siteAnalysis/personnel/fengyunList.js',
+									])
+								})
+						}
+					]
+				}
+			})
+
 			//事故预想记录
 			.state('app.accidentPrediction', {
 				  url: '/accidentPrediction',
