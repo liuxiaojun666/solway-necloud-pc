@@ -7,7 +7,7 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
     link ($scope, $element, $attrs) {
         const setWidthHeight = () => {
             $($element).width( ((window.innerWidth - 630) < 300) ? 300 : window.innerWidth - 630)
-                    .height( ((window.innerHeight - 140) < 470) ? 470 : window.innerHeight - 140)
+                    .height( ((window.innerHeight - 145) < 470) ? 470 : window.innerHeight - 145)
         }
         setWidthHeight()
         const myChart = echarts.init($element[0])
@@ -110,6 +110,85 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
     }
 })])
 
+app.directive('wpoChartBar', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
+    restrict: 'E',
+    scope: {
+        detail: '='
+    },
+
+    link ($scope, $element, $attrs) {
+        const setWidthHeight = () => {
+            $($element).width(400).height( ((window.innerHeight - 410) < 195) ? 195 : window.innerHeight - 410)
+        }
+        setWidthHeight()
+        const myChart = echarts.init($element[0])
+        window.addEventListener('resize', () => {
+            setWidthHeight()
+            myChart.resize()
+        })
+
+        const option = {
+            tooltip: {},
+            grid: {
+                left: '20',
+                right: '60',
+                bottom: '20',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                splitNumber: 3,
+                axisLine: {
+                    lineStyle: {
+                        color: '#999'
+                    }
+                },
+                axisTick: {
+                    show: false
+                }
+            },
+            yAxis: {
+                name: '省份',
+                type: 'category',
+                axisLine: {
+                    lineStyle: {
+                        color: '#999'
+                    }
+                },
+                axisTick: {
+                    show: false
+                },
+                data: ['山东','福建','新疆','内蒙古','黑龙江','贵州']
+            },
+            series: [
+                {
+                    type: 'bar',
+                    barWidth: '15',
+                    label:{
+                        normal: {
+                            show: true,
+                            position: 'right',
+                            textStyle: {
+                                color: '#2adc49'
+                            }
+                        },
+                    },
+                    data: [18203, 123489, 229034, 304970, 531744, 630230].map((value, i, arr) => ({
+                        value,
+                        itemStyle: {
+                            normal: {
+                                color: ['#d3f0db','#bceec8','#a2edb2','#85eb9d','#5de77b','#2adc49'][(value / Math.max(...arr) * 5).toFixed()],
+                            }
+                        }
+                    }))
+                },
+            ]
+        }
+        myChart.setOption(option)
+
+
+    }
+})])
 
 ajaxData({
     pageList: {

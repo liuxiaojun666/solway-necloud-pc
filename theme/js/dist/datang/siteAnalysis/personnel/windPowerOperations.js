@@ -19,7 +19,7 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', function (myAjaxData, $ocL
                     setWidthHeight = function () {
                     _newArrowCheck(this, _this);
 
-                    $($element).width(window.innerWidth - 630 < 300 ? 300 : window.innerWidth - 630).height(window.innerHeight - 140 < 470 ? 470 : window.innerHeight - 140);
+                    $($element).width(window.innerWidth - 630 < 300 ? 300 : window.innerWidth - 630).height(window.innerHeight - 145 < 470 ? 470 : window.innerHeight - 145);
                 }.bind(this);
 
                 setWidthHeight();
@@ -91,6 +91,100 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', function (myAjaxData, $ocL
                     };
                     myChart.setOption(option);
                 }.bind(this));
+            }
+
+            return link;
+        }()
+    };
+}.bind(void 0)]);
+
+app.directive('wpoChartBar', ['myAjaxData', '$ocLazyLoad', function (myAjaxData, $ocLazyLoad) {
+    _newArrowCheck(void 0, void 0);
+
+    return {
+        restrict: 'E',
+        scope: {
+            detail: '='
+        },
+
+        link: function () {
+            function link($scope, $element, $attrs) {
+                var _this2 = this,
+                    setWidthHeight = function () {
+                    _newArrowCheck(this, _this2);
+
+                    $($element).width(400).height(window.innerHeight - 410 < 195 ? 195 : window.innerHeight - 410);
+                }.bind(this);
+
+                setWidthHeight();
+                var myChart = echarts.init($element[0]);
+                window.addEventListener('resize', function () {
+                    _newArrowCheck(this, _this2);
+
+                    setWidthHeight();
+                    myChart.resize();
+                }.bind(this));
+
+                var option = {
+                    tooltip: {},
+                    grid: {
+                        left: '20',
+                        right: '60',
+                        bottom: '20',
+                        containLabel: !0
+                    },
+                    xAxis: {
+                        type: 'value',
+                        splitNumber: 3,
+                        axisLine: {
+                            lineStyle: {
+                                color: '#999'
+                            }
+                        },
+                        axisTick: {
+                            show: !1
+                        }
+                    },
+                    yAxis: {
+                        name: '省份',
+                        type: 'category',
+                        axisLine: {
+                            lineStyle: {
+                                color: '#999'
+                            }
+                        },
+                        axisTick: {
+                            show: !1
+                        },
+                        data: ['山东', '福建', '新疆', '内蒙古', '黑龙江', '贵州']
+                    },
+                    series: [{
+                        type: 'bar',
+                        barWidth: '15',
+                        label: {
+                            normal: {
+                                show: !0,
+                                position: 'right',
+                                textStyle: {
+                                    color: '#2adc49'
+                                }
+                            }
+                        },
+                        data: [18203, 123489, 229034, 304970, 531744, 630230].map(function (value, i, arr) {
+                            _newArrowCheck(this, _this2);
+
+                            return {
+                                value: value,
+                                itemStyle: {
+                                    normal: {
+                                        color: ['#d3f0db', '#bceec8', '#a2edb2', '#85eb9d', '#5de77b', '#2adc49'][(value / Math.max.apply(Math, _toConsumableArray(arr)) * 5).toFixed()]
+                                    }
+                                }
+                            };
+                        }.bind(this))
+                    }]
+                };
+                myChart.setOption(option);
             }
 
             return link;

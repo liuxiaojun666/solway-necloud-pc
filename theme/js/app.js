@@ -75,6 +75,18 @@ angular.module('app', [
     	}
 		return dataIsNull;
     }
+}).filter("incomeFilter",function(){//计算收入
+    return function(data){
+    	var dataIsNull="0元";
+    	if(data !== null && data !== undefined && data !== ''){
+    		if((data[1]+"").indexOf('万') >= 0){
+    			return (data[0] * 1.2).toFixed(0) + "万元";
+    		}else{
+    			return (data[0] * 1.2).toFixed(0) + "元";
+    		}
+    	}
+		return dataIsNull;
+    }
 }).filter("dateFilter",function(){//时间过滤器
     return function(data){
     	var countDate;

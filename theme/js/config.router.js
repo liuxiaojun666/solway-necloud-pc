@@ -162,7 +162,38 @@ angular.module('app')
 									}
 								]
 							}
-						}).state('power-index-meter',{
+						})
+						//新能云新——17-10-24
+						.state('power-index171024',{
+							url : '/power-index171024?roleId',
+							templateUrl : 'tpl/rtMonitorPage/monitor/monitoringMapNew1024.jsp',
+							resolve : {
+								deps : ['$ocLazyLoad',
+									function($ocLazyLoad) {
+										return $ocLazyLoad.load(['toaster','theme/css/monitoringMapNew1024.css'])
+											.then(function() {
+											return $ocLazyLoad.load('theme/js/controllers/toaster.js')
+										});
+									}
+								]
+							}
+						})
+						//北京区域首页
+						.state('power-index-beijing',{
+							url : '/power-index-beijing',
+							templateUrl : 'tpl/rtMonitorPage/monitor/monitoringMapBeijing.jsp',
+							resolve : {
+								deps : ['$ocLazyLoad',
+									function($ocLazyLoad) {
+										return $ocLazyLoad.load(['toaster','theme/css/monitoringMapBeijing.css'])
+											.then(function() {
+											return $ocLazyLoad.load('theme/js/controllers/toaster.js')
+										});
+									}
+								]
+							}
+						})
+						.state('power-index-meter',{
 							url : '/power-index-meter?roleId',
 							templateUrl : 'tpl/meter/rtMonitorPage/monitor/monitoringMapNew.jsp',
 							resolve : {
@@ -3700,6 +3731,19 @@ angular.module('app')
 			.state('app.dtAnalysisTwoTicketForCompany', {
 				  url: '/dtAnalysisTwoTicketForStation/:id',
 				  templateUrl: 'tpl/datang/reportPage/ticketAnalysis/ticketAnalysisCompanyHomePage.jsp',
+				  resolve : {
+						deps : [
+								'$ocLazyLoad',
+								function($ocLazyLoad) {
+									return $ocLazyLoad
+											.load('theme/js/angular.pagination.js')
+								}]
+					}
+			})
+			//调度指令记录
+			.state('app.dtDispatchInstruction', {
+				  url: '/dtDispatchInstruction',
+				  templateUrl: 'tpl/datang/reportPage/dispatchInstruction/dispatchInstructionHomePage.jsp',
 				  resolve : {
 						deps : [
 								'$ocLazyLoad',

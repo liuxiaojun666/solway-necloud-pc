@@ -207,28 +207,37 @@
 										<div class="col-xs-3 no-padder">
 											<img src="./theme/images/solway/icon/icon_day.png" alt="">
 										</div>
-										<div class="col-xs-9 no-padder">
-											<small class="stat-label">日发电量</small>
-											<h1>
-												<span ng-bind="statDayData.dayGeneratingPower[0]|dataNullFilter" class="ng-binding">0.00</span>
-												<small class="m-l-xs">
-												<span ng-bind="statDayData.dayGeneratingPower[1]|dataNullFilter" class="ng-binding">kWh</span></small>
-											</h1>
+										<div class="col-xs-9 no-padder" style="position:relative;">
+											<span class="" >
+												<small class="stat-label">日发电量</small>
+												<h1>
+													<span ng-bind="statDayData.dayGeneratingPower[0]|dataNullFilter" class="ng-binding">0.00</span>
+													<small class="m-l-xs">
+													<span ng-bind="statDayData.dayGeneratingPower[1]|dataNullFilter" class="ng-binding">kWh</span></small>
+												</h1>
+											</span>
+											<span class="no-padder " style="position:absolute;right:10px;top:-5px;"  ng-show="posJcvFlag || dailyJt">
+												<h4>
+													<span ng-bind="statDayData.dayGeneratingPowerHour|dataNullFilter"></span> h
+												</h4>
+											</span>
 										</div>
 									</div>
 									<!-- row -->
-									<div class="row" ng-show="posJcvFlag || dailyJt">
+									<div class="row" >
 											<div class="m-b-sm"></div>
-										<div class="col-xs-7">
+										<div class="col-xs-7" ng-show="posJcvFlag || dailyJt">
 											 <small class="stat-label">日辐射总量</small>
 											<h4><span ng-bind="statDayData.dayRad[0]|dataNullFilter" >0.0</span>
 												<span ng-bind="statDayData.dayRad[1]|dataNullFilter" >0.0</span>
 											</h4>
 										</div>
+										<div class="col-xs-7" ng-show="!(posJcvFlag || dailyJt)">
+										</div>
 										<div class="col-xs-5">
-											<small class="stat-label">日发电小时数</small>
+											<small class="stat-label">日收入</small>
 											<h4>
-												<span ng-bind="statDayData.dayGeneratingPowerHour|dataNullFilter"></span> h
+												<span ng-bind="statDayData.dayGeneratingPower|incomeFilter"></span>
 											</h4>
 										</div>
 									</div>
@@ -249,19 +258,27 @@
 										<div class="col-xs-3 no-padder">
 											<img src="./theme/images/solway/icon/icon_month.png" alt="">
 										</div>
-										<div class="col-xs-9 no-padder">
-											<small class="stat-label">月累计发电量</small>
-											<h1>
-												<span ng-bind="statDayData.monthGeneratingPower[0]|dataNullFilter" class="ng-binding">0.00</span><small
-													class="m-l-xs"><span ng-bind="statDayData.monthGeneratingPower[1]|dataNullFilter"
-													class="ng-binding">kWh</span></small>
-											</h1>
+										<div class="col-xs-9 no-padder " style="position:relative;">
+												
+												<span class="" >
+													<small class="stat-label">月累计发电量</small>
+													<h1>
+														<span ng-bind="statDayData.monthGeneratingPower[0]|dataNullFilter" class="ng-binding">0.00</span><small
+															class="m-l-xs"><span ng-bind="statDayData.monthGeneratingPower[1]|dataNullFilter"
+															class="ng-binding">kWh</span></small>
+													</h1>
+												</span>
+												<span class=" no-padder " ng-show="posJcvFlag" style="position:absolute;right:10px;top:-5px;">
+													<h4>
+														<span ng-bind="statDayData.monthGeneratingPowerHour|dataNullFilter"></span> h
+													</h4>
+												</span>
 										</div>
 									</div>
 									<!-- row -->
-										<div class="row" ng-show="posJcvFlag">
+										<div class="row" >
 											<div class="m-b-sm"></div>
-										<div class="col-xs-7">
+										<div class="col-xs-7" ng-show="posJcvFlag">
 											<small class="stat-label">月辐射总量</small>
 											<h4>
 												<!-- ￥<span ng-bind="statDayData.monthGeneratingPowerIncome[0]|dataNullFilter">0.0</span>
@@ -270,10 +287,12 @@
 												<span ng-bind="statDayData.monthRad[1]|dataNullFilter"></span>
 											</h4>
 										</div>
+										<div class="col-xs-7" ng-show="!posJcvFlag">
+										</div>
 										<div class="col-xs-5">
-											<small class="stat-label">月发电小时数</small>
+											<small class="stat-label">月收入</small>
 											<h4>
-												<span ng-bind="statDayData.monthGeneratingPowerHour|dataNullFilter"></span> h
+												<span ng-bind="statDayData.monthGeneratingPower|incomeFilter"></span>
 											</h4>
 										</div>
 									</div>
@@ -295,19 +314,26 @@
 										<div class="col-xs-3 no-padder">
 											<img src="./theme/images/solway/icon/icon_year.png" alt="">
 										</div>
-										<div class="col-xs-9 no-padder">
-											<small class="stat-label">年累计发电量</small>
-											<h1>
-												<span ng-bind="statDayData.yearGeneratingPower[0]|dataNullFilter" class="ng-binding">0.00</span><small
-													class="m-l-xs"><span ng-bind="statDayData.yearGeneratingPower[1]|dataNullFilter"
-													class="ng-binding">kWh</span></small>
-											</h1>
+										<div class="col-xs-9 no-padder" style="position:relative;">
+											<span class="" >
+												<small class="stat-label">年累计发电量</small>
+												<h1>
+													<span ng-bind="statDayData.yearGeneratingPower[0]|dataNullFilter" class="ng-binding">0.00</span><small
+														class="m-l-xs"><span ng-bind="statDayData.yearGeneratingPower[1]|dataNullFilter"
+														class="ng-binding">kWh</span></small>
+												</h1>
+											</span>
+											<span class=" no-padder " style="position:absolute;right:10px;top:-5px;" ng-show="posJcvFlag">
+												<h4>
+													<span ng-bind="statDayData.yearGeneratingPowerHour|dataNullFilter"></span> h
+												</h4>
+											</span>
 										</div>
 									</div>
 									<!-- row -->
 									<div class="m-b-sm"></div>
-									<div class="row" ng-show="posJcvFlag">
-										<div class="col-xs-7">
+									<div class="row" >
+										<div class="col-xs-7" ng-show="posJcvFlag">
 											<small class="stat-label">年辐射总量</small>
 											<h4>
 												<!--  ￥<span ng-bind="statDayData.yearGeneratingPowerIncome[0]|dataNullFilter">0.0</span>
@@ -317,10 +343,12 @@
 												<span ng-bind="statDayData.yearRad[1]|dataNullFilter"></span>
 											</h4>
 										</div>
+										<div class="col-xs-7" ng-show="!posJcvFlag">
+										</div>
 										<div class="col-xs-5">
-											<small class="stat-label">年发电小时数</small>
+											<small class="stat-label">年收入</small>
 											<h4>
-												<span ng-bind="statDayData.yearGeneratingPowerHour|dataNullFilter">0.0</span> h
+												<span ng-bind="statDayData.yearGeneratingPower|incomeFilter"></span>
 											</h4>
 										</div>
 
