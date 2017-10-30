@@ -9,21 +9,21 @@
 #pie-chart-solar{border-bottom:1px solid rgba(255,255,255,0.3)}
 .white-square{width:0.8rem;height:0.8rem;background:white;display:inline-block;margin-right:1rem;}
 
-.progress-con{position:relative;margin: 3.1rem 0 3.1rem 1.8rem;}
-.progressBar {
+.contrast .progress-con{position:relative;margin: 3.1rem 0 3.1rem 1.8rem;}
+.contrast .progressBar {
     width: 100%;
     height: 1rem;
     border: 1px solid rgb(178,178,178);
     background: white;
     line-height: 0px; 
 }
-.span {
+.contrast .span {
     display: inline-block;height:1rem;
 }
-.bar-content-green {
+.contrast .bar-content-green {
    position: absolute;right: 0;
 }
-.bar-content-red {
+.contrast .bar-content-red {
     background: #ff445e;
     
 }

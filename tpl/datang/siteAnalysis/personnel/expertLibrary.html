@@ -12,6 +12,143 @@
     </div>
 
     <div class="el-content">
-        
+        <div class="el-left clearfix">
+            <div class="search">
+                <input type="text" placeholder="华创">
+                <button class="fa fa-search"></button>
+            </div>
+            <div class="switch">
+                <div class="switch-tab">
+                    <button class="active">品牌</button>
+                    <button>故障类型</button>
+                </div>
+                <div class="switch-content">
+                    <ul class="checkbox-list">
+                        <li ng-repeat="item in ['华创','金风','远景','GE']">
+                            <label>
+                                <input checked type="checkbox" name="">
+                                <span>{{item}}</span>
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tips">
+                <div class="tips-title"> 技能等级 </div>
+                <div class="tips-content">
+                    <ul>
+                        <li><input checked disabled type="checkbox" name="">高级</li>
+                        <li><input checked disabled type="checkbox" name="">中级</li>
+                        <li><input checked disabled type="checkbox" name="">专家</li>
+                        <li><input checked disabled type="checkbox" name="">初级</li>
+                        <li><input checked disabled type="checkbox" name="">菜鸟</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="el-right">
+            <div class="el-box" ng-repeat="item in [1,1,1,1,1,2] track by $index">
+                <div ng-click="showDetails();$event.stopPropagation();">
+                    <div class="base-info clearfix">
+                        <img src="/theme/images/icon/bear.png" alt="">
+                        <div>
+                            <h4>李晓</h4>
+                            <p>注册年限：3年</p>
+                            <p>所属单位：大唐北京公司</p>
+                            <p>联系电话：13464675475</p>
+                            <p>联系邮箱：2345534@qq.com</p>
+                        </div>  
+                    </div>
+                    <div class="skill">
+                        <p>
+                            <span class="zj">远景</span>
+                            <span class="zj">GE</span>
+                            <span class="gj">华创</span>
+                            <span class="gj">金风</span>
+                            <span class="zji">西门子</span>
+                            <span class="cj">撒个没</span>
+                        </p>
+                        <p>
+                            <span class="zj">测风系统</span>
+                            <span class="gj">电控系统</span>
+                            <span class="gj">发电机</span>
+                            <span class="zji">机械传电系统</span>
+                            <span class="cj">变桨系统</span>
+                            <span class="cn">塔筒及基础</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <el-details></el-details>
 </div>
+
+<script type="text/html" id="el-details">
+    <div class="el-details">
+        <div class="details-content" ng-click="$event.stopPropagation();">
+            <div class="details-top clearfix">
+                <img src="/theme/images/icon/bear.png" alt="">
+                <div class="base-info">
+                    <h4>李晓</h4>
+                    <div class="first-div clearfix">
+                        <p>注册年限：3年</p>
+                        <p>联系电话：13464675475</p>
+                        <p>所属单位：大唐北京公司</p>
+                        <p>联系邮箱：2345534@qq.com</p>
+                    </div>
+                    <div class="skill" style="margin-top: 10px;">
+                        <p>
+                            <span class="zj">远景</span>
+                            <span class="zj">GE</span>
+                            <span class="gj">华创</span>
+                            <span class="gj">金风</span>
+                            <span class="zji">西门子</span>
+                            <span class="cj">撒个没</span>
+                        </p>
+                        <p>
+                            <span class="zj">测风系统</span>
+                            <span class="gj">电控系统</span>
+                            <span class="gj">发电机</span>
+                            <span class="zji">机械传电系统</span>
+                            <span class="cj">变桨系统</span>
+                            <span class="cn">塔筒及基础</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="info-right">
+                    <ul class="checkbox-list">
+                        <li ng-repeat="item in ['检修台词','检修时间','检修成功率','检修影响时间', '检修台数']">
+                            <label>
+                                <input checked type="checkbox" name="">
+                                <span>{{item}}</span>
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="details-bottom-charts">
+                <div>
+                    <el-chart
+                        name="'gzName'"
+                        style="display: block;width: 280px; height: 200px;"
+                    ></el-chart>
+                    <h4 class="chart-name">故障</h4>
+                </div>
+                <div>
+                    <el-chart
+                    name="'ppName'"
+                    style="display: block;width: 280px; height: 200px;"></el-chart>
+                    <h4 class="chart-name">品牌</h4>
+                </div>
+                <div>
+                    <el-chart
+                    name="'xhName'"
+                    style="display: block;width: 280px; height: 200px;"></el-chart>
+                    <h4 class="chart-name">型号</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>

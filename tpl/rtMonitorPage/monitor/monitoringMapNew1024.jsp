@@ -57,13 +57,13 @@ html,body {color:white;}
 				<hr/>
 				<div class="trapezoid">
 					<div class="small-trapezoid"></div>
-					<h1><img src="theme/images/common/logo1.png" class="company-logo"><span>智能运营管控系统</span></h1>
+					<h1><img src="theme/images/common/logo1.png" class="company-logo"><span class="font38">智能运营管控系统</span></h1>
 				</div>
 			</div>
 			<div class="clearfix font18" style="margin-top: -1.8rem;">
 				<div class="pull-left">
-					<span><img src="theme/images/datang/monitoringMap/clock-icon.png" style="width: 1.4rem;margin-right: 18px;vertical-align: top;"></span>
-					<span ng-bind="nowTime | date:'yyyy-MM-dd HH:mm:ss'"></span>
+					<span><img src="theme/images/datang/monitoringMap/clock-icon.png" style="width: 1.4rem;margin-right: 18px;vertical-align: sub;"></span>
+					<span class="font24" ng-bind="nowTime | date:'yyyy-MM-dd HH:mm:ss'"></span>
 				</div>
 				<div class="pull-right header-tab menu-con">
 					<ul class="header">
@@ -118,18 +118,18 @@ html,body {color:white;}
 		</div>
 		<!-- body地图 -->
 		<div class="map-body">
-			        <div class="width-center con-center">
-		                <div id="chinaChart" style="height:100%;"></div>
-		                <div class="wind-solar-tab-con font14">
-		                	<a ng-click="stationClassSelect('0' )"><span id="stClassId0" ><img src="theme/images/datang/monitoringMap/capacity-maintain.png" style="margin-right:15px;width: 14px;">光伏</span></a>
-		                	<a ng-click="stationClassSelect('1' )"><span id="stClassId1" ><img src="theme/images/datang/monitoringMap/wind-operation.png"  style="margin-right:15px;width: 14px;">风电</span></a>
-		                </div>
-			        </div>
+	        <div class="width-center con-center">
+                <div id="chinaChart" style="height:100%;"></div>
+                <div class="wind-solar-tab-con font14">
+                	<a ng-click="stationClassSelect('0' )"><span id="stClassId0" ><img src="theme/images/datang/monitoringMap/capacity-maintain.png" style="margin-right:15px;width: 14px;">光伏</span></a>
+                	<a ng-click="stationClassSelect('1' )"><span id="stClassId1" ><img src="theme/images/datang/monitoringMap/wind-operation.png"  style="margin-right:15px;width: 14px;">风电</span></a>
+                </div>
+	        </div>
 		</div> 
 		<!-- 左右框 -->
 		<div class="clearfix no-padder" style="position: absolute;;bottom: 0;left: 3rem;right: 3rem;top: 11rem;">
 			<div class="con-left pull-left">
-				<div class="square-con clearfix">
+				<div class="square-con clearfix" ng-click="showSquareDetail('powerInfo')">
 					<div class="col-sm-12 no-padder" style="line-height: 24px;">
                     	<div class="col-sm-12 border-bottom-blue no-padder" style="padding-bottom: 0.6rem !important;">
 	                    	<img src="theme/images/datang/monitoringMap/power-info.png" style="width:1rem;"><span class="font20 square-item-title">电量信息</span>
@@ -139,9 +139,9 @@ html,body {color:white;}
 	                    	<div class="odometer big-green " id="odometer"></div>
 	                    </div>
                     </div>
-                    <div class="secLevelPage-con-left">
+                    <div class="col-sm-12 no-padder secLevelPage-con-left clearfix" style="padding: 0.83rem 1.7rem 0 !important;">
 	                    <div class="col-sm-12 no-padder clearfix p-line">
-	                    	<div class="col-sm-5 font16">月发电量</div>
+	                    	<div class="col-sm-3 no-padder font16">月发电量</div>
 	                    	<div class="col-sm-7 no-padder progress-con">
 	                    		<div class="font12 text-right" style="height:12px;"><span class="font18 light-green">{{MonitorData.monthGeneratingPower[0]|sDecimalFilter:'2'}}</span><span class="blue" style="margin-left: 0.8rem;">{{MonitorData.monthGeneratingPower[1]}}</span></div>
 	                    		<div class="clearfix progress-hover-con">
@@ -161,7 +161,7 @@ html,body {color:white;}
 	                    	</div>
 	                    </div>
 	                    <div class="col-sm-12 no-padder clearfix p-line">
-	                    	<div class="col-sm-5 font16">年发电量</div>
+	                    	<div class="col-sm-3 no-padder font16">年发电量</div>
 	                    	<div class="col-sm-7 no-padder progress-con">
 	                    		<div class="font12 text-right" style="height:12px;"><span class="font18 light-green">{{MonitorData.yearGeneratingPower[0]|sDecimalFilter:'2'}}</span><span class="blue" style="margin-left: 0.8rem;">{{MonitorData.yearGeneratingPower[1]}}</span></div>
 	                    		<div class="clearfix progress-hover-con">
@@ -182,7 +182,7 @@ html,body {color:white;}
 	                    	</div>
 	                    </div>
 	                    <div class="col-sm-12 no-padder clearfix p-line">
-	                    	<div class="col-sm-5 font16">累计发电量</div>
+	                    	<div class="col-sm-3 no-padder font16">累计发电量</div>
 	                    	<div class="col-sm-7 no-padder progress-con">
 	                    		<div class="font12 text-right" style="height: 0.7rem;">
 	                    			<span class="font18 light-green">{{MonitorData.accumulateGeneratingPower[0]|sDecimalFilter:'2'}}</span>
@@ -199,10 +199,10 @@ html,body {color:white;}
 	                    		</div>
 	                    	</div>
 	                    </div>
-	                    <div class="col-sm-12 progress-tip font12">
-	                    	<div class="col-sm-4 no-padder text-center green"><span class="green-tip tip"></span><span>当前发电量</span></div>
+	                    <div class="col-sm-10 no-padder progress-tip font12">
+	                    	<div class="col-sm-4 no-padder text-left green"><span class="green-tip tip"></span><span>当前发电量</span></div>
 	                    	<div class="col-sm-4 no-padder text-center red"><span class="red-tip tip"></span><span>计划发电量</span></div>
-	                    	<div class="col-sm-4 no-padder text-center"><span class="orange-tip tip"></span><span>超发电量</span></div>
+	                    	<div class="col-sm-4 no-padder text-right"><span class="orange-tip tip"></span><span>超发电量</span></div>
 	                    </div>
                     </div>
 				</div>
@@ -223,35 +223,7 @@ html,body {color:white;}
                     </div>
                     <div class="power-curve">
                     	<div id="powerCurve" style="height:10rem;"></div>
-	                    <div class="alert-station-detail" style="display:none;width: 27rem;">
-               				<span class="arrow-left-tip"></span>
-               				<!-- <p class="text-left" style="font-size:12px;">{{allSTList.time}}</p> -->
-               				<table class="table table-striped " style="color:white;border-left: 1px solid white;border-bottom: 1px solid white;border-top: 1px solid white;margin-bottom: 0;">
-               					<thead><tr>
-	               					<th style="font-size:22px;width:15px">{{allSTList.time}}</th>
-	               					<th ng-repeat="vo in allSTList.stnames" style="width: 4rem;">{{vo.value}}</th>
-               					</tr></thead>
-               					<tbody>
-               						<tr><td style="text-align: left;">实际功率(kW)</td>
-               							<td ng-repeat="vo in allSTList.power">{{vo.value}}</td>
-               						</tr>
-               						<tr><td style="text-align: left;">预测功率(kW)</td>
-               							<td ng-repeat="vo in allSTList.prePower">{{vo.value}}</td>
-               						</tr>
-               						<tr><td style="text-align: left;">应发功率(kW)</td>
-               							<td ng-repeat="vo in allSTList.should">{{vo.value}}</td>
-               						</tr>
-               						<tr><td style="text-align: left;">预测与实际功率差值(kW)</td>
-               							<td ng-repeat="vo in allSTList.preMinus">{{vo.value}}</td>
-               						</tr>
-               						<tr><td style="text-align: left;">应发与实际功率差值(kW)</td>
-               							<td ng-repeat="vo in allSTList.shouldMinus">{{vo.value}}</td>
-               						</tr>
-               					</tbody>
-               				</table>
-						</div> 
                     </div>
-                    
                 </div>
 			</div>
 			<div class="con-right pull-right">
@@ -271,7 +243,7 @@ html,body {color:white;}
                     </div>
                     <div class="col-sm-12 no-padder " id="basicInfo" style="height:7.8rem;"></div>
                 </div>
-                <div class="square-con clearfix" style="padding-bottom: 7px;" ng-click="showSquareDetail('equRunning')">
+                <div class="square-con clearfix" style="padding-bottom: 7px;" ng-click="showWindow()">
                     <div class="col-sm-12 no-padder" style="line-height: 24px;">
                     	<div class="col-sm-12 border-bottom-blue no-padder" style="line-height: 24px;padding-bottom: 0.6rem !important;">
 	                    	<img src="theme/images/datang/monitoringMap/ico-equip.png" style="width:18px;"><span class="font20 square-item-title">设备运行情况</span>
@@ -299,6 +271,8 @@ html,body {color:white;}
 			<div class="small-trapezoid"></div>
 		</div>
 	</div>
+    <div data-ng-include="'${ctx}/tpl/datang/rtMonitorPage/modal/powerModal.jsp'"></div>
+    <div data-ng-include="'${ctx}/tpl/datang/rtMonitorPage/rtWindow.jsp'"></div>
 </div>
 
 <div data-ng-include="'${ctx}/tpl/blocks/switchPower.jsp'"></div>
@@ -314,12 +288,6 @@ $(function(){
 		$("#totalPower .alert-station-detail").show();
 	}).mouseout(function(){
 		$("#totalPower .alert-station-detail").hide();
-	});
-	
-	$("#powerCurve").mouseover(function(){
-		$(".power-curve .alert-station-detail").show();	
-	}).mouseout(function(){
-		$(".power-curve .alert-station-detail").hide();
 	});
 	
 	$(".progress-hover-con").mouseover(function(){
@@ -619,6 +587,28 @@ app.controller('mapMonitorNew1024Ctrl', function($scope,$rootScope,$http, $state
 	
 	init();
 
+
+    //点击弹框
+    $scope.showSquareDetail = function(type){
+        if(type == "powerInfo"){
+            $scope.showPowerIndexData="tpl/datang/rtMonitorPage/monitor/model/powerInfoDetail.jsp";
+        }else if(type == "basicInfo"){
+            $scope.showPowerIndexData="tpl/datang/rtMonitorPage/monitor/model/basicInfo.jsp";
+        }else if(type == "equRunning"){
+            $scope.showPowerIndexData="tpl/datang/rtMonitorPage/monitor/model/equRunning.jsp";
+        }
+        $('#powerIndexModal').modal();
+    }
+
+    $scope.showWindow = function () {
+        $scope.$broadcast('showWindow')
+    }
+    
+    //关闭弹出层
+    $scope.hiddenModal=function(){
+        $('#powerIndexModal').modal("hide");
+    };
+
 	function sub2(a,b){
 		if(a!=undefined && a!="" && a!=null && b!=undefined && b=="" && b!=null && a!="-" && b!="-"){
 			return a - b;
@@ -633,49 +623,7 @@ app.controller('mapMonitorNew1024Ctrl', function($scope,$rootScope,$http, $state
 		});
 		var option = {
 			tooltip : {
-				trigger : 'axis',
-				formatter: function (params,ticket,callback) {
-					var dataIndex = params[0].name;
-					var stnames = [{'value':'合计'}];
-					var power = [{'value':params[0].value}];
-					var should = [{'value':params[1].value}];
-					var prePower = [{'value':"-"}];
-					var shouldMinus = [{'value':sub2(should,power)}];
-					var preMinus = [{'value':sub2(prePower,power)}];
-					if($scope.allSTData){
-						for(var i=0;i<$scope.allSTData.length;i++){
-							if($scope.allSTData[i].power){
-								stnames.push({'value':$scope.allSTData[i].name});
-								power.push({'value':$scope.allSTData[i].power[dataIndex]});
-								if($scope.allSTData[i].should){
-									should.push({'value':$scope.allSTData[i].should[dataIndex]});
-									shouldMinus.push({'value':sub2($scope.allSTData[i].should[dataIndex],$scope.allSTData[i].power[dataIndex])});
-								}else{
-									should.push({'value':"-"});
-									shouldMinus.push({'value':"-"});
-								}
-								if($scope.allSTData[i].prePower){
-									prePower.push({'value':$scope.allSTData[i].prePower[dataIndex]});
-									preMinus.push({'value':sub2($scope.allSTData[i].prePower[dataIndex],$scope.allSTData[i].power[dataIndex])});
-								}else{
-									prePower.push({'value':"-"});
-									preMinus.push({'value':"-"});
-								}
-							}
-						}
-					}
-					$scope.allSTList= {
-							time : dataIndex,
-							stnames : stnames,
-							power : power,
-							should : should,
-							prePower : prePower,
-							shouldMinus : shouldMinus,
-							preMinus : preMinus
-					};
-					console.log($scope.allSTList);
-					
-		      	}
+				trigger : 'axis'
 		    },
 		    legend : {
 				left: 'center',
@@ -1224,7 +1172,7 @@ function drawMap(companyId, $http, $scope,mt, oMapData) {
 		geo: {
 			map: mt,
 			roam: true,
-			zoom:0.8,
+			zoom:0.87,
 			center: [100, 38],
 			label: {
 			    normal: {
