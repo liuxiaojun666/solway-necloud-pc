@@ -1,0 +1,37 @@
+ajaxData({
+    pageList: {
+        name: 'GETanalysisPage',
+        data: {
+            pageIndex:0,
+            pageSize:10,
+            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
+            endDate: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+    detail: {
+        name: 'GETselectEqPaintingData',
+        later: true
+    },
+    deviceType: {
+        name: 'GETgetDeviceType',
+        data: {}
+    }
+},{
+})('equipmentBrandCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
+    $scope.dateTime2 = new Date
+    setChartHeight()
+    
+
+
+    window.addEventListener('resize', setChartHeight)
+    $scope.$on('$destroy', () => {
+        window.removeEventListener('resize', setChartHeight)
+    })
+
+
+
+    function setChartHeight () {
+        $scope.chartHeight = (document.body.clientHeight - 450) < 200 ? 200 : document.body.clientHeight - 450
+    }
+})

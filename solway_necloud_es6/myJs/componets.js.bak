@@ -400,3 +400,102 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) =>
         }
     }
 })])
+
+/**
+ * echarts 图   柱状图   
+ */
+app.directive('commonChartBar', ['myAjaxData', (myAjaxData) => ({
+    restrict: 'E',
+    scope: {
+        width: '=',
+        height: '=',
+        xName: '@',
+        yName: '@',
+        y: '=',
+        data: '=',
+        colors: '=',
+        detail: '='
+    },
+
+    link ($scope, $element, $attrs) {
+        const setWidthHeight = () => {
+            $($element).width($scope.width).height($scope.height)
+        }
+        setWidthHeight()
+        let myChart = echarts.init($element[0])
+        const resizeFun = async () => {
+            await myAjaxData.timeout(0)
+            setWidthHeight()
+            myChart.resize()
+        }
+        window.addEventListener('resize', resizeFun)
+        $scope.$on('$destroy', () => {
+            window.removeEventListener('resize', resizeFun)
+            myChart.dispose()
+            myChart = null
+        })
+
+        const option = {
+            tooltip: {},
+            grid: {
+                top: '40',
+                left: '20',
+                right: '60',
+                bottom: '20',
+                containLabel: true
+            },
+            xAxis: {
+                name: $scope.xName || '',
+                type: 'value',
+                splitNumber: 3,
+                axisLine: {
+                    lineStyle: {
+                        color: '#999'
+                    }
+                },
+                axisTick: {
+                    show: false
+                }
+            },
+            yAxis: {
+                name: $scope.yName,
+                type: 'category',
+                axisLine: {
+                    lineStyle: {
+                        color: '#999'
+                    }
+                },
+                axisTick: {
+                    show: false
+                },
+                data: $scope.y
+            },
+            series: [
+                {
+                    type: 'bar',
+                    barWidth: '15',
+                    label:{
+                        normal: {
+                            show: true,
+                            position: 'right',
+                            textStyle: {
+                                color: $scope.colors[$scope.colors.length - 1]
+                            }
+                        },
+                    },
+                    data: $scope.data.map((value, i, arr) => ({
+                        value,
+                        itemStyle: {
+                            normal: {
+                                color: $scope.colors[(value / Math.max(...arr) * ($scope.colors.length - 1)).toFixed()],
+                            }
+                        }
+                    }))
+                },
+            ]
+        }
+        myChart.setOption(option)
+
+
+    }
+})])
