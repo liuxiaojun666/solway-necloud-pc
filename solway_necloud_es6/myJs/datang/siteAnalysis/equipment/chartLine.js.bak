@@ -1,0 +1,113 @@
+app.directive('equipmentChartLine', ['myAjaxData', (myAjaxData) => ({
+    restrict: 'E',
+    scope: {
+        width: '=',
+        height: '=',
+        xName: '@',
+        yName: '@',
+        y: '=',
+        data: '=',
+        colors: '=',
+        detail: '='
+    },
+
+    link ($scope, $element, $attrs) {
+        let myChart = echarts.init($element[0])
+
+        const option = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                type: 'scroll',
+                bottom: 10,
+                data: ['塔筒及基础','变桨系统','测风系统','电控系统','发电机','机械传统系统'].map(name => ({
+                    name,
+                    icon: 'rect'
+                }))
+            },
+            color: ['#a780e9', '#ffc275', '#6584f8', '#e761b0', '#4fbfe3', '#7ede44'],
+            grid: {
+                top: '40',
+                left: '20',
+                right: '60',
+                bottom: '40',
+                containLabel: true
+            },
+            xAxis: {
+                name: '日期',
+                type: 'category',
+                splitNumber: 3,
+                axisLine: {
+                    lineStyle: {
+                        color: '#999'
+                    }
+                },
+                axisTick: {
+                    show: false
+                },
+                splitLine: {
+                    show: true,
+                    interval: 0,
+                },
+                data: [1,2,3,4,5,6,7]
+            },
+            yAxis: {
+                name: '故障率',
+                type: 'value',
+                axisLine: {
+                    lineStyle: {
+                        color: '#999'
+                    }
+                },
+                axisTick: {
+                    show: false
+                },
+                splitLine: {
+                    show: false
+                },
+            },
+            series: [
+                {
+                    name:'塔筒及基础',
+                    type:'line',
+                    symbolSize: 0,
+                    data:[120, 132, 101, 134, 90, 230, 210]
+                },
+                {
+                    name:'变桨系统',
+                    type:'line',
+                    symbolSize: 0,
+                    data:[220, 182, 191, 234, 290, 330, 310]
+                },
+                {
+                    name:'测风系统',
+                    type:'line',
+                    symbolSize: 0,
+                    data:[150, 232, 201, 154, 190, 330, 410]
+                },
+                {
+                    name:'电控系统',
+                    type:'line',
+                    symbolSize: 0,
+                    data:[320, 332, 301, 334, 390, 330, 320]
+                },
+                {
+                    name:'发电机',
+                    type:'line',
+                    symbolSize: 0,
+                    data:[820, 932, 901, 934, 1290, 1330, 1320]
+                },
+                {
+                    name:'机械传统系统',
+                    type:'line',
+                    symbolSize: 0,
+                    data:[520, 132, 901, 534, 290, 30, 120]
+                }
+            ]
+        }
+        myChart.setOption(option)
+
+
+    }
+})])

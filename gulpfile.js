@@ -193,13 +193,6 @@ gulp.task('commit', [], async () => {
 
   cmd.run('cd solway_necloud_es6 && svn update && svn add * --force && svn commit -m ""')
 
-  cmd.get(`git add . && git commit -m "auto update" && git pull`, (err, data, stderr) => {
-    
-    if (err) return console.log(`git pull error\n`, err, data, stderr)
-    console.log('git pull dong', data, stderr)
-
-    cmd.run('git push')
-  })
 
   await new Promise(resolve => setTimeout(() => resolve(), 5000))
 

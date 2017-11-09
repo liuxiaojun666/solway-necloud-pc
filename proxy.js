@@ -4,9 +4,9 @@ const express = require('express'),
     bodyParser = require('body-parser'),
     app = express()
 
-const { HOST = 'http://114.112.96.220', PORT = '3001' } = process.env
+//const { HOST = 'http://114.112.96.220', PORT = '3001' } = process.env
 // const { HOST = 'http://172.10.1.11:9999', PORT = '3001' } = process.env
-// const { HOST = 'http://127.0.0.1:8080', PORT = '3001' } = process.env
+const { HOST = 'http://127.0.0.1:8080', PORT = '3001' } = process.env
 const TIME_OUT = 30 * 1e3
 app.set('port', PORT)
 app.use(bodyParser.json())
@@ -18,7 +18,8 @@ app.use((req, res, next) => {
 
 app.use('/Login/', (req, res) => {
     const method = req.method.toLowerCase()
-    const sreq = request[method](HOST + req.originalUrl)
+    //const sreq = request[method](HOST + req.originalUrl)
+    const sreq = request[method](HOST + '/NECloud' + req.originalUrl)
     sreq.header = req.headers
     sreq.header.host = HOST.substr(7)
     sreq.set('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8').send(req.body)
@@ -38,7 +39,8 @@ app.use('/Login/', (req, res) => {
 
 app.use('/NECloud/', (req, res) => {
     const method = req.method.toLowerCase()
-    const sreq = request[method](HOST + req.originalUrl.substr(8))
+    //const sreq = request[method](HOST + req.originalUrl.substr(8))
+    const sreq = request[method](HOST + req.originalUrl)
             .set('User-Agent', req.headers['user-agent'])
             .set('Content-Type', 'application/json')
     sreq.header = req.headers
