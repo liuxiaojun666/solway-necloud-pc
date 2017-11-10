@@ -297,30 +297,32 @@ app.directive('chartPie', ['myAjaxData', myAjaxData => ({
         const myChart = echarts.init($element[0])
         const renderChart = () => {
             const labelFromatter = {
-                normal : {
-                    formatter : function (params){
-                        if(params.name == 'a'){
-                            return params.value
-                        }else{
-                            return ""
-                        }
+                normal: {
+                    formatter:function (params){
+                        return params.value
                     },
-                     show : true,
-                     position : 'center',
-                     padding:[40,0,0,0],
-                     textStyle : {
-                        fontSize : '48',
-                        color : 'black',
-                     }
+                    position: 'center',
+                    show: true,
+                    textStyle: {
+                        fontSize: '48',
+                        fontWeight: 'normal',
+                        color: 'black'
+                    }
                 }
             }
             const labelBottom = {
-                normal : {
-                    color: '#ccc',
-                    labelLine : {
-                        show : false
+                normal: {
+                    color: 'rgba(36,176,155,1)', // 未完成的圆环的颜色
+                    label: {
+                        show: false
+                    },
+                    labelLine: {
+                        show: false
                     }
                 },
+                emphasis: {
+                    color: 'rgba(36,176,155,1)' // 未完成的圆环的颜色
+                }
             };
             const labelTop = {
                 normal : {
@@ -355,10 +357,9 @@ app.directive('chartPie', ['myAjaxData', myAjaxData => ({
                         startAngle: 0,
                         hoverAnimation: false,
                         legendHoverLink: false, 
-                        label : labelFromatter,
                         data : [
-                            {name:'a', value:nature,itemStyle : labelTop},
-                            {name:'b', value:100-nature, itemStyle : labelBottom}
+                            {value:nature,itemStyle : labelTop,label:labelFromatter},
+                            {value:100-nature, itemStyle : labelBottom}
                         ]
                     }
                 ]
