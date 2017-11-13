@@ -21,36 +21,15 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
             + '/vendor/echarts/china.js',
         ]).then(() => {
             const option = {
-                // geo: {
-                //     map: 'china',
-                //     label: {
-                //         emphasis: {
-                //             show: true
-                //         }
-                //     },
-                //     roam: true,
-                //     layoutCenter: ['50%', '53%'],
-                //     layoutSize: "108%",
-                //     itemStyle: {
-                //         normal: {
-                //             color: '#60b4a4',
-                //             borderColor: 'rgba(255,255,255,0.5)'
-                //         },
-                //         emphasis: {
-                //             color: '#20668e'
-                //         }
-                //     }
-                // },
-            
+                tooltip: {
+                    trigger: 'item',
+                },
                 series: [{
-                    name: 'chinaMap',
+                    name: '检修台次',
                     type: 'map',
                     mapType: 'china',
                     roam:true,
                     label: {
-                        normal: {
-                            show: false
-                        },
                         emphasis: {
                             show: false
                         }
@@ -70,10 +49,10 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
                     data:[
                         ...[
                             { name: '山西', value: 1},
-                            { name: '新疆', value: 1},
-                            { name: '内蒙古', value: 1},
-                            { name: '北京', value: 1},
-                            { name: '广东', value: 1},
+                            { name: '新疆', value: 3},
+                            { name: '内蒙古', value: 6},
+                            { name: '北京', value: 100},
+                            { name: '广东', value: 16},
                         ].map(v => ({
                             name: v.name,
                             value: v.value,
@@ -85,7 +64,19 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
                                 emphasis: {
                                     areaColor:"#20668e",//区域颜色
                                 }
-                            }
+                            },
+                            label: {
+                                normal: {
+                                    formatter () {
+                                        return v.value
+                                    },
+                                    show: true,
+                                    textStyle: {
+                                        color: '#fff',
+                                        fontSize: 9,
+                                    }
+                                }
+                            },
                         })),
                         {
                             name: '南海诸岛',

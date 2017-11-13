@@ -117,7 +117,8 @@ app.directive('dropDown', ['myAjaxData', myAjaxData => ({
     replace: true,
     scope: {
         options: '=',
-        selected: '='
+        selected: '=',
+        updated: '='
     },
     link ($scope, $element) {
         $element.find('.selected').on('click', function () {
@@ -127,11 +128,12 @@ app.directive('dropDown', ['myAjaxData', myAjaxData => ({
         $(document).on('click', () => {
             $element.find('.options').slideUp(200)
         })
-        $element.on('click', 'li', function () {
-            $scope.selected = $(this).text()
-            $scope.$apply()
-            // $(this).addClass('active').sliblings().removeClass('active')
-        })
+    },
+    controller ($scope) {
+        $scope.onSelect = (value) => {
+            $scope.selected = value
+            $scope.updated && $scope.updated()
+        }
     }
 })])
 

@@ -1,36 +1,77 @@
-ajaxData({
-    pageList: {
-        name: 'GETanalysisPage',
-        data: {
-            pageIndex:0,
-            pageSize:10,
-            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
-            endDate: (new Date).Format('yyyy-MM-dd')
-        }
-    },
-    detail: {
-        name: 'GETselectEqPaintingData',
-        later: true
-    },
-    deviceType: {
-        name: 'GETgetDeviceType',
-        data: {}
-    }
+ajaxData(
+    // 各品牌平均故障率总排名
+[{
+    name: 'bar1',
+    apiName: 'GETdeviceAnalysisRankingBrand',
+    indicators: 'FAULTRATE'
 },{
+    // 设备台数
+    name: 'bar2',
+    apiName: 'GETdeviceAnalysisRankingBrand',
+    indicators: 'DEVICECOUNT'
+},{
+    // 各省份应用数据
+    name: 'bar3',
+    apiName: 'GETdeviceAnalysisRankingProvince',
+    indicators: 'DEVICECOUNT'
+},{
+    // 各省份平均故障率排名
+    name: 'bar4',
+    apiName: 'GETdeviceAnalysisRankingProvince',
+    indicators: 'FAULTRATE'
+},].map(v => ({
+    [v.name]: {
+        name: v.apiName,
+        data: {
+            powerType: 'PV',
+            idType: 1,
+            ids: 137,
+            indicators: v.indicators,
+            timeType: 'ACCUM',
+            dateStr: (new Date).Format('yyyy-MM-dd'),
+            months: null,
+            yearDiff: null,
+            num: null
+        }
+    }
+})).reduce((obj, cur) => ({...obj, ...cur})),{
+
 })('equipmentBrandCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+
+    /**
+     * 计算  echarts 图  盒子高度
+     */
+    setChartHeight()
+
+    /**
+     * 初始化参数
+     */
     $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
     $scope.dateTime2 = new Date
-    setChartHeight()
+    $scope.indicators = 'FAULTRATE'
+    $scope.timeType = 'ACCUM'
+
+
+    /**
+     * 指标维度 改变 
+     */
+    $scope.indicatorsUpdated = async () => {
+        await myAjaxData.timeout(0)
+        $scope.bar1.getData({ indicators: $scope.indicators })
+        $scope.bar4.getData({ indicators: $scope.indicators })
+    }
     
 
-
+    /**
+     * 添加 resize 事件
+     */
     window.addEventListener('resize', setChartHeight)
-    $scope.$on('$destroy', () => {
-        window.removeEventListener('resize', setChartHeight)
-    })
+    $scope.$on('$destroy', () => window.removeEventListener('resize', setChartHeight) )
 
 
-
+    /**
+     * 计算 盒子高度  函数
+     */
     function setChartHeight () {
         $scope.chartHeight = (document.body.clientHeight - 450) < 200 ? 200 : document.body.clientHeight - 450
     }
