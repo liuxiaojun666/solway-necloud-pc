@@ -19,8 +19,8 @@ app.use((req, res, next) => {
 
 app.use('/Login/', (req, res) => {
     const method = req.method.toLowerCase()
-    //const sreq = request[method](HOST + req.originalUrl)
-    const sreq = request[method](HOST + '/NECloud' + req.originalUrl)
+    const sreq = request[method](HOST + req.originalUrl)
+    // const sreq = request[method](HOST + '/NECloud' + req.originalUrl)
     sreq.header = req.headers
     sreq.header.host = HOST.substr(7)
     sreq.set('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8').send(req.body)
@@ -40,8 +40,8 @@ app.use('/Login/', (req, res) => {
 
 app.use('/NECloud/', (req, res) => {
     const method = req.method.toLowerCase()
-    //const sreq = request[method](HOST + req.originalUrl.substr(8))
-    const sreq = request[method](HOST + req.originalUrl)
+    const sreq = request[method](HOST + req.originalUrl.substr(8))
+    // const sreq = request[method](HOST + req.originalUrl)
             .set('User-Agent', req.headers['user-agent'])
             .set('Content-Type', 'application/json')
     sreq.header = req.headers

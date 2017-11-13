@@ -1,21 +1,21 @@
 ajaxData(
     // 各品牌平均故障率总排名
-    // 设备台数
-    // 各省份应用数据
-    // 各省份平均故障率排名
 [{
     name: 'bar1',
     apiName: 'GETdeviceAnalysisRankingBrand',
     indicators: 'FAULTRATE'
 },{
+    // 设备台数
     name: 'bar2',
     apiName: 'GETdeviceAnalysisRankingBrand',
     indicators: 'DEVICECOUNT'
 },{
+    // 各省份应用数据
     name: 'bar3',
     apiName: 'GETdeviceAnalysisRankingProvince',
     indicators: 'DEVICECOUNT'
 },{
+    // 各省份平均故障率排名
     name: 'bar4',
     apiName: 'GETdeviceAnalysisRankingProvince',
     indicators: 'FAULTRATE'
@@ -28,13 +28,14 @@ ajaxData(
             ids: 137,
             indicators: v.indicators,
             timeType: 'ACCUM',
-            dateStr: '2017-01',
+            dateStr: (new Date).Format('yyyy-MM-dd'),
             months: null,
             yearDiff: null,
             num: null
         }
     }
 })).reduce((obj, cur) => ({...obj, ...cur})),{
+
 })('equipmentBrandCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
 
     /**
@@ -48,6 +49,7 @@ ajaxData(
     $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
     $scope.dateTime2 = new Date
     $scope.indicators = 'FAULTRATE'
+    $scope.timeType = 'ACCUM'
 
 
     /**
