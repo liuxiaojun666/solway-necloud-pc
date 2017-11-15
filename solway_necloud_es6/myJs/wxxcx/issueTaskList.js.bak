@@ -9,7 +9,30 @@ ajaxData({
         }
     }
 },{
+    routerUrl:[document.getElementById('routerJS').getAttribute('param')],
+
 })('issueTaskListCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    //线上
+    /*$scope.showPowerIndexData = myAjaxData.config.routerUrl[0]+'/tpl/wxxcx/issueTaskAdd.html'
+
+    $scope.coverModel = myAjaxData.config.routerUrl[0]+'/tpl/publicComponent/coverModal.html'*/
+
+    //测试
+    $scope.showPowerIndexData = '/tpl/wxxcx/issueTaskAdd.html'
+
+    $scope.coverModel = '/tpl/publicComponent/coverModal.html'
+    
+    console.log($scope.coverModel)
+
+
+    //添加
+    $scope.showAddModel =  () =>{
+       // initPageData();
+        $('#powerIndexModal').modal();
+       // $('#'+modalId).modal();
+    };
+
+    
     /*$scope.a = ()=>{
         $scope.pageList.getData({})
     }*/
@@ -19,67 +42,4 @@ ajaxData({
         //debugger
     })
 
-    $scope.created = (scope,element)=>{
-        window.changeAll = (value,ids) =>{
-            debugger
-            const objs = document.getElementsByName(ids);
-            for(let i=0; i<objs.length; i++) {
-                    objs[i].checked = value;
-            }
-        }
-    }
-    $scope.destroyed = ()=> window.changeAll = null
-    $scope.column = [
-        {
-            title: `<label class="i-checks m-b-none" style="display:inline-block;">
-                 <input type="text" value="bnm" style="display:block;w"/>
-                                    <input type="checkbox" id="all" />
-                                    <i></i>
-                                </label>`,
-            dataIndex: '',
-            width: '10%',
-            align: 'center',
-            render(text, record, index) {
-                let temp = `<label class="i-checks m-b-none">
-                                    <input type="checkbox" name="ids" id="ids" value="{{vo.id}}" />
-                                    <i></i>
-                                </label>`
-                return temp                
-            }
-        },{
-            title: '标题',
-            dataIndex: 'deviceName',
-            width: '20%',
-            align: 'center',
-        },{
-            title: '时间',
-            dataIndex: 'time',
-            width: '30%',
-            align: 'center',
-            render(text, record, index) {
-                return text && new Date(text).Format('yyyy-MM-dd')                       
-            }
-        }, {
-            title: '地点',
-            dataIndex: 'place',
-            width: '20%',
-            align: 'center'
-        }, {
-            title: '状态',
-            dataIndex: 'eqreduce',
-            width: '30%',
-            align: 'right',
-            render (text, record) {
-                return text 
-            }
-        }, {
-            title: '操作',
-            dataIndex: 'eqreduce',
-            width: '30%',
-            align: 'right',
-            render (text, record) {
-                return text 
-            }
-        }
-    ]
 })
