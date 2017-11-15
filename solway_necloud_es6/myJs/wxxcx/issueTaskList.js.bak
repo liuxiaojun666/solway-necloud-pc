@@ -1,0 +1,85 @@
+ajaxData({
+    pageList: {
+        name: 'GETanalysisPage',
+        data: {
+            pageIndex:0,
+            pageSize:10,
+            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
+            endDate: (new Date).Format('yyyy-MM-dd')
+        }
+    }
+},{
+})('issueTaskListCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    /*$scope.a = ()=>{
+        $scope.pageList.getData({})
+    }*/
+    //console.log($scope.p)
+    $scope.data = [1,223,6,657,75]
+    $scope.pageList.promise.then(res=>{
+        //debugger
+    })
+
+    $scope.created = (scope,element)=>{
+        window.changeAll = (value,ids) =>{
+            debugger
+            const objs = document.getElementsByName(ids);
+            for(let i=0; i<objs.length; i++) {
+                    objs[i].checked = value;
+            }
+        }
+    }
+    $scope.destroyed = ()=> window.changeAll = null
+    $scope.column = [
+        {
+            title: `<label class="i-checks m-b-none" style="display:inline-block;">
+                 <input type="text" value="bnm" style="display:block;w"/>
+                                    <input type="checkbox" id="all" />
+                                    <i></i>
+                                </label>`,
+            dataIndex: '',
+            width: '10%',
+            align: 'center',
+            render(text, record, index) {
+                let temp = `<label class="i-checks m-b-none">
+                                    <input type="checkbox" name="ids" id="ids" value="{{vo.id}}" />
+                                    <i></i>
+                                </label>`
+                return temp                
+            }
+        },{
+            title: '标题',
+            dataIndex: 'deviceName',
+            width: '20%',
+            align: 'center',
+        },{
+            title: '时间',
+            dataIndex: 'time',
+            width: '30%',
+            align: 'center',
+            render(text, record, index) {
+                return text && new Date(text).Format('yyyy-MM-dd')                       
+            }
+        }, {
+            title: '地点',
+            dataIndex: 'place',
+            width: '20%',
+            align: 'center'
+        }, {
+            title: '状态',
+            dataIndex: 'eqreduce',
+            width: '30%',
+            align: 'right',
+            render (text, record) {
+                return text 
+            }
+        }, {
+            title: '操作',
+            dataIndex: 'eqreduce',
+            width: '30%',
+            align: 'right',
+            render (text, record) {
+                return text 
+            }
+        }
+    ]
+})
