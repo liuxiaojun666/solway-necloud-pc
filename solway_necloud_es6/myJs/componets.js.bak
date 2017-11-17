@@ -419,7 +419,7 @@ app.directive('switchPower', ['myAjaxData', myAjaxData => ({
     week                周  需设  calendar-type 为  yyyy-MM-dd
     callback            dateTime改变之后的回调函数(oldValue, newValue)
  */
-app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) => ({
+app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad, $timeout, myAjaxData) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -429,11 +429,15 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) =>
         startDate: '=',
         calendarType: '@',
         showArrow: '=',
-        week: '=',
-        callback: '=',
-        inputDisabled: '=',
-        renderCallback: '=',
+        week: '@',
+        beforeCreate: '=',
         created: '=',
+        beforeMount: '=',
+        mounted: '=',
+        beforeUpdate: '=',
+        updated: '=',
+        beforeDestroy: '=',
+        destroyed: '=',
     },
     template: `
     <div class="calendar" style="position:relative;">
@@ -445,9 +449,13 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) =>
         </p>
     </div>`,
     link($scope, $element) {
+        $scope.beforeMount && $scope.beforeMount($scope, $element)
         const calendarMap = {
             'yyyy-MM-dd hh:mm:ss': {}, 
             'yyyy-MM-dd hh:mm': {},
+            'yyyy-MM-dd hh': {
+                minView: 1,
+            },
             'yyyy-MM-dd': {
                 minView: 2,
             },
@@ -489,9 +497,12 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) =>
             })
             $scope.showArrow && $scope.disabled()
         })
-        $timeout(() => $scope.renderCallback && $scope.renderCallback($scope.dateTime, $scope.weekStart, $scope.weekEnd), 0)
+        $timeout(() => $scope.mounted && $scope.mounted($scope, $element), 0)
     },
     controller($scope, $element) {
+        $scope.beforeCreate && $scope.beforeCreate($scope, $element)
+        if ($scope.week) $scope.calendarType = 'yyyy-MM-dd'
+        if ($scope.calendarType.length > 10) $scope.showArrow = false
         $scope.disabled = (noChange) => {
             const startDate = $scope.startDate || new Date('1970', '01', '01'),
                 endDate = $scope.endDate || new Date,
@@ -508,9 +519,10 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) =>
             } else if (!noChange) $element.find('.fa-angle-right').parent().removeClass('disabled')
             return num
         }
-        let firstChangeTime = true
+        let changeCount = 0
         $scope.$watch('dateTime', (newValue, oldValue) => {
-            if (Object.is(+oldValue, +newValue) && !firstChangeTime) return firstChangeTime = false
+            if (Object.is(+oldValue, +newValue) && !Object.is(1, ++changeCount)) return
+            $scope.beforeUpdate && $scope.beforeUpdate($scope, $element)
             if ($scope.week && window.moment) {
                 if (+newValue > +($scope.endDate || new Date)) $scope.dateTime = oldValue
                 $scope.showArrow && $scope.showDate && $scope.disabled()
@@ -520,7 +532,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) =>
                 $scope.weekEnd = (+weekEndDate > +($scope.endDate || new Date) ? ($scope.endDate || new Date) : weekEndDate).Format('yyyy-MM-dd')
             }
             $scope.showDate = $scope.dateTime.Format($scope.calendarType)
-            $scope.callback && $scope.callback(oldValue, newValue, $scope.weekStart, $scope.weekEnd)
+            $scope.updated && $scope.updated($scope, $element)
         })
         $scope.$watch('startDate', (newValue, oldValue) => {
             if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setStartDate', newValue.Format($scope.calendarType))
@@ -528,12 +540,18 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) =>
         $scope.$watch('endDate', (newValue, oldValue) => {
             if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setEndDate', newValue.Format($scope.calendarType))
         })
-        $scope.changeDateTime = num => {
+        $scope.changeDateTime = async num => {
             if ([num, 0].includes($scope.disabled(!0))) return
             if ($scope.week) num *= Object.is($scope.dateTime.getDay(), 0) ? 1 : 8 - $scope.dateTime.getDay()
             $scope.dateTime = moment($scope.dateTime).add(num, $scope.calendarType.substr(-1, 1))._d
-            $timeout(() => $scope.disabled(), 0)
+            await myAjaxData.timeout(0)
+            $scope.disabled()
         }
+        $element.on('$destroy', async () => {
+            $scope.beforeDestroy && $scope.beforeDestroy($scope, $element)
+            await myAjaxData.timeout(0)
+            $scope.destroyed && $scope.destroyed($scope, $element)
+        })
         $scope.created && $scope.created($scope, $element)
     }
 })])
