@@ -275,6 +275,140 @@ app.directive('switchPower', ['myAjaxData', myAjaxData => ({
     }
 })])
 
+// /**
+//  * [日历时间]    input样式手动设置
+//  * dateTime: '=',       初始显示时间
+//     endDate: '=',       结束时间
+//     startDate: '=',     开始时间
+//     calendarType: '@'   日历类型   (yyyy-MM-dd   yyyy-MM  yyyy等)
+//     showArrow           是否显示左右箭头
+//  */
+// app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) => ({
+//     restrict: 'E',
+//     transclude: !0,
+//     replace: !0,
+//     scope: {
+//         dateTime: '=',
+//         endDate: '=',
+//         startDate: '=',
+//         calendarType: '@',
+//         showArrow: '='
+//     },
+//     template: `
+//     <div class="calendar">
+//         <span ng-if="showArrow" ng-click="changeDateTime(-1)"><i class="fa fa-angle-left"></i></span>
+//         <input type="text" value="{{showDate}}" ng-model="showDate">
+//         <span ng-if="showArrow" ng-click="changeDateTime(1)"><i class="fa fa-angle-right"></i></span>
+//     </div>`,
+//     link ($scope, $element) {
+//         const calendarMap = {
+//             'yyyy-MM-dd': {
+//                 minView : 2,
+//             },
+//             'yyyy-MM': {
+//                 minView : 3,
+//                 startView: 3,
+//             },
+//             'yyyy': {
+//                 minView : 4,
+//                 startView: 4,
+//             }
+//         }
+//         $scope.randomId = (Math.random() + '').substr(2, 10)
+//         $($element).find('input').attr('id', $scope.randomId)
+//         $ocLazyLoad.load([
+//                 baseUrl + '/vendor/bootstrap/css/bootstrap-datetimepicker.min.css',
+//                 baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.js'
+//             ]).then( () => $ocLazyLoad.load([
+//                 baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
+//                 baseUrl + '/vendor/libs/moment.min.js'
+//             ])).then( () => {
+//                 $('#' + $scope.randomId).datetimepicker({
+//                     format: $scope.calendarType.toLocaleLowerCase(),
+//                     language: 'zh-CN',
+//                     todayHighlight:!0,
+//                     todayBtn: !0,
+//                     autoclose: !0,
+//                     endDate: $scope.endDate || new Date,
+//                     startDate: $scope.startDate || new Date('1970', '01', '01'),
+//                     ...calendarMap[$scope.calendarType],
+//                     initialDate: $scope.dateTime,
+//                     pickerPosition: "bottom-left"
+//                 })
+//                 .on('hide', ev => {
+//                     $scope.dateTime = ev.date
+//                     $scope.$apply()
+//                 })
+//                 .on('changeDate', ev => {
+//                     $scope.showArrow && $scope.disabled()
+//                 })
+//             })
+//         $timeout(() => $scope.showArrow && $scope.disabled(), 0)
+//     },
+//     controller ($scope, $element) {
+//         $scope.disabled = (noChange) => {
+//             const showDateLastNumber = +$scope.showDate.split('-').slice(-1)
+//             let startLastNumber = '', 
+//                 endLastNumber = '', 
+//                 startDate = $scope.startDate || new Date('1970', '01', '01'),
+//                 endDate = $scope.endDate || new Date
+//             switch ($scope.calendarType.substr(-1, 1)) {
+//                 case 'y':
+//                     startLastNumber = startDate.getFullYear()
+//                     endLastNumber = endDate.getFullYear()
+//                     break
+//                 case 'M':
+//                     startLastNumber = startDate.getMonth() + 1
+//                     endLastNumber = endDate.getMonth() + 1
+//                     break
+//                 case 'd':
+//                     startLastNumber = startDate.getDate()
+//                     endLastNumber = endDate.getDate()
+//                     break
+//             }
+//             let num = 0
+//             if (showDateLastNumber === startLastNumber) {
+//                 if (noChange) num = -1
+//                 else $($element).find('.fa-angle-left').parent().addClass('disabled')
+//             } else {
+//                 if (!noChange) $($element).find('.fa-angle-left').parent().removeClass('disabled')
+//             }
+//             if (showDateLastNumber === endLastNumber) {
+//                 if (noChange) num = 1
+//                 else $($element).find('.fa-angle-right').parent().addClass('disabled')
+//             } else {
+//                 if (!noChange) $($element).find('.fa-angle-right').parent().removeClass('disabled')
+//             }
+//             return num
+//         }
+//         $scope.$watch('showDate', (newValue, oldValue) => {
+//             if (void 0 === window.moment) return
+//             if (newValue != oldValue) {
+//                 const newDateTime = moment(newValue)._d
+//                 if ((newDateTime + '').toLocaleLowerCase() == "invalid date") {
+//                     return promptObj("error", "", "error" + "\n" + "您输入的日期或时间格式错误")
+//                 }
+//                 $scope.dateTime = newDateTime
+//             }
+//         })
+//         $scope.$watch('dateTime', (newValue, oldValue) => {
+//             $scope.showDate = $scope.dateTime.Format($scope.calendarType)
+//         })
+//         $scope.$watch('startDate', (newValue, oldValue) => {
+//             if (newValue != oldValue) $('#' + $scope.randomId).datetimepicker('setStartDate', newValue.Format($scope.calendarType))
+//         })
+//         $scope.$watch('endDate', (newValue, oldValue) => {
+//             if (newValue != oldValue) $('#' + $scope.randomId).datetimepicker('setEndDate', newValue.Format($scope.calendarType))
+//         })
+//         $scope.changeDateTime = num => {
+//             if (num === $scope.disabled(true)) return
+//             $scope.dateTime = moment($scope.dateTime).add(num, $scope.calendarType.substr(-1, 1))._d
+//             $timeout(() => $scope.disabled(), 0)
+//         }
+//     }
+// })])
+
+
 /**
  * [日历时间]    input样式手动设置
  * dateTime: '=',       初始显示时间
@@ -282,6 +416,8 @@ app.directive('switchPower', ['myAjaxData', myAjaxData => ({
     startDate: '=',     开始时间
     calendarType: '@'   日历类型   (yyyy-MM-dd   yyyy-MM  yyyy等)
     showArrow           是否显示左右箭头
+    week                周  需设  calendar-type 为  yyyy-MM-dd
+    callback            dateTime改变之后的回调函数(oldValue, newValue)
  */
 app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) => ({
     restrict: 'E',
@@ -292,121 +428,117 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', ($ocLazyLoad, $timeout) =>
         endDate: '=',
         startDate: '=',
         calendarType: '@',
-        showArrow: '='
+        showArrow: '=',
+        week: '=',
+        callback: '=',
+        inputDisabled: '=',
+        renderCallback: '=',
+        created: '=',
     },
     template: `
-    <div class="calendar">
+    <div class="calendar" style="position:relative;">
         <span ng-if="showArrow" ng-click="changeDateTime(-1)"><i class="fa fa-angle-left"></i></span>
         <input type="text" value="{{showDate}}" ng-model="showDate">
         <span ng-if="showArrow" ng-click="changeDateTime(1)"><i class="fa fa-angle-right"></i></span>
+        <p ng-if="week" style="position:absolute;left: 20px;right: 20px;top: 0;bottom: 0;margin: 0;text-align: center;background-color: #fff;pointer-events: none;">
+            {{weekStart + '至' + weekEnd}}
+        </p>
     </div>`,
-    link ($scope, $element) {
+    link($scope, $element) {
         const calendarMap = {
+            'yyyy-MM-dd hh:mm:ss': {}, 
+            'yyyy-MM-dd hh:mm': {},
             'yyyy-MM-dd': {
-                minView : 2,
+                minView: 2,
             },
             'yyyy-MM': {
-                minView : 3,
+                minView: 3,
                 startView: 3,
             },
             'yyyy': {
-                minView : 4,
+                minView: 4,
                 startView: 4,
             }
         }
         $scope.randomId = (Math.random() + '').substr(2, 10)
-        $($element).find('input').attr('id', $scope.randomId)
+        const $input = $($element).find('input').attr('id', $scope.randomId)
+        $input.on('focus', () => $input.blur())
         $ocLazyLoad.load([
                 baseUrl + '/vendor/bootstrap/css/bootstrap-datetimepicker.min.css',
                 baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.js'
             ]).then( () => $ocLazyLoad.load([
                 baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
                 baseUrl + '/vendor/libs/moment.min.js'
-            ])).then( () => {
-                $('#' + $scope.randomId).datetimepicker({
-                    format: $scope.calendarType.toLocaleLowerCase(),
-                    language: 'zh-CN',
-                    todayHighlight:!0,
-                    todayBtn: !0,
-                    autoclose: !0,
-                    endDate: $scope.endDate || new Date,
-                    startDate: $scope.startDate || new Date('1970', '01', '01'),
-                    ...calendarMap[$scope.calendarType],
-                    initialDate: $scope.dateTime,
-                    pickerPosition: "bottom-left"
-                })
-                .on('hide', ev => {
-                    $scope.dateTime = ev.date
-                    $scope.$apply()
-                })
-                .on('changeDate', ev => {
-                    $scope.showArrow && $scope.disabled()
-                })
+        ])).then(() => {
+            $scope.dateTime = new Date($scope.dateTime)
+            $('#' + $scope.randomId).datetimepicker({
+                format: 'yyyy-mm-dd hh:ii:ss'.substr(0, $scope.calendarType.length),
+                language: 'zh-CN',
+                todayHighlight: !0,
+                todayBtn: !0,
+                autoclose: !0,
+                endDate: $scope.endDate || new Date,
+                startDate: $scope.startDate || new Date('1970', '01', '01'),
+                ...calendarMap[$scope.calendarType],
+                initialDate: $scope.dateTime,
+                pickerPosition: "bottom-left"
+            }).on('hide', ev => {
+                $scope.dateTime = ev.date
+                $scope.showArrow && $scope.disabled()
+                $scope.$apply()
             })
-        $timeout(() => $scope.showArrow && $scope.disabled(), 0)
+            $scope.showArrow && $scope.disabled()
+        })
+        $timeout(() => $scope.renderCallback && $scope.renderCallback($scope.dateTime, $scope.weekStart, $scope.weekEnd), 0)
     },
-    controller ($scope, $element) {
+    controller($scope, $element) {
         $scope.disabled = (noChange) => {
-            const showDateLastNumber = +$scope.showDate.split('-').slice(-1)
-            let startLastNumber = '', 
-                endLastNumber = '', 
-                startDate = $scope.startDate || new Date('1970', '01', '01'),
-                endDate = $scope.endDate || new Date
-            switch ($scope.calendarType.substr(-1, 1)) {
-                case 'y':
-                    startLastNumber = startDate.getFullYear()
-                    endLastNumber = endDate.getFullYear()
-                    break
-                case 'M':
-                    startLastNumber = startDate.getMonth() + 1
-                    endLastNumber = endDate.getMonth() + 1
-                    break
-                case 'd':
-                    startLastNumber = startDate.getDate()
-                    endLastNumber = endDate.getDate()
-                    break
-            }
-            let num = 0
-            if (showDateLastNumber === startLastNumber) {
+            const startDate = $scope.startDate || new Date('1970', '01', '01'),
+                endDate = $scope.endDate || new Date,
+                startDisabled = $scope.week ? (+moment($scope.dateTime).add(-$scope.dateTime.getDay() + 1, 'd')._d <= +startDate) : (+moment([$scope.dateTime.getFullYear(), $scope.dateTime.getMonth(), $scope.dateTime.getDate()].slice(0, $scope.calendarType.split('-').length))._d <= +moment([startDate.getFullYear(), startDate.getMonth(), startDate.getDate()].slice(0, $scope.calendarType.split('-').length))._d),
+                nextDisabled = $scope.week ? (+moment($scope.dateTime).add(7 - $scope.dateTime.getDay(), 'd')._d >= +endDate) : (+$scope.dateTime >= +moment([endDate.getFullYear(), endDate.getMonth(), endDate.getDate()].slice(0, $scope.calendarType.split('-').length))._d)
+            let num
+            if (startDisabled) {
                 if (noChange) num = -1
-                else $($element).find('.fa-angle-left').parent().addClass('disabled')
-            } else {
-                if (!noChange) $($element).find('.fa-angle-left').parent().removeClass('disabled')
-            }
-            if (showDateLastNumber === endLastNumber) {
-                if (noChange) num = 1
-                else $($element).find('.fa-angle-right').parent().addClass('disabled')
-            } else {
-                if (!noChange) $($element).find('.fa-angle-right').parent().removeClass('disabled')
-            }
+                else $element.find('.fa-angle-left').parent().addClass('disabled')
+            } else if (!noChange) $element.find('.fa-angle-left').parent().removeClass('disabled')
+            if (nextDisabled) {
+                if (noChange) num = Object.is(num, -1) ? 0 : 1
+                else $element.find('.fa-angle-right').parent().addClass('disabled')
+            } else if (!noChange) $element.find('.fa-angle-right').parent().removeClass('disabled')
             return num
         }
-        $scope.$watch('showDate', (newValue, oldValue) => {
-            if (void 0 === window.moment) return
-            if (newValue != oldValue) {
-                const newDateTime = moment(newValue)._d
-                if ((newDateTime + '').toLocaleLowerCase() == "invalid date") {
-                    return promptObj("error", "", "error" + "\n" + "您输入的日期或时间格式错误")
-                }
-                $scope.dateTime = newDateTime
-            }
-        })
+        let firstChangeTime = true
         $scope.$watch('dateTime', (newValue, oldValue) => {
+            if (Object.is(+oldValue, +newValue) && !firstChangeTime) return firstChangeTime = false
+            if ($scope.week && window.moment) {
+                if (+newValue > +($scope.endDate || new Date)) $scope.dateTime = oldValue
+                $scope.showArrow && $scope.showDate && $scope.disabled()
+                const weekNum = moment($scope.dateTime).day() || 7
+                $scope.weekStart = moment($scope.dateTime).add(-weekNum + 1, 'd').format('YYYY-MM-DD')
+                const weekEndDate = moment($scope.dateTime).add(6 - weekNum + 1, 'd')._d
+                $scope.weekEnd = (+weekEndDate > +($scope.endDate || new Date) ? ($scope.endDate || new Date) : weekEndDate).Format('yyyy-MM-dd')
+            }
             $scope.showDate = $scope.dateTime.Format($scope.calendarType)
+            $scope.callback && $scope.callback(oldValue, newValue, $scope.weekStart, $scope.weekEnd)
         })
         $scope.$watch('startDate', (newValue, oldValue) => {
-            if (newValue != oldValue) $('#' + $scope.randomId).datetimepicker('setStartDate', newValue.Format($scope.calendarType))
+            if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setStartDate', newValue.Format($scope.calendarType))
         })
         $scope.$watch('endDate', (newValue, oldValue) => {
-            if (newValue != oldValue) $('#' + $scope.randomId).datetimepicker('setEndDate', newValue.Format($scope.calendarType))
+            if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setEndDate', newValue.Format($scope.calendarType))
         })
         $scope.changeDateTime = num => {
-            if (num === $scope.disabled(true)) return
+            if ([num, 0].includes($scope.disabled(!0))) return
+            if ($scope.week) num *= Object.is($scope.dateTime.getDay(), 0) ? 1 : 8 - $scope.dateTime.getDay()
             $scope.dateTime = moment($scope.dateTime).add(num, $scope.calendarType.substr(-1, 1))._d
             $timeout(() => $scope.disabled(), 0)
         }
+        $scope.created && $scope.created($scope, $element)
     }
 })])
+
+
 
 /**
  * echarts 图   柱状图   
