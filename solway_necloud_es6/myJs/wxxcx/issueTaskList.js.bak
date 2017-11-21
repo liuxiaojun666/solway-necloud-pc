@@ -1,45 +1,255 @@
-ajaxData({
-    pageList: {
-        name: 'GETanalysisPage',
-        data: {
-            pageIndex:0,
-            pageSize:10,
-            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
-            endDate: (new Date).Format('yyyy-MM-dd')
+//添加、编辑
+app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
+    return {
+        restrict: 'E',
+        template: $('#task-add-temp').html(),
+        replace: true,
+        scope: {
+            provinceList: '=',
+            cityList: '=',
+            countryList: '=',
+            getLatAndLong:'='
+        },
+
+        link ($scope, $element, $attrs) {
+            
+            $scope.stationChange = () =>{
+                const lat = $scope.stationList.selected.lat;
+                const long = $scope.stationList.selected.long;
+
+                $scope.getMap(lat ,long, false);
+            }
+            $scope.getMap();
+        },
+
+        controller ($scope, $element) {
+
+            $scope.radioValue = 1;
+
+            $scope.getMap = (lat = 39.915 ,long = 116.404,first = true) =>{
+                const map = new BMap.Map("allmap");
+                const point = new BMap.Point(long,lat);
+                
+                if(!first){
+                    //获取经纬度描点
+                    const marker = new BMap.Marker(point);
+                    map.addOverlay(marker);
+                    /*const label = new BMap.Label("afsdfsd",{offset:new BMap.Size(20,-10)});
+                    marker.setLabel(label);*/
+                }
+                map.centerAndZoom(point, 11);
+                map.enableScrollWheelZoom(true); 
+
+                //逆地址解析
+                var geoc = new BMap.Geocoder();    
+
+                /*map.addEventListener("click", function(e){        
+                    var pt = e.point;
+                    geoc.getLocation(pt, function(rs){
+                        console.log(rs)
+                    });        
+                });*/
+            }
+            $scope.provinced = {};
+            $scope.cityd = {};
+            $scope.countyd = {};
+            //获取电站列表
+            $scope.stationList = [{id:1,name:'电站1',lat:'40.915',long:'116.404'},
+                                {id:2,name:'电站2',lat:'38.915',long:'116.404'},
+                                {id:3,name:'电站3',lat:'40.615',long:'116.404'}]
+
+            const getProvinceList = () =>{
+                $scope.provinceList.getData({
+                    'treeLevel':1,
+                    'parentId':1
+                }).then(res =>{
+
+                    $scope.province = res;
+                    $scope.provinced.selected= { regionName: $scope.province[0].regionName,id: $scope.province[0].id};
+                })
+            }
+            getProvinceList();
+
+            $scope.provinceChange = () =>{
+                let a = angular.copy($scope.provinced.selected.id);
+                $scope.cityList.getData({
+                    "treeLevel":2,
+                    "parentId":a
+                }).then(res =>{
+                    $scope.city = res;
+                    $scope.cityd.selected = {regionName : $scope.city[0].regionName,id : $scope.city[0].id};
+                })        
+            }
+
+            $scope.cityChange = () =>{
+                let b = angular.copy($scope.cityd.selected.id);
+                $scope.countryList.getData({
+                    "treeLevel":3,
+                    "parentId":((b==null) || (b==""))?0:b
+                }).then(res =>{
+                    $scope.county = res;
+                    $scope.countyd.selected = {regionName : $scope.county[0].regionName,id : $scope.county[0].id};
+                })
+            }
+            
+            $scope.getlatandlng = () =>{
+                const province = $scope.provinced.selected ?$scope.provinced.selected.regionName :null
+                const city = $scope.cityd.selected ? $scope.cityd.selected.regionName :null
+                const country = $scope.countyd.selected ? $scope.countyd.selected.regionName :null
+                const street = $("#address").val();
+                if(province !=null && city != null && country != null && street != ""){
+                    const str = province+city+country+street
+                    $scope.getLatAndLong.getData({
+                        "add":str
+                    }).then(res =>{
+                        $scope.longitude = res[0]
+                        $scope.latitude = res[1]
+                        $scope.getMap($scope.latitude ,$scope.longitude, false);
+                    })
+
+                }else{
+                    alert("省市县街道均不能为空")
+                }
+            }
+
+            //获取周边人员
+            $scope.getPersonList = () =>{
+                //接口
+                $scope.personList = [{id:1,name:'张三'},{id:2,name:'asdgfsdg'},{id:3,name:'张三'},{id:4,name:'张三'},{id:5,name:'aaaaadgdg'},{id:6,name:'张三'},{id:7,name:'张三'},
+                            {id:8,name:'asdfsf'},{id:9,name:'sdfs'},{id:10,name:'张三'},{id:11,name:'aaaaa'},]
+            }
+
+            const dateTime = new Date()
+
+            $scope.timeSetLine = [{time:dateTime,money:""},{time:dateTime,money:""},{time:dateTime,money:""}]
+
+            $scope.addTimeLine = () =>{
+                $scope.timeSetLine.push({time:dateTime});
+            }
+
+            $scope.deleteTimeLine = (index) =>{
+                $scope.timeSetLine.splice(index,1);
+            }
+            
+            $scope.release = () =>{
+                validate()
+               
+            }
+
+            const validate = () =>{
+                let timeStrArr = []
+                for(let i = 0;i<$scope.timeSetLine.length;i++){
+                    timeStrArr[i] = $scope.timeSetLine[i].time.getTime()
+                }
+                let currentMaxTime = timeStrArr[0];
+                for(let i = 1;i<timeStrArr.length;i++){
+                    if(timeStrArr[i] < currentMaxTime){
+                        alert("上一个截止日期，不能大于下一个截止日期")
+                        return false
+                    }else{
+                        currentMaxTime = timeStrArr[i]
+                    }
+                }
+            }
+
+
+            $scope.hiddenModalAdd = () =>{
+                $('#powerIndexModalAdd').modal("hide");
+            }
         }
     }
+}])
+
+//审核，发红包
+app.directive('taskExamineTemp',['myAjaxData',myAjaxData => {
+    return {
+        restrict:'E',
+        template:$('#task-examine-temp').html(),
+        replace:true,
+        scope:{
+            statusType:"="
+        },
+        link($scope,$element,$attrs){
+
+        },
+        controller($scope,$element){
+            const dateTime = new Date()
+            //接口
+            const getExamine = () =>{
+                $scope.personList = [{id:1,name:'张三'},{id:2,name:'asdgfsdg'},{id:3,name:'张三'},{id:4,name:'张三'},{id:5,name:'aaaaadgdg'},{id:6,name:'张三'},{id:7,name:'张三'},
+                            {id:8,name:'asdfsf'},{id:9,name:'sdfs'},{id:10,name:'张三'}]
+
+                $scope.timeSetLine = [{time:dateTime,money:""},{time:dateTime,money:""},{time:dateTime,money:""}]
+                $scope.imageList = [1,2,3,4]
+            }
+
+            getExamine()
+
+
+            //通过
+            $scope.pass = () =>{
+                
+            }
+
+            //不通过
+            $scope.notPass = () =>{
+                
+            }
+
+            //发红包
+            $scope.handOutMoney = () =>{
+
+            }
+
+            $scope.hiddenModalExamine = () =>{
+                $('#taskExamineModal').modal("hide");
+            }
+        }
+    }
+}])
+ajaxData({
+    provinceList:{
+        name: 'POSTSelectProvince',
+        data: {},
+        later:true
+    },
+    cityList:{
+        name: 'POSTSelectCity',
+        data: {},
+        later:true
+    },
+    countryList:{
+        name: 'POSTSelectCountry',
+        data: {},
+        later:true
+    },
+    getLatAndLong:{
+        name:'POSTLatandlng',
+        data: {},
+        later:true
+    }
 },{
-    routerUrl:[document.getElementById('routerJS').getAttribute('param')],
 
-})('issueTaskListCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-    //线上
-    /*$scope.showPowerIndexData = myAjaxData.config.routerUrl[0]+'/tpl/wxxcx/issueTaskAdd.html'
-
-    $scope.coverModel = myAjaxData.config.routerUrl[0]+'/tpl/publicComponent/coverModal.html'*/
-
-    //测试
-    $scope.showPowerIndexData = '/tpl/wxxcx/issueTaskAdd.html'
-
-    $scope.coverModel = '/tpl/publicComponent/coverModal.html'
+})('issueTaskListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
     
-    console.log($scope.coverModel)
-
-
-    //添加
-    $scope.showAddModel =  () =>{
-       // initPageData();
-        $('#powerIndexModal').modal();
-       // $('#'+modalId).modal();
-    };
-
-    
-    /*$scope.a = ()=>{
-        $scope.pageList.getData({})
-    }*/
-    //console.log($scope.p)
-    $scope.data = [1,223,6,657,75]
-    $scope.pageList.promise.then(res=>{
-        //debugger
+    $ocLazyLoad.load([
+        "http://api.map.baidu.com/api?v=2.0&ak=aBsOf0A0mp32b7M6A15dvByz"
+    ]).then(()=>{
+        //添加
+        $scope.showAddModel =  () =>{
+            $('#powerIndexModalAdd').modal();
+        };
     })
 
+
+    $scope.data = [1,223,6,657,75]
+    /*$scope.pageList.promise.then(res=>{
+        })
+    */
+   
+    $scope.examineInfo = (type) =>{
+        $scope.statusType = type
+        $('#taskExamineModal').modal();
+    }
+    
 })
