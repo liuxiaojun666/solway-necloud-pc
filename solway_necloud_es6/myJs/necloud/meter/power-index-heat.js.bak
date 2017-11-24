@@ -18,6 +18,8 @@ ajaxData({
 
 })('powerIndexHeatCtrl', ['$scope', 'myAjaxData','$ocLazyLoad','$interval'], ($scope, myAjaxData,$ocLazyLoad,$interval) => {
     
+    let refreshTime
+       
     $scope.stationId = '';
     $scope.today = new Date().Format("yyyy-MM-dd")
 
@@ -38,19 +40,35 @@ ajaxData({
         }
 
         if($scope.stationId != ''){
-            $scope.temperatureData.getData({
-                'stid':$scope.stationId
-            }).then(res =>{
-                $scope.temp = res.data
-            })
-
-            $scope.powerData.getData({
-                'powerStationId':$scope.stationId,
-                'dateString':$scope.today
-            }).then(res =>{
-                $scope.power = res
-            })
+            dataSource()
+            refreshTime = $interval(() => {
+                dataSource()
+            },5000)
         }
     })
+
+    const dataSource = () =>{
+        $scope.temperatureData.getData({
+            'stid':$scope.stationId
+        }).then(res =>{
+            if(res.data){
+                $scope.temp = res.data
+                $scope.tempIn = JSON.parse(res.data.tempIn)
+            }
+            
+        })
+
+        $scope.powerData.getData({
+            'powerStationId':$scope.stationId,
+            'dateString':$scope.today
+        }).then(res =>{
+            $scope.power = res
+        })
+    }
+
+    //离开当前界面
+    $scope.$on('$stateChangeStart', function(event) {
+        clearInterval(refreshTime);
+    });
    
 })

@@ -8,7 +8,8 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
             provinceList: '=',
             cityList: '=',
             countryList: '=',
-            getLatAndLong:'='
+            getLatAndLong:'=',
+            getRepairPersonList:'='
         },
 
         link ($scope, $element, $attrs) {
@@ -114,7 +115,24 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
 
             //获取周边人员
             $scope.getPersonList = () =>{
-                //接口
+                if($scope.longitude == "" || $scope.longitude == undefined || $scope.latitude == "" || $scope.latitude == undefined || $scope.distance == ""|| $scope.distance == undefined){
+                    alert("经度、纬度、推送范围均不能为空")
+                    return false
+                }
+
+                $scope.getRepairPersonList.getData({
+                    "latitude":$scope.latitude,
+                    "longitude":$scope.longitude,
+                    "range":$scope.distance
+                }).then(res =>{
+                    console.log(res)
+                    if(res.code == 0 ){
+                        //$scope.personList = res.body
+                    }else{
+                        alert(res.msg)
+                    }
+                })    
+                
                 $scope.personList = [{id:1,name:'张三'},{id:2,name:'asdgfsdg'},{id:3,name:'张三'},{id:4,name:'张三'},{id:5,name:'aaaaadgdg'},{id:6,name:'张三'},{id:7,name:'张三'},
                             {id:8,name:'asdfsf'},{id:9,name:'sdfs'},{id:10,name:'张三'},{id:11,name:'aaaaa'},]
             }
@@ -207,6 +225,18 @@ app.directive('taskExamineTemp',['myAjaxData',myAjaxData => {
     }
 }])
 ajaxData({
+    pageList: {
+        name: 'GETTaskList',
+        data: {
+            pageIndex:0,
+            pageSize:10,
+        }
+    },
+    stationsPosition:{
+        name:'GETStationsPos',
+        data: {},
+        later:true
+    },
     provinceList:{
         name: 'POSTSelectProvince',
         data: {},
@@ -226,6 +256,11 @@ ajaxData({
         name:'POSTLatandlng',
         data: {},
         later:true
+    },
+    getRepairPersonList:{
+        name:'GETSelectRepairPerson',
+        data: {},
+        later:true
     }
 },{
 
@@ -241,6 +276,9 @@ ajaxData({
     })
 
 
+    /*$scope.search = () => {
+        $scope.pageList.getData()
+    }*/
     $scope.data = [1,223,6,657,75]
     /*$scope.pageList.promise.then(res=>{
         })
