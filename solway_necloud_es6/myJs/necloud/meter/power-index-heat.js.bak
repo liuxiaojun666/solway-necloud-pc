@@ -1,8 +1,56 @@
 ajaxData({
-    
+    getPowerStationId:{
+        name:'POSTPowerStationId',
+        data:{
+            currentView:'00',
+            isGroup:1
+        }
+    },
+    temperatureData:{
+        name: 'GETHeatPageTemperature',
+        later: true
+    },
+    powerData:{
+        name: 'POSTHeatPagePower',
+        later: true
+    }
 },{
 
-})('powerIndexHeatCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
+})('powerIndexHeatCtrl', ['$scope', 'myAjaxData','$ocLazyLoad','$interval'], ($scope, myAjaxData,$ocLazyLoad,$interval) => {
     
+    $scope.stationId = '';
+    $scope.today = new Date().Format("yyyy-MM-dd")
+
+    $scope.currentTime = new Date
+
+    $interval(() =>{
+        $scope.currentTime = new Date
+    },1000)
+
+
+    $scope.getPowerStationId.promise.then(res=>{
+        const comList = res.comList
+        for(let i = 0;i<comList.length;i++){
+            if(comList[i].stFlag == 1){
+                $scope.stationId = comList[i].id
+                break
+            }
+        }
+
+        if($scope.stationId != ''){
+            $scope.temperatureData.getData({
+                'stid':$scope.stationId
+            }).then(res =>{
+                $scope.temp = res.data
+            })
+
+            $scope.powerData.getData({
+                'powerStationId':$scope.stationId,
+                'dateString':$scope.today
+            }).then(res =>{
+                $scope.power = res
+            })
+        }
+    })
    
 })
