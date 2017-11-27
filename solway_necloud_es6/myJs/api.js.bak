@@ -1,14 +1,16 @@
 app.factory("apiService", ["$http", "$q", (d, b) => {
-    const c = window.interface
+    const c = window.interface, k = window.noFormSubmit
     let a = {}
     a.getData = (e) => {
         let f = b.defer()
-        let j = e.name.startsWith('GET') ? 'GET' : 'POST'
+        const j = e.name.startsWith('GET') ? 'GET' : 'POST'
+        let l = Object.is(j, 'POST') ? { "Content-Type": "application/x-www-form-urlencoded"} : {}
+        l = k.includes(e.name) ? {} : l
         d({
             method: j,
             url: c[e.name],
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                ...l,
                 "X-Requested-With": "XMLHttpRequest"
             },
             params: j === 'GET' ? e.data : {},
