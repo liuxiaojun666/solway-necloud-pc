@@ -1,8 +1,74 @@
 ajaxData({
-    
+    getPowerStationId:{
+        name:'POSTPowerStationId',
+        data:{
+            currentView:'00',
+            isGroup:1
+        }
+    },
+    temperatureData:{
+        name: 'GETHeatPageTemperature',
+        later: true
+    },
+    powerData:{
+        name: 'POSTHeatPagePower',
+        later: true
+    }
 },{
 
-})('powerIndexHeatCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
+})('powerIndexHeatCtrl', ['$scope', 'myAjaxData','$ocLazyLoad','$interval'], ($scope, myAjaxData,$ocLazyLoad,$interval) => {
     
+    let refreshTime
+       
+    $scope.stationId = '';
+    $scope.today = new Date().Format("yyyy-MM-dd")
+
+    $scope.currentTime = new Date
+
+    $interval(() =>{
+        $scope.currentTime = new Date
+    },1000)
+
+
+    $scope.getPowerStationId.promise.then(res=>{
+        const comList = res.comList
+        for(let i = 0;i<comList.length;i++){
+            if(comList[i].stFlag == 1){
+                $scope.stationId = comList[i].id
+                break
+            }
+        }
+
+        if($scope.stationId != ''){
+            dataSource()
+            refreshTime = $interval(() => {
+                dataSource()
+            },5000)
+        }
+    })
+
+    const dataSource = () =>{
+        $scope.temperatureData.getData({
+            'stid':$scope.stationId
+        }).then(res =>{
+            if(res.data){
+                $scope.temp = res.data
+                $scope.tempIn = JSON.parse(res.data.tempIn)
+            }
+            
+        })
+
+        $scope.powerData.getData({
+            'powerStationId':$scope.stationId,
+            'dateString':$scope.today
+        }).then(res =>{
+            $scope.power = res
+        })
+    }
+
+    //离开当前界面
+    $scope.$on('$stateChangeStart', function(event) {
+        clearInterval(refreshTime);
+    });
    
 })
