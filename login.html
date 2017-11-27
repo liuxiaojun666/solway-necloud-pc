@@ -16,8 +16,8 @@
     
         <label for="username">选择账号：</label>
         <select name="" id="username">
-            <option value="gkdemo">gkdemo</option>
-            <option value="18401540500" selected>18401540500</option>
+            <option value="gkdemo" selected>gkdemo</option>
+            <option value="18401540500">18401540500</option>
             <option value="15010158381">15010158381</option>
             <option value="18611897671">18611897671</option>
         </select><br><br>
@@ -26,7 +26,7 @@
         <input type="text" id="password" value="123456"><br><br>
     
         <img style="vertical-align: middle;" src="/Login/randomValidateCode.htm" onclick="this.src='/Login/randomValidateCode.htm?' + Math.random()" alt="">
-        <input type="text" id="code" placeholder="请输入验证码"><br><br>
+        <input type="text" id="code" placeholder="请输入验证码" autofocus><br><br>
     
         <button onclick="login()">登录</button>
     <!-- </form> -->
@@ -40,14 +40,17 @@
             }, function(msg) {
                 if (msg.status == 1) {
                     window.localStorage.hasComInvite = 1
-                    window.location.href = "/index.html"
+                    window.location.href = "/index.html#/app/groupStringShadow"
                 } else {
-                    // alert(msg.status)
                     $('img').attr('src', '/Login/randomValidateCode.htm?' + Math.random())
                     $('#code').val('').focus()
                 }
             })
         }
+
+        $(document).keydown(function (e) {
+            if (e.keyCode == 13) login()
+        })
     </script>
 </body>
 </html>
