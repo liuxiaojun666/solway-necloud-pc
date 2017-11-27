@@ -16,7 +16,7 @@ app.factory("apiService", ["$http", "$q", (d, b) => {
             params: j === 'GET' ? e.data : {},
             data: j === 'POST' ? e.data : {},
             transformRequest (g) {
-                return $.param(g)
+                return k.includes(e.name) ? JSON.stringify(g) : $.param(g)
             }
         }).success( h => {
             if (h.status >= 500) {
