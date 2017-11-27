@@ -6,10 +6,12 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
         replace: true,
         scope: {
             provinceList: '=',
+            stationList:'=',
             cityList: '=',
             countryList: '=',
             getLatAndLong:'=',
-            getRepairPersonList:'='
+            getRepairPersonList:'=',
+            creatTask:"="
         },
 
         link ($scope, $element, $attrs) {
@@ -54,19 +56,21 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
             $scope.provinced = {};
             $scope.cityd = {};
             $scope.countyd = {};
-            //获取电站列表
-            $scope.stationList = [{id:1,name:'电站1',lat:'40.915',long:'116.404'},
-                                {id:2,name:'电站2',lat:'38.915',long:'116.404'},
-                                {id:3,name:'电站3',lat:'40.615',long:'116.404'}]
+            $scope.formData = {}
+            
 
             const getProvinceList = () =>{
                 $scope.provinceList.getData({
                     'treeLevel':1,
                     'parentId':1
                 }).then(res =>{
-
+                    console.log(res);
                     $scope.province = res;
-                    $scope.provinced.selected= { regionName: $scope.province[0].regionName,id: $scope.province[0].id};
+                    $scope.provinced.selected= { regionName: $scope.province[0].regionName,id: $scope.province[0].id}
+
+                    if($scope.provinced.selected.id != undefined && $scope.provinced.selected != null){
+                       $scope.provinceChange() 
+                    }
                 })
             }
             getProvinceList();
@@ -78,7 +82,11 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
                     "parentId":a
                 }).then(res =>{
                     $scope.city = res;
-                    $scope.cityd.selected = {regionName : $scope.city[0].regionName,id : $scope.city[0].id};
+                    $scope.cityd.selected = {regionName : $scope.city[0].regionName,id : $scope.city[0].id}
+
+                    if($scope.cityd.selected.id != undefined && $scope.cityd.selected != null){
+                       $scope.cityChange() 
+                    }
                 })        
             }
 
@@ -89,7 +97,8 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
                     "parentId":((b==null) || (b==""))?0:b
                 }).then(res =>{
                     $scope.county = res;
-                    $scope.countyd.selected = {regionName : $scope.county[0].regionName,id : $scope.county[0].id};
+                    $scope.countyd.selected = {regionName : $scope.county[0].regionName,id : $scope.county[0].id}
+
                 })
             }
             
@@ -115,15 +124,25 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
 
             //获取周边人员
             $scope.getPersonList = () =>{
-                if($scope.longitude == "" || $scope.longitude == undefined || $scope.latitude == "" || $scope.latitude == undefined || $scope.distance == ""|| $scope.distance == undefined){
-                    alert("经度、纬度、推送范围均不能为空")
-                    return false
+                let lat = "",long = ""
+                if($scope.radioValue == "1"){
+                    lat = $scope.stationList.selected.latitude
+                    long = $scope.stationList.selected.longitude
+                }else if($scope.radioValue == "2"){
+                    if($scope.longitude == "" || $scope.longitude == undefined || $scope.latitude == "" || $scope.latitude == undefined || $scope.distance == ""|| $scope.distance == undefined){
+                        alert("经度、纬度、推送范围均不能为空")
+                        return false
+                    }else{
+                        lat = $scope.latitude
+                        long = $scope.longitude
+                    }
                 }
+                
 
                 $scope.getRepairPersonList.getData({
-                    "latitude":$scope.latitude,
-                    "longitude":$scope.longitude,
-                    "range":$scope.distance
+                    "latitude":lat,
+                    "longitude":long,
+                    "range":$scope.formData.sendScope
                 }).then(res =>{
                     console.log(res)
                     if(res.code == 0 ){
@@ -137,12 +156,13 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
                             {id:8,name:'asdfsf'},{id:9,name:'sdfs'},{id:10,name:'张三'},{id:11,name:'aaaaa'},]
             }
 
-            const dateTime = new Date()
+            let dateTime = new Date()
+            $scope.endDate = new Date("2050,12,12")
 
-            $scope.timeSetLine = [{time:dateTime,money:""},{time:dateTime,money:""},{time:dateTime,money:""}]
+            $scope.timeSetLine = [{time:dateTime,money:""}]
 
             $scope.addTimeLine = () =>{
-                $scope.timeSetLine.push({time:dateTime});
+                $scope.timeSetLine.push({time:dateTime,money:""});
             }
 
             $scope.deleteTimeLine = (index) =>{
@@ -150,24 +170,71 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
             }
             
             $scope.release = () =>{
-                validate()
+                if(validate()){
+                    organizeParams()
+                    $scope.creatTask.getData({
+                        'taskVo':$scope.formData,
+                        'opType':1,
+                        'userIds':$scope.userIds
+                    }).then(res =>{
+                        console.log(res)
+                    })
+
+                }
                
             }
 
+            const organizeParams = () =>{
+                if($scope.radioValue == "1"){
+                    $scope.formData['provinceId'] = $scope.stationList.selected.provinceid
+                    $scope.formData['cityId'] = $scope.stationList.selected.cityid
+                    $scope.formData['countyId'] = $scope.stationList.selected.countyid
+                    $scope.formData['address'] = $scope.stationList.selected.address
+                    $scope.formData['latitude'] = $scope.stationList.selected.latitude
+                    $scope.formData['longitude'] = $scope.stationList.selected.longitude
+                }else if($scope.radioValue == "2"){
+                    $scope.formData['provinceId'] = $scope.provinced.selected.id
+                    $scope.formData['cityId'] = $scope.cityd.selected.id
+                    $scope.formData['countyId'] = $scope.countyd.selected.id
+                    $scope.formData['address'] = $("#address").val()
+                    $scope.formData['latitude'] = $scope.latitude
+                    $scope.formData['longitude'] = $scope.longitude
+                }
+
+                for(let i = 0;i<$scope.timeSetLine.length;i++){
+                    $scope.formData['bounsTime'+i] = $scope.timeSetLine[i].time
+                    $scope.formData['bouns'+i] = $scope.timeSetLine[i].money
+                }
+
+                let checkedIds = []
+                let checkedInput = $("input[name=ids]:checked")
+                for(let i = 0;i<checkedInput.length;i++){
+                    checkedIds.push(checkedInput[i].value)
+                }
+                $scope.userIds = checkedIds
+                console.log($scope.formData)
+                
+            }
             const validate = () =>{
+                let validateFlag = true
+
+                //验证时间（时间从上到下，依次增大）
                 let timeStrArr = []
                 for(let i = 0;i<$scope.timeSetLine.length;i++){
                     timeStrArr[i] = $scope.timeSetLine[i].time.getTime()
                 }
                 let currentMaxTime = timeStrArr[0];
                 for(let i = 1;i<timeStrArr.length;i++){
-                    if(timeStrArr[i] < currentMaxTime){
+                    if(timeStrArr[i] <= currentMaxTime){
                         alert("上一个截止日期，不能大于下一个截止日期")
-                        return false
+                        validateFlag = false
+                        return validateFlag
                     }else{
                         currentMaxTime = timeStrArr[i]
                     }
                 }
+
+                return validateFlag
             }
 
 
@@ -261,6 +328,11 @@ ajaxData({
         name:'GETSelectRepairPerson',
         data: {},
         later:true
+    },
+    creatTask:{
+        name:'POSTCreatTask',
+        data:{},
+        later:true
     }
 },{
 
@@ -271,6 +343,18 @@ ajaxData({
     ]).then(()=>{
         //添加
         $scope.showAddModel =  () =>{
+            //获取电站列表
+            $scope.stationsPosition.getData({
+            }).then(res =>{
+                console.log(res)
+                if(res.code == 0){
+                    $scope.stationList = res.body
+                    $scope.stationList.selected = $scope.stationList[0]
+                }
+            })
+            /*$scope.stationList = [{id:1,name:'电站1',lat:'40.915',long:'116.404'},
+                                {id:2,name:'电站2',lat:'38.915',long:'116.404'},
+                                {id:3,name:'电站3',lat:'40.615',long:'116.404'}]*/
             $('#powerIndexModalAdd').modal();
         };
     })
