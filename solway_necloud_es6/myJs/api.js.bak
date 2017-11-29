@@ -1,11 +1,7 @@
 app.factory("apiService", ["$http", "$q", (d, b) => {
-    const c = window.interface, k = window.noFormSubmit
-    let a = {}
+    const c = window.interface, k = window.noFormSubmit, a = {}
     a.getData = (e) => {
-        let f = b.defer()
-        const j = e.name.startsWith('GET') ? 'GET' : 'POST'
-        let l = Object.is(j, 'POST') ? { "Content-Type": "application/x-www-form-urlencoded"} : {}
-        l = k.includes(e.name) ? {} : l
+        const m = k.includes(e.name), f = b.defer(), j = e.name.startsWith('GET') ? 'GET' : 'POST', l = Object.is(j, 'POST') && !m ? { "Content-Type": "application/x-www-form-urlencoded"} : {}
         d({
             method: j,
             url: c[e.name],
@@ -16,7 +12,7 @@ app.factory("apiService", ["$http", "$q", (d, b) => {
             params: j === 'GET' ? e.data : {},
             data: j === 'POST' ? e.data : {},
             transformRequest (g) {
-                return k.includes(e.name) ? JSON.stringify(g) : $.param(g)
+                return m ? JSON.stringify(g) : $.param(g)
             }
         }).success( h => {
             if (h.status >= 500) {

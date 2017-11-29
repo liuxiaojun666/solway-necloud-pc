@@ -1,10 +1,12 @@
 //添加、编辑
-app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
+app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => {
     return {
         restrict: 'E',
         template: $('#task-add-temp').html(),
         replace: true,
         scope: {
+            pageList:'=',
+            taskDetail:'=',
             provinceList: '=',
             stationList:'=',
             cityList: '=',
@@ -17,20 +19,42 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
         link ($scope, $element, $attrs) {
             
             $scope.stationChange = () =>{
-                const lat = $scope.stationList.selected.lat;
-                const long = $scope.stationList.selected.long;
+                const lat = $scope.stationList.selected.latitude;
+                const long = $scope.stationList.selected.longitude;
 
                 $scope.getMap(lat ,long, false);
             }
             $scope.getMap();
+
+            $timeout(()=>{
+                $('#result_table').on('click','.icon-note.font16', function () {
+                    let id = $(this).attr('id')
+                    $scope.taskDetail.getData({
+                        'id':id
+                    }).then(res =>{
+                        $scope.formData = res.body
+                        //todo
+                        $('#powerIndexModalAdd').modal();
+                    })
+                })
+
+                $(".issueTaskList").on('click','#add-new',function(){
+
+                    $scope.formData = {}
+                    $scope.$apply()
+                    $('#powerIndexModalAdd').modal()
+                })
+
+            },0);
+            
         },
 
         controller ($scope, $element) {
 
             $scope.radioValue = 1;
-
+            const map = new BMap.Map("allmap")
             $scope.getMap = (lat = 39.915 ,long = 116.404,first = true) =>{
-                const map = new BMap.Map("allmap");
+
                 const point = new BMap.Point(long,lat);
                 
                 if(!first){
@@ -40,22 +64,30 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
                     /*const label = new BMap.Label("afsdfsd",{offset:new BMap.Size(20,-10)});
                     marker.setLabel(label);*/
                 }
-                map.centerAndZoom(point, 11);
-                map.enableScrollWheelZoom(true); 
+                map.centerAndZoom(point, 11)
+                map.enableScrollWheelZoom(true)
 
                 //逆地址解析
-                var geoc = new BMap.Geocoder();    
+                const geoc = new BMap.Geocoder()  
 
-                /*map.addEventListener("click", function(e){        
-                    var pt = e.point;
+                map.addEventListener("click", function(e){   
+
+                    let allOverlay = map.getOverlays()
+                    for (let i = 0; i < allOverlay.length; i++){
+                        map.removeOverlay(allOverlay[i])
+                    }
+
+                    let pt = e.point
+                    const marker = new BMap.Marker(pt)
+                    map.addOverlay(marker)
                     geoc.getLocation(pt, function(rs){
                         console.log(rs)
-                    });        
-                });*/
+                    })      
+                })
             }
-            $scope.provinced = {};
-            $scope.cityd = {};
-            $scope.countyd = {};
+            $scope.provinced = {}
+            $scope.cityd = {}
+            $scope.countyd = {}
             $scope.formData = {}
             
 
@@ -64,7 +96,6 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
                     'treeLevel':1,
                     'parentId':1
                 }).then(res =>{
-                    console.log(res);
                     $scope.province = res;
                     $scope.provinced.selected= { regionName: $scope.province[0].regionName,id: $scope.province[0].id}
 
@@ -73,7 +104,7 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
                     }
                 })
             }
-            getProvinceList();
+            getProvinceList()
 
             $scope.provinceChange = () =>{
                 let a = angular.copy($scope.provinced.selected.id);
@@ -129,7 +160,7 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
                     lat = $scope.stationList.selected.latitude
                     long = $scope.stationList.selected.longitude
                 }else if($scope.radioValue == "2"){
-                    if($scope.longitude == "" || $scope.longitude == undefined || $scope.latitude == "" || $scope.latitude == undefined || $scope.distance == ""|| $scope.distance == undefined){
+                    if($scope.longitude == "" || $scope.longitude == undefined || $scope.latitude == "" || $scope.latitude == undefined || $scope.formData.sendScope == ""|| $scope.formData.sendScope == undefined){
                         alert("经度、纬度、推送范围均不能为空")
                         return false
                     }else{
@@ -144,20 +175,19 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
                     "longitude":long,
                     "range":$scope.formData.sendScope
                 }).then(res =>{
-                    console.log(res)
                     if(res.code == 0 ){
-                        //$scope.personList = res.body
+                        $scope.personList = res.body
                     }else{
                         alert(res.msg)
                     }
                 })    
                 
-                $scope.personList = [{id:1,name:'张三'},{id:2,name:'asdgfsdg'},{id:3,name:'张三'},{id:4,name:'张三'},{id:5,name:'aaaaadgdg'},{id:6,name:'张三'},{id:7,name:'张三'},
-                            {id:8,name:'asdfsf'},{id:9,name:'sdfs'},{id:10,name:'张三'},{id:11,name:'aaaaa'},]
+                /*$scope.personList = [{id:1,name:'张三'},{id:2,name:'asdgfsdg'},{id:3,name:'张三'},{id:4,name:'张三'},{id:5,name:'aaaaadgdg'},{id:6,name:'张三'},{id:7,name:'张三'},
+                            {id:8,name:'asdfsf'},{id:9,name:'sdfs'},{id:10,name:'张三'},{id:11,name:'aaaaa'}]*/
             }
 
             let dateTime = new Date()
-            $scope.endDate = new Date("2050,12,12")
+            $scope.endDate = new Date("2050,12,12,12,12")
 
             $scope.timeSetLine = [{time:dateTime,money:""}]
 
@@ -172,12 +202,18 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
             $scope.release = () =>{
                 if(validate()){
                     organizeParams()
-                    $scope.creatTask.getData({
-                        'taskVo':$scope.formData,
-                        'opType':1,
-                        'userIds':$scope.userIds
-                    }).then(res =>{
-                        console.log(res)
+                    $scope.creatTask.getData(
+                        $scope.formData
+                    ).then(res =>{
+                        if(res.code == "0"){
+                            promptObj('success', '',res.msg);
+                            $scope.pageList.getData({
+                                pageIndex:0,
+                                pageSize:10,
+                            }).then(res =>{
+                                $scope.hiddenModalAdd()
+                            })
+                        }
                     })
 
                 }
@@ -202,17 +238,20 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
                 }
 
                 for(let i = 0;i<$scope.timeSetLine.length;i++){
-                    $scope.formData['bounsTime'+i] = $scope.timeSetLine[i].time
-                    $scope.formData['bouns'+i] = $scope.timeSetLine[i].money
+                    let index = i+1
+                    $scope.formData['bounsTime'+index] = ($scope.timeSetLine[i].time).Format('yyyy-MM-dd hh:mm')
+                    $scope.formData['bouns'+index] = $scope.timeSetLine[i].money
                 }
 
                 let checkedIds = []
-                let checkedInput = $("input[name=ids]:checked")
+                let checkedInput = $("input[name=userIds]:checked")
                 for(let i = 0;i<checkedInput.length;i++){
                     checkedIds.push(checkedInput[i].value)
                 }
-                $scope.userIds = checkedIds
-                console.log($scope.formData)
+                $scope.formData['userIds'] = checkedIds.join(",")
+                $scope.formData['opType'] = 1
+
+                $scope.formData['a'] = "noUse"//todo
                 
             }
             const validate = () =>{
@@ -246,18 +285,57 @@ app.directive('taskAddTemp', ['myAjaxData', myAjaxData => {
 }])
 
 //审核，发红包
-app.directive('taskExamineTemp',['myAjaxData',myAjaxData => {
+app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) => {
     return {
         restrict:'E',
         template:$('#task-examine-temp').html(),
         replace:true,
         scope:{
-            statusType:"="
+            taskExamine:"=",
+            redPacket:"="
         },
         link($scope,$element,$attrs){
+            $timeout(()=>{
+                $('#result_table').on('click','.examine', function () {
+                    $scope.statusType = "examine"
+                    $scope.$apply()
+                    $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal();
+                })
+                $('#result_table').on('click','.money', function () {
+                    $scope.statusType = "money"
+                    $scope.$apply()
+                    $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal();
+                })
+                
+            })
 
+             //通过
+            $scope.ifPass = yesOrNot =>{
+                $scope.taskExamine.getData({
+                    'id':$scope.id,
+                    'opType':yesOrNot,
+                    'content':$("#examineCircumstance").val()
+                }).then(res =>{
+                    console.log(res)
+                })
+            }
+
+            //发红包
+            $scope.handOutMoney = () =>{
+                $scope.redPacket.getData({
+                    'id':$scope.id,
+                    'opType':1,
+                }).then(res =>{
+                    console.log(res)
+                })
+            }
+            
         },
         controller($scope,$element){
+
+            $scope.statusType = ""
             const dateTime = new Date()
             //接口
             const getExamine = () =>{
@@ -270,27 +348,13 @@ app.directive('taskExamineTemp',['myAjaxData',myAjaxData => {
 
             getExamine()
 
-            //通过
-            $scope.pass = () =>{
-                
-            }
-
-            //不通过
-            $scope.notPass = () =>{
-                
-            }
-
-            //发红包
-            $scope.handOutMoney = () =>{
-
-            }
-
             $scope.hiddenModalExamine = () =>{
                 $('#taskExamineModal').modal("hide");
             }
         }
     }
 }])
+
 ajaxData({
     pageList: {
         name: 'GETTaskList',
@@ -333,44 +397,41 @@ ajaxData({
         name:'POSTCreatTask',
         data:{},
         later:true
+    },
+    taskDetail:{
+        name:'GETTaskDetailPC',
+        data:{},
+        later:true
+    },
+    taskExamine:{
+        name:'POSTTaskExamine',
+        data:{},
+        later:true
+    },
+    redPacket:{
+        name:'POSTRedPacket',
+        data:{},
+        later:true
     }
 },{
-
+    statusMap:{'00':"未发布",'01':"已发布",'02':"处理中",'03':"处理未完成",'04':"审核中",'05':"审核通过",'06':"审核未通过",'07':"已完成",'99':"已作废"}
 })('issueTaskListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
     
     $ocLazyLoad.load([
         "http://api.map.baidu.com/api?v=2.0&ak=aBsOf0A0mp32b7M6A15dvByz"
     ]).then(()=>{
-        //添加
-        $scope.showAddModel =  () =>{
-            //获取电站列表
-            $scope.stationsPosition.getData({
-            }).then(res =>{
-                console.log(res)
-                if(res.code == 0){
-                    $scope.stationList = res.body
-                    $scope.stationList.selected = $scope.stationList[0]
-                }
-            })
-            /*$scope.stationList = [{id:1,name:'电站1',lat:'40.915',long:'116.404'},
-                                {id:2,name:'电站2',lat:'38.915',long:'116.404'},
-                                {id:3,name:'电站3',lat:'40.615',long:'116.404'}]*/
-            $('#powerIndexModalAdd').modal();
-        };
+        //获取电站列表
+        $scope.stationsPosition.getData({
+        }).then(res =>{
+            if(res.code == 0){
+                $scope.stationList = res.body
+                $scope.stationList.selected = $scope.stationList[0]
+            }
+        })
     })
 
-
-    /*$scope.search = () => {
-        $scope.pageList.getData()
-    }*/
-    $scope.data = [1,223,6,657,75]
-    /*$scope.pageList.promise.then(res=>{
-        })
-    */
-   
-    $scope.examineInfo = (type) =>{
-        $scope.statusType = type
-        $('#taskExamineModal').modal();
+    $scope.getStatus = sta =>{
+        return myAjaxData.config.statusMap[sta]
     }
     
 })
