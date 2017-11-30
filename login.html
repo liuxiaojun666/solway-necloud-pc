@@ -34,8 +34,11 @@
 
     <script>
         function login () {
-            $.post("/Login/doLogin.htm", {
-                "userName": $('#myUsername').val().trim() || $('#username').val(),
+            var username = $('#myUsername').val().trim() || $('#username').val()
+            var loginUrl = "/Login/doLogin.htm"
+            if (username == 'ydgsh' || username == 'ydghb') loginUrl = '/wxa/user/doLoginForPC.htm'
+            $.post(loginUrl, {
+                "userName": username,
                 "password": $('#password').val().trim() || '123456',
                 "randomCode": $('#code').val().trim()
             }, function(msg) {
