@@ -51,39 +51,44 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
 
         controller ($scope, $element) {
 
-            $scope.radioValue = 1;
+            $scope.radioValue = '1';
+            $scope.$watch('radioValue',function(value){
+                let allOverlay = map.getOverlays()
+                for (let i = 0; i < allOverlay.length; i++){
+                    map.removeOverlay(allOverlay[i])
+                }
+            })
             const map = new BMap.Map("allmap")
             $scope.getMap = (lat = 39.915 ,long = 116.404,first = true) =>{
 
                 const point = new BMap.Point(long,lat);
                 
                 if(!first){
-                    //获取经纬度描点
                     const marker = new BMap.Marker(point);
                     map.addOverlay(marker);
-                    /*const label = new BMap.Label("afsdfsd",{offset:new BMap.Size(20,-10)});
-                    marker.setLabel(label);*/
                 }
                 map.centerAndZoom(point, 11)
                 map.enableScrollWheelZoom(true)
-
-                //逆地址解析
-                const geoc = new BMap.Geocoder()  
-
-                map.addEventListener("click", function(e){   
-
-                    let allOverlay = map.getOverlays()
-                    for (let i = 0; i < allOverlay.length; i++){
-                        map.removeOverlay(allOverlay[i])
+  
+                map.addEventListener("click", function(e){  
+                    if($scope.radioValue == '2'){
+                        let allOverlay = map.getOverlays()
+                        for (let i = 0; i < allOverlay.length; i++){
+                            map.removeOverlay(allOverlay[i])
+                        }
+                        $scope.longitude = e.point.lng
+                        $scope.latitude = e.point.lat
+                        $scope.$apply()
+                        let pt = e.point
+                        const marker = new BMap.Marker(pt)
+                        map.addOverlay(marker)
+                        /*const geoc = new BMap.Geocoder()  
+                        geoc.getLocation(pt, function(rs){
+                        })   */   
                     }
-
-                    let pt = e.point
-                    const marker = new BMap.Marker(pt)
-                    map.addOverlay(marker)
-                    geoc.getLocation(pt, function(rs){
-                        console.log(rs)
-                    })      
+                    
                 })
+                
             }
             $scope.provinced = {}
             $scope.cityd = {}
@@ -291,22 +296,37 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
         template:$('#task-examine-temp').html(),
         replace:true,
         scope:{
+            pageList:"=",
+            taskDetail:"=",
             taskExamine:"=",
             redPacket:"="
         },
         link($scope,$element,$attrs){
             $timeout(()=>{
+
                 $('#result_table').on('click','.examine', function () {
                     $scope.statusType = "examine"
                     $scope.$apply()
                     $scope.id = $(this).attr("id")
-                    $('#taskExamineModal').modal();
+                    $scope.taskDetail.getData({
+                        'id':$scope.id
+                    }).then(res =>{
+                        $scope.data = res.body
+                        $('#taskExamineModal').modal()
+                    })
+                   
                 })
                 $('#result_table').on('click','.money', function () {
                     $scope.statusType = "money"
                     $scope.$apply()
-                    $scope.id = $(this).attr("id")
-                    $('#taskExamineModal').modal();
+                     $scope.id = $(this).attr("id")
+                    $scope.taskDetail.getData({
+                        'id':$scope.id
+                    }).then(res =>{
+                        $scope.data = res.body
+                        $scope.imageList = [1,2,3,4]
+                        $('#taskExamineModal').modal();
+                    })
                 })
                 
             })
@@ -318,7 +338,17 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                     'opType':yesOrNot,
                     'content':$("#examineCircumstance").val()
                 }).then(res =>{
-                    console.log(res)
+                    if(res.code == 0 ){
+                        promptObj('success', '',res.msg);
+                        $scope.pageList.getData({
+                            pageIndex:0,
+                            pageSize:10,
+                        }).then(res =>{
+                            $scope.hiddenModalExamine()
+                        })
+                    }else{
+                        alert(res.msg)
+                    }
                 })
             }
 
@@ -328,7 +358,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                     'id':$scope.id,
                     'opType':1,
                 }).then(res =>{
-                    console.log(res)
+                   /* console.log(res)*/
                 })
             }
             
@@ -337,17 +367,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
 
             $scope.statusType = ""
             const dateTime = new Date()
-            //接口
-            const getExamine = () =>{
-                $scope.personList = [{id:1,name:'张三'},{id:2,name:'asdgfsdg'},{id:3,name:'张三'},{id:4,name:'张三'},{id:5,name:'aaaaadgdg'},{id:6,name:'张三'},{id:7,name:'张三'},
-                            {id:8,name:'asdfsf'},{id:9,name:'sdfs'},{id:10,name:'张三'}]
-
-                $scope.timeSetLine = [{time:dateTime,money:""},{time:dateTime,money:""},{time:dateTime,money:""}]
-                $scope.imageList = [1,2,3,4]
-            }
-
-            getExamine()
-
+            
             $scope.hiddenModalExamine = () =>{
                 $('#taskExamineModal').modal("hide");
             }
