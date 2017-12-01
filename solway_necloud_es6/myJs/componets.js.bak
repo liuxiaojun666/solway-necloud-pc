@@ -491,7 +491,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad
                 initialDate: $scope.dateTime,
                 pickerPosition: "bottom-left"
             }).on('hide', ev => {
-                $scope.dateTime = ev.date
+                $scope.dateTime = new Date(ev.date.valueOf() - 28800000)
                 $scope.showArrow && $scope.disabled()
                 $scope.$apply()
             })
