@@ -46,15 +46,11 @@
                 if (msg.status === 1) {
                     window.localStorage.wxuser = JSON.stringify(msg.wxaUserSimpleInfo)
                     window.localStorage.hasComInvite = 1
-<<<<<<< HEAD
                     toUrl()
                 } else if (msg.body && msg.body.status === 1) {
                     window.localStorage.wxuser = JSON.stringify(msg.body.wxaUserSimpleInfo)
                     window.localStorage.hasComInvite = 1
                     toUrl()
-=======
-                    window.location.href = "/index.html"
->>>>>>> 2340a4720e07bcc2659d544b6a523c042bbc06c1
                 } else {
                     $('img').attr('src', '/Login/randomValidateCode.htm?' + Math.random())
                     $('#code').val('').focus()
@@ -67,18 +63,14 @@
         })
 
         function toUrl() {
-            $.ajax({
-                type: "post",
-                url: "/NECloud/UserAuthHandle/getRightListForPCNew.htm",
-                success: function (result) {
+            $.post("/NECloud/UserAuthHandle/getRightListForPCNew.htm", {},
+                function (result) {
                     if (result.result) {
                         if (result.roleType == 3 || result.roleType == 99) window.location.href = "index.html#/app" + getArrRealVal(result.rightlist, "uiurl")
                         else window.location.href = "/index.html#/app/groupStringShadow"
                     }
-                },
-                error: function (json) {
                 }
-            })
+            )
         }
 
         function getArrRealVal(arr, atr) {
