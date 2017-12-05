@@ -43,9 +43,14 @@
                 "password": $('#password').val().trim() || '123456',
                 "randomCode": $('#code').val().trim()
             }, function(msg) {
-                if (msg.status === 1 || (msg.body && msg.body.status === 1)) {
+                if (msg.status === 1) {
+                    window.localStorage.wxuser = JSON.stringify(msg.wxaUserSimpleInfo)
                     window.localStorage.hasComInvite = 1
-                    window.location.href = "/index.html"
+                    toUrl()
+                } else if (msg.body && msg.body.status === 1) {
+                    window.localStorage.wxuser = JSON.stringify(msg.body.wxaUserSimpleInfo)
+                    window.localStorage.hasComInvite = 1
+                    toUrl()
                 } else {
                     $('img').attr('src', '/Login/randomValidateCode.htm?' + Math.random())
                     $('#code').val('').focus()
@@ -56,6 +61,21 @@
         $(document).keydown(function (e) {
             if (e.keyCode == 13) login()
         })
+
+        function toUrl() {
+            $.post("/NECloud/UserAuthHandle/getRightListForPCNew.htm", {},
+                function (result) {
+                    if (result.result) {
+                        if (result.roleType == 3 || result.roleType == 99) window.location.href = "index.html#/app" + getArrRealVal(result.rightlist, "uiurl")
+                        else window.location.href = "/index.html#/app/groupStringShadow"
+                    }
+                }
+            )
+        }
+
+        function getArrRealVal(arr, atr) {
+            for (var i = 0; i < arr.length; i++) if (arr[i][atr]) return arr[i][atr]
+        }
     </script>
 </body>
 </html>
