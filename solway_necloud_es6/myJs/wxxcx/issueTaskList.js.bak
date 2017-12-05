@@ -369,6 +369,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                 $("#result_table").on('click','.task-title',function(){
                     $scope.statusType = "showInfo"
                     $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal()
                     $scope.taskDetail.getData({
                         'id':$scope.id
                     }).then(res =>{
@@ -381,6 +382,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                     $scope.statusType = "examine"
                     $scope.$apply()
                     $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal()
                     $scope.taskDetail.getData({
                         'id':$scope.id
                     }).then(res =>{
@@ -398,6 +400,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                     $scope.statusType = "money"
                     $scope.$apply()
                     $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal()
                     $scope.taskDetail.getData({
                         'id':$scope.id
                     }).then(res =>{
@@ -411,7 +414,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                 $scope.data = res.body
                 $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
                 $scope.showHisContent = $scope.data.reviewContent ? JSON.parse($scope.data.reviewContent) : []
-                $('#taskExamineModal').modal()
+                
             }
 
              //通过或者不通过
