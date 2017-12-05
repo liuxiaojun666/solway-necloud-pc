@@ -388,6 +388,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                     }).then(res =>{
                         $scope.data = res.body
                         $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
+                        $scope.showHisContent = $scope.data.reviewContent ? JSON.parse($scope.data.reviewContent) : []
                         $('#taskExamineModal').modal()
                     })
 
@@ -416,11 +417,14 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
              //通过
             $scope.ifPass = yesOrNot =>{
                 let time = new Date
-                const wxuser = localStorage.getItem("wxuser")
+                const wxuser = localStorage.getItem("wxuser") ? JSON.parse(localStorage.getItem("wxuser")) : null
                 let curContent = $("#examineCircumstance").val()
                 console.log($scope.data)
                 if(wxuser){
                     let content = [{'id':wxuser.id,'name':wxuser.realName,'time':time,'phone':wxuser.phone,'content':curContent}]
+                    if($scope.showHisContent){
+                        content = [...$scope.showHisContent,...content]
+                    }
                     $scope.taskExamine.getData({
                         'id':$scope.id,
                         'opType':yesOrNot,
