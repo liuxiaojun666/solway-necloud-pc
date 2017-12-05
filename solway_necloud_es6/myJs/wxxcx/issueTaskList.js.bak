@@ -359,11 +359,25 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
         scope:{
             pageList:"=",
             taskDetail:"=",
+            taskBonusNum:"=",
             taskExamine:"=",
             redPacket:"="
         },
         link($scope,$element,$attrs){
             $timeout(()=>{
+
+                $("#result_table").on('click','.task-title',function(){
+                    $scope.statusType = "showInfo"
+                    $scope.id = $(this).attr("id")
+                    $scope.taskDetail.getData({
+                        'id':$scope.id
+                    }).then(res =>{
+                        $scope.data = res.body
+                        $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
+                        $('#taskExamineModal').modal()
+                    })
+
+                })
 
                 $('#result_table').on('click','.examine', function () {
                     $scope.statusType = "examine"
@@ -375,6 +389,12 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                         $scope.data = res.body
                         $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
                         $('#taskExamineModal').modal()
+                    })
+
+                    $scope.taskBonusNum.getData({
+                        'id':$scope.id
+                    }).then(res =>{
+                        $scope.bonusNum = res.body ? res.body :0
                     })
                    
                 })
@@ -395,23 +415,33 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
 
              //通过
             $scope.ifPass = yesOrNot =>{
-                $scope.taskExamine.getData({
-                    'id':$scope.id,
-                    'opType':yesOrNot,
-                    'content':$("#examineCircumstance").val()
-                }).then(res =>{
-                    if(res.code == 0 ){
-                        promptObj('success', '',res.msg);
-                        $scope.pageList.getData({
-                            pageIndex:0,
-                            pageSize:10,
-                        }).then(res =>{
-                            $scope.hiddenModalExamine()
-                        })
-                    }else{
-                        alert(res.msg)
-                    }
-                })
+                let time = new Date
+                const wxuser = localStorage.getItem("wxuser")
+                let curContent = $("#examineCircumstance").val()
+                console.log($scope.data)
+                if(wxuser){
+                    let content = [{'id':wxuser.id,'name':wxuser.realName,'time':time,'phone':wxuser.phone,'content':curContent}]
+                    $scope.taskExamine.getData({
+                        'id':$scope.id,
+                        'opType':yesOrNot,
+                        'content':JSON.stringify(content),
+                        'bonus':$scope.bonusNum
+                    }).then(res =>{
+                        if(res.code == 0 ){
+                            promptObj('success', '',res.msg);
+                            $scope.pageList.getData({
+                                pageIndex:0,
+                                pageSize:10,
+                            }).then(res =>{
+                                $scope.hiddenModalExamine()
+                            })
+                        }else{
+                            alert(res.msg)
+                        }
+                    })
+                }else{
+                    alert("审核人信息没有获取到")
+                }
             }
 
             //发红包
@@ -439,6 +469,20 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
 
             $scope.statusType = ""
             
+            $(".upload-img").on("click",function(){
+                $(".bigImg").show()
+                let imgUrl = $(this).attr('src')
+                $scope.bigImg = imgUrl
+                $scope.$apply()
+            })
+
+            $scope.hiddenBigImg = () =>{
+                 $(".bigImg").hide()
+            }
+
+            $scope.showStatus = sta =>{
+                return myAjaxData.config.statusMap[sta]
+            }
             $scope.hiddenModalExamine = () =>{
                 $('#taskExamineModal').modal("hide");
             }
@@ -491,6 +535,11 @@ ajaxData({
     },
     taskDetail:{
         name:'GETTaskDetailPC',
+        data:{},
+        later:true
+    },
+    taskBonusNum:{
+        name:'GETTaskBonusNum',
         data:{},
         later:true
     },
