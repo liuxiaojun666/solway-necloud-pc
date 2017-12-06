@@ -369,12 +369,11 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                 $("#result_table").on('click','.task-title',function(){
                     $scope.statusType = "showInfo"
                     $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal()
                     $scope.taskDetail.getData({
                         'id':$scope.id
                     }).then(res =>{
-                        $scope.data = res.body
-                        $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
-                        $('#taskExamineModal').modal()
+                        renderPage(res)
                     })
 
                 })
@@ -383,13 +382,11 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                     $scope.statusType = "examine"
                     $scope.$apply()
                     $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal()
                     $scope.taskDetail.getData({
                         'id':$scope.id
                     }).then(res =>{
-                        $scope.data = res.body
-                        $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
-                        $scope.showHisContent = $scope.data.reviewContent ? JSON.parse($scope.data.reviewContent) : []
-                        $('#taskExamineModal').modal()
+                        renderPage(res)
                     })
 
                     $scope.taskBonusNum.getData({
@@ -403,25 +400,31 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                     $scope.statusType = "money"
                     $scope.$apply()
                     $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal()
                     $scope.taskDetail.getData({
                         'id':$scope.id
                     }).then(res =>{
-                        $scope.data = res.body
-                        $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
-                        $('#taskExamineModal').modal();
+                        renderPage(res)
                     })
                 })
                 
             })
 
-             //通过
+            const renderPage = res =>{
+                $scope.data = res.body
+                $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
+                $scope.showHisContent = $scope.data.reviewContent ? JSON.parse($scope.data.reviewContent) : []
+                
+            }
+
+             //通过或者不通过
             $scope.ifPass = yesOrNot =>{
-                let time = new Date
+                let time = new Date().getTime()
                 const wxuser = localStorage.getItem("wxuser") ? JSON.parse(localStorage.getItem("wxuser")) : null
-                let curContent = $("#examineCircumstance").val()
-                console.log($scope.data)
+                const curContent = $("#examineCircumstance").val()
+                const result = myAjaxData.config.passMap[yesOrNot]
                 if(wxuser){
-                    let content = [{'id':wxuser.id,'name':wxuser.realName,'time':time,'phone':wxuser.phone,'content':curContent}]
+                    let content = [{'id':wxuser.id,'name':wxuser.realName,'time':time,'phone':wxuser.phone,'content':curContent,'result':result}]
                     if($scope.showHisContent){
                         content = [...$scope.showHisContent,...content]
                     }
@@ -429,7 +432,8 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                         'id':$scope.id,
                         'opType':yesOrNot,
                         'content':JSON.stringify(content),
-                        'bonus':$scope.bonusNum
+                        //'bonus':$scope.bonusNum
+                        'bonus':$("#bonusNum").val()
                     }).then(res =>{
                         if(res.code == 0 ){
                             promptObj('success', '',res.msg);
@@ -558,7 +562,8 @@ ajaxData({
         later:true
     }
 },{
-    statusMap:{'00':"未发布",'01':"已发布",'02':"处理中",'03':"处理未完成",'04':"审核中",'05':"审核通过",'06':"审核未通过",'07':"已完成",'99':"已作废"}
+    statusMap:{'00':"未发布",'01':"已发布",'02':"处理中",'03':"处理未完成",'04':"审核中",'05':"审核通过",'06':"审核未通过",'07':"已完成",'99':"已作废"},
+    passMap : {'0':'不通过','1':'通过'}
 })('issueTaskListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
     const wxuser = localStorage.getItem("wxuser") ? JSON.parse(localStorage.getItem("wxuser")) : null
     if(wxuser){
