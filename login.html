@@ -37,23 +37,25 @@
         function login () {
             var username = $('#myUsername').val().trim() || $('#username').val()
             var loginUrl = "/Login/doLogin.htm"
-            if (username == 'ydgsh' || username == 'ydghb') loginUrl = '/wxa/user/doLoginForPC.htm'
+            if (username === 'ydgsh' || username === 'ydghb') loginUrl = '/wxa/user/doLoginForPC.htm'
             $.post(loginUrl, {
                 "userName": username,
                 "password": $('#password').val().trim() || '123456',
                 "randomCode": $('#code').val().trim()
             }, function(msg) {
-                if (msg.status === 1) {
-                    window.localStorage.wxuser = JSON.stringify(msg.wxaUserSimpleInfo)
-                    window.localStorage.hasComInvite = 1
-                    toUrl()
-                } else if (msg.body && msg.body.status === 1) {
-                    window.localStorage.wxuser = JSON.stringify(msg.body.wxaUserSimpleInfo)
-                    window.localStorage.hasComInvite = 1
-                    toUrl()
-                } else {
+                if (msg.status === 1) successFun(msg.wxaUserSimpleInfo)
+                    
+                else if (msg.body && msg.body.status === 1) successFun(msg.body.wxaUserSimpleInfo)
+
+                else {
                     $('img').attr('src', '/Login/randomValidateCode.htm?' + Math.random())
                     $('#code').val('').focus()
+                }
+
+                function successFun(params) {
+                    window.localStorage.wxuser = JSON.stringify(params)
+                    window.localStorage.hasComInvite = 1
+                    toUrl()
                 }
             })
         }
