@@ -477,12 +477,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                 
             }
             
-        },
-        controller($scope,$element){
-
-            $scope.statusType = ""
-            
-            $(".upload-img").on("click",function(){
+            $(".issueTaskList").on('click','.upload-img',function(){
                 $(".bigImg").show()
                 let imgUrl = $(this).attr('src')
                 $scope.bigImg = imgUrl
@@ -490,9 +485,13 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
             })
 
             $scope.hiddenBigImg = () =>{
-                 $(".bigImg").hide()
+                $(".bigImg").hide()
             }
+        },
+        controller($scope,$element){
 
+            $scope.statusType = ""
+            
             $scope.showStatus = sta =>{
                 return myAjaxData.config.statusMap[sta]
             }
