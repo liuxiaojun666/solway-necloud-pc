@@ -402,6 +402,8 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                     $scope.$apply()
                     $scope.id = $(this).attr("id")
                     $('#taskExamineModal').modal()
+
+                    $scope.bonusBtnAbled = true
                     $scope.taskDetail.getData({
                         'id':$scope.id
                     }).then(res =>{
@@ -415,7 +417,6 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                 $scope.data = res.body
                 $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
                 $scope.showHisContent =JSON.parse($scope.data.reviewContent || '[]')
-                
             }
 
              //通过或者不通过
@@ -433,16 +434,14 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                         'id':$scope.id,
                         'opType':yesOrNot,
                         'content':JSON.stringify(content),
-                        //'bonus':$scope.bonusNum
                         'bonus':$("#bonusNum").val()
                     }).then(res =>{
                         if(res.code == 0 ){
+                            $scope.hiddenModalExamine()
                             promptObj('success', '',res.msg);
                             $scope.pageList.getData({
                                 pageIndex:0,
                                 pageSize:10,
-                            }).then(res =>{
-                                $scope.hiddenModalExamine()
                             })
                         }else{
                             alert(res.msg)
@@ -455,22 +454,27 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
 
             //发红包
             $scope.handOutMoney = () =>{
-                $scope.redPacket.getData({
-                    'id':$scope.id,
-                    'opType':1,
-                }).then(res =>{
-                    if(res.code == 0 ){
-                        promptObj('success', '',res.msg);
-                        $scope.pageList.getData({
-                            pageIndex:0,
-                            pageSize:10,
-                        }).then(res =>{
+                if($scope.bonusBtnAbled){
+                    $scope.bonusBtnAbled = false
+                    $scope.redPacket.getData({
+                        'id':$scope.id,
+                        'opType':1,
+                    }).then(res =>{
+                        $scope.bonusBtnAbled = true
+                        if(res.code == 0 ){
                             $scope.hiddenModalExamine()
-                        })
-                    }else{
-                        alert(res.msg)
-                    }
-                })
+                            promptObj('success', '',res.msg);
+                            $scope.pageList.getData({
+                                pageIndex:0,
+                                pageSize:10,
+                            })
+                        }else{
+                            alert(res.msg)
+                        }
+
+                    })
+                }
+                
             }
             
         },
