@@ -560,6 +560,11 @@ ajaxData({
         data:{},
         later:true
     },
+    taskDoInvalid:{
+        name:'POSTTaskDoInvalid',
+        data:{},
+        later:true
+    },
     redPacket:{
         name:'POSTRedPacket',
         data:{},
@@ -590,4 +595,24 @@ ajaxData({
         return myAjaxData.config.statusMap[sta]
     }
     
+    //废除任务
+    $('#result_table').on('click','.delete-task', function () {
+        if(confirm("确定废除此任务？")){
+            let id = $(this).attr("id")
+            $scope.taskDoInvalid.getData({
+                'id':id,
+                'opType':3
+            }).then(res =>{
+                if(res.code == 0){
+                    $scope.pageList.getData({
+                        pageIndex:0,
+                        pageSize:10
+                    })
+                }else{
+                    alert(res.msg)
+                }
+            })
+        }
+        
+    })
 })
