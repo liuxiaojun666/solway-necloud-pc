@@ -1,0 +1,114 @@
+app.directive('frsChart', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    scope: {},
+    link($scope, $element) {
+        const legend = ['停机', '待机', '启动', '最大风能捕获', '恒转速', '恒功率', '限功率', '其他']
+        const option = {
+            tooltip: {
+                trigger: 'axis',
+            },
+            legend: {
+                data: [{ name: '故障' }, { name: '亚健康' }, { name: '限电' }, { name: '计划检修' }, { name: '其他' }],
+                itemWidth: 25,
+                itemGap: 40,
+                height: 15,
+                right: 60,
+                top: 10
+            },
+            grid: {
+                top: '60',
+                left: '20',
+                right: '60',
+                bottom: '20',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    name: '时间',
+                    type: 'category',
+                    axisLine: {
+                        lineStyle: {
+                            color: '#a4a4a4',
+                            width: 1
+                        }
+                    },
+                    data: Array.apply(null, { length: 30 }).map((v, i) => i + 1 + '')
+                }
+            ],
+            yAxis: [{
+                name: '电量(kWh)',
+                type: 'value',
+                axisLine: {
+                    lineStyle: {
+                        color: '#a4a4a4',
+                        width: 1
+                    }
+                },
+                axisTick: {
+                    show: false
+                },
+                splitLine: {
+                    show: false
+                }
+            }],
+            series: [
+                ...legend.map((v, i) => ({
+                    name: v,
+                    type: 'bar',
+                    barWidth: '20',
+                    yAxisIndex: 0,
+                    stack: '电量',
+                    itemStyle: {
+                        normal: {
+                            color: ['#fd2c34', '#f6863d', '#9ec18a', '#38b9da', '#4d69de', '#8f4ec0', '#d34a96', '#666666'][i]
+                        }
+                    },
+                    data: Array.apply(null, { length: 30 }).map((v, i) => Math.random() * 20)
+                })),
+            ]
+        }
+        ;(async () => {
+            await myAjaxData.timeout(0)
+            let myChart = echarts.init($element[0])
+            myChart.setOption(option)
+            const resizeFun = () => myChart.resize()
+            window.addEventListener('resize', resizeFun)
+            $scope.$on('$destroy', () => {
+                window.removeEventListener('resize', resizeFun)
+                myChart = null
+            })
+        })()
+    }
+})])
+ajaxData({
+    pageList: {
+        name: 'GETanalysisPage',
+        data: {
+            pageIndex: 0,
+            pageSize: 10,
+            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
+            endDate: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+    detail: {
+        name: 'GETselectEqPaintingData',
+        later: true
+    },
+    deviceType: {
+        name: 'GETgetDeviceType',
+        data: {}
+    }
+}, {
+        //设备查询地址
+        url: ["GETgetJunctionBox", "GETgetInverter", "GETgetBoxchange", "GETgetAmmeter", "GETgetAerograph"]
+    })('fanRunningStateCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+
+
+        const getWindowHeight = () => {
+            $scope.windowHeight = document.body.clientHeight
+            $scope.windowWidth = document.body.clientWidth
+        }
+        getWindowHeight()
+        window.addEventListener('resize', getWindowHeight)
+        $scope.$on('$destroy', () => window.removeEventListener('resize', getWindowHeight))
+    })
