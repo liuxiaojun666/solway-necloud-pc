@@ -190,7 +190,60 @@ app.directive('contentLeftWttw', ['myAjaxData', myAjaxData => {
     }
 }])
 
+app.directive('wttwScatterPlot', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
+    replace: !0,
+    restrict: 'E',
+    scope: {
+        title: '@'
+    },
+    link($scope, $element, $attrs) {
+        const dataAll = [[10.0, 8.04], [-10.0, 8.04], [-8.0, 6.95], [13.0, 7.58], [-9.0, 8.81], [11.0, 8.33], [14.0, 9.96], [-6.0, 7.24], [4.0, 4.26], [-12.0, 10.84], [7.0, 4.82], [5.0, 5.68]]
 
+        $timeout( () => {
+
+            let myChart = echarts.init($element[0])
+            myChart.setOption({
+                title: {
+                    text: $scope.title,
+                    textStyle: {
+                        fontWeight: 'normal',
+                        fontSize: 14
+                    },
+                    x: 'center',
+                    y: 0
+                },
+                grid: [{ x: 'center', y: 'center', left: '40', right: '80', top: '60', bottom: 30 }],
+                tooltip: {
+                    formatter: '{a}: ({c})'
+                },
+                xAxis: [{
+                    name: '对风角(deg)',
+                    axisTick: {
+                        show: !1
+                    }
+                }],
+                yAxis: [{
+                    name: '功率(kw)',
+                    axisTick: {
+                        show: !1
+                    }
+                }],
+                series: [{
+                    name: 'I',
+                    type: 'scatter',
+                    xAxisIndex: 0,
+                    yAxisIndex: 0,
+                    data: dataAll
+                }]
+            })
+            window.addEventListener('resize', () => {
+
+                return myChart.resize()
+            })
+        }, 0)
+    }
+    
+})])
 
 ajaxData({
     pageList: {
@@ -216,7 +269,10 @@ ajaxData({
 })('windTurbineToWindCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
 
 
-    const getWindowHeight = () => $scope.windowHeight = $(window).height()
+    const getWindowHeight = () => {
+        $scope.windowHeight = document.body.clientHeight
+        $scope.windowWidth = document.body.clientWidth
+    }
     getWindowHeight()
     window.addEventListener('resize', getWindowHeight)
     $scope.$on('$destroy', () => window.removeEventListener('resize', getWindowHeight))
