@@ -65,7 +65,60 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                     $('#powerIndexModalAdd').modal()
                 })
 
+                $scope.uploadOneImg = () =>{
+                    $.ajaxFileUpload ({
+                        url: window.baseUrl+'/wxa/img.htm?classify=task', 
+                        secureuri: false,
+                        fileElementId: 'fileaaa',
+                        type:"POST",
+                        formName: "file",
+                        dataType: 'json',
+                        success: function (data) {
+                            console.info('-----------------------------')
+                        },
+                        error: function (data, status, e) {
+                            console.info('^^^^^^^^^^^^^^^^^^')
+                            promptObj('error', "","上传失败");
+                        }
+                    })
+                }
+                
+
+                $scope.uploadImgs = []
+
+                $(".issueTaskList").on('change','#fileaaa',function(){
+                    var fileImg = $("#billImg0");
+                    var explorer = navigator.userAgent;
+                    var imgSrc = $(this)[0].value;
+                    
+                    $scope.uploadOneImg(imgSrc)
+
+                    if (explorer.indexOf('MSIE') >= 0) {
+                         if (!/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(imgSrc)) {
+                             imgSrc = "";
+                             $scope.uploadImgs.push("/img/default.png")
+                             return false;
+                         }else{
+                            $scope.uploadImgs.push(imgSrc)
+                         }
+                    }else{
+                         if (!/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(imgSrc)) {
+                             imgSrc = "";
+                             $scope.uploadImgs.push("/img/default.png")
+                             return false;
+                         }else{
+                             var file = $(this)[0].files[0];
+                             var url = URL.createObjectURL(file);
+                             $scope.uploadImgs.push(url)
+                         }
+                    }
+                    $scope.$apply()
+                })
+
+                
             },0);
+
+            
             
         },
 
@@ -117,6 +170,9 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                 })
                 
             }
+
+
+
             $scope.provinced = {}
             $scope.cityd = {}
             $scope.countyd = {}
@@ -232,6 +288,9 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                 $scope.timeSetLine.splice(index,1);
             }
             
+            /*$scope.getImg =(obj) =>{
+                
+            }*/
             $scope.release = () =>{
                 organizeParams()
                 if(validate()){
@@ -574,6 +633,8 @@ ajaxData({
     statusMap:{'00':"未发布",'01':"已发布",'02':"处理中",'03':"处理未完成",'04':"审核中",'05':"审核通过",'06':"审核未通过",'07':"已完成",'99':"已作废"},
     passMap : {'0':'不通过','1':'通过'}
 })('issueTaskListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
+
+    $scope.baseUrl = window.baseUrl
     const wxuser = localStorage.getItem("wxuser") ? JSON.parse(localStorage.getItem("wxuser")) : null
     if(wxuser){
         $scope.authType = wxuser.authType
