@@ -26,6 +26,9 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
             }
             $scope.getMap();
 
+            $scope.deleteCurrentImg = index =>{
+                $scope.responseImgs.splice(index,1)
+            }
             $timeout(()=>{
                 $('#result_table').on('click','.icon-note.font16', function () {
                     let id = $(this).attr('id')
@@ -74,25 +77,34 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                         formName: "file",
                         dataType: 'json',
                         success: function (data) {
-                            console.info('-----------------------------')
+                            if(data && data.length >=0){
+                                $scope.responseImgs.push(data[0]);
+                                $scope.$apply()
+                            }
                         },
                         error: function (data, status, e) {
-                            console.info('^^^^^^^^^^^^^^^^^^')
                             promptObj('error', "","上传失败");
                         }
                     })
+                    /*测试
+                    $scope.responseImgs = ['document/miniapp/task/1513652333181circle-rotate-green1.png',
+                        'document/miniapp/task/1513652333181circle-rotate-green2.png',
+                        'document/miniapp/task/1513652333181circle-rotate-green3.png']
+                    $scope.$apply()*/
                 }
                 
 
-                $scope.uploadImgs = []
+                $scope.uploadImgs = [],$scope.responseImgs = []
 
                 $(".issueTaskList").on('change','#fileaaa',function(){
+                    
+                    $scope.uploadOneImg()
+
+                    //本地显示图片
+                    /*
                     var fileImg = $("#billImg0");
                     var explorer = navigator.userAgent;
                     var imgSrc = $(this)[0].value;
-                    
-                    $scope.uploadOneImg(imgSrc)
-
                     if (explorer.indexOf('MSIE') >= 0) {
                          if (!/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(imgSrc)) {
                              imgSrc = "";
@@ -113,13 +125,10 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                          }
                     }
                     $scope.$apply()
+                    */
                 })
-
                 
             },0);
-
-            
-            
         },
 
         controller ($scope, $element) {
@@ -170,8 +179,6 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                 })
                 
             }
-
-
 
             $scope.provinced = {}
             $scope.cityd = {}
@@ -288,9 +295,6 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                 $scope.timeSetLine.splice(index,1);
             }
             
-            /*$scope.getImg =(obj) =>{
-                
-            }*/
             $scope.release = () =>{
                 organizeParams()
                 if(validate()){
@@ -347,15 +351,15 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                 $scope.formData['userIds'] = checkedIds.join(",")
                 $scope.formData['opType'] = 1
 
+                $scope.formData['taskImgs'] = $scope.responseImgs.join(",")
                 $scope.formData['a'] = "noUse"//todo
-                
             }
             const validate = () =>{
                 let validateFlag = true
 
-                const validateKeys  = ['provinceId','cityd','countyId','address','latitude','longitude','sendScope','userIds','taskTitle','taskContent']
+                const validateKeys  = ['provinceId','cityd','countyId','address','latitude','longitude','sendScope','userIds','taskTitle','taskContent','taskImgs']
                 const validateNamesMap = {'provinceId':'省','cityd':'市','countyId':'县','address':'详细地址','latitude':'纬度',
-                                    'longitude':'经度','sendScope':'推送范围','userIds':'检修人员','taskTitle':'任务标题','taskContent':'任务内容'}
+                                    'longitude':'经度','sendScope':'推送范围','userIds':'检修人员','taskTitle':'任务标题','taskContent':'任务内容','taskImgs':'上传图片'}
 
                 for(let i = 0;i<validateKeys.length;i++){
                     for(let key in $scope.formData){
@@ -400,7 +404,6 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
 
                 return validateFlag
             }
-
 
             $scope.hiddenModalAdd = () =>{
                 $('#powerIndexModalAdd').modal("hide");
