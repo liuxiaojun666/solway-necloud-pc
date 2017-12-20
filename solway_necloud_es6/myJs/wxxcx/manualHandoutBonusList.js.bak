@@ -1,0 +1,69 @@
+//发放红包
+app.directive('handoutBonusAddTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) => {
+    return {
+        restrict:'E',
+        template:$('#handout-bonus-add-temp').html(),
+        replace:true,
+        scope:{
+            bonusDetail:"=",
+            bonusRecievePersonList:'='
+        },
+        link($scope,$element,$attrs){
+            $timeout(()=>{
+                $(".manualHandoutBonusList").on('click','#add-new',function(){
+                    $('#bonusModalAdd').modal()
+                })
+
+            })
+        },
+        controller($scope,$element){
+            $scope.bonusTypeList = [{'id':'00','bonusType':'认证成功发放红包'},{'id':'99','bonusType':'其他'}]
+            $scope.bonusTypeList.selected = {'id':'00','bonusType':'认证成功发放红包'}
+
+            const getRecieverList = () =>{
+               /* $scope.bonusRecievePersonList.getData({
+                    'id':$scope.id
+                }).then(res =>{
+                    renderPage(res)
+                })*/
+                
+            }
+            $scope.sendoutBonus = () =>{
+               let bonus = $scope.formData.bonus
+               let sendReason = $scope.formData.sendReason
+               let bonusType = $scope.bonusTypeList.selected.id
+               let recvId = $scope.recievePersonList.selected.id
+            }
+        }
+    }
+}])
+ajaxData({
+    pageList: {
+        name: 'GETManualHandoutBonus',
+        data: {
+            pageIndex:0,
+            pageSize:10,
+        }
+    },
+    bonusDetail:{
+        name:'GETManualBonusDetail',
+        data: {},
+        later:true
+    },
+    bonusUpdate:{
+        name:'POSTManualBonusUpdate',
+        data: {},
+        later:true
+    },
+    bonusRecievePersonList:{
+        name:'GETPersonList',
+        data:{},
+        later:true
+    }
+},{
+    
+})('manualHandoutBonusListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
+
+    
+
+})
