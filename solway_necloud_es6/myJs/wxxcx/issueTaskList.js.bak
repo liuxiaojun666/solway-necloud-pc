@@ -70,12 +70,15 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
 
                 $scope.uploadOneImg = () =>{
                     $.ajaxFileUpload ({
-                        url: window.baseUrl+'/wxa/img.htm?classify=task', 
+                        url: window.baseUrl+'/wxa/img.htm', 
                         secureuri: false,
                         fileElementId: 'fileaaa',
                         type:"POST",
                         formName: "file",
                         dataType: 'json',
+                        data:{
+                            classify:'task',
+                        },
                         success: function (data) {
                             if(data && data.length >=0){
                                 $scope.responseImgs.push(data[0]);
