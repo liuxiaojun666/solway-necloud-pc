@@ -1,0 +1,104 @@
+
+app.directive('personAuditDetailTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) => {
+    return {
+        restrict:'E',
+        template:$('#person-audit-temp').html(),
+        replace:true,
+        scope:{
+            pageList: "=",
+            auditPerson: "=",
+            auditDetail: "="
+        },
+        link($scope,$element,$attrs){
+            const renderPage = res =>{
+                $scope.data = res.body
+            }
+            $timeout(()=>{
+
+                $("#result_table").on('click','.task-title',function(){
+                    $scope.statusType = "detail";
+                    let id = JSON.parse($(this).attr("id")).id
+                    let phone = JSON.parse($(this).attr("id")).phone
+                    $('#personAuditModal').modal()
+
+                    $scope.auditDetail.getData({
+                        id: id,
+                        phone: phone
+                    }).then(res =>{
+                        renderPage(res)
+                    })
+
+                })
+
+                $('#result_table').on('click','.examine', function () {
+                    $scope.statusType = "examine"
+                    $scope.id = JSON.parse($(this).attr("id")).id
+                    let phone = JSON.parse($(this).attr("id")).phone
+                    $('#personAuditModal').modal();
+                    $("#bonusNum").val("");
+
+                    $scope.auditDetail.getData({
+                        id: $scope.id,
+                        phone: phone
+                    }).then(res =>{
+                        renderPage(res)
+                    })
+
+                })
+
+            })      
+        },
+        controller($scope,$element){
+            $scope.getStatus = sta => myAjaxData.config.authorStatusMap[sta]
+            $scope.getType = type => myAjaxData.config.authorTypeMap[type]
+
+            $scope.ifPass = yesOrNot =>{
+                $scope.auditPerson.getData({
+                    id: $scope.id,
+                    isPass: yesOrNot,
+                    bouns: $("#bonusNum").val()
+                }).then(res =>{
+                    if (res.code == 0) {
+                        $scope.hiddenModalExamine()
+                        promptObj('success', '', res.msg)
+                        $scope.pageList.getData({
+                            pageIndex: 0,
+                            pageSize: 10
+                        })
+                    } else {
+                        alert(res.msg)
+                    }
+                })
+            }
+
+            $scope.hiddenModalExamine = () =>{
+                $('#personAuditModal').modal("hide")
+            }            
+        }
+    }
+}])
+
+ajaxData({
+    pageList: {
+        name: 'GETPersonList',
+        data: {
+            pageIndex: 0,
+            pageSize: 10
+        }
+    },
+    auditDetail: {
+        name: 'GETAuditDetail',
+        data: {},
+        later: true
+    },
+    auditPerson: {
+        name: 'POSTAuditPerson',
+        data: {},
+        later: true
+    }
+},{
+    authorStatusMap: { "00": "未注册", "01": "未认证", "02": "待审核", "03": "认证通过", "04": "认证失败" },
+    authorTypeMap: { "00": "现场维修人员", "01": "审核人员", "02": "红包发放人员", "03": "审核和红包发放" }
+})('personAuditListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
+    $scope.getStatus = sta => myAjaxData.config.authorStatusMap[sta]
+})

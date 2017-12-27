@@ -45,6 +45,8 @@ gulp.task('watch', [], () => {
               "comments": false,
           }))
           .pipe(gulp.dest('theme/js/dist/'))
+
+      cmd.run(`git add .`)
     })
 
     watch('scss/**/*.scss', () => {
@@ -54,6 +56,9 @@ gulp.task('watch', [], () => {
               gulp.src(JSON.parse(data.toString()).compileScss.map(v => `scss/**/${ v }.scss`))
                   .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
                   .pipe(gulp.dest('theme/css/'))
+
+            cmd.run(`git add .`)
+
           }, 500)
       })
     })
@@ -164,7 +169,11 @@ gulp.task('es6Rename', () => {
     })).pipe(gulp.dest('solway_necloud_es6/myJs/'))
 })
 
-gulp.task('es6JsDel', () => del(['solway_necloud_es6/myJs/**/*.js']).then(paths => console.log('Deleted files and folders:\n', paths.join('\n'))))
+gulp.task('es6JsDel', () => {
+  setTimeout(() => {
+    del(['solway_necloud_es6/myJs/**/*.js']).then(paths => console.log('Deleted files and folders:\n', paths.join('\n')))
+  }, 1000);
+})
 
 gulp.task('delReplaceFile', () => 
   del(['tpl/blocks/**'])

@@ -280,7 +280,8 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                 $scope.getRepairPersonList.getData({
                     "latitude":lat,
                     "longitude":long,
-                    "range":$scope.formData.sendScope
+                    "range":$scope.formData.sendScope,
+                    'keywords':$scope.personNameKeyword
                 }).then(res =>{
                     $scope.hasGetPerson = true
                     if(res.code == 0 ){
@@ -459,6 +460,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                         'id':$scope.id
                     }).then(res =>{
                         $scope.bonusNum = res.body ? res.body :0
+                        $scope.credit = $scope.bonusNum
                     })
                    
                 })
@@ -481,6 +483,7 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
             const renderPage = res =>{
                 $scope.data = res.body
                 $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
+                $scope.taskImageList = $scope.data.taskImgs ? $scope.data.taskImgs.split(",").map((v => window.baseUrl + '/' + v)) : []
                 $scope.showHisContent =JSON.parse($scope.data.reviewContent || '[]')
             }
 
@@ -499,7 +502,8 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                         'id':$scope.id,
                         'opType':yesOrNot,
                         'content':JSON.stringify(content),
-                        'bonus':$("#bonusNum").val()
+                        'bonus':$("#bonusNum").val(),
+                        'points':$("#credit").val()
                     }).then(res =>{
                         if(res.code == 0 ){
                             $scope.hiddenModalExamine()
@@ -570,10 +574,8 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
 ajaxData({
     pageList: {
         name: 'GETTaskList',
-        data: {
-            pageIndex:0,
-            pageSize:10,
-        }
+        data: {},
+        later:true
     },
     stationsPosition:{
         name:'GETStationsPos',
@@ -645,6 +647,16 @@ ajaxData({
     if(wxuser){
         $scope.authType = wxuser.authType
     }
+
+    const defineDate = new Date()
+    defineDate.setDate(defineDate.getDate() - 2000)
+    const today = new Date()
+    today.setDate(today.getDate() - 1)
+
+    $scope.distDateStart = defineDate
+    $scope.distDateEnd = today
+    $scope.endDate = new Date("2050,12,12,12,12")
+
     $ocLazyLoad.load([
         "http://api.map.baidu.com/api?v=2.0&ak=aBsOf0A0mp32b7M6A15dvByz"
     ]).then(()=>{
@@ -658,10 +670,23 @@ ajaxData({
         })
     })
 
-    $scope.getStatus = sta =>{
-        return myAjaxData.config.statusMap[sta]
-    }
+    $scope.getStatus = sta => myAjaxData.config.statusMap[sta]
+
+    $scope.taskStatusList = [{ statusName: '未发布', value: '00' }, { statusName: '已发布', value: '01' }, { statusName: '处理中', value: '02' }, { statusName: '处理未完成', value: '03' }, { statusName: '审核中', value: '04' }, { statusName: '审核通过', value: '05' },
+     { statusName: '审核未通过', value: '06' }, { statusName: '已完成', value: '07' }, { statusName: '已作废', value: '99' }]
     
+    $scope.getPageList = () =>{
+        $scope.pageList.getData({
+            publishStatus: $scope.taskStatusList.selected ? $scope.taskStatusList.selected.value : "",
+            distDateStartStr: $scope.distDateStart.Format("yyyy-MM-dd hh:mm:ss"),
+            distDateEndStr: $scope.distDateEnd.Format("yyyy-MM-dd hh:mm:ss"),
+            keywords: $scope.keywords,
+            pageIndex: 0,
+            pageSize: 10
+        })
+    }
+    $scope.getPageList()
+
     //废除任务
     $('#result_table').on('click','.delete-task', function () {
         if(confirm("确定废除此任务？")){

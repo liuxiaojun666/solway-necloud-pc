@@ -1,3 +1,12 @@
+app.directive('repeatFinish',function(){
+    return {
+        link: function(scope,element,attr){
+            if(scope.$last == true){
+                scope.$eval( attr.repeatFinish )
+            }
+        }
+    }
+})
 //添加、编辑
 app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => {
     return {
@@ -43,10 +52,22 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                         $("#address").val($scope.formData.address)
                         $scope.latitude = $scope.formData.latitude
                         $scope.longitude = $scope.formData.longitude
-                         $scope.timeSetLine = []
+                        $scope.autoPub = $scope.formData.autoPub
+                        let userIdsArr = (res.body.userIds).split(",")
+                        $scope.personListData($scope.latitude,$scope.longitude)
+                        $scope.renderFinish = () =>{
+                            $scope.$apply()
+                            let objs = document.getElementsByName("userIds");
+                            for(let i=0; i<objs.length; i++) {
+                                if($.inArray(objs[i].value, userIdsArr) != -1){
+                                    objs[i].checked = true
+                                }
+                            }
+                        }
+                        $scope.timeSetLine = []
                         for(let i = 1;i<=3;i++){
-                            if($scope.formData['bounsTime'+i] != null){
-                                $scope.timeSetLine.push({time:new Date($scope.formData['bounsTime'+i]),money:$scope.formData['bouns'+i]})
+                            if($scope.formData['bounsT'+i] != null){
+                                $scope.timeSetLine.push({time:$scope.formData['bounsT'+i],money:$scope.formData['bouns'+i]})
                             }
                         }
                         $('#powerIndexModalAdd').modal();
@@ -64,6 +85,13 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                     $scope.longitude = ""
                     $scope.personList = []
                     $scope.timeSetLine = [{time:"",money:""}]
+                    $scope.renderFinish = () =>{
+                        $scope.$apply()
+                        let objs = document.getElementsByName("userIds");
+                        for(let i=0; i<objs.length; i++) {
+                            objs[i].checked = false
+                        }
+                    }
                     $scope.$apply()
                     $('#powerIndexModalAdd').modal()
                 })
@@ -92,7 +120,6 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
     
                 }
                 
-
                 $scope.uploadImgs = [],$scope.responseImgs = []
 
                 $(".automaticTaskList").on('change','#fileaaa',function(){
@@ -227,7 +254,7 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                         alert("推送范围均不能为空")
                         return false
                     }
-                    personListData(lat,long)
+                    $scope.personListData(lat,long)
                 }else if($scope.radioValue == "2"){
                     if($scope.longitude == "" || $scope.longitude == undefined || $scope.latitude == "" || $scope.latitude == undefined || $scope.formData.sendScope == ""|| $scope.formData.sendScope == undefined){
                         alert("经度、纬度、推送范围均不能为空")
@@ -235,12 +262,12 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                     }else{
                         lat = $scope.latitude
                         long = $scope.longitude
-                        personListData(lat,long)
+                        $scope.personListData(lat,long)
                     }
                 }             
             }  
 
-            const personListData = (lat,long) =>{
+            $scope.personListData = (lat,long,callback) =>{
 
                 $scope.getRepairPersonList.getData({
                     "latitude":lat,
@@ -253,6 +280,8 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                     }else{
                         alert(res.msg)
                     }
+
+                    $scope.personList && callback && callback($scope.personList)
                 })    
             }
             $scope.addTimeLine = () =>{
@@ -353,7 +382,6 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                 if($scope.timeSetLine && $scope.timeSetLine.length>0){
                     for(let i = 0;i<$scope.timeSetLine.length;i++){
                         if($scope.timeSetLine[i].time == undefined || $scope.timeSetLine[i].time == null || $scope.timeSetLine[i].time == ""){
-                            debugger
                             alert($scope.timeSetLine[i].time)
                             alert("每组时间设置对应的时间不能为空")
                             validateFlag =  false
@@ -526,6 +554,10 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
             $scope.showStatus = sta =>{
                 return myAjaxData.config.statusMap[sta]
             }
+
+            $scope.rendarIfAutoPub = autoPub =>{
+                return autoPub == 1?"是":"否"
+            }
             $scope.hiddenModalExamine = () =>{
                 $('#taskExamineModal').modal("hide");
             }
@@ -577,7 +609,7 @@ ajaxData({
         later:true
     },
     taskDetail:{
-        name:'GETTaskDetailPC',
+        name:'GETAutomaticTaskDetail',
         data:{},
         later:true
     },
@@ -592,7 +624,7 @@ ajaxData({
         later:true
     },
     taskDoInvalid:{
-        name:'POSTTaskDoInvalid',
+        name:'POSTAutomaticTaskDelete',
         data:{},
         later:true
     },
@@ -628,13 +660,12 @@ ajaxData({
         return myAjaxData.config.statusMap[sta]
     }
     
-    //废除任务
+    //删除任务
     $('#result_table').on('click','.delete-task', function () {
         if(confirm("确定废除此任务？")){
             let id = $(this).attr("id")
             $scope.taskDoInvalid.getData({
                 'id':id,
-                'opType':3
             }).then(res =>{
                 if(res.code == 0){
                     $scope.pageList.getData({
