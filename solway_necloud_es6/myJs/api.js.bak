@@ -124,17 +124,21 @@ window.ajaxData = (b, a) => {
                     }
                     N[g].isLoding = !0
                     if (b[g].later) continue
-                    // if (b[g].data.__stationId__) {
-                    //     N.getData('GETgetCurrentInfoNew', {
-                    //         currentView: '00',
-                    //         isGroup: 0
-                    //     }).then(d => {
-                    //         Z.setCurrentStationData(d)
-                    //         b[g].data[b[g].data.__stationId__] = d.currentSTID
-                    //         b[g].data.__stationId__ = void 0
-                    //         N[g].promise = N[g].getData(b[g].data)
-                    //     })
-                    // }
+                    if (b[g].data.__stationId__) {
+                        if (Z.currentStationData.currentSTID) b[g].data[b[g].data.__stationId__] = Z.currentStationData.currentSTID
+                        else {
+                            b[g].data.__stationId__ = 'continue'
+                            N.getData('GETgetCurrentInfoNew', {
+                                currentView: '00',
+                                isGroup: 0
+                            }).then(d => {
+                                Z.setCurrentStationData(d)
+                                b[g].data[b[g].data.__stationId__] = d.currentSTID
+                                N[g].promise = N[g].getData(b[g].data)
+                            })
+                        }
+                    }
+                    if (b[g].data.__stationId__ === 'continue') continue
                     N[g].promise = N[g].getData(b[g].data)
                 }
                 e(N, Z, Y, X, W, V, U, T, S, R, Q, P, O, M, L, K, J, I, H, G, F, D, C, B, A, j)
