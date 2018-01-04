@@ -24,10 +24,8 @@ app.directive('handoutBonusAddTemp',['myAjaxData','$timeout',(myAjaxData,$timeou
 
             const getRecieverList = () =>{
                 $scope.bonusRecievePersonList.getData({
-                    pageIndex:0,
-                    pageSize:10
                 }).then(res =>{
-                    $scope.recievePersonList = res.body.data
+                    $scope.recievePersonList = res.body
                     $scope.recievePersonList.selected =  $scope.recievePersonList[0]
                 })
                 
@@ -76,7 +74,7 @@ ajaxData({
         name: 'GETManualHandoutBonus',
         data: {
             pageIndex:0,
-            pageSize:10,
+            pageSize:10
         }
     },
     bonusDetail:{
@@ -90,7 +88,7 @@ ajaxData({
         later:true
     },
     bonusRecievePersonList:{
-        name:'GETPersonList',
+        name:'GETBonusReciever',
         data:{},
         later:true
     }

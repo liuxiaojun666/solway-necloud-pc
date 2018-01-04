@@ -574,8 +574,10 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
 ajaxData({
     pageList: {
         name: 'GETTaskList',
-        data: {},
-        later:true
+        data: {
+            pageIndex: 0,
+            pageSize: 10
+        }
     },
     stationsPosition:{
         name:'GETStationsPos',
@@ -685,7 +687,6 @@ ajaxData({
             pageSize: 10
         })
     }
-    $scope.getPageList()
 
     //废除任务
     $('#result_table').on('click','.delete-task', function () {
