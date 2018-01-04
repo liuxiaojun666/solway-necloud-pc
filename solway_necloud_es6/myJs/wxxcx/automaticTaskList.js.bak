@@ -292,6 +292,16 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                 $scope.timeSetLine.splice(index,1);
             }
             
+            //执行策略
+            
+            $scope.hours = [],$scope.days = []
+            for(let i=1;i<=31;i++){
+                $scope.days.push(i)
+            }
+            for(let i=0;i<24;i++){
+                $scope.hours.push(i)
+            }
+
             $scope.release = () =>{
                 organizeParams()
                 if(validate()){
@@ -332,8 +342,8 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                 $scope.formData['taskTitle'] = $scope.formData.taskTitle
                 $scope.formData['taskContent'] = $scope.formData.taskContent
                 $scope.formData['autoPub'] = $scope.autoPub
-                $scope.formData['execStrategy'] = $scope.formData.execStrategy
-
+                //$scope.formData['execStrategy'] = $scope.formData.execStrategy
+               
                 for(let i = 0;i<$scope.timeSetLine.length;i++){
                     let index = i+1
                     $scope.formData['bounsT'+index] = $scope.timeSetLine[i].time
@@ -354,9 +364,9 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
             const validate = () =>{
                 let validateFlag = true
 
-                const validateKeys  = ['provinceId','cityd','countyId','address','latitude','longitude','sendScope','userIds','taskTitle','taskContent','execStrategy']
+                const validateKeys  = ['provinceId','cityd','countyId','address','latitude','longitude','sendScope','userIds','taskTitle','taskContent']
                 const validateNamesMap = {'provinceId':'省','cityd':'市','countyId':'县','address':'详细地址','latitude':'纬度',
-                                    'longitude':'经度','sendScope':'推送范围','userIds':'检修人员','taskTitle':'任务标题','taskContent':'任务内容','execStrategy':'执行策略'}
+                                    'longitude':'经度','sendScope':'推送范围','userIds':'检修人员','taskTitle':'任务标题','taskContent':'任务内容'}
 
                 for(let i = 0;i<validateKeys.length;i++){
                     for(let key in $scope.formData){
@@ -382,7 +392,6 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                 if($scope.timeSetLine && $scope.timeSetLine.length>0){
                     for(let i = 0;i<$scope.timeSetLine.length;i++){
                         if($scope.timeSetLine[i].time == undefined || $scope.timeSetLine[i].time == null || $scope.timeSetLine[i].time == ""){
-                            alert($scope.timeSetLine[i].time)
                             alert("每组时间设置对应的时间不能为空")
                             validateFlag =  false
                             return validateFlag
@@ -398,6 +407,20 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                     alert("时间设置请至少填写一组")
                 }
                 
+                 //策略拼接字符串（并验证）
+                if(!$scope.selectDay){
+                    alert("请选择日期")
+                    validateFlag =  false
+                    return validateFlag 
+                }
+                if(!$scope.selectHour){
+                    alert("请选择小时")
+                    validateFlag =  false
+                    return validateFlag
+                }
+                $scope.formData['execStrategy'] = "0 0 "+$scope.selectHour+" "+$scope.selectDay+" * ? *"
+                
+                //$scope.formData['execStrategy'] = "0 0/1 * * * ?"
 
                 return validateFlag
             }
