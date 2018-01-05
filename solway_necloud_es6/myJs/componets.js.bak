@@ -182,6 +182,22 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
     link ($scope, $element) {
         $scope.beforeMount && $scope.beforeMount($scope, $element)
         $timeout(() => {
+            Array.from($element.find('th')).forEach(dv => {
+                const {name} = dv.dataset
+                if (!name) return
+                const $inputs = $element.find(`input[name=${name}]`)
+                $(dv).find('input:checkbox').on('click', function (e) {
+                    e.stopPropagation()
+                    if (this.checked) Array.from($inputs).forEach(v => v.checked = true)
+                    else Array.from($inputs).forEach(v => v.checked = false)
+                })
+
+                $element.on('click', `input[name=${name}]`, e => {
+                    e.stopPropagation()
+                    $(dv).find('input:checkbox').prop('checked', Array.from($inputs).every(v => v.checked === true))
+                })
+            })
+
             $scope.mounted && $scope.mounted($scope, $element)
             $scope.isMounted = !0
         }, 0)
@@ -250,6 +266,10 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
         })
 
         $scope.created && $scope.created($scope, $element)
+
+        $scope.hello = () => {
+            debugger
+        }
     }
 })])
 
