@@ -70,6 +70,10 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                                 $scope.timeSetLine.push({time:$scope.formData['bounsT'+i],money:$scope.formData['bouns'+i]})
                             }
                         }
+                        $scope.strategyType = "0"
+                        let strategyArr = $scope.formData.execStrategy.split(" ")
+                        $scope.selectDay = strategyArr[3]
+                        $scope.selectHour = strategyArr[2]
                         $('#powerIndexModalAdd').modal();
                     })
                 })
@@ -136,6 +140,7 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
             $scope.radioValue = '1'
             $scope.hasGetPerson = false //是否获取过人员列表
             $scope.autoPub = '1'
+            $scope.strategyType = "0"
 
             $scope.timeSetLine = [{time:"",money:""}]
 
@@ -342,7 +347,6 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                 $scope.formData['taskTitle'] = $scope.formData.taskTitle
                 $scope.formData['taskContent'] = $scope.formData.taskContent
                 $scope.formData['autoPub'] = $scope.autoPub
-                //$scope.formData['execStrategy'] = $scope.formData.execStrategy
                
                 for(let i = 0;i<$scope.timeSetLine.length;i++){
                     let index = i+1
@@ -408,20 +412,26 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                 }
                 
                  //策略拼接字符串（并验证）
-                if(!$scope.selectDay){
-                    alert("请选择日期")
-                    validateFlag =  false
-                    return validateFlag 
+                if($scope.strategyType == 0){
+                    if(!$scope.selectDay){
+                        alert("请选择日期")
+                        validateFlag =  false
+                        return validateFlag 
+                    }
+                    if(!$scope.selectHour){
+                        alert("请选择小时")
+                        validateFlag =  false
+                        return validateFlag
+                    }
+                    $scope.formData['execStrategy'] = "0 0 "+$scope.selectHour+" "+$scope.selectDay+" * ? *"
+                }else if($scope.strategyType == 1){
+                    let val = $scope.formData['execStrategy']
+                    if(val == undefined || val == null || val == ""){
+                        alert('执行策略不能为空')
+                        validateFlag = false
+                        return validateFlag
+                    }
                 }
-                if(!$scope.selectHour){
-                    alert("请选择小时")
-                    validateFlag =  false
-                    return validateFlag
-                }
-                $scope.formData['execStrategy'] = "0 0 "+$scope.selectHour+" "+$scope.selectDay+" * ? *"
-                
-                //$scope.formData['execStrategy'] = "0 0/1 * * * ?"
-
                 return validateFlag
             }
 
@@ -446,6 +456,7 @@ app.directive('taskAutomaticExamineTemp',['myAjaxData','$timeout',(myAjaxData,$t
             redPacket:"="
         },
         link($scope,$element,$attrs){
+
             $timeout(()=>{
 
                 $("#result_table").on('click','.task-title',function(){
@@ -496,12 +507,16 @@ app.directive('taskAutomaticExamineTemp',['myAjaxData','$timeout',(myAjaxData,$t
             })
 
             const renderPage = res =>{
+                
                 $scope.data = res.body
                 $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
                 $scope.showHisContent =JSON.parse($scope.data.reviewContent || '[]')
+                let arr = $scope.data.execStrategy.split(" ")
+                $scope.execStrategy = "每月"+arr[3]+"日"+arr[2]+"时"
+            
             }
 
-             //通过或者不通过
+
             $scope.ifPass = yesOrNot =>{
                 let time = new Date().getTime()
                 const wxuser = localStorage.getItem("wxuser") ? JSON.parse(localStorage.getItem("wxuser")) : null
