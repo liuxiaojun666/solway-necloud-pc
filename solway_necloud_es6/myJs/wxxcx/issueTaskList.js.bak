@@ -489,35 +489,37 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
 
              //通过或者不通过
             $scope.ifPass = yesOrNot =>{
-                let time = new Date().getTime()
-                const wxuser = localStorage.getItem("wxuser") ? JSON.parse(localStorage.getItem("wxuser")) : null
-                const curContent = $("#examineCircumstance").val()
-                const result = myAjaxData.config.passMap[yesOrNot]
-                if(wxuser){
-                    let content = [{'id':wxuser.id,'name':wxuser.realName,'time':time,'phone':wxuser.phone,'content':curContent,'result':result}]
-                    if($scope.showHisContent){
-                        content = [...$scope.showHisContent,...content]
-                    }
-                    $scope.taskExamine.getData({
-                        'id':$scope.id,
-                        'opType':yesOrNot,
-                        'content':JSON.stringify(content),
-                        'bonus':$("#bonusNum").val(),
-                        'points':$("#credit").val()
-                    }).then(res =>{
-                        if(res.code == 0 ){
-                            $scope.hiddenModalExamine()
-                            promptObj('success', '',res.msg);
-                            $scope.pageList.getData({
-                                pageIndex:0,
-                                pageSize:10,
-                            })
-                        }else{
-                            alert(res.msg)
+                if(validateMaxAmount('money')){
+                    let time = new Date().getTime()
+                    const wxuser = localStorage.getItem("wxuser") ? JSON.parse(localStorage.getItem("wxuser")) : null
+                    const curContent = $("#examineCircumstance").val()
+                    const result = myAjaxData.config.passMap[yesOrNot]
+                    if(wxuser){
+                        let content = [{'id':wxuser.id,'name':wxuser.realName,'time':time,'phone':wxuser.phone,'content':curContent,'result':result}]
+                        if($scope.showHisContent){
+                            content = [...$scope.showHisContent,...content]
                         }
-                    })
-                }else{
-                    alert("审核人信息没有获取到")
+                        $scope.taskExamine.getData({
+                            'id':$scope.id,
+                            'opType':yesOrNot,
+                            'content':JSON.stringify(content),
+                            'bonus':$("#bonusNum").val(),
+                            'points':$("#credit").val()
+                        }).then(res =>{
+                            if(res.code == 0 ){
+                                $scope.hiddenModalExamine()
+                                promptObj('success', '',res.msg);
+                                $scope.pageList.getData({
+                                    pageIndex:0,
+                                    pageSize:10,
+                                })
+                            }else{
+                                alert(res.msg)
+                            }
+                        })
+                    }else{
+                        alert("审核人信息没有获取到")
+                    }
                 }
             }
 
@@ -650,14 +652,25 @@ ajaxData({
         $scope.authType = wxuser.authType
     }
 
-    const defineDate = new Date()
-    defineDate.setDate(defineDate.getDate() - 2000)
-    const today = new Date()
-    today.setDate(today.getDate())
-
-    $scope.distDateStart = defineDate
-    $scope.distDateEnd = today
-    $scope.endDate = new Date("2050,12,12,12,12")
+    $(".dist-datetime-start").datetimepicker({
+        language : 'zh-CN',
+        format: 'yyyy-mm-dd hh:ii',
+        autoclose:true,
+        todayBtn : true,
+        pickerPosition : "bottom-left"
+    }).on("click",function(){
+        $(".dist-datetime-start").datetimepicker("setEndDate",$("#endTime").val())
+    });
+    
+    $(".dist-datetime-end").datetimepicker({
+        language : 'zh-CN',
+        format: 'yyyy-mm-dd hh:ii',
+        autoclose:true,
+        todayBtn : true,
+        pickerPosition : "bottom-left"
+    }).on("click",function(){
+        $(".dist-datetime-end").datetimepicker("setStartDate",$("#startTime").val())
+    });
 
     $ocLazyLoad.load([
         "http://api.map.baidu.com/api?v=2.0&ak=aBsOf0A0mp32b7M6A15dvByz"
@@ -678,10 +691,12 @@ ajaxData({
      { statusName: '审核未通过', value: '06' }, { statusName: '已完成', value: '07' }, { statusName: '已作废', value: '99' }]
     
     $scope.getPageList = () =>{
+        let startDate = $("#startTime").val()
+        let endDate = $("#endTime").val()
         $scope.pageList.getData({
             publishStatus: $scope.taskStatusList.selected ? $scope.taskStatusList.selected.value : "",
-            distDateStartStr: $scope.distDateStart.Format("yyyy-MM-dd hh:mm:ss"),
-            distDateEndStr: $scope.distDateEnd.Format("yyyy-MM-dd hh:mm:ss"),
+            distDateStartStr: startDate,
+            distDateEndStr: endDate,
             keywords: $scope.keywords,
             pageIndex: 0,
             pageSize: 10

@@ -66,28 +66,28 @@ app.directive('personAuditDetailTemp',['myAjaxData','$timeout',(myAjaxData,$time
             $scope.getType = type => myAjaxData.config.authorTypeMap[type]
 
             $scope.ifPass = yesOrNot =>{
-                if($scope.bonusBtnAbled){
-                    $scope.bonusBtnAbled = false
-                    
-                    $scope.auditPerson.getData({
-                        id: $scope.id,
-                        isPass: yesOrNot,
-                        bouns: $("#bonusNum").val()
-                    }).then(res =>{
-                        if (res.code == 0) {
-                            $scope.hiddenModalExamine()
-                            promptObj('success', '', res.msg)
-                            $scope.pageList.getData({
-                                pageIndex: 0,
-                                pageSize: 10
-                            })
-                        } else {
-                            alert(res.msg)
-                        }
-                        $scope.bonusBtnAbled = true
-                    })
-
-                    
+                if(validateMaxAmount('money')){
+                    if($scope.bonusBtnAbled){
+                        $scope.bonusBtnAbled = false
+                        
+                        $scope.auditPerson.getData({
+                            id: $scope.id,
+                            isPass: yesOrNot,
+                            bouns: $("#bonusNum").val()
+                        }).then(res =>{
+                            if (res.code == 0) {
+                                $scope.hiddenModalExamine()
+                                promptObj('success', '', res.msg)
+                                $scope.pageList.getData({
+                                    pageIndex: 0,
+                                    pageSize: 10
+                                })
+                            } else {
+                                alert(res.msg)
+                            }
+                            $scope.bonusBtnAbled = true
+                        })
+                    }
                 }
             }
 
