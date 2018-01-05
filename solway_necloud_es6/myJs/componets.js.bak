@@ -58,7 +58,7 @@ app.directive('dLoding', [() => ({
     </div>
     </div>
 </div>`,
-    link ($scope, $element) {
+    link($scope, $element) {
         $($element).css('position', 'relative')
     }
 })])
@@ -98,7 +98,7 @@ app.directive('myPaging', [() => ({
         paging: '=',
         pageSize: '@'
     },
-    controller ($scope, $element) {
+    controller($scope, $element) {
         $scope.showPageSize = 10
         $scope.mygetData = (obj, arg2) => {
             if (arg2) return
@@ -120,7 +120,7 @@ app.directive('dropDown', ['myAjaxData', myAjaxData => ({
         selected: '=',
         updated: '='
     },
-    link ($scope, $element) {
+    link($scope, $element) {
         $element.find('.selected').on('click', function () {
             $(this).next('.options').slideToggle(200)
             return false;
@@ -129,7 +129,7 @@ app.directive('dropDown', ['myAjaxData', myAjaxData => ({
             $element.find('.options').slideUp(200)
         })
     },
-    controller ($scope) {
+    controller($scope) {
         $scope.onSelect = (value) => {
             $scope.selected = value
             $scope.updated && $scope.updated()
@@ -145,12 +145,19 @@ app.filter('to_trusted', ['$sce', $sce => v => $sce.trustAsHtml(v)])
 
 /**
  * [表格]
- * column: '=',   列
+ *  column: '=',   列
+ *      title       列名
+ *      dataIndex   对应数据的字段名
+ *      width       列width
+ *      align       水平对齐方式
+ *      sort        是否排序  布尔值
+ *      render(text, record, index) 渲染函数，   text：dataIndex   record: 对应数据（datasource）中当前记录对象   index：当前行（datasource）的index
+ *          render 方法 return 可传自定义事件 lxj-click    该事件只接收字符串参数
     datasource: '=',   行
     trClick: '=',    tr-click='点击行要执行的函数'  可不传
     scrollY: '=',   滚动部分的高度  不传不滚动
     trackBy: '@',   默认根据哪个字段排序   不传不排序
-   beforeCreate: '=',       类vue生命周期
+    beforeCreate: '=',       类vue生命周期
     created: '=',           类vue生命周期
     beforeMount: '=',       类vue生命周期
     mounted: '=',           类vue生命周期
@@ -179,11 +186,11 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
         destroyed: '=',
     },
     templateUrl: baseUrl + '/tpl/publicComponent/myTable.jsp',
-    link ($scope, $element) {
+    link($scope, $element) {
         $scope.beforeMount && $scope.beforeMount($scope, $element)
         $timeout(() => {
             Array.from($element.find('th')).forEach(dv => {
-                const {name} = dv.dataset
+                const { name } = dv.dataset
                 if (!name) return
                 const $inputs = $element.find(`input[name=${name}]`)
                 $(dv).find('input:checkbox').on('click', function (e) {
@@ -198,11 +205,17 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
                 })
             })
 
+            $element.find('[lxj-click]').on('click', function (e) {
+                e.stopPropagation()
+                const arr = $(this).attr('lxj-click').split('(')
+                $scope[arr[0]](...arr[1].split(')')[0].split(','))
+            })
+
             $scope.mounted && $scope.mounted($scope, $element)
             $scope.isMounted = !0
         }, 0)
     },
-    controller ($scope, $element) {
+    controller($scope, $element) {
         $scope.beforeCreate && $scope.beforeCreate($scope, $element)
 
         $scope.orderBy = !0
@@ -214,7 +227,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
                 $scope.orderBy = !0
             }
             if (typeof $scope.datasource[0][dataIndex] === 'number') {
-                $scope.datasource.sort( (a, b) => {
+                $scope.datasource.sort((a, b) => {
                     return $scope.orderBy ? a[dataIndex] - b[dataIndex] : b[dataIndex] - a[dataIndex]
                 })
             } else {
@@ -230,9 +243,9 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
             $scope.gen.next($scope.orderByDataIndex)
             $scope.orderBy = !$scope.orderBy
         }
-        
+
         $scope.$watch('datasource', (newValue, oldValue) => {
-            $scope.gen = (function * () {
+            $scope.gen = (function* () {
                 $scope.orderByDataIndex = void 0
                 $scope.orderByDataIndex = yield
             })()
@@ -266,10 +279,6 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
         })
 
         $scope.created && $scope.created($scope, $element)
-
-        $scope.hello = () => {
-            debugger
-        }
     }
 })])
 
@@ -282,14 +291,14 @@ app.directive('switchPower', ['myAjaxData', myAjaxData => ({
     replace: !0,
     scope: !0,
     templateUrl: baseUrl + '/tpl/publicComponent/switchPower.jsp',
-    controller ($scope) {
+    controller($scope) {
         $scope.getCurrentDataName('00', 0, (result) => {
             $scope.currentDataName = result.currentDataName
             myAjaxData.setCurrentStationData(result)
         })
-        $scope.$on('broadcastSwitchStation',(event, data) => {
+        $scope.$on('broadcastSwitchStation', (event, data) => {
             $scope.currentDataName = data.dataName
-            myAjaxData.setCurrentStationData({currentDataName: data.dataName, currentSTID: data.dataId})
+            myAjaxData.setCurrentStationData({ currentDataName: data.dataName, currentSTID: data.dataId })
             $scope.reload()
         })
     }
@@ -471,7 +480,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad
     link($scope, $element) {
         $scope.beforeMount && $scope.beforeMount($scope, $element)
         const calendarMap = {
-            'yyyy-MM-dd hh:mm:ss': {}, 
+            'yyyy-MM-dd hh:mm:ss': {},
             'yyyy-MM-dd hh:mm': {},
             'yyyy-MM-dd hh': {
                 minView: 1,
@@ -491,12 +500,18 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad
         $scope.randomId = (Math.random() + '').substr(2, 10)
         const $input = $($element).find('input').attr('id', $scope.randomId)
         $input.on('focus', () => $input.blur())
+        $input.on('input', function () {
+            const newDateTime = moment($(this).val())
+            if ((newDateTime._d + '').toLocaleLowerCase() == "invalid date") return promptObj("error", "", "error" + "\n" + "您输入的日期或时间格式错误")
+            $scope.dateTime = newDateTime
+            $scope.$apply()
+        })
         $ocLazyLoad.load([
-                baseUrl + '/vendor/bootstrap/css/bootstrap-datetimepicker.min.css',
-                baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.js'
-            ]).then( () => $ocLazyLoad.load([
-                baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
-                baseUrl + '/vendor/libs/moment.min.js'
+            baseUrl + '/vendor/bootstrap/css/bootstrap-datetimepicker.min.css',
+            baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.js'
+        ]).then(() => $ocLazyLoad.load([
+            baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
+            baseUrl + '/vendor/libs/moment.min.js'
         ])).then(() => {
             $scope.dateTime = new Date($scope.dateTime)
             $('#' + $scope.randomId).datetimepicker({
@@ -594,7 +609,7 @@ app.directive('commonChartBar', ['myAjaxData', (myAjaxData) => ({
         detail: '='
     },
 
-    link ($scope, $element, $attrs) {
+    link($scope, $element, $attrs) {
         const setWidthHeight = () => {
             $($element).width($scope.width).height($scope.height)
         }
@@ -651,7 +666,7 @@ app.directive('commonChartBar', ['myAjaxData', (myAjaxData) => ({
                 {
                     type: 'bar',
                     barWidth: '15',
-                    label:{
+                    label: {
                         normal: {
                             show: true,
                             position: 'right',
@@ -715,8 +730,8 @@ app.directive('commonChartPie', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLa
                 },
                 series: [{
                     name: $scope.chartName,
-                    center: [ '50%', '50%' ],
-                    radius: [ '45%', '70%' ],
+                    center: ['50%', '50%'],
+                    radius: ['45%', '70%'],
                     type: 'pie',
                     data: $scope.chartData.map((v, i) => ({
                         name: v.name,
@@ -754,4 +769,36 @@ app.directive('amoutLimit', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLo
     }
 })])
 
-
+/**
+ * 增删改查 模板
+ */
+app.directive('editForm', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    templateUrl: window.baseUrl + '/tpl/publicComponent/editForm.html',
+    replace: !0,
+    transclude: !0,
+    scope: !1,
+})])
+/**
+ * 元素复制
+ */
+app.directive('copyEle', ['$timeout', $timeout => ({
+    restrict: 'A',
+    scope: !1,
+    link($scope, $element) {
+        $timeout(() => {
+            $element.after(`
+            <div class="clearfix">
+                <a class="pull-right copy-ele">
+                    <span style="width: 26px; height: 26px; text-align: center; color: white; font-size: 29px; border-radius: 50%; background: #1cb09a; display: inline-block; line-height: 26px; margin-right: 10px;" class="add-input-icon">+</span>
+                    <span style="    color: #1cb09a; line-height: 26px; height: 26px; display: inline-block; vertical-align: super;" class="add-input-tip">添加</span>
+                </a>
+            </div>`)
+            const copyFunc = function () {
+                $(this).parent().before($element[0].outerHTML)
+            }
+            $element.next().find('a.copy-ele').on('click', copyFunc)
+            $scope.$on('$destroy', () => $element.next().find('a.copy-ele').off('click', copyFunc))
+        }, 0)
+    }
+})])

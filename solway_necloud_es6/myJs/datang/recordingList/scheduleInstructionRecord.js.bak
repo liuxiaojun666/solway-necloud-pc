@@ -8,6 +8,10 @@ ajaxData({
         },
     },
 }, {})('scheduleInstructionRecordCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    $scope.datetime1 = new Date
+    $scope.datetime2 = new Date
+    $scope.piaohao = 'hello'
+    // 模拟数据 表格数据
     $scope.datasource = [
         {
             piaphao: '11',
@@ -25,16 +29,43 @@ ajaxData({
             piaphao: '11',
             id: 2
         },
+        {
+            piaphao: '11',
+            jiepiaoshijian: '11',
+            xksj: '11',
+            gzrzr: '11',
+            piaphao: '11',
+            id: 3
+        },
+        {
+            piaphao: '11',
+            jiepiaoshijian: '11',
+            xksj: '11',
+            gzrzr: '11',
+            piaphao: '11',
+            id: 4
+        },
     ]
+    //表单填写要求  提示
+    $scope.editRequired = [
+        '一、工作票登记由工作许可人按工作票的生成顺序填写。',
+        '二、填写时使用钢笔或碳素笔，字迹清晰工整、内容填写完整。',
+        '三、严格执行工作票制度，每项工作必须有标准的工作票。',
+        '四、工作票号登记时可以缩写，如北架风电场058D11308001可以写成001，下个月登记时，另起一页。',
+        '五、工作终结，工作票交回，检查安全措施恢复，在备注栏中盖已执行章，工作票作废盖作废章。',
+        '六、封面使用日期应填写此记录本开始使用日期。',
+        '七、登记本vvv两个班组共同使用，保存期限为一年（备查）,每月由风场安全员对其检查并签字。',
+    ]
+    // 表格  列配置
     $scope.column = [
         {
-            title: '<input type="checkbox" />',
+            title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i>全选</label>`,
             dataIndex: '',
             width: '10%',
             align: 'left',
             checkboxName: 'test',
             render(text, record, index) {
-                return `<input data-identifies="${record.id}" name="test" type="checkbox" />`
+                return `<label class="i-checks m-b-none"><input data-identifies="${record.id}" name="test" type="checkbox" /><i></i></label>`
             }
         },
         {
@@ -63,12 +94,42 @@ ajaxData({
         },
         {
             title: '操作',
-            dataIndex: '',
+            dataIndex: 'id',
             width: '10%',
             align: 'center',
-            render() {
-                return '<i class="icon-note  font16"></i> <i class="icon-trash font16"></i>'
+            render(text, record, index) {
+                return `<i class="icon-note  font16" lxj-click="editFunc(${text})"></i> <i class="icon-trash font16" lxj-click="delFunc(${text})"></i>`
             }
         },
     ]
+    // 需要将table表格内  自定义事件（lxj-click）绑定函数挂载到table组件上
+    // lxj-click 绑定的函数只接收 字符串参数
+    $scope.tableListBeforeCreated = (scope, element) => {
+        scope.editFunc = $scope.editFunc
+        scope.delFunc = $scope.delFunc
+    }
+    //编辑当前记录
+    $scope.editFunc = (id) => {
+        debugger
+    }
+    //删除当前记录
+    $scope.delFunc = (id) => {
+        debugger
+    }
+    // 批量删除执行函数
+    $scope.batchDel = () => {
+        debugger
+    }
+    //关键字查询执行函数
+    $scope.keyWordSearch = () => {
+        debugger
+    }
+    // 保存或提交执行函数
+    $scope.saveOrSubmit = () => {
+        $scope.datetime1
+        $scope.datetime2
+        $scope.piaohao
+        $scope.note
+        debugger
+    }
 })
