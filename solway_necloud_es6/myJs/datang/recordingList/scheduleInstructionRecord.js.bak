@@ -9,7 +9,9 @@ ajaxData({
     },
 }, {})('scheduleInstructionRecordCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
     $scope.datetime1 = new Date
+    $scope.datetime1.showDate = ''
     $scope.datetime2 = new Date
+    $scope.datetime2.showDate = ''
     $scope.piaohao = 'hello'
     // 模拟数据 表格数据
     $scope.datasource = [
@@ -48,13 +50,13 @@ ajaxData({
     ]
     //表单填写要求  提示
     $scope.editRequired = [
-        '一、工作票登记由工作许可人按工作票的生成顺序填写。',
-        '二、填写时使用钢笔或碳素笔，字迹清晰工整、内容填写完整。',
-        '三、严格执行工作票制度，每项工作必须有标准的工作票。',
-        '四、工作票号登记时可以缩写，如北架风电场058D11308001可以写成001，下个月登记时，另起一页。',
-        '五、工作终结，工作票交回，检查安全措施恢复，在备注栏中盖已执行章，工作票作废盖作废章。',
+        '一、此记录由值班长或班组技术员填写。',
+        '二、填写时使用钢笔或碳素笔，字迹清晰工整，内容填写完整。',
+        '三、下令人所述内容应正确完整记录，进行录音。',
+        '四、接令人应及时、准确的进行传达与交代，并做好落实。',
+        '五、编号由电场大写拼头、中横杠、序号三位数字组成，如青灰岭风场（QHLFC—001）。',
         '六、封面使用日期应填写此记录本开始使用日期。',
-        '七、登记本vvv两个班组共同使用，保存期限为一年（备查）,每月由风场安全员对其检查并签字。',
+        '七、此本记录每年班组共同使用，保存期限为一年（备查）。',
     ]
     // 表格  列配置
     $scope.column = [
@@ -69,25 +71,31 @@ ajaxData({
             }
         },
         {
-            title: '票号',
+            title: '项序',
             dataIndex: 'piaphao',
-            width: '20%',
+            width: '13%',
             align: 'center',
         },
         {
-            title: '接票时间',
+            title: '发令时间',
             dataIndex: 'jiepiaoshijian',
             width: '20%',
             align: 'center',
         },
         {
-            title: '许可时间',
+            title: '发令人',
             dataIndex: 'xksj',
-            width: '20%',
+            width: '13%',
             align: 'center',
         },
         {
-            title: '工作认可人',
+            title: '受令人',
+            dataIndex: 'gzrzr',
+            width: '13%',
+            align: 'center',
+        },
+        {
+            title: '完成时间',
             dataIndex: 'gzrzr',
             width: '20%',
             align: 'center',
