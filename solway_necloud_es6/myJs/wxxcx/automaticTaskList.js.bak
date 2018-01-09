@@ -28,12 +28,12 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
         link ($scope, $element, $attrs) {
 
             $scope.stationChange = () =>{
-                const lat = $scope.stationList.selected.latitude;
-                const long = $scope.stationList.selected.longitude;
+                const lat = $scope.stationList.selected.latitude
+                const long = $scope.stationList.selected.longitude
 
-                $scope.getMap(lat ,long, false);
+                $scope.getMap(lat ,long, false)
             }
-            $scope.getMap();
+            $scope.getMap()
 
             $scope.deleteCurrentImg = index =>{
                 $scope.responseImgs.splice(index,1)
@@ -44,20 +44,26 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                     $scope.taskDetail.getData({
                         'id':id
                     }).then(res =>{
-                        $scope.formData = res.body
+                        let formData = res.body
+                        $scope.formData['id'] = formData.id
+                        $scope.formData['scheduleJobId'] = formData.scheduleJobId
+                        $scope.formData['sendScope'] = formData.sendScope
+                        $scope.formData['taskTitle'] = formData.taskTitle
+                        $scope.formData['taskContent'] = formData.taskContent
+                        $scope.formData['autoPub'] = formData.autoPub
                         $scope.radioValue = '2';
-                        $scope.provinced.selected= { regionName: $scope.formData.provinceName,id: $scope.formData.provinceId}
-                        $scope.cityd.selected = {regionName :$scope.formData.cityName,id: $scope.formData.cityId}
-                        $scope.countyd.selected =  {regionName :$scope.formData.countyName,id: $scope.formData.countyId}
-                        $("#address").val($scope.formData.address)
-                        $scope.latitude = $scope.formData.latitude
-                        $scope.longitude = $scope.formData.longitude
-                        $scope.autoPub = $scope.formData.autoPub
+                        $scope.provinced.selected= { regionName: formData.provinceName,id: formData.provinceId}
+                        $scope.cityd.selected = {regionName :formData.cityName,id: formData.cityId}
+                        $scope.countyd.selected =  {regionName :formData.countyName,id:formData.countyId}
+                        $scope.address = formData.address
+                        $scope.latitude = formData.latitude
+                        $scope.longitude = formData.longitude
+                        $scope.autoPub = formData.autoPub
                         let userIdsArr = (res.body.userIds).split(",")
                         $scope.personListData($scope.latitude,$scope.longitude)
                         $scope.renderFinish = () =>{
                             $scope.$apply()
-                            let objs = document.getElementsByName("userIds");
+                            let objs = document.getElementsByName("userIds")
                             for(let i=0; i<objs.length; i++) {
                                 if($.inArray(objs[i].value, userIdsArr) != -1){
                                     objs[i].checked = true
@@ -66,12 +72,12 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                         }
                         $scope.timeSetLine = []
                         for(let i = 1;i<=3;i++){
-                            if($scope.formData['bounsT'+i] != null){
-                                $scope.timeSetLine.push({time:$scope.formData['bounsT'+i],money:$scope.formData['bouns'+i]})
+                            if(formData['bounsT'+i] != null){
+                                $scope.timeSetLine.push({time:formData['bounsT'+i],money:formData['bouns'+i]})
                             }
                         }
                         
-                        let strategyArr = $scope.formData.execStrategy.split(" ")
+                        let strategyArr = formData.execStrategy.split(" ")
                        
                         if(strategyArr[4] == "*" && !isNaN(strategyArr[3]) && !isNaN(strategyArr[2])){
                             $scope.selectDay = strategyArr[3]
@@ -80,11 +86,13 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                         }else{
                             $scope.strategyType = "1"
                         }
-                        $('#powerIndexModalAdd').modal();
+                        $('#powerIndexModalAdd').modal()
                     })
                 })
 
                 $(".automaticTaskList").on('click','#add-new',function(){
+                    $scope.formData['id'] = null
+                    $scope.formData['scheduleJobId'] = null
                     $scope.formData = {}
                     $scope.radioValue = '1';
                     $scope.provinced.selected= { regionName: "",id: ""}
@@ -316,6 +324,7 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
             $scope.release = () =>{
                 organizeParams()
                 if(validate()){
+                    $scope.formData
                     $scope.creatTask.getData(
                         $scope.formData
                     ).then(res =>{
@@ -333,6 +342,8 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
             }
 
             const organizeParams = () =>{
+                $scope.formData
+                debugger
                 if($scope.radioValue == "1"){
                     $scope.formData['provinceId'] = $scope.stationList.selected.provinceid
                     $scope.formData['cityId'] = $scope.stationList.selected.cityid
