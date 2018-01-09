@@ -51,6 +51,7 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                         $scope.formData['taskTitle'] = formData.taskTitle
                         $scope.formData['taskContent'] = formData.taskContent
                         $scope.formData['autoPub'] = formData.autoPub
+                        $scope.formData['execStrategy'] = formData.execStrategy
                         $scope.radioValue = '2';
                         $scope.provinced.selected= { regionName: formData.provinceName,id: formData.provinceId}
                         $scope.cityd.selected = {regionName :formData.cityName,id: formData.cityId}
@@ -79,6 +80,8 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                         
                         let strategyArr = formData.execStrategy.split(" ")
                        
+                        $scope.selectDay = ''
+                        $scope.selectHour = ''
                         if(strategyArr[4] == "*" && !isNaN(strategyArr[3]) && !isNaN(strategyArr[2])){
                             $scope.selectDay = strategyArr[3]
                             $scope.selectHour = strategyArr[2]
@@ -91,8 +94,6 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                 })
 
                 $(".automaticTaskList").on('click','#add-new',function(){
-                    /*$scope.formData['id'] = null
-                    $scope.formData['scheduleJobId'] = null*/
                     $scope.formData = {}
                     $scope.radioValue = '1';
                     $scope.provinced.selected= { regionName: "",id: ""}
@@ -110,6 +111,8 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                             objs[i].checked = false
                         }
                     }
+                    $scope.selectDay = ''
+                    $scope.selectHour = ''
                     $scope.$apply()
                     $('#powerIndexModalAdd').modal()
                 })
@@ -329,7 +332,7 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                         $scope.formData
                     ).then(res =>{
                         if(res.code == "0"){
-                            promptObj('success', '',"发布成功");
+                            promptObj('success', '',res.msg)
                             $scope.pageList.getData({
                                 pageIndex:0,
                                 pageSize:10,
@@ -557,7 +560,7 @@ app.directive('taskAutomaticExamineTemp',['myAjaxData','$timeout',(myAjaxData,$t
                         }).then(res =>{
                             if(res.code == 0 ){
                                 $scope.hiddenModalExamine()
-                                promptObj('success', '',res.msg);
+                                promptObj('success', '',res.msg)
                                 $scope.pageList.getData({
                                     pageIndex:0,
                                     pageSize:10,
@@ -583,7 +586,7 @@ app.directive('taskAutomaticExamineTemp',['myAjaxData','$timeout',(myAjaxData,$t
                         $scope.bonusBtnAbled = true
                         if(res.code == 0 ){
                             $scope.hiddenModalExamine()
-                            promptObj('success', '',res.msg);
+                            promptObj('success', '',res.msg)
                             $scope.pageList.getData({
                                 pageIndex:0,
                                 pageSize:10,
@@ -720,6 +723,19 @@ ajaxData({
     $scope.getStatus = sta =>{
         return myAjaxData.config.statusMap[sta]
     }
+
+    //执行策略
+    $scope.showExtrategy = str =>{
+        let strategyStr
+        let arr = str.split(" ")
+
+        if(arr[4] == "*" && !isNaN(arr[3]) && !isNaN(arr[2])){
+            strategyStr = "每月"+arr[3]+"日"+arr[2]+"时"
+        }else{
+            strategyStr = str
+        }
+        return strategyStr
+    }
     
     //删除任务
     $('#result_table').on('click','.delete-task', function () {
@@ -729,6 +745,7 @@ ajaxData({
                 'id':id,
             }).then(res =>{
                 if(res.code == 0){
+                    promptObj('success', '',res.msg)
                     $scope.pageList.getData({
                         pageIndex:0,
                         pageSize:10
