@@ -70,10 +70,16 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                                 $scope.timeSetLine.push({time:$scope.formData['bounsT'+i],money:$scope.formData['bouns'+i]})
                             }
                         }
-                        $scope.strategyType = "0"
+                        
                         let strategyArr = $scope.formData.execStrategy.split(" ")
-                        $scope.selectDay = strategyArr[3]
-                        $scope.selectHour = strategyArr[2]
+                       
+                        if(strategyArr[4] == "*" && !isNaN(strategyArr[3]) && !isNaN(strategyArr[2])){
+                            $scope.selectDay = strategyArr[3]
+                            $scope.selectHour = strategyArr[2]
+                            $scope.strategyType = "0"
+                        }else{
+                            $scope.strategyType = "1"
+                        }
                         $('#powerIndexModalAdd').modal();
                     })
                 })
@@ -507,13 +513,15 @@ app.directive('taskAutomaticExamineTemp',['myAjaxData','$timeout',(myAjaxData,$t
             })
 
             const renderPage = res =>{
-                
                 $scope.data = res.body
                 $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
                 $scope.showHisContent =JSON.parse($scope.data.reviewContent || '[]')
                 let arr = $scope.data.execStrategy.split(" ")
-                $scope.execStrategy = "每月"+arr[3]+"日"+arr[2]+"时"
-            
+                if(arr[4] == "*" && !isNaN(arr[3]) && !isNaN(arr[2])){
+                    $scope.execStrategy = "每月"+arr[3]+"日"+arr[2]+"时"
+                }else{
+                    $scope.execStrategy = "-"
+                }
             }
 
 
