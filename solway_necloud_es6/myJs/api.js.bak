@@ -62,7 +62,10 @@ window.ajaxData = (b, a) => {
         }
         c.getData = o => {
             if (!i[o.name]) return d.getData(o)
-            for (let key in o.data) i[o.name][key] = o.data[key]
+            for (let key in o.data) {
+                i[o.name][key] = o.data[key]
+                if (i[o.name][key] === null) delete i[o.name][key]
+            }
             return d.getData({
                 name: o.name, 
                 data: i[o.name]
