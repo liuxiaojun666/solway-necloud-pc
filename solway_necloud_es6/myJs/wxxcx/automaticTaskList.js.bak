@@ -91,8 +91,8 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                 })
 
                 $(".automaticTaskList").on('click','#add-new',function(){
-                    $scope.formData['id'] = null
-                    $scope.formData['scheduleJobId'] = null
+                    /*$scope.formData['id'] = null
+                    $scope.formData['scheduleJobId'] = null*/
                     $scope.formData = {}
                     $scope.radioValue = '1';
                     $scope.provinced.selected= { regionName: "",id: ""}
@@ -342,8 +342,10 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
             }
 
             const organizeParams = () =>{
-                $scope.formData
-                debugger
+                if(!$scope.formData['id']){
+                    $scope.formData['id'] = null
+                    $scope.formData['scheduleJobId'] = null 
+                }
                 if($scope.radioValue == "1"){
                     $scope.formData['provinceId'] = $scope.stationList.selected.provinceid
                     $scope.formData['cityId'] = $scope.stationList.selected.cityid
