@@ -5,10 +5,10 @@ app.directive('handoutBonusAddTemp',['myAjaxData','$timeout',(myAjaxData,$timeou
         template:$('#handout-bonus-add-temp').html(),
         replace:true,
         scope:{
+            pageList: '=',
             bonusDetail:"=",
             bonusRecievePersonList:'=',
             bonusUpdate:"="
-
         },
         link($scope,$element,$attrs){
             $timeout(()=>{
@@ -74,15 +74,14 @@ app.directive('handoutBonusAddTemp',['myAjaxData','$timeout',(myAjaxData,$timeou
                             }).then(res =>{
                                 $scope.bonusBtnAbled = true
                                 if(res.code == "0"){
-                                    promptObj('success', '',res.msg)
+                                    $scope.hiddenModalAdd()
+                                    promptObj('success', '',res.msg?res.msg:"发放成功")
                                     $scope.pageList.getData({
                                         pageIndex:0,
                                         pageSize:10,
-                                    }).then(res =>{
-                                        $scope.hiddenModalAdd()
                                     })
                                 }else{
-                                    alert(res.msg)
+                                    promptObj('error', "", res.msg?res.msg:"发放失败")
                                 }
                             })
                         }

@@ -332,13 +332,14 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                         $scope.formData
                     ).then(res =>{
                         if(res.code == "0"){
-                            promptObj('success', '',res.msg)
+                            $scope.hiddenModalAdd()
+                            promptObj('success', '',res.msg?res.msg:"发放成功")
                             $scope.pageList.getData({
                                 pageIndex:0,
                                 pageSize:10,
-                            }).then(res =>{
-                                $scope.hiddenModalAdd()
                             })
+                        }else{
+                            promptObj('error', '',res.msg?res.msg:"发放失败")
                         }
                     })
                 }
@@ -560,13 +561,13 @@ app.directive('taskAutomaticExamineTemp',['myAjaxData','$timeout',(myAjaxData,$t
                         }).then(res =>{
                             if(res.code == 0 ){
                                 $scope.hiddenModalExamine()
-                                promptObj('success', '',res.msg)
+                                promptObj('success', '',res.msg?res.msg:"审核成功")
                                 $scope.pageList.getData({
                                     pageIndex:0,
                                     pageSize:10,
                                 })
                             }else{
-                                alert(res.msg)
+                                promptObj('error', "", res.msg?res.msg:"审核失败")
                             }
                         })
                     }else{
@@ -586,13 +587,13 @@ app.directive('taskAutomaticExamineTemp',['myAjaxData','$timeout',(myAjaxData,$t
                         $scope.bonusBtnAbled = true
                         if(res.code == 0 ){
                             $scope.hiddenModalExamine()
-                            promptObj('success', '',res.msg)
+                            promptObj('success', '',res.msg?res.msg:"发放成功")
                             $scope.pageList.getData({
                                 pageIndex:0,
                                 pageSize:10,
                             })
                         }else{
-                            alert(res.msg)
+                            promptObj('error', "", res.msg?res.msg:"发放失败")
                         }
 
                     })
@@ -745,13 +746,13 @@ ajaxData({
                 'id':id,
             }).then(res =>{
                 if(res.code == 0){
-                    promptObj('success', '',res.msg)
+                    promptObj('success', '',res.msg?res.msg:"删除成功")
                     $scope.pageList.getData({
                         pageIndex:0,
                         pageSize:10
                     })
                 }else{
-                    alert(res.msg)
+                    promptObj('error', "", res.msg?res.msg:"删除失败")
                 }
             })
         }

@@ -77,13 +77,13 @@ app.directive('personAuditDetailTemp',['myAjaxData','$timeout',(myAjaxData,$time
                         }).then(res =>{
                             if (res.code == 0) {
                                 $scope.hiddenModalExamine()
-                                promptObj('success', '', res.msg)
+                                promptObj('success', '', res.msg?res.msg:"审核通过")
                                 $scope.pageList.getData({
                                     pageIndex: 0,
                                     pageSize: 10
                                 })
                             } else {
-                                alert(res.msg)
+                                promptObj('error', "", res.msg?res.msg:"审核失败")
                             }
                             $scope.bonusBtnAbled = true
                         })
@@ -153,9 +153,9 @@ ajaxData({
             remark :remark
         }).then(res =>{
             if(res.code == "0"){
-                promptObj('success', '',res.msg);
+                promptObj('success', '',res.msg?res.msg:"修改成功");
             }else{
-                alert(res.msg)
+                promptObj('error', "", res.msg?res.msg:"修改失败")
             }
         })
     }

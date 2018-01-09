@@ -508,13 +508,13 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                         }).then(res =>{
                             if(res.code == 0 ){
                                 $scope.hiddenModalExamine()
-                                promptObj('success', '',res.msg);
+                                promptObj('success', '',res.msg?res.msg:"审核成功");
                                 $scope.pageList.getData({
                                     pageIndex:0,
                                     pageSize:10,
                                 })
                             }else{
-                                alert(res.msg)
+                                promptObj('error', "", res.msg?res.msg:"审核失败")
                             }
                         })
                     }else{
@@ -534,13 +534,13 @@ app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) =
                         $scope.bonusBtnAbled = true
                         if(res.code == 0 ){
                             $scope.hiddenModalExamine()
-                            promptObj('success', '',res.msg);
+                            promptObj('success', '',res.msg?res.msg:"发放成功");
                             $scope.pageList.getData({
                                 pageIndex:0,
                                 pageSize:10,
                             })
                         }else{
-                            alert(res.msg)
+                            promptObj('error', "", res.msg?res.msg:"发放失败")
                         }
 
                     })
@@ -712,12 +712,13 @@ ajaxData({
                 'opType':3
             }).then(res =>{
                 if(res.code == 0){
+                    promptObj('success', "", res.msg?res.msg:"删除成功")
                     $scope.pageList.getData({
                         pageIndex:0,
                         pageSize:10
                     })
                 }else{
-                    alert(res.msg)
+                    promptObj('error', "", res.msg?res.msg:"删除失败")
                 }
             })
         }
