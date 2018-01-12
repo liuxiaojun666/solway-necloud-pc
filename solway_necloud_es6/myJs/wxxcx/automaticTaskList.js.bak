@@ -77,6 +77,8 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                                 $scope.timeSetLine.push({time:formData['bounsT'+i],money:formData['bouns'+i]})
                             }
                         }
+
+                        $scope.responseImgs = formData.taskImgs?formData.taskImgs.split(","):[]
                         
                         let strategyArr = formData.execStrategy.split(" ")
                        
@@ -111,6 +113,7 @@ app.directive('taskAutomaticAddTemp', ['myAjaxData','$timeout', (myAjaxData,$tim
                             objs[i].checked = false
                         }
                     }
+                    $scope.responseImgs = []
                     $scope.selectDay = ''
                     $scope.selectHour = ''
                     $scope.$apply()
@@ -532,6 +535,7 @@ app.directive('taskAutomaticExamineTemp',['myAjaxData','$timeout',(myAjaxData,$t
             const renderPage = res =>{
                 $scope.data = res.body
                 $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
+                $scope.taskImageList = $scope.data.taskImgs ? $scope.data.taskImgs.split(",").map((v => window.baseUrl + '/' + v)) : []
                 $scope.showHisContent =JSON.parse($scope.data.reviewContent || '[]')
                 let arr = $scope.data.execStrategy.split(" ")
                 if(arr[4] == "*" && !isNaN(arr[3]) && !isNaN(arr[2])){
