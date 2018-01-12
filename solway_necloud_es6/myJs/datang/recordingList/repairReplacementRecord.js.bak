@@ -8,7 +8,7 @@ ajaxData({
             __stationId__: 'stationId'
         },
     },
-}, {})('scheduleInstructionRecordCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+}, {})('repairReplacementRecordCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
     $scope.datetime1 = new Date
     $scope.datetime1.showDate = ''
     $scope.datetime2 = new Date
@@ -19,64 +19,82 @@ ajaxData({
 
     //表单填写要求  提示
     $scope.editRequired = [
-        '一、此记录由值班长或班组技术员填写。',
+        '一、此记录由检修工作负责人或技术员填写，做到及时、详细、准确。',
         '二、填写时使用钢笔或碳素笔，字迹清晰工整，内容填写完整。',
-        '三、下令人所述内容应正确完整记录，进行录音。',
-        '四、接令人应及时、准确的进行传达与交代，并做好落实。',
-        '五、编号由电场大写拼头、中横杠、序号三位数字组成，如青灰岭风场（QHLFC—001）。',
+        '三、设备的检修内容传达与交代清楚，工作负责人在记录本内签字。',
+        '四、值班负责人了解设备检修的内容，在记录本内签字，传达与交代每个人。',
+        '五、编号由电厂场名称的大写拼头、中横杠、序号三位数字组成，如青灰岭风场（QHLFC—001）。',
         '六、封面使用日期应填写此记录本开始使用日期。',
-        '七、此本记录每年班组共同使用，保存期限为一年（备查）。',
+        '七、此本记录每年两个班组共同使用，保存期限为一年（备查）,风场专工每次对此记录进行检查时要签字。',
     ]
 
     // 表格  列配置
     const column = [
         {
-            title: '项序',
+            title: '编号',
             dataIndex: 'piaphao',
-            width: '13%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '154'
             }
         },
         {
-            title: '发令时间',
+            title: '异动设备名称',
             dataIndex: 'jiepiaoshijian',
-            width: '20%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '海淀区'
             }
         },
         {
-            title: '发令人',
+            title: '异动设备时间',
             dataIndex: 'xksj',
-            width: '13%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '2017-12-23'
             }
         },
         {
-            title: '受令人',
+            title: '异动设备原因',
             dataIndex: 'gzrzr',
-            width: '13%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '165'
             }
         },
         {
-            title: '完成时间',
+            title: '异动内容',
             dataIndex: 'gzrzr',
-            width: '20%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '傻乎乎'
+            }
+        },
+        {
+            title: '检修负责人',
+            dataIndex: 'gzrzr',
+            width: '',
+            align: 'center',
+            render() {
+                return '傻乎乎'
+            }
+        },
+        {
+            title: '值班负责人',
+            dataIndex: 'gzrzr',
+            width: '',
+            align: 'center',
+            render() {
+                return '傻乎乎'
             }
         },
     ]
-    
+
     //编辑当前记录
     function editFunc(id, index) {
         $scope.datetime1 = new Date
@@ -120,7 +138,7 @@ ajaxData({
 
 
 
-/* ****************************************************************** 下面的不用改 ****************************************************************** */
+    /* ****************************************************************** 下面的不用改 ****************************************************************** */
 
 
 
@@ -144,7 +162,7 @@ ajaxData({
         {
             title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i>全选</label>`,
             dataIndex: '',
-            width: '10%',
+            width: '80px',
             align: 'left',
             checkboxName: 'test',
             render(text, record, index) {
@@ -155,7 +173,7 @@ ajaxData({
         {
             title: '操作',
             dataIndex: 'id',
-            width: '10%',
+            width: '74px',
             align: 'center',
             render(text, record, index) {
                 return `<i class="icon-note  font16" lxj-click="editFunc(${text},${index})"></i> <i class="icon-trash font16" lxj-click="delFunc(${text})"></i>`

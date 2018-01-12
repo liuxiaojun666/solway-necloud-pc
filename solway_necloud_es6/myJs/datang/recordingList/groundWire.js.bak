@@ -8,7 +8,7 @@ ajaxData({
             __stationId__: 'stationId'
         },
     },
-}, {})('scheduleInstructionRecordCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+}, {})('groundWireCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
     $scope.datetime1 = new Date
     $scope.datetime1.showDate = ''
     $scope.datetime2 = new Date
@@ -19,64 +19,92 @@ ajaxData({
 
     //表单填写要求  提示
     $scope.editRequired = [
-        '一、此记录由值班长或班组技术员填写。',
-        '二、填写时使用钢笔或碳素笔，字迹清晰工整，内容填写完整。',
-        '三、下令人所述内容应正确完整记录，进行录音。',
-        '四、接令人应及时、准确的进行传达与交代，并做好落实。',
-        '五、编号由电场大写拼头、中横杠、序号三位数字组成，如青灰岭风场（QHLFC—001）。',
-        '六、封面使用日期应填写此记录本开始使用日期。',
-        '七、此本记录每年班组共同使用，保存期限为一年（备查）。',
+        '一、此记录由操作人或监护人填写。',
+        '二、填写时用钢笔或碳素笔，字迹清晰工整，填写内容完整，真实，准确。',
+        '三、严格执行操作票制度，每项工作必须有标准的操作票。',
+        '四、填写使用的范围和地点，使用时应由两人进行。',
+        '五、每装拆一次必须及时填写装设人、拆除人、装拆时间、操作票号、接地线(接地开关)电压等级和编号、组数等。',
+        '六、每装拆一次结束后，在盖章处盖已拆除章。',
+        '七、封面使用日期应填写此记录本开始使用日期。',
+        '八、此本记录每年班组共同使用，保存期限为一年（备查）。',
     ]
 
     // 表格  列配置
     const column = [
         {
-            title: '项序',
+            title: '接地线(刀闸)号',
             dataIndex: 'piaphao',
-            width: '13%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '154'
             }
         },
         {
-            title: '发令时间',
+            title: '装设地点',
             dataIndex: 'jiepiaoshijian',
-            width: '20%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '海淀区'
             }
         },
         {
-            title: '发令人',
+            title: '装设时间',
             dataIndex: 'xksj',
-            width: '13%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '2017-12-23'
             }
         },
         {
-            title: '受令人',
+            title: '操作票号',
             dataIndex: 'gzrzr',
-            width: '13%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '165'
             }
         },
         {
-            title: '完成时间',
+            title: '装设人',
             dataIndex: 'gzrzr',
-            width: '20%',
+            width: '',
             align: 'center',
             render() {
-                return '11'
+                return '傻乎乎'
+            }
+        },
+        {
+            title: '装设许可人',
+            dataIndex: 'gzrzr',
+            width: '',
+            align: 'center',
+            render() {
+                return '傻乎乎'
+            }
+        },
+        {
+            title: '拆除时间',
+            dataIndex: 'gzrzr',
+            width: '',
+            align: 'center',
+            render() {
+                return '2017-12-23'
+            }
+        },
+        {
+            title: '拆除人',
+            dataIndex: 'gzrzr',
+            width: '',
+            align: 'center',
+            render() {
+                return '王哥'
             }
         },
     ]
-    
+
     //编辑当前记录
     function editFunc(id, index) {
         $scope.datetime1 = new Date
@@ -120,7 +148,7 @@ ajaxData({
 
 
 
-/* ****************************************************************** 下面的不用改 ****************************************************************** */
+    /* ****************************************************************** 下面的不用改 ****************************************************************** */
 
 
 
@@ -144,7 +172,7 @@ ajaxData({
         {
             title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i>全选</label>`,
             dataIndex: '',
-            width: '10%',
+            width: '80px',
             align: 'left',
             checkboxName: 'test',
             render(text, record, index) {
@@ -155,7 +183,7 @@ ajaxData({
         {
             title: '操作',
             dataIndex: 'id',
-            width: '10%',
+            width: '74px',
             align: 'center',
             render(text, record, index) {
                 return `<i class="icon-note  font16" lxj-click="editFunc(${text},${index})"></i> <i class="icon-trash font16" lxj-click="delFunc(${text})"></i>`
