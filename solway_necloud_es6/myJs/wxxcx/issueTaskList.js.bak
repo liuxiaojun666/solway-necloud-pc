@@ -49,6 +49,9 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                                 $scope.timeSetLine.push({time:new Date($scope.formData['bounsTime'+i]),money:$scope.formData['bouns'+i]})
                             }
                         }
+
+                        $scope.responseImgs = formData.taskImgs?formData.taskImgs.split(","):[]
+
                         $('#powerIndexModalAdd').modal();
                     })
                 })
@@ -64,6 +67,7 @@ app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => 
                     $scope.longitude = ""
                     $scope.personList = []
                     $scope.timeSetLine = [{time:$scope.dateTime,money:""}]
+                    $scope.responseImgs = []
                     $scope.$apply()
                     $('#powerIndexModalAdd').modal()
                 })
