@@ -1,0 +1,108 @@
+app.directive('seChart', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: {
+
+    },
+    link($scope, $element) {
+        const yAxisArr = [1,2,3,4].map(v => {
+            return {
+                axisLabel: {
+                    textStyle: {
+                        color: '#bbb',
+                        fontSize: 12
+                    }
+                },
+                name: 'hello',
+                position: 'left',
+                offset: v *= 60,
+                font: {
+                    color: '#bbb'
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#bbb',
+                        width: 1
+                    }
+                },
+                splitLine: {
+                    show: false
+                },
+                type: 'value'
+            }
+        })
+        const xMarginLeft = 60 * yAxisArr.length + "px"
+        const option = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            grid: {
+                borderWidth: '0px',
+                x: xMarginLeft,
+                x2: '60px',
+                y: "80px",
+                y2: "40px"
+            },
+            xAxis: [{
+                axisTick: {
+                    show: false
+                },
+                type: 'category',
+                axisLine: {
+                    lineStyle: {
+                        color: '#bbb',
+                        width: 1
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: '#bbb',
+                        fontSize: 12
+                    }
+                },
+                splitLine: {
+                    show: false
+                },
+                data: $scope.x
+            }],
+            yAxis: yAxisArr,
+            series: [1, 32, 34, 45, 567].map(v => ({
+                name: v,
+                type: 'line',
+                yAxisIndex: v,
+                itemStyle: {
+                    normal: {
+                        color: '#ccc',
+                        areaStyle: {
+                            color: 'transparent'
+                        },
+                        lineStyle: {
+                            color: '#ccc',
+                            width: 1
+                        }
+                    }
+                },
+                data: v
+            }))
+        }
+
+        setTimeout(() => {
+            const myChart = echarts.init($element[0])
+            myChart.setOption(option)
+        }, 0);
+    }
+})]);
+
+ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    $scope.startDate = new Date;
+    $scope.endDate = new Date;
+    const getWindowHeight = () => {
+        $scope.windowHeight = document.body.clientHeight;
+        $scope.windowWidth = document.body.clientWidth;
+        $scope.$apply()
+    };
+    setTimeout(getWindowHeight, 0);
+    window.addEventListener('resize', getWindowHeight);
+    $scope.$on('$destroy', () => window.removeEventListener('resize', getWindowHeight));
+});
