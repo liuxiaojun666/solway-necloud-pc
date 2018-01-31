@@ -65,8 +65,50 @@ app.directive('seChart', ['myAjaxData', myAjaxData => ({
 })]);
 
 ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-    $scope.startDate = new Date;
-    $scope.endDate = new Date;
+    $scope.startDate = new Date;//历史曲线 开始 时间
+    $scope.endDate = new Date;//历史曲线 结束 时间
+    $scope.selectedEquipments = [];//已选择的设备
+
+    $scope.equipments = new Array(30).fill('').map((v, i) => ({
+        name: `a#${i}`,
+        id: i + 1
+    }))
+
+    // 选择设备执行
+    $('#equipments').on('click', 'input', function (e) {
+
+        const equipmentId = this.dataset['id']
+
+        if (this.checked) {
+
+            if ($scope.selectedEquipments.length < 1) $scope.selectedEquipments.push(equipmentId);
+
+            else this.checked = false;
+
+        } else $scope.selectedEquipments = $scope.selectedEquipments.filter(v => v != equipmentId);
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const getWindowHeight = () => {
         $scope.windowHeight = document.body.clientHeight;
         $scope.windowWidth = document.body.clientWidth;
