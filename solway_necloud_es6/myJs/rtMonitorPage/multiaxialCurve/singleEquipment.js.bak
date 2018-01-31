@@ -6,90 +6,60 @@ app.directive('seChart', ['myAjaxData', myAjaxData => ({
 
     },
     link($scope, $element) {
-        const yAxisArr = [1,2,3,4].map(v => {
-            return {
-                axisLabel: {
-                    textStyle: {
-                        color: '#bbb',
-                        fontSize: 12
-                    }
-                },
-                name: 'hello',
-                position: 'left',
-                offset: v *= 60,
-                font: {
-                    color: '#bbb'
-                },
-                axisLine: {
-                    lineStyle: {
-                        color: '#bbb',
-                        width: 1
-                    }
-                },
-                splitLine: {
-                    show: false
-                },
-                type: 'value'
-            }
-        })
-        const xMarginLeft = 60 * yAxisArr.length + "px"
         const option = {
-            tooltip: {
-                trigger: 'axis'
+            backgroundColor: '#fff',
+            "tooltip": {
+                "trigger": "axis"
+            },
+            xAxis: {
+                type: 'category',
+                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
             },
             grid: {
-                borderWidth: '0px',
-                x: xMarginLeft,
-                x2: '60px',
-                y: "80px",
-                y2: "40px"
+                left: 60,
+                right: 60,
+                bottom: 20,
+                containLabel: true
             },
-            xAxis: [{
-                axisTick: {
-                    show: false
+            yAxis: [
+                {
+                    name: 'hello',
+                    position: 'left',
+                    offset: 0,
+                    splitLine: {
+                        show: false
+                    },
+                    type: 'value'
                 },
-                type: 'category',
-                axisLine: {
-                    lineStyle: {
-                        color: '#bbb',
-                        width: 1
-                    }
+                {
+                    name: 'hello',
+                    position: 'left',
+                    offset: 60,
+                    splitLine: {
+                        show: false
+                    },
+                    type: 'value'
+                }
+            ],
+            series: [
+                {
+                    data: [820, 932, 901, 934, 1290, 1330, 1320],
+                    yAxisIndex: 0,
+                    type: 'line'
+                }, {
+                    data: [80, 92, 91, 94, 120, 130, 120],
+                    yAxisIndex: 1,
+                    type: 'line'
                 },
-                axisLabel: {
-                    textStyle: {
-                        color: '#bbb',
-                        fontSize: 12
-                    }
-                },
-                splitLine: {
-                    show: false
-                },
-                data: $scope.x
-            }],
-            yAxis: yAxisArr,
-            series: [1, 32, 34, 45, 567].map(v => ({
-                name: v,
-                type: 'line',
-                yAxisIndex: v,
-                itemStyle: {
-                    normal: {
-                        color: '#ccc',
-                        areaStyle: {
-                            color: 'transparent'
-                        },
-                        lineStyle: {
-                            color: '#ccc',
-                            width: 1
-                        }
-                    }
-                },
-                data: v
-            }))
-        }
+            ]
+        };
+
 
         setTimeout(() => {
-            const myChart = echarts.init($element[0])
-            myChart.setOption(option)
+            const myChart = echarts.init($element[0]);
+            myChart.setOption(option);
+            window.addEventListener('resize', myChart.resize);
+            $scope.$on('$destroy', () => window.removeEventListener('resize', myChart.resize))
         }, 0);
     }
 })]);
