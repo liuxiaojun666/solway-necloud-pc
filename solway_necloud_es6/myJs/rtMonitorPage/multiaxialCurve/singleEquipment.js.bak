@@ -8,8 +8,27 @@ app.directive('seChart', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
     link($scope, $element) {
         let allTimes = [];
         let allData = [];
+        const maxLength = 100;//最多点数
         const setOption = (myChart, data) => {
-            debugger
+            if (data.newData) {
+                allTimes = [];
+                allData = [];
+                myChart.clear();
+            }
+            allTimes = allTimes.concat(data.times);
+            data.lines.forEach((v, i) => {
+                if (!allData[i]) allData[i] = {};
+                allData[i].name = v.name;
+                if (!allData[i].data) allData[i].data = [];
+                allData[i].data = allData[i].data.concat(v.data);
+            });
+            if (allTimes.length > maxLength) {
+                allTimes = allTimes.slice(-maxLength);
+                allData = allData.map(v => ({
+                    name: v.name,
+                    data: v.data.slice(-maxLength)
+                }));
+            }
             const option = {
                 backgroundColor: '#fff',
                 "tooltip": {
@@ -17,15 +36,15 @@ app.directive('seChart', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                 },
                 xAxis: {
                     type: 'category',
-                    data: data.times.map(v => new Date(v).Format('yyyy-MM-dd hh:mm:ss').slice(-5))
+                    data: allTimes.map(v => new Date(v).Format('yyyy-MM-dd hh:mm:ss').slice(-8))
                 },
                 grid: {
-                    left: data.lines.length * 30,
+                    left: allData.length * 30,
                     right: 20,
                     bottom: 20,
                     containLabel: true
                 },
-                yAxis: data.lines.map((v, i) => ({
+                yAxis: allData.map((v, i) => ({
                     name: v.name,
                     position: 'left',
                     offset: i * 60,
@@ -34,7 +53,8 @@ app.directive('seChart', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                     },
                     type: 'value'
                 })),
-                series: data.lines.map((v, i) => ({
+                series: allData.map((v, i) => ({
+                    name: v.name,
                     data: v.data,
                     yAxisIndex: i,
                     type: 'line'
@@ -57,7 +77,22 @@ app.directive('seChart', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
     }
 })]);
 
-ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData', '$timeout'], ($scope, myAjaxData, $timeout) => {
+ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData', '$timeout', '$location'], ($scope, myAjaxData, $timeout, $location) => {
+    let optionalEquipmentNum = 1; //根据路径判断 是多设备 还是 单设备
+    switch ($location.$$url) {
+        case "/app/singleEquipment":
+            optionalEquipmentNum = 1;
+            break;
+
+        case "/app/moreEquipmentBiaxial":
+            optionalEquipmentNum = 9;
+            break;
+    
+        default:
+            break;
+    }
+    const optionalAnalogCurveNum = optionalEquipmentNum === 1 ? 9 : 2;//可选模拟量类型个数
+    const optionalSwitchCurveNum = optionalEquipmentNum === 1 ? 9 : 2;//可选开关量类型个数
     $scope.startDate = new Date;//历史曲线 开始 时间
     $scope.endDate = new Date;//历史曲线 结束 时间
     $scope.selectedEquipments = [];//已选择的设备
@@ -92,7 +127,7 @@ ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData', '$timeout'], ($
             name: `a#${i}`,
             id: (Math.random() + '').substr(2)
         })),
-        dl: new Array(30).fill('').map((v, i) => ({
+        dl2: new Array(30).fill('').map((v, i) => ({
             name: `a#${i}`,
             id: (Math.random() + '').substr(2)
         })),
@@ -136,86 +171,67 @@ ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData', '$timeout'], ($
 
     // 选择设备执行
     $('#equipments').on('click', 'input', function () {
-        selectFunc('selectedEquipments', this, 1);
+        selectFunc('selectedEquipments', this, optionalEquipmentNum);
     });
 
     // 选择模拟量曲线类型
     $('#analogCurve').on('click', 'input', function (e) {
-        selectFunc('selectedAnalogCurves', this, 9);
+        selectFunc('selectedAnalogCurves', this, optionalEquipmentNum === 1 ? optionalAnalogCurveNum : optionalAnalogCurveNum - $scope.selectedSwitchCurves.length);
     });
 
     // 选择开关量曲线类型
     $('#switchCurve').on('click', 'input', function (e) {
-        selectFunc('selectedSwitchCurves', this, 2);
+        selectFunc('selectedSwitchCurves', this, optionalEquipmentNum === 1 ? optionalSwitchCurveNum : optionalSwitchCurveNum - $scope.selectedAnalogCurves.length);
     });
+
+    // 开关量曲线  模拟量曲线  选择重置操作
+    $scope.reset = name => $('#' + name).find('input').prop('checked', false);
 
     // 查询曲线执行函数
     let timer;
-    $scope.inquire = () => {
-        if ($scope.selectedEquipments.length < 1) return alert('请选择设备');
+    $scope.inquire = (selectedEquipments, selectedAnalogCurves, selectedSwitchCurves, curveType, startDate, endDate, newData = true) => {
+        $timeout.cancel(timer);//停止刷新数据
 
-        const types = [...$scope.selectedAnalogCurves, ...$scope.selectedSwitchCurves];
+        //检查是否选择设备
+        const minimumEquipments = optionalEquipmentNum > 1 ? 2 : 1
+        if (selectedEquipments.length < minimumEquipments) {
+            return alert('请至少选择' + minimumEquipments + '台设备');
+        }
+
+        const types = [...selectedAnalogCurves, ...selectedSwitchCurves];
 
         if (types.length < 1) return alert('请选择设备曲线类型');
 
-        let startDate = $scope.startDate.showDate;
-        let endDate = $scope.endDate.showDate;
+        let _startDate = startDate.showDate;
+        let _endDate = endDate.showDate;
 
-        
-        if ($scope.curveType === 'realTime') {
-            $timeout.cancel(timer);
-            startDate = endDate = null;
-            timer = $timeout($scope.inquire, 5000);
+        //如果是实时数据  需要定时刷新
+        if (curveType === 'realTime') {
+            _startDate = _endDate = null;
+            timer = $timeout(() => $scope.inquire(selectedEquipments, selectedAnalogCurves, selectedSwitchCurves, curveType, startDate, endDate, false), 5000);
         }
+
+        //模拟数据
         $timeout(() => {
             const dateNow = Date.now();
             const length = 5
             $scope.data = {
+                newData,
                 times: new Array(length).fill('').map((v, i) => dateNow - 1000 * (5 - i)),
-                lines: new Array(types.length).fill('').map(() => ({
-                    name: 'adf kWh',
+                lines: new Array(types.length * selectedEquipments.length).fill('').map((v, i) => ({
+                    name: 'name' + i,
                     data: new Array(length).fill('').map(() => (Math.random() * 1000).toFixed()),
                 }))
             };
         }, 1000);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    const getWindowHeight = () => {
-        $scope.windowHeight = document.body.clientHeight;
-        $scope.windowWidth = document.body.clientWidth;
-        $scope.$apply()
     };
-    setTimeout(getWindowHeight, 0);
-    window.addEventListener('resize', getWindowHeight);
-    $scope.$on('$destroy', () => window.removeEventListener('resize', getWindowHeight));
 
-
-
+    // 停止实时数据刷新
+    $scope.stop = () => $timeout.cancel(timer);
 
 
     /* 选择执行公共函数 */
-    function selectFunc (name/* 数组名 */, ele/* 当前点击的 复选框 */, max/* 最多选择个数 */) {
+    function selectFunc(name/* 数组名 */, ele/* 当前点击的 复选框 */, max/* 最多选择个数 */) {
 
         const id = ele.dataset['id']
 
@@ -227,4 +243,16 @@ ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData', '$timeout'], ($
 
         } else $scope[name] = $scope[name].filter(v => v != id);
     }
+
+
+    // 获取窗口高度，使高度自适应屏幕
+    const getWindowHeight = () => {
+        $scope.windowHeight = document.body.clientHeight;
+        $scope.windowWidth = document.body.clientWidth;
+        $scope.$apply();
+    };
+    setTimeout(getWindowHeight, 0);
+    window.addEventListener('resize', getWindowHeight);
+    $scope.$on('$destroy', () => window.removeEventListener('resize', getWindowHeight));
+
 });
