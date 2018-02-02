@@ -1,92 +1,184 @@
-app.directive('seChart', ['myAjaxData', myAjaxData => ({
+app.directive('seChart', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
     scope: {
-
+        data: '='
     },
     link($scope, $element) {
-        const option = {
-            backgroundColor: '#fff',
-            "tooltip": {
-                "trigger": "axis"
-            },
-            xAxis: {
-                type: 'category',
-                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-            },
-            grid: {
-                left: 60,
-                right: 60,
-                bottom: 20,
-                containLabel: true
-            },
-            yAxis: [
-                {
-                    name: 'hello',
+        let allTimes = [];
+        let allData = [];
+        const setOption = (myChart, data) => {
+            debugger
+            const option = {
+                backgroundColor: '#fff',
+                "tooltip": {
+                    "trigger": "axis"
+                },
+                xAxis: {
+                    type: 'category',
+                    data: data.times.map(v => new Date(v).Format('yyyy-MM-dd hh:mm:ss').slice(-5))
+                },
+                grid: {
+                    left: data.lines.length * 30,
+                    right: 20,
+                    bottom: 20,
+                    containLabel: true
+                },
+                yAxis: data.lines.map((v, i) => ({
+                    name: v.name,
                     position: 'left',
-                    offset: 0,
+                    offset: i * 60,
                     splitLine: {
                         show: false
                     },
                     type: 'value'
-                },
-                {
-                    name: 'hello',
-                    position: 'left',
-                    offset: 60,
-                    splitLine: {
-                        show: false
-                    },
-                    type: 'value'
-                }
-            ],
-            series: [
-                {
-                    data: [820, 932, 901, 934, 1290, 1330, 1320],
-                    yAxisIndex: 0,
+                })),
+                series: data.lines.map((v, i) => ({
+                    data: v.data,
+                    yAxisIndex: i,
                     type: 'line'
-                }, {
-                    data: [80, 92, 91, 94, 120, 130, 120],
-                    yAxisIndex: 1,
-                    type: 'line'
-                },
-            ]
-        };
-
-
-        setTimeout(() => {
-            const myChart = echarts.init($element[0]);
+                }))
+            };
             myChart.setOption(option);
+        }
+
+
+        $timeout(() => {
+            const myChart = echarts.init($element[0]);
+            $scope.$watch('data', async (newData, oldData) => {
+                if (!newData || Object.is(newData, oldData)) return;
+                await myAjaxData.timeout(0);
+                setOption(myChart, $scope.data)
+            });
             window.addEventListener('resize', myChart.resize);
-            $scope.$on('$destroy', () => window.removeEventListener('resize', myChart.resize))
+            $scope.$on('$destroy', () => window.removeEventListener('resize', myChart.resize));
         }, 0);
     }
 })]);
 
-ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData', '$timeout'], ($scope, myAjaxData, $timeout) => {
     $scope.startDate = new Date;//历史曲线 开始 时间
     $scope.endDate = new Date;//历史曲线 结束 时间
     $scope.selectedEquipments = [];//已选择的设备
+    $scope.selectedAnalogCurves = [];//已选择，模拟量曲线类型
+    $scope.selectedSwitchCurves = [];//已选择，开关量曲线类型
 
+    // 设备 模拟数据
     $scope.equipments = new Array(30).fill('').map((v, i) => ({
         name: `a#${i}`,
-        id: i + 1
-    }))
+        id: (Math.random() + '').substr(2)
+    }));
+
+    // 模拟量曲线模拟数据
+    $scope.analogCurve = {
+        wd: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        sd: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        dl: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        gl: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        dy: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        dl: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        qt: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+    };
+
+    // 开关量曲线模拟数据
+    $scope.switchCurve = {
+        ty: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        jc: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        fl: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        fdj: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        blq: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        cd: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        ph: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+    };
 
     // 选择设备执行
-    $('#equipments').on('click', 'input', function (e) {
-
-        const equipmentId = this.dataset['id']
-
-        if (this.checked) {
-
-            if ($scope.selectedEquipments.length < 1) $scope.selectedEquipments.push(equipmentId);
-
-            else this.checked = false;
-
-        } else $scope.selectedEquipments = $scope.selectedEquipments.filter(v => v != equipmentId);
+    $('#equipments').on('click', 'input', function () {
+        selectFunc('selectedEquipments', this, 1);
     });
+
+    // 选择模拟量曲线类型
+    $('#analogCurve').on('click', 'input', function (e) {
+        selectFunc('selectedAnalogCurves', this, 9);
+    });
+
+    // 选择开关量曲线类型
+    $('#switchCurve').on('click', 'input', function (e) {
+        selectFunc('selectedSwitchCurves', this, 2);
+    });
+
+    // 查询曲线执行函数
+    let timer;
+    $scope.inquire = () => {
+        if ($scope.selectedEquipments.length < 1) return alert('请选择设备');
+
+        const types = [...$scope.selectedAnalogCurves, ...$scope.selectedSwitchCurves];
+
+        if (types.length < 1) return alert('请选择设备曲线类型');
+
+        let startDate = $scope.startDate.showDate;
+        let endDate = $scope.endDate.showDate;
+
+        
+        if ($scope.curveType === 'realTime') {
+            $timeout.cancel(timer);
+            startDate = endDate = null;
+            timer = $timeout($scope.inquire, 5000);
+        }
+        $timeout(() => {
+            const dateNow = Date.now();
+            const length = 5
+            $scope.data = {
+                times: new Array(length).fill('').map((v, i) => dateNow - 1000 * (5 - i)),
+                lines: new Array(types.length).fill('').map(() => ({
+                    name: 'adf kWh',
+                    data: new Array(length).fill('').map(() => (Math.random() * 1000).toFixed()),
+                }))
+            };
+        }, 1000);
+    }
 
 
 
@@ -117,4 +209,22 @@ ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData'], ($scope, myAja
     setTimeout(getWindowHeight, 0);
     window.addEventListener('resize', getWindowHeight);
     $scope.$on('$destroy', () => window.removeEventListener('resize', getWindowHeight));
+
+
+
+
+
+    /* 选择执行公共函数 */
+    function selectFunc (name/* 数组名 */, ele/* 当前点击的 复选框 */, max/* 最多选择个数 */) {
+
+        const id = ele.dataset['id']
+
+        if (ele.checked) {
+
+            if ($scope[name].length < max) $scope[name].push(id);
+
+            else ele.checked = false;
+
+        } else $scope[name] = $scope[name].filter(v => v != id);
+    }
 });
