@@ -1,13 +1,13 @@
 app.directive('chartWd1', ['myAjaxData', (myAjaxData) => {
-    return{
+    return {
         restrict: 'E',
         scope: {
             detail: '='
         },
-        link ($scope, $element, $attrs) {
+        link($scope, $element, $attrs) {
             $scope.$watch("detail", (newValue, oldValue) => {
-　　　　　　　　newValue.res && renderChart()
-　　　　　　}, !0)
+                newValue.x && newValue.x.length && renderChart()
+            　　　　　　}, !0)
             const setWidthHeight = () => {
                 $($element).width(do {
                     if ((window.innerWidth - 535) < 800) 800
@@ -17,9 +17,7 @@ app.directive('chartWd1', ['myAjaxData', (myAjaxData) => {
             setWidthHeight()
             const myChart = echarts.init($element[0])
             const renderChart = () => {
-                let data1 = [23,24,25,23,26,27,28,30,27,28,26,25,24,26,23,23,25,26,27,30,26,24,20,23], 
-                    data2 = []
-                for (data2[data2.length] of data1) data2[data2.length-1] += 2
+                const data2 = $scope.detail.y1, data1 = $scope.detail.y2;
                 const option = {
                     tooltip: {
                         trigger: 'axis'
@@ -38,7 +36,7 @@ app.directive('chartWd1', ['myAjaxData', (myAjaxData) => {
                     xAxis: {
                         name: '小时(h)',
                         boundaryGap: !1,
-                        data: ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24']
+                        data: $scope.detail.x.map(v => new Date(v).Format('yyyy-MM-dd').slice(-5))
                     },
                     yAxis: {
                         name: myAjaxData.config.yName,
@@ -49,16 +47,17 @@ app.directive('chartWd1', ['myAjaxData', (myAjaxData) => {
                         type: 'value'
                     },
                     series: [
-                        {   name: myAjaxData.config.lineName[0],
-                            type:'line',
+                        {
+                            name: myAjaxData.config.lineName[0],
+                            type: 'line',
                             stack: '总量',
                             data: data1
                         },
                         {
                             name: myAjaxData.config.lineName[1],
-                            type:'line',
+                            type: 'line',
                             stack: '总量',
-                            data:data2
+                            data: data2
                         }
                     ]
                 }
@@ -73,150 +72,150 @@ app.directive('chartWd1', ['myAjaxData', (myAjaxData) => {
 }])
 
 app.directive('chartWd2', ['myAjaxData', (myAjaxData) => {
-    return{
+    return {
         restrict: 'E',
         scope: {
             detail: '='
         },
-        link ($scope, $element, $attrs) {
+        link($scope, $element, $attrs) {
             $scope.$watch("detail", (newValue, oldValue) => {
-　　　　　　　　newValue.res && renderChart()
-　　　　　　}, !0)
+                // 　　　　　　　　newValue.res && renderChart()
+            　　　　　　}, !0)
             const setWidthHeight = () => {
                 $($element).width(do {
-                                if ((window.innerWidth - 535) < 800) 800
-                                else window.innerWidth - 535
-                            } + 'px')
+                    if ((window.innerWidth - 535) < 800) 800
+                    else window.innerWidth - 535
+                } + 'px')
                             .height( do {
-                                if((window.innerHeight - 420) < 220) 220
-                                else window.innerHeight - 420
-                            } + 'px')
-            }
+                if ((window.innerHeight - 420) < 220) 220
+                else window.innerHeight - 420
+            } + 'px')
+        }
             setWidthHeight()
             const myChart = echarts.init($element[0])
             const renderChart = () => {
 
-                const option = {
-                    tooltip: {
-                        trigger: 'axis',
-                        position (pt) {
-                            return [pt[0], '20%'];
-                        },
-                        formatter (params) {
-                            let res = params[0].name + '<br/>'
-                            // params.slice(0, -2).reverse().forEach(v => {
-                            //     res += v.seriesName + ':' + (v.value || '') + '<br/>'
-                            // })
-                            return res
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    position(pt) {
+                        return [pt[0], '20%'];
+                    },
+                    formatter(params) {
+                        let res = params[0].name + '<br/>'
+                        // params.slice(0, -2).reverse().forEach(v => {
+                        //     res += v.seriesName + ':' + (v.value || '') + '<br/>'
+                        // })
+                        return res
+                    }
+                },
+                legend: {
+                    data: ['超限报警', '异常报警']
+                },
+                grid: {
+                    top: '40',
+                    left: '20',
+                    right: '80',
+                    bottom: '20',
+                    containLabel: !0
+                },
+                xAxis: [{
+                    name: '日期',
+                    type: 'category',
+                    splitLine: {
+                        show: !1
+                    },
+                    axisLabel: {
+                        interval: 1,
+                        textStyle: {
+                            fontSize: 12
                         }
                     },
-                    legend: {
-                        data:['超限报警', '异常报警']
+                    boundaryGap: !1,
+                    data: Array.apply(null, { length: 30 }).map((v, i) => '8月' + (i + 1) + '日')
+                }],
+                yAxis: [{
+                    type: 'value',
+                    interval: 1,
+                    splitLine: {
+                        show: !1
                     },
-                    grid: {
-                        top: '40',
-                        left: '20',
-                        right: '80',
-                        bottom: '20',
-                        containLabel: !0
-                    },
-                    xAxis: [{
-                        name: '日期',
-                        type: 'category',
-                        splitLine: {
-                            show: !1
-                        },
-                        axisLabel : {
-                            interval : 1,
-                            textStyle : {
-                                fontSize : 12
+                    nameTextStyle: {
+                        fontSize: 14,
+                        rotation: 2
+                    }
+                }],
+                series: [
+                    {
+                        xAxisIndex: [0],
+                        yAxisIndex: [0],
+                        type: 'line',
+                        showAllSymbol: !0,
+                        symbol: 'none',
+                        lineStyle: {
+                            normal: {
+                                width: 5,
+                                color: '#f8606d'
                             }
                         },
-                        boundaryGap: !1,
-                        data: Array.apply(null, { length: 30 }).map((v, i) => '8月' + (i + 1) + '日')
-                    }],
-                    yAxis: [{
-                        type: 'value',
-                        interval: 1,
-                        splitLine: {
-                            show: !1
+                        itemStyle: {
+                            normal: {
+                                color: '#333'
+                            },
+                            emphais: {
+                                color: '#333'
+                            }
                         },
-                        nameTextStyle: {
-                            fontSize: 14,
-                            rotation: 2
-                        }
-                    }],
-                    series: [
-                        {
-                            xAxisIndex: [0],
-                            yAxisIndex: [0],
-                            type: 'line',
-                            showAllSymbol: !0,
-                            symbol: 'none',
-                            lineStyle: {
-                                normal: {
-                                    width: 5,
-                                    color: '#f8606d'
-                                }
-                            },
-                            itemStyle: {
-                                normal: {
-                                    color: '#333'
-                                },
-                                emphais: {
-                                    color: '#333'
-                                }
-                            },
-                            data: Array.apply(null, { length: 30 }).map((v, i) => i % 4 == 0 ? '': 1)
+                        data: Array.apply(null, { length: 30 }).map((v, i) => i % 4 == 0 ? '' : 1)
+                    },
+                    {
+                        xAxisIndex: [0],
+                        yAxisIndex: [0],
+                        type: 'line',
+                        showAllSymbol: !0,
+                        symbol: 'none',
+                        lineStyle: {
+                            normal: {
+                                width: 5,
+                                color: '#f2c007'
+                            }
                         },
-                        {
-                            xAxisIndex: [0],
-                            yAxisIndex: [0],
-                            type: 'line',
-                            showAllSymbol: !0,
-                            symbol: 'none',
-                            lineStyle: {
-                                normal: {
-                                    width: 5,
-                                    color: '#f2c007'
-                                }
+                        itemStyle: {
+                            normal: {
+                                color: '#333'
                             },
-                            itemStyle: {
-                                normal: {
-                                    color: '#333'
-                                },
-                                emphais: {
-                                    color: '#333'
-                                }
-                            },
-                            data: Array.apply(null, { length: 30 }).map((v, i) => i % 3 == 0 ? '': 2)
+                            emphais: {
+                                color: '#333'
+                            }
                         },
-                        {
-                            name:'超限报警',
-                            type:'bar',
-                            itemStyle: {
-                                normal: {
-                                    color: '#f8606d'
-                                }
-                            },
+                        data: Array.apply(null, { length: 30 }).map((v, i) => i % 3 == 0 ? '' : 2)
+                    },
+                    {
+                        name: '超限报警',
+                        type: 'bar',
+                        itemStyle: {
+                            normal: {
+                                color: '#f8606d'
+                            }
                         },
-                        {
-                            name:'异常报警',
-                            type:'bar',
-                            itemStyle: {
-                                normal: {
-                                    color: '#f2c007'
-                                }
-                            },
+                    },
+                    {
+                        name: '异常报警',
+                        type: 'bar',
+                        itemStyle: {
+                            normal: {
+                                color: '#f2c007'
+                            }
                         },
-                    ]
-                }
-                myChart.setOption(option)
+                    },
+                ]
             }
-            window.addEventListener('resize', () => {
-                setWidthHeight()
-                myChart.resize()
-            })
+            myChart.setOption(option)
         }
+            window.addEventListener('resize', () => {
+            setWidthHeight()
+            myChart.resize()
+        })
     }
+}
 }])
