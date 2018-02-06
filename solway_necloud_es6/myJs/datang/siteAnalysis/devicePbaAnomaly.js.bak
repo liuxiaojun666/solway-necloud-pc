@@ -1,7 +1,7 @@
-app.directive('contentLeft6', ['myAjaxData', myAjaxData => {
+app.directive('contentLeftDevPba', ['myAjaxData', myAjaxData => {
     return {
         restrict: 'E',
-        template: $('#content-left').html(),
+        template: $('#content-left-dev-pba').html(),
         replace: true,
         scope: {
             pageList: '=',
@@ -96,8 +96,6 @@ app.directive('contentLeft6', ['myAjaxData', myAjaxData => {
                     deviceType: $scope.deviceTypeVal,
                     deviceId: data.eqid,
                     id: data._id,
-                    beginDate: $scope.dateTime1.Format('yyyy-MM-dd'),
-                    endDate: $scope.dateTime2.Format('yyyy-MM-dd'),
                     currDate: data.dtime
                 })
                 await myAjaxData.timeout(0)
@@ -144,8 +142,8 @@ app.directive('contentLeft6', ['myAjaxData', myAjaxData => {
                 align: 'center',
                 sort: !0,
             }, {
-                title: '平均效率',
-                dataIndex: 'ice_extime',
+                title: '超限次数',
+                dataIndex: 'pba_over',
                 width: '25%',
                 align: 'right',
                 sort: !0,
@@ -153,8 +151,8 @@ app.directive('contentLeft6', ['myAjaxData', myAjaxData => {
                     return text + ''
                 }
             }, {
-                title: '最大效率',
-                dataIndex: 'ice_overtime',
+                title: '异常次数',
+                dataIndex: 'pba_ex',
                 width: '25%',
                 align: 'right',
                 sort: !0,
@@ -192,7 +190,7 @@ app.directive('contentLeft6', ['myAjaxData', myAjaxData => {
 
 ajaxData({
     pageList: {
-        name: 'GETdeviceTransPage',
+        name: 'GETdevicePbaPage',
         data: {
             pageIndex: 0,
             pageSize: 10,
@@ -203,11 +201,11 @@ ajaxData({
         }
     },
     detail: {
-        name: 'GETdeviceTransline',
+        name: 'GETdevicePbaline',
         later: !0
     },
     warning: {
-        name: 'GETdeviceTranslineWarning',
+        name: 'GETdevicePbalineWarning',
         later: !0
     },
     deviceType: {
@@ -216,10 +214,9 @@ ajaxData({
     }
 }, {
         url: ["GETgetJunctionBox", "GETgetInverter", "GETgetBoxchange", "GETgetAmmeter", "GETgetAerograph"],
-        yName: '转换效率',
-        lineName: ['设备效率', '平均效率'],
-        dataType: '2'
-    })('inverterConversionEfficiencyCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+        yName: 'PBA',
+        lineName: ['设备PBA', '平均PBA']
+    })('devicePbaAnomalyCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
         const getWindowHeight = () => {
             $scope.windowHeight = document.body.clientHeight
             $scope.windowWidth = document.body.clientWidth

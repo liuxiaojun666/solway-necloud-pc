@@ -11,7 +11,8 @@ app.directive('chartWd1', ['myAjaxData', (myAjaxData) => {
             }, !0)
             let myChart
             const renderChart = () => {
-                const data2 = $scope.detail.y1, data1 = $scope.detail.y2;
+                let data2 = $scope.detail.y1 || $scope.detail.y_avg, data1 = $scope.detail.y2 || $scope.detail.y_curr;
+                
                 const option = {
                     tooltip: {
                         trigger: 'axis'
@@ -30,7 +31,10 @@ app.directive('chartWd1', ['myAjaxData', (myAjaxData) => {
                     xAxis: {
                         name: '日期',
                         boundaryGap: !1,
-                        data: $scope.detail.x.map(v => new Date(v).Format('yyyy-MM月dd日').slice(-6))
+                        data: (() => {
+                            if (myAjaxData.config.dataType === '2') return $scope.detail.x
+                            return $scope.detail.x.map(v => new Date(v).Format('yyyy-MM月dd日').slice(-6))
+                        })()
                     },
                     yAxis: {
                         name: myAjaxData.config.yName,
