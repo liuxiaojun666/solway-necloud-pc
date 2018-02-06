@@ -6,6 +6,7 @@ app.directive('contentLeftDevEfficiency', ['myAjaxData', myAjaxData => {
         scope: {
             pageList: '=',
             detail: '=',
+            warning: '=',
             deviceType: '='
         },
 
@@ -85,12 +86,19 @@ app.directive('contentLeftDevEfficiency', ['myAjaxData', myAjaxData => {
                     $scope.detail.res = null
                     return $scope.detail.isLoding = !1
                 }
-                await $scope.detail.getData({
+                $scope.detail.getData({
                     deviceType: $scope.deviceTypeVal,
                     deviceId: data.eqid,
                     id: data._id,
                     currDate: data.dtime
                 })
+                $scope.warning.getData({
+                    deviceType: $scope.deviceTypeVal,
+                    deviceId: data.eqid,
+                    id: data._id,
+                    currDate: data.dtime
+                })
+                await myAjaxData.timeout(0)
                 $($element).find('tbody tr').removeClass('active').eq(index).addClass('active')
             }
 
@@ -99,13 +107,15 @@ app.directive('contentLeftDevEfficiency', ['myAjaxData', myAjaxData => {
              */
             $scope.$watch('pageList', (newValue, oldValue) => {
                 if (void 0 === newValue.res) return
+                if (!newValue.res.body.data) return $scope.loadDetail()
                 if (void 0 === newValue.res.body.data[0]) return $scope.loadDetail()
                 const _newValue = newValue.res.body.data
                 $($element).find('tbody tr').removeClass('active')
                 if (oldValue.res) {
                     const _oldValue = oldValue.res.body.data
                     for (let i = 0, len = _newValue.length; i < len; i++) {
-                        if (_oldValue[activeIndex] && _newValue[i].deviceId == _oldValue[activeIndex].deviceId) {
+                        if (!_oldValue) continue
+                        if (_oldValue[activeIndex] && _newValue[i]._id == _oldValue[activeIndex]._id) {
                             $($element).find('tbody tr').eq(i).addClass('active')
                             return activeIndex = i
                         }
@@ -172,7 +182,7 @@ app.directive('contentLeftDevEfficiency', ['myAjaxData', myAjaxData => {
                 ; (async () => {
                     await $scope.pageList.promise
                     await myAjaxData.timeout(0)
-                    $scope.loadDetail($scope.pageList.res.body.data[0])
+                    // $scope.loadDetail($scope.pageList.res.body.data[0])
                 })()
         }
     }
@@ -184,7 +194,7 @@ ajaxData({
         data: {
             pageIndex: 0,
             pageSize: 10,
-            deviceTypeVal: '2',
+            deviceType: '2',
             beginDate: new Date(new Date().setDate(new Date().getDate() - 7)).Format('yyyy-MM-dd'),
             endDate: new Date().Format('yyyy-MM-dd'),
             currDate: new Date().Format('yyyy-MM-dd')
@@ -192,6 +202,10 @@ ajaxData({
     },
     detail: {
         name: 'GETdevicePrLine',
+        later: !0
+    },
+    warning: {
+        name: 'GETdevicePrWarning',
         later: !0
     },
     deviceType: {
@@ -203,5 +217,12 @@ ajaxData({
         yName: '效率',
         lineName: ['设备效率', '平均效率']
     })('deviceEfficiencyAnomalyCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-
+        const getWindowHeight = () => {
+            $scope.windowHeight = document.body.clientHeight
+            $scope.windowWidth = document.body.clientWidth
+            $scope.$apply()
+        }
+        setTimeout(getWindowHeight, 0);
+        window.addEventListener('resize', getWindowHeight)
+        $scope.$on('$destroy', () => window.removeEventListener('resize', getWindowHeight))
     });
