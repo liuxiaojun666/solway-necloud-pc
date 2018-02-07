@@ -4,10 +4,10 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
         detail: '='
     },
 
-    link ($scope, $element, $attrs) {
+    link($scope, $element, $attrs) {
         const setWidthHeight = () => {
-            $($element).width( ((window.innerWidth - 630) < 300) ? 300 : window.innerWidth - 630)
-                    .height( ((window.innerHeight - 145) < 470) ? 470 : window.innerHeight - 145)
+            $($element).width(((window.innerWidth - 630) < 300) ? 300 : window.innerWidth - 630)
+                .height(((window.innerHeight - 145) < 470) ? 470 : window.innerHeight - 145)
         }
         setWidthHeight()
         const myChart = echarts.init($element[0])
@@ -17,7 +17,7 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
         })
 
         $ocLazyLoad.load([
-            document.getElementById('routerJS').getAttribute('param') 
+            document.getElementById('routerJS').getAttribute('param')
             + '/vendor/echarts/china.js',
         ]).then(() => {
             const option = {
@@ -28,46 +28,46 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
                     name: '检修台次',
                     type: 'map',
                     mapType: 'china',
-                    roam:true,
+                    roam: true,
                     label: {
                         emphasis: {
                             show: false
                         }
                     },
-                    itemStyle:{
+                    itemStyle: {
                         normal: {
                             borderWidth: .5,//区域边框宽度
                             borderColor: '#fff',//区域边框颜色
-                            areaColor:"#60b4a4",//区域颜色
+                            areaColor: "#60b4a4",//区域颜色
                         },
                         emphasis: {
                             borderWidth: .5,//区域边框宽度
                             borderColor: '#fff',//区域边框颜色
-                            areaColor:"#60b4a4",//区域颜色
+                            areaColor: "#60b4a4",//区域颜色
                         }
                     },
-                    data:[
+                    data: [
                         ...[
-                            { name: '山西', value: 1},
-                            { name: '新疆', value: 3},
-                            { name: '内蒙古', value: 6},
-                            { name: '北京', value: 100},
-                            { name: '广东', value: 16},
+                            { name: '山西', value: 1 },
+                            { name: '新疆', value: 3 },
+                            { name: '内蒙古', value: 6 },
+                            { name: '北京', value: 100 },
+                            { name: '广东', value: 16 },
                         ].map(v => ({
                             name: v.name,
                             value: v.value,
                             selected: false,
                             itemStyle: {
                                 normal: {
-                                    areaColor:"#20668e",//区域颜色
+                                    areaColor: "#20668e",//区域颜色
                                 },
                                 emphasis: {
-                                    areaColor:"#20668e",//区域颜色
+                                    areaColor: "#20668e",//区域颜色
                                 }
                             },
                             label: {
                                 normal: {
-                                    formatter () {
+                                    formatter() {
                                         return v.value
                                     },
                                     show: true,
@@ -82,7 +82,7 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
                             name: '南海诸岛',
                             itemStyle: {
                                 normal: {
-                                    opacity:0
+                                    opacity: 0
                                 }
                             },
                             label: {
@@ -92,7 +92,7 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
                             }
                         }
                     ],
-                    zlevel:3
+                    zlevel: 3
                 }]
             }
             myChart.setOption(option)
@@ -107,9 +107,9 @@ app.directive('wpoChartBar', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyL
         detail: '='
     },
 
-    link ($scope, $element, $attrs) {
+    link($scope, $element, $attrs) {
         const setWidthHeight = () => {
-            $($element).width(400).height( ((window.innerHeight - 410) < 195) ? 195 : window.innerHeight - 410)
+            $($element).width(400).height(((window.innerHeight - 410) < 195) ? 195 : window.innerHeight - 410)
         }
         setWidthHeight()
         const myChart = echarts.init($element[0])
@@ -149,13 +149,13 @@ app.directive('wpoChartBar', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyL
                 axisTick: {
                     show: false
                 },
-                data: ['山东','福建','新疆','内蒙古','黑龙江','贵州']
+                data: ['山东', '福建', '新疆', '内蒙古', '黑龙江', '贵州']
             },
             series: [
                 {
                     type: 'bar',
                     barWidth: '15',
-                    label:{
+                    label: {
                         normal: {
                             show: true,
                             position: 'right',
@@ -168,7 +168,7 @@ app.directive('wpoChartBar', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyL
                         value,
                         itemStyle: {
                             normal: {
-                                color: ['#d3f0db','#bceec8','#a2edb2','#85eb9d','#5de77b','#2adc49'][(value / Math.max(...arr) * 5).toFixed()],
+                                color: ['#d3f0db', '#bceec8', '#a2edb2', '#85eb9d', '#5de77b', '#2adc49'][(value / Math.max(...arr) * 5).toFixed()],
                             }
                         }
                     }))
@@ -182,25 +182,59 @@ app.directive('wpoChartBar', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyL
 })])
 
 ajaxData({
-    pageList: {
-        name: 'GETanalysisPage',
+    ...[{
+        name: 'bar1',
+        apiName: 'GETdeviceAnalysisRankingBrand',
+        indicators: 'FAULTRATE'
+    }, {
+        // 设备台数
+        name: 'bar2',
+        apiName: 'GETdeviceAnalysisRankingBrand',
+        indicators: 'DEVICECOUNT'
+    }, {
+        // 各省份应用数据
+        name: 'bar3',
+        apiName: 'GETdeviceAnalysisRankingProvince',
+        indicators: 'DEVICECOUNT'
+    }, {
+        // 各省份平均故障率排名
+        name: 'bar4',
+        apiName: 'GETdeviceAnalysisRankingProvince',
+        indicators: 'FAULTRATE'
+    }].map(v => ({
+        [v.name]: {
+            name: v.apiName,
+            data: {
+                powerType: 'PV',
+                idType: 1,
+                ids: 137,
+                indicators: v.indicators,
+                timeType: 'ACCUM',
+                dateStr: (new Date).Format('yyyy-MM-dd'),
+                months: null,
+                yearDiff: null,
+                num: null
+            }
+        }
+    })).reduce((obj, cur) => ({ ...obj, ...cur })),
+    province: {
+        name: 'POSTSelectProvince',
         data: {
-            pageIndex:0,
-            pageSize:10,
-            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
-            endDate: (new Date).Format('yyyy-MM-dd')
+            parentId: 1,
+            treeLevel: 1
         }
     },
-    detail: {
-        name: 'GETselectEqPaintingData',
-        later: true
+    repairTotal: {
+        name: 'GETrepairTotal',
+        data: {
+            powerType: 'PV',
+            idType: '1',
+            timeType: 'MONTH',
+            dateStr: (new Date).Format('yyyy-MM-dd')
+        }
     },
-    deviceType: {
-        name: 'GETgetDeviceType',
-        data: {}
-    }
-},{
-})('windPowerOperationsCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-$scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
-$scope.dateTime2 = new Date
-})
+}, {
+    })('windPowerOperationsCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+        $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
+        $scope.dateTime2 = new Date
+    })
