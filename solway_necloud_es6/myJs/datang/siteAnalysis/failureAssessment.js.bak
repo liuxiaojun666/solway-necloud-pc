@@ -240,7 +240,7 @@ app.directive('faChart1', [() => {
                 }
                 myChart.setOption(option)
             }
-            renderChart()
+
             window.addEventListener('resize', () => {
                 myChart.resize()
             })
@@ -271,19 +271,25 @@ ajaxData({
     url: [ "GETgetJunctionBox", "GETgetInverter", "GETgetBoxchange", "GETgetAmmeter", "GETgetAerograph" ]
 })('failureAssessmentCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
 
-    $scope.tableMounted = (scope, element) => {
-        const setWidthHeight = () => {
-            const windowHeight = window.innerHeight
-            $('.fa-right-bottom tr').height(do {
-                if ( (windowHeight - 430) < 220 ) 220/3
-                else (windowHeight - 430)/3
-            })
-        }
-        setWidthHeight()
+    const setWidthHeight = () =>{
+        const windowHeight = window.innerHeight
+        $('.fa-right-bottom tr').height(do {
+            if ( (windowHeight - 430) < 220 ) 220/3
+            else (windowHeight - 430)/3
+        })
+    }
+    $scope.updatedMounted = (scope, element) => {
+        setWidthHeight()   
+    }
+
+    $scope.tableMounted = (scope, element) =>{
         window.addEventListener('resize', setWidthHeight)
+    }
+
+    $scope.tableDestroy = (scope, element) =>{
         scope.beforeDestroy = () => window.removeEventListener('resize', setWidthHeight)
     }
-   
+
     $scope.column2 = [
         {
             title: '',
