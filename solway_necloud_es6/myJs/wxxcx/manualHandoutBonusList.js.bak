@@ -127,10 +127,13 @@ ajaxData({
     
 })('manualHandoutBonusListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
     $scope.export = () =>{
-        $scope.bonusExportExcel.getData({
-            dateStr:new Date().Format("yyyy-MM"),
-        }).then(res =>{
-           console.log(res)
-        })
+        let dateStr = new Date().Format("yyyy-MM");
+        let url = window.baseUrl?window.baseUrl:'/NECloud'
+        window.open(url+'/wxa/export/bonus.htm?dateStr='+dateStr)
+        // $scope.bonusExportExcel.getData({
+        //     dateStr:new Date().Format("yyyy-MM"),
+        // }).then(res =>{
+        //    console.log(res)
+        // })
     }
 })
