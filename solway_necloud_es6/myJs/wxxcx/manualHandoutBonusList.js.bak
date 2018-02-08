@@ -117,9 +117,20 @@ ajaxData({
         name:'GETBonusReciever',
         data:{},
         later:true
+    },
+    bonusExportExcel:{
+        name:'GETExportBonus',
+        data:{},
+        later:true
     }
 },{
     
 })('manualHandoutBonusListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
-
+    $scope.export = () =>{
+        $scope.bonusExportExcel.getData({
+            dateStr:new Date().Format("yyyy-MM"),
+        }).then(res =>{
+           console.log(res)
+        })
+    }
 })
