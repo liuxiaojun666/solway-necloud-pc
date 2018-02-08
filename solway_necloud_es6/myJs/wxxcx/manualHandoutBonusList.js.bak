@@ -126,14 +126,29 @@ ajaxData({
 },{
     
 })('manualHandoutBonusListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
+    $(".dist-datetime-start").datetimepicker({
+        language : 'zh-CN',
+        format: 'yyyy-mm-dd hh:ii',
+        autoclose:true,
+        todayBtn : true,
+        pickerPosition : "bottom-left"
+    }).on("click",function(){
+        $(".dist-datetime-start").datetimepicker("setEndDate",$("#endTime").val())
+    });
+    
+    $(".dist-datetime-end").datetimepicker({
+        language : 'zh-CN',
+        format: 'yyyy-mm-dd hh:ii',
+        autoclose:true,
+        todayBtn : true,
+        pickerPosition : "bottom-left"
+    }).on("click",function(){
+        $(".dist-datetime-end").datetimepicker("setStartDate",$("#startTime").val())
+    });
     $scope.export = () =>{
-        let dateStr = new Date().Format("yyyy-MM");
+        let startDate = $("#startTime").val()
+        let endDate = $("#endTime").val()
         let url = window.baseUrl?window.baseUrl:'/NECloud'
-        window.open(url+'/wxa/export/bonus.htm?dateStr='+dateStr)
-        // $scope.bonusExportExcel.getData({
-        //     dateStr:new Date().Format("yyyy-MM"),
-        // }).then(res =>{
-        //    console.log(res)
-        // })
+        window.open(url+'/wxa/export/bonus.htm?startDateStr='+startDate+"&endDateStr="+endDate)
     }
 })
