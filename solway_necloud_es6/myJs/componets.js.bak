@@ -132,7 +132,7 @@ app.directive('dropDown', ['myAjaxData', myAjaxData => ({
     controller($scope) {
         $scope.onSelect = (value) => {
             $scope.selected = value
-            $scope.updated && $scope.updated()
+            $scope.updated && $scope.updated(value)
         }
     }
 })])
@@ -472,20 +472,22 @@ app.directive('commonChartBar', ['myAjaxData', (myAjaxData) => ({
     scope: {
         width: '=',
         height: '=',
-        xName: '@',
-        yName: '@',
+        xName: '=',
+        yName: '=',
         y: '=',
         data: '=',
         colors: '=',
-        detail: '='
     },
 
     link($scope, $element, $attrs) {
         const setWidthHeight = () => {
             $($element).width($scope.width).height($scope.height)
         }
-        setWidthHeight()
-        let myChart = echarts.init($element[0])
+        let myChart
+        setTimeout(() => {
+            setWidthHeight()
+            myChart = echarts.init($element[0])
+        }, 0);
         const resizeFun = async () => {
             await myAjaxData.timeout(0)
             setWidthHeight()
@@ -498,66 +500,71 @@ app.directive('commonChartBar', ['myAjaxData', (myAjaxData) => ({
             myChart = null
         })
 
-        const option = {
-            tooltip: {},
-            grid: {
-                top: '40',
-                left: '20',
-                right: '60',
-                bottom: '20',
-                containLabel: true
-            },
-            xAxis: {
-                name: $scope.xName || '',
-                type: 'value',
-                splitNumber: 3,
-                axisLine: {
-                    lineStyle: {
-                        color: '#999'
-                    }
+        $scope.$watch('data', (newValue, oldValue) => {
+            if (!newValue) return
+            if (Object.is(newValue, oldValue)) return
+            const option = {
+                tooltip: {},
+                grid: {
+                    top: '60',
+                    left: '20',
+                    right: '60',
+                    bottom: '20',
+                    containLabel: true
                 },
-                axisTick: {
-                    show: false
-                }
-            },
-            yAxis: {
-                name: $scope.yName,
-                type: 'category',
-                axisLine: {
-                    lineStyle: {
-                        color: '#999'
-                    }
-                },
-                axisTick: {
-                    show: false
-                },
-                data: $scope.y
-            },
-            series: [
-                {
-                    type: 'bar',
-                    barWidth: '15',
-                    label: {
-                        normal: {
-                            show: true,
-                            position: 'right',
-                            textStyle: {
-                                color: $scope.colors[$scope.colors.length - 1]
-                            }
-                        },
-                    },
-                    data: $scope.data.map((value, i, arr) => ({
-                        value,
-                        itemStyle: {
-                            normal: {
-                                color: $scope.colors[(value / Math.max(...arr) * ($scope.colors.length - 1)).toFixed()],
-                            }
+                xAxis: {
+                    name: $scope.xName || '',
+                    type: 'value',
+                    splitNumber: 3,
+                    axisLine: {
+                        lineStyle: {
+                            color: '#999'
                         }
-                    }))
+                    },
+                    axisTick: {
+                        show: false
+                    }
                 },
-            ]
-        }
-        myChart.setOption(option)
+                yAxis: {
+                    name: $scope.yName,
+                    type: 'category',
+                    axisLine: {
+                        lineStyle: {
+                            color: '#999'
+                        }
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    data: $scope.y
+                },
+                series: [
+                    {
+                        type: 'bar',
+                        barWidth: '15',
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'right',
+                                textStyle: {
+                                    color: $scope.colors[$scope.colors.length - 1]
+                                }
+                            },
+                        },
+                        data: $scope.data.map((value, i, arr) => ({
+                            value,
+                            itemStyle: {
+                                normal: {
+                                    color: $scope.colors[(value / Math.max(...arr) * ($scope.colors.length - 1)).toFixed()],
+                                }
+                            }
+                        }))
+                    },
+                ]
+            }
+            myChart.setOption(option)
+        })
+        
 
 
     }
