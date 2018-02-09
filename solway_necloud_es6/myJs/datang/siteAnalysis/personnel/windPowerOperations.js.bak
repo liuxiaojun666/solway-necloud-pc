@@ -1,7 +1,8 @@
 app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
     restrict: 'E',
     scope: {
-        detail: '='
+        name: '=',
+        data: '='
     },
 
     link($scope, $element, $attrs) {
@@ -14,207 +15,126 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
         window.addEventListener('resize', () => {
             setWidthHeight()
             myChart.resize()
-        })
-
+        });
         $ocLazyLoad.load([
-            document.getElementById('routerJS').getAttribute('param')
-            + '/vendor/echarts/china.js',
+            window.baseUrl + '/vendor/echarts/china.js',
         ]).then(() => {
-            const option = {
-                tooltip: {
-                    trigger: 'item',
-                },
-                series: [{
-                    name: '检修台次',
-                    type: 'map',
-                    mapType: 'china',
-                    roam: true,
-                    label: {
-                        emphasis: {
-                            show: false
-                        }
+            $scope.$watch('data', (newValue, oldValue) => {
+                if (!newValue) return
+                const data = $scope.data.names.map((v, i) => ({ name: v, value: $scope.data.values[i] }));
+                const option = {
+                    tooltip: {
+                        trigger: 'item',
                     },
-                    itemStyle: {
-                        normal: {
-                            borderWidth: .5,//区域边框宽度
-                            borderColor: '#fff',//区域边框颜色
-                            areaColor: "#60b4a4",//区域颜色
-                        },
-                        emphasis: {
-                            borderWidth: .5,//区域边框宽度
-                            borderColor: '#fff',//区域边框颜色
-                            areaColor: "#60b4a4",//区域颜色
-                        }
-                    },
-                    data: [
-                        ...[
-                            { name: '山西', value: 1 },
-                            { name: '新疆', value: 3 },
-                            { name: '内蒙古', value: 6 },
-                            { name: '北京', value: 100 },
-                            { name: '广东', value: 16 },
-                        ].map(v => ({
-                            name: v.name,
-                            value: v.value,
-                            selected: false,
-                            itemStyle: {
-                                normal: {
-                                    areaColor: "#20668e",//区域颜色
-                                },
-                                emphasis: {
-                                    areaColor: "#20668e",//区域颜色
-                                }
-                            },
-                            label: {
-                                normal: {
-                                    formatter() {
-                                        return v.value
-                                    },
-                                    show: true,
-                                    textStyle: {
-                                        color: '#fff',
-                                        fontSize: 9,
-                                    }
-                                }
-                            },
-                        })),
-                        {
-                            name: '南海诸岛',
-                            itemStyle: {
-                                normal: {
-                                    opacity: 0
-                                }
-                            },
-                            label: {
-                                normal: {
-                                    show: false
-                                }
-                            }
-                        }
-                    ],
-                    zlevel: 3
-                }]
-            }
-            myChart.setOption(option)
-        })
-
-    }
-})])
-
-app.directive('wpoChartBar', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
-    restrict: 'E',
-    scope: {
-        detail: '='
-    },
-
-    link($scope, $element, $attrs) {
-        const setWidthHeight = () => {
-            $($element).width(400).height(((window.innerHeight - 410) < 195) ? 195 : window.innerHeight - 410)
-        }
-        setWidthHeight()
-        const myChart = echarts.init($element[0])
-        window.addEventListener('resize', () => {
-            setWidthHeight()
-            myChart.resize()
-        })
-
-        const option = {
-            tooltip: {},
-            grid: {
-                left: '20',
-                right: '60',
-                bottom: '20',
-                containLabel: true
-            },
-            xAxis: {
-                type: 'value',
-                splitNumber: 3,
-                axisLine: {
-                    lineStyle: {
-                        color: '#999'
-                    }
-                },
-                axisTick: {
-                    show: false
-                }
-            },
-            yAxis: {
-                name: '省份',
-                type: 'category',
-                axisLine: {
-                    lineStyle: {
-                        color: '#999'
-                    }
-                },
-                axisTick: {
-                    show: false
-                },
-                data: ['山东', '福建', '新疆', '内蒙古', '黑龙江', '贵州']
-            },
-            series: [
-                {
-                    type: 'bar',
-                    barWidth: '15',
-                    label: {
-                        normal: {
-                            show: true,
-                            position: 'right',
-                            textStyle: {
-                                color: '#2adc49'
+                    series: [{
+                        name: $scope.name,
+                        type: 'map',
+                        mapType: 'china',
+                        roam: true,
+                        label: {
+                            emphasis: {
+                                show: false
                             }
                         },
-                    },
-                    data: [18203, 123489, 229034, 304970, 531744, 630230].map((value, i, arr) => ({
-                        value,
                         itemStyle: {
                             normal: {
-                                color: ['#d3f0db', '#bceec8', '#a2edb2', '#85eb9d', '#5de77b', '#2adc49'][(value / Math.max(...arr) * 5).toFixed()],
+                                borderWidth: .5,//区域边框宽度
+                                borderColor: '#fff',//区域边框颜色
+                                areaColor: "#60b4a4",//区域颜色
+                            },
+                            emphasis: {
+                                borderWidth: .5,//区域边框宽度
+                                borderColor: '#fff',//区域边框颜色
+                                areaColor: "#60b4a4",//区域颜色
                             }
-                        }
-                    }))
-                },
-            ]
-        }
-        myChart.setOption(option)
+                        },
+                        data: [
+                            ...data.map(v => ({
+                                name: v.name,
+                                value: v.value,
+                                selected: false,
+                                itemStyle: {
+                                    normal: {
+                                        areaColor: "#20668e",//区域颜色
+                                    },
+                                    emphasis: {
+                                        areaColor: "#20668e",//区域颜色
+                                    }
+                                },
+                                label: {
+                                    normal: {
+                                        formatter() {
+                                            return v.value
+                                        },
+                                        show: true,
+                                        textStyle: {
+                                            color: '#fff',
+                                            fontSize: 9,
+                                        }
+                                    }
+                                },
+                            })),
+                            {
+                                name: '南海诸岛',
+                                itemStyle: {
+                                    normal: {
+                                        opacity: 0
+                                    }
+                                },
+                                label: {
+                                    normal: {
+                                        show: false
+                                    }
+                                }
+                            }
+                        ],
+                        zlevel: 3
+                    }]
+                }
+                myChart.setOption(option)
+            })
 
+        })
 
     }
 })])
 
 ajaxData({
-    ...[{
-        name: 'bar1',
-        apiName: 'GETdeviceAnalysisRankingBrand',
-        indicators: 'FAULTRATE'
-    }, {
-        // 设备台数
-        name: 'bar2',
-        apiName: 'GETdeviceAnalysisRankingBrand',
-        indicators: 'DEVICECOUNT'
-    }, {
-        // 各省份应用数据
-        name: 'bar3',
-        apiName: 'GETdeviceAnalysisRankingProvince',
-        indicators: 'DEVICECOUNT'
-    }, {
-        // 各省份平均故障率排名
-        name: 'bar4',
-        apiName: 'GETdeviceAnalysisRankingProvince',
-        indicators: 'FAULTRATE'
-    }].map(v => ({
+    ...[
+        {
+            name: 'repairCount',
+            apiName: 'GETrepairCount',
+        },
+        {
+            name: 'repairHours',
+            apiName: 'GETrepairHours',
+            later: true
+        },
+        {
+            name: 'repairSuccessRate',
+            apiName: 'GETrepairSuccessRate',
+            later: true
+        },
+        {
+            name: 'repairRespHours',
+            apiName: 'GETrepairRespHours',
+            later: true
+        },
+        {
+            name: 'repairNum',
+            apiName: 'GETrepairNum',
+            later: true
+        }
+    ].map(v => ({
         [v.name]: {
             name: v.apiName,
             data: {
                 powerType: 'PV',
                 idType: 1,
-                ids: 137,
-                indicators: v.indicators,
                 timeType: 'ACCUM',
-                dateStr: (new Date).Format('yyyy-MM-dd'),
-                months: null,
-                yearDiff: null,
-                num: null
-            }
+                dateStr: (new Date).Format('yyyy-MM-dd')
+            },
+            later: v.later
         }
     })).reduce((obj, cur) => ({ ...obj, ...cur })),
     province: {
@@ -229,12 +149,89 @@ ajaxData({
         data: {
             powerType: 'PV',
             idType: '1',
-            timeType: 'MONTH',
+            timeType: 'ACCUM',
             dateStr: (new Date).Format('yyyy-MM-dd')
         }
     },
 }, {
     })('windPowerOperationsCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-        $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
-        $scope.dateTime2 = new Date
-    })
+        $scope.dateTime1 = new Date; //选择月日期
+        $scope.dateTime2 = new Date; //选择年日期
+        $scope.timeType = 'ACCUM';   //默认查累计
+        $scope.idType = 1;           //默认范围 集团  1:集团|2:省份|3:电站
+        $scope.ids = null;           //默认集团 不传ids 
+        $scope.currDataType = 'repairCount'; //默认查询检修台次
+        $scope.allDataType = {       //所有查询类型
+            repairCount: '检修台次',
+            repairHours: '检修时间',
+            repairSuccessRate: '检修成功率',
+            repairRespHours: '检修响应时间',
+            repairNum: '检修台数',
+        };
+
+        // 所有省份  + 集团
+        $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
+
+        $scope.repairCount.promise.then(res => $scope.rankingData = res.body)
+        // 改变  范围 执行 函数  重新请求 数据 汇总
+        $scope.changeIds = value => {
+            if (value === $scope.ids) return;
+            const isJT = value == 1; // 选择的是否是集团
+            const idType = $scope.idType = isJT ? 1 : 2;
+            const ids = $scope.ids = isJT ? null : value;
+            $scope.repairTotal.getData({ idType, ids });
+            $scope[$scope.currDataType].getData({ idType, ids }).then(res => $scope.rankingData = res.body);
+        };
+
+
+        // 改变时间维度 执行 func update all data
+        $scope.changeTimeType = value => {
+            if ($scope.timeType === value) return;
+            const timeType = $scope.timeType = value;
+            const dateStr = getDateStr();
+            $scope.dateStr = dateStr;
+            $scope.repairTotal.getData({ timeType, dateStr });
+            $scope[$scope.currDataType].getData({ timeType, dateStr }).then(res => $scope.rankingData = res.body);
+        };
+
+        // 改变查询时间  执行函数 
+        $scope.changeDateTime = async () => {
+            await myAjaxData.timeout(0);
+            const dateStr = getDateStr();
+            if (dateStr === $scope.dateStr) return;
+            $scope.dateStr = dateStr;
+            $scope.repairTotal.getData({ dateStr });
+            $scope[$scope.currDataType].getData({ dateStr }).then(res => $scope.rankingData = res.body);
+        };
+
+
+        // 改变 查询类型  执行 函数 重新请求  类型 排名
+        $scope.changeDataType = value => {
+            if (value === $scope.currDataType) return;
+            $scope.currDataType = value;
+            const { idType, ids, timeType, currDataType } = $scope;
+            $scope[currDataType].getData({
+                powerType: 'PV',
+                idType,
+                ids,
+                timeType,
+                dateStr: getDateStr()
+            }).then(res => $scope.rankingData = res.body);
+        };
+
+        // 根据时间维度  判断 需要 使用的 时间 字符串
+        function getDateStr() {
+            if ($scope.timeType === 'MONTH') return $scope.dateTime1.Format('yyyy-MM-dd');
+            if ($scope.timeType === 'YEAR') return $scope.dateTime2.Format('yyyy-MM-dd');
+            return (new Date).Format('yyyy-MM-dd');
+        }
+
+        const getWindowHeight = () => {
+            $scope.windowHeight = document.body.clientHeight;
+            $scope.windowWidth = document.body.clientWidth;
+            $scope.$apply();
+        };
+        setTimeout(getWindowHeight, 0);
+        window.addEventListener('resize', getWindowHeight);
+        $scope.$on('$destroy', () => window.removeEventListener('resize', getWindowHeight));
+    });
