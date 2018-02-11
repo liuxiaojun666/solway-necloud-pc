@@ -150,7 +150,7 @@ ajaxData({
         [v.name]: {
             name: v.apiName,
             data: {
-                powerType: 'PV',
+                powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
                 idType: 1,
                 timeType: 'ACCUM',
                 dateStr: (new Date).Format('yyyy-MM-dd')
@@ -168,7 +168,7 @@ ajaxData({
     repairTotal: {
         name: 'GETrepairTotal',
         data: {
-            powerType: 'PV',
+            powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
             idType: '1',
             timeType: 'ACCUM',
             dateStr: (new Date).Format('yyyy-MM-dd')
@@ -232,7 +232,7 @@ ajaxData({
             $scope.currDataType = value;
             const { idType, ids, timeType, currDataType } = $scope;
             $scope[currDataType].getData({
-                powerType: 'PV',
+                powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
                 idType,
                 ids,
                 timeType,
