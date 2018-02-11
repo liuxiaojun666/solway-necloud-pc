@@ -1,80 +1,171 @@
 ajaxData({
-    pageList: {
-        name: 'GETanalysisPage',
-        data: {
-            pageIndex:0,
-            pageSize:10,
-            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
-            endDate: (new Date).Format('yyyy-MM-dd')
+    ...[
+        {
+            name: 'repairCount',
+            apiName: 'GETRankingRepairCount',
+        },
+        {
+            name: 'repairHours',
+            apiName: 'GETRankingRepairHours',
+            later: true
+        },
+        {
+            name: 'repairSuccessRate',
+            apiName: 'GETRankingRepairSuccessRate',
+            later: true
+        },
+        {
+            name: 'repairRespHours',
+            apiName: 'GETRankingRepairResHours',
+            later: true
+        },
+        {
+            name: 'repairNum',
+            apiName: 'GETRankingRepairNum',
+            later: true
         }
-    },
-    detail: {
-        name: 'GETselectEqPaintingData',
-        later: true
-    },
-    deviceType: {
-        name: 'GETgetDeviceType',
-        data: {}
+    ].map(v => ({
+        [v.name]: {
+            name: v.apiName,
+            data: {
+                powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
+                idType: 1,
+                timeType: 'ACCUM',
+                dateStr: (new Date).Format('yyyy-MM-dd'),
+                pageIndex: 0,
+                pageSize: 10
+            },
+            later: v.later
+        }
+    })).reduce((obj, cur) => ({ ...obj, ...cur })),
+    province: {
+        name: 'POSTSelectProvince',
+        data: {
+            parentId: 1,
+            treeLevel: 1
+        }
     }
-},{
-})('fengyunListCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-    $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
-    $scope.dateTime2 = new Date
+}, {
+    })('fengyunListCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+        $scope.dateTime1 = new Date; //选择月日期
+        $scope.dateTime2 = new Date; //选择年日期
+        $scope.timeType = 'ACCUM';   //默认查累计
 
-    $scope.datasource = (new Array(10)).fill('').map((v, i) => ({
-        name: ['习近平','李克强','栗战书','汪洋','王沪宁','赵乐际','韩正'][i],
-        phone: '1' + (Math.random() + '').slice(-10),
-        email: (Math.random() + '').slice(-10) + '@qq.com',
-        company: '大唐北京公司',
-        ranking: i + 1
-    }))
+        $scope.idType = 1;           //默认范围 集团  1:集团|2:省份|3:电站
+        $scope.ids = null;           //默认集团 不传ids 
 
-    $scope.column = [
-        {
-            title: null,
-            dataIndex: 'ranking',
-            width: '50px',
-            align: 'center',
-            render (text, item, index) {
-                return `<span class="jiangbei jiangbei-${[1, 2, 3][text - 1]}"></span>`
-            }
-        },
-        {
-            title: null,
-            dataIndex: 'name',
-            width: '150px',
-            align: 'left',
-            render (text) {
-                return '<span class="icon-user"></span> ' + (text || '')
-            }
-        },
-        {
-            title: null,
-            dataIndex: 'company',
-            width: '200px',
-            align: 'left',
-            render (text) {
-                return '<span class="fa fa-building-o"></span> ' + text
-            }
-        },
-        {
-            title: null,
-            dataIndex: 'phone',
-            width: '150px',
-            align: 'center',
-            render (text) {
-                return '<span class="fa fa-phone"></span> ' + text
-            }
-        },
-        {
-            title: null,
-            dataIndex: 'email',
-            width: '150px',
-            align: 'center',
-            render (text) {
-                return '<span class="fa fa-envelope-o"></span> ' + text
-            }
-        },
-    ]
+        $scope.currDataType = 'repairCount'; //默认查询检修台次
+        $scope.allDataType = {       //所有查询类型
+            repairCount: '检修台次',
+            repairHours: '检修时间',
+            repairSuccessRate: '检修成功率',
+            repairRespHours: '检修响应时间',
+            repairNum: '检修台数',
+        };
 
-})
+        // 所有省份  + 集团
+        $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
+        $scope.repairCount.promise.then(res => { 
+            assignFun(res)
+        });
+
+        // 改变时间维度 执行 func update all data
+        $scope.changeTimeType = value => {
+            if ($scope.timeType === value) return;
+            const timeType = $scope.timeType = value;
+            const dateStr = getDateStr();
+            $scope.dateStr = dateStr;
+            $scope[$scope.currDataType].getData({ timeType, dateStr }).then(res => {
+                assignFun(res)
+            });
+        };
+
+        // 改变 查询类型  执行 函数 重新请求  类型 排名
+        $scope.changeDataType = value => {
+            if (value === $scope.currDataType) return;
+            $scope.currDataType = value;
+            const { idType, ids, timeType, currDataType } = $scope;
+            $scope[currDataType].getData({
+                powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
+                idType,
+                ids,
+                timeType,
+                dateStr: getDateStr(),
+                pageIndex: 0,
+                pageSize: 10
+            }).then(res => {
+                assignFun(res)
+            });
+        };
+
+        // 改变  范围 执行 函数  重新请求 数据 汇总
+        $scope.changeIds = value => {
+            if (value === $scope.ids) return;
+            const isJT = value == 1; // 选择的是否是集团
+            const idType = $scope.idType = isJT ? 1 : 2;
+            const ids = $scope.ids = isJT ? null : value;
+            $scope[$scope.currDataType].getData({ idType, ids }).then(res =>{
+                assignFun(res)
+            });
+        };
+
+        function assignFun(res){
+            $scope.datasource = res.body
+            $scope.currentPageList = $scope[$scope.currDataType].getData
+        }
+        // 根据时间维度  判断 需要 使用的 时间 字符串
+        function getDateStr() {
+            if ($scope.timeType === 'MONTH') return $scope.dateTime1.Format('yyyy-MM');
+            if ($scope.timeType === 'YEAR') return $scope.dateTime2.Format('yyyy');
+            return (new Date).Format('yyyy-MM-dd');
+        }
+
+        $scope.column = [
+            {
+                title: null,
+                dataIndex: "",
+                width: '50px',
+                align: 'center',
+                render(text, item, index) {
+                    return `<span class="jiangbei jiangbei-${[1, 2, 3][text - 1]}">${index}</span>`
+                }
+            },
+            {
+                title: null,
+                dataIndex: 'realName',
+                width: '150px',
+                align: 'left',
+                render(text) {
+                    return '<span class="icon-user"></span> ' + (text || '')
+                }
+            },
+            {
+                title: null,
+                dataIndex: 'companyName',
+                width: '200px',
+                align: 'left',
+                render(text) {
+                    return '<span class="fa fa-building-o"></span> ' + text
+                }
+            },
+            {
+                title: null,
+                dataIndex: 'tel',
+                width: '150px',
+                align: 'center',
+                render(text) {
+                    return '<span class="fa fa-phone"></span> ' + text
+                }
+            },
+            {
+                title: null,
+                dataIndex: 'email',
+                width: '150px',
+                align: 'center',
+                render(text) {
+                    return '<span class="fa fa-envelope-o"></span> ' + text
+                }
+            },
+        ]
+
+    })
