@@ -138,7 +138,12 @@ app.directive('dropDown', ['myAjaxData', myAjaxData => ({
 })])
 
 /**
- * 该过滤器
+ * 该过滤器 值为null 的字符串
+ */
+app.filter('filter_null', () => text => text == null ? '-' : text)
+
+/**
+ * 该过滤器 过滤html 单标签不能绑定的问题
  */
 app.filter('to_trusted', ['$sce', $sce => v => $sce.trustAsHtml(v)])
 

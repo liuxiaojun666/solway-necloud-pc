@@ -2,26 +2,49 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
     restrict: 'E',
     scope: {
         name: '=',
-        data: '='
+        data: '=',
+        allIds: '=',
+        ids: '='
     },
 
     link($scope, $element, $attrs) {
+        const filterName = v => {
+            let name = v.replace("省", "");
+            name = name.replace("壮族自治区", "");
+            name = name.replace("回族自治区", "");
+            name = name.replace("维吾尔自治区", "");
+            name = name.replace("特别行政区", "");
+            name = name.replace("自治区", "");
+            return name;
+        };
         const setWidthHeight = () => {
             $($element).width(((window.innerWidth - 630) < 300) ? 300 : window.innerWidth - 630)
-                .height(((window.innerHeight - 145) < 470) ? 470 : window.innerHeight - 145)
-        }
-        setWidthHeight()
-        const myChart = echarts.init($element[0])
+                .height(((window.innerHeight - 145) < 470) ? 470 : window.innerHeight - 145);
+        };
+        setWidthHeight();
+        const myChart = echarts.init($element[0]);
         window.addEventListener('resize', () => {
-            setWidthHeight()
-            myChart.resize()
+            setWidthHeight();
+            myChart.resize();
         });
         $ocLazyLoad.load([
             window.baseUrl + '/vendor/echarts/china.js',
         ]).then(() => {
             $scope.$watch('data', (newValue, oldValue) => {
                 if (!newValue) return
-                const data = $scope.data.names.map((v, i) => ({ name: v, value: $scope.data.values[i] }));
+                let total = null;
+                const data = $scope.data.names.map((v, i) => {
+                    const value = $scope.data.values[i];
+                    if (!Object.is(null, value)) total += value;
+                    return {
+                        name: filterName(v),
+                        value
+                    };
+                });
+                data.push({
+                    name: filterName($scope.allIds[$scope.ids] || '中国'),
+                    value: total
+                });
                 const option = {
                     tooltip: {
                         trigger: 'item',
@@ -90,14 +113,12 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
                         ],
                         zlevel: 3
                     }]
-                }
-                myChart.setOption(option)
-            })
-
-        })
-
+                };
+                myChart.setOption(option, true);
+            });
+        });
     }
-})])
+})]);
 
 ajaxData({
     ...[
