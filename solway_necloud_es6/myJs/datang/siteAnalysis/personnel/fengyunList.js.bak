@@ -69,6 +69,18 @@ ajaxData({
             assignFun(res)
         });
 
+        // 改变查询时间 
+        $scope.changeDateTime = async () => {
+            await myAjaxData.timeout(0);
+            const dateStr = getDateStr();
+            if (dateStr === $scope.dateStr) return;
+            $scope.dateStr = dateStr;
+            const timeType = $scope.timeType;
+            $scope[$scope.currDataType].getData({ timeType, dateStr }).then(res => {
+                assignFun(res)
+            });
+        };
+
         // 改变时间维度 执行 func update all data
         $scope.changeTimeType = value => {
             if ($scope.timeType === value) return;
