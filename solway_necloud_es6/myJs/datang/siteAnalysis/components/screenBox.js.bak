@@ -41,7 +41,7 @@ app.directive('screenBox', ['$timeout', ($timeout) => ({
         <div class="screenBox" ng-show="showScreenBox">
             <div class="line-text"><span>投产时间&nbsp;&gt;&nbsp;</span><input type="number" ng-model="time"/><span>年</span></div>
             <div class="line-text"><span>机型台数&nbsp;&gt;&nbsp;</span><input type="number" ng-model="number"/><span>台</span></div>
-            <div ng-show="true" class="menology clearfix">
+            <div ng-show="timeType !== 'ACCUM'" class="menology clearfix">
                 <span ng-click="selectMonth($index)" ng-repeat="item in ['全部', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']">{{ item }}</span>
             </div>
             <div class="btn-grup clearfix">
@@ -94,8 +94,8 @@ app.directive('screenBox', ['$timeout', ($timeout) => ({
          * 点击确定  
          */
         $scope.ok = () => {
-            $scope.$parent.time = $scope.time
-            $scope.$parent.number = $scope.number
+            $scope.$parent.yearDiff = $scope.time
+            $scope.$parent.num = $scope.number
             $scope.$parent.selectedMonth = $scope.selectedMonth
             
             $scope.$parent.isSelected = true
