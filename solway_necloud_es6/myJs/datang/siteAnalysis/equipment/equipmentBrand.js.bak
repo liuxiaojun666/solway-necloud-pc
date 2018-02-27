@@ -9,6 +9,18 @@ ajaxData({
         }
     },
 
+    // 设备数据线性分析
+    lineBrand: {
+        name: 'GETlineBrand',
+        data: {
+            powerType: 'PV',
+            idType: '1',
+            indicators: 'FAULTRATE',
+            timeType: 'ACCUM',
+            dateStr: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+
     // 查询 各品牌 总排名  默认 集团 故障率 总排名
     rankingBrand: {
         name: 'GETrankingBrand',
@@ -83,30 +95,30 @@ ajaxData({
         $scope.rankingBrandCount.getData({ idType, ids, dateStr: getDateStr() });
         $scope.rankingProvince.getData({ idType, ids, dateStr: getDateStr() });
         $scope.rankingProvinceCount.getData({ idType, ids, dateStr: getDateStr() });
+        $scope.lineBrand.getData({ idType, ids, dateStr: getDateStr() });
     };
 
     // 改变 查询类型  执行 函数 重新请求  类型 排名
     $scope.changeDataType = value => {
         if (value === $scope.currDataType) return;
-        $scope.currDataType = value;
-        const { idType, ids, timeType, currDataType } = $scope;
-        // $scope[currDataType].getData({
-        //     powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
-        //     idType,
-        //     ids,
-        //     timeType,
-        //     dateStr: getDateStr()
-        // }).then(res => $scope.rankingData = res.body);
+        const indicators = $scope.currDataType = value;
+
+        $scope.rankingBrand.getData({ indicators, dateStr: getDateStr() });
+        $scope.rankingProvince.getData({ indicators, dateStr: getDateStr() });
+        $scope.lineBrand.getData({ indicators, dateStr: getDateStr() });
     };
 
     // 改变时间维度 执行 func update all data
     $scope.changeTimeType = value => {
         if ($scope.timeType === value) return;
         const timeType = $scope.timeType = value;
-        const dateStr = getDateStr();
-        $scope.dateStr = dateStr;
-        // $scope.repairTotal.getData({ timeType, dateStr });
-        // $scope[$scope.currDataType].getData({ timeType, dateStr }).then(res => $scope.rankingData = res.body);
+        const dateStr = $scope.dateStr = getDateStr();
+
+        $scope.rankingBrand.getData({ timeType, dateStr });
+        $scope.rankingBrandCount.getData({ timeType, dateStr });
+        $scope.rankingProvince.getData({ timeType, dateStr });
+        $scope.rankingProvinceCount.getData({ timeType, dateStr });
+        $scope.lineBrand.getData({ timeType, dateStr });
     };
 
     // 改变查询时间  执行函数 
@@ -115,8 +127,12 @@ ajaxData({
         const dateStr = getDateStr();
         if (dateStr === $scope.dateStr) return;
         $scope.dateStr = dateStr;
-        // $scope.repairTotal.getData({ dateStr });
-        // $scope[$scope.currDataType].getData({ dateStr }).then(res => $scope.rankingData = res.body);
+
+        $scope.rankingBrand.getData({ dateStr });
+        $scope.rankingBrandCount.getData({ dateStr });
+        $scope.rankingProvince.getData({ dateStr });
+        $scope.rankingProvinceCount.getData({ dateStr });
+        $scope.lineBrand.getData({ dateStr });
     };
 
     // 条件过滤  改变  投产时间  投产 台数  投产月份  执行 函数
@@ -128,13 +144,14 @@ ajaxData({
         $scope.rankingBrandCount.getData({ yearDiff, num, months, dateStr: getDateStr() });
         $scope.rankingProvince.getData({ yearDiff, num, months, dateStr: getDateStr() });
         $scope.rankingProvinceCount.getData({ yearDiff, num, months, dateStr: getDateStr() });
+        $scope.lineBrand.getData({ yearDiff, num, months, dateStr: getDateStr() });
     };
 
 
     // 根据时间维度  判断 需要 使用的 时间 字符串
     function getDateStr() {
-        if ($scope.timeType === 'MONTH') return $scope.dateTime1.Format('yyyy-MM-dd');
-        if ($scope.timeType === 'YEAR') return $scope.dateTime2.Format('yyyy-MM-dd');
+        if ($scope.timeType === 'MONTH') return $scope.dateTime1.Format('yyyy-MM');
+        if ($scope.timeType === 'YEAR') return $scope.dateTime2.Format('yyyy');
         return (new Date).Format('yyyy-MM-dd');
     }
 
