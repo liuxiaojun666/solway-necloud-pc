@@ -72,23 +72,71 @@ ajaxData({
     // 所有省份  + 集团
     $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
 
-    // 改变  范围 执行 函数  重新请求 排名
+    // 改变  范围 执行 函数  重新请求 所有
     $scope.changeIds = value => {
         if (value === $scope.ids) return;
         const isJT = value == 1; // 选择的是否是集团
         const idType = $scope.idType = isJT ? 1 : 2;
         const ids = $scope.ids = isJT ? null : value;
-        // $scope.repairTotal.getData({ idType, ids });
-        // $scope[$scope.currDataType].getData({ idType, ids }).then(res => $scope.rankingData = res.body);
+        
+        $scope.rankingBrand.getData({ idType, ids, dateStr: getDateStr() });
+        $scope.rankingBrandCount.getData({ idType, ids, dateStr: getDateStr() });
+        $scope.rankingProvince.getData({ idType, ids, dateStr: getDateStr() });
+        $scope.rankingProvinceCount.getData({ idType, ids, dateStr: getDateStr() });
+    };
+
+    // 改变 查询类型  执行 函数 重新请求  类型 排名
+    $scope.changeDataType = value => {
+        if (value === $scope.currDataType) return;
+        $scope.currDataType = value;
+        const { idType, ids, timeType, currDataType } = $scope;
+        // $scope[currDataType].getData({
+        //     powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
+        //     idType,
+        //     ids,
+        //     timeType,
+        //     dateStr: getDateStr()
+        // }).then(res => $scope.rankingData = res.body);
     };
 
     // 改变时间维度 执行 func update all data
     $scope.changeTimeType = value => {
         if ($scope.timeType === value) return;
         const timeType = $scope.timeType = value;
+        const dateStr = getDateStr();
+        $scope.dateStr = dateStr;
+        // $scope.repairTotal.getData({ timeType, dateStr });
+        // $scope[$scope.currDataType].getData({ timeType, dateStr }).then(res => $scope.rankingData = res.body);
+    };
+
+    // 改变查询时间  执行函数 
+    $scope.changeDateTime = async () => {
+        await myAjaxData.timeout(0);
+        const dateStr = getDateStr();
+        if (dateStr === $scope.dateStr) return;
+        $scope.dateStr = dateStr;
+        // $scope.repairTotal.getData({ dateStr });
+        // $scope[$scope.currDataType].getData({ dateStr }).then(res => $scope.rankingData = res.body);
+    };
+
+    // 条件过滤  改变  投产时间  投产 台数  投产月份  执行 函数
+    $scope.filterData = () => {
+        const { yearDiff = 0, num = 0, selectedMonth = [] } = $scope;
+        const months = selectedMonth.join(',') || null;
+
+        $scope.rankingBrand.getData({ yearDiff, num, months, dateStr: getDateStr() });
+        $scope.rankingBrandCount.getData({ yearDiff, num, months, dateStr: getDateStr() });
+        $scope.rankingProvince.getData({ yearDiff, num, months, dateStr: getDateStr() });
+        $scope.rankingProvinceCount.getData({ yearDiff, num, months, dateStr: getDateStr() });
     };
 
 
+    // 根据时间维度  判断 需要 使用的 时间 字符串
+    function getDateStr() {
+        if ($scope.timeType === 'MONTH') return $scope.dateTime1.Format('yyyy-MM-dd');
+        if ($scope.timeType === 'YEAR') return $scope.dateTime2.Format('yyyy-MM-dd');
+        return (new Date).Format('yyyy-MM-dd');
+    }
 
 
     const getWindowHeight = () => {
