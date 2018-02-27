@@ -56,26 +56,26 @@ app.directive('elChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad)
     }
 })])
 
-
-
-
 ajaxData({
     pageList: {
-        name: 'GETanalysisPage',
+        name: 'GETExpertLibrary',
         data: {
+            powerType: 'PV',
+            idType: 1,
             pageIndex:0,
-            pageSize:10,
-            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
-            endDate: (new Date).Format('yyyy-MM-dd')
+            pageSize:10
         }
     },
     detail: {
         name: 'GETselectEqPaintingData',
         later: true
     },
-    deviceType: {
-        name: 'GETgetDeviceType',
-        data: {}
+    province: {
+        name: 'POSTSelectProvince',
+        data: {
+            parentId: 1,
+            treeLevel: 1
+        }
     }
 },{
     gzName: ['塔筒及基础', '变桨系统', '测风系统', '电控系统', '机械传动系统', '发电机'],
@@ -84,6 +84,36 @@ ajaxData({
 })('expertLibraryCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
     $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
     $scope.dateTime2 = new Date
+
+    $scope.powerType = 'PV';
+    $scope.changePowerType = type => $scope.powerType = type;
+    $scope.idType = 1;
+    $scope.brandIds = [];
+    $scope.faultTypeIds = [];
+    // 所有省份  + 集团
+    $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
+
+    $scope.conditionSearch = () =>{
+        $scope.pageList.getData({
+            powerType: $scope.powerType,
+            idType:$scope.idType,
+            ids:$scope.ids,
+            brandIds:$scope.brandIds,
+            faultTypeIds:$scope.faultTypeIds,
+            keyword:$scope.keyword,
+            pageIndex: 0,
+            pageSize: 10
+        })
+    }
+
+    // 改变  范围 执行 函数  重新请求 数据 汇总
+    $scope.changeIds = value => {
+        if (value === $scope.ids) return;
+        const isJT = value == 1; // 选择的是否是集团
+        $scope.idType = isJT ? 1 : 2;
+        $scope.ids = isJT ? null : value;
+        $scope.conditionSearch();
+    }; 
 
     $scope.showDetails = (a, e) => {
         $('.el-details').show()
