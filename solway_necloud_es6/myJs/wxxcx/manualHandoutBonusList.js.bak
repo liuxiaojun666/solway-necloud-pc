@@ -145,6 +145,18 @@ ajaxData({
     }).on("click",function(){
         $(".dist-datetime-end").datetimepicker("setStartDate",$("#startTime").val())
     });
+
+     $scope.getPageList = () =>{
+        let startDate = $("#startTime").val()
+        let endDate = $("#endTime").val()
+        $scope.pageList.getData({
+            distDateStartStr: startDate,
+            distDateEndStr: endDate,
+            pageIndex: 0,
+            pageSize: 10
+        })
+    }
+    
     $scope.export = () =>{
         let startDate = $("#startTime").val()
         let endDate = $("#endTime").val()

@@ -1,0 +1,52 @@
+//添加、编辑
+app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => {
+    return {
+        restrict: 'E',
+        template: $('#settle-add-temp').html(),
+        replace: true,
+        scope: {
+            pageList:'=',
+           
+        },
+
+        link ($scope, $element, $attrs) {
+
+           
+            $timeout(()=>{
+                $('#result_table').on('click','.icon-note.font16', function () {
+                    
+                        $('#powerIndexModalAdd').modal()
+                })
+
+                $(".settlePowerManageList").on('click','#add-new',function(){
+                    $scope.formData = {}
+                    
+                    $scope.$apply()
+                    $('#powerIndexModalAdd').modal()
+                })
+
+               
+            },0);
+        },
+
+        controller ($scope, $element) {
+            
+        }
+    }
+}])
+ajaxData({
+    pageList: {
+        name: 'GETAutomaticTaskList',
+        data: {
+            pageIndex:0,
+            pageSize:10,
+        }
+    }
+},{
+    statusMap:{'00':"未发布",'01':"已发布",'02':"处理中",'03':"处理未完成",'04':"审核中",'05':"审核通过",'06':"审核未通过",'07':"已完成",'99':"已作废"},
+    passMap : {'0':'不通过','1':'通过'}
+})('settlePowerManageListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
+
+    $scope.titleType = "期数"; //期数、月份
+    
+})
