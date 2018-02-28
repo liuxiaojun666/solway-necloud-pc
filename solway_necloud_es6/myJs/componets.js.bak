@@ -492,13 +492,13 @@ app.directive('commonChartBar', ['myAjaxData', (myAjaxData) => ({
         setTimeout(() => {
             setWidthHeight()
             myChart = echarts.init($element[0])
+            window.addEventListener('resize', resizeFun)
         }, 0);
         const resizeFun = async () => {
             await myAjaxData.timeout(0)
             setWidthHeight()
             myChart.resize()
         }
-        window.addEventListener('resize', resizeFun)
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', resizeFun)
             myChart.dispose()
@@ -590,22 +590,27 @@ app.directive('commonChartPie', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLa
     },
     link($scope, $element, $attrs) {
         const setWidthHeight = () => {
-            $($element).width($scope.width).height($scope.height)
+            $($element).height($scope.height)
         }
-        setWidthHeight()
-        let myChart = echarts.init($element[0])
+        let myChart
+        setTimeout(() => {
+            setWidthHeight()
+            myChart = echarts.init($element[0])
+            window.addEventListener('resize', resizeFun)
+        }, 0);
         const resizeFun = async () => {
             await myAjaxData.timeout(0)
             setWidthHeight()
             myChart.resize()
         }
-        window.addEventListener('resize', resizeFun)
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', resizeFun)
             myChart.dispose()
             myChart = null
         })
-        const renderChart = () => {
+        $scope.$watch('chartData', (newValue, oldValue) => {
+            if (!newValue) return
+            if (Object.is(newValue, oldValue)) return
             const option = {
                 tooltip: {
                     trigger: 'item',
@@ -616,9 +621,9 @@ app.directive('commonChartPie', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLa
                     center: ['50%', '50%'],
                     radius: ['45%', '70%'],
                     type: 'pie',
-                    data: $scope.chartData.map((v, i) => ({
-                        name: v.name,
-                        value: v.data,
+                    data: $scope.chartData.names.map((v, i) => ({
+                        name: v,
+                        value: $scope.chartData.values[i],
                         label: {
                             normal: {
                                 textStyle: {
@@ -637,9 +642,8 @@ app.directive('commonChartPie', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLa
                 }]
             }
             myChart.setOption(option)
-        }
+        })
 
-        renderChart()
     }
 })])
 
