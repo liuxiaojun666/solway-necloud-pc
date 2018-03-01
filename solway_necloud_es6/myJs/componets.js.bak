@@ -310,6 +310,28 @@ app.directive('switchPower', ['myAjaxData', myAjaxData => ({
 })])
 
 /**
+ * [切换电站头-公司可点]
+ */
+app.directive('switchPower1', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: !0,
+    templateUrl: baseUrl + '/tpl/publicComponent/switchPower.jsp',
+    controller($scope) {
+        $scope.getCurrentDataName('00', 1, (result) => {
+            $scope.currentDataName = result.currentDataName
+            myAjaxData.setCurrentStationData(result)
+        })
+        $scope.$on('broadcastSwitchStation', (event, data) => {
+            $scope.currentDataName = data.dataName
+            myAjaxData.setCurrentStationData({ currentDataName: data.dataName, currentSTID: data.dataId })
+            $scope.reload()
+        })
+    }
+})])
+
+/**
  * [日历时间]    input样式手动设置
  * dateTime: '=',       初始显示时间   dateTime 添加shouDate属性（显示在页面的字符串）
     endDate: '=',       结束时间

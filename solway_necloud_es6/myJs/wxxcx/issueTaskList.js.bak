@@ -731,9 +731,11 @@ ajaxData({
 
     //导出
     $scope.export = () =>{
-        let startDate = $("#startTime").val()
-        let endDate = $("#endTime").val()
-        let url = window.baseUrl?window.baseUrl:'/NECloud'
-        window.open(url+'/wxa/export/task.htm?distDateStartStr='+startDate+"&distDateEndStr="+endDate+"&keywords="+$scope.keywords)
+        let publishStatus = $scope.taskStatusList.selected ? $scope.taskStatusList.selected.value : "";
+        let keywords = $scope.keywords?$scope.keywords:'';
+        let startDate = $("#startTime").val()? $("#startTime").val():'';
+        let endDate = $("#endTime").val()?$("#endTime").val():'';
+        let url = window.baseUrl?window.baseUrl:'/NECloud';
+        window.open(url+'/wxa/export/task.htm?distDateStartStr='+startDate+"&distDateEndStr="+endDate+"&keywords="+keywords+"&publishStatus="+publishStatus);
     }
 })

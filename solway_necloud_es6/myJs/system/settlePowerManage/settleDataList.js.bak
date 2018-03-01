@@ -6,7 +6,7 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
         replace: true,
         scope: {
             pageList:'=',
-           
+            stationList:'='
         },
 
         link ($scope, $element, $attrs) {
@@ -14,8 +14,7 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
            
             $timeout(()=>{
                 $('#result_table').on('click','.icon-note.font16', function () {
-                    
-                        $('#powerIndexModalAdd').modal()
+                    $('#powerIndexModalAdd').modal()
                 })
 
                 $(".settlePowerManageList").on('click','#add-new',function(){
@@ -30,17 +29,64 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
         },
 
         controller ($scope, $element) {
-            
+            $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
+            $scope.dateTime2 = new Date
+
+            $scope.save = () =>{
+                organizeParams()
+                if(validate()){
+                    $scope.settlePowerSave.getData(
+                        $scope.formData
+                    ).then(res =>{
+                        if(res.code == "0"){
+                            $scope.hiddenModalAdd()
+                            promptObj('success', '',res.msg?res.msg:"添加成功")
+                            $scope.pageList.getData({
+                                pageIndex:0,
+                                pageSize:10,
+                            })
+                        }else{
+                            promptObj('error', '',res.msg?res.msg:"添加失败")
+                        }
+                    })
+                }
+            }
+
+            const validate = () =>{
+                let validateFlag = true;
+                return validateFlag;
+            }
+
+            const organizeParams = () =>{
+                // $scope.formData['stid'] = $scope.stationList.selected.id;
+                // $scope.formData['stationName'] = $scope.stationList.selected.stationname;
+                // $scope.formData[''] = 
+                // $scope.formData['num'] = 
+                // $scope.formData[''] = 
+                // $scope.formData[''] = 
+                // $scope.formData[''] = 
+                // $scope.formData[''] = 
+            }
         }
     }
 }])
 ajaxData({
     pageList: {
-        name: 'GETAutomaticTaskList',
+        name: 'GETSettlePowerList',
         data: {
             pageIndex:0,
-            pageSize:10,
+            pageSize:10
         }
+    },
+    stationsPosition:{
+        name:'GETStationsPos',
+        data: {},
+        later:true
+    },
+    settlePowerSave:{
+        name:'POSTSettlePowerUpdate',
+        data:{},
+        later:true
     }
 },{
     statusMap:{'00':"未发布",'01':"已发布",'02':"处理中",'03':"处理未完成",'04':"审核中",'05':"审核通过",'06':"审核未通过",'07':"已完成",'99':"已作废"},
@@ -48,5 +94,12 @@ ajaxData({
 })('settlePowerManageListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
 
     $scope.titleType = "期数"; //期数、月份
-    
+    //获取电站列表
+    $scope.stationsPosition.getData({
+    }).then(res =>{
+        if(res.code == 0){
+            $scope.stationList = res.body
+            $scope.stationList.selected = $scope.stationList[0]
+        }
+    })
 })
