@@ -691,7 +691,7 @@ ajaxData({
 
     $scope.getStatus = sta => myAjaxData.config.statusMap[sta]
 
-    $scope.taskStatusList = [{ statusName: '-所有-', value: null },{ statusName: '未发布', value: '00' }, { statusName: '已发布', value: '01' }, { statusName: '处理中', value: '02' }, { statusName: '处理未完成', value: '03' }, { statusName: '审核中', value: '04' }, { statusName: '审核通过', value: '05' },
+    $scope.taskStatusList = [{ statusName: '-所有-', value: '' },{ statusName: '未发布', value: '00' }, { statusName: '已发布', value: '01' }, { statusName: '处理中', value: '02' }, { statusName: '处理未完成', value: '03' }, { statusName: '审核中', value: '04' }, { statusName: '审核通过', value: '05' },
      { statusName: '审核未通过', value: '06' }, { statusName: '已完成', value: '07' }, { statusName: '已作废', value: '99' }]
     
     $scope.getPageList = () =>{
@@ -731,9 +731,11 @@ ajaxData({
 
     //导出
     $scope.export = () =>{
-        let startDate = $("#startTime").val()
-        let endDate = $("#endTime").val()
-        let url = window.baseUrl?window.baseUrl:'/NECloud'
-        window.open(url+'/wxa/export/task.htm?distDateStartStr='+startDate+"&distDateEndStr="+endDate+"&keywords="+$scope.keywords)
+        let publishStatus = $scope.taskStatusList.selected ? $scope.taskStatusList.selected.value : "";
+        let keywords = $scope.keywords?$scope.keywords:'';
+        let startDate = $("#startTime").val()? $("#startTime").val():'';
+        let endDate = $("#endTime").val()?$("#endTime").val():'';
+        let url = window.baseUrl?window.baseUrl:'/NECloud';
+        window.open(url+'/wxa/export/task.htm?distDateStartStr='+startDate+"&distDateEndStr="+endDate+"&keywords="+keywords+"&publishStatus="+publishStatus);
     }
 })
