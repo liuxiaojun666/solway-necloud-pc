@@ -52,6 +52,7 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
                     $scope.netPower = '';
                     $scope.periodNum = '';
                     $scope.selfPower = '';
+                    $scope.responseImgs = [];
                     $scope.$apply()
                     $('#powerIndexModalAdd').modal()
                 })
@@ -77,11 +78,6 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
                             promptObj('error', "","上传失败");
                         }
                     })
-                    /*测试
-                    $scope.responseImgs = ['document/miniapp/task/1513652333181circle-rotate-green1.png',
-                        'document/miniapp/task/1513652333181circle-rotate-green2.png',
-                        'document/miniapp/task/1513652333181circle-rotate-green3.png']
-                    $scope.$apply()*/
                 }
 
                 $(".settlePowerManageList").on('change','#fileaaa',function(){
@@ -124,8 +120,8 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
                 $scope.formData['stid'] = $scope.stationList.selected.id;
                 $scope.formData['stationName'] = $scope.stationList.selected.stationname;
                 $scope.formData['num'] = $scope.periodNum;
-                $scope.formData['beginTime'] = $scope.dateTime1.showDate;
-                $scope.formData['endTime'] = $scope.dateTime2.showDate;
+                $scope.formData['beginTime'] = $scope.dateTime1.showDate || $scope.dateTime1.Format("yyyy-MM-dd");
+                $scope.formData['endTime'] = $scope.dateTime2.showDate || $scope.dateTime2.Format("yyyy-MM-dd");
                 $scope.formData['year'] = $scope.formData['beginTime'].substr(0,4);
                 $scope.formData['netPower'] = $scope.netPower;
                 $scope.formData['selfPower'] = $scope.selfPower;
@@ -171,7 +167,6 @@ ajaxData({
     passMap : {'0':'不通过','1':'通过'}
 })('settlePowerManageListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
 
-    $scope.titleType = "期数"; //期数、月份
     //获取电站列表
     $scope.stationsPosition.getData({
     }).then(res =>{
@@ -183,7 +178,7 @@ ajaxData({
 
     //删除记录
     $('#result_table').on('click','.delete-task', function () {
-        if(confirm("确定废除此任务？")){
+        if(confirm("确定废除此记录？")){
             let id = $(this).attr("id")
             $scope.settlePowerDelete.getData({
                 'id':id,
