@@ -11,7 +11,12 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
             settlePowerSave:'='
         },
 
-        link ($scope, $element, $attrs) {           
+        link ($scope, $element, $attrs) {   
+            $scope.responseImgs = [];
+            $scope.deleteCurrentImg = index =>{
+                $scope.responseImgs.splice(index,1)
+            }        
+
             $timeout(()=>{
                 $('#result_table').on('click','.icon-note.font16', function () {
                     $scope.formData = {}
@@ -50,6 +55,37 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
                     $('#powerIndexModalAdd').modal()
                 })
 
+                $scope.uploadOneImg = () =>{
+                    $.ajaxFileUpload ({
+                        url: window.baseUrl+'/wxa/img.htm', 
+                        secureuri: false,
+                        fileElementId: 'fileaaa',
+                        type:"POST",
+                        formName: "file",
+                        dataType: 'json',
+                        data:{
+                            classify:'task',
+                        },
+                        success: function (data) {
+                            if(data && data.length >=0){
+                                $scope.responseImgs.push(data[0]);
+                                $scope.$apply()
+                            }
+                        },
+                        error: function (data, status, e) {
+                            promptObj('error', "","上传失败");
+                        }
+                    })
+                    /*测试
+                    $scope.responseImgs = ['document/miniapp/task/1513652333181circle-rotate-green1.png',
+                        'document/miniapp/task/1513652333181circle-rotate-green2.png',
+                        'document/miniapp/task/1513652333181circle-rotate-green3.png']
+                    $scope.$apply()*/
+                }
+
+                $(".issueTaskList").on('change','#fileaaa',function(){
+                    $scope.uploadOneImg();
+                })
                
             },0);
         },
