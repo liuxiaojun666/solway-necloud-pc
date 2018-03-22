@@ -1,7 +1,7 @@
 app.factory("apiService", ["$http", "$q", (d, b) => {
     const c = window.interface, k = window.noFormSubmit, a = {}
     a.getData = (e) => {
-        const m = k.includes(e.name), f = b.defer(), j = e.name.startsWith('GET') ? 'GET' : 'POST', l = Object.is(j, 'POST') && !m ? { "Content-Type": "application/x-www-form-urlencoded"} : {}
+        const m = k.includes(e.name), f = b.defer(), j = e.name.startsWith('GET') ? 'GET' : 'POST', l = Object.is(j, 'POST') && !m ? { "Content-Type": "application/x-www-form-urlencoded" } : {}
         d({
             method: j,
             url: c[e.name],
@@ -11,17 +11,17 @@ app.factory("apiService", ["$http", "$q", (d, b) => {
             },
             params: j === 'GET' ? e.data : {},
             data: j === 'POST' ? e.data : {},
-            transformRequest (g) {
+            transformRequest(g) {
                 return m ? JSON.stringify(g) : $.param(g)
             }
-        }).success( h => {
+        }).success(h => {
             if (h.status >= 500) {
                 promptObj("error", "", "error" + "\n" + c[e.name] + "\n" + "服务器错误，请稍后再试")
                 console.error(e.name, c[e.name], h)
                 return f.reject(h.status)
             }
             f.resolve(h)
-        }).error( (h, g) => {
+        }).error((h, g) => {
             if (g == 404) {
                 promptObj("error", "", "error" + "\n" + c[e.name] + "\n" + "您请求的资源不存在")
             } else if (g >= 500) {
@@ -40,10 +40,10 @@ window.ajaxData = (b, a) => {
         let j = {}
         let c = {}
         c.init = (b, a) => {
-            i = {} 
+            i = {}
             j = {}
             c.isLoding = !0
-            for ( let f in b) {
+            for (let f in b) {
                 i[b[f].name] = {}
                 c[f] = {}
                 c[f].isLoding = !0
@@ -53,7 +53,7 @@ window.ajaxData = (b, a) => {
             c.currentStationData = j
         }
         c.setCurrentStationData = o => {
-            for(let key in o) j[key] = o[key]
+            for (let key in o) j[key] = o[key]
         }
         c.timeout = t => {
             let d = q.defer()
@@ -67,7 +67,7 @@ window.ajaxData = (b, a) => {
                 if (i[o.name][key] === null) delete i[o.name][key]
             }
             return d.getData({
-                name: o.name, 
+                name: o.name,
                 data: i[o.name]
             })
         }
@@ -80,72 +80,75 @@ window.ajaxData = (b, a) => {
     }])
     return (f, c, e) => {
         let d = (N, Z, Y, X, W, V, U, T, S, R, Q, P, O, M, L, K, J, I, H, G, F, D, C, B, A, j) => {
-                Z.init(b, a)
-                let E = () => {
-                        for (let key in b) if (N[key].isLoding) return !0
-                        return !1
-                    }
-                N.isLoding = !0
-                N.reload = () => {
-                    for(let key in b) {
-                        if(b[key].later) continue
-                        N[key].getData(b[key].data)
-                    }
-                }
-                N.getData = (g, i) => {
-                    return Z.getData({
-                        name: g,
-                        data: i
-                    })
-                }
-                for (let g in b) {
-                    N[g] = {}
-                    // if (b[g].delay) {
-                    //     N.$watch('isLoding', (n, o) => {
-                    //         if (n === !1) N[g].promise = N[g].getData(b[g].data)
-                    //     })
-                    // }
-                    N[g].getData = k => {
-                        let i = Z.getData({
-                            name: b[g].name, 
-                            data: k
-                        })
-                        N[g].promise = i
-                        N[g].isLoding = !0
-                        N.isLoding = E()
-                        Z.setData(g, null, N.isLoding)
-                        i.then( l => {
-                            N[g].res = l
-                            N[g].isLoding = !1
-                            N.isLoding = E()
-                            Z.setData(g, l, N.isLoding)
-                        }, l => {
-                            N[g].isLoding = !1
-                            N.isLoding = E()
-                        })
-                        return i
-                    }
-                    N[g].isLoding = !0
-                    if (b[g].later) continue
-                    if (b[g].data.__stationId__) {
-                        if (Z.currentStationData.currentSTID) b[g].data[b[g].data.__stationId__] = Z.currentStationData.currentSTID
-                        else {
-                            b[g].data.__stationId__ = 'continue'
-                            N.getData('GETgetCurrentInfoNew', {
-                                currentView: '00',
-                                isGroup: 0
-                            }).then(d => {
-                                Z.setCurrentStationData(d)
-                                b[g].data[b[g].data.__stationId__] = d.currentSTID
-                                N[g].promise = N[g].getData(b[g].data)
-                            })
-                        }
-                    }
-                    if (b[g].data.__stationId__ === 'continue') continue
-                    N[g].promise = N[g].getData(b[g].data)
-                }
-                e(N, Z, Y, X, W, V, U, T, S, R, Q, P, O, M, L, K, J, I, H, G, F, D, C, B, A, j)
+            Z.init(b, a)
+            let E = () => {
+                for (let key in b) if (N[key].isLoding) return !0
+                N.allGetDataCallback && N.allGetDataCallback()
+                return !1
             }
+            N.isLoding = !1
+            N.reload = () => {
+                for (let key in b) {
+                    if (b[key].later) continue
+                    N[key].getData(b[key].data)
+                }
+            }
+            N.getData = (g, i) => {
+                return Z.getData({
+                    name: g,
+                    data: i
+                })
+            }
+            for (let g in b) {
+                N[g] = {}
+                // if (b[g].delay) {
+                //     N.$watch('isLoding', (n, o) => {
+                //         if (n === !1) N[g].promise = N[g].getData(b[g].data)
+                //     })
+                // }
+                N[g].getData = k => {
+                    let i = Z.getData({
+                        name: b[g].name,
+                        data: k
+                    })
+                    N[g].promise = i
+                    N[g].isLoding = !0
+                    N.isLoding = E()
+                    Z.setData(g, null, N.isLoding)
+                    i.then(l => {
+                        N[g].res = l
+                        N[g].isLoding = !1
+                        N[g].getDataCallback && N[g].getDataCallback(true)
+                        N.isLoding = E()
+                        Z.setData(g, l, N.isLoding)
+                    }, l => {
+                        N[g].isLoding = !1
+                        N[g].getDataCallback && N[g].getDataCallback(false)
+                        N.isLoding = E()
+                    })
+                    return i
+                }
+                N[g].isLoding = !1
+                if (b[g].later) continue
+                if (b[g].data.__stationId__) {
+                    if (Z.currentStationData.currentSTID) b[g].data[b[g].data.__stationId__] = Z.currentStationData.currentSTID
+                    else {
+                        b[g].data.__stationId__ = 'continue'
+                        N.getData('GETgetCurrentInfoNew', {
+                            currentView: '00',
+                            isGroup: 0
+                        }).then(d => {
+                            Z.setCurrentStationData(d)
+                            b[g].data[b[g].data.__stationId__] = d.currentSTID
+                            N[g].promise = N[g].getData(b[g].data)
+                        })
+                    }
+                }
+                if (b[g].data.__stationId__ === 'continue') continue
+                N[g].promise = N[g].getData(b[g].data)
+            }
+            e(N, Z, Y, X, W, V, U, T, S, R, Q, P, O, M, L, K, J, I, H, G, F, D, C, B, A, j)
+        }
         app.controller(f, [...c, d])
     }
 }
