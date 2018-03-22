@@ -6,24 +6,83 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
         replace: true,
         scope: {
             pageList:'=',
-            stationList:'='
+            settlePowerDetail:'=',
+            stationList:'=',
+            settlePowerSave:'='
         },
 
-        link ($scope, $element, $attrs) {
+        link ($scope, $element, $attrs) {   
+            $scope.responseImgs = [];
+            $scope.deleteCurrentImg = index =>{
+                $scope.responseImgs.splice(index,1)
+            }        
 
-           
             $timeout(()=>{
                 $('#result_table').on('click','.icon-note.font16', function () {
+                    $scope.formData = {}
+                    let id = $(this).attr('id')
+                    $scope.settlePowerDetail.getData({
+                        'id':id
+                    }).then(res =>{
+                        if(res.code == 0){
+                            let formData = res.body
+                            $scope.formData['id'] = formData.id;
+                            $scope.formData['stid'] = formData.stid;
+                            $scope.dateTime1 = new Date(formData.beginTime);
+                            $scope.dateTime2 = new Date(formData.endTime);
+                            $scope.netPower = formData.netPower;
+                            $scope.periodNum = formData.num;
+                            $scope.selfPower = formData.selfPower;
+                            $scope.responseImgs = formData.imgs?formData.imgs.split(","):[]
+                           // $scope.stationName = formData.stationName;
+                            $scope.$apply();
+                        }else{
+                            promptObj('error', '',res.msg?res.msg:"获取失败")
+                        }
+                    })
                     $('#powerIndexModalAdd').modal()
                 })
 
                 $(".settlePowerManageList").on('click','#add-new',function(){
                     $scope.formData = {}
-                    
+                    $scope.formData['id'] = '';
+                    $scope.formData['stid'] = '';
+                    $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7));
+                    $scope.dateTime2 = new Date();
+                    $scope.netPower = '';
+                    $scope.periodNum = '';
+                    $scope.selfPower = '';
+                    $scope.responseImgs = [];
                     $scope.$apply()
                     $('#powerIndexModalAdd').modal()
                 })
 
+                $scope.uploadOneImg = () =>{
+                    $.ajaxFileUpload ({
+                        url: window.baseUrl+'/uploadImage/single.htm', 
+                        secureuri: false,
+                        fileElementId: 'fileaaa',
+                        type:"POST",
+                        formName: "file",
+                        dataType: 'json',
+                        data:{
+                            classify:'settlementPower',
+                        },
+                        success: function (data) {
+                            if(data.body){
+                                $scope.responseImgs.push(data.body);
+                                $scope.$apply()
+                            }
+                        },
+                        error: function (data, status, e) {
+                            promptObj('error', "","上传失败");
+                        }
+                    })
+                }
+
+                $(".settlePowerManageList").on('change','#fileaaa',function(){
+                    $scope.uploadOneImg();
+                })
                
             },0);
         },
@@ -58,14 +117,19 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
             }
 
             const organizeParams = () =>{
-                // $scope.formData['stid'] = $scope.stationList.selected.id;
-                // $scope.formData['stationName'] = $scope.stationList.selected.stationname;
-                // $scope.formData[''] = 
-                // $scope.formData['num'] = 
-                // $scope.formData[''] = 
-                // $scope.formData[''] = 
-                // $scope.formData[''] = 
-                // $scope.formData[''] = 
+                $scope.formData['stid'] = $scope.stationList.selected.id;
+                $scope.formData['stationName'] = $scope.stationList.selected.stationname;
+                $scope.formData['num'] = $scope.periodNum;
+                $scope.formData['beginTime'] = $scope.dateTime1.showDate || $scope.dateTime1.Format("yyyy-MM-dd");
+                $scope.formData['endTime'] = $scope.dateTime2.showDate || $scope.dateTime2.Format("yyyy-MM-dd");
+                $scope.formData['year'] = $scope.formData['beginTime'].substr(0,4);
+                $scope.formData['netPower'] = $scope.netPower;
+                $scope.formData['selfPower'] = $scope.selfPower;
+                $scope.formData['imgs'] = $scope.responseImgs.join(",");
+            }
+
+            $scope.hiddenModalAdd = () =>{
+                $('#powerIndexModalAdd').modal("hide");
             }
         }
     }
@@ -87,19 +151,49 @@ ajaxData({
         name:'POSTSettlePowerUpdate',
         data:{},
         later:true
+    },
+    settlePowerDetail:{
+        name:'GETSettlePowerDetail',
+        data:{},
+        later:true
+    },
+    settlePowerDelete:{
+        name:'POSTSettlePowerDelete',
+        data:{},
+        later:true
     }
 },{
     statusMap:{'00':"未发布",'01':"已发布",'02':"处理中",'03':"处理未完成",'04':"审核中",'05':"审核通过",'06':"审核未通过",'07':"已完成",'99':"已作废"},
     passMap : {'0':'不通过','1':'通过'}
 })('settlePowerManageListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
 
-    $scope.titleType = "期数"; //期数、月份
     //获取电站列表
     $scope.stationsPosition.getData({
     }).then(res =>{
         if(res.code == 0){
             $scope.stationList = res.body
-            $scope.stationList.selected = $scope.stationList[0]
+            $scope.stationList.selected = $scope.stationList[0];
         }
+    })
+
+    //删除记录
+    $('#result_table').on('click','.delete-task', function () {
+        if(confirm("确定废除此记录？")){
+            let id = $(this).attr("id")
+            $scope.settlePowerDelete.getData({
+                'id':id,
+            }).then(res =>{
+                if(res.code == 0){
+                    promptObj('success', '',res.msg?res.msg:"删除成功")
+                    $scope.pageList.getData({
+                        pageIndex:0,
+                        pageSize:10
+                    })
+                }else{
+                    promptObj('error', "", res.msg?res.msg:"删除失败")
+                }
+            })
+        }
+        
     })
 })
