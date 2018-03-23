@@ -28,13 +28,14 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
                             let formData = res.body
                             $scope.formData['id'] = formData.id;
                             $scope.formData['stid'] = formData.stid;
-                            $scope.dateTime1 = new Date(formData.beginTime);
-                            $scope.dateTime2 = new Date(formData.endTime);
                             $scope.netPower = formData.netPower;
                             $scope.periodNum = formData.num;
                             $scope.selfPower = formData.selfPower;
+                            $scope.year = formData.year;
+                            $("#startTime").val(new Date(formData.beginTime).Format('yyyy-MM-dd'));
+                            $("#endTime").val(new Date(formData.endTime).Format('yyyy-MM-dd'));
                             $scope.responseImgs = formData.imgs?formData.imgs.split(","):[]
-                           // $scope.stationName = formData.stationName;
+                            $scope.stationList.selected.stationName = formData.stationName;
                             $scope.$apply();
                         }else{
                             promptObj('error', '',res.msg?res.msg:"获取失败")
@@ -47,8 +48,9 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
                     $scope.formData = {}
                     $scope.formData['id'] = '';
                     $scope.formData['stid'] = '';
-                    $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7));
-                    $scope.dateTime2 = new Date();
+                    $("#startTime").val("");
+                    $("#endTime").val("");
+                    $scope.year = '';
                     $scope.netPower = '';
                     $scope.periodNum = '';
                     $scope.selfPower = '';
@@ -88,8 +90,27 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
         },
 
         controller ($scope, $element) {
-            $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
-            $scope.dateTime2 = new Date
+
+            $(".dist-datetime-start").datetimepicker({
+                language : 'zh-CN',
+                format: 'yyyy-mm-dd',
+                autoclose:true,
+                todayBtn : true,
+                pickerPosition : "bottom-left"
+            }).on("click",function(){
+                $(".dist-datetime-start").datetimepicker("setEndDate",$("#endTime").val())
+            });
+            
+            $(".dist-datetime-end").datetimepicker({
+                language : 'zh-CN',
+                format: 'yyyy-mm-dd',
+                autoclose:true,
+                todayBtn : true,
+                pickerPosition : "bottom-left"
+            }).on("click",function(){
+                $(".dist-datetime-end").datetimepicker("setStartDate",$("#startTime").val())
+                $(".dist-datetime-end").datetimepicker("setEndDate",new Date((new Date).setDate((new Date).getDate() - 1)))
+            });
 
             $scope.save = () =>{
                 organizeParams()
@@ -118,11 +139,11 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
 
             const organizeParams = () =>{
                 $scope.formData['stid'] = $scope.stationList.selected.id;
-                $scope.formData['stationName'] = $scope.stationList.selected.stationname;
+                $scope.formData['stationName'] = $scope.stationList.selected.stationName;
                 $scope.formData['num'] = $scope.periodNum;
-                $scope.formData['beginTime'] = $scope.dateTime1.showDate || $scope.dateTime1.Format("yyyy-MM-dd");
-                $scope.formData['endTime'] = $scope.dateTime2.showDate || $scope.dateTime2.Format("yyyy-MM-dd");
-                $scope.formData['year'] = $scope.formData['beginTime'].substr(0,4);
+                $scope.formData['beginTime'] = $("#startTime").val();
+                $scope.formData['endTime'] = $("#endTime").val();
+                $scope.formData['year'] = $scope.year;
                 $scope.formData['netPower'] = $scope.netPower;
                 $scope.formData['selfPower'] = $scope.selfPower;
                 $scope.formData['imgs'] = $scope.responseImgs.join(",");
@@ -143,7 +164,7 @@ ajaxData({
         }
     },
     stationsPosition:{
-        name:'GETStationsPos',
+        name:'GETStationList',
         data: {},
         later:true
     },
@@ -170,9 +191,10 @@ ajaxData({
     //获取电站列表
     $scope.stationsPosition.getData({
     }).then(res =>{
-        if(res.code == 0){
-            $scope.stationList = res.body
-            $scope.stationList.selected = $scope.stationList[0];
+        console.log(res)
+        if(res.key == 1){
+            $scope.stationList = res.data.stations;
+            $scope.stationList.selected =  res.data.stations[0];
         }
     })
 
