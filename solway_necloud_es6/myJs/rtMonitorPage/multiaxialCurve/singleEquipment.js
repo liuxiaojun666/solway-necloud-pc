@@ -78,6 +78,13 @@ app.directive('seChart', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
 })]);
 
 ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData', '$timeout', '$location'], ($scope, myAjaxData, $timeout, $location) => {
+    $scope.lineOrTable = '列表';
+    $scope.changeShowType = function(){
+        $scope.lineOrTable == '曲线'?$scope.lineOrTable = '列表':$scope.lineOrTable = '曲线';
+    }
+
+    $scope.tbody = [];
+
     let optionalEquipmentNum = 1; //根据路径判断 是多设备 还是 单设备
     switch ($location.$$url) {
         case "/app/singleEquipment":
@@ -223,7 +230,13 @@ ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData', '$timeout', '$l
                     data: new Array(length).fill('').map(() => (Math.random() * 1000).toFixed()),
                 }))
             };
+
+            //测试
+            $scope.thead = ['时间','设备1','a1','a2','设备1','b1'];
+            $scope.tbody.push(['2018-03-23','d1','123','43','d2','48']) ;
+
         }, 1000);
+        
     };
 
     // 停止实时数据刷新
