@@ -91,6 +91,10 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
 
         controller ($scope, $element) {
 
+            $scope.bonusBtnAbled = true
+
+            $scope.btnMap = {true:'保存',false:'保存中'}
+
             $(".dist-datetime-start").datetimepicker({
                 language : 'zh-CN',
                 format: 'yyyy-mm-dd',
@@ -113,22 +117,26 @@ app.directive('settlePowerAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeo
             });
 
             $scope.save = () =>{
-                organizeParams()
-                if(validate()){
-                    $scope.settlePowerSave.getData(
-                        $scope.formData
-                    ).then(res =>{
-                        if(res.code == "0"){
-                            $scope.hiddenModalAdd()
-                            promptObj('success', '',res.msg?res.msg:"添加成功")
-                            $scope.pageList.getData({
-                                pageIndex:0,
-                                pageSize:10,
-                            })
-                        }else{
-                            promptObj('error', '',res.msg?res.msg:"添加失败")
-                        }
-                    })
+                if($scope.bonusBtnAbled){
+                    organizeParams()
+                    if(validate()){
+                        $scope.bonusBtnAbled = false;
+                        $scope.settlePowerSave.getData(
+                            $scope.formData
+                        ).then(res =>{
+                            $scope.bonusBtnAbled = true;
+                            if(res.code == "0"){
+                                $scope.hiddenModalAdd()
+                                promptObj('success', '',res.msg?res.msg:"添加成功")
+                                $scope.pageList.getData({
+                                    pageIndex:0,
+                                    pageSize:10,
+                                })
+                            }else{
+                                promptObj('error', '',res.msg?res.msg:"添加失败")
+                            }
+                        })
+                    }
                 }
             }
 
