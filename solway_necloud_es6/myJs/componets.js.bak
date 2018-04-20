@@ -609,7 +609,8 @@ app.directive('commonChartLine', ['myAjaxData', '$timeout', (myAjaxData, $timeou
         xdata: '=',
         ydatas: '=',
         colors: '=',
-        backgroundColor: '='
+        backgroundColor: '=',
+        datazoom: '='
     },
     link($scope, $element) {
         let myChart;
@@ -624,7 +625,7 @@ app.directive('commonChartLine', ['myAjaxData', '$timeout', (myAjaxData, $timeou
         }, 0);
 
         const drawing = () => {
-            const { backgroundColor, linenames, ynames, xdata, ydatas, colors } = $scope;
+            const { backgroundColor, linenames, ynames, xdata, ydatas, colors, datazoom } = $scope;
             const option = {
                 backgroundColor,
                 tooltip: {
@@ -652,7 +653,7 @@ app.directive('commonChartLine', ['myAjaxData', '$timeout', (myAjaxData, $timeou
                     top: '60',
                     left: '20',
                     right: '20',
-                    bottom: '5',
+                    bottom: '19',
                     containLabel: true //grid 区域是否包含坐标轴的刻度标签[ default: false ] 
                 },
                 xAxis: [{
@@ -702,6 +703,11 @@ app.directive('commonChartLine', ['myAjaxData', '$timeout', (myAjaxData, $timeou
                         }
                     }
                 })),
+                dataZoom: datazoom && [{
+                    type: 'slider',
+                    xAxisIndex: 0,
+                    filterMode: 'empty'
+                }],
                 series: ydatas.map((v, i) => {
                     return v.map((data, xi) => ({
                         name: linenames[i][xi],
