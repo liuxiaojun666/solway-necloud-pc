@@ -1,5 +1,6 @@
+const win = window
 app.factory("apiService", ["$http", "$q", (d, b) => {
-    const c = window.interface, k = window.noFormSubmit, a = {}
+    const c = win.interface, k = win.noFormSubmit, a = {}
     a.getData = (e) => {
         const m = k.includes(e.name), f = b.defer(), j = e.name.startsWith('GET') ? 'GET' : 'POST', l = Object.is(j, 'POST') && !m ? { "Content-Type": "application/x-www-form-urlencoded" } : {}
         d({
@@ -34,7 +35,7 @@ app.factory("apiService", ["$http", "$q", (d, b) => {
     }
     return a
 }])
-window.ajaxData = (b, a) => {
+win.ajaxData = (b, a) => {
     app.factory("myAjaxData", ["apiService", '$q', '$timeout', (d, q, m) => {
         let i = {}
         let j = {}
@@ -147,6 +148,15 @@ window.ajaxData = (b, a) => {
                 if (b[g].data.__stationId__ === 'continue') continue
                 N[g].promise = N[g].getData(b[g].data)
             }
+            const GWH = (first) => {
+                N.winHeight = document.body.clientHeight
+                N.winWidth = document.body.clientWidth
+                if (first === true) return
+                N.$apply()
+            }
+            GWH(true)
+            win.addEventListener('resize', GWH)
+            N.$on('$destroy', () => win.removeEventListener('resize', GWH))
             e(N, Z, Y, X, W, V, U, T, S, R, Q, P, O, M, L, K, J, I, H, G, F, D, C, B, A, j)
         }
         app.controller(f, [...c, d])
