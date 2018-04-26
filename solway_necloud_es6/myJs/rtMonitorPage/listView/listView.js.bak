@@ -5,10 +5,16 @@ ajaxData({
             __stationId__: 'id'
         }
     }
-},{})('listViewCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-    $scope.deviceLayout.getDataCallback = (success, res) => {
-        if (!success) return;
-        initDraggSVGDevCore();
-        $scope.boxChanges = res.data;
-    };
+}, {})('listViewCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    // 所有svg图路径
+    $scope.svgUrls = [
+        "tpl/rtMonitorPage/deviceLayout/css/svg_template/XB.svg",
+        "tpl/rtMonitorPage/deviceLayout/css/svg_template/NBQ.svg",
+        "tpl/rtMonitorPage/deviceLayout/css/svg_template/HLX.svg",
+        "tpl/rtMonitorPage/deviceLayout/css/svg_template/NBQHLX.svg",
+    ];
+    
+    
+    $scope.drawSvg = (svgUrl) => d3.xml(svgUrl, "image/svg+xml", xml => $scope.$apply(() => $scope.xml = xml.documentElement.outerHTML));
+    $scope.drawSvg($scope.svgUrls[1]);
 });
