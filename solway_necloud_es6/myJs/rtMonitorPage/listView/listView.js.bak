@@ -1,0 +1,14 @@
+ajaxData({
+    deviceLayout: {
+        name: 'GETDeviceLayout',
+        data: {
+            __stationId__: 'id'
+        }
+    }
+},{})('listViewCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    $scope.deviceLayout.getDataCallback = (success, res) => {
+        if (!success) return;
+        initDraggSVGDevCore();
+        $scope.boxChanges = res.data;
+    };
+});

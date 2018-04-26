@@ -119,12 +119,12 @@ win.ajaxData = (b, a) => {
                     i.then(l => {
                         N[g].res = l
                         N[g].isLoding = !1
-                        N[g].getDataCallback && N[g].getDataCallback(true)
+                        N[g].getDataCallback && N[g].getDataCallback(true, l)
                         N.isLoding = E()
                         Z.setData(g, l, N.isLoding)
                     }, l => {
                         N[g].isLoding = !1
-                        N[g].getDataCallback && N[g].getDataCallback(false)
+                        N[g].getDataCallback && N[g].getDataCallback(false, l)
                         N.isLoding = E()
                     })
                     return i
@@ -132,9 +132,10 @@ win.ajaxData = (b, a) => {
                 N[g].isLoding = !1
                 if (b[g].later) continue
                 if (b[g].data.__stationId__) {
-                    if (Z.currentStationData.currentSTID) b[g].data[b[g].data.__stationId__] = Z.currentStationData.currentSTID
-                    else {
-                        b[g].data.__stationId__ = 'continue'
+                    if (Z.currentStationData.currentSTID) {
+                        b[g].data[b[g].data.__stationId__] = Z.currentStationData.currentSTID
+                        N[g].promise = N[g].getData(b[g].data)
+                    } else {
                         N.getData('GETgetCurrentInfoNew', {
                             currentView: '00',
                             isGroup: 0
@@ -144,8 +145,8 @@ win.ajaxData = (b, a) => {
                             N[g].promise = N[g].getData(b[g].data)
                         })
                     }
+                    continue
                 }
-                if (b[g].data.__stationId__ === 'continue') continue
                 N[g].promise = N[g].getData(b[g].data)
             }
             const GWH = (first) => {
