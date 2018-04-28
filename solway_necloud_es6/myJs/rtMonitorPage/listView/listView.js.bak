@@ -135,20 +135,18 @@ ajaxData({
         const {svgUrl, svgUrls, status: {status1, status2, status3, status4, status5, statusAll}} = $scope;
         const status = [];
         if (statusAll) status.push('00');
-        else {
-            if (status1) status.push('01');
-            if (status2) status.push('02');
-            if (status3) status.push('03');
-            if (status4) status.push('04');
-            if (status5) status.push('05');
-        }
+        if (status1) status.push('01');
+        if (status2) status.push('02');
+        if (status3) status.push('03');
+        if (status4) status.push('04');
+        if (status5) status.push('05');
         switch (svgUrl) {
             case svgUrls[0]:
                 
                 break;
         
             case svgUrls[1]:
-                $scope.realDataBInverter.getData({status: status.join(',')});
+                $scope.realDataBInverter.getData({ status: status.join(','), pageIndex: 0});
                 break;
         
             case svgUrls[2]:
