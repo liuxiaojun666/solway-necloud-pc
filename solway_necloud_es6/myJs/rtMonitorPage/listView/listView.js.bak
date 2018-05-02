@@ -38,7 +38,7 @@ ajaxData({
 
     // 切换设备类型
     $scope.changeType = typeUrl => {
-        if (typeUrl === $scope.svgUrl) return;
+        // if (typeUrl === $scope.svgUrl) return;
         $scope.svgUrl = typeUrl;
         $scope.drawSvg(typeUrl);
         getData();
@@ -165,7 +165,11 @@ ajaxData({
                 break;
 
             case svgUrls[1]:
-                $scope.realDataBInverter.getData({ status: status.join(','), pageIndex: 0 });
+                $scope.realDataBInverter.getData({
+                    status: status.join(','),
+                    pageIndex: 0,
+                    pageSize: '20'
+                });
                 break;
 
             case svgUrls[2]:
@@ -177,6 +181,9 @@ ajaxData({
         }
     }
 
-    // 默认 逆变器
-    $scope.changeType($scope.svgUrls[1]);
+
+    // 切换电站  默认 逆变器
+    $scope.switchPowerCallback = () => {
+        $scope.changeType($scope.svgUrls[1]);
+    }
 });

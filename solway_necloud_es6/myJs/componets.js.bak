@@ -96,10 +96,11 @@ app.directive('myPaging', [() => ({
     scope: {
         getData: '=',
         paging: '=',
-        pageSize: '@'
+        pageSize: '@',
+        defaultPageSize: '='
     },
     controller($scope, $element) {
-        $scope.showPageSize = 10
+        $scope.showPageSize = $scope.defaultPageSize || 10
         $scope.mygetData = (obj, arg2) => {
             if (arg2) return
             $scope.getData(obj)
@@ -301,11 +302,13 @@ app.directive('switchPower', ['myAjaxData', myAjaxData => ({
         $scope.getCurrentDataName('00', 0, (result) => {
             $scope.currentDataName = result.currentDataName
             myAjaxData.setCurrentStationData(result)
+            $scope.switchPowerCallback && $scope.switchPowerCallback()
         })
         $scope.$on('broadcastSwitchStation', (event, data) => {
             $scope.currentDataName = data.dataName
             myAjaxData.setCurrentStationData({ currentDataName: data.dataName, currentSTID: data.dataId })
             $scope.reload()
+            $scope.switchPowerCallback && $scope.switchPowerCallback()
         })
     }
 })])
