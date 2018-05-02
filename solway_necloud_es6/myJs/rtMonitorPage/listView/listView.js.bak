@@ -1,11 +1,14 @@
 ajaxData({
     realDataBInverter: {
         name: 'GETRealDataBInverter',
-        data: {
-            status: '00'
-        },
+        data: {},
         later: true
-    }
+    },
+    selectByConditionMap: {
+        name: 'GETselectByConditionMap',
+        data: {},
+        later: true
+    },
 }, {})('listViewCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
     // 所有svg图路径
     $scope.svgUrls = [
@@ -47,7 +50,7 @@ ajaxData({
         if (statu === 'statusAll') {
             Object.keys($scope.status).forEach(v => $scope.status[v] = $scope.status[statu]);
         } else {
-            const {statusAll, ...other} = $scope.status;
+            const { statusAll, ...other } = $scope.status;
             $scope.status.statusAll = Object.values(other).every(e => e);
         }
         getData();
@@ -130,9 +133,25 @@ ajaxData({
         });
     };
 
+
+    // 点击，弹出层(类型为逆变器)
+    $scope.dblclick = async (deviceSerialNnumber, pstationid, deviceId) => {
+        $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
+        const { id } = await $scope.selectByConditionMap.getData({
+            stid: pstationid,
+            sn: deviceSerialNnumber
+        });
+        $scope.$broadcast("showDeviceDetail2broad", {
+            deviceTypeNow: 2,
+            pstationid,
+            deviceId: id,
+            deviceSerialNnumber
+        });
+    };
+
     // 请求接口
     function getData() {
-        const {svgUrl, svgUrls, status: {status1, status2, status3, status4, status5, statusAll}} = $scope;
+        const { svgUrl, svgUrls, status: { status1, status2, status3, status4, status5, statusAll } } = $scope;
         const status = [];
         if (statusAll) status.push('00');
         if (status1) status.push('01');
@@ -142,22 +161,22 @@ ajaxData({
         if (status5) status.push('05');
         switch (svgUrl) {
             case svgUrls[0]:
-                
+
                 break;
-        
+
             case svgUrls[1]:
-                $scope.realDataBInverter.getData({ status: status.join(','), pageIndex: 0});
+                $scope.realDataBInverter.getData({ status: status.join(','), pageIndex: 0 });
                 break;
-        
+
             case svgUrls[2]:
-                
+
                 break;
-        
+
             default:
                 break;
         }
     }
 
     // 默认 逆变器
-    $scope.changeType($scope.svgUrls[1]); 
+    $scope.changeType($scope.svgUrls[1]);
 });
