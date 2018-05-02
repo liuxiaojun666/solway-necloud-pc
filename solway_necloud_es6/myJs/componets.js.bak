@@ -89,7 +89,7 @@ app.directive('hasContent', [() => ({
  * paging="接口返回数据中包含分页信息部分"    
  * pageSize="none"} pageSize为none时不显示每页多少条默认10条
  */
-app.directive('myPaging', [() => ({
+app.directive('myPaging', ['myAjaxData', (myAjaxData) => ({
     restrict: 'E',
     replace: !1,
     templateUrl: baseUrl + '/tpl/publicComponent/paging.jsp',
@@ -100,7 +100,6 @@ app.directive('myPaging', [() => ({
         defaultPageSize: '='
     },
     controller($scope, $element) {
-        $scope.showPageSize = $scope.defaultPageSize || 10
         $scope.mygetData = (obj, arg2) => {
             if (arg2) return
             $scope.getData(obj)

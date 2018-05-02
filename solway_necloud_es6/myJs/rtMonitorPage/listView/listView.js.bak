@@ -135,12 +135,13 @@ ajaxData({
 
 
     // 点击，弹出层(类型为逆变器)
-    $scope.dblclick = async (deviceSerialNnumber, pstationid, deviceId) => {
+    $scope.dblclick = async (deviceSerialNnumber, pstationid, deviceId, hasJB) => {
         $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
         const { id } = await $scope.selectByConditionMap.getData({
             stid: pstationid,
             sn: deviceSerialNnumber
         });
+        $scope.inverterType = hasJB;// include 页面中用 点击逆变器，不同类型跳转不同样式页面（1->inverterDetailNew.jsp,2->inverterDetailNewType1.jsp）
         $scope.$broadcast("showDeviceDetail2broad", {
             deviceTypeNow: 2,
             pstationid,
