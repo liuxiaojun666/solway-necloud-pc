@@ -9,7 +9,7 @@ ajaxData({
         data: {},
         later: true
     },
-}, {})('listViewCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+}, {})('listViewCtrl', ['$scope', 'myAjaxData', '$interval'], ($scope, myAjaxData, $interval) => {
     // 所有svg图路径
     $scope.svgUrls = [
         "tpl/rtMonitorPage/deviceLayout/css/svg_template/XB.svg",
@@ -37,11 +37,11 @@ ajaxData({
     };
 
     // 切换设备类型
-    $scope.changeType = typeUrl => {
+    $scope.changeType = (typeUrl, timing) => {
         // if (typeUrl === $scope.svgUrl) return;
         $scope.svgUrl = typeUrl;
         $scope.drawSvg(typeUrl);
-        getData();
+        getData(timing);
     };
 
     // 改变状态
@@ -151,7 +151,7 @@ ajaxData({
     };
 
     // 请求接口
-    function getData() {
+    function getData(timing) {
         const { svgUrl, svgUrls, status: { status1, status2, status3, status4, status5, statusAll } } = $scope;
         const status = [];
         if (statusAll) status.push('00');
@@ -166,10 +166,10 @@ ajaxData({
                 break;
 
             case svgUrls[1]:
+                const args = timing ? {} : { pageIndex: 0, pageSize: '20' }
                 $scope.realDataBInverter.getData({
                     status: status.join(','),
-                    pageIndex: 0,
-                    pageSize: '20'
+                    ...args
                 });
                 break;
 
@@ -185,4 +185,10 @@ ajaxData({
 
     // 切换电站  默认 逆变器
     $scope.switchPowerCallback = () => $scope.changeType($scope.svgUrls[1]);
+
+
+    // 定时刷新数据
+    const timing = () => $scope.changeType($scope.svgUrl, true);
+    const timer = $interval(timing, 5000);
+    $scope.$on('$destroy', () => $interval.cancel(timer));
 });
