@@ -3,6 +3,7 @@ ajaxData({
         {
             name: 'repairCount',
             apiName: 'GETRankingRepairCount',
+            later: true
         },
         {
             name: 'repairHours',
@@ -28,12 +29,12 @@ ajaxData({
         [v.name]: {
             name: v.apiName,
             data: {
-                powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
-                idType: 1,
-                timeType: 'ACCUM',
-                dateStr: (new Date).Format('yyyy-MM-dd'),
-                pageIndex: 0,
-                pageSize: 10
+                // powerType: '',
+                // idType: 1,
+                // timeType: 'ACCUM',
+                // dateStr: (new Date).Format('yyyy-MM-dd'),
+                // pageIndex: 0,
+                // pageSize: 10
             },
             later: v.later
         }
@@ -46,8 +47,9 @@ ajaxData({
         }
     }
 }, {
-    })('fengyunListCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    })('fengyunListCtrl', ['$scope', 'myAjaxData', '$state'], ($scope, myAjaxData, $state) => {
         $scope.dateTime1 = new Date; //选择月日期
+        $scope.dateTime1.setMonth((new Date).getMonth() - 1);
         $scope.dateTime2 = new Date; //选择年日期
         $scope.timeType = 'ACCUM';   //默认查累计
 
@@ -65,9 +67,15 @@ ajaxData({
 
         // 所有省份  + 集团
         $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
-        $scope.repairCount.promise.then(res => { 
-            assignFun(res)
-        });
+        // 默认加载
+        $scope.repairCount.getData({
+            powerType: ($state.current.name.includes('pv') ? 'PV' : 'WP'),
+            idType: 1,
+            timeType: 'ACCUM',
+            dateStr: (new Date).Format('yyyy-MM-dd'),
+            pageIndex: 0,
+            pageSize: 10
+        }).then(res => assignFun(res));
 
         // 改变查询时间 
         $scope.changeDateTime = async () => {
@@ -76,9 +84,7 @@ ajaxData({
             if (dateStr === $scope.dateStr) return;
             $scope.dateStr = dateStr;
             const timeType = $scope.timeType;
-            $scope[$scope.currDataType].getData({ timeType, dateStr }).then(res => {
-                assignFun(res)
-            });
+            $scope[$scope.currDataType].getData({ timeType, dateStr, pageIndex: 0 }).then(res => assignFun(res));
         };
 
         // 改变时间维度 执行 func update all data
@@ -87,9 +93,7 @@ ajaxData({
             const timeType = $scope.timeType = value;
             const dateStr = getDateStr();
             $scope.dateStr = dateStr;
-            $scope[$scope.currDataType].getData({ timeType, dateStr }).then(res => {
-                assignFun(res)
-            });
+            $scope[$scope.currDataType].getData({ timeType, dateStr, pageIndex: 0 }).then(res => assignFun(res));
         };
 
         // 改变 查询类型  执行 函数 重新请求  类型 排名
@@ -98,16 +102,14 @@ ajaxData({
             $scope.currDataType = value;
             const { idType, ids, timeType, currDataType } = $scope;
             $scope[currDataType].getData({
-                powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
+                powerType: ($state.current.name.includes('pv') ? 'PV' : 'WP'),
                 idType,
                 ids,
                 timeType,
                 dateStr: getDateStr(),
                 pageIndex: 0,
                 pageSize: 10
-            }).then(res => {
-                assignFun(res)
-            });
+            }).then(res => assignFun(res));
         };
 
         // 改变  范围 执行 函数  重新请求 数据 汇总
@@ -116,12 +118,10 @@ ajaxData({
             const isJT = value == 1; // 选择的是否是集团
             const idType = $scope.idType = isJT ? 1 : 2;
             const ids = $scope.ids = isJT ? null : value;
-            $scope[$scope.currDataType].getData({ idType, ids }).then(res =>{
-                assignFun(res)
-            });
+            $scope[$scope.currDataType].getData({ idType, ids, pageIndex: 0 }).then(res => assignFun(res));
         };
 
-        function assignFun(res){
+        function assignFun(res) {
             $scope.datasource = res.body
             $scope.currentPageList = $scope[$scope.currDataType].getData
         }
@@ -139,7 +139,7 @@ ajaxData({
                 width: '50px',
                 align: 'center',
                 render(text, item, index) {
-                    return `<span class="jiangbei jiangbei-${[1, 2, 3][text - 1]}">${index}</span>`
+                    return `<span class="jiangbei jiangbei-${[1, 2, 3][index]}">${index > 2 ? index + 1 : ''}</span>`
                 }
             },
             {
@@ -157,27 +157,27 @@ ajaxData({
                 width: '200px',
                 align: 'left',
                 render(text) {
-                    return '<span class="fa fa-building-o"></span> ' + text
+                    return '<span class="fa fa-building-o"></span> ' + (text || '')
                 }
             },
             {
                 title: null,
                 dataIndex: 'tel',
                 width: '150px',
-                align: 'center',
+                align: 'left',
                 render(text) {
-                    return '<span class="fa fa-phone"></span> ' + text
+                    return '<span class="fa fa-phone"></span> ' + (text || '')
                 }
             },
             {
                 title: null,
                 dataIndex: 'email',
                 width: '150px',
-                align: 'center',
+                align: 'left',
                 render(text) {
-                    return '<span class="fa fa-envelope-o"></span> ' + text
+                    return '<span class="fa fa-envelope-o"></span> ' + (text || '')
                 }
             },
-        ]
+        ];
 
-    })
+    });
