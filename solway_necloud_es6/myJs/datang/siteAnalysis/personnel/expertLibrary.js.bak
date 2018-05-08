@@ -2,22 +2,59 @@ app.directive('elDetails', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoa
     restrict: 'E',
     template: $('#el-details').html(),
     scope: {
-        detail: '='
+        detail: '=',
+        objs: '=',
+        powerType: '='
     },
     link($scope, $element) {
 
+        $scope.repairDimensionFun = function (params) {
+            const ele = document.getElementsByName('repairDimensionName');
+            [].forEach.call(ele, element => element.checked = false);
+            ele[this.$index].checked = true;
+            $scope._getData(this.item.str);
+        };
+
+    },
+    controller($scope) {
+        $scope.repairDimension = [
+            { name: '检修台词', str: 'GETrepairCount' },
+            { name: '检修时间', str: 'GETrepairHours' },
+            { name: '检修成功率', str: 'GETrepairSuccessRate' },
+            { name: '检修影响时间', str: 'GETrepairRespHours' },
+            { name: '检修台数', str: 'GETrepairNum' }
+        ];
+
+        $scope._getData = str => {
+            ['Brand', 'Project', 'FaultType'].forEach(v => {
+                $scope.objs[str + v].getData({
+                    powerType: $scope.powerType,
+                    id: $scope.detail._id
+                }).then(res => $scope[v] = res)
+            });
+        };
+
+
+        $scope.$watch('detail', (newValue, oldValue) => {
+            if (!newValue) return;
+            $scope._getData('GETrepairCount');
+        });
     }
-})])
+})]);
 
 
 app.directive('elChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
     restrict: 'E',
     scope: {
-        detail: '=',
+        data: '=',
         name: '='
     },
     link($scope, $element, $attrs) {
         const myChart = echarts.init($element[0])
+        $scope.$watch('data', (newValue, oldValue) => {
+            if(!newValue) return;
+            renderChart();
+        });
         const renderChart = () => {
             const option = {
                 tooltip: {
@@ -29,8 +66,8 @@ app.directive('elChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad)
                     center: ['50%', '50%'],
                     radius: ['25%', '50%'],
                     type: 'pie',
-                    data: [30, 50, 34, 6, 34, 74, 23, 26, 4].slice(0, myAjaxData.config[$scope.name].length).map((v, i) => ({
-                        name: myAjaxData.config[$scope.name][i],
+                    data: $scope.data.map((v, i) => ({
+                        name: $scope.name[i],
                         value: v,
                         label: {
                             normal: {
@@ -50,11 +87,9 @@ app.directive('elChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad)
                 }]
             }
             myChart.setOption(option)
-        }
-
-        renderChart()
+        };
     }
-})])
+})]);
 
 ajaxData({
     // 专家库列表
@@ -95,13 +130,33 @@ ajaxData({
             dictType: 'FAULT_REAL_TYPE'
         }
     },
+    ...[
+        'GETrepairCountBrand',
+        'GETrepairCountProject',
+        'GETrepairCountFaultType',
+
+        'GETrepairHoursBrand',
+        'GETrepairHoursProject',
+        'GETrepairHoursFaultType',
+
+        'GETrepairSuccessRateBrand',
+        'GETrepairSuccessRateProject',
+        'GETrepairSuccessRateFaultType',
+
+        'GETrepairRespHoursBrand',
+        'GETrepairRespHoursProject',
+        'GETrepairRespHoursFaultType',
+
+        'GETrepairNumBrand',
+        'GETrepairNumProject',
+        'GETrepairNumFaultType',
+    ].map(v => ({ [v]: { name: v, later: true } })).reduce((obj, cur) => ({ ...obj, ...cur })),
 }, {
         gzName: ['塔筒及基础', '变桨系统', '测风系统', '电控系统', '机械传动系统', '发电机'],
         ppName: ['西门子', '远景', 'GE', '葛美凤', '华创', '金风'],
         xhName: ['jj-1550', 's2000', 'k2000', 'm500'],
     })('expertLibraryCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-        $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
-        $scope.dateTime2 = new Date
+        
         $scope.powerType = 'PV';
         $scope.idType = 1; // 集团 省份，默认集团
         $scope.switchTab = '1'; // 默认选择  品牌  使用品牌查询
@@ -159,18 +214,16 @@ ajaxData({
 
 
         // 第一次 品牌接口  完成后，  
-        $scope.selectBypowerType.promise.then( async () => {
+        $scope.selectBypowerType.promise.then(async () => {
             await myAjaxData.timeout(0);
             $scope.conditionSearch();
         });
 
+
         // 弹出框 详情
-        $scope.showDetails = function (id) {
+        $scope.showDetails = function (obj) {
             $('.el-details').show();
-            $scope.detail.getData({
-                powerType: $scope.powerType,
-                id
-            });
+            $scope.detail.res = obj;
         };
         $(document).on('click.el', () => $('.el-details').hide());
     });
