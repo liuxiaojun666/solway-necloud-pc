@@ -69,7 +69,7 @@ ajaxData({
         later: true
     },
     detail: {
-        name: 'aaa',
+        name: 'GETmasterDetail',
         later: true
     },
 
@@ -165,6 +165,12 @@ ajaxData({
         });
 
         // 弹出框 详情
-        $scope.showDetails = (a, e) => $('.el-details').show();
+        $scope.showDetails = function (id) {
+            $('.el-details').show();
+            $scope.detail.getData({
+                powerType: $scope.powerType,
+                id
+            });
+        };
         $(document).on('click.el', () => $('.el-details').hide());
     });
