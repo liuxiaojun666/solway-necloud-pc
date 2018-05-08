@@ -65,7 +65,8 @@ ajaxData({
             idType: 1,
             pageIndex: 0,
             pageSize: 10
-        }
+        },
+        later: true
     },
     detail: {
         name: 'aaa',
@@ -101,21 +102,15 @@ ajaxData({
     })('expertLibraryCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
         $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
         $scope.dateTime2 = new Date
-
-        $scope.powerType = 'PV'; // 默认光伏
+        $scope.powerType = 'PV';
         $scope.idType = 1; // 集团 省份，默认集团
-        // $scope.brandIds = []; // 品牌类型
-        // $scope.faultTypeIds = []; // 故障类型
         $scope.switchTab = '1'; // 默认选择  品牌  使用品牌查询
         // 所有省份  + 集团
         $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
 
         // 查询  搜索
         $scope.conditionSearch = () => {
-            const obj = {
-                brandIds: null,
-                faultTypeIds: null
-            };
+            const obj = { brandIds: null, faultTypeIds: null };
 
             $scope.switchTab === '1'
                 ? obj.brandIds = [].filter.call(document.getElementsByName('shortType'), v => v.checked).map(v => v.value).join(',')
@@ -129,20 +124,27 @@ ajaxData({
                 keyword: $scope.keyword,
                 pageIndex: 0,
                 pageSize: 6
-            }).then(() => $scope.keyword = '');
+            }).then(async res => {
+                $scope.keyword = '';
+                await myAjaxData.timeout(0);
+                $scope.pageList.res.body.data = res.body.data.map(v => ({
+                    ...v,
+                    createDate2: new Date(v.createDate).Format('yyyy-MM-dd')
+                }));
+                $scope.$apply();
+            });
         };
 
 
         //切换电站类型
         $scope.changePowerType = async type => {
             $scope.powerType = type;
-            $scope.selectBypowerType.res = null;
-            $scope.selectBypowerType.getData({ powerType: type });
-            $scope.basedictionarySelectAll.res = null;
-            await myAjaxData.timeout(0);
-            $scope.basedictionarySelectAll.getData({
+            const pro1 = $scope.selectBypowerType.getData({ powerType: type });
+            const pro2 = $scope.basedictionarySelectAll.getData({
                 dictType: type === 'PV' ? 'FAULT_REAL_TYPE' : 'WT_SYSTEM'
             });
+            const _promise = $scope.switchTab === '1' ? pro1 : pro2;
+            await _promise;
             $scope.conditionSearch();
         };
 
@@ -154,6 +156,13 @@ ajaxData({
             $scope.ids = isJT ? null : value;
             $scope.conditionSearch();
         };
+
+
+        // 第一次 品牌接口  完成后，  
+        $scope.selectBypowerType.promise.then( async () => {
+            await myAjaxData.timeout(0);
+            $scope.conditionSearch();
+        });
 
         // 弹出框 详情
         $scope.showDetails = (a, e) => $('.el-details').show();
