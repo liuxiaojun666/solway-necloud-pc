@@ -165,17 +165,12 @@ ajaxData({
 
         // 查询  搜索
         $scope.conditionSearch = () => {
-            const obj = { brandIds: null, faultTypeIds: null };
-
-            $scope.switchTab === '1'
-                ? obj.brandIds = [].filter.call(document.getElementsByName('shortType'), v => v.checked).map(v => v.value).join(',')
-                : obj.faultTypeIds = [].filter.call(document.getElementsByName('faultType'), v => v.checked).map(v => v.value).join(',')
-
+            
             $scope.pageList.getData({
                 powerType: $scope.powerType,
                 idType: $scope.idType,
                 ids: $scope.ids,
-                ...obj,
+                ...(checkObj()),
                 keyword: $scope.keyword,
                 pageIndex: 0,
                 pageSize: 6
@@ -219,6 +214,13 @@ ajaxData({
             $scope.conditionSearch();
         });
 
+        // 全选 品牌  或者  故障类型
+        $scope.checkAll = function (type, e) {
+            [].forEach.call(document.getElementsByName(type), ele => ele.checked = e.target.checked)
+            $scope.conditionSearch();
+        };
+
+
 
         // 弹出框 详情
         $scope.showDetails = function (obj) {
@@ -226,4 +228,22 @@ ajaxData({
             $scope.detail.res = obj;
         };
         $(document).on('click.el', () => $('.el-details').hide());
+
+
+        // 检查选中状态
+        function checkObj() {
+            const obj = { brandIds: null, faultTypeIds: null };
+
+            if ($scope.switchTab === '1') {
+                const eles = document.getElementsByName('shortType');
+                obj.brandIds = [].filter.call(eles, v => v.checked).map(v => v.value).join(',');
+                document.getElementsByName('shortTypeCheckAll')[0].checked = eles.length === obj.brandIds.split(',').length;
+            } else {
+                const eles = document.getElementsByName('faultType');
+                obj.faultTypeIds = [].filter.call(eles, v => v.checked).map(v => v.value).join(',');
+                document.getElementsByName('faultTypeCheckAll')[0].checked = eles.length === obj.faultTypeIds.split(',').length;
+            }
+            obj.skillIds = [].filter.call(document.getElementsByName('skill'), v => v.checked).map(v => v.value).join(',');
+            return obj;
+        }
     });
