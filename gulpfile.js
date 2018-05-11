@@ -47,7 +47,24 @@ gulp.task('watch', [], () => {
 				}))
 				.pipe(gulp.dest('theme/js/dist/'))
 
-			cmd.run(`git add .`)
+			cmd.run(`git add solway_necloud_es6/`)
+		})
+
+		watch(['solway_necloud_es6/react/**'], () => {
+			gulp.src(['solway_necloud_es6/react/**/*.js', 'solway_necloud_es6/react/*.js'])
+				.pipe(plumber({ errorHandler: notify.onError("Error: <%= error.message %>") }))
+				.pipe(babel({
+					"presets": [
+						"es2015",
+						"stage-0",
+						"react"
+					],
+					"plugins": [],
+					"comments": false,
+				}))
+				.pipe(gulp.dest('theme/js/dist/'))
+
+			cmd.run(`git add solway_necloud_es6/`)
 		})
 
 		watch('scss/**/*.scss', () => {
@@ -62,7 +79,7 @@ gulp.task('watch', [], () => {
 						}))
 						.pipe(gulp.dest('theme/css/'))
 
-					cmd.run(`git add .`)
+					cmd.run(`git add scss/`)
 
 				}, 500)
 			})
@@ -86,33 +103,8 @@ gulp.task('watch', [], () => {
 	}, 5000)
 })
 
-gulp.task('replaceToDev', () => {
 
-	gulp.src(['theme/js/config.router.js'])
-		.pipe(replace('theme/', '/theme/'))
-		.pipe(replace(`tpl/`, `/NECloud/tpl/`))
-		.pipe(replace(`/NECloud/tpl/app.jsp`, `/tpl/app.jsp`))
-		.pipe(replace(`templateUrl: /* @ */'/NECloud/tpl/`, `templateUrl: /* @ */'/tpl/`))
-		.pipe(gulp.dest('theme/js/'))
-
-	gulp.src(['theme/js/dist/componets.js'])
-		.pipe(replace(`window.baseUrl = document.getElementById('routerJS').getAttribute('param')`, `window.baseUrl = '';`))
-		.pipe(gulp.dest('theme/js/dist/'))
-
-	gulp.src(['needToReplace/tpl/blocks/**']).pipe(gulp.dest('tpl/blocks/'))
-
-	gulp.src(['needToReplace/tpl/app.jsp']).pipe(gulp.dest('tpl/'))
-
-	gulp.src(['tpl/publicComponent/*.jsp'])
-		.pipe(replace(`<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>`, ``))
-		.pipe(replace('${ctx}/vendor/', '/vendor/'))
-		.pipe(replace('${ctx}/tpl/', '/tpl/'))
-		.pipe(gulp.dest('tpl/publicComponent/'))
-})
-
-gulp.task('proxy', () => require('./proxy'))
-
-gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:3001/login.html'))
+gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:88/login.html'))
 
 gulp.task('updateCode', () => {
 	svnUpdate()
@@ -142,33 +134,8 @@ function svnUpdate() {
 
 
 
-/****************************************开发环境构建************************************** */
-gulp.task('dev', gulpSequence('updateCode', 'replaceToDev', 'watch', 'proxy', 'openChrome'))
-
-
-
-
-/****************************************生产环境构建************************************** */
-gulp.task('build', gulpSequence('replaceToProduction', 'es6Rename', 'es6JsDel', 'delReplaceFile'))
-
-gulp.task('replaceToProduction', () => {
-	gulp.src(['theme/js/config.router.js'])
-		.pipe(replace('/theme/', 'theme/'))
-		.pipe(replace(`templateUrl: /* @ */'/tpl/`, `templateUrl: /* @ */'tpl/`))
-		.pipe(replace(`/NECloud/tpl/`, `tpl/`))
-		.pipe(gulp.dest('theme/js/'))
-
-	gulp.src(['theme/js/dist/componets.js'])
-		.pipe(replace(`window.baseUrl = '';`, `window.baseUrl = document.getElementById('routerJS').getAttribute('param')`))
-		.pipe(gulp.dest('theme/js/dist/'))
-
-	gulp.src(['tpl/publicComponent/*.jsp'])
-		.pipe(replace('/vendor/', '${ctx}/vendor/'))
-		.pipe(replace('/tpl/', '${ctx}/tpl/'))
-		.pipe(header(` charset=UTF-8" pageEncoding="UTF-8"%>`))
-		.pipe(header(`<%@ page language="java" contentType="text/html;`))
-		.pipe(gulp.dest('tpl/publicComponent/'))
-})
+/****************************************非代理启动************************************** */
+gulp.task('start', gulpSequence('updateCode', 'watch', 'openChrome'))
 
 gulp.task('es6Rename', () => {
 	gulp.src('solway_necloud_es6/myJs/**/*.js')
@@ -183,12 +150,6 @@ gulp.task('es6JsDel', () => {
 		del(['solway_necloud_es6/myJs/**/*.js']).then(paths => console.log('Deleted files and folders:\n', paths.join('\n')))
 	}, 1000);
 })
-
-gulp.task('delReplaceFile', () =>
-	del(['tpl/blocks/**'])
-		.then(() => del(['tpl/app.jsp']))
-		.then(() => console.log('delReplaceFile'))
-)
 
 gulp.task('commit', [], async () => {
 	await svnUpdate()
