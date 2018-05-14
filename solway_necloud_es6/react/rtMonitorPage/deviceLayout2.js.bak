@@ -1,0 +1,122 @@
+ajaxData({
+    getDeviceLayout: {
+        name: 'GETdeviceLayoutV2',
+        data: {}
+    }
+
+}, {})('DeviceLayout2Ctrl', ['$scope', 'myAjaxData', '$interval'], ($scope, myAjaxData, $interval) => {
+    // 所有状态  默认全选
+    $scope.status = {
+        status1: true,
+        status2: true,
+        status3: true,
+        status4: true,
+        status5: true,
+        statusAll: true,
+    };
+
+    //双击按钮事件
+    $scope.dblclick = function (pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
+        const res = {};
+        res.deviceSerialNnumber = deviceSerialNnumber;
+        res.deviceId = deviceid;
+        res.pstationid = pstationid;
+        res.deviceTypeNow = deviceType;
+        $scope.deviceTypeNow = deviceType;
+
+        $scope.inverterType = hasJB;//点击逆变器，不同类型跳转不同样式页面（1->inverterDetailNew.jsp,2->inverterDetailNewType1.jsp）
+
+        if (deviceType == '3') {
+            $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
+            //$scope.$emit("showDeviceDetail3", res);
+            $scope.$broadcast("showDeviceDetail3broad", res);
+        } else if (deviceType == '2') {
+            $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
+            $scope.$broadcast("showDeviceDetail2broad", res);
+            //$scope.$emit("showDeviceDetail2", res);
+        } else if (deviceType == '1') {
+            $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
+            $scope.$broadcast("showDeviceDetail1broad", res);
+            //$scope.$emit("showDeviceDetail1", res);
+        }
+        return false;
+        //$scope.showHistoryData_byRTMDeviceLogId(pstationid,deviceid,deviceSerialNnumber,deviceType);
+    }
+
+    class Root extends React.Component {
+        constructor(props) {
+            super(props);
+            this.getData = this.getData.bind(this);
+            this.bindData = this.bindData.bind(this);
+            this.bindEvents = this.bindEvents.bind(this);
+            this.dataFilter = this.dataFilter.bind(this);
+            this.state = {
+                data: $scope.getDeviceLayout.res || [],
+                status: $scope.status
+            };
+            this.bindData();
+        }
+
+        getChildContext() {
+            return {
+                status: this.state.status,
+                dblClick: $scope.dblclick
+            };
+        }
+
+        componentDidMount() {
+            this.bindEvents();
+        }
+
+        bindEvents() {
+            $scope.changeStatus = statu => {
+                $scope.status[statu] = !$scope.status[statu];
+                if (statu === 'statusAll') {
+                    Object.keys($scope.status).forEach(v => $scope.status[v] = $scope.status[statu]);
+                } else {
+                    const { statusAll, ...other } = $scope.status;
+                    $scope.status.statusAll = Object.values(other).every(e => e);
+                }
+                this.dataFilter();
+            };
+        }
+
+        dataFilter() {
+            const { status } = $scope;
+            this.setState({ status });
+        }
+
+        async bindData() {
+            const data = await $scope.getDeviceLayout.promise;
+            this.timer = $interval(this.getData, 5000);
+            this.setState({ data });
+        }
+
+        async getData() {
+            const data = await $scope.getDeviceLayout.getData({});
+            this.setState({ data });
+        }
+
+        componentWillUnmount() {
+            $interval.cancel(this.timer);
+        }
+
+        render() {
+            const { Xb, Nbq } = window.reactComponent;
+            return this.state.data.map(v => (
+                <div key={v.id} className="col-xs-4" style={{ margin: '50px 0' }}>
+                    {v.deviceType === '1' ? <Xb data={v} /> : null}
+                    {v.deviceType === '2' ? <Nbq data={v} /> : null}
+                </div>
+            ));
+        }
+    };
+    Root.childContextTypes = {
+        status: PropTypes.object,
+        dblClick: PropTypes.func
+    };
+    ReactDOM.render(
+        <Root />,
+        document.getElementById('deviceLayout')
+    );
+});
