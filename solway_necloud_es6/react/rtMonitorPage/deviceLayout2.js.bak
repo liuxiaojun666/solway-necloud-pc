@@ -2,6 +2,12 @@ ajaxData({
     getDeviceLayout: {
         name: 'GETdeviceLayoutV2',
         data: {}
+    },
+    rtmSingleStationComm: {
+        name: 'GETRtmSingleStationComm',
+        data: {
+            dateString: new Date().Format("yyyy-MM-dd")
+        }
     }
 
 }, {})('DeviceLayout2Ctrl', ['$scope', 'myAjaxData', '$interval'], ($scope, myAjaxData, $interval) => {
@@ -14,6 +20,11 @@ ajaxData({
         status5: true,
         statusAll: true,
     };
+
+    const timeInterval = 10 * 1000; // 10秒刷新一次数据
+
+    $scope.$on('$destroy', () => $interval.cancel($scope.timer));
+
 
     //双击按钮事件
     $scope.dblclick = function (pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
@@ -93,18 +104,15 @@ ajaxData({
         async bindData() {
             // 首次绑定数据
             const data = await $scope.getDeviceLayout.promise;
-            this.timer = $interval(this.getData, 5000);
+            $scope.timer = $interval(this.getData, timeInterval);
             this.setState({ data });
         }
 
         async getData() {
             // 获取数据 刷新接口
+            $scope.rtmSingleStationComm.getData({});
             const data = await $scope.getDeviceLayout.getData({});
             this.setState({ data });
-        }
-
-        componentWillUnmount() {
-            $interval.cancel(this.timer);
         }
 
         toggleHover(e, ref, isHover) {
@@ -127,7 +135,7 @@ ajaxData({
                     className="col-xs-4"
                     onMouseEnter={e => this.toggleHover(e, v.deviceType + '' + v.id, true)}
                     onMouseLeave={e => this.toggleHover(e, v.deviceType + '' + v.id, false)}
-                    style={{ margin: '50px 0' }}>
+                    style={{ margin: '10px 0' }}>
 
                     {v.deviceType === '1' ? <Xb
                         hover={this.state.hover[v.deviceType + '' + v.id]}
