@@ -50,9 +50,11 @@ ajaxData({
             this.bindData = this.bindData.bind(this);
             this.bindEvents = this.bindEvents.bind(this);
             this.dataFilter = this.dataFilter.bind(this);
+            this.toggleHover = this.toggleHover.bind(this);
             this.state = {
                 data: $scope.getDeviceLayout.res || [],
-                status: $scope.status
+                status: $scope.status,
+                hover: {}
             };
             this.bindData();
         }
@@ -69,6 +71,7 @@ ajaxData({
         }
 
         bindEvents() {
+            // 状态过滤 事件执行函数
             $scope.changeStatus = statu => {
                 $scope.status[statu] = !$scope.status[statu];
                 if (statu === 'statusAll') {
@@ -82,17 +85,20 @@ ajaxData({
         }
 
         dataFilter() {
+            // 根据选择状态 过滤数据
             const { status } = $scope;
             this.setState({ status });
         }
 
         async bindData() {
+            // 首次绑定数据
             const data = await $scope.getDeviceLayout.promise;
             this.timer = $interval(this.getData, 5000);
             this.setState({ data });
         }
 
         async getData() {
+            // 获取数据 刷新接口
             const data = await $scope.getDeviceLayout.getData({});
             this.setState({ data });
         }
@@ -101,12 +107,35 @@ ajaxData({
             $interval.cancel(this.timer);
         }
 
+        toggleHover(e, ref, isHover) {
+            // hover事件 处理函数
+            const obj = { ...this.state.hover };
+            Object.keys(obj).forEach(v => obj[v] = false);
+            this.setState({
+                hover: {
+                    ...obj,
+                    [ref]: isHover
+                }
+            });
+        }
+
         render() {
             const { Xb, Nbq } = window.reactComponent;
             return this.state.data.map(v => (
-                <div key={v.id} className="col-xs-4" style={{ margin: '50px 0' }}>
-                    {v.deviceType === '1' ? <Xb data={v} /> : null}
-                    {v.deviceType === '2' ? <Nbq data={v} /> : null}
+                <div
+                    key={v.id}
+                    className="col-xs-4"
+                    onMouseEnter={e => this.toggleHover(e, v.deviceType + '' + v.id, true)}
+                    onMouseLeave={e => this.toggleHover(e, v.deviceType + '' + v.id, false)}
+                    style={{ margin: '50px 0' }}>
+
+                    {v.deviceType === '1' ? <Xb
+                        hover={this.state.hover[v.deviceType + '' + v.id]}
+                        data={v} /> : null}
+
+                    {v.deviceType === '2' ? <Nbq
+                        hover={this.state.hover[v.deviceType + '' + v.id]}
+                        data={v} /> : null}
                 </div>
             ));
         }
