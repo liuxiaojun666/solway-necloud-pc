@@ -21,9 +21,9 @@ ajaxData({
         statusAll: true,
     };
 
-    const timeInterval = 10 * 1000; // 10秒刷新一次数据
+    // const timeInterval = 10 * 1000; // 10秒刷新一次数据
 
-    $scope.$on('$destroy', () => $interval.cancel($scope.timer));
+    // $scope.$on('$destroy', () => $interval.cancel($scope.timer));
 
 
     //双击按钮事件
@@ -65,7 +65,8 @@ ajaxData({
             this.state = {
                 data: $scope.getDeviceLayout.res || [],
                 status: $scope.status,
-                hover: {}
+                hover: {},
+                loop: true
             };
             this.bindData();
         }
@@ -79,6 +80,14 @@ ajaxData({
 
         componentDidMount() {
             this.bindEvents();
+            this.switchPowerCallback();
+        }
+
+        switchPowerCallback() {
+            $scope.switchPowerCallback = () => {
+                this.setState({ data: [], loop: false });
+                this.getData(true);
+            };
         }
 
         bindEvents() {
@@ -104,14 +113,19 @@ ajaxData({
         async bindData() {
             // 首次绑定数据
             const data = await $scope.getDeviceLayout.promise;
-            $scope.timer = $interval(this.getData, timeInterval);
+            // $scope.timer = $interval(this.getData, timeInterval);
             this.setState({ data });
         }
 
-        async getData() {
+        async getData(loop) {
             // 获取数据 刷新接口
             $scope.rtmSingleStationComm.getData({});
             const data = await $scope.getDeviceLayout.getData({});
+            if (loop) {
+                this.getData();
+                this.setState({ data, loop });
+            } else if (!this.state.loop) return;
+            this.getData();
             this.setState({ data });
         }
 
