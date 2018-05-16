@@ -21,11 +21,6 @@ ajaxData({
         statusAll: true,
     };
 
-    // const timeInterval = 10 * 1000; // 10秒刷新一次数据
-
-    // $scope.$on('$destroy', () => $interval.cancel($scope.timer));
-
-
     //双击按钮事件
     $scope.dblclick = function (pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
         const res = {};
@@ -62,6 +57,7 @@ ajaxData({
             this.bindEvents = this.bindEvents.bind(this);
             this.dataFilter = this.dataFilter.bind(this);
             this.toggleHover = this.toggleHover.bind(this);
+            this.setData = this.setData.bind(this);
             this.state = {
                 data: $scope.getDeviceLayout.res || [],
                 status: $scope.status,
@@ -80,7 +76,6 @@ ajaxData({
 
         componentDidMount() {
             this.bindEvents();
-            this.switchPowerCallback();
         }
 
         switchPowerCallback() {
@@ -91,7 +86,6 @@ ajaxData({
         }
 
         bindEvents() {
-            // 状态过滤 事件执行函数
             $scope.changeStatus = statu => {
                 $scope.status[statu] = !$scope.status[statu];
                 if (statu === 'statusAll') {
@@ -105,39 +99,36 @@ ajaxData({
         }
 
         dataFilter() {
-            // 根据选择状态 过滤数据
             const { status } = $scope;
             this.setState({ status });
         }
 
         async bindData() {
-            // 首次绑定数据
             const data = await $scope.getDeviceLayout.promise;
-            // $scope.timer = $interval(this.getData, timeInterval);
-            this.setState({ data });
-        }
-
-        async getData(loop) {
-            // 获取数据 刷新接口
-            $scope.rtmSingleStationComm.getData({});
-            const data = await $scope.getDeviceLayout.getData({});
-            if (loop) {
-                this.getData();
-                this.setState({ data, loop });
-            } else if (!this.state.loop) return;
+            this.switchPowerCallback();
             this.getData();
             this.setState({ data });
         }
 
+        async getData(loop) {
+            $scope.rtmSingleStationComm.getData({});
+            const data = await $scope.getDeviceLayout.getData({});
+            this.setData(data, loop);
+        }
+
+        setData(data, loop) {
+            if (loop) {
+                this.setState({ data, loop }, this.getData);
+            } else if (!this.state.loop) {
+                return;
+            } else {
+                this.setState({ data }, this.getData);
+            }
+        }
+
         toggleHover(e, ref, isHover) {
-            // hover事件 处理函数
-            const obj = { ...this.state.hover };
-            Object.keys(obj).forEach(v => obj[v] = false);
             this.setState({
-                hover: {
-                    ...obj,
-                    [ref]: isHover
-                }
+                hover: { [ref]: isHover }
             });
         }
 
@@ -160,7 +151,7 @@ ajaxData({
                             hover={this.state.hover[v.deviceType + '' + v.id]}
                             data={v} /> : null}
                     </div>
-                )) : <Loading/>
+                )) : <Loading />
         }
     };
     Root.childContextTypes = {
