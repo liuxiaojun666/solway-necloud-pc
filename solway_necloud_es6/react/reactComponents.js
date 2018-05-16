@@ -89,10 +89,10 @@ win.reactComponent = (() => {
             </g>
             <rect name="shadow" height="100%" width="100%" fillOpacity="0.5" fill="#CCCCCC" style={{ display: 'none' }} />
         </svg>,
-        filterEle(status, data.status) && <span key={data.name}>{data.name}</span>,
-        <br key='br' />,
+        filterEle(status, data.status) && <span key={data.name} style={{ marginRight: '50px', whiteSpace: 'nowrap'}}>{data.name}</span>,
+        data.children && data.children[0] && <br key='br' />,
         data.children && data.children[0] && data.children.map((v, i) => <Hlx key={'hlxid' + v.id} hover={hover} data={v} />),
-        <br key='br2' />
+        data.children && data.children[0] && <br key='br2' />
     ];
     NbqD.contextTypes = { status: PropTypes.object, dblClick: PropTypes.func };
 
