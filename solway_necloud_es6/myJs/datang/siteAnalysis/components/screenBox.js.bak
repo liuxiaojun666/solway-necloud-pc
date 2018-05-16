@@ -26,7 +26,7 @@ app.directive('screen', [() => ({
          * 组件销毁，取消绑定事件
          */
         $scope.$on('$destroy', () => {
-            $element.off('click').find('botton').off('click')
+            $element.off('click').find('button').off('click')
             document.removeEventListener('click', hideBox)
         })
     },
@@ -62,8 +62,8 @@ app.directive('screenBox', ['$timeout', ($timeout) => ({
         /**
          * 初始化数据
          */
-        $scope.time = $scope.$parent.time || 0
-        $scope.number = $scope.$parent.number || 0
+        $scope.time = $scope.$parent.yearDiff || 0
+        $scope.number = $scope.$parent.num || 0
         $scope.selectedMonth = $scope.$parent.selectedMonth && $scope.$parent.selectedMonth.slice(0) || []
 
 
@@ -97,7 +97,7 @@ app.directive('screenBox', ['$timeout', ($timeout) => ({
             $scope.$parent.yearDiff = $scope.time
             $scope.$parent.num = $scope.number
             $scope.$parent.selectedMonth = $scope.selectedMonth
-            
+            $scope.number = $scope.number
             $scope.$parent.isSelected = true
             $scope.$parent.showScreenBox = false
             $scope.$parent.filterData()

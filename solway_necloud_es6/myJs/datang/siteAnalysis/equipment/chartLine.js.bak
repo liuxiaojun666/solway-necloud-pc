@@ -8,13 +8,28 @@ app.directive('equipmentChartLine', ['myAjaxData', (myAjaxData) => ({
         xdata: '=',
         lines: '=',
         colors: '=',
+        timeType : '='
     },
 
     link ($scope, $element, $attrs) {
         let myChart = echarts.init($element[0])
         $scope.$watch('lines', (newValue) => {
             if (!newValue) return
-            
+            let xAxisData = '';
+            switch ($scope.timeType) {
+                case 'MONTH':
+                    xAxisData = $scope.xdata.map(v => new Date(v).Format('dd'))
+                    break;
+                case 'YEAR':
+                    xAxisData = $scope.xdata.map(v => new Date(v).Format('MM'))
+                    break;
+                case 'ACCUM':
+                    xAxisData = $scope.xdata.map(v => new Date(v).Format('yyyy'))
+                    break;
+                default:
+                    xAxisData = $scope.xdata.map(v => new Date(v).Format('yyyy-MM-dd'))
+                    break;
+            }
             const option = {
                 tooltip: {
                     trigger: 'axis'
@@ -51,7 +66,7 @@ app.directive('equipmentChartLine', ['myAjaxData', (myAjaxData) => ({
                         show: true,
                         interval: 0,
                     },
-                    data: $scope.xdata.map(v => new Date(v).Format('yyyy-MM-dd'))
+                    data: xAxisData
                 },
                 yAxis: {
                     name: $scope.yName,
