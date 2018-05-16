@@ -27,6 +27,30 @@ win.reactComponent = (() => {
         return false;
     };
 
+    const Loading = () => (
+        <div style={{position: 'relative'}}>
+            <div className="clearfix" style={{ height: '100%'}}></div>
+            <div className="loding-view" style={{
+                position: 'absolute', 
+                width: '100%',
+                height: '100%',
+                top: '0',
+                left: '0',
+                Zindex: '9999',
+                textAlign:'center',
+                background:'rgba(255,255,255,.8)'
+        }}>
+                <div className="spinner">
+                    <div className="rect1"></div>
+                    <div className="rect2"></div>
+                    <div className="rect3"></div>
+                    <div className="rect4"></div>
+                    <div className="rect5"></div>
+                </div>
+            </div>
+        </div>
+    );
+
     // 箱变
     const Xb = ({ data, hover }, { status, dblClick }) => [
         filterEle(status, data.status) && <svg
@@ -67,7 +91,7 @@ win.reactComponent = (() => {
         </svg>,
         filterEle(status, data.status) && <span key={data.name}>{data.name}</span>,
         <br key='br' />,
-        ...data.children.map((v, i) => <Hlx key={'hlxid' + v.id} hover={hover} data={v} />),
+        data.children && data.children[0] && data.children.map((v, i) => <Hlx key={'hlxid' + v.id} hover={hover} data={v} />),
         <br key='br2' />
     ];
     NbqD.contextTypes = { status: PropTypes.object, dblClick: PropTypes.func };
@@ -139,6 +163,7 @@ win.reactComponent = (() => {
     const Nbq = ({ data, hover }) => data.hasJB === '1' ? <NbqHlx data={data} hover={hover} /> : <NbqD data={data} hover={hover} />;
 
     return {
+        Loading,
         Xb,
         NbqD,
         Hlx,
