@@ -125,6 +125,7 @@ ajaxData({
         {
             name: 'repairCount',
             apiName: 'GETrepairCount',
+            later:true
         },
         {
             name: 'repairHours',
@@ -175,7 +176,7 @@ ajaxData({
         }
     },
 }, {
-    })('windPowerOperationsCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    })('windPowerOperationsCtrl', ['$scope', 'myAjaxData', '$state'], ($scope, myAjaxData, $state) => {
         $scope.dateTime1 = new Date; //选择月日期
         $scope.dateTime2 = new Date; //选择年日期
         $scope.timeType = 'ACCUM';   //默认查累计
@@ -193,7 +194,15 @@ ajaxData({
         // 所有省份  + 集团
         $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
 
-        $scope.repairCount.promise.then(res => $scope.rankingData = res.body)
+        // 默认加载
+        $scope.repairCount.getData({
+            powerType: ($state.current.name.includes('pv') ? 'PV' : 'WP'),
+            idType: '1',
+            timeType: 'ACCUM',
+            dateStr: (new Date).Format('yyyy-MM-dd')
+        }).then(res => ($scope.rankingData = res.body));
+
+        //$scope.repairCount.promise.then(res => $scope.rankingData = res.body)
         // 改变  范围 执行 函数  重新请求 数据 汇总
         $scope.changeIds = value => {
             if (value === $scope.ids) return;
