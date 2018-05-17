@@ -156,7 +156,7 @@ ajaxData({
                 timeType: 'ACCUM',
                 dateStr: (new Date).Format('yyyy-MM-dd')
             },
-            later: v.later
+            later: true
         }
     })).reduce((obj, cur) => ({ ...obj, ...cur })),
     province: {
@@ -173,7 +173,8 @@ ajaxData({
             idType: '1',
             timeType: 'ACCUM',
             dateStr: (new Date).Format('yyyy-MM-dd')
-        }
+        },
+        later: true
     },
 }, {
     })('windPowerOperationsCtrl', ['$scope', 'myAjaxData', '$state'], ($scope, myAjaxData, $state) => {
@@ -201,6 +202,13 @@ ajaxData({
             timeType: 'ACCUM',
             dateStr: (new Date).Format('yyyy-MM-dd')
         }).then(res => ($scope.rankingData = res.body));
+
+        $scope.repairTotal.getData({
+            powerType: ($state.current.name.includes('pv') ? 'PV' : 'WP'),
+            idType: '1',
+            timeType: 'ACCUM',
+            dateStr: (new Date).Format('yyyy-MM-dd')
+        });
 
         //$scope.repairCount.promise.then(res => $scope.rankingData = res.body)
         // 改变  范围 执行 函数  重新请求 数据 汇总
