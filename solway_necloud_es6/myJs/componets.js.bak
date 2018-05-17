@@ -144,6 +144,28 @@ app.directive('dropDown', ['myAjaxData', myAjaxData => ({
 app.filter('filter_null', () => text => text == null ? '-' : text)
 
 /**
+ * 该过滤器  可以 调用任意 输入值的 任意函数
+ * 使用方法   input | self_func: 'substr': 0: 4   //表示 把输入的 input 使用函数 substr 过滤  参数为  （0, 4）
+ */
+app.filter('self_func', () => (input, funcName, ...arg) => input && input[funcName] && input[funcName](...arg));
+
+/**
+ * 该过滤器 使用  传入的函数过滤 （输入的值为参数）
+ * 使用方法   input | func: 'Object.keys'
+ */
+app.filter('func', () => (input, funcName, ...arg) => {
+    if (!input) return input;
+    let func;
+    try {
+        func = eval(funcName);
+    } catch (error) {
+        console.error(error);
+    }
+    if (!func) return input;
+    return func(input);
+});
+
+/**
  * 该过滤器 过滤html 单标签不能绑定的问题
  */
 app.filter('to_trusted', ['$sce', $sce => v => $sce.trustAsHtml(v)])
