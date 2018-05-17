@@ -76,20 +76,22 @@ win.reactComponent = (() => {
 
     // 大逆变器
     const NbqD = ({ data, hover }, { status, dblClick }) => [
-        filterEle(status, data.status) && <svg key={'nbqid' + data.id}
-            onDoubleClick={() => dblClick(data.stid, data.id, data.serialNumber, '2', data.hasJB)}
-            xmlns="http://www.w3.org/2000/svg" height="50" width="30"
-            style={{ verticalAlign: 'middle', cursor: 'pointer' }}>
-            {hover && <rect name="select" height="100%" width="100%" fill="rgba(6, 190, 189, .3)"/>}
-            <g>
-                <rect stroke={deviceStatusColorMap[data.status]} height="40" width="20" y="5" x="5" fillOpacity="0.1" strokeWidth="1" fill={deviceStatusColorMap[data.status]} />
-                <line stroke={deviceStatusColorMap[data.status]} y2="45" x2="5" y1="5" x1="25" strokeWidth="1" />
-                <line stroke={deviceStatusColorMap[data.status]} y2="14" x2="16" y1="14" x1="8" strokeWidth="1" />
-                <path stroke={deviceStatusColorMap[data.status]} d="M15 35 Q 17 33, 19 35 T 23 35" fillOpacity="0" />
-            </g>
-            <rect name="shadow" height="100%" width="100%" fillOpacity="0.5" fill="#CCCCCC" style={{ display: 'none' }} />
-        </svg>,
-        filterEle(status, data.status) && <span key={data.name} style={{ marginRight: '50px', whiteSpace: 'nowrap'}}>{data.name}</span>,
+        filterEle(status, data.status) && <div key={'nbqid' + data.id} style={{display: 'inline-block', width: '115px'}}>
+            <svg
+                onDoubleClick={() => dblClick(data.stid, data.id, data.serialNumber, '2', data.hasJB)}
+                xmlns="http://www.w3.org/2000/svg" height="50" width="30"
+                style={{ verticalAlign: 'middle', cursor: 'pointer' }}>
+                {hover && <rect name="select" height="100%" width="100%" fill="rgba(6, 190, 189, .3)" />}
+                <g>
+                    <rect stroke={deviceStatusColorMap[data.status]} height="40" width="20" y="5" x="5" fillOpacity="0.1" strokeWidth="1" fill={deviceStatusColorMap[data.status]} />
+                    <line stroke={deviceStatusColorMap[data.status]} y2="45" x2="5" y1="5" x1="25" strokeWidth="1" />
+                    <line stroke={deviceStatusColorMap[data.status]} y2="14" x2="16" y1="14" x1="8" strokeWidth="1" />
+                    <path stroke={deviceStatusColorMap[data.status]} d="M15 35 Q 17 33, 19 35 T 23 35" fillOpacity="0" />
+                </g>
+                <rect name="shadow" height="100%" width="100%" fillOpacity="0.5" fill="#CCCCCC" style={{ display: 'none' }} />
+            </svg>
+            <span key={data.name} style={{ whiteSpace: 'nowrap'}}>{data.name}</span>
+        </div>,
         data.children && data.children[0] && <br key='br' />,
         data.children && data.children[0] && data.children.map((v, i) => <Hlx key={'hlxid' + v.id} hover={hover} data={v} />),
         data.children && data.children[0] && <br key='br2' />
