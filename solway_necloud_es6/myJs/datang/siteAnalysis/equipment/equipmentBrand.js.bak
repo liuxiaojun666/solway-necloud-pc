@@ -81,6 +81,14 @@ ajaxData({
         MTTR: 'MTTR',
     };
 
+    const xAxisNameMap = { 'MONTH': '日', 'YEAR': '月', 'ACCUM': '年' }
+
+    const getXAxisName = name => {
+        $scope.xAxisName = xAxisNameMap[name];
+    }
+
+    getXAxisName($scope.timeType);
+
     // 所有省份  + 集团
     $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
 
@@ -114,6 +122,8 @@ ajaxData({
         const timeType = $scope.timeType = value;
         const dateStr = $scope.dateStr = getDateStr();
 
+        getXAxisName($scope.timeType);
+        
         $scope.rankingBrand.getData({ timeType, dateStr });
         $scope.rankingBrandCount.getData({ timeType, dateStr });
         $scope.rankingProvince.getData({ timeType, dateStr });
