@@ -21,6 +21,8 @@ ajaxData({
         statusAll: true,
     };
 
+    
+
     //双击事件
     $scope.dblclick = function (pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
         const res = {};
@@ -73,6 +75,7 @@ ajaxData({
 
         componentDidMount() {
             this.bindEvents();
+            $scope.$on('$destroy', () => this.setState({ data: null, loop: false }));
         }
 
         switchPowerCallback() {
@@ -113,14 +116,16 @@ ajaxData({
             this.setData(data, loop);
         }
 
-        setData(data, loop) {
+        async setData(data, loop) {
             if (loop) {
-                this.setState({ data, loop }, this.getData);
+                this.setState({ data, loop });
             } else if (!this.state.loop) {
                 return;
             } else {
-                this.setState({ data }, this.getData);
+                this.setState({ data });
             }
+            await myAjaxData.timeout(10000);
+            this.getData();
         }
 
         toggleHover(e, ref, isHover) {
@@ -131,24 +136,26 @@ ajaxData({
 
         render() {
             const { Xb, Nbq, Loading } = window.reactComponent;
-            return this.state.data[0]
-                ? this.state.data.map(v => (
-                    <div
-                        key={v.id}
-                        className={v.deviceType === '1' ? "col-xs-4" : 'col-xs-3'}
-                        onMouseEnter={e => this.toggleHover(e, v.deviceType + '' + v.id, true)}
-                        onMouseLeave={e => this.toggleHover(e, v.deviceType + '' + v.id, false)}
-                        style={{ margin: '10px 0' }}>
+            return this.state.data ? (
+                this.state.data[0]
+                    ? this.state.data.map(v => (
+                        <div
+                            key={v.id}
+                            className={v.deviceType === '1' ? "col-xs-4" : 'col-xs-3'}
+                            onMouseEnter={e => this.toggleHover(e, v.deviceType + '' + v.id, true)}
+                            onMouseLeave={e => this.toggleHover(e, v.deviceType + '' + v.id, false)}
+                            style={{ margin: '10px 0' }}>
 
-                        {v.deviceType === '1' ? <Xb
-                            hover={this.state.hover[v.deviceType + '' + v.id]}
-                            data={v} /> : null}
+                            {v.deviceType === '1' ? <Xb
+                                hover={this.state.hover[v.deviceType + '' + v.id]}
+                                data={v} /> : null}
 
-                        {v.deviceType === '2' ? <Nbq
-                            hover={this.state.hover[v.deviceType + '' + v.id]}
-                            data={v} /> : null}
-                    </div>
-                )) : <Loading />
+                            {v.deviceType === '2' ? <Nbq
+                                hover={this.state.hover[v.deviceType + '' + v.id]}
+                                data={v} /> : null}
+                        </div>
+                    )) : <Loading />
+            ) : null;
         }
     };
     Root.childContextTypes = {
