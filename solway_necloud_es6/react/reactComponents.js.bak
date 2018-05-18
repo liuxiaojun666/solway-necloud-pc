@@ -69,7 +69,7 @@ win.reactComponent = (() => {
             <rect name="shadow" height="100%" width="100%" fillOpacity="0.5" fill="#CCCCCC" style={{ display: 'none' }} />
         </svg>,
         filterEle(status, data.status) && <span key={data.name}>{data.name}</span>,
-        <br key='br' />,
+        filterEle(status, data.status) && <br key='br' />,
         data.children && data.children[0] && data.children.map(v => <Nbq key={'nbq' + v.id} hover={hover} data={v} />)
     ];
     Xb.contextTypes = { status: PropTypes.object, dblClick: PropTypes.func };
@@ -92,9 +92,9 @@ win.reactComponent = (() => {
             </svg>
             <span key={data.name} style={{ whiteSpace: 'nowrap'}}>{data.name}</span>
         </div>,
-        data.children && data.children[0] && <br key='br' />,
+        filterEle(status, data.status) && data.children && data.children[0] && <br key='br' />,
         data.children && data.children[0] && data.children.map((v, i) => <Hlx key={'hlxid' + v.id} hover={hover} data={v} />),
-        data.children && data.children[0] && <br key='br2' />
+        filterEle(status, data.status) && data.children && data.children[0] && <br key='br2' />
     ];
     NbqD.contextTypes = { status: PropTypes.object, dblClick: PropTypes.func };
 

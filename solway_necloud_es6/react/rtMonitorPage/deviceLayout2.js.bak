@@ -21,7 +21,7 @@ ajaxData({
         statusAll: true,
     };
 
-    
+
 
     //双击事件
     $scope.dblclick = function (pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
@@ -144,7 +144,14 @@ ajaxData({
                             className={v.deviceType === '1' ? "col-xs-4" : 'col-xs-3'}
                             onMouseEnter={e => this.toggleHover(e, v.deviceType + '' + v.id, true)}
                             onMouseLeave={e => this.toggleHover(e, v.deviceType + '' + v.id, false)}
-                            style={{ margin: '10px 0' }}>
+                            style={{
+                                margin: ((this.state.status.status5 &&
+                                    !this.state.status.status1 &&
+                                    !this.state.status.status2 &&
+                                    !this.state.status.status3 &&
+                                    !this.state.status.status4) ?
+                                    '0' : '10px 0')
+                            }}>
 
                             {v.deviceType === '1' ? <Xb
                                 hover={this.state.hover[v.deviceType + '' + v.id]}
