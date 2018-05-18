@@ -744,13 +744,15 @@ app.directive('commonChartLine', ['myAjaxData', '$timeout', (myAjaxData, $timeou
                         yAxisIndex: i,
                         smooth: true,
                         showSymbol: false,
-                        data: data.map(v => v === null ? '-' : v),
+                        data: data.map(v => {
+                            if (!Number.isNaN(v + '' - 0)) return (+v).toFixed(1) - 0;
+                            return v === null ? '-' : v;
+                        }),
                         itemStyle: {
                             normal: {
                                 color: colors[i][xi],
                                 borderColor: colors[i][xi],
                                 borderWidth: 12
-
                             }
                         },
                     }))

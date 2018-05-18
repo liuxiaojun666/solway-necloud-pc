@@ -108,6 +108,7 @@ win.ajaxData = (b, a) => {
                 //     })
                 // }
                 N[g].getData = k => {
+                    N[g].getData.reqNumber++
                     let i = Z.getData({
                         name: b[g].name,
                         data: k
@@ -117,6 +118,8 @@ win.ajaxData = (b, a) => {
                     N.isLoding = E()
                     Z.setData(g, null, N.isLoding)
                     i.then(l => {
+                        N[g].getData.resNumber++
+                        if (N[g].onlyLatest && N[g].getData.resNumber < N[g].getData.reqNumber) return
                         N[g].res = l
                         N[g].isLoding = !1
                         N[g].getDataCallback && N[g].getDataCallback(true, l)
@@ -129,6 +132,9 @@ win.ajaxData = (b, a) => {
                     })
                     return i
                 }
+                N[g].getData.reqNumber = 0
+                N[g].getData.resNumber = 0
+                N[g].onlyLatest = b[g].onlyLatest
                 N[g].isLoding = !1
                 if (b[g].later) continue
                 if (b[g].data.__stationId__) {
