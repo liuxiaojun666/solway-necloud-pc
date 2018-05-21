@@ -31,11 +31,12 @@ ajaxData({
         };
 
         let handle = null;
-        function timer(params) {
+        function timer() {
             if (handle) $interval.cancel(handle);
+            if ((+$scope.dateTime1 + 1000 * 60 * 60 * 24 * 2) < +$scope.dateTime2) return;
             handle = $interval(() => {
+                if ($scope.line.isLoding) return;
                 $scope.line.getData({});
-                if ((+$scope.dateTime1 + 1000 * 60 * 60 * 24 * 3) < +$scope.dateTime2) return;
                 $scope.list.getData({});
             }, 10000);
         }
