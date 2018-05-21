@@ -103,7 +103,7 @@ win.ajaxData = (b, a) => {
             for (let g in b) {
                 N[g] = {}
                 N[g].getData = k => {
-                    N[g].getData.reqNumber++
+                    const _number = ++N[g].getData.reqNumber
                     let i = Z.getData({
                         name: b[g].name,
                         data: k
@@ -114,7 +114,7 @@ win.ajaxData = (b, a) => {
                     Z.setData(g, null, N.isLoding)
                     i.then(l => {
                         N[g].getData.resNumber++
-                        if (N[g].onlyLatest && N[g].getData.resNumber < N[g].getData.reqNumber) return
+                        if (N[g].onlyLatest && (N[g].getData.reqNumber !== _number)) return
                         N[g].res = l
                         N[g].isLoding = !1
                         N[g].getDataCallback && N[g].getDataCallback(true, l)
