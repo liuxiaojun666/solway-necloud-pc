@@ -16,7 +16,7 @@ ajaxData({
         onlyLatest: true
     },
 }, {
-    })('powerPredictionCtrl', ['$scope', 'myAjaxData', '$interval'], ($scope, myAjaxData, $interval) => {
+    })('powerPredictionCtrl', ['$scope', 'myAjaxData', '$interval', '$http'], ($scope, myAjaxData, $interval, $http) => {
         $scope.dateTime1 = new Date;
         $scope.dateTime2 = new Date;
         $scope.customLoading = true;
@@ -30,9 +30,12 @@ ajaxData({
             $scope.line.getData({dateStr: $scope.dateTime1.showDate});
         };
 
-        const handle = $interval(() => {
+        $scope.line.getDataCallback = async () => {
+            await myAjaxData.timeout(10000);
+            if ($scope.customLoading) return;
             $scope.list.getData({});
             $scope.line.getData({});
-        }, 10000);
-        $scope.$on('$destroy', () => $interval.cancel(handle));
+        };
+
+        $scope.$on('$destroy', () => $scope.customLoading = true);
     });
