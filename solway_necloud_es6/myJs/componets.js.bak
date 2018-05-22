@@ -138,6 +138,9 @@ app.directive('dropDown', ['myAjaxData', myAjaxData => ({
     }
 })])
 
+Date.create = (...arg) => new Date(...arg);
+Array.create = (...arg) => new Array(...arg);
+
 /**
  * 该过滤器 值为null 的字符串
  */
@@ -651,6 +654,7 @@ app.directive('commonChartLine', ['myAjaxData', '$timeout', (myAjaxData, $timeou
 
         const drawing = () => {
             const { backgroundColor, linenames, ynames, xdata, ydatas, colors, datazoom } = $scope;
+
             const option = {
                 backgroundColor,
                 tooltip: {
@@ -740,13 +744,15 @@ app.directive('commonChartLine', ['myAjaxData', '$timeout', (myAjaxData, $timeou
                         yAxisIndex: i,
                         smooth: true,
                         showSymbol: false,
-                        data,
+                        data: data.map(v => {
+                            if (!Number.isNaN(v + '' - 0)) return (+v).toFixed(1) - 0;
+                            return v === null ? '-' : v;
+                        }),
                         itemStyle: {
                             normal: {
                                 color: colors[i][xi],
                                 borderColor: colors[i][xi],
                                 borderWidth: 12
-
                             }
                         },
                     }))
