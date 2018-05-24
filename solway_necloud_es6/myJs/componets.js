@@ -393,9 +393,9 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad
     },
     template: `
     <div class="calendar" style="position:relative;">
-        <span ng-if="showArrow" ng-click="changeDateTime(-1)"><i class="fa fa-angle-left"></i></span>
+        <span ng-show="showArrow" ng-click="changeDateTime(-1)"><i class="fa fa-angle-left"></i></span>
         <input type="text">
-        <span ng-if="showArrow" ng-click="changeDateTime(1)"><i class="fa fa-angle-right"></i></span>
+        <span ng-show="showArrow" ng-click="changeDateTime(1)"><i class="fa fa-angle-right"></i></span>
         <p ng-if="week" style="position:absolute;left: 20px;right: 20px;top: 0;bottom: 0;margin: 0;text-align: center;background-color: #fff;pointer-events: none;">
             {{weekStart + '至' + weekEnd}}
         </p>
@@ -543,6 +543,70 @@ app.directive('commonChartBar', ['myAjaxData', (myAjaxData) => ({
             setWidthHeight()
             myChart = echarts.init($element[0])
             window.addEventListener('resize', resizeFun)
+            $scope.$watch('data', (newValue, oldValue) => {
+                if (!newValue) return
+                if (Object.is(newValue, oldValue)) return
+                const option = {
+                    tooltip: {},
+                    grid: {
+                        top: '60',
+                        left: '20',
+                        right: '60',
+                        bottom: '20',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        name: $scope.xName || '',
+                        type: 'value',
+                        splitNumber: 3,
+                        axisLine: {
+                            lineStyle: {
+                                color: '#999'
+                            }
+                        },
+                        axisTick: {
+                            show: false
+                        }
+                    },
+                    yAxis: {
+                        name: $scope.yName,
+                        type: 'category',
+                        axisLine: {
+                            lineStyle: {
+                                color: '#999'
+                            }
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        data: $scope.y
+                    },
+                    series: [
+                        {
+                            type: 'bar',
+                            barWidth: '15',
+                            label: {
+                                normal: {
+                                    show: true,
+                                    position: 'right',
+                                    textStyle: {
+                                        color: $scope.colors[$scope.colors.length - 1]
+                                    }
+                                },
+                            },
+                            data: $scope.data.reverse().map((value, i, arr) => ({
+                                value,
+                                itemStyle: {
+                                    normal: {
+                                        color: $scope.colors[(value / Math.max(...arr) * ($scope.colors.length - 1)).toFixed()],
+                                    }
+                                }
+                            }))
+                        },
+                    ]
+                }
+                myChart.setOption(option)
+            })
         }, 0);
         const resizeFun = async () => {
             await myAjaxData.timeout(0)
@@ -554,74 +618,6 @@ app.directive('commonChartBar', ['myAjaxData', (myAjaxData) => ({
             myChart.dispose()
             myChart = null
         })
-
-        $scope.$watch('data', (newValue, oldValue) => {
-            if (!newValue) return
-            if (Object.is(newValue, oldValue)) return
-            const option = {
-                tooltip: {},
-                grid: {
-                    top: '60',
-                    left: '20',
-                    right: '60',
-                    bottom: '20',
-                    containLabel: true
-                },
-                xAxis: {
-                    name: $scope.xName || '',
-                    type: 'value',
-                    splitNumber: 3,
-                    axisLine: {
-                        lineStyle: {
-                            color: '#999'
-                        }
-                    },
-                    axisTick: {
-                        show: false
-                    }
-                },
-                yAxis: {
-                    name: $scope.yName,
-                    type: 'category',
-                    axisLine: {
-                        lineStyle: {
-                            color: '#999'
-                        }
-                    },
-                    axisTick: {
-                        show: false
-                    },
-                    data: $scope.y
-                },
-                series: [
-                    {
-                        type: 'bar',
-                        barWidth: '15',
-                        label: {
-                            normal: {
-                                show: true,
-                                position: 'right',
-                                textStyle: {
-                                    color: $scope.colors[$scope.colors.length - 1]
-                                }
-                            },
-                        },
-                        data: $scope.data.map((value, i, arr) => ({
-                            value,
-                            itemStyle: {
-                                normal: {
-                                    color: $scope.colors[(value / Math.max(...arr) * ($scope.colors.length - 1)).toFixed()],
-                                }
-                            }
-                        }))
-                    },
-                ]
-            }
-            myChart.setOption(option)
-        })
-        
-
-
     }
 })])
 /**
@@ -799,6 +795,41 @@ app.directive('commonChartPie', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLa
             setWidthHeight()
             myChart = echarts.init($element[0])
             window.addEventListener('resize', resizeFun)
+            $scope.$watch('chartData', (newValue, oldValue) => {
+                if (!newValue) return
+                if (Object.is(newValue, oldValue)) return
+                const option = {
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
+                    },
+                    series: [{
+                        name: $scope.chartName,
+                        center: ['50%', '50%'],
+                        radius: ['45%', '70%'],
+                        type: 'pie',
+                        data: $scope.chartData.names.map((v, i) => ({
+                            name: v,
+                            value: $scope.chartData.values[i],
+                            label: {
+                                normal: {
+                                    textStyle: {
+                                        color: '#3f3f3f',
+                                        fontSize: 14
+                                    }
+                                }
+                            },
+                            itemStyle: {
+                                normal: {
+                                    color: $scope.colors[i]
+                                },
+                            },
+                            hoverAnimation: false
+                        }))
+                    }]
+                }
+                myChart.setOption(option)
+            })
         }, 0);
         const resizeFun = async () => {
             await myAjaxData.timeout(0)
@@ -810,42 +841,6 @@ app.directive('commonChartPie', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLa
             myChart.dispose()
             myChart = null
         })
-        $scope.$watch('chartData', (newValue, oldValue) => {
-            if (!newValue) return
-            if (Object.is(newValue, oldValue)) return
-            const option = {
-                tooltip: {
-                    trigger: 'item',
-                    formatter: "{a} <br/>{b} : {c} ({d}%)"
-                },
-                series: [{
-                    name: $scope.chartName,
-                    center: ['50%', '50%'],
-                    radius: ['45%', '70%'],
-                    type: 'pie',
-                    data: $scope.chartData.names.map((v, i) => ({
-                        name: v,
-                        value: $scope.chartData.values[i],
-                        label: {
-                            normal: {
-                                textStyle: {
-                                    color: '#3f3f3f',
-                                    fontSize: 14
-                                }
-                            }
-                        },
-                        itemStyle: {
-                            normal: {
-                                color: $scope.colors[i]
-                            },
-                        },
-                        hoverAnimation: false
-                    }))
-                }]
-            }
-            myChart.setOption(option)
-        })
-
     }
 })])
 
