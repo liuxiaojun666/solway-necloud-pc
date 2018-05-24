@@ -189,12 +189,12 @@ ajaxData({
         //切换电站类型
         $scope.changePowerType = async type => {
             $scope.powerType = type;
-            const pro1 = $scope.selectBypowerType.getData({ powerType: type });
+            $scope.selectBypowerType.getData({ powerType: type });
             const pro2 = $scope.basedictionarySelectAll.getData({
                 dictType: type === 'PV' ? 'FAULT_REAL_TYPE' : 'WT_SYSTEM'
             });
-            const _promise = $scope.switchTab === '1' ? pro1 : pro2;
-            await _promise;
+            if ($scope.switchTab === '1') return;
+            await pro2
             $scope.conditionSearch();
         };
 
@@ -208,11 +208,11 @@ ajaxData({
         };
 
 
-        // 第一次 品牌接口  完成后，  
-        $scope.selectBypowerType.promise.then(async () => {
+        // 品牌接口  完成后，  
+        $scope.selectBypowerType.getDataCallback = async () => {
             await myAjaxData.timeout(0);
             $scope.conditionSearch();
-        });
+        };
 
         // 全选 品牌  或者  故障类型
         $scope.checkAll = function (type, e) {
