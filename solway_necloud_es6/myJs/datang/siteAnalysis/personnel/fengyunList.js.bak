@@ -142,8 +142,7 @@ ajaxData({
                 render(text, item, index) {
                     return `<span class="jiangbei jiangbei-${[1, 2, 3][index]}">${index > 2 ? index + 1 : ''}</span>`
                 }
-            },
-            {
+            }, {
                 title: '姓名',
                 dataIndex: 'realName',
                 width: '150px',
@@ -151,8 +150,7 @@ ajaxData({
                 render(text) {
                     return '<span class="icon-user"></span> ' + (text || '')
                 }
-            },
-            {
+            }, {
                 title: '公司名称',
                 dataIndex: 'companyName',
                 width: '200px',
@@ -160,8 +158,7 @@ ajaxData({
                 render(text) {
                     return '<span class="fa fa-building-o"></span> ' + (text || '')
                 }
-            },
-            {
+            }, {
                 title: '电话',
                 dataIndex: 'tel',
                 width: '150px',
@@ -169,8 +166,7 @@ ajaxData({
                 render(text) {
                     return '<span class="fa fa-phone"></span> ' + (text || '')
                 }
-            },
-            {
+            }, {
                 title: '邮箱',
                 dataIndex: 'email',
                 width: '150px',
@@ -178,14 +174,14 @@ ajaxData({
                 render(text) {
                     return '<span class="fa fa-envelope-o"></span> ' + (text || '')
                 }
-            },
-            {
+            }, {
                 title: `<span style="padding-right:30px;" id="dynamicTitle">${$scope.allDataType[$scope.currDataType]}</span>`,
                 dataIndex: "count",
                 width: '100px',
                 align: 'right',
-                render(text) {
-                    return `<span style="padding-right:30px;">${text || ''}</span>`
+                render(text, item, index) {
+                    const isNone = text === null
+                    return `<span style="padding-right:30px;">${isNone ? '' : (text + item.unit)}</span>`
                 }
             }
         ];
