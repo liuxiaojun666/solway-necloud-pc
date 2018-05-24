@@ -107,7 +107,10 @@ ajaxData({
                 dateStr: getDateStr(),
                 pageIndex: 0,
                 pageSize: 10
-            }).then(res => assignFun(res));
+            }).then(res => {
+                document.getElementById('dynamicTitle').firstChild.data = $scope.allDataType[$scope.currDataType];
+                assignFun(res)
+            });
         };
 
         // 改变  范围 执行 函数  重新请求 数据 汇总
@@ -132,7 +135,7 @@ ajaxData({
 
         $scope.column = [
             {
-                title: null,
+                title: '排名',
                 dataIndex: "",
                 width: '50px',
                 align: 'center',
@@ -141,7 +144,7 @@ ajaxData({
                 }
             },
             {
-                title: null,
+                title: '姓名',
                 dataIndex: 'realName',
                 width: '150px',
                 align: 'left',
@@ -150,16 +153,7 @@ ajaxData({
                 }
             },
             {
-                title: null,
-                dataIndex: "count",
-                width: '150px',
-                align: 'center',
-                render(text) {
-                    return `<span>${text || ''}</span>`
-                }
-            },
-            {
-                title: null,
+                title: '公司名称',
                 dataIndex: 'companyName',
                 width: '200px',
                 align: 'left',
@@ -168,7 +162,7 @@ ajaxData({
                 }
             },
             {
-                title: null,
+                title: '电话',
                 dataIndex: 'tel',
                 width: '150px',
                 align: 'left',
@@ -177,7 +171,7 @@ ajaxData({
                 }
             },
             {
-                title: null,
+                title: '邮箱',
                 dataIndex: 'email',
                 width: '150px',
                 align: 'left',
@@ -185,6 +179,15 @@ ajaxData({
                     return '<span class="fa fa-envelope-o"></span> ' + (text || '')
                 }
             },
+            {
+                title: `<span style="padding-right:30px;" id="dynamicTitle">${$scope.allDataType[$scope.currDataType]}</span>`,
+                dataIndex: "count",
+                width: '100px',
+                align: 'right',
+                render(text) {
+                    return `<span style="padding-right:30px;">${text || ''}</span>`
+                }
+            }
         ];
 
     });
