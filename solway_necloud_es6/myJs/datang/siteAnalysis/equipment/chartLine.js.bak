@@ -37,7 +37,7 @@ app.directive('equipmentChartLine', ['myAjaxData', (myAjaxData) => ({
                 legend: {
                     type: 'scroll',
                     bottom: 10,
-                    data: $scope.lines.map(v => ({
+                    data: $scope.lines.reverse().map(v => ({
                         name: v.name,
                         icon: 'rect'
                     }))
@@ -83,14 +83,14 @@ app.directive('equipmentChartLine', ['myAjaxData', (myAjaxData) => ({
                         show: false
                     },
                 },
-                series: $scope.lines.map(v => ({
+                series: $scope.lines.reverse().map(v => ({
                     name: v.name,
                     type: 'line',
                     symbolSize: 0,
                     data: v.values
                 }))
             }
-            myChart.setOption(option)
+            myChart.setOption(option, true)
         })
     
         window.addEventListener('resize', myChart.resize);

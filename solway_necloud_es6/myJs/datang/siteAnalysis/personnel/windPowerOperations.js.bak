@@ -42,7 +42,7 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
                     };
                 });
                 data.push({
-                    name: filterName($scope.allIds[$scope.ids] || '中国'),
+                    name: filterName($scope.allIds ? $scope.allIds[$scope.ids || '1'] : '中国'),
                     value: total
                 });
                 const option = {
@@ -89,7 +89,7 @@ app.directive('wpoMap', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) 
                                         formatter() {
                                             return v.value
                                         },
-                                        show: true,
+                                        show: v.value === null ? false : true,
                                         textStyle: {
                                             color: '#fff',
                                             fontSize: 9,
@@ -153,34 +153,27 @@ ajaxData({
             data: {
                 powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
                 idType: 1,
-                timeType: 'ACCUM',
+                timeType: 'MONTH',
                 dateStr: (new Date).Format('yyyy-MM-dd')
             },
-            later: true
+            later: v.later
         }
     })).reduce((obj, cur) => ({ ...obj, ...cur })),
     province: {
-        name: 'POSTSelectProvince',
-        data: {
-            parentId: 1,
-            treeLevel: 1
-        }
+        name: 'GETprovinces',
+        data: { }
     },
     repairTotal: {
         name: 'GETrepairTotal',
-        data: {
-            powerType: (window.location.hash.includes('pv') ? 'PV' : 'WP'),
-            idType: '1',
-            timeType: 'ACCUM',
-            dateStr: (new Date).Format('yyyy-MM-dd')
-        },
+        data: { },
         later: true
     },
 }, {
     })('windPowerOperationsCtrl', ['$scope', 'myAjaxData', '$state'], ($scope, myAjaxData, $state) => {
         $scope.dateTime1 = new Date; //选择月日期
+        $scope.dateTime1.setMonth($scope.dateTime1.getMonth() - 1);
         $scope.dateTime2 = new Date; //选择年日期
-        $scope.timeType = 'ACCUM';   //默认查累计
+        $scope.timeType = 'MONTH';   //默认查累计
         $scope.idType = 1;           //默认范围 集团  1:集团|2:省份|3:电站
         $scope.ids = null;           //默认集团 不传ids 
         $scope.currDataType = 'repairCount'; //默认查询检修台次
@@ -193,20 +186,20 @@ ajaxData({
         };
 
         // 所有省份  + 集团
-        $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
+        $scope.province.promise.then(res => $scope.allIds = res.body.map(v => ({ [v.provinceId]: v.provinceName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
 
         // 默认加载
         $scope.repairCount.getData({
             powerType: ($state.current.name.includes('pv') ? 'PV' : 'WP'),
             idType: '1',
-            timeType: 'ACCUM',
+            timeType: $scope.timeType,
             dateStr: (new Date).Format('yyyy-MM-dd')
         }).then(res => ($scope.rankingData = res.body));
 
         $scope.repairTotal.getData({
             powerType: ($state.current.name.includes('pv') ? 'PV' : 'WP'),
             idType: '1',
-            timeType: 'ACCUM',
+            timeType: $scope.timeType,
             dateStr: (new Date).Format('yyyy-MM-dd')
         });
 
