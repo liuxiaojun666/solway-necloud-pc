@@ -40,19 +40,16 @@ ajaxData({
         }
     })).reduce((obj, cur) => ({ ...obj, ...cur })),
     province: {
-        name: 'POSTSelectProvince',
-        data: {
-            parentId: 1,
-            treeLevel: 1
-        }
-    }
+        name: 'GETprovinces',
+        data: {}
+    },
 }, {
     })('fengyunListCtrl', ['$scope', 'myAjaxData', '$state'], ($scope, myAjaxData, $state) => {
         $scope.dateTime1 = new Date; //选择月日期
         $scope.dateTime1.setMonth((new Date).getMonth() - 1);
         $scope.time1EndDate = new Date($scope.dateTime1);
         $scope.dateTime2 = new Date; //选择年日期
-        $scope.timeType = 'ACCUM';   //默认查累计
+        $scope.timeType = 'MONTH';   //默认查累计
 
         $scope.idType = 1;           //默认范围 集团  1:集团|2:省份|3:电站
         $scope.ids = null;           //默认集团 不传ids 
@@ -67,12 +64,12 @@ ajaxData({
         };
 
         // 所有省份  + 集团
-        $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
+        $scope.province.promise.then(res => $scope.allIds = res.body.map(v => ({ [v.provinceId]: v.provinceName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
         // 默认加载
         $scope.repairCount.getData({
             powerType: ($state.current.name.includes('pv') ? 'PV' : 'WP'),
             idType: 1,
-            timeType: 'ACCUM',
+            timeType: $scope.timeType,
             dateStr: (new Date).Format('yyyy-MM-dd'),
             pageIndex: 0,
             pageSize: 10
@@ -156,7 +153,10 @@ ajaxData({
                 title: null,
                 dataIndex: "count",
                 width: '150px',
-                align: 'center'
+                align: 'center',
+                render(text) {
+                    return `<span>${text || ''}</span>`
+                }
             },
             {
                 title: null,

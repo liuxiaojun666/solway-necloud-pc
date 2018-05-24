@@ -110,11 +110,8 @@ ajaxData({
 
     // 集团 省份
     province: {
-        name: 'POSTSelectProvince',
-        data: {
-            parentId: 1,
-            treeLevel: 1
-        }
+        name: 'GETprovinces',
+        data: {}
     },
     // 品牌列表接口  powerType = PV | WP
     selectBypowerType: {
@@ -161,7 +158,7 @@ ajaxData({
         $scope.idType = 1; // 集团 省份，默认集团
         $scope.switchTab = '1'; // 默认选择  品牌  使用品牌查询
         // 所有省份  + 集团
-        $scope.province.promise.then(res => $scope.allIds = res.map(v => ({ [v.id]: v.regionName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
+        $scope.province.promise.then(res => $scope.allIds = res.body.map(v => ({ [v.provinceId]: v.provinceName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
 
         // 查询  搜索
         $scope.conditionSearch = () => {
@@ -175,7 +172,7 @@ ajaxData({
                 pageIndex: 0,
                 pageSize: 6
             }).then(async res => {
-                $scope.keyword = '';
+                // $scope.keyword = '';
                 await myAjaxData.timeout(0);
                 $scope.pageList.res.body.data = res.body.data.map(v => ({
                     ...v,
