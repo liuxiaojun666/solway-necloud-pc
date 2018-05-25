@@ -1,24 +1,19 @@
 ajaxData({
     list: {
         name: 'GETforecastPowerList',
-        data: {
-            dateStr: (new Date).Format('yyyy-MM-dd')
-        },
+        data: { },
         later: true,
         onlyLatest: true
     },
     line: {
         name: 'GETforecastPowerLine',
-        data: {
-            dateStr: (new Date).Format('yyyy-MM-dd')
-        },
+        data: { },
         later: true,
         onlyLatest: true
     },
 }, {
     })('powerPredictionCtrl', ['$scope', 'myAjaxData', '$interval'], ($scope, myAjaxData, $interval) => {
         $scope.dateTime1 = new Date;
-        $scope.dateTime2 = new Date;
 
         $scope.updated = async () => {
             $scope.topLoading = true;
@@ -41,6 +36,8 @@ ajaxData({
                 $scope.list.getData({});
             }, 10000);
         }
+
+        $scope.switchPowerCallback = $scope.updated;
 
         $scope.$on('$destroy', () => $interval.cancel(handle));
     });
