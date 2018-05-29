@@ -221,9 +221,9 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
         $scope.beforeMount && $scope.beforeMount($scope, $element)
         $timeout(() => {
             Array.from($element.find('th')).forEach(dv => {
-                const $inputs = () => $element.find(`input[name=${name}]`)
                 const { name } = dv.dataset
                 if (!name) return
+                const $inputs = () => $element.find(`input[name=${name}]`)
                 $(dv).find('input:checkbox').on('click', function (e) {
                     e.stopPropagation()
                     if (this.checked) Array.from($inputs()).forEach(v => v.checked = true)
@@ -236,7 +236,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
                 })
             })
 
-            $element.find('[lxj-click]').on('click', function (e) {
+            $element.on('click', '[lxj-click]', function (e) {
                 e.stopPropagation()
                 const arr = $(this).attr('lxj-click').split('(')
                 $scope[arr[0]](...arr[1].split(')')[0].split(','))
@@ -884,5 +884,36 @@ app.directive('copyEle', ['$timeout', $timeout => ({
             $element.next().find('a.copy-ele').on('click', copyFunc)
             $scope.$on('$destroy', () => $element.next().find('a.copy-ele').off('click', copyFunc))
         }, 0)
+    }
+})])
+
+
+/**
+ * 表单验证
+ * 可验证  必填
+ * @param {要验证的数据} data 
+ * @param {验证的元素所在的元素  只验证该DOM元素内的} element 
+ */
+app.lxj_validation = (data, element) => {
+    let verificationBy = true
+    Array.from(document.querySelectorAll(`${element} [data-require]`)).map(ele => ele.dataset.require).forEach(v => {
+        if (data[v]) return
+        verificationBy = false
+        promptObj("error", "", "验证失败:" + document.querySelectorAll(`[data-require="${v}"]`)[0].firstChild.data + '必填')
+    })
+    return verificationBy
+}
+
+app.directive('datePicker', [() => ({
+    restrict: 'E',
+    templateUrl: window.baseUrl + '/tpl/publicComponent/datePicker.html',
+    scope: {
+        type: '='
+    },
+    link($scope, $element) {
+
+    },
+    controller($scope) {
+        debugger
     }
 })])

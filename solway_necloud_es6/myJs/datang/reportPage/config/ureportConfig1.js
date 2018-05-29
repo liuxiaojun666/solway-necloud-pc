@@ -1,0 +1,151 @@
+ajaxData({
+    //列表 必须叫 pageList
+    pageList: {
+        name: 'GETselectByConditionPage',
+        data: {},
+    },
+    detail: {
+        name: 'GETopReportTplSelectById',
+        data: {},
+        later: true
+    },
+    saveOrUpdate: {
+        name: 'OpReportTplUpdate',
+        data: {},
+        later: true
+    },
+    recordDelete: {
+        name: 'OpReportTplDelete',
+        data: {},
+        later: true
+    },
+    recordDeleteBatch: {
+        name: 'OpReportTplDeleteBatch',
+        data: {},
+        later: true
+    },
+    loadReportProviders: {
+        name: 'GETloadReportProviders',
+        data: {}
+    },
+}, {})('ureportConfig1Ctrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+   
+    $scope.hasSwitchPower = false;
+
+    // 列表数据 
+    $scope.pageList.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+    };
+
+    $scope.editRequired = [
+        '一、此记录由管理员填写。',
+    ]
+
+    // 表格  列配置
+    const column = [
+        {
+            title: '报表名称',
+            dataIndex: 'name',
+            width: '',
+            align: 'left'
+        }, {
+            title: '顺序序号',
+            dataIndex: 'weight',
+            width: '',
+            align: 'left',
+            render(text) {
+                return `<span>${text ? text : ''}</span>`
+            }
+        }, {
+            title: '模板',
+            dataIndex: 'tplUrl',
+            width: '',
+            align: 'left',
+            render(text) {
+                return `<span>${text ? text : ''}</span>`
+            }
+        }
+    ];
+
+    // 新记录 初始化
+    $scope.newRecordCallback = () => $scope.formData = {};
+
+    //编辑当前记录
+    function editFunc(id, index) {
+        $scope.formData = {};
+        $scope.detail.getData({ id }).then(res => $scope.formData = res.body);
+    }
+    //删除当前记录
+    $scope.delFunc = (id) => $scope.recordDelete.getData({id}).then(res => $scope.pageList.getData());
+    
+    // 批量删除执行函数
+    $scope.batchDel = () =>  $scope.recordDeleteBatch.getData({ ids: document.getElementsByName('test')::[].filter(ele => ele.checked)::[].map(ele => ele.value)::[].join(',') }).then(res => $scope.pageList.getData());
+    
+    // 保存或提交执行函数
+    $scope.saveOrSubmit = () => {
+        if (!app.lxj_validation($scope.formData, '.edit-form')) return;
+        $scope.saveOrUpdate.getData($scope.formData).then(res => {
+            if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
+            promptObj("success", "", res.msg);
+            $scope.isEdit = false;
+            $scope.toEdit = false;
+            $scope.newRecord = false;
+            $scope.pageList.getData({});
+        });
+    };
+
+
+
+
+
+
+
+
+
+
+
+    /* ****************************************************************** 下面的不用改 ****************************************************************** */
+
+
+
+
+    // 需要将table表格内  自定义事件（lxj-click）绑定函数挂载到table组件上
+    // lxj-click 绑定的函数只接收 字符串参数
+    $scope.tableListBeforeCreated = (scope, element) => {
+        scope.editFunc = $scope.editFunc
+        scope.delFunc = $scope.delFunc
+    };
+    //编辑当前记录不变代码  不要改
+    $scope.editFunc = (id, index) => {
+        $scope.isEdit = true;
+        $scope.toEdit = true;
+        $scope.newRecord = false;
+        editFunc(id, index);
+        $scope.$apply();
+    };
+    $scope.column = [
+        {
+            title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i>全选</label>`,
+            dataIndex: '',
+            width: '80px',
+            align: 'left',
+            checkboxName: 'test',
+            render(text, record, index) {
+                return `<label class="i-checks m-b-none"><input data-identifies="${record.id}" name="test" value="${record.id}" type="checkbox" /><i></i></label>`
+            }
+        },
+        ...column,
+        {
+            title: '操作',
+            dataIndex: 'id',
+            width: '74px',
+            align: 'center',
+            render(text, record, index) {
+                return `
+                <i style="cursor: pointer;" class="icon-note  font16" lxj-click="editFunc(${text},${index})"></i>
+                <i style="cursor: pointer;" class="icon-trash font16" lxj-click="delFunc(${text})"></i>`
+            }
+        },
+    ];
+})
