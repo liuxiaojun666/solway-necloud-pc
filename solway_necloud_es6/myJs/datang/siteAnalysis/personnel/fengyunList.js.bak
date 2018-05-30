@@ -28,14 +28,7 @@ ajaxData({
     ].map(v => ({
         [v.name]: {
             name: v.apiName,
-            data: {
-                // powerType: '',
-                // idType: 1,
-                // timeType: 'ACCUM',
-                // dateStr: (new Date).Format('yyyy-MM-dd'),
-                // pageIndex: 0,
-                // pageSize: 10
-            },
+            data: { },
             later: v.later
         }
     })).reduce((obj, cur) => ({ ...obj, ...cur })),
@@ -73,7 +66,7 @@ ajaxData({
             dateStr: (new Date).Format('yyyy-MM-dd'),
             pageIndex: 0,
             pageSize: 10
-        }).then(res => assignFun(res));
+        });
 
         // 改变查询时间 
         $scope.changeDateTime = async () => {
@@ -82,7 +75,7 @@ ajaxData({
             if (dateStr === $scope.dateStr) return;
             $scope.dateStr = dateStr;
             const timeType = $scope.timeType;
-            $scope[$scope.currDataType].getData({ timeType, dateStr, pageIndex: 0 }).then(res => assignFun(res));
+            $scope[$scope.currDataType].getData({ timeType, dateStr, pageIndex: 0 });
         };
 
         // 改变时间维度 执行 func update all data
@@ -91,7 +84,7 @@ ajaxData({
             const timeType = $scope.timeType = value;
             const dateStr = getDateStr();
             $scope.dateStr = dateStr;
-            $scope[$scope.currDataType].getData({ timeType, dateStr, pageIndex: 0 }).then(res => assignFun(res));
+            $scope[$scope.currDataType].getData({ timeType, dateStr, pageIndex: 0 });
         };
 
         // 改变 查询类型  执行 函数 重新请求  类型 排名
@@ -109,7 +102,6 @@ ajaxData({
                 pageSize: 10
             }).then(res => {
                 document.getElementById('dynamicTitle').firstChild.data = $scope.allDataType[$scope.currDataType];
-                assignFun(res)
             });
         };
 
@@ -119,13 +111,20 @@ ajaxData({
             const isJT = value == 1; // 选择的是否是集团
             const idType = $scope.idType = isJT ? 1 : 2;
             const ids = $scope.ids = isJT ? null : value;
-            $scope[$scope.currDataType].getData({ idType, ids, pageIndex: 0 }).then(res => assignFun(res));
+            $scope[$scope.currDataType].getData({ idType, ids, pageIndex: 0 });
         };
 
-        function assignFun(res) {
-            $scope.datasource = res.body
-            $scope.currentPageList = $scope[$scope.currDataType].getData
-        }
+        // 给每个接口 添加 接口完成回调
+        Object.keys($scope.allDataType).forEach(str => {
+            $scope[str].getDataCallback = async(success, res) => {
+                if (!success) return;
+                await myAjaxData.timeout(0);
+                $scope.datasource = res.body;
+                $scope.currentPageList = $scope[$scope.currDataType].getData;
+                $scope.$apply();
+            };
+        });
+        
         // 根据时间维度  判断 需要 使用的 时间 字符串
         function getDateStr() {
             if ($scope.timeType === 'MONTH') return $scope.dateTime1.Format('yyyy-MM');
