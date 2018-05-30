@@ -1,0 +1,99 @@
+ajaxData({
+    pageList: {
+        name: 'GETopReportLayRelPage',
+        data: {},
+        later: true
+    },
+    detail: {
+        name: 'GETopReportLayRelSelectById',
+        data: {},
+        later: true
+    },
+    saveOrUpdate: {
+        name: 'opReportLayRelUpdate',
+        data: {},
+        later: true
+    },
+    recordDelete: {
+        name: 'GETopReportLayRelDelete',
+        data: {},
+        later: true
+    },
+    recordDeleteBatch: {
+        name: 'GETopReportLayRelDeleteBatch',
+        data: {},
+        later: true
+    },
+}, {})('secondaryConfigCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+
+    // 获取列表  存储 id
+    $scope.$parent.detail.getDataCallback = (success, res) => getList(res.body.id);
+    $scope.$parent.saveOrUpdate.getDataCallback = (success, res) => getList(res.body.id);
+    function getList(id) {
+        $scope.layId = id;
+        $scope.pageList.getData({ layId: id });
+    }
+
+    // 监听是否编辑状态  非编辑状态 影藏 并 清空 id
+    $scope.$watch('$parent.isEdit', (newValue, oldValue) => {
+        $scope.secondaryConfig = newValue;
+        if (!newValue) $scope.layId = void 0;
+    });
+
+    // 列表配置项
+    const column = [
+        {
+            title: '名称',
+            dataIndex: 'name',
+            width: '',
+            align: 'left'
+        }, {
+            title: '顺序序号',
+            dataIndex: 'weight',
+            width: '',
+            align: 'left',
+            render(text) {
+                return `<span>${text ? text : ''}</span>`;
+            }
+        }, {
+            title: '页面展示名称',
+            dataIndex: 'layName',
+            width: '',
+            align: 'left'
+        }
+    ];
+
+
+
+
+    $scope.column = [
+        {
+            title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i>全选</label>`,
+            dataIndex: '',
+            width: '80px',
+            align: 'left',
+            checkboxName: 'test',
+            render(text, record, index) {
+                return `<label class="i-checks m-b-none"><input data-identifies="${record.id}" name="test" value="${record.id}" type="checkbox" /><i></i></label>`
+            }
+        },
+        ...column,
+        {
+            title: '操作',
+            dataIndex: 'id',
+            width: '74px',
+            align: 'center',
+            render(text, record, index) {
+                return `
+                <i style="cursor: pointer;" class="icon-note  font16" lxj-click="editFunc(${text},${index})"></i>
+                <i style="cursor: pointer;" class="icon-trash font16" lxj-click="delFunc(${text})"></i>`
+            }
+        },
+    ];
+    // 需要将table表格内  自定义事件（lxj-click）绑定函数挂载到table组件上
+    // lxj-click 绑定的函数只接收 字符串参数
+    $scope.tableListBeforeCreated = (scope, element) => {
+        scope.editFunc = $scope.editFunc
+        scope.delFunc = $scope.delFunc
+    };
+});

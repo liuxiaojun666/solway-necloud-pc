@@ -15,12 +15,12 @@ ajaxData({
         later: true
     },
     recordDelete: {
-        name: 'GETopReportLayDelete',
+        name: 'opReportLayDelete',
         data: {},
         later: true
     },
     recordDeleteBatch: {
-        name: 'GETopReportLayDeleteBatch',
+        name: 'opReportLayDeleteBatch',
         data: {},
         later: true
     },
@@ -90,12 +90,18 @@ ajaxData({
     ];
 
     // 新记录 初始化 之前
-    $scope.newRecordBefore = () => $scope.formData = {};
+    $scope.newRecordBefore = () => $scope.formData = { startDate: '01:01'};
 
     //编辑当前记录
     function editFunc(id, index) {
-        $scope.formData = {};
-        $scope.detail.getData({ id }).then(res => $scope.formData = res.body);
+        $scope.secondaryConfig = true;
+        $scope.formData = { startDate: '01:01'};
+        $scope.detail.getData({ id }).then(res => {
+            $scope.formData = {
+                ...res.body,
+                startDate: res.body.startDate || '01:01'
+            };
+        });
     }
     //删除当前记录
     $scope.delFunc = (id) => $scope.recordDelete.getData({ id }).then(res => $scope.pageList.getData());
@@ -105,17 +111,12 @@ ajaxData({
 
     // 保存或提交执行函数
     $scope.saveOrSubmit = () => {
-        $scope.formData.startDate = $scope.formData._startDate.showDate;
+        if ($scope.formData.reportType === '3') $scope.formData.startDate = $scope.formData.startDate + ',' + $scope.week;
         if (!app.lxj_validation($scope.formData, '.edit-form')) return;
-        $scope.saveOrUpdate.getData({
-            ...$scope.formData,
-            _startDate: null
-        }).then(res => {
+        $scope.saveOrUpdate.getData($scope.formData).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
             promptObj("success", "", res.msg);
-            $scope.isEdit = false;
-            $scope.toEdit = false;
-            $scope.newRecord = false;
+            $scope.secondaryConfig = true;
             $scope.pageList.getData({});
         });
     };

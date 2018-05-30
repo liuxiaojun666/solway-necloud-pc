@@ -849,7 +849,7 @@ app.directive('amoutLimit', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLo
     scope: {
     },
     link($scope, $element, $attrs) {
-        $element.attr("data-maxAmout",500)
+        $element.attr("data-maxAmout", 500)
     }
 })])
 
@@ -887,33 +887,3 @@ app.directive('copyEle', ['$timeout', $timeout => ({
     }
 })])
 
-
-/**
- * 表单验证
- * 可验证  必填
- * @param {要验证的数据} data 
- * @param {验证的元素所在的元素  只验证该DOM元素内的} element 
- */
-app.lxj_validation = (data, element) => {
-    let verificationBy = true
-    Array.from(document.querySelectorAll(`${element} [data-require]`)).map(ele => ele.dataset.require).forEach(v => {
-        if (data[v]) return
-        verificationBy = false
-        promptObj("error", "", "验证失败:" + document.querySelectorAll(`[data-require="${v}"]`)[0].firstChild.data + '必填')
-    })
-    return verificationBy
-}
-
-app.directive('datePicker', [() => ({
-    restrict: 'E',
-    templateUrl: window.baseUrl + '/tpl/publicComponent/datePicker.html',
-    scope: {
-        type: '='
-    },
-    link($scope, $element) {
-
-    },
-    controller($scope) {
-        debugger
-    }
-})])
