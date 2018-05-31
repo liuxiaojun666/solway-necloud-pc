@@ -23,11 +23,10 @@ app.directive('datePicker', ['myAjaxData', (myAjaxData) => ({
             newValue.forEach((v, i) => {
                 if (v) {
                     if (startPoint < 0) startPoint = i;
-                    if (endPoint >= 0) console.error('日期类型错误，年月日时分秒不可中断');
-                }
-                if (!v) {
-                    if (startPoint < 0) $scope[typeStrArr[i]] = '';
-                    else endPoint = i;
+                    if (endPoint > 0) console.error('日期类型错误，年月日时分秒不可中断');
+                } else {
+                    $scope[typeStrArr[i]] = '';
+                    if (startPoint >= 0) endPoint = i;
                 }
             });
             $scope.update();
