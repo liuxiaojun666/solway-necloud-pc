@@ -221,9 +221,9 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
         $scope.beforeMount && $scope.beforeMount($scope, $element)
         $timeout(() => {
             Array.from($element.find('th')).forEach(dv => {
-                const $inputs = () => $element.find(`input[name=${name}]`)
                 const { name } = dv.dataset
                 if (!name) return
+                const $inputs = () => $element.find(`input[name=${name}]`)
                 $(dv).find('input:checkbox').on('click', function (e) {
                     e.stopPropagation()
                     if (this.checked) Array.from($inputs()).forEach(v => v.checked = true)
@@ -236,7 +236,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
                 })
             })
 
-            $element.find('[lxj-click]').on('click', function (e) {
+            $element.on('click', '[lxj-click]', function (e) {
                 e.stopPropagation()
                 const arr = $(this).attr('lxj-click').split('(')
                 $scope[arr[0]](...arr[1].split(')')[0].split(','))
@@ -849,7 +849,7 @@ app.directive('amoutLimit', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLo
     scope: {
     },
     link($scope, $element, $attrs) {
-        $element.attr("data-maxAmout",500)
+        $element.attr("data-maxAmout", 500)
     }
 })])
 
@@ -886,3 +886,4 @@ app.directive('copyEle', ['$timeout', $timeout => ({
         }, 0)
     }
 })])
+
