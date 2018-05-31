@@ -1,25 +1,25 @@
 ajaxData({
-    pageList: {
+    pageList2: {
         name: 'GETopReportLayRelPage',
         data: {},
         later: true
     },
-    detail: {
+    detail2: {
         name: 'GETopReportLayRelSelectById',
         data: {},
         later: true
     },
-    saveOrUpdate: {
+    saveOrUpdate2: {
         name: 'opReportLayRelUpdate',
         data: {},
         later: true
     },
-    recordDelete: {
+    recordDelete2: {
         name: 'opReportLayRelDelete',
         data: {},
         later: true
     },
-    recordDeleteBatch: {
+    recordDeleteBatch2: {
         name: 'opReportLayRelDeleteBatch',
         data: {},
         later: true
@@ -29,13 +29,15 @@ ajaxData({
         data: {},
         later: true
     },
-}, {})('secondaryConfigCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+}, {
+    __serviceName__: 'secondaryConfig'
+})('secondaryConfigCtrl', ['$scope', 'secondaryConfig'], ($scope, myAjaxData) => {
     // 获取列表  存储 id
     $scope.$parent.$parent.detail.getDataCallback = (success, res) => getList(res.body.id);
     $scope.$parent.$parent.saveOrUpdate.getDataCallback = (success, res) => getList(res.body.id);
     function getList(id) {
         $scope.layId = id;
-        $scope.pageList.getData({ layId: id });
+        $scope.pageList2.getData({ layId: id });
     }
 
     // 监听是否编辑状态  非编辑状态 影藏
@@ -51,11 +53,11 @@ ajaxData({
     // 保存或提交执行函数
     $scope.saveOrSubmit = () => {
         if (!app.lxj_validation($scope.formData, '.edit-form2')) return;
-        $scope.saveOrUpdate.getData({ ...$scope.formData, layId: $scope.layId }).then(res => {
+        $scope.saveOrUpdate2.getData({ ...$scope.formData, layId: $scope.layId }).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
             promptObj("success", "", res.msg);
             $scope.edit = false;
-            $scope.pageList.getData({});
+            $scope.pageList2.getData({});
         });
     };
 
@@ -63,15 +65,15 @@ ajaxData({
     $scope.editFunc = (id, index) => {
         $scope.edit = true;
         $scope.formData = {};
-        $scope.detail.getData({ id, layId: $scope.layId }).then(res => $scope.formData = res.body);
+        $scope.detail2.getData({ id, layId: $scope.layId }).then(res => $scope.formData = res.body);
         $scope.$apply();
     };
 
     //删除当前记录
-    $scope.delFunc = (id) => $scope.recordDelete.getData({ id, layId: $scope.layId }).then(res => $scope.pageList.getData());
+    $scope.delFunc = (id) => $scope.recordDelete2.getData({ id, layId: $scope.layId }).then(res => $scope.pageList2.getData());
 
     // 批量删除执行函数
-    $scope.batchDel = () => $scope.recordDeleteBatch.getData({ layId: $scope.layId, ids: document.getElementsByName('secondaryConfigPage'):: [].filter(ele => ele.checked):: [].map(ele => ele.value):: [].join(',') }).then(res => $scope.pageList.getData());
+    $scope.batchDel = () => $scope.recordDeleteBatch2.getData({ layId: $scope.layId, ids: document.getElementsByName('secondaryConfigPage'):: [].filter(ele => ele.checked):: [].map(ele => ele.value):: [].join(',') }).then(res => $scope.pageList2.getData());
 
     // 列表配置项
     const column = [

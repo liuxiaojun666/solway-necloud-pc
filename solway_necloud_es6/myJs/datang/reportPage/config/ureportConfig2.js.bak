@@ -75,8 +75,13 @@ ajaxData({
             dataIndex: 'startDate',
             width: '',
             align: 'center',
-            render(text) {
-                return `<span>${text ? text : ''}</span>`;
+            render(text, item) {
+                let str = text || '';
+                if (item.reportType == '3' && text) {
+                    const tempArr = text.split(',');
+                    str = '周' + ['', '一', '二', '三', '四', '五', '六', '日'][tempArr[1]] + ' ' + tempArr[0];
+                }
+                return `<span>${str}</span>`;
             }
         }, {
             title: '是否可用',
@@ -90,15 +95,17 @@ ajaxData({
     ];
 
     // 新记录 初始化 之前
-    $scope.newRecordBefore = () => $scope.formData = { reportType: '1', dateArr: getDateArr(1, void 0) };
+    $scope.newRecordBefore = () => $scope.formData = { reportType: '1', week: 1, dateArr: getDateArr(1, void 0) };
 
     //编辑当前记录
     function editFunc(id, index) {
         $scope.secondaryConfig = true;
+        $scope.formData = {};
         $scope.detail.getData({ id }).then(res => {
-            const {reportType, startDate} = $scope.res.body;
+            const {reportType, startDate} = res.body;
             $scope.formData = {
                 ...res.body,
+                week: reportType === 3 ? startDate.substr(-1) : '1',
                 dateArr: getDateArr(reportType, startDate)
             };
         });
@@ -111,10 +118,9 @@ ajaxData({
 
     // 保存或提交执行函数
     $scope.saveOrSubmit = () => {
-        debugger
-        if ($scope.formData.reportType === '3') $scope.formData.startDate = $scope.formData.startDate + ',' + $scope.week;
+        if ($scope.formData.reportType == '3') $scope.formData.startDate = $scope.formData.startDate + ',' + $scope.formData.week;
         if (!app.lxj_validation($scope.formData, '.edit-form1')) return;
-        $scope.saveOrUpdate.getData($scope.formData).then(res => {
+        $scope.saveOrUpdate.getData({...$scope.formData, dateArr: null, week: null}).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
             promptObj("success", "", res.msg);
             $scope.secondaryConfig = true;
@@ -129,17 +135,18 @@ ajaxData({
 
     // 日期组件 传入格式处理
     function getDateArr(reportType, startDate) {
+        const func = str => str.split('-').join().split(' ').join().split(':').join().split(',');
         if (reportType == '1') {
-            if (startDate) return [null, ...startDate.split('-').join().split(' ').join().split(':').join().split(','), null];
+            if (startDate) return [null, ...func(startDate), null];
             else return [null, '01', '01', '00', '00', null];
         } else if (reportType == '2') {
-            if (startDate) return [null, null, ...startDate.split('-').join().split(' ').join().split(':').join().split(','), null];
+            if (startDate) return [null, null, ...func(startDate), null];
             else return [null, null, '01', '00', '00', null];
         } else if (reportType == '4') {
-            if (startDate) return [null, null, null, ...startDate.split('-').join().split(' ').join().split(':').join().split(','), null];
+            if (startDate) return [null, null, null, ...func(startDate), null];
             else return [null, null, null, '00', '00', null];
         } else if (reportType == '3') {
-            if (startDate) return [null, null, null, ...startDate.substr(0, startDate.length - 2).split('-').join().split(' ').join().split(':').join().split(','), null];
+            if (startDate) return [null, null, null, ...func(startDate.substr(0, startDate.length - 2)), null];
             else return [null, null, null, '00', '00', null];
         }
     }

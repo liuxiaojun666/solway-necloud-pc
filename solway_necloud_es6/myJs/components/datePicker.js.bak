@@ -42,6 +42,7 @@ app.directive('datePicker', ['myAjaxData', (myAjaxData) => ({
         });
 
         $scope.update = type => {
+            if (!type) return;
             if (type === 'month' || type === 'year') {
                 let num = 30;
                 if (['01','03','05','07','08','10','12'].includes($scope.month)) num = 31;
@@ -57,7 +58,6 @@ app.directive('datePicker', ['myAjaxData', (myAjaxData) => ({
             if (!hour) dateStr = dateStr.substr(1);
             if (!minute) dateStr = dateStr.substr(1);
             if (!second) dateStr = dateStr.substr(0, dateStr.length - 1);
-
             $scope.updated && $scope.updated(dateStr, $scope.dateArr);
         };
     }
