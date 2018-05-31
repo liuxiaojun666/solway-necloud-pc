@@ -8,6 +8,7 @@ app.directive('datePicker', ['myAjaxData', (myAjaxData) => ({
     },
     controller($scope) {
         const thisYear = (new Date).getFullYear();
+        const typeStrArr = ['year', 'month', 'day', 'hour', 'minute', 'second'];
         $scope.years = new Array(20).fill('').map((v, i) => (i < 10) ? (thisYear - 10 + i + '') : (thisYear + i + ''));
         $scope.months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
         $scope.days = new Array(31).fill('').map((v, i) => (i < 9) ? ('0' + (i + 1)) : (i + 1 + ''));
@@ -18,19 +19,25 @@ app.directive('datePicker', ['myAjaxData', (myAjaxData) => ({
 
         $scope.$watch('type', (newValue, oldValue) => {
             if (!newValue) return;
-            const tempArr = ['year', 'month', 'day', 'hour', 'minute', 'second'];
+            let startPoint = -1, endPoint = -1;
             newValue.forEach((v, i) => {
-                if (!v) $scope[tempArr[i]] = '';
+                if (v) {
+                    if (startPoint < 0) startPoint = i;
+                    if (endPoint >= 0) console.error('日期类型错误，年月日时分秒不可中断');
+                }
+                if (!v) {
+                    if (startPoint < 0) $scope[typeStrArr[i]] = '';
+                    else endPoint = i;
+                }
             });
             $scope.update();
         });
 
         $scope.$watch('dateArr', (newValue, oldValue) => {
             if (!newValue) return;
-            const tempArr = ['year', 'month', 'day', 'hour', 'minute', 'second'];
             $scope.type.forEach((v, i) => {
-                if (v) $scope[tempArr[i]] = $scope.dateArr[i] || (i === 0 ? thisYear : '01');
-                else $scope[tempArr[i]] = '';
+                if (v) $scope[typeStrArr[i]] = $scope.dateArr[i] || (i === 0 ? thisYear : '01');
+                else $scope[typeStrArr[i]] = '';
             });
         });
 
