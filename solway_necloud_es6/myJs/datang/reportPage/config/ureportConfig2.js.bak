@@ -90,16 +90,16 @@ ajaxData({
     ];
 
     // 新记录 初始化 之前
-    $scope.newRecordBefore = () => $scope.formData = { startDate: '01:01'};
+    $scope.newRecordBefore = () => $scope.formData = { reportType: '1', dateArr: getDateArr(1, void 0) };
 
     //编辑当前记录
     function editFunc(id, index) {
         $scope.secondaryConfig = true;
-        $scope.formData = { startDate: '01:01'};
         $scope.detail.getData({ id }).then(res => {
+            const {reportType, startDate} = $scope.res.body;
             $scope.formData = {
                 ...res.body,
-                startDate: res.body.startDate || '01:01'
+                dateArr: getDateArr(reportType, startDate)
             };
         });
     }
@@ -111,6 +111,7 @@ ajaxData({
 
     // 保存或提交执行函数
     $scope.saveOrSubmit = () => {
+        debugger
         if ($scope.formData.reportType === '3') $scope.formData.startDate = $scope.formData.startDate + ',' + $scope.week;
         if (!app.lxj_validation($scope.formData, '.edit-form1')) return;
         $scope.saveOrUpdate.getData($scope.formData).then(res => {
@@ -120,6 +121,28 @@ ajaxData({
             $scope.pageList.getData({});
         });
     };
+
+
+
+    // 日期组件 更新回调
+    $scope.dateUpdated = (dateStr) => $scope.formData.startDate = dateStr;
+
+    // 日期组件 传入格式处理
+    function getDateArr(reportType, startDate) {
+        if (reportType == '1') {
+            if (startDate) return [null, ...startDate.split('-').join().split(' ').join().split(':').join().split(','), null];
+            else return [null, '01', '01', '00', '00', null];
+        } else if (reportType == '2') {
+            if (startDate) return [null, null, ...startDate.split('-').join().split(' ').join().split(':').join().split(','), null];
+            else return [null, null, '01', '00', '00', null];
+        } else if (reportType == '4') {
+            if (startDate) return [null, null, null, ...startDate.split('-').join().split(' ').join().split(':').join().split(','), null];
+            else return [null, null, null, '00', '00', null];
+        } else if (reportType == '3') {
+            if (startDate) return [null, null, null, ...startDate.substr(0, startDate.length - 2).split('-').join().split(' ').join().split(':').join().split(','), null];
+            else return [null, null, null, '00', '00', null];
+        }
+    }
 
 
 
