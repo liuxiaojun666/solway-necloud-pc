@@ -28,18 +28,18 @@ win.reactComponent = (() => {
     };
 
     const Loading = () => (
-        <div style={{position: 'relative'}}>
-            <div className="clearfix" style={{ height: '100%'}}></div>
+        <div style={{ position: 'relative' }}>
+            <div className="clearfix" style={{ height: '100%' }}></div>
             <div className="loding-view" style={{
-                position: 'absolute', 
+                position: 'absolute',
                 width: '100%',
                 height: '100%',
                 top: '0',
                 left: '0',
                 Zindex: '9999',
-                textAlign:'center',
-                background:'rgba(255,255,255,.8)'
-        }}>
+                textAlign: 'center',
+                background: 'rgba(255,255,255,.8)'
+            }}>
                 <div className="spinner">
                     <div className="rect1"></div>
                     <div className="rect2"></div>
@@ -76,7 +76,7 @@ win.reactComponent = (() => {
 
     // 大逆变器
     const NbqD = ({ data, hover }, { status, dblClick }) => [
-        filterEle(status, data.status) && <div key={'nbqid' + data.id} style={{display: 'inline-block', width: '115px'}}>
+        filterEle(status, data.status) && <div key={'nbqid' + data.id} style={{ display: 'inline-block', width: '115px' }}>
             <svg
                 onDoubleClick={dblClick.bind(this, data.stid, data.id, data.serialNumber, '2', data.hasJB)}
                 xmlns="http://www.w3.org/2000/svg" height="50" width="30"
@@ -90,7 +90,7 @@ win.reactComponent = (() => {
                 </g>
                 <rect name="shadow" height="100%" width="100%" fillOpacity="0.5" fill="#CCCCCC" style={{ display: 'none' }} />
             </svg>
-            <span key={data.name} style={{ whiteSpace: 'nowrap'}}>{data.name}</span>
+            <span key={data.name} style={{ whiteSpace: 'nowrap' }}>{data.name}</span>
         </div>,
         filterEle(status, data.status) && data.children && data.children[0] && <br key='br' />,
         data.children && data.children[0] && data.children.map((v, i) => <Hlx key={'hlxid' + v.id} hover={hover} data={v} />),
@@ -105,7 +105,7 @@ win.reactComponent = (() => {
             onDoubleClick={dblClick.bind(this, data.stid, data.id, data.serialNumber, '1')}
             title={data.name}>
             <svg xmlns="http://www.w3.org/2000/svg" height="47" width="56">
-                {hover && <rect name="select" height="100%" width="100%" fill="rgba(6, 190, 189, .3)"/>}
+                {hover && <rect name="select" height="100%" width="100%" fill="rgba(6, 190, 189, .3)" />}
                 <g>
                     <rect height="4" width="46" z="0" y="5" x="5" strokeOpacity="null" strokeWidth="1" stroke={deviceStatusColorMap[data.status]} fill={deviceStatusColorMap[data.status]} />
                     <rect name="shadow" height="8" width="50" y="2" x="3" fillOpacity="0.5" fill="#CCCCCC" style={{ display: 'none' }} />
@@ -129,36 +129,38 @@ win.reactComponent = (() => {
     Hlx.contextTypes = { status: PropTypes.object, dblClick: PropTypes.func };
 
     // 小逆变器
-    const NbqHlx = ({ data, hover }, { status, dblClick }) => [
-        filterEle(status, data.status, data.statusData.shadowFlags) && <svg key={'nbqhlx' + data.id}
-            onDoubleClick={dblClick.bind(this, data.stid, data.id, data.serialNumber, '2', data.hasJB)}
-            style={{ verticalAlign: 'middle', cursor: 'pointer' }}
-            xmlns="http://www.w3.org/2000/svg" version="1.1" height="63" width="56">
-            {hover && <rect name="select" height="100%" width="100%" fill="rgba(6, 190, 189, .3)"/>}
-            <g type='nbq'>
-                <rect stroke={deviceStatusColorMap[data.status]} x="5" y="5" width="46" height="14" fillOpacity='0.1' fill={deviceStatusColorMap[data.status]} />
-                <line stroke={deviceStatusColorMap[data.status]} x1="5" y1="19" x2="51" y2="5" />
-                <line stroke={deviceStatusColorMap[data.status]} x1="38" y1="14" x2="46" y2="14" />
-                <path stroke={deviceStatusColorMap[data.status]} d='M10.17,9.7q2.09,2.31,4.19,0t4.19,0' fillOpacity='0' />
-                <rect stroke={deviceStatusColorMap[data.status]} className='rectLayout' height='14' width='46' y='5' x='5' fillOpacity='0' fill={deviceStatusColorMap[data.status]} />
-            </g>
-            <g type='hlx'>
-                {
-                    data.statusData.statuFlags.slice(0, 10).map((v, i) => [
-                        <rect key={i + '1'} fill={groupStringColorMap[v]} strokeOpacity='null' x={5 + 5 * i} y='24' width='1' height='14' stroke={groupStringColorMap[v]} name="zuchuan" />,
-                        data.statusData.shadowFlags[i] && <rect key={i + '2'} name='shadow' fillOpacity='0.5' sz='0' x={3 + 5 * i} y='22' width='5' height='18' fill="#CCCCCC" />
-                    ])
-                }
-                {
-                    data.statusData.statuFlags.slice(10, 20).map((v, i) => [
-                        <rect key={i + '1'} fill={groupStringColorMap[v]} strokeOpacity='null' x={5 + 5 * i} y='44' width='1' height='14' stroke={groupStringColorMap[v]} name="zuchuan" />,
-                        data.statusData.shadowFlags[10 + i] && <rect key={i + '2'} name='shadow' fillOpacity='0.5' sz='0' x={3 + 3 * i} y='42' width='5' height='18' fill="#CCCCCC" />
-                    ])
-                }
-            </g>
-        </svg>,
-        filterEle(status, data.status) && <span key={data.name}>{data.name}</span>
-    ];
+    const NbqHlx = ({ data, hover }, { status, dblClick }) => (
+        filterEle(status, data.status, data.statusData.shadowFlags) && <div key={'nbqhlx' + data.id} style={{ display: 'inline-block', width: '150px' }}>
+            <svg
+                onDoubleClick={dblClick.bind(this, data.stid, data.id, data.serialNumber, '2', data.hasJB)}
+                style={{ verticalAlign: 'middle', cursor: 'pointer' }}
+                xmlns="http://www.w3.org/2000/svg" version="1.1" height="63" width="56">
+                {hover && <rect name="select" height="100%" width="100%" fill="rgba(6, 190, 189, .3)" />}
+                <g type='nbq'>
+                    <rect stroke={deviceStatusColorMap[data.status]} x="5" y="5" width="46" height="14" fillOpacity='0.1' fill={deviceStatusColorMap[data.status]} />
+                    <line stroke={deviceStatusColorMap[data.status]} x1="5" y1="19" x2="51" y2="5" />
+                    <line stroke={deviceStatusColorMap[data.status]} x1="38" y1="14" x2="46" y2="14" />
+                    <path stroke={deviceStatusColorMap[data.status]} d='M10.17,9.7q2.09,2.31,4.19,0t4.19,0' fillOpacity='0' />
+                    <rect stroke={deviceStatusColorMap[data.status]} className='rectLayout' height='14' width='46' y='5' x='5' fillOpacity='0' fill={deviceStatusColorMap[data.status]} />
+                </g>
+                <g type='hlx'>
+                    {
+                        data.statusData.statuFlags.slice(0, 10).map((v, i) => [
+                            <rect key={i + '1'} fill={groupStringColorMap[v]} strokeOpacity='null' x={5 + 5 * i} y='24' width='1' height='14' stroke={groupStringColorMap[v]} name="zuchuan" />,
+                            data.statusData.shadowFlags[i] && <rect key={i + '2'} name='shadow' fillOpacity='0.5' sz='0' x={3 + 5 * i} y='22' width='5' height='18' fill="#CCCCCC" />
+                        ])
+                    }
+                    {
+                        data.statusData.statuFlags.slice(10, 20).map((v, i) => [
+                            <rect key={i + '1'} fill={groupStringColorMap[v]} strokeOpacity='null' x={5 + 5 * i} y='44' width='1' height='14' stroke={groupStringColorMap[v]} name="zuchuan" />,
+                            data.statusData.shadowFlags[10 + i] && <rect key={i + '2'} name='shadow' fillOpacity='0.5' sz='0' x={3 + 3 * i} y='42' width='5' height='18' fill="#CCCCCC" />
+                        ])
+                    }
+                </g>
+            </svg>
+            <span key={data.name}>{data.name}</span>}
+        </div>
+    );
     NbqHlx.contextTypes = { status: PropTypes.object, dblClick: PropTypes.func };
 
     // 逆变器 判断  大逆 or 小逆
