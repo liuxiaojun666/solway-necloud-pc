@@ -88,7 +88,7 @@ ajaxData({
             title: '顺序序号',
             dataIndex: 'weight',
             width: '',
-            align: 'left',
+            align: 'right',
             render(text) {
                 return `<span>${text ? text : ''}</span>`;
             }
@@ -96,7 +96,7 @@ ajaxData({
     ];
 
     // 新记录 初始化 之前
-    $scope.newRecordBefore = () => $scope.formData = { reportType: '1', week: 1, single: 1, enable: 0, dateArr: getDateArr(1, void 0) };
+    $scope.newRecordBefore = () => $scope.formData = { id: null, reportType: '1', week: 1, single: 1, enable: 0, dateArr: getDateArr(1, void 0) };
 
     //编辑当前记录
     function editFunc(id, index) {
@@ -119,7 +119,7 @@ ajaxData({
 
     // 保存或提交执行函数
     $scope.saveOrSubmit = () => {
-        if ($scope.formData.reportType == '3') $scope.formData.startDate = $scope.formData.startDate + ',' + $scope.formData.week;
+        if ($scope.formData.reportType == '3') $scope.formData.startDate = $scope.formData.startDate.split(',')[0] + ',' + $scope.formData.week;
         if (!app.lxj_validation($scope.formData, '.edit-form1')) return;
         $scope.saveOrUpdate.getData({...$scope.formData, dateArr: null, week: null}).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
