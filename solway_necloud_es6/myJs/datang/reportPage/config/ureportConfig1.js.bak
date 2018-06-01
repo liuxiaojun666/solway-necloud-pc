@@ -1,7 +1,7 @@
 ajaxData({
     //列表 必须叫 pageList
     pageList: {
-        name: 'GETselectByConditionPage',
+        name: 'GETselectByCondition',
         data: {},
     },
     detail: {
@@ -35,7 +35,7 @@ ajaxData({
     // 列表数据 
     $scope.pageList.getDataCallback = (success, res) => {
         if (!success) return;
-        $scope.datasource = res.body.data;
+        $scope.datasource = res.body;
     };
 
     $scope.editRequired = [
@@ -126,7 +126,7 @@ ajaxData({
     };
     $scope.column = [
         {
-            title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i>全选</label>`,
+            title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i></label>`,
             dataIndex: '',
             width: '80px',
             align: 'left',
@@ -144,7 +144,7 @@ ajaxData({
             render(text, record, index) {
                 return `
                 <i style="cursor: pointer;" class="icon-note  font16" lxj-click="editFunc(${text},${index})"></i>
-                <i style="cursor: pointer;" class="icon-trash font16" lxj-click="delFunc(${text})"></i>`
+                <i style="cursor: pointer;color:red;" class="icon-trash font16" lxj-click="delFunc(${text})"></i>`
             }
         },
     ];

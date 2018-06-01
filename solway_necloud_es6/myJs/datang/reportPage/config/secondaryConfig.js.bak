@@ -1,6 +1,6 @@
 ajaxData({
     pageList2: {
-        name: 'GETopReportLayRelPage',
+        name: 'GETopReportLayRelSelectByCondition',
         data: {},
         later: true
     },
@@ -40,6 +40,12 @@ ajaxData({
         $scope.pageList2.getData({ layId: id });
     }
 
+    // 绑定列表数据
+    $scope.pageList2.getDataCallback = (success, res) => {
+        if(!success) return;
+        $scope.datasource2 = res.body;
+    };
+
     // 监听是否编辑状态  非编辑状态 影藏
     $scope.$watch('$parent.$parent.isEdit', (newValue, oldValue) => $scope.secondaryConfig = newValue);
 
@@ -78,7 +84,12 @@ ajaxData({
     // 列表配置项
     const column = [
         {
-            title: '名称',
+            title: '展示名称',
+            dataIndex: 'layName',
+            width: '',
+            align: 'left'
+        },{
+            title: '备注名称',
             dataIndex: 'name',
             width: '',
             align: 'left'
@@ -90,12 +101,7 @@ ajaxData({
             render(text) {
                 return `<span>${text ? text : ''}</span>`;
             }
-        }, {
-            title: '页面展示名称',
-            dataIndex: 'layName',
-            width: '',
-            align: 'left'
-        }
+        }, 
     ];
 
 
@@ -103,7 +109,7 @@ ajaxData({
 
     $scope.column = [
         {
-            title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i>全选</label>`,
+            title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i></label>`,
             dataIndex: '',
             width: '80px',
             align: 'left',
@@ -121,7 +127,7 @@ ajaxData({
             render(text, record, index) {
                 return `
                 <i style="cursor: pointer;" class="icon-note  font16" lxj-click="editFunc(${text},${index})"></i>
-                <i style="cursor: pointer;" class="icon-trash font16" lxj-click="delFunc(${text})"></i>`;
+                <i style="cursor: pointer;color:red;" class="icon-trash font16" lxj-click="delFunc(${text})"></i>`;
             }
         },
     ];

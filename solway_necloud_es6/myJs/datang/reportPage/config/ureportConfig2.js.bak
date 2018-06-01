@@ -1,7 +1,7 @@
 ajaxData({
     //列表 必须叫 pageList
     pageList: {
-        name: 'GETopReportLaySelectByConditionPage',
+        name: 'GETopReportLaySelectByCondition',
         data: {},
     },
     detail: {
@@ -34,7 +34,7 @@ ajaxData({
     // 列表数据 
     $scope.pageList.getDataCallback = (success, res) => {
         if (!success) return;
-        $scope.datasource = res.body.data;
+        $scope.datasource = res.body;
     };
 
     // 填写要求
@@ -45,19 +45,6 @@ ajaxData({
     // 表格  列配置
     const column = [
         {
-            title: '名称',
-            dataIndex: 'name',
-            width: '',
-            align: 'left'
-        }, {
-            title: '顺序序号',
-            dataIndex: 'weight',
-            width: '',
-            align: 'left',
-            render(text) {
-                return `<span>${text ? text : ''}</span>`;
-            }
-        }, {
             title: '公司',
             dataIndex: 'companyId',
             width: '',
@@ -70,8 +57,22 @@ ajaxData({
                 });
                 return `<span>${companyName}</span>`;
             }
+        },{
+            title: '报表模板名称',
+            dataIndex: 'layName',
+            width: '',
+            align: 'left'
         }, {
-            title: '导出最早时间',
+            title: '报表类型',
+            dataIndex: 'reportType',
+            width: '',
+            align: 'left',
+            render(text) {
+                const type = text || 0;
+                return `<span>${['', '年报', '月报', '周报', '日报'][type]}</span>`
+            }
+        }, {
+            title: '最早导出时间',
             dataIndex: 'startDate',
             width: '',
             align: 'center',
@@ -84,18 +85,18 @@ ajaxData({
                 return `<span>${str}</span>`;
             }
         }, {
-            title: '是否可用',
-            dataIndex: 'enable',
+            title: '顺序序号',
+            dataIndex: 'weight',
             width: '',
-            align: 'center',
+            align: 'left',
             render(text) {
-                return ['否', '是'][text];
+                return `<span>${text ? text : ''}</span>`;
             }
         }
     ];
 
     // 新记录 初始化 之前
-    $scope.newRecordBefore = () => $scope.formData = { reportType: '1', week: 1, dateArr: getDateArr(1, void 0) };
+    $scope.newRecordBefore = () => $scope.formData = { reportType: '1', week: 1, single: 1, enable: 0, dateArr: getDateArr(1, void 0) };
 
     //编辑当前记录
     function editFunc(id, index) {
@@ -182,7 +183,7 @@ ajaxData({
     };
     $scope.column = [
         {
-            title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i>全选</label>`,
+            title: `<label class="i-checks m-b-none"><input type="checkbox"><i></i></label>`,
             dataIndex: '',
             width: '80px',
             align: 'left',
@@ -200,7 +201,7 @@ ajaxData({
             render(text, record, index) {
                 return `
                 <i style="cursor: pointer;" class="icon-note  font16" lxj-click="editFunc(${text},${index})"></i>
-                <i style="cursor: pointer;" class="icon-trash font16" lxj-click="delFunc(${text})"></i>`
+                <i style="cursor: pointer;color:red;" class="icon-trash font16" lxj-click="delFunc(${text})"></i>`
             }
         },
     ];

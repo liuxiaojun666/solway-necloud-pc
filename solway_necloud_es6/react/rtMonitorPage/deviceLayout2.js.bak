@@ -26,28 +26,22 @@ ajaxData({
 
 
     //双击事件
-    $scope.dblclick = function (pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
-        const res = {};
-        res.deviceSerialNnumber = deviceSerialNnumber;
-        res.deviceId = deviceid;
-        res.pstationid = pstationid;
-        res.deviceTypeNow = deviceType;
-        $scope.deviceTypeNow = deviceType;
-
+    $scope.dblclick = function (pstationid, deviceId, deviceSerialNnumber, deviceTypeNow, hasJB) {
+        const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow };
+        $scope.deviceTypeNow = deviceTypeNow;
         $scope.inverterType = hasJB;//点击逆变器，不同类型跳转不同样式页面（1->inverterDetailNew.jsp,2->inverterDetailNewType1.jsp）
 
-        if (deviceType == '3') {
+        if (deviceTypeNow == '3') {
             $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
             $scope.$broadcast("showDeviceDetail3broad", res);
-        } else if (deviceType == '2') {
+        } else if (deviceTypeNow == '2') {
             $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
             $scope.$broadcast("showDeviceDetail2broad", res);
-        } else if (deviceType == '1') {
+        } else if (deviceTypeNow == '1') {
             $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
             $scope.$broadcast("showDeviceDetail1broad", res);
         }
         return false;
-        //$scope.showHistoryData_byRTMDeviceLogId(pstationid,deviceid,deviceSerialNnumber,deviceType);
     }
 
     class Root extends React.Component {
