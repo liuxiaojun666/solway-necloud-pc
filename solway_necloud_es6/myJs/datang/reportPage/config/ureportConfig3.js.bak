@@ -1,84 +1,115 @@
 ajaxData({
-    pageList: {
+    pageList1: {
         name: 'GETopReportLaySelectByCom',
         data: {}
     },
+    detail: {
+        name: 'GETopReportLaySelectById',
+        data: {},
+        later: true
+    },
+    update: {
+        name: 'opReportLayUpdateByCom',
+        data: {},
+        later: true
+    },
+    pageList: {
+        name: 'GETopReportTargetRelSelectByCom',
+        data: {},
+        later: true
+    },
+    informationList: {
+        name: 'GETroleInformationListAdmin',
+        data: {},
+    }
 }, {})('ureportConfig3Ctrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-    $scope.hasSwitchPower = false;
-    $scope.wapHeader = false;
-    
-    
-    // 列表数据 
-    $scope.pageList.getDataCallback = (success, res) => {
+
+    // 默认 编辑 第 0 个 
+    $scope.pageList1.getDataCallback = async (success, res) => {
         if (!success) return;
-        $scope.datasource = res.body;
+        await myAjaxData.timeout(0);
+        $scope.edit(0);
     };
 
-    $scope.editRequired = [
-        '一、此记录由管理员填写。',
-    ]
+    // 编辑对应tab 的 内容
+    $scope.edit = index => {
+        $scope.curIndex = index;
+        $scope.formData = { mailAble: 1 }
+        $scope.detail.getData({ id: $scope.pageList1.res.body[index].id });
+        $scope.pageList.getData({ layId: $scope.pageList1.res.body[index].id });
+    };
+
+    // 获取当前 tab 的记录后 
+    $scope.detail.getDataCallback = (success, res) => {
+        if (!success) return;
+        const { reportType, startDate } = res.body;
+        $scope.formData = {
+            ...res.body,
+            week: reportType === 3 ? startDate.substr(-1) : '1',
+            dateArr: getDateArr(reportType, startDate)
+        };
+    };
+
+    // 日期组件 更新回调
+    $scope.dateUpdated = (dateStr) => $scope.formData.mailCron = dateStr;
+
+    // 更新 保存
+    $scope.saveOrSubmit = () => {
+        if ($scope.formData.reportType == '3') $scope.formData.mailCron = $scope.formData.mailCron.split(',')[0] + ',' + $scope.formData.week;
+        if (!app.lxj_validation($scope.formData, '.edit-form1')) return;
+        $scope.update.getData({ ...$scope.formData, dateArr: null, week: null }).then(res => {
+            if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
+            promptObj("success", "", res.msg);
+            $scope.pageList.getData({});
+        });
+    };
 
     // 表格  列配置
-    const column = [
+    $scope.column = [
         {
-            title: '报表名称',
-            dataIndex: 'layName',
+            title: '类型',
+            dataIndex: 'targetType',
             width: '',
-            align: 'left'
-        }, {
+            align: 'left',
+        },
+        {
+            title: 'ID',
+            dataIndex: 'targetId',
+            width: '',
+            align: 'left',
+        },
+        {
             title: '是否发送邮件',
             dataIndex: 'mailAble',
             width: '',
             align: 'left',
-            render(text) {
-                return `<span>${['否','是'][text]}</span>`
-            }
-        }, {
-            title: '发送邮件时间',
-            dataIndex: 'mailCron',
-            width: '',
-            align: 'left'
-        }
-    ];
-
-
-
-
-
-
-
-
-
-
-
-    /* ****************************************************************** 下面的不用改 ****************************************************************** */
-
-
-
-
-    // 需要将table表格内  自定义事件（lxj-click）绑定函数挂载到table组件上
-    // lxj-click 绑定的函数只接收 字符串参数
-    $scope.tableListBeforeCreated = (scope, element) => {
-        scope.editFunc = $scope.editFunc
-    };
-    //编辑当前记录不变代码  不要改
-    $scope.editFunc = (id, index) => {
-        $scope.isEdit = true;
-        $scope.toEdit = true;
-        $scope.newRecord = false;
-        // editFunc(id, index);
-        $scope.$apply();
-    };
-    $scope.column = [
-        ...column,
+        },
         {
-            title: '操作',
-            dataIndex: 'id',
-            width: '74px',
-            align: 'center',
-            render(text, record, index) {
-                return `<i style="cursor: pointer;" class="icon-note  font16" lxj-click="editFunc(${text},${index})"></i>`
-            }
+            title: '是否可用',
+            dataIndex: 'enable',
+            width: '',
+            align: 'left',
         },
     ];
-})
+
+
+    // 日期组件 传入格式处理
+    function getDateArr(reportType, startDate) {
+        const func = str => str.split('-').join().split(' ').join().split(':').join().split(',');
+        if (reportType == '1') {
+            if (startDate) return [null, ...func(startDate), null];
+            else return [null, '01', '01', '00', '00', null];
+        } else if (reportType == '2') {
+            if (startDate) return [null, null, ...func(startDate), null];
+            else return [null, null, '01', '00', '00', null];
+        } else if (reportType == '4') {
+            if (startDate) return [null, null, null, ...func(startDate), null];
+            else return [null, null, null, '00', '00', null];
+        } else if (reportType == '3') {
+            if (startDate) return [null, null, null, ...func(startDate.substr(0, startDate.length - 2)), null];
+            else return [null, null, null, '00', '00', null];
+        }
+    }
+
+
+});
