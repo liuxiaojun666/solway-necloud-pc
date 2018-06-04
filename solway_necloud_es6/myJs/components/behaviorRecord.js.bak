@@ -1,10 +1,16 @@
-app.factory('myService', function () {
+app.factory('historicalRecord', function () {
     let behaviorRecordArr = [];
+    behaviorRecordArr.fromIndex = 0;
+    behaviorRecordArr.toIndex = 0;
+
+    const _this = this;
     function push(obj) {
         behaviorRecordArr.push(obj);
+        behaviorRecordArr.fromIndex++;
     }
     function pop(index) {
         behaviorRecordArr = behaviorRecordArr.slice(0, index);
+        return _this;
     }
     function set(index, obj) {
         behaviorRecordArr[i] = {
@@ -15,12 +21,18 @@ app.factory('myService', function () {
     function get() {
         return behaviorRecordArr;
     }
+    function back() {
+        
+    }
+    function go() {
+        
+    }
 
     return {
         set,
         get,
         push,
         pop
-    }
+    };
 
 });
