@@ -1,12 +1,20 @@
-app.directive('datePicker', ['myAjaxData', (myAjaxData) => ({
+app.directive('datePicker', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
     restrict: 'E',
     templateUrl: window.baseUrl + '/tpl/publicComponent/datePicker.html',
     scope: {
         type: '=',
         updated: '=',
-        dateArr: '='
+        dateArr: '=',
+        created: '=',
+        mounted: '='
     },
-    controller($scope) {
+    link($scope) {
+        $timeout(() => {
+            $scope.update('day');
+            $scope.mounted && $scope.mounted($scope, $element);
+        }, 0);
+    },
+    controller($scope, $element, $attrs) {
         const thisYear = (new Date).getFullYear();
         const typeStrArr = ['year', 'month', 'day', 'hour', 'minute', 'second'];
         $scope.years = new Array(20).fill('').map((v, i) => (i < 10) ? (thisYear - 10 + i + '') : (thisYear + i + ''));
@@ -47,6 +55,7 @@ app.directive('datePicker', ['myAjaxData', (myAjaxData) => ({
                 if (['01','03','05','07','08','10','12'].includes($scope.month)) num = 31;
                 else if ($scope.month === '02') num = (($scope.year || thisYear) % 4 === 0) ? 29 : 28;
                 $scope.days = new Array(num).fill('').map((v, i) => (i < 9) ? ('0' + (i + 1)) : (i + 1 + ''));
+                $scope.day = $scope.days.includes($scope.day) ? $scope.day : $scope.days[$scope.days.length - 1];
             }
             let { year, month, day, hour, minute, second } = $scope;
             $scope.dateArr = [year, month, day, hour, minute, second];
@@ -57,7 +66,9 @@ app.directive('datePicker', ['myAjaxData', (myAjaxData) => ({
             if (!hour) dateStr = dateStr.substr(1);
             if (!minute) dateStr = dateStr.substr(1);
             if (!second) dateStr = dateStr.substr(0, dateStr.length - 1);
-            $scope.updated && $scope.updated(dateStr, $scope.dateArr);
+            $scope.updated && $scope.updated(dateStr, $scope.dateArr, $attrs);
         };
+
+        $scope.created && $scope.created($scope, $element);
     }
 })]);

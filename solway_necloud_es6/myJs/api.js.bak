@@ -63,6 +63,7 @@ win.ajaxData = (b, a) => {
         }
         c.getData = o => {
             if (!i[o.name]) return d.getData(o)
+            if (Array.isArray(o.data)) return d.getData({name: o.name, data: o.data})
             for (let key in o.data) {
                 i[o.name][key] = o.data[key]
                 if (i[o.name][key] === null) delete i[o.name][key]

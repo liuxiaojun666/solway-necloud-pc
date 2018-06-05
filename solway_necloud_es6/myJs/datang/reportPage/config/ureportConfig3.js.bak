@@ -1,97 +1,43 @@
 ajaxData({
     pageList1: {
         name: 'GETopReportLaySelectByCom',
-        data: {}
-    },
-    detail: {
-        name: 'GETopReportLaySelectById',
-        data: {},
-        later: true
+        data: {
+            useSt: 0
+        }
     },
     update: {
         name: 'opReportLayUpdateByCom',
         data: {},
         later: true
-    },
-    pageList: {
-        name: 'GETopReportTargetRelSelectByCom',
-        data: {},
-        later: true
-    },
-    informationList: {
-        name: 'GETroleInformationListAdmin',
-        data: {},
     }
 }, {})('ureportConfig3Ctrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
 
-    // 默认 编辑 第 0 个 
+    // 编辑对应tab 的 内容
+    $scope.edit = index => $scope.pageList1.getData({ useSt: index });
+
+    // 列表处理
     $scope.pageList1.getDataCallback = async (success, res) => {
         if (!success) return;
         await myAjaxData.timeout(0);
-        $scope.edit(0);
-    };
-
-    // 编辑对应tab 的 内容
-    $scope.edit = index => {
-        $scope.curIndex = index;
-        $scope.formData = { mailAble: 1 }
-        $scope.detail.getData({ id: $scope.pageList1.res.body[index].id });
-        $scope.pageList.getData({ layId: $scope.pageList1.res.body[index].id });
-    };
-
-    // 获取当前 tab 的记录后 
-    $scope.detail.getDataCallback = (success, res) => {
-        if (!success) return;
-        const { reportType, startDate } = res.body;
-        $scope.formData = {
-            ...res.body,
-            week: reportType === 3 ? startDate.substr(-1) : '1',
-            dateArr: getDateArr(reportType, startDate)
-        };
+        $scope.pageList1.res.body = res.body.map(v => ({
+            ...v,
+            mailAble: 1,
+            week: v.reportType == '3' ? 1 : null,
+            dateArr: getDateArr(v.reportType, v.mailCron)
+        }));
+        $scope.$apply();
     };
 
     // 日期组件 更新回调
-    $scope.dateUpdated = (dateStr) => $scope.formData.mailCron = dateStr;
+    $scope.dateUpdated = (dateStr, dateArr, attrs) => $scope.pageList1.res.body[attrs.index].sendDate = dateStr;
 
     // 更新 保存
     $scope.saveOrSubmit = () => {
-        if ($scope.formData.reportType == '3') $scope.formData.mailCron = $scope.formData.mailCron.split(',')[0] + ',' + $scope.formData.week;
-        if (!app.lxj_validation($scope.formData, '.edit-form1')) return;
-        $scope.update.getData({ ...$scope.formData, dateArr: null, week: null }).then(res => {
+        $scope.update.getData($scope.pageList1.res.body.map(v => ({ id: v.id, reportType: v.reportType, sendDate: v.sendDate, mailAble: 1}))).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
             promptObj("success", "", res.msg);
-            $scope.pageList.getData({});
         });
     };
-
-    // 表格  列配置
-    $scope.column = [
-        {
-            title: '类型',
-            dataIndex: 'targetType',
-            width: '',
-            align: 'left',
-        },
-        {
-            title: 'ID',
-            dataIndex: 'targetId',
-            width: '',
-            align: 'left',
-        },
-        {
-            title: '是否发送邮件',
-            dataIndex: 'mailAble',
-            width: '',
-            align: 'left',
-        },
-        {
-            title: '是否可用',
-            dataIndex: 'enable',
-            width: '',
-            align: 'left',
-        },
-    ];
-
 
     // 日期组件 传入格式处理
     function getDateArr(reportType, startDate) {
