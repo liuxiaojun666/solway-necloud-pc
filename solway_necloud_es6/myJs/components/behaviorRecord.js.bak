@@ -25,7 +25,7 @@ app.factory('historicalRecord', function ($state) {
     function push(obj) {
         behaviorRecordArr.push(obj);
         curIndex++;
-        setStorage();
+        persiste && setStorage();
     }
     // 有前进页面是添加新页面  删除之前的前进页面
     function pop(index) {
@@ -37,7 +37,7 @@ app.factory('historicalRecord', function ($state) {
             ...behaviorRecordArr[curIndex],
             ...obj
         };
-        setStorage();
+        persiste && setStorage();
     }
     // 后退
     function back() {
