@@ -316,18 +316,22 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
 /**
  * [切换电站头]
  */
-app.directive('switchPower', ['myAjaxData', myAjaxData => ({
+app.directive('switchPower', ['myAjaxData', (myAjaxData) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
     scope: !0,
     templateUrl: baseUrl + '/tpl/publicComponent/switchPower.jsp',
     controller($scope) {
-        $scope.getCurrentDataName('00', 0, (result) => {
+        myAjaxData.getData({
+            name: 'GETgetCurrentInfoNew',
+            data: { currentView: '00', isGroup: 0 }
+        }).then(result => {
             $scope.currentDataName = result.currentDataName
             myAjaxData.setCurrentStationData(result)
             $scope.switchPowerCallback && $scope.switchPowerCallback()
         })
+
         $scope.$on('broadcastSwitchStation', (event, data) => {
             $scope.currentDataName = data.dataName
             myAjaxData.setCurrentStationData({ currentDataName: data.dataName, currentSTID: data.dataId })
