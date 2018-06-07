@@ -21,7 +21,7 @@ ajaxData({
         await myAjaxData.timeout(0);
         $scope.pageList1.res.body = res.body.map(v => ({
             ...v,
-            week: v.reportType == '3' ? 1 : null,
+            week: v.reportType == '3' ? v.sendDate ? v.sendDate.substr(-1) : v.startDate.substr(-1) : null,
             dateArr: getDateArr(v.reportType, v.sendDate || v.startDate),
             __bj: v.sendDate
         }));
@@ -29,7 +29,8 @@ ajaxData({
     };
 
     // 日期组件 更新回调
-    $scope.dateUpdated = (dateStr, dateArr, attrs) => {
+    $scope.dateUpdated = async (dateStr, dateArr, attrs) => {
+        await myAjaxData.timeout(0);
         $scope.pageList1.res.body[attrs.index].sendDate = dateStr;
         const obj = $scope.pageList1.res.body[attrs.index];
         const tempArr = dateArr.reverse();
