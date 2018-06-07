@@ -9,5 +9,13 @@ app.directive('timeRange', ['myAjaxData', myAjaxData => ({
         $scope.dayDate = new Date;
         $scope.monthDate = new Date;
         $scope.yearDate = new Date;
+        $scope.range = 0; // 默认选择日
+
+        let updateCount = 0;
+        $scope.myUpdated = () => {
+            if (updateCount++ < 3) return;
+            const {range, dayDate, monthDate, yearDate} = $scope;
+            $scope.updated && $scope.updated(range, [dayDate, monthDate, yearDate][range]);
+        };
     }
 })]);
