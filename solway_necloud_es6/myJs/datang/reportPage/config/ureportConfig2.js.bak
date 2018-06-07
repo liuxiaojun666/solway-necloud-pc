@@ -121,7 +121,13 @@ ajaxData({
     $scope.saveOrSubmit = () => {
         if ($scope.formData.reportType == '3') $scope.formData.startDate = $scope.formData.startDate.split(',')[0] + ',' + $scope.formData.week;
         if (!app.lxj_validation($scope.formData, '.edit-form1')) return;
-        $scope.saveOrUpdate.getData({...$scope.formData, dateArr: null, week: null}).then(res => {
+        $scope.saveOrUpdate.getData({ 
+            ...$scope.formData, 
+            mailAble: 0, 
+            dateArr: null, 
+            week: null,
+            name: $scope.formData.layName
+        }).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
             promptObj("success", "", res.msg);
             $scope.secondaryConfig = true;
