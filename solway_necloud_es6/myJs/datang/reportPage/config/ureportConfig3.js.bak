@@ -21,21 +21,34 @@ ajaxData({
         await myAjaxData.timeout(0);
         $scope.pageList1.res.body = res.body.map(v => ({
             ...v,
-            mailAble: 1,
-            week: v.reportType == '3' ? 1 : null,
-            dateArr: getDateArr(v.reportType, v.mailCron)
+            week: v.reportType == '3' ? v.sendDate ? v.sendDate.substr(-1) : v.startDate.substr(-1) : null,
+            dateArr: getDateArr(v.reportType, v.sendDate || v.startDate),
+            __bj: v.sendDate
         }));
         $scope.$apply();
     };
 
     // 日期组件 更新回调
-    $scope.dateUpdated = (dateStr, dateArr, attrs) => $scope.pageList1.res.body[attrs.index].sendDate = dateStr;
+    $scope.dateUpdated = async (dateStr, dateArr, attrs) => {
+        await myAjaxData.timeout(0);
+        $scope.pageList1.res.body[attrs.index].sendDate = dateStr;
+        const obj = $scope.pageList1.res.body[attrs.index];
+        const tempArr = dateArr.reverse();
+        tempArr[5] = obj.reportType === 3 ? obj.week : '?';
+        $scope.pageList1.res.body[attrs.index].mailCron = tempArr.map(v => v === '' ? '*' : v).join(' ');
+    };
 
     // 更新 保存
     $scope.saveOrSubmit = () => {
-        $scope.update.getData($scope.pageList1.res.body.map(v => ({ id: v.id, reportType: v.reportType, sendDate: v.sendDate, mailAble: 1}))).then(res => {
+        $scope.update.getData($scope.pageList1.res.body.map(v => ({ 
+            id: v.id, 
+            reportType: v.reportType, 
+            sendDate: (v.reportType === 3 ? v.sendDate + ',' + v.week : v.sendDate), 
+            mailAble: v.mailAble ? 1 : 0
+        }))).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
             promptObj("success", "", res.msg);
+            $scope.pageList1.getData({});
         });
     };
 

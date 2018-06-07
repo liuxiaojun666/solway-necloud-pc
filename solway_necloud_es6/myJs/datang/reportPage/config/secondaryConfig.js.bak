@@ -59,7 +59,11 @@ ajaxData({
     // 保存或提交执行函数
     $scope.saveOrSubmit = () => {
         if (!app.lxj_validation($scope.formData, '.edit-form2')) return;
-        $scope.saveOrUpdate2.getData({ ...$scope.formData, layId: $scope.layId }).then(res => {
+        $scope.saveOrUpdate2.getData({ 
+            ...$scope.formData, 
+            layId: $scope.layId,
+            name: $scope.formData.layName
+        }).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
             promptObj("success", "", res.msg);
             $scope.edit = false;

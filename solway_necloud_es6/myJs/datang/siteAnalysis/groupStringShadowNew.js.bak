@@ -286,9 +286,9 @@ app.directive('chart1', ['myAjaxData', myAjaxData => {
                         position (pt) {
                             return [pt[0], '20%'];
                         },
-                        formatter (params) {
+                        formatter (params, b, c) {
                             let res = params[0].name + '<br/>'
-                            params.slice(0, -3).reverse().forEach(v => {
+                            params.slice(0).reverse().forEach(v => {
                                 res += `${v.seriesName}:${v.value || ''}<br/>`
                             })
                             return res
@@ -335,7 +335,7 @@ app.directive('chart1', ['myAjaxData', myAjaxData => {
                     }],
                     series: seriesData
                 }
-                myChart.setOption(option)
+                myChart.setOption(option, true)
             }
             
             window.addEventListener('resize', () => {

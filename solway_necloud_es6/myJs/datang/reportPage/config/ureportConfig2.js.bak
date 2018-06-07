@@ -29,7 +29,15 @@ ajaxData({
         data: {}
     }
 }, {})('ureportConfig2Ctrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-    $scope.hasSwitchPower = false;// 不切换电站
+    // edit-form 模板 显示配置
+    $scope.visibilityConfig = {
+        hasSwitchPower: false,
+        listName: '集团电站报表配置列表',
+        goPage: {
+            url: 'app.ureportConfig1',
+            name: '报表模板配置'
+        }
+    };
 
     // 列表数据 
     $scope.pageList.getDataCallback = (success, res) => {
@@ -58,7 +66,7 @@ ajaxData({
                 return `<span>${companyName}</span>`;
             }
         },{
-            title: '报表模板名称',
+            title: '一级报表名称',
             dataIndex: 'layName',
             width: '',
             align: 'left'
@@ -72,7 +80,7 @@ ajaxData({
                 return `<span>${['', '年报', '月报', '周报', '日报'][type]}</span>`
             }
         }, {
-            title: '最早导出时间',
+            title: '最早发邮件时间',
             dataIndex: 'startDate',
             width: '',
             align: 'center',
@@ -121,7 +129,13 @@ ajaxData({
     $scope.saveOrSubmit = () => {
         if ($scope.formData.reportType == '3') $scope.formData.startDate = $scope.formData.startDate.split(',')[0] + ',' + $scope.formData.week;
         if (!app.lxj_validation($scope.formData, '.edit-form1')) return;
-        $scope.saveOrUpdate.getData({...$scope.formData, dateArr: null, week: null}).then(res => {
+        $scope.saveOrUpdate.getData({ 
+            ...$scope.formData, 
+            mailAble: 0, 
+            dateArr: null, 
+            week: null,
+            name: $scope.formData.layName
+        }).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
             promptObj("success", "", res.msg);
             $scope.secondaryConfig = true;
