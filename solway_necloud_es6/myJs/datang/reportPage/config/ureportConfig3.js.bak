@@ -23,17 +23,23 @@ ajaxData({
             ...v,
             mailAble: 1,
             week: v.reportType == '3' ? 1 : null,
-            dateArr: getDateArr(v.reportType, v.mailCron)
+            dateArr: getDateArr(v.reportType, v.sendDate || v.startDate)
         }));
         $scope.$apply();
     };
 
     // 日期组件 更新回调
-    $scope.dateUpdated = (dateStr, dateArr, attrs) => $scope.pageList1.res.body[attrs.index].sendDate = dateStr;
+    $scope.dateUpdated = (dateStr, dateArr, attrs) => {
+        $scope.pageList1.res.body[attrs.index].sendDate = dateStr;
+        const obj = $scope.pageList1.res.body[attrs.index];
+        const tempArr = dateArr.reverse();
+        tempArr[5] = obj.reportType === 3 ? obj.week : '?';
+        $scope.pageList1.res.body[attrs.index].mailCron = tempArr.map(v => v === '' ? '*' : v).join(' ');
+    };
 
     // 更新 保存
     $scope.saveOrSubmit = () => {
-        $scope.update.getData($scope.pageList1.res.body.map(v => ({ id: v.id, reportType: v.reportType, sendDate: v.sendDate, mailAble: 1}))).then(res => {
+        $scope.update.getData($scope.pageList1.res.body.map(v => ({ id: v.id, reportType: v.reportType, mailCron: v.mailCron, sendDate: v.sendDate, mailAble: 1}))).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
             promptObj("success", "", res.msg);
         });
