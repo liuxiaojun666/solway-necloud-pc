@@ -493,6 +493,8 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad
                 $scope.weekStart = moment($scope.dateTime).add(-weekNum + 1, 'd').format('YYYY-MM-DD')
                 const weekEndDate = moment($scope.dateTime).add(6 - weekNum + 1, 'd')._d
                 $scope.weekEnd = (+weekEndDate > +($scope.endDate || new Date) ? ($scope.endDate || new Date) : weekEndDate).Format('yyyy-MM-dd')
+                $scope.dateTime.weekStart = $scope.weekStart
+                $scope.dateTime.weekEnd = $scope.weekEnd
             }
             showDate = $element.find('input').val() && $scope.dateTime.Format($scope.calendarType)
             $element.find('input').val(showDate)

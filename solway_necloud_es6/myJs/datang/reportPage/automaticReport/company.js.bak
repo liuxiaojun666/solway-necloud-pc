@@ -1,7 +1,7 @@
 ajaxData({
     tab: {
         name: 'GETreportShowTab',
-        data: { comId: 137 }
+        data: { }
     },
     view: {
         name: 'GETreportShowView',
@@ -41,10 +41,20 @@ ajaxData({
     // 切换 第二次 tab
     $scope.changeTab2 = index => {
         $scope.tabIndex = index;
+        const timeType = ['ACCUM', 'YEAR', 'MONTH', 'WEEK', 'DAY'][$scope.tab.res.body[$scope.timeRange].reportType];
+        $scope.timeType = timeType;
+        $scope.dateStr = (() => {
+            if (timeType === 'YEAR') return $scope.dateTime1.showDate;
+            if (timeType === 'MONTH') return $scope.dateTime2.showDate;
+            if (timeType === 'WEEK') return $scope.dateTime3.weekStart + ',' + $scope.dateTime3.weekEnd;
+            if (timeType === 'DAY') return $scope.dateTime4.showDate;
+        })();
         $scope.view.getData({
-            useSt: 0,
+            timeType,
             subTabId: $scope.tab.res.body[$scope.timeRange].subTabs[index].id,
-            type: 0
+            style: 0,
+            useSt: 0,
+            dateStr: $scope.dateStr
         });
     };
 
