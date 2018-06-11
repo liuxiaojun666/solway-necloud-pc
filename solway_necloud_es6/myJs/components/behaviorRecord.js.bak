@@ -1,31 +1,29 @@
 app.factory('historicalRecord', function ($state) {
     const _this = this, win = window;
-    let behaviorRecordArr = [], curIndex = 0, persiste = false;
-
-    // 初始化 历史记录 清空   参数为是否 持久化， 持久化不清空记录，并读取上次记录
-    function init(persiste) {
-        persiste = persiste;
-        if (persiste) {
-            const historicalRecord = JSON.parse(win.localStorage.historicalRecord || {});
-            behaviorRecordArr = historicalRecord.behaviorRecordArr || [];
-            curIndex = historicalRecord.curIndex || 0;
-            return;
-        }
-        behaviorRecordArr = [];
-        curIndex = 0;
-    }
+    let behaviorRecordArr = [], curIndex = -1, persiste = false;
 
     // 进入页面  判断
     function diffPage(obj) {
-        if (behaviorRecordArr[curIndex].url === obj.url) return;
-        if (behaviorRecordArr[curIndex + 1]) pop(curIndex);
+        if (behaviorRecordArr[curIndex] && behaviorRecordArr[curIndex].url === obj.url) {
+            return {
+                back: behaviorRecordArr[curIndex - 1] ? back : null,
+                go: behaviorRecordArr[curIndex + 1] ? go : null
+            };
+        }
+        if (behaviorRecordArr[curIndex + 1]) {
+            pop(curIndex);
+            return {go: null, back};
+        }
         push(obj);
+        return {
+            go: null,
+            back: behaviorRecordArr[curIndex - 1] ? back : null
+        };
     }
     // 添加新页面
     function push(obj) {
         behaviorRecordArr.push(obj);
         curIndex++;
-        persiste && setStorage();
     }
     // 有前进页面是添加新页面  删除之前的前进页面
     function pop(index) {
@@ -33,11 +31,10 @@ app.factory('historicalRecord', function ($state) {
     }
     // 记录 当前页的 行为
     function set(obj) {
-        behaviorRecordArr[curIndex] = {
-            ...behaviorRecordArr[curIndex],
+        behaviorRecordArr[curIndex].data = {
+            ...behaviorRecordArr[curIndex].data,
             ...obj
         };
-        persiste && setStorage();
     }
     // 后退
     function back() {
@@ -50,17 +47,10 @@ app.factory('historicalRecord', function ($state) {
         $state.go(behaviorRecordArr[curIndex].url, {}, { reload: false });
     }
 
-    // 持久化
-    function setStorage() {
-        win.localStorage.historicalRecord = JSON.stringify({ behaviorRecordArr, curIndex });
-    }
 
     return {
-        init: init,
         initCurPage: diffPage,
-        set,
-        back: curIndex === 0 ? null : back,
-        go: curIndex === (behaviorRecordArr.length - 1) ? null : go
+        set
     };
 
 });
