@@ -1,0 +1,31 @@
+app.directive('historicalRecord', ['myAjaxData', 'historicalRecord', '$state', (myAjaxData, historicalRecord, $state) => ({
+    restrict: 'E',
+    replace: !0,
+    scope: {},
+    template: `
+    <div class="historical-record" style="display: inline-block;">
+        <style>
+            .historical-record button {
+                border-color: #1cb09a;
+                border-style: solid;
+                background: #1cb09a;
+                color: #fff;
+            }
+            .historical-record button.disabled {
+                opacity: .5;
+                cursor: no-drop;
+            }
+        </style>
+        <button ng-class="{disabled: !back}" ng-click="back();">←</button>
+        <button ng-class="{disabled: !go}" ng-click="go();">→</button>
+    </div>`,
+    controller($scope) {
+        const {go, back} = historicalRecord.initCurPage({
+            url: $state.current.name,
+            data: {}
+        });
+        $scope.go = go;
+        $scope.back = back;
+
+    }
+})]);
