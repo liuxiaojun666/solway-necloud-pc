@@ -41,20 +41,15 @@ ajaxData({
     $scope.changeTab2 = index => {
         if (index === void 0) return;
         $scope.tabIndex = index;
-        const timeType = ['ACCUM', 'YEAR', 'MONTH', 'WEEK', 'DAY'][$scope.tab.res.body[$scope.timeRange].reportType];
-        $scope.timeType = timeType;
-        $scope.dateStr = (() => {
-            if (timeType === 'YEAR') return $scope.dateTime1.showDate;
-            if (timeType === 'MONTH') return $scope.dateTime2.showDate;
-            if (timeType === 'WEEK') return $scope.dateTime3.weekStart + ',' + $scope.dateTime3.weekEnd;
-            if (timeType === 'DAY') return $scope.dateTime4.showDate;
-        })();
+        $scope.timeType = ['ACCUM', 'YEAR', 'MONTH', 'WEEK', 'DAY'][$scope.tab.res.body[$scope.timeRange].reportType];
+        $scope.dateStr = getDateStr();
+        const {timeType, dateStr} = $scope;
         $scope.view.getData({
             timeType,
             subTabId: $scope.tab.res.body[$scope.timeRange].subTabs[index].id,
             style: 0,
             useSt: 0,
-            dateStr: $scope.dateStr
+            dateStr
         });
     };
 
@@ -74,4 +69,12 @@ ajaxData({
         promptObj("success", "", res.msg);
         $scope.checkSubscribe.getData({});
     };
+
+    function getDateStr() {
+        const {timeType} = $scope;
+        if (timeType === 'YEAR') return $scope.dateTime1.showDate;
+        if (timeType === 'MONTH') return $scope.dateTime2.showDate;
+        if (timeType === 'WEEK') return $scope.dateTime3.weekStart + ',' + $scope.dateTime3.weekEnd;
+        if (timeType === 'DAY') return $scope.dateTime4.showDate;
+    }
 });
