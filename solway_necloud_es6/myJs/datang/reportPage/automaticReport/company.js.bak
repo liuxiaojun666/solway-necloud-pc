@@ -28,7 +28,6 @@ ajaxData({
     $scope.tab.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.changeTab1(0);
-        $scope.changeTab2(0);
     };
 
     // 切换 第一层 tab
@@ -40,6 +39,7 @@ ajaxData({
 
     // 切换 第二次 tab
     $scope.changeTab2 = index => {
+        if (index === void 0) return;
         $scope.tabIndex = index;
         const timeType = ['ACCUM', 'YEAR', 'MONTH', 'WEEK', 'DAY'][$scope.tab.res.body[$scope.timeRange].reportType];
         $scope.timeType = timeType;
@@ -57,6 +57,9 @@ ajaxData({
             dateStr: $scope.dateStr
         });
     };
+
+    // 日期更新后
+    $scope.dateUpdated = () => $scope.changeTab2($scope.tabIndex);
 
     // view 处理
     $scope.view.getDataCallback = (success, res) => {

@@ -123,7 +123,8 @@ ajaxData({
             $scope.formData = {
                 ...res.body,
                 week: reportType === 3 ? startDate.substr(-1) : '1',
-                dateArr: getDateArr(reportType, startDate)
+                dateArr: getDateArr(reportType, startDate),
+                isEdit: true
             };
         });
     }
@@ -148,6 +149,7 @@ ajaxData({
             promptObj("success", "", res.msg);
             $scope.secondaryConfig = true;
             $scope.formData.id = res.body.id;
+            $scope.formData.isEdit = true;
             $scope.pageList.getData({});
         });
     };
