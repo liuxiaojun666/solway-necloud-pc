@@ -54,7 +54,12 @@ ajaxData({
     };
 
     // 日期更新后
-    $scope.dateUpdated = () => $scope.changeTab2($scope.tabIndex);
+    let dateUpdateNum = 0;
+    $scope.dateUpdated = () => {
+        if (!$scope.dateStr) return;
+        if (++dateUpdateNum < 2) return;
+        $scope.changeTab2($scope.tabIndex);
+    };
 
     // view 处理
     $scope.view.getDataCallback = (success, res) => {
