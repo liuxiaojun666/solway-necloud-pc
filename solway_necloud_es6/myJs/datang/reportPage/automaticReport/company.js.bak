@@ -28,7 +28,6 @@ ajaxData({
     $scope.tab.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.changeTab1(0);
-        $scope.changeTab2(0);
     };
 
     // 切换 第一层 tab
@@ -40,22 +39,26 @@ ajaxData({
 
     // 切换 第二次 tab
     $scope.changeTab2 = index => {
+        if (index === void 0) return;
         $scope.tabIndex = index;
-        const timeType = ['ACCUM', 'YEAR', 'MONTH', 'WEEK', 'DAY'][$scope.tab.res.body[$scope.timeRange].reportType];
-        $scope.timeType = timeType;
-        $scope.dateStr = (() => {
-            if (timeType === 'YEAR') return $scope.dateTime1.showDate;
-            if (timeType === 'MONTH') return $scope.dateTime2.showDate;
-            if (timeType === 'WEEK') return $scope.dateTime3.weekStart + ',' + $scope.dateTime3.weekEnd;
-            if (timeType === 'DAY') return $scope.dateTime4.showDate;
-        })();
+        $scope.timeType = ['ACCUM', 'YEAR', 'MONTH', 'WEEK', 'DAY'][$scope.tab.res.body[$scope.timeRange].reportType];
+        $scope.dateStr = getDateStr();
+        const {timeType, dateStr} = $scope;
         $scope.view.getData({
             timeType,
             subTabId: $scope.tab.res.body[$scope.timeRange].subTabs[index].id,
             style: 0,
             useSt: 0,
-            dateStr: $scope.dateStr
+            dateStr
         });
+    };
+
+    // 日期更新后
+    let dateUpdateNum = 0;
+    $scope.dateUpdated = () => {
+        if (!$scope.dateStr) return;
+        if (++dateUpdateNum < 2) return;
+        $scope.changeTab2($scope.tabIndex);
     };
 
     // view 处理
@@ -71,4 +74,12 @@ ajaxData({
         promptObj("success", "", res.msg);
         $scope.checkSubscribe.getData({});
     };
+
+    function getDateStr() {
+        const {timeType} = $scope;
+        if (timeType === 'YEAR') return $scope.dateTime1.showDate;
+        if (timeType === 'MONTH') return $scope.dateTime2.showDate;
+        if (timeType === 'WEEK') return $scope.dateTime3.weekStart + ',' + $scope.dateTime3.weekEnd;
+        if (timeType === 'DAY') return $scope.dateTime4.showDate;
+    }
 });

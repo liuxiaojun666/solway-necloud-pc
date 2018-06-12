@@ -73,11 +73,18 @@ ajaxData({
 
     //编辑当前记录
     $scope.editFunc = (id, index) => {
-        $scope.selectByCondition.getData();
+        $scope.selectByCondition.getData({});
         $scope.edit = true;
         $scope.formData = {};
         $scope.detail2.getData({ id, layId: $scope.layId }).then(res => $scope.formData = res.body);
         $scope.$apply();
+    };
+
+    // 获取模板 列表  若已获取  取消
+    const selectByConditionGetData = $scope.selectByCondition.getData;
+    $scope.selectByCondition.getData = (obj) => {
+        if ($scope.selectByCondition.res) return;
+        selectByConditionGetData(obj);
     };
 
     //删除当前记录
@@ -89,13 +96,8 @@ ajaxData({
     // 列表配置项
     const column = [
         {
-            title: '展示名称',
+            title: '二级报表名称',
             dataIndex: 'layName',
-            width: '',
-            align: 'left'
-        },{
-            title: '备注名称',
-            dataIndex: 'name',
             width: '',
             align: 'left'
         }, {

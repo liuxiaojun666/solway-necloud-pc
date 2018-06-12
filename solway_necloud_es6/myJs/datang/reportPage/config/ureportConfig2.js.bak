@@ -66,6 +66,14 @@ ajaxData({
                 return `<span>${companyName}</span>`;
             }
         },{
+            title: '适用范围',
+            dataIndex: 'useSt',
+            width: '',
+            align: 'left',
+            render(text) {
+                return ['公司', '电站'][text];
+            }
+        },{
             title: '一级报表名称',
             dataIndex: 'layName',
             width: '',
@@ -104,7 +112,15 @@ ajaxData({
     ];
 
     // 新记录 初始化 之前
-    $scope.newRecordBefore = () => $scope.formData = { id: null, reportType: '1', weight: 10, week: 1, single: 1, enable: 0, dateArr: getDateArr(1, void 0) };
+    $scope.newRecordBefore = () => $scope.formData = { 
+        id: null, 
+        reportType: '1', 
+        weight: 10, 
+        week: 1, 
+        single: 1, 
+        enable: 0, 
+        dateArr: getDateArr(1, void 0) 
+    };
 
     //编辑当前记录
     function editFunc(id, index) {
@@ -115,7 +131,8 @@ ajaxData({
             $scope.formData = {
                 ...res.body,
                 week: reportType === 3 ? startDate.substr(-1) : '1',
-                dateArr: getDateArr(reportType, startDate)
+                dateArr: getDateArr(reportType, startDate),
+                isEdit: true
             };
         });
     }
@@ -140,6 +157,7 @@ ajaxData({
             promptObj("success", "", res.msg);
             $scope.secondaryConfig = true;
             $scope.formData.id = res.body.id;
+            $scope.formData.isEdit = true;
             $scope.pageList.getData({});
         });
     };

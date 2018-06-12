@@ -1,7 +1,9 @@
 app.directive('historicalRecord', ['myAjaxData', 'historicalRecord', '$state', (myAjaxData, historicalRecord, $state) => ({
     restrict: 'E',
     replace: !0,
-    scope: {},
+    scope: {
+        callback: '='
+    },
     template: `
     <div class="historical-record" style="display: inline-block;">
         <style>
@@ -26,6 +28,6 @@ app.directive('historicalRecord', ['myAjaxData', 'historicalRecord', '$state', (
         });
         $scope.go = go;
         $scope.back = back;
-
+        $scope.callback && $scope.callback();
     }
 })]);
