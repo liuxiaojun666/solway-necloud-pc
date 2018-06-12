@@ -10,6 +10,7 @@ app.directive('datePicker', ['myAjaxData', '$timeout', (myAjaxData, $timeout) =>
     },
     link($scope) {
         $timeout(() => {
+            $scope.isMounted = true;
             $scope.update('day');
             $scope.mounted && $scope.mounted($scope, $element);
         }, 0);
@@ -25,7 +26,7 @@ app.directive('datePicker', ['myAjaxData', '$timeout', (myAjaxData, $timeout) =>
         $scope.seconds = new Array(60).fill('').map((v, i) => (i < 10) ? ('0' + i) : i);
         $scope.year = $scope.month = $scope.day = $scope.hour = $scope.minute = $scope.second = '';
 
-        $scope.$watch('type', (newValue, oldValue) => {
+        $scope.$watch('type', async (newValue, oldValue) => {
             if (!newValue) return;
             let startPoint = -1, endPoint = -1;
             newValue.forEach((v, i) => {
@@ -37,6 +38,7 @@ app.directive('datePicker', ['myAjaxData', '$timeout', (myAjaxData, $timeout) =>
                     if (startPoint >= 0) endPoint = i;
                 }
             });
+            await myAjaxData.timeout(0);
             $scope.update('day');
         });
 

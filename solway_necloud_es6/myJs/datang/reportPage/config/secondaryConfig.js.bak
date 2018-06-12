@@ -73,11 +73,18 @@ ajaxData({
 
     //编辑当前记录
     $scope.editFunc = (id, index) => {
-        $scope.selectByCondition.getData();
+        $scope.selectByCondition.getData({});
         $scope.edit = true;
         $scope.formData = {};
         $scope.detail2.getData({ id, layId: $scope.layId }).then(res => $scope.formData = res.body);
         $scope.$apply();
+    };
+
+    // 获取模板 列表  若已获取  取消
+    const selectByConditionGetData = $scope.selectByCondition.getData;
+    $scope.selectByCondition.getData = (obj) => {
+        if ($scope.selectByCondition.res) return;
+        selectByConditionGetData(obj);
     };
 
     //删除当前记录
