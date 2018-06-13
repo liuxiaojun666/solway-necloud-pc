@@ -73,7 +73,7 @@ app.directive('endDateWarning', ['$ocLazyLoad', '$http', ($ocLazyLoad, $http) =>
             $scope.showNoticeAlert = false;
         }
     }
-})]).directive('slideDown', ['$ocLazyLoad', '$http', ($ocLazyLoad, $http) => ({
+})]).directive('slideDown', ['$ocLazyLoad', '$http', '$state',($ocLazyLoad, $http, $state) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -82,6 +82,14 @@ app.directive('endDateWarning', ['$ocLazyLoad', '$http', ($ocLazyLoad, $http) =>
     },
     templateUrl: 'tpl/blocks/indexPageSlideDown.html',
     link($scope, $element) {
+
+        $scope.goPageMonitoring = () =>{
+            $state.go('monitoringSummary');
+        }
+
+        $scope.goPageAnalysis = () =>{
+            $state.go('analyzeSummary');
+        }
 
         //鼠标悬浮0.5s页面头部，出现下拉页面
         let timer = null;
