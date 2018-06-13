@@ -1,0 +1,61 @@
+ajaxData({}, {
+    __serviceName__: 'themePowerAjaxData'
+})('themePowerCtrl', ['$scope', 'themePowerAjaxData'], ($scope, themePowerAjaxData) => {
+
+    const myChart = echarts.init(document.getElementById('themePowerGaugeEchart'))
+    const initEchart = currentPower =>{
+        const option = {
+            tooltip: {
+                //formatter: "{a} <br/>{b} : {c}%"
+            },
+            toolbox: {
+                show: false,
+                feature: {
+                    restore: {},
+                    saveAsImage: {}
+                }
+            },
+            series: [
+                {
+                    name: '实时功率',
+                    type: 'gauge',
+                    radius: '100%',
+                    splitLine:{
+                        length:10
+                    },
+                    axisLine: {            // 坐标轴线
+                        lineStyle: {       // 属性lineStyle控制线条样式
+                            color: [[1, 'rgba(26,174,151,0.2)']],
+                            width: 30,
+                            shadowColor: '#fff', //默认透明
+                            shadowBlur: 12
+                        }
+                    },
+                    axisTick:{
+                        lineStyle:{
+                            color:'#76a8d9'
+                        }
+                    },
+                    axisLabel:{
+                        color:'white',
+                        distance:2
+                    },
+                    pointer: {
+                        width: 5,
+                        length:'100%'
+                    },
+                    itemStyle: {
+                        //color:'#5086c0'
+                        color: 'red',
+                        borderWidth: 10,
+                        borderColor: 'pink'
+                    },
+                    detail: { formatter: '{value}%',show:false },
+                    data: [{ value: currentPower, name: '' }]
+                }
+            ]
+        };
+        myChart.setOption(option)
+    }
+    initEchart(35);
+});
