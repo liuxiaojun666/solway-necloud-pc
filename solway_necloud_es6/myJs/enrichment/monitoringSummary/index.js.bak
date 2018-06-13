@@ -46,11 +46,7 @@ ajaxData({
     // 电站 信息  对比
     async function diffStationInfo(stationData) {
         const currentStationData = await $scope._getStationInfo;
-        if (!currentStationData.currentSTID) {
-            // 首次进入页面
-            const res = await $scope.defaultStation.getData({});
-            debugger
-        } else if (!stationData.currentSTID) {
+        if (!stationData.currentSTID) {
             // 没有记录电站信息  
             await myAjaxData.timeout(500);
         } else if (Object.is(currentStationData.currentSTID, stationData.currentSTID)) {
