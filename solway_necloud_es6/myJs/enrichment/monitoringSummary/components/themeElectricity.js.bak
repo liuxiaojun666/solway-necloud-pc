@@ -82,9 +82,10 @@ ajaxData({}, {
 
     //pie
     const pieChart = echarts.init(document.getElementById('themeElePieEchart'))
-    const initPieEchart = () => {
+    const pieChartSmall = echarts.init(document.getElementById('themeElePieEchartSmall'))
+    const initPieEchart = (pieId) => {
         window.addEventListener("resize", function () {
-            pieChart.resize();
+            pieId.resize();
         });
         const option = {
             tooltip: {
@@ -143,9 +144,11 @@ ajaxData({}, {
                 }
             ]
         };
-        pieChart.setOption(option)
+        pieId.setOption(option)
     }
     
-    
-    initPieEchart();
+    //大小Pie
+    //initPieEchart(pieChartSmall);
+    initPieEchart(pieChart);
+
 });

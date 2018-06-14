@@ -2,5 +2,77 @@ ajaxData({}, {
     __serviceName__: 'themeEqumentOperationAjaxData'
 })('themeEqumentOperationCtrl', ['$scope', 'themeEqumentOperationAjaxData'], ($scope, themeEqumentOperationAjaxData) => {
 
+    const pieChart = echarts.init(document.getElementById('themeEquipmentPieEchart'))
+    const initPieEchart = (pieId) => {
+        window.addEventListener("resize", function () {
+            pieChart.resize();
+        });
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            series: [
+                {
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['50%', '45%'],
+                    label: {
+                        normal: {
+                            show: false
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    lableLine: {
+                        normal: {
+                            show: false
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    data: [
+                        {
+                            value: 12, name: '故障台数',
+                            itemStyle: {
+                                normal: {
+                                    color: '#e57d70'
+                                }
+                            }
+                        },
+                        {
+                            value: 18, name: '离线台数',
+                            itemStyle: {
+                                normal: {
+                                    color: '#a99bac'
+                                }
+                            }
+                        },
+                        {
+                            value: 20, name: '告警台数',
+                            itemStyle: {
+                                normal: {
+                                    color: '#efc185'
+                                }
+                            }
+                        },
+                        {
+                            value: 15, name: '运行台数',
+                            itemStyle: {
+                                normal: {
+                                    color: '#62a6c9'
+                                }
+                            }
+                        }
 
+                    ]
+                }
+            ]
+        };
+        pieChart.setOption(option)
+    }
+
+    initPieEchart(pieChart);
 });
