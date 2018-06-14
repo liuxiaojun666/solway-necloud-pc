@@ -1,5 +1,151 @@
 ajaxData({}, {
     __serviceName__: 'themeElectricityAjaxData'
 })('themeElectricityCtrl', ['$scope', 'themeElectricityAjaxData'], ($scope, themeElectricityAjaxData) => {
+    $scope.ifTwoPart = true;
 
+    //bar 
+    const barChart = echarts.init(document.getElementById('themeEleBarEchart'))
+    const initBarEchart = (xAxis,yAxis) => {
+        window.addEventListener("resize", function () {
+            barChart.resize();
+        });
+        const option = {
+            tooltip: {
+                trigger: 'axis',
+            },
+            grid: {
+                top: '55',
+                left: '40',
+                right: '10',
+                bottom: '20',
+               // containLabel: true
+            },
+            xAxis: [
+                {
+                   // name: '点数',
+                    type: 'category',
+                    axisLabel:{
+                        color:'white'
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(154,148,141,0.2)'
+                        }
+                    },
+                    data: xAxis
+                }
+            ],
+            yAxis: [
+                {
+                    name: '度',
+                    nameTextStyle:{
+                        color:'white'
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLabel: {
+                        color: 'white'
+                    },
+                    axisLine:{
+                        lineStyle:{
+                            color:'rgba(154,148,141,0.2)'
+                        }
+                    },
+                    type: 'value'
+                }
+            ],
+            series: [
+                {
+                    name: '灰尘影响率',
+                    type: 'bar',
+                    itemStyle:{
+                        normal: {
+                            color: '#9364b8'
+                        }
+                    },
+                    label:{
+                        normal: {
+                            color:'white'
+                        }
+                    },
+                    barWidth: '10',
+                    data: yAxis
+                }
+            ]
+        };
+        barChart.setOption(option)
+    }
+    let x = ['实发电量', '上网电量', '预测发电量', '应发电量'];
+    let y = [200,400,145,300]
+    initBarEchart(x,y);
+
+    //pie
+    const pieChart = echarts.init(document.getElementById('themeElePieEchart'))
+    const initPieEchart = () => {
+        window.addEventListener("resize", function () {
+            pieChart.resize();
+        });
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            series: [
+                {
+                    name: '半径模式',
+                    type: 'pie',
+                    radius: ['20%', '80%'],
+                    center: ['50%', '40%'],
+                    roseType: 'radius',
+                    label: {
+                        normal: {
+                            show: false
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    lableLine: {
+                        normal: {
+                            show: false
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    data: [
+                        { 
+                            value: 12, name: '限电',
+                            itemStyle:{
+                                normal: {
+                                    color:'#40a5dd'
+                                }
+                            }
+                        },
+                        { 
+                            value: 18, name: '其他',
+                            itemStyle: {
+                                normal: {
+                                    color: '#847ce9'
+                                }
+                            }
+                        },
+                        { value: 15, name: '故障',
+                            itemStyle:{
+                                normal: {
+                                    color:'#fa7594'
+                                }
+                            }
+                        }
+
+                    ]
+                }
+            ]
+        };
+        pieChart.setOption(option)
+    }
+    
+    
+    initPieEchart();
 });
