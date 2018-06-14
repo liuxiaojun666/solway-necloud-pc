@@ -1,30 +1,53 @@
 ajaxData({
-    defaultStation: {
+    // 给默认选中电站
+    getuserAuthHandleSetSTClass: {
         name: 'GETUserAuthHandleSetSTClass',
         data: {},
         later: true
     },
+    // 切换电站
     changeStation: {
         name: 'GETUserAuthHandleChangeDataType',
         data: {},
         later: true
+    },
+    // 基本电站信息
+    getUserAuthHandleGetCurrentInfo: {
+        name: 'GETUserAuthHandleGetCurrentInfo',
+        data: {},
+        later: true
     }
 }, {})('monitoringSummaryCtrl', ['$scope', 'myAjaxData', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
+    $scope.beforeLoading = true; // 页面loading
+
+    // 电站 信息  对比
+    const diffStationInfo = async stationData => {
+        const currentStationData = await $scope._getStationInfo;
+        if (!currentStationData.currentSTID) { // 没有选择过电站
+            await $scope.getuserAuthHandleSetSTClass.getData({});
+            return window.location.reload();
+        }
+        if (!stationData) { // 没有记录电站信息  
+            const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
+            $scope.switchPowerCallback({ id, isGroup, dataType, stClass });
+        } else if (Object.is(currentStationData.currentSTID, stationData.id)) { // 电站信息 没有变化
+            await myAjaxData.timeout(500);
+        } else { // 电站信息  发生变化   切换到记录中的电站
+            await $scope.changeStation.getData(stationData);
+        }
+    };
+    
     // 当前页面行为记录初始化回调 获取行为记录
     $scope.historyInitCallback = async () => {
         const historiData = historicalRecord.get();
-        const { 
-            dateType = 2,
-            dateTime = new Date([2017, 1, 2]),
-            theme = 'BasicSituation', 
-            stationData 
-        } = historiData;
-
+        const { dateType = 2, dateTime = new Date([2017, 1, 2]), theme = 'BasicSituation', stationData } = historiData;
         $scope.dateTime = dateTime;
         $scope.dateType = dateType;
         $scope.theme = theme;
         if (!stationData) historicalRecord.set({ dateType, dateTime, theme });
         await diffStationInfo(stationData);
+        $scope.beforeLoading = false;
+        $scope.$apply();
     };
 
     // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
@@ -33,8 +56,8 @@ ajaxData({
     };
 
     // 切换电站 回调
-    $scope.switchPowerCallback = () => {
-        historicalRecord.set({ stationData: myAjaxData.currentStationData });
+    $scope.switchPowerCallback = (switchArguments) => {
+        historicalRecord.set({ stationData: switchArguments });
     };
 
     // 切换主题模块
@@ -43,22 +66,9 @@ ajaxData({
         historicalRecord.set({ theme });
     };
 
-    // 电站 信息  对比
-    async function diffStationInfo(stationData) {
-        const currentStationData = await $scope._getStationInfo;
-        if (!stationData.currentSTID) {
-            // 没有记录电站信息  
-            await myAjaxData.timeout(500);
-        } else if (Object.is(currentStationData.currentSTID, stationData.currentSTID)) {
-            // 电站信息 没有变化
-            await myAjaxData.timeout(500);
-        } else {
-            // 电站信息  发生变化
-            await $scope.changeStation.getData({
+    // 计算当前 所属 哪一类
+    const computeClass = () => {
 
-            })
-        }
-    }
-
+    };
 
 });
