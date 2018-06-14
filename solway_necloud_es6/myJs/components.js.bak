@@ -83,12 +83,19 @@ app.directive('endDateWarning', ['$ocLazyLoad', '$http', ($ocLazyLoad, $http) =>
     templateUrl: 'tpl/blocks/indexPageSlideDown.html',
     link($scope, $element) {
 
-        $scope.goPageMonitoring = () =>{
-            $state.go('monitoringSummary');
-        }
-
-        $scope.goPageAnalysis = () =>{
-            $state.go('analyzeSummary');
+        $scope.goChildrenPage = type =>{
+            if ($state.current.name == 'power-index171024'){
+                $http({
+                    method: "POST",
+                    url: window.baseUrl+"/UserAuthHandle/setSTClass.htm",
+                    params: {
+                    }
+                }).success(function (res) {
+                    $state.go(type);
+                });
+            }else{
+                $state.go(type);
+            }
         }
 
         //鼠标悬浮0.5s页面头部，出现下拉页面
