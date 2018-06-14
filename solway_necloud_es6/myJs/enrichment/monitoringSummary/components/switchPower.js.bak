@@ -1,7 +1,7 @@
 /**
  * [切换电站头]
  */
-app.directive('switchPowerEnrich', ['myAjaxData', (myAjaxData) => ({
+app.directive('switchPowerEnrich', ['myAjaxData', '$rootScope', (myAjaxData, $rootScope) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -10,7 +10,7 @@ app.directive('switchPowerEnrich', ['myAjaxData', (myAjaxData) => ({
     controller($scope) {
         $scope.$parent._getStationInfo = myAjaxData.getData({
             name: 'GETgetCurrentInfoNew',
-            data: { currentView: '00', isGroup: 0 }
+            data: { currentView: '00', isGroup: 1 }
         });
         $scope.$parent._getStationInfo.then(result => {
             $scope.currentDataName = result.currentDataName;
@@ -19,11 +19,11 @@ app.directive('switchPowerEnrich', ['myAjaxData', (myAjaxData) => ({
             $scope.switchPowerCallback && $scope.switchPowerCallback();
         });
 
-        $scope.$on('broadcastSwitchStation', (event, data) => {
+        $scope.$on('broadcastSwitchStation', (event, data, switchArguments) => {
             $scope.currentDataName = data.dataName;
             myAjaxData.setCurrentStationData({ currentDataName: data.dataName, currentSTID: data.dataId });
             $scope.reload();
-            $scope.switchPowerCallback && $scope.switchPowerCallback();
+            $scope.switchPowerCallback && $scope.switchPowerCallback(switchArguments);
         });
     }
 })])

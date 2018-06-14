@@ -326,7 +326,11 @@ app.directive('switchPower', ['myAjaxData', (myAjaxData) => ({
         myAjaxData.getData({
             name: 'GETgetCurrentInfoNew',
             data: { currentView: '00', isGroup: 0 }
-        }).then(result => {
+        }).then(async result => {
+            if (!result.currentSTID) {
+                await myAjaxData.getData({ name: 'GETUserAuthHandleSetSTClass', data: {}});
+                return window.location.reload();
+            }
             $scope.currentDataName = result.currentDataName
             myAjaxData.setCurrentStationData(result)
             $scope.switchPowerCallback && $scope.switchPowerCallback()
