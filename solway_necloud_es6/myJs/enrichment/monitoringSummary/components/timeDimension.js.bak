@@ -42,9 +42,7 @@ app.directive('timeRange', ['myAjaxData','$timeout', (myAjaxData, $timeout) => (
         $scope.myUpdated = () => {
             if (updateCount++ < 3) return;
             const {range, dayDate, monthDate, yearDate} = $scope;
-            $scope.dateTime = [dayDate, monthDate, yearDate][range];
-            $scope.dateType = range;
-            $scope.updated && $scope.updated(range, $scope.dateTime);
+            $scope.updated && $scope.updated(range, [dayDate, monthDate, yearDate][range]);
         };
     }
 })]);
