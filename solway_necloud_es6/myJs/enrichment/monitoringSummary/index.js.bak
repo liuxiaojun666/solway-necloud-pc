@@ -36,7 +36,7 @@ ajaxData({
             await $scope.changeStation.getData(stationData);
         }
     };
-    
+
     // 当前页面行为记录初始化回调 获取行为记录
     $scope.historyInitCallback = async () => {
         const historiData = historicalRecord.get();
@@ -47,7 +47,7 @@ ajaxData({
         if (!stationData) historicalRecord.set({ dateType, dateTime, theme });
         await diffStationInfo(stationData);
         $scope.beforeLoading = false;
-        $scope.mainPageInitComplete && $scope.mainPageInitComplete();
+        $scope.mainPageInitComplete && $scope.mainPageInitComplete($scope.currentClass);
         $scope.$apply();
     };
 
@@ -72,7 +72,7 @@ ajaxData({
     // 计算当前 所属 哪一类
     const computeClass = () => {
         if ($scope.beforeLoading) return;
-        const { dateTime, dateType, stationData: { dataType }} = historicalRecord.get();
+        const { dateTime, dateType, stationData: { dataType } } = historicalRecord.get();
         const str1 = ['Station', 'Company', 'Company'][dataType];
         const str2 = ['Day', 'Month', 'Year', 'Total'][dateType];
         if (str2 !== 'Day') return $scope.currentClass = str1 + str2;
