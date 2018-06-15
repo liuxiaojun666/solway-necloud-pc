@@ -19,11 +19,11 @@ app.directive('switchPowerEnrich', ['myAjaxData', '$rootScope', (myAjaxData, $ro
             $scope.switchPowerCallback && $scope.switchPowerCallback();
         });
 
-        $scope.$on('broadcastSwitchStation', (event, data, switchArguments) => {
+        $scope.$on('broadcastSwitchStation', (event, data) => {
             $scope.currentDataName = data.dataName;
             myAjaxData.setCurrentStationData({ currentDataName: data.dataName, currentSTID: data.dataId });
             $scope.reload();
-            $scope.switchPowerCallback && $scope.switchPowerCallback(switchArguments);
+            $scope.switchPowerCallback && $scope.switchPowerCallback(data.switchArguments);
         });
     }
 })])
