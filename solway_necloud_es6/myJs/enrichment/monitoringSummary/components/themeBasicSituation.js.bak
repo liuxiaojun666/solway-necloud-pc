@@ -3,54 +3,32 @@ ajaxData({}, {
 })('themeBasicSituationCtrl', ['$scope', 'themeBasicSituationAjaxData', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
     $scope.initChildScope($scope, myAjaxData);
 
-    const initParams = params => {
-        console.log(params)
+    const initParams = () => {
+        const params = historicalRecord.get();
+
+        if (params.detailFullPage) return false; //放大状态，不做处理
         $scope.roleType = params.stationData.dataType;//电站（0）和非电站
         $scope.dateType = params.dateType;//日期类型（日、月、年、累计；0、1、2、3）
-        //$scope.$apply();
-        // debugger
+        //$scope.getAjaxData() //接口
     }
 
     //父页面初始化完成
     $scope.mainPageInitComplete = () => {
-        const params = historicalRecord.get(); 
-        initParams(params);
+        initParams();
     };
 
     //切换日期类型
     $scope.dateUpdated = () =>{
-        const params = historicalRecord.get();
-        initParams(params);
+        initParams();
     }
 
+    //切换电站
+    $scope.switchPowerCallback = () => {
+        initParams();
+    }
 
-    // $scope.switchPowerCallback = () => {
-    //     historicalRecord.get();
-    //     debugger
-    // };
-
-    // const a = $scope.$parent.$parent.mainPageInitComplete;
-    // $scope.$parent.$parent.mainPageInitComplete = (...arg) => {
-        
-    //     a && a(...arg);
-    //     $scope.test();
-    // }
-
-    //$scope.basicBelowShow = true;
-
-    //$scope.expenseHeight = 100;//费用 高
-    // const aaa = $scope.$parent.$parent.dateUpdated;
-    // $scope.$parent.$parent.dateUpdated = (b,c) =>{
-
-    //     aaa && aaa(b, c);
-    //     $scope.dateType = b;
-    //     $scope.dateTime = c;
-    //     if ($scope.$parent.$parent.beforeloading) return;
-    //     $scope.test();
-    // }
-
-
-    // $scope.test = () =>{
-    //     console.log($scope.dateType + '-----------' + $scope.dateTime);
-    // }
+    //点击放大后
+    $scope.switchDetailFullPage = () =>{
+        initParams();
+    }
 });
