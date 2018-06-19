@@ -23,6 +23,7 @@ ajaxData({
     // 电站 信息  对比
     const diffStationInfo = async stationData => {
         const currentStationData = await $scope._getStationInfo;
+        if (currentStationData.isMan === 1) return;
         if (!currentStationData.currentSTID) { // 没有选择过电站
             await $scope.getuserAuthHandleSetSTClass.getData({});
             return window.location.reload();
