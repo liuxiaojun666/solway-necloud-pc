@@ -327,6 +327,7 @@ app.directive('switchPower', ['myAjaxData', (myAjaxData) => ({
             name: 'GETgetCurrentInfoNew',
             data: { currentView: '00', isGroup: 0 }
         }).then(async result => {
+            if (result.isMan === 1) return
             if (!result.currentSTID) {
                 await myAjaxData.getData({ name: 'GETUserAuthHandleSetSTClass', data: {}});
                 return window.location.reload();

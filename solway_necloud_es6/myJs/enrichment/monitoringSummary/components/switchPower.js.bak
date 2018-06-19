@@ -8,6 +8,8 @@ app.directive('switchPowerEnrich', ['myAjaxData', '$rootScope', (myAjaxData, $ro
     scope: !0,
     templateUrl: baseUrl + '/tpl/enrichment/monitoringSummary/components/switchPower.html',
     controller($scope) {
+        $rootScope.isGroup = 1;
+        $rootScope.currentView = '00';
         $scope.$parent._getStationInfo = myAjaxData.getData({
             name: 'GETgetCurrentInfoNew',
             data: { currentView: '00', isGroup: 1 }
@@ -15,8 +17,7 @@ app.directive('switchPowerEnrich', ['myAjaxData', '$rootScope', (myAjaxData, $ro
         $scope.$parent._getStationInfo.then(result => {
             $scope.currentDataName = result.currentDataName;
             myAjaxData.setCurrentStationData(result);
-            if (!result.currentSTID) return;
-            $scope.switchPowerCallback && $scope.switchPowerCallback();
+            $scope.switchPowerCallback && $scope.switchPowerCallback(null, $scope);
         });
 
         $scope.$on('broadcastSwitchStation', (event, data) => {
@@ -26,4 +27,4 @@ app.directive('switchPowerEnrich', ['myAjaxData', '$rootScope', (myAjaxData, $ro
             $scope.switchPowerCallback && $scope.switchPowerCallback(data.switchArguments);
         });
     }
-})])
+})]);
