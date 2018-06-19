@@ -2,18 +2,26 @@ ajaxData({}, {
     __serviceName__:'themeBasicSituationAjaxData'
 })('themeBasicSituationCtrl', ['$scope', 'themeBasicSituationAjaxData', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
     $scope.initChildScope($scope, myAjaxData);
-    $scope.mainPageInitComplete = () => {
-        const params = historicalRecord.get();
 
-        const initParams = params => {
-            console.log(params)
-            $scope.roleType = params.stationData.dataType;//电站（0）和非电站
-            $scope.dateType = params.stationData.dateType;//日期类型（日、月、年、累计；0、1、2、3）
-        }
+    const initParams = params => {
+        console.log(params)
+        $scope.roleType = params.stationData.dataType;//电站（0）和非电站
+        $scope.dateType = params.dateType;//日期类型（日、月、年、累计；0、1、2、3）
+        //$scope.$apply();
+        // debugger
+    }
+
+    //父页面初始化完成
+    $scope.mainPageInitComplete = () => {
+        const params = historicalRecord.get(); 
         initParams(params);
     };
 
-    
+    //切换日期类型
+    $scope.dateUpdated = () =>{
+        const params = historicalRecord.get();
+        initParams(params);
+    }
 
 
     // $scope.switchPowerCallback = () => {
@@ -30,7 +38,7 @@ ajaxData({}, {
 
     //$scope.basicBelowShow = true;
 
-    $scope.expenseHeight = 100;//费用 高
+    //$scope.expenseHeight = 100;//费用 高
     // const aaa = $scope.$parent.$parent.dateUpdated;
     // $scope.$parent.$parent.dateUpdated = (b,c) =>{
 
