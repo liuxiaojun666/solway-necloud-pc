@@ -96,9 +96,14 @@ ajaxData({
         const { dateTime, dateType, stationData: { dataType } } = historicalRecord.get();
         const str1 = ['Station', 'Company', 'Company'][dataType];
         const str2 = ['Day', 'Month', 'Year', 'Accumulative'][dateType];
-        if (str2 !== 'Day') return $scope.currentClass = str1 + str2;
-        if (dateTime.showDate === (new Date).Format('yyyy-MM-dd')) return $scope.currentClass = str1 + str2 + 'Today';
-        return $scope.currentClass = str1 + str2 + 'Ago';
+        if (str2 !== 'Day') {
+            $scope.currentClass = str1 + str2;
+        } else if (dateTime.showDate === (new Date).Format('yyyy-MM-dd')) {
+            $scope.currentClass = str1 + str2 + 'Today';
+        } else {
+            $scope.currentClass = str1 + str2 + 'Ago';
+        }
+        historicalRecord.set({ currentClass: $scope.currentClass });
     };
 
 
