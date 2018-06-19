@@ -1,6 +1,25 @@
 ajaxData({}, {
     __serviceName__:'themeBasicSituationAjaxData'
-})('themeBasicSituationCtrl', ['$scope', 'themeBasicSituationAjaxData'], ($scope, themeBasicSituationAjaxData) => {
+})('themeBasicSituationCtrl', ['$scope', 'themeBasicSituationAjaxData', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
+    $scope.initChildScope($scope, myAjaxData);
+    $scope.mainPageInitComplete = () => {
+        const params = historicalRecord.get();
+
+        const initParams = params => {
+            console.log(params)
+            $scope.roleType = params.stationData.dataType;//电站（0）和非电站
+            $scope.dateType = params.stationData.dateType;//日期类型（日、月、年、累计；0、1、2、3）
+        }
+        initParams(params);
+    };
+
+    
+
+
+    // $scope.switchPowerCallback = () => {
+    //     historicalRecord.get();
+    //     debugger
+    // };
 
     // const a = $scope.$parent.$parent.mainPageInitComplete;
     // $scope.$parent.$parent.mainPageInitComplete = (...arg) => {
