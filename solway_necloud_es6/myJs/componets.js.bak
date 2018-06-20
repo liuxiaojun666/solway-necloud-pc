@@ -504,6 +504,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad
             showDate = $element.find('input').val() && $scope.dateTime.Format($scope.calendarType)
             $element.find('input').val(showDate)
             $scope.dateTime.showDate = showDate
+            window.moment && $scope.showArrow && $scope.disabled()
             $scope.updated && $scope.updated($scope, $element)
         })
         $scope.$watch('startDate', (newValue, oldValue) => {
