@@ -5,9 +5,15 @@ ajaxData({}, {
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
-    $scope.mainPageInitComplete = () => {
-        const { showShape } = historicalRecord.get().data || {};
+    $scope.mainPageInitComplete =() => {
+        let { showShape } = historicalRecord.get().themeBasicSituationData || {};
+        if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
         $scope.changeShowShape(showShape || 'list');
+        $scope.$apply();
+
+
+        $scope.xdata = [23,34]
+
     };
 
     // 切换电站 回调
@@ -15,14 +21,58 @@ ajaxData({}, {
         
     };
 
+    // 日期改变
+    $scope.dateUpdated = () => {
+        if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+    }
+
     // 切换显示形式  图表 or 列表
-    $scope.changeShowShape = showShape => {
+    $scope.changeShowShape = async showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            data: {
-                ...historicalRecord.get().data || {},
+            themeBasicSituationData: {
+                ...historicalRecord.get().themeBasicSituationData || {},
                 showShape
             }
         });
+        if (!$scope.chartHeight) setChartHeight();
     };
+
+
+    window.addEventListener('resize', setChartHeight);
+    function setChartHeight() {
+        const {showShape, detailFullPage, winHeight} = $scope;
+        if (showShape === 'chart') $scope.chartHeight = detailFullPage ? winHeight - 200 : winHeight - 420;
+    }
+    $scope.$on('$destroy', () => window.removeEventListener('resize', setChartHeight));
+
+    // 列表
+    $scope.column = [
+        {
+            title: '电站名称',
+            dataIndex: '',
+            width: '',
+            align: 'left'
+        }, {
+            title: '装机容量',
+            dataIndex: '',
+            width: '',
+            align: 'left'
+        }, {
+            title: '投产时间',
+            dataIndex: '',
+            width: '',
+            align: 'center'
+        }, {
+            title: '接入时间',
+            dataIndex: '',
+            width: '',
+            align: 'center'
+        }, {
+            title: '地址',
+            dataIndex: '',
+            width: '',
+            align: 'left'
+        }
+    ];
 });
