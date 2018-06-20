@@ -6,11 +6,23 @@ ajaxData({}, {
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = () => {
-        
+        const { showShape } = historicalRecord.get().data || {};
+        $scope.changeShowShape(showShape || 'list');
     };
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            data: {
+                ...historicalRecord.get().data || {},
+                showShape
+            }
+        });
     };
 });
