@@ -76,6 +76,7 @@ ajaxData({
     $scope.switchPowerCallback = (switchArguments, switchPowerScope) => {
         if (switchPowerScope) $scope.switchPowerScope = switchPowerScope;
         if (!switchArguments) return;
+        $scope.dataType = switchArguments.dataType;
         historicalRecord.set({ stationData: switchArguments });
         computeClass();
     };
@@ -85,6 +86,7 @@ ajaxData({
 
     // 切换主题模块
     $scope.changeTheme = theme => {
+        if (theme === 'Expense') return;
         $scope.theme = theme;
         historicalRecord.set({ theme });
         $scope.themeDetail = `tpl/enrichment/monitoringSummary/components/theme${theme}Detail.html`;
@@ -109,7 +111,10 @@ ajaxData({
         const mainPageInitComplete = __childScope.$parent.$parent.mainPageInitComplete;
         __childScope.$parent.$parent.mainPageInitComplete = (...arg) => {
             mainPageInitComplete && mainPageInitComplete(...arg);
-            __childScope.hasOwnProperty('mainPageInitComplete') && __childScope.mainPageInitComplete();
+            if (__childScope.hasOwnProperty('mainPageInitComplete')) {
+                __childScope.mainPageInitComplete();
+                __childScope.$apply();
+            }
         };
 
         // 日期切换
@@ -117,7 +122,10 @@ ajaxData({
         __childScope.$parent.$parent.dateUpdated = (...arg) => {
             dateUpdated && dateUpdated(...arg);
             if ($scope.beforeLoading) return;
-            __childScope.hasOwnProperty('dateUpdated') && __childScope.dateUpdated();
+            if (__childScope.hasOwnProperty('dateUpdated')) {
+                __childScope.dateUpdated();
+                __childScope.$apply();
+            }
         };
 
         // 电站切换
@@ -125,7 +133,10 @@ ajaxData({
         __childScope.$parent.$parent.switchPowerCallback = (...arg) => {
             switchPowerCallback && switchPowerCallback(...arg);
             if ($scope.beforeLoading) return;
-            __childScope.hasOwnProperty('switchPowerCallback') && __childScope.switchPowerCallback();
+            if (__childScope.hasOwnProperty('switchPowerCallback')) {
+                __childScope.switchPowerCallback();
+                __childScope.$apply();
+            }
         };
 
         // 详情放大缩小 切换
@@ -133,7 +144,10 @@ ajaxData({
         __childScope.$parent.$parent.switchDetailFullPage = (...arg) => {
             switchDetailFullPage && switchDetailFullPage(...arg);
             if ($scope.beforeLoading) return;
-            __childScope.hasOwnProperty('switchDetailFullPage') && __childScope.switchDetailFullPage();
+            if (__childScope.hasOwnProperty('switchDetailFullPage')) {
+                __childScope.switchDetailFullPage();
+                __childScope.$apply();
+            }
         };
 
         // 如果已初始化  尝试调用初始化完成函数
