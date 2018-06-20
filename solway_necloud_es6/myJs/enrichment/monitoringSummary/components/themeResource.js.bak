@@ -7,37 +7,34 @@ ajaxData({
     $scope.initChildScope($scope, myAjaxData);
 
     const getAjaxData = () =>{
-        //天气信息
+        if ($scope.detailFullPage) return false; //放大状态，不做处理
+        
+        //天气信息测试
         $scope.weatherType = 'A';
         $scope.weatherName = myAjaxData.config.weatherMap[$scope.weatherType]
-    }
-    const initParams = () => {
-        const params = historicalRecord.get();
-
-        if (params.detailFullPage) return false; //放大状态，不做处理
-        $scope.roleType = params.stationData.dataType;//电站（0）和非电站
-        $scope.dateType = params.dateType;//日期类型（日、月、年、累计；0、1、2、3）
-        getAjaxData() //接口
     }
 
     //父页面初始化完成
     $scope.mainPageInitComplete = () => {
-        initParams();
-        
+        // $scope.dateType;
+        // $scope.dataType;
+        // $scope.dateTime;
+        // $scope.currentClass;
+        // $scope.detailFullPage;
     };
 
     //切换日期类型
     $scope.dateUpdated = () => {
-        initParams();
+        getAjaxData() //接口
     }
 
     //切换电站
     $scope.switchPowerCallback = () => {
-        initParams();
+        getAjaxData() //接口
     }
 
     //点击放大后
     $scope.switchDetailFullPage = () => {
-        initParams();
+        getAjaxData() //接口
     }
 });
