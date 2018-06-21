@@ -5,25 +5,26 @@ ajaxData({}, {
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
-    $scope.mainPageInitComplete =() => {
+    $scope.mainPageInitComplete = async () => {
         let { showShape } = historicalRecord.get().themeBasicSituationData || {};
         if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
         $scope.changeShowShape(showShape || 'list');
         $scope.$apply();
-
-
-        $scope.xdata = [23,34]
-
     };
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
-        
+
     };
 
     // 日期改变
     $scope.dateUpdated = () => {
         if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+    };
+
+    // 详情 放大缩小  回调
+    $scope.switchDetailFullPage = () => {
+        
     }
 
     // 切换显示形式  图表 or 列表
@@ -35,16 +36,7 @@ ajaxData({}, {
                 showShape
             }
         });
-        if (!$scope.chartHeight) setChartHeight();
     };
-
-
-    window.addEventListener('resize', setChartHeight);
-    function setChartHeight() {
-        const {showShape, detailFullPage, winHeight} = $scope;
-        if (showShape === 'chart') $scope.chartHeight = detailFullPage ? winHeight - 200 : winHeight - 420;
-    }
-    $scope.$on('$destroy', () => window.removeEventListener('resize', setChartHeight));
 
     // 列表
     $scope.column = [
