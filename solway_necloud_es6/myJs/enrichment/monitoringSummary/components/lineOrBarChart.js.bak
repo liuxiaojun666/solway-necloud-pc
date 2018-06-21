@@ -22,11 +22,11 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
             $element.css('display', 'block')
             setWidthHeight();
             myChart = echarts.init($element[0]);
-            $scope.$watch('xdata', (newValue, oldValue) => {
-                if (!Array.isArray(newValue)) return;
-                resizeFunc();
+            $scope.$watchGroup(['xdata', 'ydatas', 'ynames'], (newValue, oldValue) => {
+                if (!newValue) return;
+                drawing();
             });
-            $scope.$watch('height', async (newValue, oldValue) => {
+            $scope.$watchGroup(['height', 'width'], async (newValue, oldValue) => {
                 if (!newValue) return;
                 await resizeFunc();
             });
