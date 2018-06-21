@@ -5,24 +5,66 @@ ajaxData({}, {
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
-    $scope.mainPageInitComplete = () => {
-        const { showShape } = historicalRecord.get().data || {};
+    $scope.mainPageInitComplete = async () => {
+        let { showShape } = historicalRecord.get().themeBasicSituationData || {};
+        if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
         $scope.changeShowShape(showShape || 'list');
+        $scope.$apply();
     };
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
-        
+
     };
 
+    // 日期改变
+    $scope.dateUpdated = () => {
+        if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+    };
+
+    // 详情 放大缩小  回调
+    $scope.switchDetailFullPage = () => {
+        
+    }
+
     // 切换显示形式  图表 or 列表
-    $scope.changeShowShape = showShape => {
+    $scope.changeShowShape = async showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            data: {
-                ...historicalRecord.get().data || {},
+            themeBasicSituationData: {
+                ...historicalRecord.get().themeBasicSituationData || {},
                 showShape
             }
         });
     };
+
+    // 列表
+    $scope.column = [
+        {
+            title: '电站名称',
+            dataIndex: '',
+            width: '',
+            align: 'left'
+        }, {
+            title: '装机容量',
+            dataIndex: '',
+            width: '',
+            align: 'left'
+        }, {
+            title: '投产时间',
+            dataIndex: '',
+            width: '',
+            align: 'center'
+        }, {
+            title: '接入时间',
+            dataIndex: '',
+            width: '',
+            align: 'center'
+        }, {
+            title: '地址',
+            dataIndex: '',
+            width: '',
+            align: 'left'
+        }
+    ];
 });

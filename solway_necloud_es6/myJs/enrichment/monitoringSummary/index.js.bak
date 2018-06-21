@@ -39,10 +39,12 @@ ajaxData({
             $scope.switchPowerCallback({ id, isGroup, dataType, stClass });
         } else if (Object.is(currentStationData.currentSTID, stationData.id)) { // 电站信息 没有变化
             await myAjaxData.timeout(500);
+            $scope.switchPowerCallback(stationData);
         } else { // 电站信息  发生变化   切换到记录中的电站
             await $scope.changeStation.getData(stationData);
             const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
             $scope.switchPowerScope.currentDataName = currentDataName;
+            $scope.switchPowerCallback(stationData);
         }
     };
 
@@ -99,7 +101,7 @@ ajaxData({
         const str1 = ['Station', 'Company', 'Company'][dataType];
         const str2 = ['Day', 'Month', 'Year', 'Accumulative'][dateType];
         if (str2 !== 'Day') $scope.currentClass = str1 + str2;
-        else if (dateTime.showDate === (new Date).Format('yyyy-MM-dd')) $scope.currentClass = str1 + str2 + 'Today';
+        else if (dateTime.Format('yyyy-MM-dd') === (new Date).Format('yyyy-MM-dd')) $scope.currentClass = str1 + str2 + 'Today';
         else $scope.currentClass = str1 + str2 + 'Ago';
         historicalRecord.set({ currentClass: $scope.currentClass });
     };
@@ -113,7 +115,7 @@ ajaxData({
             mainPageInitComplete && mainPageInitComplete(...arg);
             if (__childScope.hasOwnProperty('mainPageInitComplete')) {
                 __childScope.mainPageInitComplete();
-                __childScope.$apply();
+                // __childScope.$apply();
             }
         };
 
@@ -124,6 +126,9 @@ ajaxData({
             if ($scope.beforeLoading) return;
             if (__childScope.hasOwnProperty('dateUpdated')) {
                 __childScope.dateUpdated();
+                const {dateTime, dateType} = historicalRecord.get();
+                __childScope.dateTime = dateTime;
+                __childScope.dateType = dateType;
                 // __childScope.$apply();
             }
         };
