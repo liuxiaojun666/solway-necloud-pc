@@ -143,10 +143,8 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                                     y2: 1,
                                     colorStops: [{
                                         offset: 0, color: colors[i][xi] // 0% 处的颜色
-                                    }, {
-                                        offset: 0.5, color: colors[i][xi] // 0% 处的颜色
-                                    }, {
-                                        offset: 1, color: 'rgba(0, 0, 0, .1)' // 100% 处的颜色
+                                    },{
+                                        offset: 1, color: 'rgba(255, 255, 255, .1)' // 100% 处的颜色
                                     }],
                                     globalCoord: true
                                 }
@@ -171,7 +169,8 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         window.addEventListener('resize', resizeFunc);
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', resizeFunc);
-            myChart.dispose();
+            echarts.dispose($element);
+            // echarts.dispose(myChart);
             myChart = null;
         });
     }
