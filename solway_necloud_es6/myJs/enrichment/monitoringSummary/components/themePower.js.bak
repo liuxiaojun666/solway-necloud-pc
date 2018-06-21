@@ -64,9 +64,11 @@ ajaxData({}, {
         myChart.resize();
     }
     
-    const getAjaxData = () => {
+    const getAjaxData = async() => {
         if ($scope.detailFullPage) return false; //放大状态，不做处理
 
+        await myAjaxData.timeout(0)
+        $("#themePowerGaugeEchart").width($("#themePower").width());
         initEchart(35);
     }
 
