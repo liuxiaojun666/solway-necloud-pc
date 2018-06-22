@@ -7,7 +7,7 @@ ajaxData({}, {
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
         let { showShape } = historicalRecord.get().themeResource || {};
-        if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
+        // if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -31,7 +31,7 @@ ajaxData({}, {
     }
 
     // 切换显示形式  图表 or 列表
-    $scope.changeShowShape = async showShape => {
+    $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
             themeResource: {
