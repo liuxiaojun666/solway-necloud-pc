@@ -7,7 +7,12 @@ app.directive('radiateCalendar', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocL
     link($scope, $element, $attrs) {
 
     },
-    controller() {
-
+    controller($scope) {
+        $scope.calendarList = new Array(30).fill('').map((v, i) => ({
+            day: 1528560000000 + i * 60 * 60 * 24 * 1000,
+            grossRadiationIntensity: ["2.7807", "kWh/㎡"],
+            scoreRadiationIntensity: 1.5,
+            weaterTag: "B"
+        }));
     }
 })])

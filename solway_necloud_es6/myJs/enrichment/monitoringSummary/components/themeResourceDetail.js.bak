@@ -6,12 +6,14 @@ ajaxData({}, {
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape } = historicalRecord.get().themeResource || {};
+        let { showShape, select1, select2 } = historicalRecord.get().themeResource || {};
         // if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
+        $scope.select1 = select1 || 1;
+        $scope.select2 = select2 || 1;
         $scope.$apply();
     };
 
@@ -37,6 +39,24 @@ ajaxData({}, {
             themeResource: {
                 ...historicalRecord.get().themeResource || {},
                 showShape
+            }
+        });
+    };
+
+    // 图标轴线切换
+    $scope.select1Change = () => {
+        historicalRecord.set({
+            themeResource: {
+                ...historicalRecord.get().themeResource || {},
+                select1: $scope.select1
+            }
+        });
+    };
+    $scope.select2Change = () => {
+        historicalRecord.set({
+            themeResource: {
+                ...historicalRecord.get().themeResource || {},
+                select2: $scope.select2
             }
         });
     };

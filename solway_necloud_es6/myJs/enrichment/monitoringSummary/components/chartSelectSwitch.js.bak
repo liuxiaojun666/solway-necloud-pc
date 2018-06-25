@@ -1,0 +1,43 @@
+app.directive('chartSelectSwitch', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
+    restrict: 'E',
+    replace: !0,
+    template: `
+    <div style="position: relative;z-index: 10;">
+        <select 
+            ng-show="select1"
+            ng-change="select1Change();" 
+            ng-model="select1" 
+            style="background: #16385d; width: 150px;height: 2em;position: absolute;left: 30px;top: 25px;">
+            <option 
+                ng-repeat="(key, value) in select1Options" 
+                ng-selected="item == select1" 
+                value="{{item}}"
+                >{{'投产容量MW' + item}}</option>
+        </select>
+        <select 
+            ng-show="select2"
+            ng-change="select2Change();" 
+            ng-model="select2" 
+            style="background: #16385d; width: 150px;height: 2em;position: absolute;right: 30px;top: 25px;">
+            <option 
+                ng-repeat="(key, value) in select2Options" 
+                ng-selected="item == select2" 
+                value="{{item}}"
+                >{{'投产数量(个)'}}</option>
+        </select>
+    </div>`,
+    scope: {
+        select1: '=',
+        select2: '=',
+        select1Change: '=',
+        select2Change: '=',
+        select1Options: '=',
+        select2Options: '='
+    },
+    link($scope, $element, $attrs) {
+
+    },
+    controller($scope) {
+        
+    }
+})])
