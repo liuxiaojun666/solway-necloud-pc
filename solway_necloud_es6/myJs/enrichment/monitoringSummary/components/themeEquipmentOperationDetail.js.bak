@@ -1,0 +1,39 @@
+ajaxData({}, {
+    __serviceName__: 'themeEquipmentOperationService'
+})('themeEquipmentOperationDetailCtrl', ['$scope', 'themeEquipmentOperationService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        // let { showShape, select1, select2 } = historicalRecord.get().themeResource || {};
+        // $scope.changeShowShape(showShape || 'list');
+        // const { dateType, dateTime } = historicalRecord.get();
+        // $scope.dateType = dateType;
+        // $scope.dateTime = dateTime;
+        // $scope.select1 = select1 || 2;
+        // $scope.select2 = select2 || 2;
+        // $scope.$apply();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeResource: {
+                ...historicalRecord.get().themeResource || {},
+                showShape
+            }
+        });
+    };
+
+    // 列表
+    $scope.column = [
+        {
+            title: '电站名称',
+            dataIndex: '',
+            width: '',
+            align: 'left'
+        }
+    ];
+});
