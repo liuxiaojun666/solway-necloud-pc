@@ -1,0 +1,100 @@
+ajaxData({
+    getDeviceLayout: {
+        name: 'GETdeviceLayoutV2',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    rtmSingleStationComm: {
+        name: 'GETRtmSingleStationComm',
+        data: {
+            dateString: new Date().Format("yyyy-MM-dd")
+        },
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'themePowerDetailService'
+})('themePowerDetailCtrl', ['$scope', 'themePowerDetailService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, tabIndex = 0, checkboxStatus=[true, true, true, true, true] } = historicalRecord.get().themeResource || {};
+        if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        $scope.checkboxStatus = checkboxStatus;
+        $scope.changeTab(tabIndex);
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+
+    };
+
+    // 日期改变
+    $scope.dateUpdated = () => {
+        if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+    };
+
+    // 详情 放大缩小  回调
+    $scope.switchDetailFullPage = () => {
+
+    }
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeResource: {
+                ...historicalRecord.get().themeResource || {},
+                tabIndex
+            }
+        });
+
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeResource: {
+                ...historicalRecord.get().themeResource || {},
+                showShape
+            }
+        });
+        if ($scope.tabIndex === 1 && $scope.showShape === 'chart') {
+            $scope.getDeviceLayout.getData({});
+            $scope.rtmSingleStationComm.getData({ dateString: new Date().Format("yyyy-MM-dd") });
+        }
+    };
+
+    // 复选框状态改变
+    $scope.changeCheckboxStatus = index => {
+        if (index === 0) $scope.checkboxStatus.fill($scope.checkboxStatus[0]);
+        else if (!$scope.checkboxStatus[index]) $scope.checkboxStatus[0] = false;
+        else if ($scope.checkboxStatus.slice(1).every(v => v)) $scope.checkboxStatus[0] = true;
+        historicalRecord.set({
+            themeResource: {
+                ...historicalRecord.get().themeResource || {},
+                checkboxStatus: $scope.checkboxStatus
+            }
+        });
+    };
+
+    // 列表
+    $scope.column = [
+        {
+            title: '电站名称',
+            dataIndex: '',
+            width: '',
+            align: 'left'
+        }
+    ];
+});
