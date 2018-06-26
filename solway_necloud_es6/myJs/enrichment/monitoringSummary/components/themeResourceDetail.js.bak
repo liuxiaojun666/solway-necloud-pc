@@ -12,8 +12,8 @@ ajaxData({}, {
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
-        $scope.select1 = select1 || 1;
-        $scope.select2 = select2 || 1;
+        $scope.select1 = select1 || 2;
+        $scope.select2 = select2 || 2;
         $scope.$apply();
     };
 
@@ -44,19 +44,12 @@ ajaxData({}, {
     };
 
     // 图标轴线切换
-    $scope.select1Change = () => {
+    $scope.selectChange = async (arg) => {
+        await myAjaxData.timeout(0);
         historicalRecord.set({
             themeResource: {
                 ...historicalRecord.get().themeResource || {},
-                select1: $scope.select1
-            }
-        });
-    };
-    $scope.select2Change = () => {
-        historicalRecord.set({
-            themeResource: {
-                ...historicalRecord.get().themeResource || {},
-                select2: $scope.select2
+                [arg]: $scope[arg]
             }
         });
     };
