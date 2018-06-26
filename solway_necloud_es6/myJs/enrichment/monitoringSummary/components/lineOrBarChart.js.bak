@@ -14,7 +14,8 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         axisColor: '=',
         barWidth: '=',
         splitLine: '=',
-        datazoom: '='
+        datazoom: '=',
+        symbolSize: '='
     },
     link($scope, $element) {
         let myChart;
@@ -33,7 +34,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         }, 0);
 
         const drawing = () => {
-            const { backgroundColor, splitLine, barWidth, axisColor, fontColor, linenames, ynames, xdata, ydatas, types, colors, datazoom } = $scope;
+            const { backgroundColor, symbolSize, splitLine, barWidth, axisColor, fontColor, linenames, ynames, xdata, ydatas, types, colors, datazoom } = $scope;
 
             const option = {
                 backgroundColor,
@@ -125,17 +126,18 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         barWidth: barWidth || 20,
                         yAxisIndex: i,
                         smooth: true,
-                        showSymbol: false,
+                        symbol: 'circle',
+                        showSymbol: symbolSize ? true : false,
+                        symbolSize: symbolSize,
                         data: data.map(v => {
                             if (!Number.isNaN(v + '' - 0)) return (+v).toFixed(1) - 0;
                             return v === null ? '-' : v;
                         }),
                         itemStyle: {
                             normal: {
-                                // color: colors[i][xi],
                                 // borderColor: colors[i][xi],
                                 // borderWidth: 12
-                                color: {
+                                color: (types[i][xi] === 'bar') && (colors[i][xi].length > 7) ? {
                                     type: 'linear',
                                     x: 0,
                                     y: 0,
@@ -143,11 +145,11 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                                     y2: 1,
                                     colorStops: [{
                                         offset: 0, color: colors[i][xi] // 0% 处的颜色
-                                    },{
-                                        offset: 1, color: 'rgba(255, 255, 255, .1)' // 100% 处的颜色
+                                    }, {
+                                        offset: 1, color: 'rgba' + colors[i][xi].slice(3, -1) + ',.1' + ')' // 100% 处的颜色
                                     }],
                                     globalCoord: true
-                                }
+                                } : colors[i][xi]
                             }
                         },
                     }))
@@ -170,7 +172,6 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', resizeFunc);
             echarts.dispose($element[0]);
-            // echarts.dispose(myChart);
             myChart = null;
         });
     }

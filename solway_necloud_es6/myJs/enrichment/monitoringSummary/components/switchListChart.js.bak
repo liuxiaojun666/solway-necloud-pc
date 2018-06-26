@@ -7,10 +7,15 @@ app.directive('switchListChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocL
         <a ng-show="showShape === 'list'" target="_blank" href="{{dowloadLink}}" title="导出">
             <i class="iconfont icon-daochu"></i>
         </a>
-        <i style="margin-top: 2px;" ng-click="changeShowShape('chart')" class="iconfont icon-other" ng-class="{'active': showShape === 'chart'}"></i>
-        <i style="margin-top: 2px;" ng-click="changeShowShape('list')" class="iconfont icon-list" ng-class="{'active': showShape === 'list'}"></i>
+        <i ng-show="!noChart" style="margin-top: 2px;" ng-click="changeShowShape('chart')" class="iconfont icon-other" ng-class="{'active': showShape === 'chart'}"></i>
+        <i ng-show="!noChart" style="margin-top: 2px;" ng-click="changeShowShape('list')" class="iconfont icon-list" ng-class="{'active': showShape === 'list'}"></i>
     </div>`,
-    scope: !1,
+    scope: {
+        showShape: '=',
+        changeShowShape: '=',
+        dowloadLink: '=',
+        noChart: '='
+    },
     link($scope, $element, $attrs) {
         
     },
