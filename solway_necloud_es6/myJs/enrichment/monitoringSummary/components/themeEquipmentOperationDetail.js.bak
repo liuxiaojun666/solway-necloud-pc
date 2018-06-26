@@ -6,34 +6,62 @@ ajaxData({}, {
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        // let { showShape, select1, select2 } = historicalRecord.get().themeResource || {};
-        // $scope.changeShowShape(showShape || 'list');
-        // const { dateType, dateTime } = historicalRecord.get();
-        // $scope.dateType = dateType;
-        // $scope.dateTime = dateTime;
-        // $scope.select1 = select1 || 2;
-        // $scope.select2 = select2 || 2;
-        // $scope.$apply();
+        let { showShape } = historicalRecord.get().themeEquipmentOperation || {};
+        if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
+        $scope.changeShowShape(showShape || 'list');
+
+        $scope.currentColumn();
+
+        $scope.$apply();
     };
 
     // 切换显示形式  图表 or 列表
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeResource: {
-                ...historicalRecord.get().themeResource || {},
+            themeEquipmentOperation: {
+                ...historicalRecord.get().themeEquipmentOperation || {},
                 showShape
             }
         });
     };
 
-    // 列表
-    $scope.column = [
-        {
-            title: '电站名称',
-            dataIndex: '',
-            width: '',
-            align: 'left'
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        $scope.currentColumn();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = () => {
+        $scope.currentColumn();
+    };
+
+    // 详情 放大缩小  回调
+    $scope.switchDetailFullPage = () => {
+
+    }
+
+    const combineColumn = arr => {
+        const newArr = arr.map(item => {
+            return {
+                title: item,
+                dataIndex: '',
+                width: '',
+                align: 'left'
+            }
+        })
+        return newArr;
+    }
+
+    $scope.currentColumn = () =>{
+        if($scope.currentClass === 'StationDayToday'){
+            $scope.column = combineColumn(['设备名称', '故障类型', '设备类型', '故障发生时间', '故障描述', '持续时间', '处理详情']);
+        }else if($scope.currentClass === 'CompanyDayToday'){
+            $scope.column = combineColumn(['电站名称', '总台数', '运行台数', '待机', '故障', '维护', '离线']);
+        } else if ($scope.currentClass === 'CompanyDayAgo'){
+            $scope.column = combineColumn(['电站名称', '总台数', '故障台次', '维护台次', '离线台次', '故障损失小时数', '故障损失电量', 'mttr', 'mtbf', 'pba', 'pr', '综合得分']);
         }
-    ];
+    }
+
+    
 });
