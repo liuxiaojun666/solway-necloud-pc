@@ -1,14 +1,13 @@
 ajaxData({}, {
     __serviceName__: 'themePowerAjaxData'
-})('themePowerCtrl', ['$scope', 'themePowerAjaxData'], ($scope, myAjaxData) => {
+})('themePowerCtrl', ['$scope', 'themePowerAjaxData', '$timeout'], ($scope, myAjaxData, $timeout) => {
 
     $scope.initChildScope($scope, myAjaxData);
 
-    const myChart = echarts.init(document.getElementById('themePowerGaugeEchart'))
+    let myChart = echarts.init(document.getElementById('themePowerGaugeEchart'))
+    
     const initEchart = currentPower => {
-        window.addEventListener("resize", function () {
-            myChart.resize();
-        });
+        
         const option = {
             tooltip: {
                 //formatter: "{a} <br/>{b} : {c}%"
@@ -66,7 +65,7 @@ ajaxData({}, {
     
     const getAjaxData = async() => {
         if ($scope.detailFullPage) return false; //放大状态，不做处理
-
+        
         await myAjaxData.timeout(0)
         $("#themePowerGaugeEchart").width($("#themePower").width());
         initEchart(35);
@@ -92,4 +91,12 @@ ajaxData({}, {
         getAjaxData() 
     }
     
+    window.addEventListener("resize", () => {
+        $("#themePowerGaugeEchart").width($("#themePower").width())
+        myChart.resize();
+    });
+
+    $scope.$on('$destroy', () => {
+        myChart = null;
+    });
 });

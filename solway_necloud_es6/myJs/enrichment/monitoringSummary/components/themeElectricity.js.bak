@@ -4,11 +4,10 @@ ajaxData({}, {
 
     $scope.initChildScope($scope, myAjaxData);
     
+    const pieChart = echarts.init(document.getElementById('themeElePieEchart'));
+    const pieChartSmall = echarts.init(document.getElementById('themeElePieEchartSmall'));
 
     const initPieEchart = (pieId) => {
-        window.addEventListener("resize", function () {
-            pieId.resize();
-        });
         const option = {
             tooltip: {
                 trigger: 'item',
@@ -76,28 +75,21 @@ ajaxData({}, {
         if ($scope.detailFullPage) return false; //放大状态，不做处理
 
         await myAjaxData.timeout(0)
-        const pieChart = echarts.init(document.getElementById('themeElePieEchart'))
-        const pieChartSmall = echarts.init(document.getElementById('themeElePieEchartSmall'))
+        
         //左侧柱状图占的比例
         if ($scope.currentClass == 'StationMonth' || $scope.currentClass == 'StationYear' || $scope.currentClass == 'CompanyMonth' || $scope.currentClass == 'CompanyYear'){
             $scope.whichPart = 'part1-3';
             $scope.barWidth = $("#themeElectricity").width()*0.56;
-            $scope.pieChartBigWidth = 0;
-            // $scope.pieChartSmallWidth = $("#themeElectricity").width() * 0.44*0.5;
             $("#themeElePieEchartSmall").width($("#themeElectricity").width() * 0.44 * 0.5)
             initPieEchart(pieChartSmall);//小Pie
         } else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo'){
             $scope.whichPart = 'part1-2';
             $scope.barWidth = $("#themeElectricity").width()*0.7;
-            // $scope.pieChartBigWidth = $("#themeElectricity").width() * 0.3;
             $("#themeElePieEchart").width($("#themeElectricity").width() * 0.3)
-            $scope.pieChartSmallWidth = 0;
             initPieEchart(pieChart);//大Pie
         }else{
             $scope.whichPart = 'part1-1';
             $scope.barWidth = $("#themeElectricity").width();
-            $scope.pieChartSmallWidth = 0;
-            $scope.pieChartBigWidth = 0;
         }
         
         $scope.$apply();
@@ -123,5 +115,9 @@ ajaxData({}, {
     $scope.switchDetailFullPage = () => {
         getAjaxData()
     }
+
+    window.addEventListener("resize", function () {
+        getAjaxData();
+    });
 
 });
