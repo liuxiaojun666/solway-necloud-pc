@@ -6,12 +6,17 @@ ajaxData({}, {
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape } = historicalRecord.get().themeEquipmentOperation || {};
-        if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
+        let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeEquipmentOperation || {};
         $scope.changeShowShape(showShape || 'list');
-
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        $scope.select1 = select1 || 2;
+        $scope.select2 = select2 || 2;
+        $scope.selectChange('select1');
+        $scope.selectChange('select2');
+        $scope.changeTab(tabIndex);
         $scope.currentColumn();
-
         $scope.$apply();
     };
 
@@ -25,7 +30,26 @@ ajaxData({}, {
             }
         });
     };
-
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeEquipmentOperation: {
+                ...historicalRecord.get().themeEquipmentOperation || {},
+                tabIndex
+            }
+        });
+    };
+    // 图标轴线切换
+    $scope.selectChange = async (arg) => {
+        await myAjaxData.timeout(0);
+        historicalRecord.set({
+            themeEquipmentOperation: {
+                ...historicalRecord.get().themeEquipmentOperation || {},
+                [arg]: $scope[arg]
+            }
+        });
+    };
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         $scope.currentColumn();
@@ -59,6 +83,8 @@ ajaxData({}, {
         }else if($scope.currentClass === 'CompanyDayToday'){
             $scope.column = combineColumn(['电站名称', '总台数', '运行台数', '待机', '故障', '维护', '离线']);
         } else if ($scope.currentClass === 'CompanyDayAgo'){
+            $scope.column = combineColumn(['电站名称', '总台数', '故障台次', '维护台次', '离线台次', '故障损失小时数', '故障损失电量', 'mttr', 'mtbf', 'pba', 'pr', '综合得分']);
+        } else {
             $scope.column = combineColumn(['电站名称', '总台数', '故障台次', '维护台次', '离线台次', '故障损失小时数', '故障损失电量', 'mttr', 'mtbf', 'pba', 'pr', '综合得分']);
         }
     }
