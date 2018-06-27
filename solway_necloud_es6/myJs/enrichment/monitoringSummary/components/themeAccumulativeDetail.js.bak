@@ -4,10 +4,49 @@ ajaxData({}, {
     $scope.initChildScope($scope, myAjaxData);
     
     $scope.mainPageInitComplete = () => {
-        historicalRecord.get();
+        let { showShape, select1, select2, } = historicalRecord.get().themeAccumulative || {};
+        $scope.changeShowShape(showShape || 'list');
+        $scope.select1 = select1 || 2;
+        $scope.select2 = select2 || 2;
+        $scope.selectChange('select1');
+        $scope.selectChange('select2');
+        $scope.$apply();
     };
     
     $scope.switchPowerCallback = () => {
         historicalRecord.get();
     };
+
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeAccumulative: {
+                ...historicalRecord.get().themeAccumulative || {},
+                showShape
+            }
+        });
+    };
+
+    // 图标轴线切换
+    $scope.selectChange = async (arg) => {
+        await myAjaxData.timeout(0);
+        historicalRecord.set({
+            themeAccumulative: {
+                ...historicalRecord.get().themeAccumulative || {},
+                [arg]: $scope[arg]
+            }
+        });
+    };
+
+    // 列表
+    $scope.column = [
+        {
+            title: '电站名称',
+            dataIndex: '',
+            width: '',
+            align: 'left'
+        }
+    ];
 });

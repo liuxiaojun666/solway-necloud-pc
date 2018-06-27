@@ -43,7 +43,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
             </ul>
         </div>
         <div class="clearfix"></div>
-        <div>
+        <div style="margin: 0 20px;">
             <div ng-show="!rtmSingleStationComm.res" style="margin-bottom: 0;" class="alert alert-danger" role="alert">未接收到任何数据。请等待...</div>
             <div ng-show="rtmSingleStationComm.res.comm === null" style="margin-bottom: 0;" class="alert alert-danger" role="alert">返回数据异常！</div>
             <div ng-show="rtmSingleStationComm.res.comm === 1" style="margin-bottom: 0;" class="alert alert-danger" role="alert">
@@ -92,12 +92,10 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
             }
 
             switchPowerCallback() {
-                const sp = $scope.switchPowerCallback;
-                $scope.switchPowerCallback = () => {
-                    sp && sp();
+                $scope.$on("switchPowerCallback", (e, m) => {
                     this.setState({ data: [], loop: false });
                     this.getData(true);
-                };
+                });
             }
 
             bindEvents() {
