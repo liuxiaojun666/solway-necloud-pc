@@ -5,6 +5,16 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
     <div>
         <div style="margin-left: {{winWidth / 2 - 50 - 225}}px;">
             <ul class="nav navbar-nav m-r-xxl" style="margin-right: 0;">
+                <a ng-show="!status.statusAll" class="btn no-shadow navbar-btn" ng-click="changeStatus('statusAll');">
+                    <i class="fa fa-circle-o" style="color: #fff" />
+                    <span>全选</span>
+                </a>
+                <a ng-show="status.statusAll" class="btn no-shadow navbar-btn" ng-click="changeStatus('statusAll');">
+                    <i class="fa fa-check-circle" style="color: #fff" />
+                    <span>全选</span>
+                </a>
+            </ul>
+            <ul class="nav navbar-nav m-r-xxl" style="margin-right: 0;">
                 <a class="btn no-shadow navbar-btn" ng-click="changeStatus('status1');">
                     <i ng-show="!status.status1" class="fa fa-circle-o" style="color: #3fad22;" />
                     <i ng-show="status.status1" class="fa fa-check-circle-o" style="color: #3fad22;" />
@@ -31,16 +41,6 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
                     <span>阴影遮挡</span>
                 </a>
             </ul>
-            <ul class="nav navbar-nav m-r-xxl" style="margin-right: 0;">
-                <a ng-show="!status.statusAll" class="btn no-shadow navbar-btn" ng-click="changeStatus('statusAll');">
-                    <i class="fa fa-circle-o" style="color: #333" />
-                    <span>全选</span>
-                </a>
-                <a ng-show="status.statusAll" class="btn no-shadow navbar-btn" ng-click="changeStatus('statusAll');">
-                    <i class="fa fa-check-circle" style="color: #333" />
-                    <span>全选</span>
-                </a>
-            </ul>
         </div>
         <div class="clearfix"></div>
         <div>
@@ -53,7 +53,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
             </div>
             <div ng-show="rtmSingleStationComm.res.comm === 2" style="margin-bottom: 0;" class="alert alert-info" role="alert">设备初始化，未接收到任何数据。请等待...</div>
         </div>
-        <div id="deviceLayout" style="height: {{winHeight - 150}}px;overflow: auto;" class="clearfix"></div>
+        <div id="deviceLayout" class="clearfix"></div>
         <script src="theme/js/angular.pagination.js"></script>
         <div ng-include="'tpl/systemPage/basemessage/modal/taskList_historyData1.jsp'"></div>
         <div ng-include="'tpl/systemPage/basemessage/modal/taskList_historyData2.jsp'"></div>
@@ -92,7 +92,9 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
             }
 
             switchPowerCallback() {
+                const sp = $scope.switchPowerCallback;
                 $scope.switchPowerCallback = () => {
+                    sp && sp();
                     this.setState({ data: [], loop: false });
                     this.getData(true);
                 };
