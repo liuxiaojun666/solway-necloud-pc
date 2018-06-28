@@ -73,7 +73,7 @@ app.directive('endDateWarning', ['$ocLazyLoad', '$http', ($ocLazyLoad, $http) =>
             $scope.showNoticeAlert = false;
         }
     }
-})]).directive('slideDown', ['$ocLazyLoad', '$http', '$state',($ocLazyLoad, $http, $state) => ({
+})]).directive('slideDown', ['$ocLazyLoad', '$http', '$state', '$timeout', ($ocLazyLoad, $http, $state, $timeout) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -116,14 +116,17 @@ app.directive('endDateWarning', ['$ocLazyLoad', '$http', ($ocLazyLoad, $http) =>
             setMainHeight()            
         })
         
-        $(".hover-header-con").hover(() =>{
-            if (localStorage['monitoringSummary']?false:true) return;
-            timer = setTimeout(() =>{
-                $(".systems-page").slideDown();
-            }, 500);
-        }, () =>{
-            if (timer) clearTimeout(timer);
-        });
+        $timeout(()=>{
+            $(".hover-header-con").hover(() => {
+                if (localStorage['monitoringSummary'] ? false : true) return;
+                timer = setTimeout(() => {
+                    $(".systems-page").slideDown();
+                }, 500);
+            }, () => {
+                if (timer) clearTimeout(timer);
+            });
+        },0)
+        
 
         $("#closeSystemBtn").click(() =>{
             $(".systems-page").slideUp();
