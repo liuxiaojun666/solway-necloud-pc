@@ -89,6 +89,7 @@ ajaxData({
     // 切换主题模块
     $scope.changeTheme = theme => {
         if (theme === 'Expense') return;
+        $scope.themeLoading = true;
         $scope.theme = theme;
         historicalRecord.set({ theme });
         $scope.themeDetail = `tpl/enrichment/monitoringSummary/components/theme${theme}Detail.html`;
@@ -109,6 +110,7 @@ ajaxData({
 
     // 初始化子页面scope
     $scope.initChildScope = async (__childScope, __myAjaxData) => {
+        $scope.themeLoading = false;
         // 主页面初始化完成
         const mainPageInitComplete = __childScope.$parent.$parent.mainPageInitComplete;
         __childScope.$parent.$parent.mainPageInitComplete = (...arg) => {
