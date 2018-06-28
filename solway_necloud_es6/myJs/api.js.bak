@@ -151,13 +151,14 @@ win.ajaxData = (b, a) => {
                 }
                 N[g].promise = N[g].getData(b[g].data)
             }
-            const GWH = (first) => {
-                N.winHeight = document.body.clientHeight
-                N.winWidth = document.body.clientWidth
-                if (first === true) return
-                N.$apply()
+            const GWH = () => {
+                setTimeout(() => {
+                    N.winHeight = document.body.clientHeight
+                    N.winWidth = document.body.clientWidth
+                    N.$apply()
+                }, 0);
             }
-            GWH(true)
+            GWH()
             win.addEventListener('resize', GWH)
             N.$on('$destroy', () => win.removeEventListener('resize', GWH))
             e(N, Z, Y, X, W, V, U, T, S, R, Q, P, O, M, L, K, J, I, H, G, F, D, C, B, A, j)
