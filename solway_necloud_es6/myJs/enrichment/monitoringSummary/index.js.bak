@@ -89,7 +89,7 @@ ajaxData({
     // 切换主题模块
     $scope.changeTheme = theme => {
         if (theme === 'Expense') return;
-        $scope.themeLoading = true;
+        if (theme !== $scope.theme) $scope.themeLoading = true;
         $scope.theme = theme;
         historicalRecord.set({ theme });
         $scope.themeDetail = `tpl/enrichment/monitoringSummary/components/theme${theme}Detail.html`;
