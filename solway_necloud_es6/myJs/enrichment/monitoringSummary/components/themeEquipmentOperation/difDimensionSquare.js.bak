@@ -1,13 +1,17 @@
 app.directive('difDimensionSquare', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
     restrict: 'E',
     replace: !0,
-    templateUrl: 'tpl/enrichment/monitoringSummary/components/themeEquipmentOperation/difDimensionSquare.html',
     scope: {
+        // dataSource:"="
     },
+    templateUrl: 'tpl/enrichment/monitoringSummary/components/themeEquipmentOperation/difDimensionSquare.html',
     link($scope, $element, $attrs) {
-
+        
     },
-    controller() {
-
+    controller($scope) {
+        //切换三种条件（级别：level；设备：device；时间：time）
+        $scope.changeParams = (type,value) =>{
+            $scope[type] = value;
+        }
     }
 })])
