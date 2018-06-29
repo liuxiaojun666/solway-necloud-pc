@@ -13,11 +13,16 @@ ajaxData({
     $scope.initChildScope($scope, myAjaxData);
 
     const initParams = () => {
-        const params = historicalRecord.get();
-        if (params.detailFullPage) return false; //放大状态，不做处理
-        $scope.roleType = params.stationData.dataType;//电站（0）和非电站
-        $scope.dateType = params.dateType;//日期类型（日、月、年、累计；0、1、2、3）
-        $scope.getAjaxData() //接口
+        if ($scope.detailFullPage) return false; //放大状态，不做处理
+
+        // $scope.dataType;//电站（0）和非电站
+        // $scope._dateType;//日期类型（日、月、年、累计；0、1、2、3）
+        // $scope._dateTime;
+        
+        const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
+        const dateType = ($scope._dateType == 0) ? 3 : ($scope._dateType == 1 ? 2 : 1);
+        const dateTime = $scope._dateTime.showDate;
+        $scope.getAjaxData(queryType, dateTime, dateType) //接口
     }
 
     //父页面初始化完成
@@ -27,35 +32,27 @@ ajaxData({
 
     //切换日期类型
     $scope.dateUpdated = () =>{
-        $scope.getAjaxData();
+        initParams();
     }
 
     //切换电站
     $scope.switchPowerCallback = () => {
-        $scope.getAjaxData();
+        initParams();
     }
 
     //点击放大后
     $scope.switchDetailFullPage = () =>{
-        $scope.getAjaxData();
+        initParams();
     }
 
-    $scope.getAjaxData = () =>{
-        const queryType = $scope.roleType?1:3 //集团1，电站3
-        const dateType = $scope.dateType == 0 ? 3 : ($scope.dateType == 1?2:1)
+    $scope.getAjaxData = (queryType,dateTime,dateType) =>{
         $scope.pageData.getData({
             'queryType': queryType,
-            'date': $scope.dateTime,
+            'date': dateTime,
             'dateType': dateType
         }).then(res => {
-            // debugger
             console.log(res)
-            // debugger
         })
     }
 
-    // //处理成接口需要的参数
-    // $scope.dealWithParams = () =>{
-
-    // }
 });
