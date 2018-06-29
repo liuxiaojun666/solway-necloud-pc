@@ -107,6 +107,37 @@ ajaxData({
         historicalRecord.set({ currentClass: $scope.currentClass });
     };
 
+    
+    // 键盘 左右 键   切换主题  组合键 放大缩小（ctrl + M）
+    $(document).on('keydown', keyChangeTheme);
+    $scope.$on('$destroy', () => $(document).off('keydown', keyChangeTheme));
+    function keyChangeTheme(event) {
+        const themeArr = ['BasicSituation', 'Resource', 'Power', 'Electricity', 'EquipmentOperation'];
+        if ($scope.dateType > 0) themeArr.splice(2, 1);
+        const {theme} = $scope;
+        switch (event.keyCode) {
+            case 37:
+                if (theme === themeArr[0]) return;
+                $scope.changeTheme(themeArr[themeArr.indexOf(theme) - 1]);
+                $scope.$apply();
+                break;
+        
+            case 39:
+                if (theme === themeArr[themeArr.length - 1]) return;
+                $scope.changeTheme(themeArr[themeArr.indexOf(theme) + 1]);
+                $scope.$apply();
+                break;
+        
+            case 77:
+                if (event.ctrlKey) $scope.switchDetailFullPage();
+                $scope.$apply();
+        
+            default:
+                break;
+        }
+        
+    }
+
 
     // 初始化子页面scope
     $scope.initChildScope = async (__childScope, __myAjaxData) => {
