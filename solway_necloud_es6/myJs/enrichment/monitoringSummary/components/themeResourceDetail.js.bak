@@ -1,4 +1,26 @@
-ajaxData({}, {
+ajaxData({
+    // 电站日
+    StationDay: {
+        name: 'GETresourceDetailStationDay',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 月 时间 列表
+    query_station_month_res_timelist_his: {
+        name: 'GETquery_station_month_res_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 月 时间 曲线
+    query_station_month_res_timeline_his: {
+        name: 'GETquery_station_month_res_timeline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
     __serviceName__: 'themeResourceDetailService'
 })('themeResourceDetailCtrl', ['$scope', 'themeResourceDetailService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
     // 初始化 scope
@@ -18,23 +40,26 @@ ajaxData({}, {
         $scope.selectChange('select2');
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        diffGetData();
         $scope.$apply();
     };
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
-        
+        diffGetData();
     };
 
     // 日期改变
     $scope.dateUpdated = () => {
         if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+        diffGetData();
     };
 
     // 详情 放大缩小  回调
     $scope.switchDetailFullPage = () => {
-
+        diffGetData();
     }
 
     // tab 切换
@@ -46,6 +71,7 @@ ajaxData({}, {
                 tabIndex
             }
         });
+        diffGetData();
     };
 
     // 切换显示形式  图表 or 列表
@@ -57,6 +83,7 @@ ajaxData({}, {
                 showShape
             }
         });
+        diffGetData();
     };
 
     // 图标轴线切换
@@ -68,7 +95,63 @@ ajaxData({}, {
                 [arg]: $scope[arg]
             }
         });
+        diffGetData();
     };
+
+    // 判断 调用  对应 接口
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        switch ($scope.currentClass) {
+            case 'StationDayToday':
+                $scope.StationDay.getData({
+                    queryType: 3,
+                    dateType: 3,
+                    date: $scope.dateTime.showDate
+                });
+                break;
+
+            case 'StationDayAgo':
+                $scope.StationDay.getData({});
+                break;
+
+            case 'StationMonth':
+                $scope.query_station_month_res_timelist_his.getData({
+                    queryCode: 'query_station_month_res_timelist_his',
+                    queryType: 3,
+                    date: $scope.dateTime
+                });
+                $scope.query_station_month_res_timeline_his.getData({
+                    queryCode: 'query_station_month_res_timeline_his',
+                    queryType: 3,
+                    date: $scope.dateTime
+                });
+                break;
+
+            case 'StationDayAgo':
+                $scope.StationDay.getData({});
+                break;
+
+            case 'StationDayAgo':
+                $scope.StationDay.getData({});
+                break;
+
+            case 'StationDayAgo':
+                $scope.StationDay.getData({});
+                break;
+
+            case 'StationDayAgo':
+                $scope.StationDay.getData({});
+                break;
+
+            case 'StationDayAgo':
+                $scope.StationDay.getData({});
+                break;
+        
+            default:
+                break;
+        }
+    }
 
     // 列表
     $scope.column = [
