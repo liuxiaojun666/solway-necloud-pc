@@ -23,7 +23,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
             $element.css('display', 'block')
             setWidthHeight();
             myChart = echarts.init($element[0]);
-            $scope.$watchGroup(['xdata', 'ydatas', 'ynames'], (newValue, oldValue) => {
+            $scope.$watchGroup(['xdata', 'ydatas'], (newValue, oldValue) => {
                 if (!newValue) return;
                 drawing();
             });
@@ -34,7 +34,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         }, 0);
 
         const drawing = () => {
-            const { backgroundColor, symbolSize, splitLine, barWidth, axisColor, fontColor, linenames, ynames, xdata, ydatas, types, colors, datazoom } = $scope;
+            const { backgroundColor, symbolSize, splitLine, barWidth, axisColor, fontColor, linenames = [], ynames = [], xdata, ydatas = [], types, colors, datazoom } = $scope;
 
             const option = {
                 backgroundColor,
@@ -52,7 +52,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     itemHeight: 4,
                     itemGap: 20, //图例每项之间的间隔。横向布局时为水平间隔，纵向布局时为纵向间隔。[ default: 10 ] 
                     data: linenames.reduce((a, b) => a.concat(b), []),
-                    right: 100,
+                    right: 200,
                     top: 30,
                     textStyle: {
                         fontSize: 12,
