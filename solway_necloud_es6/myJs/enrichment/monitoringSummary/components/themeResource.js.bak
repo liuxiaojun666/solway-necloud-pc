@@ -4,28 +4,20 @@ ajaxData({
         later: true        
     }
 }, {
-    __serviceName__: 'themeResourceAjaxData',
-    weatherMap: { 'A': '晴', 'B': '阴', 'C': '雨', 'D': '雪', 'E': '雾', 'X': '-'}
+    __serviceName__: 'themeResourceAjaxData'
     })('themeResourceCtrl', ['$scope', 'themeResourceAjaxData', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
 
+    $scope.weatherMap= { 'A': '晴', 'B': '阴', 'C': '雨', 'D': '雪', 'E': '雾', 'X': '-' };
     $scope.initChildScope($scope, myAjaxData);
 
-    // const getAjaxData = () =>{
-    //     if ($scope.detailFullPage) return false; //放大状态，不做处理
-        
-    //     //天气信息测试
-    //     $scope.weatherType = 'A';
-    //     $scope.weatherName = myAjaxData.config.weatherMap[$scope.weatherType]
-    // }
-
     const initParams = () => {
-        // if ($scope.detailFullPage) return false; //放大状态，不做处理
+        if ($scope.detailFullPage) return false; //放大状态，不做处理
 
-        // const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
-        // const dateType = ($scope._dateType == 0) ? 3 : ($scope._dateType == 1 ? 2 : 1);
-        // const dateTime = $scope._dateTime.showDate;
+        const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
+        const dateType = ($scope._dateType == 0) ? 3 : ($scope._dateType == 1 ? 2 : 1);
+        const dateTime = $scope._dateTime.showDate;
         
-        // $scope.getAjaxData(queryType, dateTime, dateType) 
+        $scope.getAjaxData(queryType, dateTime, dateType) 
     }
 
     //父页面初始化完成
@@ -55,7 +47,6 @@ ajaxData({
             'date': dateTime,
             'dateType': dateType
         }).then(res => {
-            
             if (res.code == 0) $scope.data = res.body;
         })
     }
