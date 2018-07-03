@@ -42,11 +42,13 @@ ajaxData({
 
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
+        $scope.themeResourceIsLoding = true;
         $scope.pageData.getData({
             'queryType': queryType,
             'date': dateTime,
             'dateType': dateType
         }).then(res => {
+            $scope.themeResourceIsLoding = false;
             if (res.code == 0) $scope.data = res.body;
         })
     }
