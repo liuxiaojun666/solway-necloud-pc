@@ -470,7 +470,6 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad
         if ($scope.calendarType.length > 10) $scope.showArrow = false
         if (Object.is(void 0, $scope.dateTime.showDate)) $scope.dateTime.showDate = $scope.dateTime.Format($scope.calendarType)
         let showDate = $scope.dateTime.showDate
-        $element.find('input').val(showDate)
         $scope.disabled = (noChange) => {
             const startDate = $scope.startDate || new Date('1970', '01', '01'),
                 endDate = $scope.endDate || new Date,
@@ -501,7 +500,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad
                 $scope.dateTime.weekStart = $scope.weekStart
                 $scope.dateTime.weekEnd = $scope.weekEnd
             }
-            showDate = $element.find('input').val() && $scope.dateTime.Format($scope.calendarType)
+            showDate = $scope.dateTime.Format($scope.calendarType)
             $element.find('input').val(showDate)
             $scope.dateTime.showDate = showDate
             window.moment && $scope.showArrow && $scope.disabled()
