@@ -439,7 +439,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', 'myAjaxData', ($ocLazyLoad
             baseUrl + '/vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
             baseUrl + '/vendor/libs/moment.min.js'
         ])).then(() => {
-            const showDate = $scope.dateTime.showDate
+            const showDate = $scope.dateTime.showDate || $scope.dateTime.Format($scope.calendarType)
             $input.val(showDate)
             $scope.dateTime = new Date($scope.dateTime)
             $scope.dateTime.showDate = showDate
