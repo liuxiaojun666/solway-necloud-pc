@@ -17,8 +17,7 @@ ajaxData({
 
     let myChart = echarts.init(document.getElementById('themePowerGaugeEchart'))
     
-    const initEchart = currentPower => {
-        
+    const initEchart = (currentPower, maxValue) => {
         const option = {
             tooltip: {
                 //formatter: "{a} <br/>{b} : {c}%"
@@ -35,6 +34,7 @@ ajaxData({
                     name: '实时功率',
                     type: 'gauge',
                     radius: '100%',
+                    max:maxValue,
                     splitLine: {
                         length: 10
                     },
@@ -109,15 +109,17 @@ ajaxData({
     
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
+        $scope.themePowerIsLoding = true;
         if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday'){
             $scope.currentPowerInfo.getData({
                 'queryType': queryType,
                 'date': dateTime,
                 'dateType': dateType
             }).then(res => {
+                $scope.themePowerIsLoding = false;
                 if (res.code == 0) {
                     $scope.data = res.body;
-                    initEchart(35);
+                    initEchart(res.body.realTimePower[0], res.body.installedCapacity[0]);
                 }
             })
         } else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo'){
@@ -126,8 +128,10 @@ ajaxData({
                 'queryType': queryType,
                 'date': dateTime
             }).then(res => {
+                $scope.themePowerIsLoding = false;
                 if (res.code == 0) {
-                    initEchart(35);
+                    $scope.data = res.body;
+                    initEchart(res.body.max_p[0], res.body.inst_kw[0]);
                 }
             })
         }
