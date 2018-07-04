@@ -83,6 +83,20 @@ ajaxData({
         // 日期改变
         $scope.dateUpdated = () => {
             if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+            if ($scope.dateType === 1) {
+                $scope.selectOptions = {
+                    max_sun: '最大辐射强度(kWh/m²)',
+                    rad_chk: '辐射总量(kWh/m²)',
+                    sun_hours: '日照小时数(h)',
+                    ta_avg: '平均温度'
+                };
+            } else if ($scope.dateType === 2) {
+                $scope.selectOptions = {
+                    rad_chk: '辐射总量(kWh/m²)',
+                    sun_hours: '日照小时数(h)',
+                    ta_avg: '平均温度'
+                };
+            }
             diffGetData();
         };
 
@@ -115,12 +129,6 @@ ajaxData({
         // 图标轴线切换
         $scope.selectChange = async (arg) => {
             await myAjaxData.timeout(0);
-            $scope.selectOptions = {
-                max_sun: '最大辐射强度(kWh/m²)',
-                rad_chk: '辐射总量(kWh/m²)',
-                sun_hours: '日照小时数(h)',
-                ta_avg: '平均温度'
-            };
             historicalRecord.set({
                 themeResource: {
                     ...historicalRecord.get().themeResource || {},
@@ -214,8 +222,8 @@ ajaxData({
             }
         };
 
-        // 电站月、年 列表 数据处理
-        $scope.query_station_month_res_timelist_his.getDataCallback = $scope.query_station_year_res_timelist_his.getDataCallback = (success, res) => {
+        // 电站月 列表 数据处理
+        $scope.query_station_month_res_timelist_his.getDataCallback = (success, res) => {
             if (!success) return;
             $scope.column = [
                 {
@@ -228,7 +236,7 @@ ajaxData({
                     title: '辐射总量(' + res.body.units.rad_chk + ')',
                     dataIndex: 'rad_chk',
                     width: '',
-                    align: 'center',
+                    align: 'right',
                     render(text, item, index) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
                     }
@@ -246,22 +254,67 @@ ajaxData({
                     title: '日照小时数(' + res.body.units.sun_hours + ')',
                     dataIndex: 'sun_hours',
                     width: '',
-                    align: 'center',
+                    align: 'right',
                 },
                 {
                     title: '最大光照强度',
                     dataIndex: 'max_sun',
                     width: '',
-                    align: 'center',
+                    align: 'right',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
                     }
                 },
                 {
-                    title: '温度',
+                    title: '平均温度',
                     dataIndex: 'ta_avg',
                     width: '',
+                    align: 'right',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+            ];
+        };
+        // 电站年 列表 数据处理
+        $scope.query_station_year_res_timelist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    width: '',
                     align: 'center',
+                },
+                {
+                    title: '辐射总量(' + res.body.units.rad_chk + ')',
+                    dataIndex: 'rad_chk',
+                    width: '',
+                    align: 'right',
+                    render(text, item, index) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '降雨量(' + res.body.units.pcpn + ')',
+                    dataIndex: 'pcpn',
+                    width: '',
+                    align: 'right',
+                    render(text) {
+                        return text >= 0 ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '日照小时数(' + res.body.units.sun_hours + ')',
+                    dataIndex: 'sun_hours',
+                    width: '',
+                    align: 'right',
+                },
+                {
+                    title: '平均温度',
+                    dataIndex: 'ta_avg',
+                    width: '',
+                    align: 'right',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
                     }
@@ -274,6 +327,11 @@ ajaxData({
             if (!res.body.data.dtime[0]) return;
             const day = new Date(res.body.data.dtime[0].split('-')).getDay() - 1;
             $scope.query_station_month_res_timeline_his.res.body.data.nullBlock = new Array(day < 0 ? 6 : day).fill('');
+            if ($scope.dateTime.showDate === (new Date).Format('yyyy-MM')) {
+                const date = new Date();
+                const dateNum = date.getDate();
+                $scope.query_station_month_res_timeline_his.res.body.data.nullBlock2 = new Array(new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate() - dateNum + 1).fill('').map((v, i) => (i + dateNum) < 10 ? '0' + (i + dateNum) : i + dateNum);
+            }
             diffChartLineData();
         };
         // 电站年 图表 数据回调 处理
