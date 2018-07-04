@@ -133,6 +133,8 @@ ajaxData({
         // 切换电站 回调
         $scope.switchPowerCallback = () => {
             if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
             diffSelectOptions();
             diffGetData();
         };
@@ -141,6 +143,8 @@ ajaxData({
         $scope.dateUpdated = async () => {
             await myAjaxData.timeout(0);
             if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
             diffSelectOptions();
             diffGetData();
         };
@@ -449,6 +453,9 @@ ajaxData({
                     dataIndex: 'st_name',
                     width: '',
                     align: 'left',
+                    render(text) {
+                        return `<span>${text || ''}</span>`
+                    }
                 },
                 {
                     title: '装机容量',
@@ -460,26 +467,26 @@ ajaxData({
                     }
                 },
                 {
-                    title: '辐射总量',
+                    title: '辐射总量kWh/m²',
                     dataIndex: 'rad_chk',
                     width: '',
                     align: 'right',
                     render(text) {
-                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                        return text ? '<span>' + text[0] + '</span>' : '<span></span>';
                     }
                 },
                 {
-                    title: '最大光照强度',
-                    dataIndex: 'max_sun',
+                    title: '光照强度W/m²',
+                    dataIndex: 'sun',
                     width: '',
                     align: 'right',
                     render(text) {
-                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                        return text ? '<span>' + text[0] + '</span>' : '<span></span>';
                     }
                 },
                 {
                     title: '天气',
-                    dataIndex: 'weather',
+                    dataIndex: 'weater',
                     width: '',
                     align: 'center',
                     render(text) {
@@ -488,38 +495,38 @@ ajaxData({
                 },
                 {
                     title: '温度',
-                    dataIndex: 'ta_avg',
+                    dataIndex: 'tmp',
                     width: '',
-                    align: 'right',
+                    align: 'center',
                     render(text) {
-                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                        return text ? '<span>' + text.join('') + '</span>' : '<span></span>';
                     }
                 },
                 {
                     title: '预测今日',
-                    dataIndex: 'pre_weather',
+                    dataIndex: 'pre_weater',
                     width: '',
                     align: 'center',
-                    render(text) {
-                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    render(text, item) {
+                        return text ? '<span>' + text + ' ' + item.pre_tmp  + '℃'+ '</span>' : '<span></span>';
                     }
                 },
                 {
                     title: '预测明日',
-                    dataIndex: 'pre_weather',
+                    dataIndex: 'pre_weater2',
                     width: '',
                     align: 'center',
-                    render(text) {
-                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    render(text, item) {
+                        return text ? '<span>' + text + ' ' + item.pre_tmp2 + '℃' + '</span>' : '<span></span>';
                     }
                 },
                 {
                     title: '预测后日',
-                    dataIndex: 'pre_weather',
+                    dataIndex: 'pre_weater3',
                     width: '',
                     align: 'center',
-                    render(text) {
-                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    render(text, item) {
+                        return text ? '<span>' + text + ' ' + item.pre_tmp3 + '℃' + '</span>' : '<span></span>';
                     }
                 },
             ];
@@ -623,9 +630,13 @@ ajaxData({
             $scope.datasource = res.body.data;
             $scope.column = [
                 {
-                    title: '时间',
-                    dataIndex: 'dtime',
-                    align: 'center'
+                    title: '电站名称',
+                    dataIndex: 'st_name',
+                    align: 'left'
+                }, {
+                    title: '装机容量kW',
+                    dataIndex: 'inst_kw',
+                    align: 'right',
                 }, {
                     title: '辐射总量kWh/㎡',
                     dataIndex: 'rad_chk',
@@ -636,7 +647,55 @@ ajaxData({
         // 公司 月 电站 柱状图
         $scope.query_company_month_res_stationline_his.getDataCallback = (success, res) => {
             if (!success) return;
+            $scope.xdata = res.body.data.st_name;
+            $scope.ydatas = [[res.body.data.rad_chk]];
+        };
+        // 公司 年 时间 列表
+        $scope.query_company_year_res_timelist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.data;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    align: 'center'
+                }, {
+                    title: '辐射总量kWh/㎡',
+                    dataIndex: 'rad_chk',
+                    align: 'right',
+                }
+            ];
+        };
+        // 公司 年 时间 柱状图
+        $scope.query_company_year_res_timeline_his.getDataCallback = (success, res) => {
+            if (!success) return;
             $scope.xdata = res.body.data.dtime;
+            $scope.ydatas = [[res.body.data.rad_chk]];
+        };
+        // 公司 年 电站 列表
+        $scope.query_company_year_res_stationlist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.data;
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'st_name',
+                    align: 'left'
+                }, {
+                    title: '装机容量',
+                    dataIndex: 'inst_kw',
+                    align: 'right',
+                }, {
+                    title: '辐射总量kWh/㎡',
+                    dataIndex: 'rad_chk',
+                    align: 'right',
+                }
+            ];
+        };
+        // 公司 年 电站 柱状图
+        $scope.query_company_year_res_stationline_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.xdata = res.body.data.st_name;
             $scope.ydatas = [[res.body.data.rad_chk]];
         };
 
@@ -649,7 +708,6 @@ ajaxData({
                 $scope.ydatas = [[$scope.query_station_month_res_timeline_his.res.body.data[select1]], [$scope.query_station_month_res_timeline_his.res.body.data[select2]]]
             } else if (currentClass === 'StationYear') {
                 $scope.xdata = $scope.query_station_year_res_timeline_his.res.body.data.dtime
-                $scope.lineNames = [[selectOptions[select1]], [selectOptions[select2]]];
                 $scope.ydatas = [[$scope.query_station_year_res_timeline_his.res.body.data[select1]], [$scope.query_station_year_res_timeline_his.res.body.data[select2]]]
             } else if (currentClass === 'CompanyDayAgo') {
                 $scope.ydatas = [[$scope.query_company_day_res_timelist_his.res.body.data.map(v => v[$scope.select1])], [$scope.query_company_day_res_timelist_his.res.body.data.map(v => v.max_sun)]];

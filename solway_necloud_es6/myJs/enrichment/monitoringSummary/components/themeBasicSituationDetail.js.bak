@@ -1,4 +1,12 @@
-ajaxData({}, {
+ajaxData({
+    // 电站 日 月 年 
+    stationData: {
+        name: 'GETpvMonitorGetRunBaseList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
     __serviceName__: 'themeBasicSituationDetailService'
 })('themeBasicSituationDetailCtrl', ['$scope', 'themeBasicSituationDetailService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
     // 初始化 scope
@@ -12,6 +20,10 @@ ajaxData({}, {
         const {dateType, dateTime} = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        diffGetData();
         $scope.$apply();
     };
 
@@ -70,4 +82,19 @@ ajaxData({}, {
             align: 'left'
         }
     ];
+
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        const { currentClass, showShape, dateTime, dataType, dateType } = $scope;
+        if (dataType === 0) {
+            // 电站接口
+            $scope.stationData.getData({
+                queryType: 3,
+                dateType: [1,2,3][dateType],
+                date: dateTime.showDate
+            });
+        }
+    }
+
 });
