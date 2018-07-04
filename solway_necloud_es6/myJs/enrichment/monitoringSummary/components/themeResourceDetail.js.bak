@@ -57,11 +57,11 @@ ajaxData({
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
             let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeResource || {};
-            if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
             $scope.changeShowShape(showShape || 'list');
             const { dateType, dateTime } = historicalRecord.get();
             $scope.dateType = dateType;
             $scope.dateTime = dateTime;
+            await $scope.dateUpdated();
             $scope.select1 = select1 || 'rad_chk';
             $scope.select2 = select2 || 'sun_hours';
             await $scope.selectChange('select1');
@@ -81,7 +81,8 @@ ajaxData({
         };
 
         // 日期改变
-        $scope.dateUpdated = () => {
+        $scope.dateUpdated = async () => {
+            await myAjaxData.timeout(0);
             if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
             if ($scope.dateType === 1) {
                 $scope.selectOptions = {
@@ -90,7 +91,7 @@ ajaxData({
                     sun_hours: '日照小时数(h)',
                     ta_avg: '平均温度'
                 };
-            } else if ($scope.dateType === 2) {
+            } else {
                 $scope.selectOptions = {
                     rad_chk: '辐射总量(kWh/m²)',
                     sun_hours: '日照小时数(h)',
@@ -257,7 +258,7 @@ ajaxData({
                     align: 'right',
                 },
                 {
-                    title: '最大光照强度',
+                    title: '最大光照强度(W/m²)',
                     dataIndex: 'max_sun',
                     width: '',
                     align: 'right',
@@ -266,7 +267,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '平均温度',
+                    title: '平均温度(℃)',
                     dataIndex: 'ta_avg',
                     width: '',
                     align: 'right',
