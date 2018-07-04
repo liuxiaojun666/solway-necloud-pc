@@ -43,7 +43,13 @@ ajaxData({
     const pieChart = echarts.init(document.getElementById('themeElePieEchart'));
     const pieChartSmall = echarts.init(document.getElementById('themeElePieEchartSmall'));
 
-    const initPieEchart = (pieId) => {
+    const initPieEchart = () => {
+        let pieId;
+        if ($scope.currentClass == 'StationMonth' || $scope.currentClass == 'StationYear' || $scope.currentClass == 'CompanyMonth' || $scope.currentClass == 'CompanyYear') {
+            pieId = pieChartSmall;//小Pie
+        } else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo') {
+            pieId = pieChart;     //大Pie       
+        }
         const option = {
             tooltip: {
                 trigger: 'item',
@@ -112,18 +118,22 @@ ajaxData({
             $scope.whichPart = 'part1-3';
             $scope.barWidth = $("#themeElectricity").width() * 0.56;
             $("#themeElePieEchartSmall").width($("#themeElectricity").width() * 0.44 * 0.5)
-            initPieEchart(pieChartSmall);//小Pie
+
+            $scope.xAxis = ['实发电量', '上网电量', '计划发电量', '预测发电量', '应发电量'];
         } else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo') {
             $scope.whichPart = 'part1-2';
             $scope.barWidth = $("#themeElectricity").width() * 0.7;
             $("#themeElePieEchart").width($("#themeElectricity").width() * 0.3)
-            initPieEchart(pieChart);//大Pie
+
+            $scope.xAxis = ['实发电量', '上网电量', '预测发电量', '应发电量'];
         } else {
             $scope.whichPart = 'part1-1';
             $scope.barWidth = $("#themeElectricity").width();
+
+            $scope.xAxis = ['实发电量', '上网电量', '当日预测发电量', '明日预测发电量', '后日预测发电量'];
         }
 
-        $scope.$apply();
+        // $scope.$apply();
     }
 
     const initParams = async () => {
@@ -169,9 +179,11 @@ ajaxData({
                 'date': dateTime,
                 'dateType': dateType
             }).then(res => {
+                console.log(res);
                 $scope.themePowerIsLoding = false;
                 if (res.code == 0) {
                     $scope.data = res.body;
+                    $scope.yAxis = [200, 400, 145, 300, 200];
                 }
             })
         } else {
@@ -210,14 +222,17 @@ ajaxData({
             'date': dateTime
         }).then(res => {
             $scope.themePowerIsLoding = false;
+            console.log(res)
             if (res.code == 0) {
                 $scope.data = res.body;
+                // debugger
+                initPieEchart();
             }
         })
     }
 
     window.addEventListener("resize", function () {
-        initEchartHeightWidth();
+        // initEchartHeightWidth();
     });
 
 });
