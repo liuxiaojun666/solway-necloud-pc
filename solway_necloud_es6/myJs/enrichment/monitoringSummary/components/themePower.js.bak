@@ -17,10 +17,10 @@ ajaxData({
 
     let myChart = echarts.init(document.getElementById('themePowerGaugeEchart'))
     
-    const initEchart = (currentPower, maxValue) => {
+    const initEchart = (currentPower) => {
         const option = {
             tooltip: {
-                //formatter: "{a} <br/>{b} : {c}%"
+                formatter: "{a} <br/>{b}  {c}%"
             },
             toolbox: {
                 show: false,
@@ -31,10 +31,10 @@ ajaxData({
             },
             series: [
                 {
-                    name: '实时功率',
+                    name: '出力比',
                     type: 'gauge',
                     radius: '100%',
-                    max:maxValue,
+                    // max:maxValue,
                     splitLine: {
                         length: 10
                     },
@@ -119,10 +119,10 @@ ajaxData({
                 $scope.themePowerIsLoding = false;
                 if (res.code == 0) {
                     $scope.data = res.body;
-                    initEchart(res.body.p[0], res.body.acc_kw[0]);
+                    initEchart(res.body.kw_r[0]);
                 }else{
                     $scope.data = {};
-                    initEchart('','');
+                    initEchart('');
                 }
             })
         } else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo'){
@@ -134,10 +134,10 @@ ajaxData({
                 $scope.themePowerIsLoding = false;
                 if (res.code == 0) {
                     $scope.data = res.body;
-                    initEchart(res.body.max_p[0], res.body.inst_kw[0]);
+                    initEchart(res.body.max_p_rate[0]);
                 }else{
                     $scope.data = {};
-                    initEchart('', '');
+                    initEchart('');
                 }
             })
         }
