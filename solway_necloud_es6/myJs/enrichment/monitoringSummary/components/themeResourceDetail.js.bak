@@ -1,6 +1,6 @@
 ajaxData({
     // 电站日
-    StationDay: {
+    stationDay: {
         name: 'GETresourceDetailStationDay',
         data: {},
         later: true,
@@ -35,7 +35,7 @@ ajaxData({
         onlyLatest: true
     },
     // 集团 当日
-    CompanyDayToday: {
+    companyDayToday: {
         name: 'GETresourceDetailCompanyDayToday',
         data: {},
         later: true,
@@ -44,6 +44,62 @@ ajaxData({
     // 集团 历史日
     query_company_day_res_timelist_his: {
         name: 'GETquery_company_day_res_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团月资源详情时间列表
+    query_company_month_res_timelist_his: {
+        name: 'GETquery_company_month_res_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团月资源详情时间曲线
+    query_company_month_res_timeline_his: {
+        name: 'GETquery_company_month_res_timeline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团月资源详情电站列表
+    query_company_month_res_stationlist_his: {
+        name: 'GETquery_company_month_res_stationlist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团月资源详情电站曲线
+    query_company_month_res_stationline_his: {
+        name: 'GETquery_company_month_res_stationline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团年资源详情时间列表
+    query_company_year_res_timelist_his: {
+        name: 'GETquery_company_year_res_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团年资源详情时间曲线
+    query_company_year_res_timeline_his: {
+        name: 'GETquery_company_year_res_timeline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团年资源详情电站列表
+    query_company_year_res_stationlist_his: {
+        name: 'GETquery_company_year_res_stationlist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团年资源详情电站曲线
+    query_company_year_res_stationline_his: {
+        name: 'GETquery_company_year_res_stationline_his',
         data: {},
         later: true,
         onlyLatest: true
@@ -62,10 +118,10 @@ ajaxData({
             $scope.dateType = dateType;
             $scope.dateTime = dateTime;
             await $scope.dateUpdated();
-            $scope.select1 = select1 || 'rad_chk';
-            $scope.select2 = select2 || 'sun_hours';
-            await $scope.selectChange('select1');
-            await $scope.selectChange('select2');
+            $scope.select1 = select1;
+            $scope.select2 = select2;
+            if (select1) await $scope.selectChange('select1');
+            if (select2) await $scope.selectChange('select2');
             $scope.changeTab(tabIndex);
             $('.ng-clock').removeClass('ng-clock');
             $scope.initComplete = true;
@@ -77,6 +133,7 @@ ajaxData({
         // 切换电站 回调
         $scope.switchPowerCallback = () => {
             if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+            diffSelectOptions();
             diffGetData();
         };
 
@@ -84,20 +141,7 @@ ajaxData({
         $scope.dateUpdated = async () => {
             await myAjaxData.timeout(0);
             if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
-            if ($scope.dateType === 1) {
-                $scope.selectOptions = {
-                    max_sun: '最大辐射强度(kWh/m²)',
-                    rad_chk: '辐射总量(kWh/m²)',
-                    sun_hours: '日照小时数(h)',
-                    ta_avg: '平均温度'
-                };
-            } else {
-                $scope.selectOptions = {
-                    rad_chk: '辐射总量(kWh/m²)',
-                    sun_hours: '日照小时数(h)',
-                    ta_avg: '平均温度'
-                };
-            }
+            diffSelectOptions();
             diffGetData();
         };
 
@@ -124,6 +168,7 @@ ajaxData({
                     showShape
                 }
             });
+            if ($scope.currentClass === 'CompanyDayAgo') return;
             diffGetData();
         };
 
@@ -144,10 +189,10 @@ ajaxData({
         async function diffGetData() {
             if (!$scope.initComplete) return;
             await myAjaxData.timeout(0);
-            const { currentClass, showShape, dateTime } = $scope;
+            const { currentClass, showShape, dateTime, tabIndex } = $scope;
             switch (currentClass) {
                 case 'StationDayToday':
-                    $scope.StationDay.getData({
+                    $scope.stationDay.getData({
                         queryType: 3,
                         dateType: 3,
                         date: dateTime.showDate
@@ -155,7 +200,7 @@ ajaxData({
                     break;
 
                 case 'StationDayAgo':
-                    $scope.StationDay.getData({
+                    $scope.stationDay.getData({
                         queryType: 3,
                         dateType: 3,
                         date: dateTime.showDate
@@ -195,7 +240,7 @@ ajaxData({
                     break;
 
                 case 'CompanyDayToday':
-                    $scope.CompanyDayToday.getData({
+                    $scope.companyDayToday.getData({
                         queryType: 1,
                         dateType: 3,
                         date: dateTime.showDate
@@ -210,12 +255,60 @@ ajaxData({
                     });
                     break;
 
-                case 'StationDayAgo':
-                    $scope.StationDay.getData({});
+                case 'CompanyMonth':
+                    if (tabIndex === 0 && showShape === 'list') {
+                        $scope.query_company_month_res_timelist_his.getData({
+                            queryCode: 'query_company_month_res_timelist_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    } else if (tabIndex === 0 && showShape === 'chart') {
+                        $scope.query_company_month_res_timeline_his.getData({
+                            queryCode: 'query_company_month_res_timeline_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    } else if (tabIndex === 1 && showShape === 'list') {
+                        $scope.query_company_month_res_stationlist_his.getData({
+                            queryCode: 'query_company_month_res_stationlist_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    } else if (tabIndex === 1 && showShape === 'chart') {
+                        $scope.query_company_month_res_stationline_his.getData({
+                            queryCode: 'query_company_month_res_stationline_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
                     break;
 
-                case 'StationDayAgo':
-                    $scope.StationDay.getData({});
+                case 'CompanyYear':
+                    if (tabIndex === 0 && showShape === 'list') {
+                        $scope.query_company_year_res_timelist_his.getData({
+                            queryCode: 'query_company_year_res_timelist_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    } else if (tabIndex === 0 && showShape === 'chart') {
+                        $scope.query_company_year_res_timeline_his.getData({
+                            queryCode: 'query_company_year_res_timeline_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    } else if (tabIndex === 1 && showShape === 'list') {
+                        $scope.query_company_year_res_stationlist_his.getData({
+                            queryCode: 'query_company_year_res_stationlist_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    } else if (tabIndex === 1 && showShape === 'chart') {
+                        $scope.query_company_year_res_stationline_his.getData({
+                            queryCode: 'query_company_year_res_stationline_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
                     break;
 
                 default:
@@ -323,9 +416,15 @@ ajaxData({
             ];
         };
         // 电站月 图表 数据处理
-        $scope.query_station_month_res_timeline_his.getDataCallback = (success, res) => {
+        $scope.query_station_month_res_timeline_his.getDataCallback = async (success, res) => {
             if (!success) return;
             if (!res.body.data.dtime[0]) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'rad_chk';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'sun_hours';
+            $scope.query_station_month_res_timeline_his.res.body.data.nullBlock = [];
+            $scope.query_station_month_res_timeline_his.res.body.data.nullBlock2 = [];
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
             const day = new Date(res.body.data.dtime[0].split('-')).getDay() - 1;
             $scope.query_station_month_res_timeline_his.res.body.data.nullBlock = new Array(day < 0 ? 6 : day).fill('');
             if ($scope.dateTime.showDate === (new Date).Format('yyyy-MM')) {
@@ -334,15 +433,104 @@ ajaxData({
                 $scope.query_station_month_res_timeline_his.res.body.data.nullBlock2 = new Array(new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate() - dateNum + 1).fill('').map((v, i) => (i + dateNum) < 10 ? '0' + (i + dateNum) : i + dateNum);
             }
             diffChartLineData();
+            $scope.$apply();
         };
         // 电站年 图表 数据回调 处理
         $scope.query_station_year_res_timeline_his.getDataCallback = (success, res) => {
             if (!success) return;
             diffChartLineData();
         };
+        // 公司 今日 列表 数据处理
+        $scope.companyDayToday.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'st_name',
+                    width: '',
+                    align: 'left',
+                },
+                {
+                    title: '装机容量',
+                    dataIndex: 'inst_kw',
+                    width: '',
+                    align: 'right',
+                    render(text, item, index) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '辐射总量',
+                    dataIndex: 'rad_chk',
+                    width: '',
+                    align: 'right',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '最大光照强度',
+                    dataIndex: 'max_sun',
+                    width: '',
+                    align: 'right',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '天气',
+                    dataIndex: 'weather',
+                    width: '',
+                    align: 'center',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '温度',
+                    dataIndex: 'ta_avg',
+                    width: '',
+                    align: 'right',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '预测今日',
+                    dataIndex: 'pre_weather',
+                    width: '',
+                    align: 'center',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '预测明日',
+                    dataIndex: 'pre_weather',
+                    width: '',
+                    align: 'center',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '预测后日',
+                    dataIndex: 'pre_weather',
+                    width: '',
+                    align: 'center',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+            ];
+        };
         // 公司 历史日 列表 数据回调 处理
-        $scope.query_company_day_res_timelist_his.getDataCallback = (success, res) => {
-            if(!success) return;
+        $scope.query_company_day_res_timelist_his.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'inst_kw';
+            await $scope.selectChange('select1');
+            $scope.xdata = res.body.data.map(v => v.st_name);
+            $scope.ydatas = [[res.body.data.map(v => v[$scope.select1])], [res.body.data.map(v => v.max_sun)]];
             $scope.column = [
                 {
                     title: '电站名称',
@@ -405,6 +593,51 @@ ajaxData({
                     }
                 },
             ];
+            $scope.$apply();
+        };
+        // 公司 月 时间 列表
+        $scope.query_company_month_res_timelist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.data;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    align: 'center'
+                }, {
+                    title: '辐射总量kWh/㎡',
+                    dataIndex: 'rad_chk',
+                    align: 'right',
+                }
+            ];
+        };
+        // 公司 月 时间 柱状图
+        $scope.query_company_month_res_timeline_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.xdata = res.body.data.dtime;
+            $scope.ydatas = [[res.body.data.rad_chk]];
+        };
+        // 公司 月 电站 列表
+        $scope.query_company_month_res_stationlist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.data;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    align: 'center'
+                }, {
+                    title: '辐射总量kWh/㎡',
+                    dataIndex: 'rad_chk',
+                    align: 'right',
+                }
+            ];
+        };
+        // 公司 月 电站 柱状图
+        $scope.query_company_month_res_stationline_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.xdata = res.body.data.dtime;
+            $scope.ydatas = [[res.body.data.rad_chk]];
         };
 
         // 计算 图表 显示对应 轴
@@ -413,12 +646,37 @@ ajaxData({
             const { currentClass, selectOptions, select1, select2 } = $scope;
             if (currentClass === 'StationMonth') {
                 $scope.xdata = $scope.query_station_month_res_timeline_his.res.body.data.dtime
-                $scope.lineNames = [[selectOptions[select1]], [selectOptions[select2]]];
                 $scope.ydatas = [[$scope.query_station_month_res_timeline_his.res.body.data[select1]], [$scope.query_station_month_res_timeline_his.res.body.data[select2]]]
             } else if (currentClass === 'StationYear') {
                 $scope.xdata = $scope.query_station_year_res_timeline_his.res.body.data.dtime
                 $scope.lineNames = [[selectOptions[select1]], [selectOptions[select2]]];
                 $scope.ydatas = [[$scope.query_station_year_res_timeline_his.res.body.data[select1]], [$scope.query_station_year_res_timeline_his.res.body.data[select2]]]
+            } else if (currentClass === 'CompanyDayAgo') {
+                $scope.ydatas = [[$scope.query_company_day_res_timelist_his.res.body.data.map(v => v[$scope.select1])], [$scope.query_company_day_res_timelist_his.res.body.data.map(v => v.max_sun)]];
+            }
+        }
+
+        // 轴线切换  可选项  判断
+        function diffSelectOptions() {
+            if ($scope.currentClass === 'StationMonth') {
+                $scope.selectOptions = {
+                    max_sun: '最大辐射强度(kWh/m²)',
+                    rad_chk: '辐射总量(kWh/m²)',
+                    sun_hours: '日照小时数(h)',
+                    ta_avg: '平均温度'
+                };
+            } else if ($scope.currentClass === 'StationYear') {
+                $scope.selectOptions = {
+                    rad_chk: '辐射总量(kWh/m²)',
+                    sun_hours: '日照小时数(h)',
+                    ta_avg: '平均温度'
+                };
+            } else if ($scope.currentClass === 'CompanyDayAgo') {
+                $scope.selectOptions = {
+                    inst_kw: '装机容量kW',
+                    rad_chk: '辐射总量kWh/m²',
+                    ta_avg: '平均温度℃'
+                }
             }
         }
     });
