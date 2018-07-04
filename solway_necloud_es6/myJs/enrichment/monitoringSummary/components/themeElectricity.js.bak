@@ -43,7 +43,7 @@ ajaxData({
     const pieChart = echarts.init(document.getElementById('themeElePieEchart'));
     const pieChartSmall = echarts.init(document.getElementById('themeElePieEchartSmall'));
 
-    const initPieEchart = () => {
+    const initPieEchart = (fail_kwh, grid_disc_kwh, other_loss_kwh) => {
         let pieId;
         if ($scope.currentClass == 'StationMonth' || $scope.currentClass == 'StationYear' || $scope.currentClass == 'CompanyMonth' || $scope.currentClass == 'CompanyYear') {
             pieId = pieChartSmall;//小Pie
@@ -57,7 +57,7 @@ ajaxData({
             },
             series: [
                 {
-                    name: '半径模式',
+                    name: '',
                     type: 'pie',
                     radius: ['20%', '80%'],
                     center: ['50%', '40%'],
@@ -80,7 +80,7 @@ ajaxData({
                     },
                     data: [
                         {
-                            value: 12, name: '限电',
+                            value: grid_disc_kwh, name: '限电',
                             itemStyle: {
                                 normal: {
                                     color: '#40a5dd'
@@ -88,7 +88,7 @@ ajaxData({
                             }
                         },
                         {
-                            value: 18, name: '其他',
+                            value: other_loss_kwh, name: '其他',
                             itemStyle: {
                                 normal: {
                                     color: '#847ce9'
@@ -96,7 +96,7 @@ ajaxData({
                             }
                         },
                         {
-                            value: 15, name: '故障',
+                            value: fail_kwh, name: '故障',
                             itemStyle: {
                                 normal: {
                                     color: '#fa7594'
@@ -133,7 +133,7 @@ ajaxData({
             $scope.xAxis = ['实发电量', '上网电量', '当日预测发电量', '明日预测发电量', '后日预测发电量'];
         }
 
-        // $scope.$apply();
+        $scope.$apply();
     }
 
     const initParams = async () => {
@@ -172,18 +172,18 @@ ajaxData({
 
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        $scope.themePowerIsLoding = true;
+        $scope.themeElectricityIsLoding = true;
         if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
             $scope.electricityCurrent.getData({
                 'queryType': queryType,
                 'date': dateTime,
                 'dateType': dateType
             }).then(res => {
-                console.log(res);
-                $scope.themePowerIsLoding = false;
+                $scope.themeElectricityIsLoding = false;
                 if (res.code == 0) {
                     $scope.data = res.body;
-                    $scope.yAxis = [200, 400, 145, 300, 200];
+                    const data = res.body;
+                    $scope.yAxis = [[[data.real_kwh, data.send_kwh_chk, data.pre_real_kwh, data.pre_real_kwh_day2, data.pre_real_kwh_day3]]];
                 }
             })
         } else {
@@ -221,18 +221,22 @@ ajaxData({
             'queryType': queryType,
             'date': dateTime
         }).then(res => {
-            $scope.themePowerIsLoding = false;
-            console.log(res)
+            $scope.themeElectricityIsLoding = false;
             if (res.code == 0) {
                 $scope.data = res.body;
-                // debugger
-                initPieEchart();
+                const data = res.body;
+                if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo'){
+                    $scope.yAxis = [[[data.real_kwh, data.send_kwh_chk, data.pre_real_kwh, data.shd_kwh_chk]]];
+                }else{
+                    $scope.yAxis = [[[data.real_kwh, data.send_kwh_chk, data.plan_kwh, data.pre_real_kwh, data.shd_kwh_chk]]];
+                }
+                initPieEchart(data.fail_kwh, data.grid_disc_kwh, data.other_loss_kwh);
             }
         })
     }
 
     window.addEventListener("resize", function () {
-        // initEchartHeightWidth();
+        initEchartHeightWidth();
     });
 
 });
