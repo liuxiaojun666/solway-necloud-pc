@@ -82,6 +82,7 @@ ajaxData({
         if ((dateType === 1 || dateType === 2) && $scope.theme === 'Power') $scope.changeTheme('BasicSituation');
         else if (dateType === 3) $scope.changeTheme('Accumulative');
         else if ($scope.theme === 'Accumulative') $scope.changeTheme('BasicSituation');
+        $scope.getTopXhr = true;
     };
 
     // 切换电站 回调
@@ -91,10 +92,16 @@ ajaxData({
         $scope.dataType = switchArguments.dataType;
         historicalRecord.set({ stationData: switchArguments });
         computeClass();
+        $scope.getTopXhr = true;
     };
 
     // 放大显示详情操作
-    $scope.switchDetailFullPage = () => historicalRecord.set({ detailFullPage: $scope.detailFullPage = !$scope.detailFullPage });
+    $scope.switchDetailFullPage = () => {
+        historicalRecord.set({ 
+            detailFullPage: $scope.detailFullPage = !$scope.detailFullPage 
+        });
+        if ($scope.detailFullPage) $scope.getTopXhr = false;
+    };
 
     // 切换主题模块
     $scope.changeTheme = theme => {
