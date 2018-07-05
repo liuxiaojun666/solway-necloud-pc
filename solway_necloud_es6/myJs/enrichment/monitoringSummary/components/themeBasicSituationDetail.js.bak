@@ -29,18 +29,14 @@ ajaxData({
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
-
+        diffGetData();
     };
 
     // 日期改变
     $scope.dateUpdated = () => {
         if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+        diffGetData();
     };
-
-    // 详情 放大缩小  回调
-    $scope.switchDetailFullPage = () => {
-        
-    }
 
     // 切换显示形式  图表 or 列表
     $scope.changeShowShape = async showShape => {
@@ -91,7 +87,7 @@ ajaxData({
             // 电站接口
             $scope.stationData.getData({
                 queryType: 3,
-                dateType: [1,2,3][dateType],
+                dateType: [3,2,1][dateType],
                 date: dateTime.showDate
             });
         }
