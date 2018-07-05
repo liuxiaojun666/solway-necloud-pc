@@ -5,92 +5,242 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
-    }
+    },
+    // 公司今日
+    companyDayToday: {
+        name: 'GETBaseSituationCompanyDay',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 公司 历史日
+    companyDayAgo: {
+        name: 'GETBaseSituationCompanyDayAgo',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 公司  月年
+    companyMonthOrYear: {
+        name: 'GETBaseSituationCompanyMonthOrYear',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
-    __serviceName__: 'themeBasicSituationDetailService'
-})('themeBasicSituationDetailCtrl', ['$scope', 'themeBasicSituationDetailService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
-    // 初始化 scope
-    $scope.initChildScope($scope, myAjaxData);
+        __serviceName__: 'themeBasicSituationDetailService'
+    })('themeBasicSituationDetailCtrl', ['$scope', 'themeBasicSituationDetailService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
 
-    // 主页面初始化完成 回调
-    $scope.mainPageInitComplete = async () => {
-        let { showShape } = historicalRecord.get().themeBasicSituationData || {};
-        if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
-        $scope.changeShowShape(showShape || 'list');
-        const {dateType, dateTime} = historicalRecord.get();
-        $scope.dateType = dateType;
-        $scope.dateTime = dateTime;
-        $('.ng-clock').removeClass('ng-clock');
-        $scope.initComplete = true;
-        await myAjaxData.timeout(0);
-        diffGetData();
-        $scope.$apply();
-    };
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            let { showShape } = historicalRecord.get().themeBasicSituationData || {};
+            if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
+            $scope.changeShowShape(showShape || 'list');
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            diffGetData();
+            $scope.$apply();
+        };
 
-    // 切换电站 回调
-    $scope.switchPowerCallback = () => {
-        diffGetData();
-    };
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            diffGetData();
+        };
 
-    // 日期改变
-    $scope.dateUpdated = () => {
-        if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
-        diffGetData();
-    };
+        // 日期改变
+        $scope.dateUpdated = () => {
+            if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
+            diffGetData();
+        };
 
-    // 切换显示形式  图表 or 列表
-    $scope.changeShowShape = async showShape => {
-        $scope.showShape = showShape;
-        historicalRecord.set({
-            themeBasicSituationData: {
-                ...historicalRecord.get().themeBasicSituationData || {},
-                showShape
-            }
-        });
-    };
-
-    // 列表
-    $scope.column = [
-        {
-            title: '电站名称',
-            dataIndex: '',
-            width: '',
-            align: 'left'
-        }, {
-            title: '装机容量',
-            dataIndex: '',
-            width: '',
-            align: 'left'
-        }, {
-            title: '投产时间',
-            dataIndex: '',
-            width: '',
-            align: 'center'
-        }, {
-            title: '接入时间',
-            dataIndex: '',
-            width: '',
-            align: 'center'
-        }, {
-            title: '地址',
-            dataIndex: '',
-            width: '',
-            align: 'left'
-        }
-    ];
-
-    async function diffGetData() {
-        if (!$scope.initComplete) return;
-        await myAjaxData.timeout(0);
-        const { currentClass, showShape, dateTime, dataType, dateType } = $scope;
-        if (dataType === 0) {
-            // 电站接口
-            $scope.stationData.getData({
-                queryType: 3,
-                dateType: [3,2,1][dateType],
-                date: dateTime.showDate
+        // 切换显示形式  图表 or 列表
+        $scope.changeShowShape = showShape => {
+            if (showShape === $scope.showShape) return;
+            $scope.showShape = showShape;
+            historicalRecord.set({
+                themeBasicSituationData: {
+                    ...historicalRecord.get().themeBasicSituationData || {},
+                    showShape
+                }
             });
-        }
-    }
+        };
 
-});
+
+        async function diffGetData() {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            const { currentClass, showShape, dateTime, dataType, dateType } = $scope;
+            // 电站接口
+            if (dataType === 0) {
+                $scope.stationData.getData({
+                    queryType: 3,
+                    dateType: [3, 2, 1][dateType],
+                    date: dateTime.showDate
+                });
+            } else if (currentClass === 'CompanyDayToday') {
+                $scope.companyDayToday.getData({
+                    queryType: 1,
+                    dateType: 3,
+                    date: dateTime.showDate
+                });
+            } else if (currentClass === 'CompanyDayAgo') {
+                $scope.companyDayAgo.getData({
+                    queryType: 1,
+                    dateType: 3,
+                    date: dateTime.showDate
+                });
+            } else if (dateType > 0) {
+                $scope.companyMonthOrYear.getData({
+                    queryType: 1,
+                    dateType: [3, 2, 1][dateType],
+                    date: dateTime.showDate
+                });
+            }
+        }
+
+
+        // 公司 今日 数据 处理
+        $scope.companyDayToday.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.resultList;
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'stationname',
+                    sort: 'true',
+                    align: 'left'
+                }, {
+                    title: '装机容量kW',
+                    dataIndex: 'buildcapacity',
+                    sort: 'true',
+                    align: 'right'
+                }, {
+                    title: '投产时间',
+                    dataIndex: 'productiondate',
+                    sort: 'true',
+                    align: 'center',
+                    render(text) {
+                        // const dateStr = new Date(text).Format('yyyy-MM-dd');
+                        return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
+                    }
+                }, {
+                    title: '接入时间',
+                    dataIndex: 'expiryDate',
+                    sort: 'true',
+                    align: 'center',
+                    render(text) {
+                        return `<span>${text || ''}</span>`
+                    }
+                }, {
+                    title: '地址',
+                    dataIndex: 'address',
+                    align: 'left'
+                }
+            ];
+        };
+        
+        // 公司 历史日 数据 处理
+        $scope.companyDayAgo.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.resultList;
+            $scope.ydatas = [[res.body.resultList.map(v => v.buildcapacity)]];
+            $scope.xdata = res.body.resultList.map(v => v.stationname);
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'stationname',
+                    sort: 'true',
+                    align: 'left'
+                }, {
+                    title: '装机容量kW',
+                    dataIndex: 'buildcapacity',
+                    sort: 'true',
+                    align: 'right'
+                }, {
+                    title: '投产时间',
+                    dataIndex: 'productiondate',
+                    sort: 'true',
+                    align: 'center',
+                    render(text) {
+                        // const dateStr = new Date(text).Format('yyyy-MM-dd');
+                        return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
+                    }
+                }, {
+                    title: '接入时间',
+                    dataIndex: 'expiryDate',
+                    sort: 'true',
+                    align: 'center',
+                    render(text) {
+                        return `<span>${text || ''}</span>`
+                    }
+                }, {
+                    title: '地址',
+                    dataIndex: 'address',
+                    align: 'left'
+                }
+            ];
+        };
+
+        // 公司 月年 数据 处理
+        $scope.companyMonthOrYear.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.resultList;
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'stationname',
+                    sort: 'true',
+                    align: 'left'
+                }, {
+                    title: '装机容量kW',
+                    dataIndex: 'buildcapacity',
+                    sort: 'true',
+                    align: 'right'
+                }, {
+                    title: '投产时间',
+                    dataIndex: 'productiondate',
+                    sort: 'true',
+                    align: 'center',
+                    render(text) {
+                        // const dateStr = new Date(text).Format('yyyy-MM-dd');
+                        return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
+                    }
+                }, {
+                    title: '接入时间',
+                    dataIndex: 'expiryDate',
+                    sort: 'true',
+                    align: 'center',
+                    render(text) {
+                        return `<span>${text || ''}</span>`
+                    }
+                }
+            ];
+        };
+
+        // 定位
+        $scope.showPosition = function () {
+            if (!$scope.stationData.res) return;
+            if (document.getElementById('allmap').innerHTML === '') {
+                const map = $scope.map = new BMap.Map("allmap");
+                map.enableScrollWheelZoom();   //启用滚轮放大缩小
+                map.enableContinuousZoom();    //启用地图惯性拖拽
+            }
+            const {map} = $scope;
+            map.clearOverlays();
+            const point = new BMap.Point(parseFloat($scope.stationData.res.body.resultList.longitude) - 0.03083, parseFloat($scope.stationData.res.body.resultList.latitude) + 0.01553);
+            map.centerAndZoom(point, 15);
+            const point2 = new BMap.Point($scope.stationData.res.body.resultList.longitude, $scope.stationData.res.body.resultList.latitude);
+            const marker = new BMap.Marker(point2); // 创建标注
+            map.addOverlay(marker); // 将标注添加到地图中
+            marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        };
+
+    });

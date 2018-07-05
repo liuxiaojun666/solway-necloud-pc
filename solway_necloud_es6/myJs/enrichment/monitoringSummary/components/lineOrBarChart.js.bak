@@ -15,7 +15,8 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         barWidth: '=',
         splitLine: '=',
         datazoom: '=',
-        symbolSize: '='
+        symbolSize: '=',
+        splitNumber: '=',
     },
     link($scope, $element) {
         let myChart;
@@ -34,7 +35,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         }, 0);
 
         const drawing = () => {
-            const { backgroundColor, symbolSize, splitLine, barWidth, axisColor, fontColor, linenames = [], ynames = [], xdata =[], ydatas = [], types, colors, datazoom } = $scope;
+            const { backgroundColor, symbolSize,splitNumber, splitLine, barWidth, axisColor, fontColor, linenames = [], ynames = [], xdata =[], ydatas = [], types, colors, datazoom } = $scope;
 
             const option = {
                 backgroundColor,
@@ -90,6 +91,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     nameTextStyle: {
                         color: fontColor
                     },
+                    splitNumber,
                     axisTick: {
                         show: false //是否显示坐标轴刻度
                     },

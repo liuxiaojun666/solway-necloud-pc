@@ -106,7 +106,7 @@ ajaxData({
     },
 }, {
         __serviceName__: 'themeResourceDetailService'
-    })('themeResourceDetailCtrl', ['$scope', 'themeResourceDetailService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
+    })('themeResourceDetailCtrl', ['$scope', 'themeResourceDetailService', 'historicalRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
         // 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
 
@@ -327,13 +327,13 @@ ajaxData({
                 {
                     title: '时间',
                     dataIndex: 'dtime',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                 },
                 {
                     title: '辐射总量(' + res.body.units.rad_chk + ')',
                     dataIndex: 'rad_chk',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text, item, index) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -342,7 +342,7 @@ ajaxData({
                 {
                     title: '天气',
                     dataIndex: 'weather',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -351,13 +351,13 @@ ajaxData({
                 {
                     title: '日照小时数(' + res.body.units.sun_hours + ')',
                     dataIndex: 'sun_hours',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                 },
                 {
                     title: '最大光照强度(W/m²)',
                     dataIndex: 'max_sun',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -366,7 +366,7 @@ ajaxData({
                 {
                     title: '平均温度(℃)',
                     dataIndex: 'ta_avg',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -381,13 +381,13 @@ ajaxData({
                 {
                     title: '时间',
                     dataIndex: 'dtime',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                 },
                 {
                     title: '辐射总量(' + res.body.units.rad_chk + ')',
                     dataIndex: 'rad_chk',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text, item, index) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -396,7 +396,7 @@ ajaxData({
                 {
                     title: '降雨量(' + res.body.units.pcpn + ')',
                     dataIndex: 'pcpn',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text) {
                         return text >= 0 ? '<span>' + text + '</span>' : '<span></span>';
@@ -405,13 +405,13 @@ ajaxData({
                 {
                     title: '日照小时数(' + res.body.units.sun_hours + ')',
                     dataIndex: 'sun_hours',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                 },
                 {
                     title: '平均温度',
                     dataIndex: 'ta_avg',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -440,9 +440,15 @@ ajaxData({
             $scope.$apply();
         };
         // 电站年 图表 数据回调 处理
-        $scope.query_station_year_res_timeline_his.getDataCallback = (success, res) => {
+        $scope.query_station_year_res_timeline_his.getDataCallback = async (success, res) => {
             if (!success) return;
+            if (!res.body.data.dtime[0]) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'rad_chk';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'sun_hours';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
             diffChartLineData();
+            $scope.$apply();
         };
         // 公司 今日 列表 数据处理
         $scope.companyDayToday.getDataCallback = (success, res) => {
@@ -451,7 +457,7 @@ ajaxData({
                 {
                     title: '电站名称',
                     dataIndex: 'st_name',
-                    width: '',
+                    sort: 'true',
                     align: 'left',
                     render(text) {
                         return `<span>${text || ''}</span>`
@@ -460,7 +466,7 @@ ajaxData({
                 {
                     title: '装机容量',
                     dataIndex: 'inst_kw',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text, item, index) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -469,7 +475,7 @@ ajaxData({
                 {
                     title: '辐射总量kWh/m²',
                     dataIndex: 'rad_chk',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text) {
                         return text ? '<span>' + text[0] + '</span>' : '<span></span>';
@@ -478,7 +484,7 @@ ajaxData({
                 {
                     title: '光照强度W/m²',
                     dataIndex: 'sun',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text) {
                         return text ? '<span>' + text[0] + '</span>' : '<span></span>';
@@ -487,7 +493,7 @@ ajaxData({
                 {
                     title: '天气',
                     dataIndex: 'weater',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -496,7 +502,7 @@ ajaxData({
                 {
                     title: '温度',
                     dataIndex: 'tmp',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                     render(text) {
                         return text ? '<span>' + text.join('') + '</span>' : '<span></span>';
@@ -505,7 +511,7 @@ ajaxData({
                 {
                     title: '预测今日',
                     dataIndex: 'pre_weater',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                     render(text, item) {
                         return text ? '<span>' + text + ' ' + item.pre_tmp  + '℃'+ '</span>' : '<span></span>';
@@ -514,7 +520,7 @@ ajaxData({
                 {
                     title: '预测明日',
                     dataIndex: 'pre_weater2',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                     render(text, item) {
                         return text ? '<span>' + text + ' ' + item.pre_tmp2 + '℃' + '</span>' : '<span></span>';
@@ -523,7 +529,7 @@ ajaxData({
                 {
                     title: '预测后日',
                     dataIndex: 'pre_weater3',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                     render(text, item) {
                         return text ? '<span>' + text + ' ' + item.pre_tmp3 + '℃' + '</span>' : '<span></span>';
@@ -542,13 +548,13 @@ ajaxData({
                 {
                     title: '电站名称',
                     dataIndex: 'st_name',
-                    width: '',
+                    sort: 'true',
                     align: 'left',
                 },
                 {
                     title: '装机容量(' + res.body.units.inst_kw + ')',
                     dataIndex: 'inst_kw',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text, item, index) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -557,7 +563,7 @@ ajaxData({
                 {
                     title: '辐射总量(' + res.body.units.rad_chk + ')',
                     dataIndex: 'rad_chk',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -566,7 +572,7 @@ ajaxData({
                 {
                     title: '最大光照强度',
                     dataIndex: 'max_sun',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -575,7 +581,7 @@ ajaxData({
                 {
                     title: '天气',
                     dataIndex: 'weather',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -584,7 +590,7 @@ ajaxData({
                 {
                     title: '温度',
                     dataIndex: 'ta_avg',
-                    width: '',
+                    sort: 'true',
                     align: 'right',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -593,7 +599,7 @@ ajaxData({
                 {
                     title: '预测天气',
                     dataIndex: 'pre_weather',
-                    width: '',
+                    sort: 'true',
                     align: 'center',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
@@ -610,10 +616,12 @@ ajaxData({
                 {
                     title: '时间',
                     dataIndex: 'dtime',
+                    sort: 'true',
                     align: 'center'
                 }, {
                     title: '辐射总量kWh/㎡',
                     dataIndex: 'rad_chk',
+                    sort: 'true',
                     align: 'right',
                 }
             ];
@@ -632,14 +640,17 @@ ajaxData({
                 {
                     title: '电站名称',
                     dataIndex: 'st_name',
+                    sort: 'true',
                     align: 'left'
                 }, {
                     title: '装机容量kW',
                     dataIndex: 'inst_kw',
+                    sort: 'true',
                     align: 'right',
                 }, {
                     title: '辐射总量kWh/㎡',
                     dataIndex: 'rad_chk',
+                    sort: 'true',
                     align: 'right',
                 }
             ];
@@ -658,10 +669,12 @@ ajaxData({
                 {
                     title: '时间',
                     dataIndex: 'dtime',
+                    sort: 'true',
                     align: 'center'
                 }, {
                     title: '辐射总量kWh/㎡',
                     dataIndex: 'rad_chk',
+                    sort: 'true',
                     align: 'right',
                 }
             ];
@@ -680,14 +693,17 @@ ajaxData({
                 {
                     title: '电站名称',
                     dataIndex: 'st_name',
+                    sort: 'true',
                     align: 'left'
                 }, {
                     title: '装机容量',
                     dataIndex: 'inst_kw',
+                    sort: 'true',
                     align: 'right',
                 }, {
                     title: '辐射总量kWh/㎡',
                     dataIndex: 'rad_chk',
+                    sort: 'true',
                     align: 'right',
                 }
             ];
@@ -737,4 +753,11 @@ ajaxData({
                 }
             }
         }
+
+        // 定时器  定时刷新接口
+        const timer = $interval(() => {
+            if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') diffGetData();
+        },10000);
+        $scope.$on('$destroy', () => $interval.cancel(timer));
+
     });

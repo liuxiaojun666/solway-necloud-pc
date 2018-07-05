@@ -4,8 +4,8 @@ app.directive('switchListChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocL
     template: `
     <div style="position:absolute;left:30px;right:60px;background:rgba(22,62,103,0.8);" class="clearfix switch-list-chart icons">
         <style>.switch-list-chart.icons i{color:#fff;cursor: pointer;margin-right: 2em;float:right;font-size:20px;} i.iconfont.active{color:#2ac2ad!important;}</style>
-        <a ng-show="showShape === 'list'" target="_blank" href="{{dowloadLink}}" title="导出">
-            <i class="iconfont icon-daochu"></i>
+        <a target="_blank" ng-click="tableExport();" title="导出">
+            <i class="iconfont icon-daochu" ng-class="{'active': showShape === 'list'}"></i>
         </a>
         <i ng-show="!noChart" style="margin-top: 2px;" ng-click="changeShowShape('chart')" class="iconfont icon-other" ng-class="{'active': showShape === 'chart'}"></i>
         <i ng-show="!noChart" style="margin-top: 2px;" ng-click="changeShowShape('list')" class="iconfont icon-list" ng-class="{'active': showShape === 'list'}"></i>
@@ -13,11 +13,30 @@ app.directive('switchListChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocL
     scope: {
         showShape: '=',
         changeShowShape: '=',
-        dowloadLink: '=',
+        fileName: '=',
         noChart: '='
     },
     link($scope, $element, $attrs) {
-        
+        $ocLazyLoad.load([
+            'theme/js/modal.js',
+            'vendor/jquery/TableExport/libs/js-xlsx/xlsx.core.min.js',
+            'vendor/jquery/TableExport/libs/FileSaver/FileSaver.min.js',
+            'vendor/jquery/TableExport/tableExport.js'
+        ]).then(() => {
+            $scope.tableExport = () => {
+                if ($scope.showShape !== 'list') return;
+                $(".my-table table").eq(1).tableExport({
+                    headings: true,
+                    footers: true,
+                    formats: ["xls", "csv", "txt"],
+                    fileName: $scope.fileName || '未命名',
+                    bootstrap: true,
+                    position: "bottom",
+                    ignoreRows: null,
+                    ignoreCols: null
+                });
+            };
+        });
     },
     controller($scope) {
         if ($scope.noChart) $scope.changeShowShape('list')
