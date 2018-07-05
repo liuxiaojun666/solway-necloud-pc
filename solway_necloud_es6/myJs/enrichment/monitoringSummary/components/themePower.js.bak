@@ -75,16 +75,20 @@ ajaxData({
     }
 
     const initParams = async() => {
-        if ($scope.detailFullPage) return false; //放大状态，不做处理
+        if ($scope.detailFullPage) {
+            return false;
+        } else {
+            if ($scope.getTopXhr === false) return false; 
 
-        const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
-        const dateType = ($scope._dateType == 0) ? 3 : ($scope._dateType == 1 ? 2 : 1);
-        const dateTime = $scope._dateTime.showDate;
+            const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
+            const dateType = ($scope._dateType == 0) ? 3 : ($scope._dateType == 1 ? 2 : 1);
+            const dateTime = $scope._dateTime.showDate;
 
-        await myAjaxData.timeout(0)
-        $("#themePowerGaugeEchart").width($("#themePower").width());
-        
-        $scope.getAjaxData(queryType, dateTime, dateType)
+            await myAjaxData.timeout(0)
+            $("#themePowerGaugeEchart").width($("#themePower").width());
+            
+            $scope.getAjaxData(queryType, dateTime, dateType)
+        }
     }
 
     //父页面初始化完成
