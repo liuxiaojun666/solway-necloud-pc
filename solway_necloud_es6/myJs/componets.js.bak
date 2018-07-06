@@ -197,7 +197,7 @@ app.filter('to_trusted', ['$sce', $sce => v => $sce.trustAsHtml(v)])
     beforeDestroy: '=',     类vue生命周期
     destroyed: '=',         类vue生命周期
  */
-app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
+app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, myAjaxData, $ocLazyLoad) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -257,7 +257,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
                 'vendor/jquery/TableExport/tableExport.js'
             ]).then(() => {
                 $scope.tableExport = () => {
-                    $($element[0]).eq(1).tableExport({
+                    $($element[0]).find('table').eq(1).tableExport({
                         headings: true,
                         footers: true,
                         formats: ["xls", "csv", "txt"],
