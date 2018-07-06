@@ -7,22 +7,8 @@ ajaxData({
         onlyLatest: true
     },
     // 公司今日
-    companyDayToday: {
-        name: 'GETBaseSituationCompanyDay',
-        data: {},
-        later: true,
-        onlyLatest: true
-    },
-    // 公司 历史日
-    companyDayAgo: {
-        name: 'GETBaseSituationCompanyDayAgo',
-        data: {},
-        later: true,
-        onlyLatest: true
-    },
-    // 公司  月年
-    companyMonthOrYear: {
-        name: 'GETBaseSituationCompanyMonthOrYear',
+    companyData: {
+        name: 'GETBaseSituationCompanyData',
         data: {},
         later: true,
         onlyLatest: true
@@ -36,7 +22,7 @@ ajaxData({
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
             let { showShape } = historicalRecord.get().themeBasicSituationData || {};
-            if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
+            await $scope.dateUpdated();
             $scope.changeShowShape(showShape || 'list');
             const { dateType, dateTime } = historicalRecord.get();
             $scope.dateType = dateType;
@@ -50,14 +36,15 @@ ajaxData({
 
         // 切换电站 回调
         $scope.switchPowerCallback = () => {
+            $scope.stationData.res = null;
+            $scope.companyData.res = null;
             diffGetData();
         };
 
         // 日期改变
-        $scope.dateUpdated = () => {
-            if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
-            $scope.xdata = void 0;
-            $scope.ydatas = void 0;
+        $scope.dateUpdated = async() => {
+            await myAjaxData.timeout(0);
+            diffData();
             diffGetData();
         };
 
@@ -80,25 +67,15 @@ ajaxData({
             const { currentClass, showShape, dateTime, dataType, dateType } = $scope;
             // 电站接口
             if (dataType === 0) {
+                if ($scope.stationData.res) return;
                 $scope.stationData.getData({
                     queryType: 3,
                     dateType: [3, 2, 1][dateType],
                     date: dateTime.showDate
                 });
-            } else if (currentClass === 'CompanyDayToday') {
-                $scope.companyDayToday.getData({
-                    queryType: 1,
-                    dateType: 3,
-                    date: dateTime.showDate
-                });
-            } else if (currentClass === 'CompanyDayAgo') {
-                $scope.companyDayAgo.getData({
-                    queryType: 1,
-                    dateType: 3,
-                    date: dateTime.showDate
-                });
-            } else if (dateType > 0) {
-                $scope.companyMonthOrYear.getData({
+            } else if (dataType > 0) {
+                if ($scope.companyData.res) return;
+                $scope.companyData.getData({
                     queryType: 1,
                     dateType: [3, 2, 1][dateType],
                     date: dateTime.showDate
@@ -106,49 +83,8 @@ ajaxData({
             }
         }
 
-
-        // 公司 今日 数据 处理
-        $scope.companyDayToday.getDataCallback = (success, res) => {
-            if (!success) return;
-            $scope.datasource = res.body.resultList;
-            $scope.column = [
-                {
-                    title: '电站名称',
-                    dataIndex: 'stationname',
-                    sort: 'true',
-                    align: 'left'
-                }, {
-                    title: '装机容量kW',
-                    dataIndex: 'buildcapacity',
-                    sort: 'true',
-                    align: 'right'
-                }, {
-                    title: '投产时间',
-                    dataIndex: 'productiondate',
-                    sort: 'true',
-                    align: 'center',
-                    render(text) {
-                        // const dateStr = new Date(text).Format('yyyy-MM-dd');
-                        return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
-                    }
-                }, {
-                    title: '接入时间',
-                    dataIndex: 'expiryDate',
-                    sort: 'true',
-                    align: 'center',
-                    render(text) {
-                        return `<span>${text || ''}</span>`
-                    }
-                }, {
-                    title: '地址',
-                    dataIndex: 'address',
-                    align: 'left'
-                }
-            ];
-        };
-        
         // 公司 历史日 数据 处理
-        $scope.companyDayAgo.getDataCallback = (success, res) => {
+        $scope.companyData.getDataCallback = (success, res) => {
             if (!success) return;
             $scope.datasource = res.body.resultList;
             $scope.ydatas = [[res.body.resultList.map(v => v.buildcapacity)]];
@@ -189,42 +125,6 @@ ajaxData({
             ];
         };
 
-        // 公司 月年 数据 处理
-        $scope.companyMonthOrYear.getDataCallback = (success, res) => {
-            if (!success) return;
-            $scope.datasource = res.body.resultList;
-            $scope.column = [
-                {
-                    title: '电站名称',
-                    dataIndex: 'stationname',
-                    sort: 'true',
-                    align: 'left'
-                }, {
-                    title: '装机容量kW',
-                    dataIndex: 'buildcapacity',
-                    sort: 'true',
-                    align: 'right'
-                }, {
-                    title: '投产时间',
-                    dataIndex: 'productiondate',
-                    sort: 'true',
-                    align: 'center',
-                    render(text) {
-                        // const dateStr = new Date(text).Format('yyyy-MM-dd');
-                        return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
-                    }
-                }, {
-                    title: '接入时间',
-                    dataIndex: 'expiryDate',
-                    sort: 'true',
-                    align: 'center',
-                    render(text) {
-                        return `<span>${text || ''}</span>`
-                    }
-                }
-            ];
-        };
-
         // 定位
         $scope.showPosition = function () {
             if (!$scope.stationData.res) return;
@@ -242,5 +142,18 @@ ajaxData({
             map.addOverlay(marker); // 将标注添加到地图中
             marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
         };
+
+        // 公司 数据 投产 时间 对比
+        function diffData() {
+            if (!$scope.initComplete) return;
+            if ($scope.dataType === 0) return;
+            if (!$scope.companyData.res) return;
+            const {dateType, dateTime} = $scope;
+            $scope.barColors = $scope.companyData.res.body.resultList.map(v => {
+                if (dateType === 0 && dateTime.showDate === new Date(v.productiondate).Format('yyyy-MM-dd')) return 'rgb(255,0,0)';
+                if (dateType === 1 && dateTime.showDate.substr(0, 7) === new Date(v.productiondate).Format('yyyy-MM')) return 'rgb(255,0,0)';
+                if (dateType === 2 && dateTime.showDate.substr(0, 4) === new Date(v.productiondate).Format('yyyy')) return 'rgb(255,0,0)';
+            });
+        }
 
     });

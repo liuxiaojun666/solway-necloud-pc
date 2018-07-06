@@ -17,6 +17,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         datazoom: '=',
         symbolSize: '=',
         splitNumber: '=',
+        barColors: '=',
     },
     link($scope, $element) {
         let myChart;
@@ -24,7 +25,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
             $element.css('display', 'block')
             setWidthHeight();
             myChart = echarts.init($element[0]);
-            $scope.$watchGroup(['xdata', 'ydatas'], (newValue, oldValue) => {
+            $scope.$watchGroup(['xdata', 'ydatas', 'barColors'], (newValue, oldValue) => {
                 if (!newValue) return;
                 drawing();
             });
@@ -35,7 +36,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         }, 0);
 
         const drawing = () => {
-            const { backgroundColor, symbolSize,splitNumber, splitLine, barWidth, axisColor, fontColor, linenames = [], ynames = [], xdata =[], ydatas = [], types, colors, datazoom } = $scope;
+            const { backgroundColor, symbolSize, splitNumber, barColors = [], splitLine, barWidth, axisColor, fontColor, linenames = [], ynames = [], xdata = [], ydatas = [], types, colors, datazoom } = $scope;
 
             const option = {
                 backgroundColor,
@@ -131,14 +132,33 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         symbol: 'circle',
                         showSymbol: symbolSize ? true : false,
                         symbolSize: symbolSize,
-                        data: data.map(v => {
-                            if (!Number.isNaN(v + '' - 0)) return (+v).toFixed(1) - 0;
-                            return v === null ? '-' : v;
+                        data: data.map((xxv, xxi) => {
+                            let value;
+                            if (!Number.isNaN(xxv + '' - 0)) value = (+xxv).toFixed(1) - 0;
+                            else value = xxv === null ? '-' : xxv;
+                            return barColors.every(v => v === void 0) ? value : {
+                                value,
+                                itemStyle: {
+                                    normal: {
+                                        color: (types[i][xi] === 'bar') && (colors[i][xi].length > 7) ? {
+                                            type: 'linear',
+                                            x: 0,
+                                            y: 0,
+                                            x2: 0,
+                                            y2: 1,
+                                            colorStops: [{
+                                                offset: 0, color: barColors[xxi] || colors[i][xi] // 0% 处的颜色
+                                            }, {
+                                                offset: 1, color: 'rgba' + (barColors[xxi] || colors[i][xi]).slice(3, -1) + ',.1' + ')' // 100% 处的颜色
+                                            }],
+                                            globalCoord: true
+                                        } : colors[i][xi]
+                                    }
+                                }
+                            }
                         }),
                         itemStyle: {
                             normal: {
-                                // borderColor: colors[i][xi],
-                                // borderWidth: 12
                                 color: (types[i][xi] === 'bar') && (colors[i][xi].length > 7) ? {
                                     type: 'linear',
                                     x: 0,
@@ -153,7 +173,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                                     globalCoord: true
                                 } : colors[i][xi]
                             }
-                        },
+                        }
                     }))
                 }).reduce((a, b) => a.concat(b), [])
             };

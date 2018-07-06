@@ -206,6 +206,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
         datasource: '=',
         trClick: '=',
         scrollY: '=',
+        scrollHeight: '=',
         trackBy: '@',
         beforeCreate: '=',
         created: '=',
