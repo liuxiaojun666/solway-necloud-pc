@@ -1,0 +1,28 @@
+app.directive('personalCenter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
+    restrict: 'E',
+    replace: !0,
+    scope: {
+        
+    },
+    templateUrl: window.baseUrl + '/tpl/enrichment/monitoringSummary/components/personalCenter.html',
+    link($scope) {
+        
+    },
+    controller($scope) {
+        //退出登录
+        $scope.logOut = () =>{
+            $.ajax({
+                type: "post",
+                url: window.baseUrl +"/Login/logout.htm",
+                timeout: 5000,
+                data: {},
+                success: function (msg) {
+                    window.location.href = window.baseUrl+"/login.jsp";
+                },
+                error: function (msg) {
+                    window.location.href = window.baseUrl +"/login.jsp";
+                }
+            });
+        }
+    }
+})]);
