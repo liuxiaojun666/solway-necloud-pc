@@ -1,4 +1,4 @@
-app.directive('personalCenter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
+app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', (myAjaxData, $timeout, $http) => ({
     restrict: 'E',
     replace: !0,
     scope: {
@@ -9,6 +9,43 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', (myAjaxData, $timeout
         
     },
     controller($scope) {
+        //获取角色
+        $http({
+            method: "POST",
+            url: window.baseUrl +"/UserAuthHandle/getRoleListForPC.htm"
+        }).success(function (res) {
+            $scope.rolelist = res.rolelist;	//用户列表
+            $scope.currentRoleID = res.currentRole;//当前用户的ID‘
+            $scope.roleType = res.roleType;//当前角色类型
+            const currentRoleNum = getArrAtrNum($scope.rolelist, 'roleId', $scope.currentRoleID);
+            $scope.currentRoleName = $scope.rolelist[currentRoleNum].roleDisplayName;//当前角色名
+        });
+
+        //获取当前用户
+        $http.get(window.baseUrl +"/Login/getLoginUser.htm", {
+            timeout: 5000
+        }).success(function (result) {
+            $scope.loginName = result.userName;
+            $scope.userId = result.userId;
+            
+        })
+
+        //电站组
+        $scope.powerStationManage = function () {
+            $('#powerStationManageModal').modal('show');
+        }
+
+        //个人信息
+        $scope.editUserData = function () {
+            initPageDataUserMod($scope.userId);
+            $('#userInformationUpdateModel').modal('show');
+        }
+
+        //修改密码
+        $scope.changePassword = function () {
+            $('#userPasswordChangeModel').modal('show');
+        }
+
         //退出登录
         $scope.logOut = () =>{
             $.ajax({
@@ -24,5 +61,17 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', (myAjaxData, $timeout
                 }
             });
         }
+
+
+
+        //根据数组中每项的每个属性的值查找在数组中的排序，找不到返回-1
+        function getArrAtrNum(arr, atr, value) {//getArrAtrNum([{id:1},{id:2}], "id", 3)
+            for (var i = 0; i < arr.length; i++) {
+                if (arr[i][atr] == value) {
+                    return i;
+                }
+            }
+            return -1;
+        };
     }
 })]);
