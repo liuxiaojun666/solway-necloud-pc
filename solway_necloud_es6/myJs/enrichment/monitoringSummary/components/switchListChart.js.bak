@@ -2,45 +2,22 @@ app.directive('switchListChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocL
     restrict: 'E',
     replace: !0,
     template: `
-    <div style="position:absolute;left:30px;right:60px;background:rgba(22,62,103,0.8);" class="clearfix switch-list-chart icons">
+    <div style="padding: 10px 0;position:absolute;z-index:10;left:30px;right:30px;background:{{showShape === 'list' ? '' : 'rgba(22,62,103,0.8)'}};" class="clearfix switch-list-chart icons">
         <style>
-            .switch-list-chart.icons i{ color:#fff;cursor: pointer;margin-right: 2em;float:right;font-size:20px; } 
+            .switch-list-chart.icons i{ color:#fff;cursor: pointer;margin-left: 2em;float:left;font-size:20px; } 
             .switch-list-chart i.iconfont.active{ color:#2ac2ad!important; }
             i.icon-daochu.disabled { color: rgba(255,255,255,.5)!important; }
         </style>
-        <a target="_blank" ng-click="tableExport();" title="导出">
-            <i class="iconfont icon-daochu" ng-class="{'active': showShape === 'list', 'disabled': showShape !== 'list'}"></i>
-        </a>
-        <i ng-show="!noChart" style="margin-top: 2px;font-size:15px;" ng-click="changeShowShape('chart')" class="iconfont icon-zhuzhuangtu" ng-class="{'active': showShape === 'chart'}"></i>
-        <i ng-show="!noChart" style="margin-top: 2px;" ng-click="changeShowShape('list')" class="iconfont icon-list" ng-class="{'active': showShape === 'list'}"></i>
+        <i ng-show="!noChart" title="图表" style="margin-top: 2px;font-size:15px;" ng-click="changeShowShape('chart')" class="iconfont icon-zhuzhuangtu" ng-class="{'active': showShape === 'chart'}"></i>
+        <i ng-show="!noChart" title="列表" style="margin-top: 2px;" ng-click="changeShowShape('list')" class="iconfont icon-list" ng-class="{'active': showShape === 'list'}"></i>
     </div>`,
     scope: {
         showShape: '=',
         changeShowShape: '=',
-        fileName: '=',
         noChart: '='
     },
     link($scope, $element, $attrs) {
-        $ocLazyLoad.load([
-            'theme/js/modal.js',
-            'vendor/jquery/TableExport/libs/js-xlsx/xlsx.core.min.js',
-            'vendor/jquery/TableExport/libs/FileSaver/FileSaver.min.js',
-            'vendor/jquery/TableExport/tableExport.js'
-        ]).then(() => {
-            $scope.tableExport = () => {
-                if ($scope.showShape !== 'list') return;
-                $(".my-table table").eq(1).tableExport({
-                    headings: true,
-                    footers: true,
-                    formats: ["xls", "csv", "txt"],
-                    fileName: $scope.fileName || '未命名',
-                    bootstrap: true,
-                    position: "bottom",
-                    ignoreRows: null,
-                    ignoreCols: null
-                });
-            };
-        });
+        
     },
     controller($scope) {
         if ($scope.noChart) $scope.changeShowShape('list')

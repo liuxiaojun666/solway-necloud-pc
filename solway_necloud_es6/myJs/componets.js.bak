@@ -197,7 +197,7 @@ app.filter('to_trusted', ['$sce', $sce => v => $sce.trustAsHtml(v)])
     beforeDestroy: '=',     类vue生命周期
     destroyed: '=',         类vue生命周期
  */
-app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
+app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, myAjaxData, $ocLazyLoad) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -216,6 +216,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
         updated: '=',
         beforeDestroy: '=',
         destroyed: '=',
+        tableExportFileName: '=',
     },
     templateUrl: baseUrl + '/tpl/publicComponent/myTable.jsp',
     link($scope, $element) {
@@ -245,7 +246,30 @@ app.directive('myTable', ['$timeout', 'myAjaxData', ($timeout, myAjaxData) => ({
 
             $scope.mounted && $scope.mounted($scope, $element)
             $scope.isMounted = !0
+
+            
         }, 0)
+
+        if ($scope.tableExportFileName) {
+            $ocLazyLoad.load([
+                'vendor/jquery/TableExport/libs/js-xlsx/xlsx.core.min.js',
+                'vendor/jquery/TableExport/libs/FileSaver/FileSaver.min.js',
+                'vendor/jquery/TableExport/tableExport.js'
+            ]).then(() => {
+                $scope.tableExport = () => {
+                    $($element[0]).find('table').eq(1).tableExport({
+                        headings: true,
+                        footers: true,
+                        formats: ["xls", "csv", "txt"],
+                        fileName: $scope.tableExportFileName || '未命名',
+                        bootstrap: true,
+                        position: "bottom",
+                        ignoreRows: null,
+                        ignoreCols: null
+                    })
+                }
+            })
+        }
     },
     controller($scope, $element) {
         $scope.beforeCreate && $scope.beforeCreate($scope, $element)
