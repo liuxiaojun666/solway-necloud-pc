@@ -83,7 +83,14 @@ ajaxData({
             }
         }
 
-        // 公司 历史日 数据 处理
+        $scope.stationData.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.slideImages = res.body.resultList.scenepictures.split(',').map(v => ({
+                url: res.body.resultList.filePath + v
+            }));
+        };
+
+        // 公司  数据 处理
         $scope.companyData.getDataCallback = (success, res) => {
             if (!success) return;
             $scope.datasource = res.body.resultList;
@@ -94,16 +101,19 @@ ajaxData({
                     title: '电站名称',
                     dataIndex: 'stationname',
                     sort: 'true',
+                    width: '25%',
                     align: 'left'
                 }, {
                     title: '装机容量kW',
                     dataIndex: 'buildcapacity',
                     sort: 'true',
+                    width: '10%',
                     align: 'right'
                 }, {
                     title: '投产时间',
                     dataIndex: 'productiondate',
                     sort: 'true',
+                    width: '10%',
                     align: 'center',
                     render(text) {
                         // const dateStr = new Date(text).Format('yyyy-MM-dd');
@@ -113,6 +123,7 @@ ajaxData({
                     title: '接入时间',
                     dataIndex: 'expiryDate',
                     sort: 'true',
+                    width: '10%',
                     align: 'center',
                     render(text) {
                         return `<span>${text || ''}</span>`
@@ -120,6 +131,7 @@ ajaxData({
                 }, {
                     title: '地址',
                     dataIndex: 'address',
+                    width: '45%',
                     align: 'left'
                 }
             ];
