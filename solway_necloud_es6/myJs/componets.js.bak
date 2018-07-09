@@ -273,7 +273,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
     },
     controller($scope, $element) {
         $scope.beforeCreate && $scope.beforeCreate($scope, $element)
-
+        $scope.isWindows = window.navigator.userAgent.toLocaleLowerCase().includes('windows')
         $scope.orderBy = !0
         $scope.sort = (sort, dataIndex) => {
             if (void 0 === $scope.datasource[0]) return
