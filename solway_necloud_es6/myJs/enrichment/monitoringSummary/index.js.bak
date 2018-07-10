@@ -27,6 +27,11 @@ ajaxData({
     $scope.beforeLoading = true; // 页面loading
 
     $scope.moduleName = '电站监视';//当前页面名称；
+    //主题功率传来的更新时间和状态
+    $scope.$on('lastUpdate',(i,val)=>{
+        $scope.comm = val.comm;
+        $scope.dtime = val.dtime;
+    })
     // 电站 信息  对比
     const diffStationInfo = async stationData => {
         const currentStationData = await $scope._getStationInfo;
