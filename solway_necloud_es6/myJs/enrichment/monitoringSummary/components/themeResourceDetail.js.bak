@@ -132,7 +132,7 @@ ajaxData({
 
         // 切换电站 回调
         $scope.switchPowerCallback = () => {
-            if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+            if (($scope.currentClass === 'CompanyDayToday') || ($scope.dataType > 0 && $scope.showShape === 'chart2')) $scope.changeShowShape('list');
             $scope.xdata = void 0;
             $scope.ydatas = void 0;
             diffSelectOptions();
@@ -142,7 +142,7 @@ ajaxData({
         // 日期改变
         $scope.dateUpdated = async () => {
             await myAjaxData.timeout(0);
-            if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+            if ($scope.currentClass === 'CompanyDayToday' || ($scope.currentClass === 'StationYear' && $scope.showShape === 'chart2')) $scope.changeShowShape('list');
             $scope.xdata = void 0;
             $scope.ydatas = void 0;
             diffSelectOptions();
@@ -433,7 +433,7 @@ ajaxData({
             $scope.query_station_month_res_timeline_his.res.body.data.nullBlock2 = [];
             await $scope.selectChange('select1');
             await $scope.selectChange('select2');
-            const day = new Date(res.body.data.dtime[0].split('-')).getDay() - 1;
+            const day = new Date($scope.dateTime.showDate.split('-')).getDay() - 1;
             $scope.query_station_month_res_timeline_his.res.body.data.nullBlock = new Array(day < 0 ? 6 : day).fill('');
             if ($scope.dateTime.showDate === (new Date).Format('yyyy-MM')) {
                 const date = new Date();
