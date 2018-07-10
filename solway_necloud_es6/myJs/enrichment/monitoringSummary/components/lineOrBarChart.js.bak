@@ -18,6 +18,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         symbolSize: '=',
         splitNumber: '=',
         barColors: '=',
+        imagesymboloptions: '=',
     },
     link($scope, $element) {
         let myChart;
@@ -25,7 +26,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
             $element.css('display', 'block')
             setWidthHeight();
             myChart = echarts.init($element[0]);
-            $scope.$watchGroup(['xdata', 'ydatas', 'barColors'], (newValue, oldValue) => {
+            $scope.$watchGroup(['xdata', 'ydatas', 'imagesymboloptions'], (newValue, oldValue) => {
                 if (!newValue) return;
                 drawing();
             });
@@ -36,7 +37,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         }, 0);
 
         const drawing = () => {
-            const { backgroundColor, symbolSize, splitNumber, barColors = [], splitLine, barWidth, axisColor, fontColor, linenames = [], ynames = [], xdata = [], ydatas = [], types, colors, datazoom } = $scope;
+            const { backgroundColor, imagesymboloptions, symbolSize, splitNumber, barColors = [], splitLine, barWidth = 20, axisColor, fontColor, linenames = [], ynames = [], xdata = [], ydatas = [[[]]], types, colors, datazoom } = $scope;
 
             const option = {
                 backgroundColor,
@@ -46,6 +47,10 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         lineStyle: {
                             color: axisColor
                         }
+                    },
+                    formatter(params, ticket, callback) {
+                        if (imagesymboloptions) params.pop();
+                        return params[0].name + '<br/>' + params.map(v => v.seriesName + ':' + v.value + '<br/>').join('');
                     }
                 },
                 legend: {
@@ -126,7 +131,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     return v.map((data, xi) => ({
                         name: linenames[i][xi],
                         type: types[i][xi],
-                        barWidth: barWidth || 20,
+                        barWidth: barWidth,
                         yAxisIndex: i,
                         smooth: true,
                         symbol: 'circle',
@@ -136,26 +141,27 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                             let value;
                             if (!Number.isNaN(xxv + '' - 0)) value = (+xxv).toFixed(1) - 0;
                             else value = xxv === null ? '-' : xxv;
-                            return barColors.every(v => v === void 0) ? value : {
-                                value,
-                                itemStyle: {
-                                    normal: {
-                                        color: (types[i][xi] === 'bar') && (colors[i][xi].length > 7) ? {
-                                            type: 'linear',
-                                            x: 0,
-                                            y: 0,
-                                            x2: 0,
-                                            y2: 1,
-                                            colorStops: [{
-                                                offset: 0, color: barColors[xxi] || colors[i][xi] // 0% 处的颜色
-                                            }, {
-                                                offset: 1, color: 'rgba' + (barColors[xxi] || colors[i][xi]).slice(3, -1) + ',.1' + ')' // 100% 处的颜色
-                                            }],
-                                            globalCoord: true
-                                        } : colors[i][xi]
-                                    }
-                                }
-                            }
+                            return value;
+                            // return barColors.every(v => v === void 0) ? value : {
+                            //     value,
+                            //     itemStyle: {
+                            //         normal: {
+                            //             color: (types[i][xi] === 'bar') && (colors[i][xi].length > 7) ? {
+                            //                 type: 'linear',
+                            //                 x: 0,
+                            //                 y: 0,
+                            //                 x2: 0,
+                            //                 y2: 1,
+                            //                 colorStops: [{
+                            //                     offset: 0, color: barColors[xxi] || colors[i][xi] // 0% 处的颜色
+                            //                 }, {
+                            //                     offset: 1, color: 'rgba' + (barColors[xxi] || colors[i][xi]).slice(3, -1) + ',.1' + ')' // 100% 处的颜色
+                            //                 }],
+                            //                 globalCoord: true
+                            //             } : colors[i][xi]
+                            //         }
+                            //     }
+                            // }
                         }),
                         itemStyle: {
                             normal: {
@@ -175,7 +181,19 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                             }
                         }
                     }))
-                }).reduce((a, b) => a.concat(b), [])
+                })
+                .reduce((a, b) => a.concat(b), [])
+                .concat(imagesymboloptions &&  {
+                    type: 'pictorialBar',
+                    yAxisIndex: 0,
+                    symbolPosition: 'end',
+                    symbolSize: imagesymboloptions.symbolSize,
+                    symbolOffset: imagesymboloptions.symbolOffset,
+                    data: ydatas[imagesymboloptions.ydatasIndex[0]][imagesymboloptions.ydatasIndex[1]].map((v, i) => ({
+                        value: imagesymboloptions.images[i] && v,
+                        symbol: imagesymboloptions.images[i],
+                    }))
+                })
             };
             myChart.setOption(option, true);
         };
