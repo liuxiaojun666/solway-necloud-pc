@@ -1,0 +1,62 @@
+app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$timeout', ($ocLazyLoad, $http, $state, $timeout) => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: {
+
+    },
+    templateUrl: 'tpl/enrichment/blocks/pageSlideDown.html',
+    link($scope, $element) {
+
+        $scope.goChildrenPage = type => {
+            if ($state.current.name == 'power-index171024') {
+                $http({
+                    method: "POST",
+                    url: window.baseUrl + "/UserAuthHandle/setSTClass.htm",
+                    params: {
+                    }
+                }).success(function (res) {
+                    $state.go(type);
+                });
+            } else {
+                $state.go(type);
+            }
+        }
+
+        //鼠标悬浮0.5s页面头部，出现下拉页面
+        let timer = null;
+        const setMainHeight = () => {
+            let wHeight = $(window).height();
+            let muduleHeight = 380;
+            $(".module-list").css('marginTop', (wHeight - muduleHeight)/2-90)
+        }
+
+        setMainHeight()
+
+        $(window).resize(() => {
+            setMainHeight()
+        })
+
+        $timeout(() => {
+            $(".hover-header-con").hover(() => {
+                if (localStorage['monitoringSummary'] ? false : true) return;
+                timer = setTimeout(() => {
+                    $(".systems-page").slideDown();
+                }, 500);
+            }, () => {
+                if (timer) clearTimeout(timer);
+            });
+        }, 0)
+
+        $(".systems-page").click(() => {
+            $(".systems-page").slideUp();
+        });
+
+        $(".square-common").hover(function () {
+            $(this).addClass('active');
+        }, function () {
+            $(this).removeClass('active');
+        })
+
+    }
+})])
