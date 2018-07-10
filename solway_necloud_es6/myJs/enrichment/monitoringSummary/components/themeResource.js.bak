@@ -1,11 +1,12 @@
 ajaxData({
     pageData:{
         name:'GETResourceInfo',
-        later: true        
+        later: true,
+        onlyLatest: true
     }
 }, {
     __serviceName__: 'themeResourceAjaxData'
-    })('themeResourceCtrl', ['$scope', 'themeResourceAjaxData', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
+    })('themeResourceCtrl', ['$scope', 'themeResourceAjaxData', 'historicalRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
 
     $scope.weatherMap= { 'A': '晴', 'B': '阴', 'C': '雨', 'D': '雪', 'E': '雾', 'X': '-' };
     $scope.initChildScope($scope, myAjaxData);
@@ -45,7 +46,7 @@ ajaxData({
 
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        $scope.themeResourceIsLoding = true;
+        $scope.themeResourceIsLoding = !$scope.pageData.res;//第一次请求接口，loading
         $scope.pageData.getData({
             'queryType': queryType,
             'date': dateTime,
@@ -55,4 +56,11 @@ ajaxData({
             if (res.code == 0) $scope.data = res.body;
         })
     }
+
+    const interval = $interval(() => {
+        if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();
+    }, 10000);
+    $scope.$on('$destroy', () => {
+        $interval.cancel(interval)
+    });
 });
