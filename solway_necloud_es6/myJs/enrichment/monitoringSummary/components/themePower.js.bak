@@ -11,7 +11,7 @@ ajaxData({
     }
 }, {
     __serviceName__: 'themePowerAjaxData'
-})('themePowerCtrl', ['$scope', 'themePowerAjaxData', '$timeout'], ($scope, myAjaxData, $timeout) => {
+    })('themePowerCtrl', ['$scope', 'themePowerAjaxData', '$timeout', '$interval'], ($scope, myAjaxData, $timeout, $interval) => {
 
     $scope.initChildScope($scope, myAjaxData);
 
@@ -113,7 +113,7 @@ ajaxData({
     
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        $scope.themePowerIsLoding = true;
+        $scope.themePowerIsLoding = !$scope.currentPowerInfo.res;
         if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday'){
             $scope.currentPowerInfo.getData({
                 'queryType': queryType,
@@ -148,6 +148,10 @@ ajaxData({
         }
     }
 
+    const interval = $interval(() => {
+        if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();
+    }, 10000);
+
     window.addEventListener("resize", () => {
         $("#themePowerGaugeEchart").width($("#themePower").width())
         myChart.resize();
@@ -155,5 +159,6 @@ ajaxData({
 
     $scope.$on('$destroy', () => {
         myChart = null;
+        $interval.cancel(interval);
     });
 });

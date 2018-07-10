@@ -36,7 +36,7 @@ ajaxData({
     }
 }, {
     __serviceName__: 'themeElectricityAjaxData'
-})('themeElectricityCtrl', ['$scope', 'themeElectricityAjaxData', '$timeout'], ($scope, myAjaxData, $timeout) => {
+    })('themeElectricityCtrl', ['$scope', 'themeElectricityAjaxData', '$timeout', '$interval'], ($scope, myAjaxData, $timeout, $interval) => {
 
     $scope.initChildScope($scope, myAjaxData);
     
@@ -176,7 +176,7 @@ ajaxData({
 
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        $scope.themeElectricityIsLoding = true;
+        $scope.themeElectricityIsLoding = !$scope.electricityCurrent.res;
         if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
             $scope.electricityCurrent.getData({
                 'queryType': queryType,
@@ -238,6 +238,14 @@ ajaxData({
             }
         })
     }
+
+    const interval = $interval(() => {
+        if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();
+    }, 10000);
+
+    $scope.$on('$destroy', () => {
+        $interval.cancel(interval)
+    });
 
     window.addEventListener("resize", function () {
         initEchartHeightWidth();
