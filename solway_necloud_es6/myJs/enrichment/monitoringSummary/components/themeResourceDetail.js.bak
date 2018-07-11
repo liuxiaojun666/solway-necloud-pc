@@ -113,6 +113,7 @@ ajaxData({
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
             let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeResource || {};
+            if (($scope.currentClass === 'CompanyDayToday') || ($scope.dataType > 0 && showShape === 'chart2')) showShape = 'list';
             $scope.changeShowShape(showShape || 'list');
             const { dateType, dateTime } = historicalRecord.get();
             $scope.dateType = dateType;
