@@ -341,13 +341,10 @@ ajaxData({
                     }
                 },
                 {
-                    title: '天气',
-                    dataIndex: 'weather',
+                    title: '发电小时数(' + res.body.units.real_hours + ')',
+                    dataIndex: 'real_hours',
                     sort: 'true',
-                    align: 'center',
-                    render(text) {
-                        return text ? '<span>' + text + '</span>' : '<span></span>';
-                    }
+                    align: 'right',
                 },
                 {
                     title: '日照小时数(' + res.body.units.sun_hours + ')',
@@ -363,6 +360,15 @@ ajaxData({
                     dataIndex: 'max_sun',
                     sort: 'true',
                     align: 'right',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '天气',
+                    dataIndex: 'weather',
+                    sort: 'true',
+                    align: 'center',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
                     }
@@ -398,6 +404,18 @@ ajaxData({
                     }
                 },
                 {
+                    title: '发电小时数(' + res.body.units.real_hours + ')',
+                    dataIndex: 'real_hours',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '日照小时数(' + res.body.units.sun_hours + ')',
+                    dataIndex: 'sun_hours',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
                     title: '降雨量(' + res.body.units.pcpn + ')',
                     dataIndex: 'pcpn',
                     sort: 'true',
@@ -405,12 +423,6 @@ ajaxData({
                     render(text) {
                         return text >= 0 ? '<span>' + text + '</span>' : '<span></span>';
                     }
-                },
-                {
-                    title: '日照小时数(' + res.body.units.sun_hours + ')',
-                    dataIndex: 'sun_hours',
-                    sort: 'true',
-                    align: 'right',
                 },
                 {
                     title: '平均温度',
@@ -779,19 +791,21 @@ ajaxData({
                     max_sun: '最大辐射强度(kWh/m²)',
                     rad_chk: '辐射总量(kWh/m²)',
                     sun_hours: '日照小时数(h)',
-                    ta_avg: '平均温度'
+                    ta_avg: '平均温度(℃)',
+                    real_hours: '发电小时数(h)'
                 };
             } else if ($scope.currentClass === 'StationYear') {
                 $scope.selectOptions = {
                     rad_chk: '辐射总量(kWh/m²)',
                     sun_hours: '日照小时数(h)',
-                    ta_avg: '平均温度'
+                    ta_avg: '平均温度(℃)',
+                    real_hours: '发电小时数(h)'
                 };
             } else if ($scope.currentClass === 'CompanyDayAgo') {
                 $scope.selectOptions = {
                     inst_kw: '装机容量kW',
                     rad_chk: '辐射总量kWh/m²',
-                    ta_avg: '平均温度℃'
+                    ta_avg: '平均温度(℃)',
                 }
             }
         }
