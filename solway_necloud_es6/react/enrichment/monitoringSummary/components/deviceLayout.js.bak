@@ -2,7 +2,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
     restrict: 'E',
     replace: !0,
     template: `
-    <div>
+    <div class="ng-clock">
         <div style="margin-left: {{winWidth / 2 - 50 - 225}}px;">
             <ul class="nav navbar-nav m-r-xxl" style="margin-right: 0;">
                 <a ng-show="!status.statusAll" class="btn no-shadow navbar-btn" ng-click="changeStatus('statusAll');">
@@ -44,14 +44,14 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
         </div>
         <div class="clearfix"></div>
         <div style="margin: 0 20px;">
-            <div ng-show="!rtmSingleStationComm.res" style="margin-bottom: 0;" class="alert alert-danger" role="alert">未接收到任何数据。请等待...</div>
-            <div ng-show="rtmSingleStationComm.res.comm === null" style="margin-bottom: 0;" class="alert alert-danger" role="alert">返回数据异常！</div>
-            <div ng-show="rtmSingleStationComm.res.comm === 1" style="margin-bottom: 0;" class="alert alert-danger" role="alert">
+            <div ng-if="!rtmSingleStationComm.res" style="margin-bottom: 0;" class="alert alert-danger" role="alert">未接收到任何数据。请等待...</div>
+            <div ng-if="rtmSingleStationComm.res.comm === null" style="margin-bottom: 0;" class="alert alert-danger" role="alert">返回数据异常！</div>
+            <div ng-if="rtmSingleStationComm.res.comm === 1" style="margin-bottom: 0;" class="alert alert-danger" role="alert">
                 <span>通讯中断故障！已中断</span>
                 <span ng-bind="rtmSingleStationComm.res.commInterruptTime"></span>，最后更新于
                 <span ng-bind="rtmSingleStationComm.res.utime | date:'yyyy-MM-dd HH:mm:ss'"></span>
             </div>
-            <div ng-show="rtmSingleStationComm.res.comm === 2" style="margin-bottom: 0;" class="alert alert-info" role="alert">设备初始化，未接收到任何数据。请等待...</div>
+            <div ng-if="rtmSingleStationComm.res.comm === 2" style="margin-bottom: 0;" class="alert alert-info" role="alert">设备初始化，未接收到任何数据。请等待...</div>
         </div>
         <div id="deviceLayout" class="clearfix"></div>
         <script src="theme/js/angular.pagination.js"></script>
@@ -188,6 +188,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
                 <Root />,
                 document.getElementById('deviceLayout')
             );
+            $('.ng-clock').removeClass('ng-clock');
         }, 0);
     },
     controller($scope) {
@@ -220,7 +221,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
                 $scope.$broadcast("showDeviceDetail1broad", res);
             }
             return false;
-        }
+        };
 
         
     }
