@@ -1,4 +1,5 @@
 ajaxData({
+    // 矩阵视图
     getDeviceLayout: {
         name: 'GETdeviceLayoutV2',
         data: {},
@@ -12,6 +13,20 @@ ajaxData({
         },
         later: true,
         onlyLatest: true
+    },
+    //电站日功率时间列表（历史日
+    stationDayAgoTimeList: {
+        name: 'GETPowerStationDayAgoTimeList',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+    //电站日功率时间曲线（历史日
+    stationDayAgoTimeLine: {
+        name: 'GETPowerStationDayAgoTimeLine',
+        data: {},
+        later: true,
+        onlyLatest: true,
     }
 }, {
     __serviceName__: 'themePowerDetailService'
@@ -22,40 +37,37 @@ ajaxData({
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
         let { showShape, tabIndex = 0, checkboxStatus=[true, true, true, true, true] } = historicalRecord.get().themePower || {};
-        if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
-        $scope.changeShowShape(showShape || 'list');
+        $scope.changeShowShape((tabIndex === 1 && currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'list'));
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
         $scope.checkboxStatus = checkboxStatus;
-        $scope.changeTab(tabIndex);
+        $scope.changeTab(($scope.dataType > 0 && $scope.tabIndex > 1) ? 0 : tabIndex);
         $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await diffGetData();
         $scope.$apply();
-
     };
-
-    //接线图替代方法
-    $scope.getCurrentDataName = function (currentView, isGroup, callback) {}
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         if ($scope.tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
         if ($scope.dataType > 0 && $scope.tabIndex > 1) $scope.changeTab(0);
         $scope.$broadcast("switchPowerCallback");
+        diffGetData();
     };
 
     // 日期改变
-    $scope.dateUpdated = () => {
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
         if ($scope.tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+        await diffGetData();
     };
-
-    // 详情 放大缩小  回调
-    $scope.switchDetailFullPage = () => {
-
-    }
 
     // tab 切换
     $scope.changeTab = tabIndex => {
+        if (tabIndex === $scope.tabIndex) return;
         $scope.tabIndex = tabIndex;
         if (tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
         historicalRecord.set({
@@ -64,11 +76,12 @@ ajaxData({
                 tabIndex
             }
         });
-
+        diffGetData();
     };
 
     // 切换显示形式  图表 or 列表
     $scope.changeShowShape = showShape => {
+        if (showShape === $scope.showShape) return;
         $scope.showShape = showShape;
         historicalRecord.set({
             themePower: {
@@ -80,6 +93,7 @@ ajaxData({
             $scope.getDeviceLayout.getData({});
             $scope.rtmSingleStationComm.getData({ dateString: new Date().Format("yyyy-MM-dd") });
         }
+        diffGetData();
     };
 
     // 复选框状态改变
@@ -93,6 +107,7 @@ ajaxData({
                 checkboxStatus: $scope.checkboxStatus
             }
         });
+        diffGetData();
     };
 
     // 列表
@@ -104,4 +119,90 @@ ajaxData({
             align: 'left'
         }
     ];
+
+
+
+    // 判断 调用  对应 接口
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+        if (!currentClass.includes('DayToday')) $scope.column = [];
+        switch (currentClass) {
+            case 'StationDayToday':
+                
+                break;
+
+            case 'StationDayAgo':
+                if (showShape === 'list') {
+                    $scope.stationDayAgoTimeList.getData({
+                        queryType: 3,
+                        dateType: 3,
+                        date: dateTime.showDate
+                    });
+                } else if (showShape === 'chart') {
+                    $scope.stationDayAgoTimeLine.getData({
+                        queryType: 3,
+                        dateType: 3,
+                        date: dateTime.showDate
+                    });
+                }
+                break;
+
+            case 'CompanyDayToday':
+                
+                break;
+
+            case 'CompanyDayAgo':
+                
+                break;
+
+
+            default:
+                break;
+        }
+    };
+
+
+    // 电站  历史日   时间   列表
+    $scope.stationDayAgoTimeList.getDataCallback = (success, res) => {
+        if(!success) return;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'time',
+                sort: true,
+                width: '',
+                align: 'center'
+            },
+            {
+                title: '实发功率(kW)',
+                dataIndex: 'real_curve',
+                sort: true,
+                width: '',
+                align: 'center',
+            },
+            {
+                title: '应发功率(kW)',
+                dataIndex: 'shd_curve',
+                sort: true,
+                width: '',
+                align: 'center',
+            },
+            {
+                title: '光照强度(W/㎡)',
+                dataIndex: 'sun_curve',
+                sort: true,
+                width: '',
+                align: 'center',
+            }
+        ];
+    };
+    // 电站  历史日   时间   列表
+    $scope.stationDayAgoTimeLine.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.x;
+        $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.sun_curve]]
+    };
+
 });
