@@ -120,6 +120,8 @@ ajaxData({
             if ($scope.tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
             $scope.xdata = void 0;
             $scope.ydatas = void 0;
+            $scope.stationDayTodayTime.res = null;
+            $scope.companyDayTodayTime.res = null;
             await diffGetData();
         };
 
@@ -203,6 +205,7 @@ ajaxData({
                         });
                     }
                     if (tabIndex === 0 && showShape === 'list') {
+                        if ($scope.stationDayTodayTime.res) return;
                         $scope.stationDayTodayTime.getData({
                             queryType: 3,
                             dateType: 3,
@@ -234,6 +237,7 @@ ajaxData({
                 case 'CompanyDayToday':
                     if (tabIndex === 0) {
                         if (showShape === 'list') {
+                            if ($scope.companyDayTodayTime.res) return;
                             $scope.companyDayTodayTime.getData({
                                 queryType: 1,
                                 dateType: 3,
