@@ -1,6 +1,74 @@
-ajaxData({}, {
+ajaxData({
+    //集团
+    query_company_accum_subject_his: {
+        name: 'GETquery_company_accum_subject_his',
+        later: true,
+        onlyLatest: true
+    },
+    //电站
+    query_station_accum_subject_his: {
+        name: 'GETquery_station_accum_subject_his',
+        later: true,
+        onlyLatest: true
+    },
+}, {
     __serviceName__: 'themeAccumulativeAjaxData'
-})('themeAccumulativeCtrl', ['$scope', 'themeAccumulativeAjaxData'], ($scope, themeAccumulativeAjaxData) => {
+    })('themeAccumulativeCtrl', ['$scope', 'themeAccumulativeAjaxData'], ($scope, myAjaxData) => {
+
+        $scope.initChildScope($scope, myAjaxData);
+
+        const initParams = async () => {
+            await myAjaxData.timeout(0)
+            const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
+            $scope.getAjaxData(queryType)
+        }
+
+        //父页面初始化完成
+        // $scope.mainPageInitComplete = () => {
+        //     initParams();
+        // };
+
+        //切换日期类型
+        $scope.dateUpdated = () => {
+            if ($scope._dateType == 3) {
+                initParams();
+            }
+        }
+
+        //切换电站
+        $scope.switchPowerCallback = () => {
+            initParams();
+        }
+
+        //点击放大后
+        $scope.switchDetailFullPage = () => {
+            initParams();
+        }
+
+        //接口
+        $scope.getAjaxData = (queryType) => {
+            let params = '';
+            switch (queryType) {
+                case 1:
+                    params = 'query_company_accum_subject_his' //集团 
+                    break;
+                case 3:
+                    params = 'query_station_accum_subject_his' //电站
+                    break;
+                default:
+                    break;
+            }
+            $scope[params].getData({
+                'queryCode': params,
+                'queryType': queryType
+            }).then(res => {
+                if (res.code == 0) {
+                    $scope.data = res.body;
+                }else{
+                    $scope.data = []
+                }
+            })
+        }
 
 
 });
