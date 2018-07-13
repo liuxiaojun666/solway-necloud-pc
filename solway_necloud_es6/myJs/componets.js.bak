@@ -208,6 +208,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
         scrollY: '=',
         scrollHeight: '=',
         trackBy: '@',
+        trKey: '=',
         beforeCreate: '=',
         created: '=',
         beforeMount: '=',
@@ -222,6 +223,15 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
     link($scope, $element) {
         $scope.beforeMount && $scope.beforeMount($scope, $element)
         $timeout(() => {
+            trCheckeboxApply()
+            lxjClickApply()
+            // tbodyLazyLoadScrollListen()
+
+            $scope.mounted && $scope.mounted($scope, $element)
+            $scope.isMounted = !0
+        }, 0)
+
+        function trCheckeboxApply() {
             Array.from($element.find('th')).forEach(dv => {
                 const { name } = dv.dataset
                 if (!name) return
@@ -237,18 +247,30 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
                     $(dv).find('input:checkbox').prop('checked', Array.from($inputs()).every(v => v.checked === true))
                 })
             })
+        }
 
+        function lxjClickApply() {
             $element.on('click', '[lxj-click]', function (e) {
                 e.stopPropagation()
                 const arr = $(this).attr('lxj-click').split('(')
                 $scope[arr[0]](...arr[1].split(')')[0].split(','))
             })
+        }
 
-            $scope.mounted && $scope.mounted($scope, $element)
-            $scope.isMounted = !0
+        function tbodyLazyLoadScrollListen() {
+            const $myTableBody = $($element[0]).find('.my-table-body')
+            $myTableBody.on('scroll', eventHand)
+            $element.on('$destroy', () => $myTableBody.off('scroll', eventHand))
+            function eventHand(e) {
+                const $this = $(this);
+                const $table = $this.find('table')
+                if (($table.position().top - $scope.scrollHeight + $table.height()) < 100) {
+                    $scope.pushData()
+                    $scope.$apply()
+                }
+            }
+        }
 
-            
-        }, 0)
 
         if ($scope.tableExportFileName) {
             $ocLazyLoad.load([
@@ -273,23 +295,24 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
     },
     controller($scope, $element) {
         $scope.beforeCreate && $scope.beforeCreate($scope, $element)
+        $scope.__datasource = []
         $scope.isWindows = window.navigator.userAgent.toLocaleLowerCase().includes('windows')
         $scope.orderBy = !0
         $scope.sort = (sort, dataIndex) => {
-            if (void 0 === $scope.datasource[0]) return
+            if (void 0 === $scope.__datasource[0]) return
             if (!sort) return
             if (dataIndex !== $scope.orderByDataIndex) {
                 $scope.orderByDataIndex = dataIndex
                 $scope.orderBy = !0
             }
-            if (typeof $scope.datasource[0][dataIndex] === 'number') {
-                $scope.datasource.sort((a, b) => {
+            if (typeof $scope.__datasource[0][dataIndex] === 'number') {
+                $scope.__datasource.sort((a, b) => {
                     const aData = a[dataIndex] || 0;
                     const bData = b[dataIndex] || 0;
                     return $scope.orderBy ? aData - bData : bData - aData
                 })
             } else {
-                $scope.orderBy && $scope.datasource.sort((a, b) => {
+                $scope.orderBy && $scope.__datasource.sort((a, b) => {
                     const aData = (a[dataIndex] || '').toString();
                     const bData = (b[dataIndex] || '').toString();
                     return do {
@@ -298,13 +321,14 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
                         else bData.length - aData.length
                     }
                 })
-                $scope.datasource.reverse()
+                $scope.__datasource.reverse()
             }
             $scope.gen.next($scope.orderByDataIndex)
             $scope.orderBy = !$scope.orderBy
         }
 
         $scope.$watch('datasource', (newValue, oldValue) => {
+            copyDatasource(newValue || []);
             $scope.gen = (function* () {
                 $scope.orderByDataIndex = void 0
                 $scope.orderByDataIndex = yield
@@ -338,7 +362,40 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
             $scope.destroyed && $scope.destroyed($scope, $element)
         })
 
+
+
+        let allDataSource = [];
+        function copyDatasource(datasource) {
+            if (datasource.isConcat) {
+                allDataSource = allDataSource.concat(datasource);
+            }else {
+                $scope.__datasource = [];
+                allDataSource = datasource.concat();
+            }
+            $scope.pushData();
+            tbodySubstepTimingLoad();
+        }
+        $scope.pushData = () => {
+            const {trKey} = $scope;
+            const oldLength = $scope.__datasource.length;
+            $scope.__datasource = allDataSource.map((v, i) => ({
+                ...v,
+                __trKey: v[trKey] || i
+            })).slice(0, oldLength + 50);
+        }
+
+        function tbodySubstepTimingLoad() {
+            $timeout(function () {
+                $scope.pushData()
+                if ($scope.datasource && $scope.__datasource.length < $scope.datasource.length) {
+                    tbodySubstepTimingLoad();
+                }
+            }, 500)
+        }
+
+
         $scope.created && $scope.created($scope, $element)
+
     }
 })])
 

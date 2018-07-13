@@ -21,6 +21,13 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 电站 今日  时间  图表
+    stationDayTodayTime2: {
+        name: 'GETPowerStationDayTodayTime2',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     //电站日功率时间列表（历史日
     stationDayAgoTimeList: {
         name: 'GETPowerStationDayAgoTimeList',
@@ -35,9 +42,16 @@ ajaxData({
         later: true,
         onlyLatest: true,
     },
-    // 公司今日 时间
+    // 公司今日 时间 列表
     companyDayTodayTime: {
         name: 'GETPowerCompanyDayTodayTime',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 公司今日 时间 图表
+    companyDayTodayTime2: {
+        name: 'GETPowerCompanyDayTodayTime2',
         data: {},
         later: true,
         onlyLatest: true
@@ -72,14 +86,14 @@ ajaxData({
     },
 }, {
         __serviceName__: 'themePowerDetailService'
-    })('themePowerDetailCtrl', ['$scope', 'themePowerDetailService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
+    })('themePowerDetailCtrl', ['$scope', 'themePowerDetailService', 'historicalRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
         // 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
 
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
             let { showShape, tabIndex = 0, checkboxStatus = [true, true, true, true, true] } = historicalRecord.get().themePower || {};
-            $scope.changeShowShape((tabIndex === 1 && currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'list'));
+            $scope.changeShowShape((tabIndex === 1 && currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'chart'));
             const { dateType, dateTime } = historicalRecord.get();
             $scope.dateType = dateType;
             $scope.dateTime = dateTime;
@@ -104,6 +118,8 @@ ajaxData({
         $scope.dateUpdated = async () => {
             await myAjaxData.timeout(0);
             if ($scope.tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
             await diffGetData();
         };
 
@@ -135,8 +151,8 @@ ajaxData({
                 $scope.getDeviceLayout.getData({});
                 $scope.rtmSingleStationComm.getData({ dateString: new Date().Format("yyyy-MM-dd") });
             }
-            if ($scope.dateType === 0 && $scope.tabIndex === 0) return;
-            if ($scope.currentClass === 'CompanyDayToday') return;
+            // if ($scope.dateType === 0 && $scope.tabIndex === 0) return;
+            // if ($scope.currentClass === 'CompanyDayToday') return;
             diffGetData();
         };
 
@@ -174,11 +190,26 @@ ajaxData({
             if (!currentClass.includes('DayToday')) $scope.column = [];
             switch (currentClass) {
                 case 'StationDayToday':
-                    if (tabIndex === 0) {
+                    if (tabIndex === 0 && showShape === 'chart') {
+                        $scope.stationDayTodayTime2.getData({
+                            queryType: 3,
+                            dateType: 3,
+                            date: dateTime.showDate,
+                            dataType: 2,
+                            stime: $scope.stationDayTodayTime2.res
+                                ? $scope.stationDayTodayTime2.res.body.echarts_xaTime[$scope.stationDayTodayTime2.res.body.echarts_xaTime.length - 1].split(':').join('')
+                                : 0,
+                        });
+                    }
+                    if (tabIndex === 0 && showShape === 'list') {
                         $scope.stationDayTodayTime.getData({
                             queryType: 3,
                             dateType: 3,
-                            date: dateTime.showDate
+                            date: dateTime.showDate,
+                            dataType: 1,
+                            stime: $scope.stationDayTodayTime.res
+                                ? $scope.stationDayTodayTime.res.body.chartList[$scope.stationDayTodayTime.res.body.chartList.length - 1].xaTime.split(':').join('')
+                                : 0,
                         });
                     }
                     break;
@@ -201,11 +232,27 @@ ajaxData({
 
                 case 'CompanyDayToday':
                     if (tabIndex === 0) {
-                        $scope.companyDayTodayTime.getData({
-                            queryType: 1,
-                            dateType: 3,
-                            date: dateTime.showDate
-                        });
+                        if (showShape === 'list') {
+                            $scope.companyDayTodayTime.getData({
+                                queryType: 1,
+                                dateType: 3,
+                                date: dateTime.showDate,
+                                dataType: 1,
+                                stime: $scope.companyDayTodayTime.res
+                                    ? $scope.companyDayTodayTime.res.body.chartList[$scope.companyDayTodayTime.res.body.chartList.length - 1].xaTime.split(':').join('')
+                                    : 0,
+                            });
+                        } else if (showShape === 'chart') {
+                            $scope.companyDayTodayTime2.getData({
+                                queryType: 1,
+                                dateType: 3,
+                                date: dateTime.showDate,
+                                dataType: 2,
+                                stime: $scope.companyDayTodayTime2.res
+                                    ? $scope.companyDayTodayTime2.res.body.echarts_xaTime[$scope.companyDayTodayTime2.res.body.echarts_xaTime.length - 1].split(':').join('')
+                                    : 0,
+                            });
+                        }
                     } else if (tabIndex === 1) {
                         $scope.companyDayTodayStation.getData({
                             queryType: 1,
@@ -244,41 +291,53 @@ ajaxData({
         };
 
 
-        // 电站 今日 时间 列表 图表
+        // 电站 今日 时间 列表 列表
         $scope.stationDayTodayTime.getDataCallback = (success, res) => {
             if (!success) return;
-            $scope.xdata = res.body.echarts_xaxisTime;
-            $scope.ydatas = [[res.body.echarts_power, res.body.echarts_predictPower], [res.body.echarts_luminousIntensity]];
+            const tempArr = res.body.chartList.slice(1);
+            tempArr.isConcat = true;
+            $scope.datasource = tempArr;
             $scope.column = [
                 {
                     title: '时间',
-                    dataIndex: 'xaxisTime',
+                    dataIndex: 'xaTime',
                     sort: true,
                     width: '',
                     align: 'center'
                 },
                 {
                     title: '实发功率(kW)',
-                    dataIndex: 'power',
+                    dataIndex: 'p',
                     sort: true,
                     width: '',
                     align: 'right',
                 },
                 {
                     title: '应发功率(kW)',
-                    dataIndex: 'predictPower',
+                    dataIndex: 'shd_p',
                     sort: true,
                     width: '',
                     align: 'right',
                 },
                 {
                     title: '光照强度(W/㎡)',
-                    dataIndex: 'luminousIntensity',
+                    dataIndex: 'sun',
                     sort: true,
                     width: '',
                     align: 'right',
                 }
             ];
+        };
+        // 电站 今日 时间 列表 图表
+        const stationDayTodayTimeLineData = { xdata: [], line1: [], line2: [], line3: [] };
+        $scope.stationDayTodayTime2.getDataCallback = (success, res) => {
+            if (!success) return;
+            const { xdata, line1, line2, line3 } = stationDayTodayTimeLineData;
+            const length = xdata.length;
+            $scope.xdata = stationDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaTime);
+            $scope.ydatas = [[stationDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_p),
+            stationDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_shd_p)],
+            [stationDayTodayTimeLineData.line3 = line3.slice(0, length - 1).concat(res.body.echarts_sun)]];
         };
         // 电站  历史日   时间   列表
         $scope.stationDayAgoTimeList.getDataCallback = (success, res) => {
@@ -320,42 +379,54 @@ ajaxData({
             $scope.xdata = res.body.x;
             $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.sun_curve]]
         };
-        // 公司 今日 时间 列表 图表
+        // 公司 今日 时间 列表
         $scope.companyDayTodayTime.getDataCallback = (success, res) => {
             if (!success) return;
-            $scope.xdata = res.body.echarts_xaxisTime;
-            $scope.ydatas = [[res.body.echarts_power, res.body.echarts_predictPower], [res.body.echarts_luminousIntensity]];
+            const tempArr = res.body.chartList.slice(1);
+            tempArr.isConcat = true;
+            $scope.datasource = tempArr;
             $scope.column = [
                 {
                     title: '时间',
-                    dataIndex: 'xaxisTime',
+                    dataIndex: 'xaTime',
                     sort: true,
                     width: '',
                     align: 'center'
                 },
                 {
                     title: '实发功率(kW)',
-                    dataIndex: 'power',
+                    dataIndex: 'p',
                     sort: true,
                     width: '',
                     align: 'right',
                 },
                 {
                     title: '应发功率(kW)',
-                    dataIndex: 'predictPower',
+                    dataIndex: 'shd_p',
                     sort: true,
                     width: '',
                     align: 'right',
                 },
                 {
                     title: '光照强度(W/㎡)',
-                    dataIndex: 'luminousIntensity',
+                    dataIndex: 'sun',
                     sort: true,
                     width: '',
                     align: 'right',
                 }
             ];
         }
+        // 公司 今日 时间 图表
+        const companyDayTodayTimeLineData = { xdata: [], line1: [], line2: [], line3: [] };
+        $scope.companyDayTodayTime2.getDataCallback = (success, res) => {
+            if (!success) return;
+            const { xdata, line1, line2, line3 } = companyDayTodayTimeLineData;
+            const length = xdata.length;
+            $scope.xdata = companyDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaTime);
+            $scope.ydatas = [[companyDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_p),
+            companyDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_shd_p)],
+            [companyDayTodayTimeLineData.line3 = line3.slice(0, length - 1).concat(res.body.echarts_sun)]];
+        };
         // 公司 今日 电站 列表
         $scope.companyDayTodayStation.getDataCallback = (success, res) => {
             if (!success) return;
@@ -464,5 +535,12 @@ ajaxData({
                 },
             ];
         };
+
+
+        // 定时器  定时刷新接口
+        const timer = $interval(() => {
+            if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') diffGetData();
+        }, 10000);
+        $scope.$on('$destroy', () => $interval.cancel(timer));
 
     });
