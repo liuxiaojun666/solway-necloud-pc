@@ -364,7 +364,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
 
 
 
-        let allDataSource = [];
+        let allDataSource = [], isLoading = false;
         function copyDatasource(datasource) {
             if (datasource.isConcat) {
                 allDataSource = allDataSource.concat(datasource);
@@ -385,11 +385,14 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
         }
 
         function tbodySubstepTimingLoad() {
+            // if (isLoading) return;
+            // isLoading = true;
             $timeout(function () {
                 $scope.pushData()
                 if ($scope.datasource && $scope.__datasource.length < $scope.datasource.length) {
                     tbodySubstepTimingLoad();
                 }
+                // isLoading = false;
             }, 500)
         }
 
