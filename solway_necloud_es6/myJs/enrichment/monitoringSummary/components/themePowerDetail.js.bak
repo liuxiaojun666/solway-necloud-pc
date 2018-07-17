@@ -147,6 +147,9 @@ ajaxData({
             if ($scope.tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
             if ($scope.dataType > 0 && $scope.tabIndex > 1) $scope.changeTab(0);
             $scope.$broadcast("switchPowerCallback");
+            $scope.column = [];
+            $scope.stationDayTodayTime.res = null;
+            $scope.companyDayTodayTime.res = null;
             diffGetData();
         };
 
@@ -156,6 +159,7 @@ ajaxData({
             if ($scope.tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
             $scope.xdata = void 0;
             $scope.ydatas = void 0;
+            $scope.column = [];
             $scope.stationDayTodayTime.res = null;
             $scope.companyDayTodayTime.res = null;
             await diffGetData();
@@ -172,6 +176,9 @@ ajaxData({
                     tabIndex
                 }
             });
+            $scope.column = [];
+            $scope.stationDayTodayTime.res = null;
+            $scope.companyDayTodayTime.res = null;
             diffGetData();
         };
 
@@ -191,6 +198,9 @@ ajaxData({
             }
             // if ($scope.dateType === 0 && $scope.tabIndex === 0) return;
             // if ($scope.currentClass === 'CompanyDayToday') return;
+            $scope.column = [];
+            $scope.stationDayTodayTime.res = null;
+            $scope.companyDayTodayTime.res = null;
             diffGetData();
         };
 
@@ -270,6 +280,7 @@ ajaxData({
                     break;
             
                 case '2':
+                    if ($scope.getRunRealDataBInverter.isLoding) return
                     $scope.getRunRealDataBInverter.getData({
                         pageIndex: 0,
                         search: $scope.searchKey,
@@ -419,6 +430,7 @@ ajaxData({
                     dataIndex: 'statusDesc',
                     title: '状态',
                     width: '80px',
+                    fixed: 'left',
                     render(text, item, index) {
                         if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
                         else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
@@ -431,11 +443,13 @@ ajaxData({
                     dataIndex: 'did',
                     title: '编号',
                     width: '60px',
+                    fixed: 'left',
                 },
                 {
                     dataIndex: 'name',
                     title: '名称',
                     width: '120px',
+                    fixed: 'left',
                     render(text) {
                         return `<text style="color: #428bca;">${text}</text>`
                     }
