@@ -38,14 +38,23 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$timeout', ($
         })
 
         $timeout(() => {
-            $(".hover-header-con").hover(() => {
+            $('body').on('mouseover','.hover-header-con',()=>{
                 if (localStorage['monitoringSummary'] ? false : true) return;
                 timer = setTimeout(() => {
                     $(".systems-page").slideDown();
                 }, 500);
-            }, () => {
+            })
+            $('body').on('mouseout', '.hover-header-con', () => {
                 if (timer) clearTimeout(timer);
-            });
+            })
+            // $(".hover-header-con").hover(() => {
+            //     if (localStorage['monitoringSummary'] ? false : true) return;
+            //     timer = setTimeout(() => {
+            //         $(".systems-page").slideDown();
+            //     }, 500);
+            // }, () => {
+            //     if (timer) clearTimeout(timer);
+            // });
         }, 0)
 
         $(".systems-page").click(() => {
