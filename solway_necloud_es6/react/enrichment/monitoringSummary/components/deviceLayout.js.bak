@@ -124,6 +124,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
             }
 
             async getData(loop) {
+                if ($scope.rtmSingleStationComm.isLoding || $scope.getDeviceLayout.isLoding) return;
                 $scope.rtmSingleStationComm.getData({});
                 const data = await $scope.getDeviceLayout.getData({});
                 this.setData(data, loop);
