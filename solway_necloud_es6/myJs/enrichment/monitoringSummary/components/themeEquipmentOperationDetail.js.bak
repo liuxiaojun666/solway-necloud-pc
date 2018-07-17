@@ -6,7 +6,20 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
-    
+    //电站-今日-故障分析
+    faultAlarmTotalStatistics: {
+        name: 'GETfaultAlarmTotalStatistics',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //电站-今日-故障列表
+    getStationFaultAlarmRtData: {
+        name: 'GETgetStationFaultAlarmRtData',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
     __serviceName__: 'themeEquipmentOperationService'
 })('themeEquipmentOperationDetailCtrl', ['$scope', 'themeEquipmentOperationService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -20,6 +33,7 @@ ajaxData({
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
         $scope.select1 = select1 || 2;
         $scope.select2 = select2 || 2;
         $scope.selectChange('select1');
@@ -27,6 +41,7 @@ ajaxData({
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
 
+        $scope.initComplete = true;
         await myAjaxData.timeout(0);
         diffGetData();
         $scope.$apply();
@@ -65,6 +80,7 @@ ajaxData({
     };
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
+       
         diffGetData();
     };
 
@@ -80,7 +96,7 @@ ajaxData({
 
     // 判断 调用  对应 接口
     async function diffGetData() {
-        // if (!$scope.initComplete) return;
+        if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
         switch (currentClass) {
@@ -91,21 +107,20 @@ ajaxData({
                     date: dateTime.showDate
                 });
                 break;
-            // case 'CompanyDayToday':
-            //     $scope.companyToday.getData({
-            //         queryType: 1,
-            //         dateType: 3,
-            //         date: dateTime.showDate
-            //     });
-            //     break;
+            case 'StationDayToday':
+                $scope.faultAlarmTotalStatistics.getData({});
+                $scope.getStationFaultAlarmRtData.getData({
+                    pageIndex:0 ,
+                    pageSize:10
+                });
+                break;
             default:
                 break;
-
         }
     }
 
+    //集团当日
     $scope.companyToday.getDataCallback = (success, res) => {
-        console.log(res)
         if (!success) return;
         $scope.column = [
             {
@@ -154,6 +169,62 @@ ajaxData({
             }
         ];
     };
+
+    //电站-故障分析
+    $scope.faultAlarmTotalStatistics.getDataCallback = (success, res) => {
+        $scope.faultData = res;
+    }
+
+    //电站-故障列表
+    $scope.getStationFaultAlarmRtData.getDataCallback = (success, res) => {
+        $scope.column = [
+            {
+                title: '设备名称',
+                dataIndex: 'name',
+                sort: 'true',
+                align: 'center',
+            },
+            {
+                title: '故障类型',
+                dataIndex: 'eventType',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '设备类型',
+                dataIndex: 'deviceType',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '故障发生时间',
+                dataIndex: 'sStartTime',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '故障描述',
+                dataIndex: 'eventDesc',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '持续时间',
+                dataIndex: 'hours',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '处理详情',
+                dataIndex: '',
+                sort: 'true',
+                align: 'right',
+                render(text, item, index) {
+                    return `<span>待写</span>`
+                }
+            }
+        ];
+    }
 
     // const combineColumn = arr => {
     //     const newArr = arr.map(item => {
