@@ -1,4 +1,13 @@
-ajaxData({}, {
+ajaxData({
+    //集团-今日
+    companyToday: {
+        name: 'GETequipmentDetailCompanyToday',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    
+}, {
     __serviceName__: 'themeEquipmentOperationService'
 })('themeEquipmentOperationDetailCtrl', ['$scope', 'themeEquipmentOperationService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
     // 初始化 scope
@@ -16,8 +25,10 @@ ajaxData({}, {
         $scope.selectChange('select1');
         $scope.selectChange('select2');
         $scope.changeTab(tabIndex);
-        $scope.currentColumn();
         $('.ng-clock').removeClass('ng-clock');
+
+        await myAjaxData.timeout(0);
+        diffGetData();
         $scope.$apply();
     };
 
@@ -40,6 +51,7 @@ ajaxData({}, {
                 tabIndex
             }
         });
+        diffGetData();
     };
     // 图标轴线切换
     $scope.selectChange = async (arg) => {
@@ -53,12 +65,12 @@ ajaxData({}, {
     };
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
-        $scope.currentColumn();
+        diffGetData();
     };
 
     // 日期改变
     $scope.dateUpdated = () => {
-        $scope.currentColumn();
+        diffGetData();
     };
 
     // 详情 放大缩小  回调
@@ -66,29 +78,106 @@ ajaxData({}, {
 
     }
 
-    const combineColumn = arr => {
-        const newArr = arr.map(item => {
-            return {
-                title: item,
-                dataIndex: '',
-                width: '',
-                align: 'left'
-            }
-        })
-        return newArr;
-    }
+    // 判断 调用  对应 接口
+    async function diffGetData() {
+        // if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+        switch (currentClass) {
+            case 'CompanyDayToday':
+                $scope.companyToday.getData({
+                    queryType: 1,
+                    dateType: 3,
+                    date: dateTime.showDate
+                });
+                break;
+            // case 'CompanyDayToday':
+            //     $scope.companyToday.getData({
+            //         queryType: 1,
+            //         dateType: 3,
+            //         date: dateTime.showDate
+            //     });
+            //     break;
+            default:
+                break;
 
-    $scope.currentColumn = () =>{
-        if($scope.currentClass === 'StationDayToday'){
-            $scope.column = combineColumn(['设备名称', '故障类型', '设备类型', '故障发生时间', '故障描述', '持续时间', '处理详情']);
-        }else if($scope.currentClass === 'CompanyDayToday'){
-            $scope.column = combineColumn(['电站名称', '总台数', '运行台数', '待机', '故障', '维护', '离线']);
-        } else if ($scope.currentClass === 'CompanyDayAgo'){
-            $scope.column = combineColumn(['电站名称', '总台数', '故障台次', '维护台次', '离线台次', '故障损失小时数', '故障损失电量', 'mttr', 'mtbf', 'pba', 'pr', '综合得分']);
-        } else {
-            $scope.column = combineColumn(['电站名称', '总台数', '故障台次', '维护台次', '离线台次', '故障损失小时数', '故障损失电量', 'mttr', 'mtbf', 'pba', 'pr', '综合得分']);
         }
     }
+
+    $scope.companyToday.getDataCallback = (success, res) => {
+        console.log(res)
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                align: 'center',
+            },
+            {
+                title: '总台数',
+                dataIndex: '',
+                sort: 'true',
+                align: 'right',
+                render(text, item, index) {
+                    return `<span>${item.comm + item.fault + item.maintain + item.run + item.wait || ''}</span>`
+                }
+            },
+            {
+                title: '运行台数',
+                dataIndex: 'run',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '待机',
+                dataIndex: 'wait',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '故障',
+                dataIndex: 'fault',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '维护',
+                dataIndex: 'maintain',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '离线',
+                dataIndex: 'comm',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+    };
+
+    // const combineColumn = arr => {
+    //     const newArr = arr.map(item => {
+    //         return {
+    //             title: item,
+    //             dataIndex: '',
+    //             width: '',
+    //             align: 'left'
+    //         }
+    //     })
+    //     return newArr;
+    // }
+
+    // $scope.currentColumn = () =>{
+    //     if($scope.currentClass === 'StationDayToday'){
+    //         $scope.column = combineColumn(['设备名称', '故障类型', '设备类型', '故障发生时间', '故障描述', '持续时间', '处理详情']);
+    //     }else if($scope.currentClass === 'CompanyDayToday'){
+    //         $scope.column = combineColumn(['电站名称', '总台数', '运行台数', '待机', '故障', '维护', '离线']);
+    //     } else if ($scope.currentClass === 'CompanyDayAgo'){
+    //         $scope.column = combineColumn(['电站名称', '总台数', '故障台次', '维护台次', '离线台次', '故障损失小时数', '故障损失电量', 'mttr', 'mtbf', 'pba', 'pr', '综合得分']);
+    //     } else {
+    //         $scope.column = combineColumn(['电站名称', '总台数', '故障台次', '维护台次', '离线台次', '故障损失小时数', '故障损失电量', 'mttr', 'mtbf', 'pba', 'pr', '综合得分']);
+    //     }
+    // }
 
     
 });

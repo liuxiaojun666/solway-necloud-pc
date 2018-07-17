@@ -31,7 +31,6 @@ ajaxData({
     __serviceName__: 'themeAccumulativeDetailService'
 })('themeAccumulativeDetailCtrl', ['$scope', 'themeAccumulativeDetailService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
     $scope.initChildScope($scope, myAjaxData);
-    
     $scope.mainPageInitComplete = async () => {
         let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeAccumulative || {};
         $scope.changeShowShape(showShape || 'list');
@@ -42,6 +41,8 @@ ajaxData({
         $('.ng-clock').removeClass('ng-clock');
 
         diffSelectOptions();//只有一种情况，无需判断
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
         diffGetData();
         $scope.$apply();
     };
@@ -51,9 +52,9 @@ ajaxData({
         diffGetData();
     };
 
-
     // 切换显示形式  图表 or 列表
     $scope.changeShowShape = showShape => {
+        if (showShape === $scope.showShape) return;
         $scope.showShape = showShape;
         historicalRecord.set({
             themeAccumulative: {
@@ -80,6 +81,7 @@ ajaxData({
 
     // 判断 调用  对应 接口
     async function diffGetData() {
+        if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         if ($scope.dataType && $scope.showShape == 'list'){ //集团列表
             $scope.query_company_accum_detail_timelist_his.getData({
@@ -215,7 +217,7 @@ ajaxData({
     $scope.query_company_accum_detail_timebar_his.getDataCallback = (success, res) => {
         
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'comp_score';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
     }
@@ -329,13 +331,14 @@ ajaxData({
     // 电站柱状图--接口处理
     $scope.query_station_accum_detail_timebar_his.getDataCallback = (success, res) => {
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'comp_score';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
     }
 
     // 计算 图表 显示对应 轴
     function diffChartLineData() {
+        if (!$scope.initComplete) return;
         const { select1, select2 } = $scope;
         
         if ($scope.dataType){//集团
@@ -350,12 +353,12 @@ ajaxData({
     // selectOption赋值
     function diffSelectOptions() {
         $scope.selectOptions = {
-            real_kwh_chk: '实发电量',
+            real_kwh_chk: '实发电量(kWh)',
             fail_count: '故障台次',
             alarm_count: '维护台次',
             inter_count: '离线台次',
-            fail_hours: '故障损失小时数',
-            fail_kwh: '故障损失电量',
+            fail_hours: '故障损失小时数(h)',
+            fail_kwh: '故障损失电量(kWh)',
             mttr: 'mttr',
             mtbf: 'mtbf',
             pba: 'pba',
