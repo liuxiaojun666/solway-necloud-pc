@@ -226,11 +226,21 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
             trCheckeboxApply()
             lxjClickApply()
             // tbodyLazyLoadScrollListen()
-            tableXScroll();
+            tableScroll()
+            fixedTableWidth()
 
             $scope.mounted && $scope.mounted($scope, $element)
             $scope.isMounted = !0
         }, 0)
+
+        function fixedTableWidth() {
+            let width = 0;
+            $($element[0]).find('th.fixed-left-th').each((i,v) => {
+                width += $(v).outerWidth();
+            });
+            $element.find('.my-table-body.fixed-left table').width(width);
+            $element.find('.my-table-head.fixed-left table').width(width);
+        }
 
         function trCheckeboxApply() {
             Array.from($element.find('th')).forEach(dv => {
@@ -272,14 +282,15 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
             }
         }
 
-        function tableXScroll() {
+        function tableScroll() {
             const $myTableBody = $($element[0]).find('.my-table-body')
             $myTableBody.on('scroll', eventHand)
             $element.on('$destroy', () => $myTableBody.off('scroll', eventHand))
             function eventHand(e) {
                 const $this = $(this);
-                const $table = $this.find('table');
-                $('.my-table-head table').css('margin-left', $table.offset().left - $this.offset().left + 'px');
+                const $table = $this.find('table').eq(0);
+                $element.find('.my-table-head.main-head table').css('margin-left', $table.offset().left - $this.offset().left + 'px');
+                $element.find('.my-table-body.fixed-left table').css('margin-top', $table.offset().top - $this.offset().top + 'px');
             }
         }
 
