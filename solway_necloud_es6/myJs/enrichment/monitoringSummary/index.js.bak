@@ -102,7 +102,10 @@ ajaxData({
     };
 
     // 放大显示详情操作
-    $scope.switchDetailFullPage = () => {
+    $scope.switchDetailFullPage = (e, type) => {
+        if (type === 'dblclick') {
+            if (!e.ctrlKey) return;
+        }
         historicalRecord.set({ 
             detailFullPage: $scope.detailFullPage = !$scope.detailFullPage 
         });

@@ -84,6 +84,41 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 列表视图  获取 设备 类型
+    getDeviceType: {
+        name: 'GETgetDeviceType',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 列表视图  获取 设备 类型 箱变 列表
+    getRunRealDataBBoxChange: {
+        name: 'GETDeviceStationGetRunRealDataBBoxChange',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 列表视图  获取 设备 类型 逆变器 列表
+    getRunRealDataBInverter: {
+        name: 'GETDeviceStationGetRunRealDataBInverter',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 列表视图  获取 设备 类型 汇流箱 列表
+    getRunRealDataBJunction: {
+        name: 'GETDeviceStationGetRunRealDataBJunction',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 逆变器获取设备信息 用  serialnumber  获取 deviceId
+    selectByConditionMap: {
+        name: 'GETselectByConditionMap',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
 }, {
         __serviceName__: 'themePowerDetailService'
     })('themePowerDetailCtrl', ['$scope', 'themePowerDetailService', 'historicalRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
@@ -92,11 +127,12 @@ ajaxData({
 
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
-            let { showShape, tabIndex = 0, checkboxStatus = [true, true, true, true, true] } = historicalRecord.get().themePower || {};
+            let { showShape, currentDeviceType = '1', tabIndex = 0, checkboxStatus = [true, true, true, true, true] } = historicalRecord.get().themePower || {};
             $scope.changeShowShape((tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'chart'));
             const { dateType, dateTime } = historicalRecord.get();
             $scope.dateType = dateType;
             $scope.dateTime = dateTime;
+            $scope.currentDeviceType = currentDeviceType;
             await $scope.dateUpdated();
             $scope.checkboxStatus = checkboxStatus;
             $scope.changeTab(($scope.dataType > 0 && $scope.tabIndex > 1) ? 0 : tabIndex);
@@ -158,6 +194,17 @@ ajaxData({
             diffGetData();
         };
 
+        // 列表视图  切换 设备类型
+        $scope.switchDeviceType = () => {
+            historicalRecord.set({
+                themePower: {
+                    ...historicalRecord.get().themePower || {},
+                    currentDeviceType: $scope.currentDeviceType
+                }
+            });
+            diffDeviceTypeGetData();
+        };
+
         // 复选框状态改变
         $scope.changeCheckboxStatus = index => {
             if (index === 0) $scope.checkboxStatus.fill($scope.checkboxStatus[0]);
@@ -169,20 +216,79 @@ ajaxData({
                     checkboxStatus: $scope.checkboxStatus
                 }
             });
-            diffGetData();
+            diffDeviceTypeGetData();
         };
 
-        // 列表
-        $scope.column = [
-            {
-                title: '电站名称',
-                dataIndex: '',
-                width: '',
-                align: 'left'
+        // 逆变器 列表视图 点击 行
+        $scope.showInformation = function (item, index) {
+            const { did: serialnumber, sid: pstationid } = item;
+            $scope.selectByConditionMap.getData({
+                stid: pstationid,
+                sn: serialnumber
+            }).then(function (result) {
+                if (result) showHistoryData_byRTMDeviceLogId(pstationid, result.id, serialnumber, '2', result.hasJB);				
+            });
+        };
+
+        // 箱变 列表视图 点击 行
+        $scope.showBoxChangeData = (item, index) => {
+            $scope.showHistoryData_byRTMDeviceLogId(pstationid, result.id, serialnumber, '3');
+        };
+
+        // 汇流箱 列表视图 点击 行
+        $scope.toJunctionBoxMonitor = (item, index) => {
+            $scope.showHistoryData_byRTMDeviceLogId(pstationid, result.id, serialnumber, '1');
+        };
+        
+        //设备  弹窗
+        function showHistoryData_byRTMDeviceLogId (pstationid, deviceId, deviceSerialNnumber, deviceTypeNow, hasJB) {
+            const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, defaultShowPage: '2' };
+            $scope.deviceTypeNow = deviceTypeNow;
+            $scope.inverterType = hasJB;//点击逆变器，不同类型跳转不同样式页面（1->inverterDetailNew.jsp,2->inverterDetailNewType1.jsp）
+
+            if (deviceTypeNow == '3') {
+                $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
+                $scope.$broadcast("showDeviceDetail3broad", res);
+            } else if (deviceTypeNow == '2') {
+                $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
+                $scope.$broadcast("showDeviceDetail2broad", res);
+            } else if (deviceTypeNow == '1') {
+                $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
+                $scope.$broadcast("showDeviceDetail1broad", res);
             }
-        ];
+        };
 
-
+        // 列表视图 接口请求
+        function diffDeviceTypeGetData() {
+            switch ($scope.currentDeviceType) {
+                case '1':
+                    $scope.getRunRealDataBBoxChange.getData({
+                        pageIndex: 0,
+                        search: $scope.searchKey,
+                        status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
+                    });
+                    break;
+            
+                case '2':
+                    $scope.getRunRealDataBInverter.getData({
+                        pageIndex: 0,
+                        search: $scope.searchKey,
+                        status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
+                    });
+                    break;
+            
+                case '3':
+                    $scope.getRunRealDataBJunction.getData({
+                        pageIndex: 0,
+                        search: $scope.searchKey,
+                        status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
+                    });
+                    break;
+            
+                default:
+                    break;
+            }
+        }
 
         // 判断 调用  对应 接口
         async function diffGetData() {
@@ -203,8 +309,7 @@ ajaxData({
                                 ? $scope.stationDayTodayTime2.res.body.echarts_xaTime[$scope.stationDayTodayTime2.res.body.echarts_xaTime.length - 1].split(':').join('')
                                 : 0,
                         });
-                    }
-                    if (tabIndex === 0 && showShape === 'list') {
+                    } else if (tabIndex === 0 && showShape === 'list') {
                         if ($scope.stationDayTodayTime.res) return;
                         $scope.stationDayTodayTime.getData({
                             queryType: 3,
@@ -215,6 +320,8 @@ ajaxData({
                                 ? $scope.stationDayTodayTime.res.body.chartList[$scope.stationDayTodayTime.res.body.chartList.length - 1].xaTime.split(':').join('')
                                 : 0,
                         });
+                    } else if (tabIndex === 1 && showShape === 'list') {
+                        $scope.getDeviceType.getData({});
                     }
                     break;
 
@@ -296,7 +403,163 @@ ajaxData({
             }
         };
 
-
+        // 电站 今日 设备 列表视图
+        $scope.getDeviceType.getDataCallback = (success, res) => {
+            if (!success) return;
+            const {currentDeviceType} = $scope;
+            const isChange = !res.data.some(v => v.devid === currentDeviceType);
+            if (isChange) $scope.currentDeviceType = res.data[0].devid;
+            $scope.switchDeviceType();
+        };
+        // 电站 今日 设备 列表视图 逆变器 列表
+        $scope.getRunRealDataBInverter.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    dataIndex: 'statusDesc',
+                    title: '状态',
+                    width: '80px',
+                    render(text, item, index) {
+                        if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                        else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                        else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                        else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                        else return `<span>${text}</span>`;
+                    }
+                },
+                {
+                    dataIndex: 'did',
+                    title: '编号',
+                    width: '60px',
+                },
+                {
+                    dataIndex: 'name',
+                    title: '名称',
+                    width: '120px',
+                    render(text) {
+                        return `<text style="color: #428bca;">${text}</text>`
+                    }
+                },
+                {
+                    dataIndex: 'dtime',
+                    title: '时间',
+                    width: '130px',
+                    align: 'center',
+                    render(text) {
+                        return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
+                    }
+                }, {
+                    dataIndex: 'dcu',
+                    title: 'DC电压(V)',
+                    width: '80px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'dcc',
+                    title: 'DC电流(A)',
+                    width: '80px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'dcp',
+                    title: 'DC功率(kW)',
+                    width: '80px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'acu',
+                    title: 'AC电压(V)',
+                    width: '80px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'acc',
+                    title: 'AC电流(A)',
+                    width: '80px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'acp',
+                    title: 'AC功率(kW)',
+                    width: '80px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 't',
+                    title: '温度(℃)',
+                    width: '80px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'ef',
+                    title: '效率(%)',
+                    width: '80px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${(text * 100).toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'f',
+                    title: '频率(Hz)',
+                    width: '80px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'pf',
+                    title: '功率因数',
+                    width: '90px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'dw',
+                    title: '日发电量(度)',
+                    width: '120px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, {
+                    dataIndex: 'tw',
+                    title: '总发电量(度)',
+                    width: '120px',
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                }, 
+                ...new Array(20).fill('c').map((v, i) => ({
+                    dataIndex: v + (i + 1),
+                    title: `<span>${i + 1}</span>`,
+                    width: '80px',
+                    align: 'right',
+                    render(text, item, index) {
+                        return `
+                        <div style="background: ${item.shadowFlags[i] ? 'rgba(0, 0, 0,0.3)' : ''}">
+                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags[i]]}">${text ? text.toFixed(2) : '-'}</span>
+                        </div>
+                        `
+                    }
+                }))
+            ];
+        };
         // 电站 今日 时间 列表 列表
         $scope.stationDayTodayTime.getDataCallback = (success, res) => {
             if (!success) return;

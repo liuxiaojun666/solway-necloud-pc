@@ -226,6 +226,7 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
             trCheckeboxApply()
             lxjClickApply()
             // tbodyLazyLoadScrollListen()
+            tableXScroll();
 
             $scope.mounted && $scope.mounted($scope, $element)
             $scope.isMounted = !0
@@ -268,6 +269,17 @@ app.directive('myTable', ['$timeout', 'myAjaxData', '$ocLazyLoad', ($timeout, my
                     $scope.pushData()
                     $scope.$apply()
                 }
+            }
+        }
+
+        function tableXScroll() {
+            const $myTableBody = $($element[0]).find('.my-table-body')
+            $myTableBody.on('scroll', eventHand)
+            $element.on('$destroy', () => $myTableBody.off('scroll', eventHand))
+            function eventHand(e) {
+                const $this = $(this);
+                const $table = $this.find('table');
+                $('.my-table-head table').css('margin-left', $table.offset().left - $this.offset().left + 'px');
             }
         }
 
