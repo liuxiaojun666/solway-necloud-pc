@@ -83,6 +83,7 @@ ajaxData({
     async function diffGetData() {
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
+        $scope.accumulativeDetailLoading = true;
         if ($scope.dataType && $scope.showShape == 'list'){ //集团列表
             $scope.query_company_accum_detail_timelist_his.getData({
                 'queryCode': 'query_company_accum_detail_timelist_his',
@@ -108,6 +109,7 @@ ajaxData({
 
     // 集团列表--接口处理
     $scope.query_company_accum_detail_timelist_his.getDataCallback = (success, res) => {
+        $scope.accumulativeDetailLoading = false;
         if (!success) return;
         $scope.column = [
             {
@@ -117,113 +119,69 @@ ajaxData({
                 align: 'center',
             },
             {
+                title: '应发电量(' + res.body.units.shd_kwh_chk + ')',
+                dataIndex: 'shd_kwh_chk',
+                sort: 'true',
+                align: 'right'
+            },
+            {
                 title: '实发电量(' + res.body.units.real_kwh_chk + ')',
                 dataIndex: 'real_kwh_chk',
                 sort: 'true',
                 align: 'right'
             },
             {
-                title: '故障台次',
-                dataIndex: 'fail_count',
+                title: '上网电量(' + res.body.units.send_kwh_chk + ')',
+                dataIndex: 'send_kwh_chk',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
-                title: '维护台次',
-                dataIndex: 'alarm_count',
+                title: '损失电量(' + res.body.units.fail_we + ')',
+                dataIndex: 'fail_we',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
-                title: '离线台次',
-                dataIndex: 'inter_count',
+                title: '发电小时数(' + res.body.units.real_hours + ')',
+                dataIndex: 'real_hours',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
-                title: '故障损失小时数',
-                dataIndex: 'fail_hours',
+                title: '辐射总量(' + res.body.units.rad_chk + ')',
+                dataIndex: 'rad_chk',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
-            },
-            {
-                title: '故障损失电量',
-                dataIndex: 'fail_kwh',
-                sort: 'true',
-                align: 'right',
-            },
-            {
-                title: 'mttr',
-                dataIndex: 'mttr',
-                sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
-            },
-            {
-                title: 'mtbf',
-                dataIndex: 'mtbf',
-                sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
                 title: 'pba',
                 dataIndex: 'pba',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
                 title: 'pr',
                 dataIndex: 'pr_score',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
-            },
-            {
-                title: '综合得分',
-                dataIndex: 'comp_score',
-                sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
-            },
+                align: 'right'
+            }
         ];
         // $scope.$apply();
     };
 
     // 集团柱状图--接口处理
     $scope.query_company_accum_detail_timebar_his.getDataCallback = (success, res) => {
-        
+        $scope.accumulativeDetailLoading = false;        
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'comp_score';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
     }
 
     // 电站列表--接口处理
     $scope.query_station_accum_detail_timelist_his.getDataCallback = (success, res) => {
+        $scope.accumulativeDetailLoading = false;
         if (!success) return;
         $scope.column = [
             {
@@ -233,105 +191,61 @@ ajaxData({
                 align: 'center',
             },
             {
+                title: '应发电量(' + res.body.units.shd_kwh_chk + ')',
+                dataIndex: 'shd_kwh_chk',
+                sort: 'true',
+                align: 'right'
+            },
+            {
                 title: '实发电量(' + res.body.units.real_kwh_chk + ')',
                 dataIndex: 'real_kwh_chk',
                 sort: 'true',
                 align: 'right'
             },
             {
-                title: '故障台次',
-                dataIndex: 'fail_count',
+                title: '上网电量(' + res.body.units.send_kwh_chk + ')',
+                dataIndex: 'send_kwh_chk',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
-                title: '维护台次',
-                dataIndex: 'alarm_count',
+                title: '损失电量(' + res.body.units.fail_we + ')',
+                dataIndex: 'fail_we',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
-                title: '离线台次',
-                dataIndex: 'inter_count',
+                title: '发电小时数(' + res.body.units.real_hours + ')',
+                dataIndex: 'real_hours',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
-                title: '故障损失小时数',
-                dataIndex: 'fail_hours',
+                title: '辐射总量(' + res.body.units.rad_chk + ')',
+                dataIndex: 'rad_chk',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
-            },
-            {
-                title: '故障损失电量',
-                dataIndex: 'fail_kwh',
-                sort: 'true',
-                align: 'right',
-            },
-            {
-                title: 'mttr',
-                dataIndex: 'mttr',
-                sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
-            },
-            {
-                title: 'mtbf',
-                dataIndex: 'mtbf',
-                sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
                 title: 'pba',
                 dataIndex: 'pba',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
+                align: 'right'
             },
             {
                 title: 'pr',
                 dataIndex: 'pr_score',
                 sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
-            },
-            {
-                title: '综合得分',
-                dataIndex: 'comp_score',
-                sort: 'true',
-                align: 'right',
-                render(text, item, index) {
-                    return text ? '<span>' + text + '</span>' : '<span></span>';
-                }
-            },
+                align: 'right'
+            }
         ];
     }
 
     // 电站柱状图--接口处理
     $scope.query_station_accum_detail_timebar_his.getDataCallback = (success, res) => {
+        $scope.accumulativeDetailLoading = false;
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'comp_score';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
     }
@@ -353,17 +267,14 @@ ajaxData({
     // selectOption赋值
     function diffSelectOptions() {
         $scope.selectOptions = {
+            shd_kwh_chk: '应发电量(kWh)',
             real_kwh_chk: '实发电量(kWh)',
-            fail_count: '故障台次',
-            alarm_count: '维护台次',
-            inter_count: '离线台次',
-            fail_hours: '故障损失小时数(h)',
-            fail_kwh: '故障损失电量(kWh)',
-            mttr: 'mttr',
-            mtbf: 'mtbf',
+            send_kwh_chk: '上网电量(kWh)',
+            fail_we: '损失电量(kWh)',
+            real_hours: '发电小时数',
+            rad_chk: '辐射总量',
             pba: 'pba',
-            pr_score: 'pr',
-            comp_score:'综合得分'
+            pr: 'pr'
         };
     }
 });
