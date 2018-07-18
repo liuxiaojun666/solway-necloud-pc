@@ -407,30 +407,35 @@ ajaxData({
                 dataIndex: 'dtime',
                 width: '20%',
                 sort: true,
+                align: 'center'
             },
             {
-                title: '实发电量',
+                title: '实发电量(kWh)',
                 dataIndex: 'real_kwh_chk',
                 width: '20%',
                 sort: true,
+                align: 'right'
             },
             {
-                title: '应发电量',
+                title: '应发电量(kWh)',
                 dataIndex: 'shd_kwh_chk',
                 width: '20%',
                 sort: true,
+                align: 'right'
             },
             {
-                title: '上网电量',
+                title: '上网电量(kWh)',
                 dataIndex: 'send_kwh_chk',
                 width: '20%',
                 sort: true,
+                align: 'right'
             },
             {
-                title: '其他损失电量',
+                title: '其他损失电量(kWh)',
                 dataIndex: 'we_rate',
                 width: '20%',
                 sort: true,
+                align: 'right'
             },
         ];
     };
@@ -438,7 +443,7 @@ ajaxData({
     $scope.query_station_month_elec_detail_timeline_his.getDataCallback = async (success, res) => {
         if (!success) return;
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'send_kwh_chk';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
         await $scope.selectChange('select1');
         await $scope.selectChange('select2');
         diffChartLineData();
@@ -498,6 +503,131 @@ ajaxData({
             },
         ]
     };
+    // 电站 月 设备 曲线
+    $scope.query_station_month_elec_devline_his.getDataCallback = async (success, res) => {
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'inst_kw';
+        await $scope.selectChange('select1');
+        await $scope.selectChange('select2');
+        diffChartLineData();
+        $scope.$apply();
+    };
+    // 电站 年 时间 列表
+    $scope.query_station_year_elec_detail_timelist_his.getDataCallback =(success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'dtime',
+                width: '20%',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '实发电量(kWh)',
+                dataIndex: 'real_kwh_chk',
+                width: '20%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '应发电量(kWh)',
+                dataIndex: 'shd_kwh_chk',
+                width: '20%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '上网电量(kWh)',
+                dataIndex: 'send_kwh_chk',
+                width: '20%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '其他损失电量(kWh)',
+                dataIndex: 'we_rate',
+                width: '20%',
+                sort: true,
+                align: 'right'
+            },
+        ];
+    };
+    // 电站 年 时间 图表
+    $scope.query_station_year_elec_detail_timeline_his.getDataCallback = async (success, res) => {
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
+        await $scope.selectChange('select1');
+        await $scope.selectChange('select2');
+        diffChartLineData();
+        $scope.$apply();
+    };
+    // 电站 年 设备 列表
+    $scope.query_station_year_elec_devlist_his.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '设备名称',
+                dataIndex: 'eq_name',
+                width: '25%',
+                sort: true,
+            },
+            {
+                title: '装机容量(kW)',
+                dataIndex: 'inst_kw',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '发电量(kWh)',
+                dataIndex: 'real_kwh_chk',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '发电小时数(h)',
+                dataIndex: 'real_hours',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '故障损失电量(kWh)',
+                dataIndex: 'fail_we',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '限电损失电量(kWh)',
+                dataIndex: 'restrict_we',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '其他损失电量(kWh)',
+                dataIndex: 'other_we',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+        ]
+    };
+    // 电站 年 设备 曲线
+    $scope.query_station_year_elec_devline_his.getDataCallback = async (success, res) => {
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'inst_kw';
+        await $scope.selectChange('select1');
+        await $scope.selectChange('select2');
+        diffChartLineData();
+        $scope.$apply();
+    };
 
     // 计算 图表 显示对应 轴
     function diffChartLineData() {
@@ -509,11 +639,15 @@ ajaxData({
         } else if (currentClass === 'StationMonth' && tabIndex === 0) {
             $scope.xdata = $scope.query_station_month_elec_detail_timeline_his.res.body.data.dtime
             $scope.ydatas = [[$scope.query_station_month_elec_detail_timeline_his.res.body.data[select1]], [$scope.query_station_month_elec_detail_timeline_his.res.body.data[select2]]]
-        } else if (currentClass === 'StationYear') {
-            $scope.xdata = $scope.query_station_year_res_timeline_his.res.body.data.dtime
-            $scope.ydatas = [[$scope.query_station_year_res_timeline_his.res.body.data[select1]], [$scope.query_station_year_res_timeline_his.res.body.data[select2]]]
-        } else if (currentClass === 'CompanyDayAgo') {
-            $scope.ydatas = [[$scope.query_company_day_res_timelist_his.res.body.data.map(v => v[$scope.select1])], [$scope.query_company_day_res_timelist_his.res.body.data.map(v => v.max_sun)]];
+        } else if (currentClass === 'StationMonth' && tabIndex === 1) {
+            $scope.xdata = $scope.query_station_month_elec_devline_his.res.body.data.eq_name
+            $scope.ydatas = [[$scope.query_station_month_elec_devline_his.res.body.data[select1]], [$scope.query_station_month_elec_devline_his.res.body.data[select2]]]
+        } else if (currentClass === 'StationYear' && tabIndex === 0) {
+            $scope.xdata = $scope.query_station_year_elec_detail_timeline_his.res.body.data.dtime
+            $scope.ydatas = [[$scope.query_station_year_elec_detail_timeline_his.res.body.data[select1]], [$scope.query_station_year_elec_detail_timeline_his.res.body.data[select2]]]
+        } else if (currentClass === 'StationYear' && tabIndex === 1) {
+            $scope.xdata = $scope.query_station_year_elec_devline_his.res.body.data.eq_name
+            $scope.ydatas = [[$scope.query_station_year_elec_devline_his.res.body.data[select1]], [$scope.query_station_year_elec_devline_his.res.body.data[select2]]]
         }
     }
 
@@ -533,13 +667,18 @@ ajaxData({
                     shd_kwh_chk: '应发电量(kWh)',
                     we_rate: '其他损失电量(kWh)',
                 };
-            } else if ($scope.tabIndex === 0) {
+            } else if ($scope.tabIndex === 1) {
                 $scope.selectOptions = {
-                    max_sun: '最大辐射强度(kWh/m²)',
-                    rad_chk: '辐射总量(kWh/m²)',
-                    sun_hours: '日照小时数(h)',
-                    ta_avg: '平均温度(℃)',
-                    real_hours: '发电小时数(h)'
+                    decay_we: '衰减损失电量(kWh)',
+                    dust_we: '灰尘损失电量(kWh)',
+                    fail_we: '故障损失电量(kWh)',
+                    inst_kw: '装机容量(kW)',
+                    other_we: '其他损失电量(kWh)',
+                    real_hours: '实际利用小时数(h)',
+                    real_kwh_chk: '实发电量(kWh)',
+                    repair_we: '检修损失电量(kWh)',
+                    restrict_we: '限电损失电量(kWh)',
+                    shade_we: '阴影损失电量(kWh)',
                 };
             }
         } else if ($scope.currentClass === 'StationYear') {
@@ -550,21 +689,22 @@ ajaxData({
                     shd_kwh_chk: '应发电量(kWh)',
                     we_rate: '其他损失电量(kWh)',
                 };
-            } else if ($scope.tabIndex === 0) {
+            } else if ($scope.tabIndex === 1) {
                 $scope.selectOptions = {
-                    max_sun: '最大辐射强度(kWh/m²)',
-                    rad_chk: '辐射总量(kWh/m²)',
-                    sun_hours: '日照小时数(h)',
-                    ta_avg: '平均温度(℃)',
-                    real_hours: '发电小时数(h)'
+                    decay_we: '衰减损失电量(kWh)',
+                    dust_we: '灰尘损失电量(kWh)',
+                    fail_we: '故障损失电量(kWh)',
+                    inst_kw: '装机容量(kW)',
+                    other_we: '其他损失电量(kWh)',
+                    real_hours: '实际利用小时数(h)',
+                    real_kwh_chk: '实发电量(kWh)',
+                    repair_we: '检修损失电量(kWh)',
+                    restrict_we: '限电损失电量(kWh)',
+                    shade_we: '阴影损失电量(kWh)',
                 };
             }
         } else if ($scope.currentClass === 'CompanyDayAgo') {
-            $scope.selectOptions = {
-                inst_kw: '装机容量kW',
-                rad_chk: '辐射总量kWh/m²',
-                ta_avg: '平均温度(℃)',
-            }
+            
         }
     }
     
