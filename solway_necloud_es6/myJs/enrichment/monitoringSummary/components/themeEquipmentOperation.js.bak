@@ -145,12 +145,14 @@ ajaxData({
     
     //父页面初始化完成
     $scope.mainPageInitComplete = () => {
+        $scope.themeEquipmentIsLoding = true;
         initParams();
     };
 
     //切换日期类型
     $scope.dateUpdated = () => {
         if ($scope._dateType != 3) {
+            $scope.themeEquipmentIsLoding = true;
             initParams();
         }
     }
@@ -158,6 +160,7 @@ ajaxData({
     //切换电站
     $scope.switchPowerCallback = () => {
         if ($scope._dateType != 3) {
+            $scope.themeEquipmentIsLoding = true;
             initParams();
         }
     }
@@ -169,7 +172,7 @@ ajaxData({
 
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        $scope.themeEquipmentIsLoding = !$scope.deviceCurrent.res;;
+        // $scope.themeEquipmentIsLoding = !$scope.deviceCurrent.res;
         if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
             $scope.deviceCurrent.getData({
                 'queryType': queryType,
