@@ -76,653 +76,1014 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 集团 日 今日 列表
+    companyDayToday: {
+        name: 'GETpvMonitorGetRunKWPowerList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 日 历史日 列表
+    query_company_day_elec_detail_stationlist_his: {
+        name: 'GETquery_company_day_elec_detail_stationlist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 日 历史日 图表
+    query_company_day_elec_detail_stationline_his: {
+        name: 'GETquery_company_day_elec_detail_stationline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 月 时间 列表
+    query_company_month_elec_detail_timelist_his: {
+        name: 'GETquery_company_month_elec_detail_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 月 时间 图表
+    query_company_month_elec_detail_timeline_his: {
+        name: 'GETquery_company_month_elec_detail_timeline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 月 电站 列表
+    query_company_month_elec_detail_stationlist_his: {
+        name: 'GETquery_company_month_elec_detail_stationlist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 月 电站 图表
+    query_company_month_elec_detail_stationline_his: {
+        name: 'GETquery_company_month_elec_detail_stationline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 年 时间 列表
+    query_company_year_elec_detail_timelist_his: {
+        name: 'GETquery_company_year_elec_detail_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 年 时间 图表
+    query_company_year_elec_detail_timeline_his: {
+        name: 'GETquery_company_year_elec_detail_timeline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 年 电站 列表
+    query_company_year_elec_detail_stationlist_his: {
+        name: 'GETquery_company_year_elec_detail_stationlist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团 年 电站 图表
+    query_company_year_elec_detail_stationline_his: {
+        name: 'GETquery_company_year_elec_detail_stationline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
-    __serviceName__: 'themeElectricityDetailService'
-})('themeElectricityDetailCtrl', ['$scope', 'themeElectricityDetailService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
-    // 初始化 scope
-    $scope.initChildScope($scope, myAjaxData);
+        __serviceName__: 'themeElectricityDetailService'
+    })('themeElectricityDetailCtrl', ['$scope', 'themeElectricityDetailService', 'historicalRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
 
-    // 主页面初始化完成 回调
-    $scope.mainPageInitComplete = async () => {
-        let { showShape, select1, select2, tabIndex = 0, checkboxStatus = [true, true, true, true, true] } = historicalRecord.get().themeElectricity || {};
-        if ($scope.currentClass === 'CompanyDayToday') showShape = 'list';
-        $scope.changeShowShape(showShape || 'list');
-        const { dateType, dateTime } = historicalRecord.get();
-        $scope.checkboxStatus = checkboxStatus;
-        $scope.dateType = dateType;
-        $scope.dateTime = dateTime;
-        await $scope.dateUpdated();
-        $scope.select1 = select1 || 2;
-        $scope.select2 = select2 || 2;
-        if (select1) await $scope.selectChange('select1');
-        if (select2) await $scope.selectChange('select2');
-        $scope.changeTab(tabIndex);
-        $('.ng-clock').removeClass('ng-clock');
-        $scope.initComplete = true;
-        await myAjaxData.timeout(0);
-        await $scope.diffGetData();
-        $scope.$apply();
-    };
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            let { showShape, select1, select2, tabIndex = 0, checkboxStatus = [true, true, true, true, true] } = historicalRecord.get().themeElectricity || {};
+            if ($scope.currentClass === 'CompanyDayToday' || $scope.currentClass === 'StationDatyToday') showShape = 'list';
+            $scope.changeShowShape(showShape || 'list');
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.checkboxStatus = checkboxStatus;
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            await $scope.dateUpdated();
+            $scope.select1 = select1 || 2;
+            $scope.select2 = select2 || 2;
+            if (select1) await $scope.selectChange('select1');
+            if (select2) await $scope.selectChange('select2');
+            $scope.changeTab(tabIndex);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            await $scope.diffGetData();
+            $scope.$apply();
+        };
 
-    // 切换电站 回调
-    $scope.switchPowerCallback = () => {
-        if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
-        setDataNull();
-        diffSelectOptions();
-        $scope.diffGetData();
-    };
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            if ($scope.currentClass === 'CompanyDayToday' || $scope.currentClass === 'StationDatyToday') $scope.changeShowShape('list');
+            setDataNull();
+            diffSelectOptions();
+            $scope.diffGetData();
+        };
 
-    // 日期改变
-    $scope.dateUpdated = async () => {
-        await myAjaxData.timeout(0);
-        if ($scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
-        setDataNull();
-        diffSelectOptions();
-        $scope.diffGetData();
-    };
+        // 日期改变
+        $scope.dateUpdated = async () => {
+            await myAjaxData.timeout(0);
+            if ($scope.currentClass === 'CompanyDayToday' || $scope.currentClass === 'StationDatyToday') $scope.changeShowShape('list');
+            setDataNull();
+            diffSelectOptions();
+            $scope.diffGetData();
+        };
 
 
-    // tab 切换
-    $scope.changeTab = tabIndex => {
-        $scope.tabIndex = tabIndex;
-        historicalRecord.set({
-            themeElectricity: {
-                ...historicalRecord.get().themeElectricity || {},
-                tabIndex
+        // tab 切换
+        $scope.changeTab = tabIndex => {
+            $scope.tabIndex = tabIndex;
+            historicalRecord.set({
+                themeElectricity: {
+                    ...historicalRecord.get().themeElectricity || {},
+                    tabIndex
+                }
+            });
+            setDataNull();
+            diffSelectOptions();
+            $scope.diffGetData();
+        };
+
+        // 切换显示形式  图表 or 列表
+        $scope.changeShowShape = showShape => {
+            $scope.showShape = showShape;
+            historicalRecord.set({
+                themeElectricity: {
+                    ...historicalRecord.get().themeElectricity || {},
+                    showShape
+                }
+            });
+            setDataNull();
+            diffSelectOptions();
+            $scope.diffGetData();
+        };
+
+        // 图标轴线切换
+        $scope.selectChange = async (arg) => {
+            await myAjaxData.timeout(0);
+            historicalRecord.set({
+                themeElectricity: {
+                    ...historicalRecord.get().themeElectricity || {},
+                    [arg]: $scope[arg]
+                }
+            });
+            diffChartLineData();
+            $scope.$apply();
+        };
+
+        // 复选框状态改变
+        $scope.changeCheckboxStatus = index => {
+            if (index === 0) $scope.checkboxStatus.fill($scope.checkboxStatus[0]);
+            else if (!$scope.checkboxStatus[index]) $scope.checkboxStatus[0] = false;
+            else if ($scope.checkboxStatus.slice(1).every(v => v)) $scope.checkboxStatus[0] = true;
+            historicalRecord.set({
+                themeElectricity: {
+                    ...historicalRecord.get().themeElectricity || {},
+                    checkboxStatus: $scope.checkboxStatus
+                }
+            });
+            $scope.diffGetData();
+        };
+
+        $scope.diffGetData = async () => {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+            if (!currentClass.includes('DayToday')) $scope.column = [];
+            switch (currentClass) {
+                case 'StationDayToday':
+                    $scope.stationDayTodayData.getData({
+                        queryType: 3,
+                        dateType: 3,
+                        date: dateTime.showDate,
+                        search: $scope.searchKey || '',
+                        status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
+                    });
+                    break;
+
+                case 'StationDayAgo':
+                    if (showShape === 'list') {
+                        $scope.query_station_day_elec_his_list.getData({
+                            queryCode: 'query_station_day_elec_his_list',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    } else if (showShape === 'chart') {
+                        $scope.query_station_day_elec_his_line.getData({
+                            queryCode: 'query_station_day_elec_his_line',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    }
+                    break;
+
+                case 'StationMonth':
+                    if (showShape === 'list' && tabIndex === 0) {
+                        $scope.query_station_month_elec_detail_timelist_his.getData({
+                            queryCode: 'query_station_month_elec_detail_timelist_his',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'chart' && tabIndex === 0) {
+                        $scope.query_station_month_elec_detail_timeline_his.getData({
+                            queryCode: 'query_station_month_elec_detail_timeline_his',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'list' && tabIndex === 1) {
+                        $scope.query_station_month_elec_devlist_his.getData({
+                            queryCode: 'query_station_month_elec_devlist_his',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'chart' && tabIndex === 1) {
+                        $scope.query_station_month_elec_devline_his.getData({
+                            queryCode: 'query_station_month_elec_devline_his',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    }
+                    break;
+
+                case 'StationYear':
+                    if (showShape === 'list' && tabIndex === 0) {
+                        $scope.query_station_year_elec_detail_timelist_his.getData({
+                            queryCode: 'query_station_year_elec_detail_timelist_his',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'chart' && tabIndex === 0) {
+                        $scope.query_station_year_elec_detail_timeline_his.getData({
+                            queryCode: 'query_station_year_elec_detail_timeline_his',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'list' && tabIndex === 1) {
+                        $scope.query_station_year_elec_devlist_his.getData({
+                            queryCode: 'query_station_year_elec_devlist_his',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'chart' && tabIndex === 1) {
+                        $scope.query_station_year_elec_devline_his.getData({
+                            queryCode: 'query_station_year_elec_devline_his',
+                            queryType: 3,
+                            date: dateTime.showDate
+                        });
+                    }
+                    break;
+
+                case 'CompanyDayToday':
+                    $scope.companyDayToday.getData({
+                        queryType: 1,
+                        dateType: 3,
+                        date: dateTime.showDate
+                    });
+                    break;
+
+                case 'CompanyDayAgo':
+                    if (showShape === 'list') {
+                        $scope.query_company_day_elec_detail_stationlist_his.getData({
+                            queryCode: 'query_company_day_elec_detail_stationlist_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    } else if (showShape === 'chart') {
+                        $scope.query_company_day_elec_detail_stationline_his.getData({
+                            queryCode: 'query_company_day_elec_detail_stationline_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
+                    break;
+
+                case 'CompanyMonth':
+                    if (showShape === 'list' && tabIndex === 0) {
+                        $scope.query_company_month_elec_detail_timelist_his.getData({
+                            queryCode: 'query_company_month_elec_detail_timelist_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'chart' && tabIndex === 0) {
+                        $scope.query_company_month_elec_detail_timeline_his.getData({
+                            queryCode: 'query_company_month_elec_detail_timeline_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'list' && tabIndex === 1) {
+                        $scope.query_company_month_elec_detail_stationlist_his.getData({
+                            queryCode: 'query_company_month_elec_detail_stationlist_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'chart' && tabIndex === 1) {
+                        $scope.query_company_month_elec_detail_stationline_his.getData({
+                            queryCode: 'query_company_month_elec_detail_stationline_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
+                    break;
+
+                case 'CompanyYear':
+                    if (showShape === 'list' && tabIndex === 0) {
+                        $scope.query_company_year_elec_detail_timelist_his.getData({
+                            queryCode: 'query_company_year_elec_detail_timelist_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'chart' && tabIndex === 0) {
+                        $scope.query_company_year_elec_detail_timeline_his.getData({
+                            queryCode: 'query_company_year_elec_detail_timeline_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'list' && tabIndex === 1) {
+                        $scope.query_company_year_elec_detail_stationlist_his.getData({
+                            queryCode: 'query_company_year_elec_detail_stationlist_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
+                    else if (showShape === 'chart' && tabIndex === 1) {
+                        $scope.query_company_year_elec_detail_stationline_his.getData({
+                            queryCode: 'query_company_year_elec_detail_stationline_his',
+                            queryType: 1,
+                            date: dateTime.showDate
+                        });
+                    }
+                    break;
+
+                default:
+                    break;
             }
-        });
-        setDataNull();
-        diffSelectOptions();
-        $scope.diffGetData();
-    };
+        };
 
-    // 切换显示形式  图表 or 列表
-    $scope.changeShowShape = showShape => {
-        $scope.showShape = showShape;
-        historicalRecord.set({
-            themeElectricity: {
-                ...historicalRecord.get().themeElectricity || {},
-                showShape
+        // 数据处理
+        // 电站 今日
+        $scope.stationDayTodayData.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '状态',
+                    dataIndex: 'statusDesc',
+                    width: '15%',
+                    sort: true,
+                },
+                {
+                    title: '设备名称',
+                    dataIndex: 'name',
+                    width: '25%',
+                    sort: true,
+                },
+                {
+                    title: '装机容量(kW)',
+                    dataIndex: 'acc_kw',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                },
+                {
+                    title: '发电量(kW/h)',
+                    dataIndex: 'dw',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                    render(text) {
+                        return `<span>${text.toFixed(2)}</span>`
+                    }
+                },
+                {
+                    title: '发电小数数(h)',
+                    dataIndex: 'dw',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                    render(text, item) {
+                        return `<span>${(text / item.acc_kw).toFixed(2)}</span>`
+                    }
+                },
+            ];
+        };
+        // 电站 历史日 列表
+        $scope.query_station_day_elec_his_list.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '设备名称',
+                    dataIndex: 'eq_name',
+                    width: '25%',
+                    sort: true,
+                },
+                {
+                    title: '装机容量(kW)',
+                    dataIndex: 'inst_kw',
+                    width: '15%',
+                    align: 'right',
+                    sort: true,
+                },
+                {
+                    title: '发电量',
+                    dataIndex: 'real_kwh_chk',
+                    width: '15%',
+                    align: 'right',
+                    sort: true,
+                },
+                {
+                    title: '发电小时数(h)',
+                    dataIndex: 'real_hours',
+                    width: '15%',
+                    align: 'right',
+                    sort: true,
+                },
+                {
+                    title: '阴影损失电量(kWh)',
+                    dataIndex: 'shade_we',
+                    width: '15%',
+                    align: 'right',
+                    sort: true,
+                },
+                {
+                    title: '灰尘损失电量(kWh)',
+                    dataIndex: 'dust_we',
+                    width: '15%',
+                    align: 'right',
+                    sort: true,
+                },
+            ];
+        };
+        // 电站 历史日 图表
+        $scope.query_station_day_elec_his_line.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_hours';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            diffChartLineData();
+            $scope.$apply();
+        };
+        // 电站 月 时间 列表
+        $scope.query_station_month_elec_detail_timelist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    width: '20%',
+                    sort: true,
+                    align: 'center'
+                },
+                {
+                    title: '实发电量(kWh)',
+                    dataIndex: 'real_kwh_chk',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '应发电量(kWh)',
+                    dataIndex: 'shd_kwh_chk',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '上网电量(kWh)',
+                    dataIndex: 'send_kwh_chk',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '其他损失电量(kWh)',
+                    dataIndex: 'we_rate',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+            ];
+        };
+        // 电站 月 时间 图表
+        $scope.query_station_month_elec_detail_timeline_his.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            diffChartLineData();
+            $scope.$apply();
+        };
+        // 电站 月 设备 列表
+        $scope.query_station_month_elec_devlist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '设备名称',
+                    dataIndex: 'eq_name',
+                    width: '25%',
+                    sort: true,
+                },
+                {
+                    title: '装机容量(kW)',
+                    dataIndex: 'inst_kw',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '发电量(kWh)',
+                    dataIndex: 'real_kwh_chk',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '发电小时数(h)',
+                    dataIndex: 'real_hours',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '故障损失电量(kWh)',
+                    dataIndex: 'fail_we',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '阴影损失电量(kWh)',
+                    dataIndex: 'shade_we',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '灰尘损失电量(kWh)',
+                    dataIndex: 'dust_we',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+            ]
+        };
+        // 电站 月 设备 曲线
+        $scope.query_station_month_elec_devline_his.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'inst_kw';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            diffChartLineData();
+            $scope.$apply();
+        };
+        // 电站 年 时间 列表
+        $scope.query_station_year_elec_detail_timelist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    width: '20%',
+                    sort: true,
+                    align: 'center'
+                },
+                {
+                    title: '实发电量(kWh)',
+                    dataIndex: 'real_kwh_chk',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '应发电量(kWh)',
+                    dataIndex: 'shd_kwh_chk',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '上网电量(kWh)',
+                    dataIndex: 'send_kwh_chk',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '其他损失电量(kWh)',
+                    dataIndex: 'we_rate',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+            ];
+        };
+        // 电站 年 时间 图表
+        $scope.query_station_year_elec_detail_timeline_his.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            diffChartLineData();
+            $scope.$apply();
+        };
+        // 电站 年 设备 列表
+        $scope.query_station_year_elec_devlist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '设备名称',
+                    dataIndex: 'eq_name',
+                    width: '25%',
+                    sort: true,
+                },
+                {
+                    title: '装机容量(kW)',
+                    dataIndex: 'inst_kw',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '发电量(kWh)',
+                    dataIndex: 'real_kwh_chk',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '发电小时数(h)',
+                    dataIndex: 'real_hours',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '故障损失电量(kWh)',
+                    dataIndex: 'fail_we',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '阴影损失电量(kWh)',
+                    dataIndex: 'shade_we',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '灰尘损失电量(kWh)',
+                    dataIndex: 'dust_we',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+            ]
+        };
+        // 电站 年 设备 曲线
+        $scope.query_station_year_elec_devline_his.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'inst_kw';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            diffChartLineData();
+            $scope.$apply();
+        };
+        // 集团 今日 列表
+        $scope.companyDayToday.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'st_name',
+                    width: '20%',
+                    sort: true,
+                },
+                {
+                    title: '装机容量(kW)',
+                    dataIndex: 'inst_kw',
+                    width: '10%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '实发电量(kWh)',
+                    dataIndex: 'real_kwh',
+                    width: '10%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '上网电量(kWh)',
+                    dataIndex: 'send_kwh_chk',
+                    width: '10%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '计划发电量(kWh)',
+                    dataIndex: 'plan_kwh',
+                    width: '10%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '预测当日发电量(kWh)',
+                    dataIndex: 'pre_real_kwh',
+                    width: '13%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '预测明日发电量(kWh)',
+                    dataIndex: 'pre_real_kwh_day2',
+                    width: '13%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '预测后日发电量(kWh)',
+                    dataIndex: 'pre_real_kwh_day3',
+                    width: '13%',
+                    sort: true,
+                    align: 'right'
+                },
+            ];
+        };
+        // 集团 历史 日 列表
+        $scope.query_company_day_elec_detail_stationlist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'st_name',
+                    width: '20%',
+                    sort: true,
+                },
+                {
+                    title: '装机容量(kW)',
+                    dataIndex: 'inst_kw',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '实发电量(kWh)',
+                    dataIndex: 'real_kwh_chk',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '应发电量(kWh)',
+                    dataIndex: 'shd_kwh_chk',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '上网电量(kWh)',
+                    dataIndex: 'send_kwh_chk',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '辐射总量(kWh/m²)',
+                    dataIndex: 'rad_chk',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '发电小时数(h)',
+                    dataIndex: 'real_hours',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+            ];
+        };
+        // 集团 历史 日 图表
+        $scope.query_company_day_elec_detail_stationline_his.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'inst_kw';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            diffChartLineData();
+            $scope.$apply();
+        };
+        // 集团 月 时间 列表
+        $scope.query_company_month_elec_detail_timelist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    width: '20%',
+                    sort: true,
+                },
+                {
+                    title: '实发电量(kWh)',
+                    dataIndex: 'real_kwh_chk',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '应发电量(kWh)',
+                    dataIndex: 'shd_kwh_chk',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '上网电量(kWh)',
+                    dataIndex: 'send_kwh_chk',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '损失百分比(%)',
+                    dataIndex: 'we_rate',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+            ];
+        };
+        // 集团 月 时间 图表
+        $scope.query_company_month_elec_detail_timeline_his.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'shd_kwh_chk';
+            // $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
+            await $scope.selectChange('select1');
+            // await $scope.selectChange('select2');
+            diffChartLineData();
+            $scope.$apply();
+        };
+
+        // 计算 图表 显示对应 轴
+        function diffChartLineData() {
+            if (!$scope.initComplete) return;
+            const { currentClass, selectOptions, select1, select2, tabIndex } = $scope;
+            if (currentClass === 'StationDayAgo') {
+                $scope.xdata = $scope.query_station_day_elec_his_line.res.body.data.eq_name
+                $scope.ydatas = [[$scope.query_station_day_elec_his_line.res.body.data[select1]], [$scope.query_station_day_elec_his_line.res.body.data[select2]]]
+            } else if (currentClass === 'StationMonth' && tabIndex === 0) {
+                $scope.xdata = $scope.query_station_month_elec_detail_timeline_his.res.body.data.dtime
+                $scope.ydatas = [[$scope.query_station_month_elec_detail_timeline_his.res.body.data[select1]], [$scope.query_station_month_elec_detail_timeline_his.res.body.data[select2]]]
+            } else if (currentClass === 'StationMonth' && tabIndex === 1) {
+                $scope.xdata = $scope.query_station_month_elec_devline_his.res.body.data.eq_name
+                $scope.ydatas = [[$scope.query_station_month_elec_devline_his.res.body.data[select1]], [$scope.query_station_month_elec_devline_his.res.body.data[select2]]]
+            } else if (currentClass === 'StationYear' && tabIndex === 0) {
+                $scope.xdata = $scope.query_station_year_elec_detail_timeline_his.res.body.data.dtime
+                $scope.ydatas = [[$scope.query_station_year_elec_detail_timeline_his.res.body.data[select1]], [$scope.query_station_year_elec_detail_timeline_his.res.body.data[select2]]]
+            } else if (currentClass === 'StationYear' && tabIndex === 1) {
+                $scope.xdata = $scope.query_station_year_elec_devline_his.res.body.data.eq_name
+                $scope.ydatas = [[$scope.query_station_year_elec_devline_his.res.body.data[select1]], [$scope.query_station_year_elec_devline_his.res.body.data[select2]]]
+            } else if (currentClass === 'CompanyDayAgo') {
+                $scope.xdata = $scope.query_company_day_elec_detail_stationline_his.res.body.data.st_name
+                $scope.ydatas = [[$scope.query_company_day_elec_detail_stationline_his.res.body.data[select1]], [$scope.query_company_day_elec_detail_stationline_his.res.body.data[select2]]]
+            } else if (currentClass === 'CompanyMonth' && tabIndex === 0) {
+                $scope.xdata = $scope.query_company_month_elec_detail_timeline_his.res.body.data.dtime
+                $scope.ydatas = [[$scope.query_company_month_elec_detail_timeline_his.res.body.data['real_kwh_chk'], $scope.query_company_month_elec_detail_timeline_his.res.body.data[select1]], [$scope.query_company_month_elec_detail_timeline_his.res.body.data['we_rate']]]
             }
-        });
-        setDataNull();
-        diffSelectOptions();
-        $scope.diffGetData();
-    };
-
-    // 图标轴线切换
-    $scope.selectChange = async (arg) => {
-        await myAjaxData.timeout(0);
-        historicalRecord.set({
-            themeElectricity: {
-                ...historicalRecord.get().themeElectricity || {},
-                [arg]: $scope[arg]
-            }
-        });
-        diffChartLineData();
-        $scope.$apply();
-    };
-
-    // 复选框状态改变
-    $scope.changeCheckboxStatus = index => {
-        if (index === 0) $scope.checkboxStatus.fill($scope.checkboxStatus[0]);
-        else if (!$scope.checkboxStatus[index]) $scope.checkboxStatus[0] = false;
-        else if ($scope.checkboxStatus.slice(1).every(v => v)) $scope.checkboxStatus[0] = true;
-        historicalRecord.set({
-            themeElectricity: {
-                ...historicalRecord.get().themeElectricity || {},
-                checkboxStatus: $scope.checkboxStatus
-            }
-        });
-        $scope.diffGetData();
-    };
-
-    $scope.diffGetData = async () => {
-        if (!$scope.initComplete) return;
-        await myAjaxData.timeout(0);
-        const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
-        if (!currentClass.includes('DayToday')) $scope.column = [];
-        switch (currentClass) {
-            case 'StationDayToday':
-                $scope.stationDayTodayData.getData({
-                    queryType: 3,
-                    dateType: 3,
-                    date: dateTime.showDate,
-                    search: $scope.searchKey || '',
-                    status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
-                });
-                break;
-
-            case 'StationDayAgo':
-                if (showShape === 'list') {
-                    $scope.query_station_day_elec_his_list.getData({
-                        queryCode: 'query_station_day_elec_his_list',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                } else if (showShape === 'chart') {
-                    $scope.query_station_day_elec_his_line.getData({
-                        queryCode: 'query_station_day_elec_his_line',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                }
-                break;
-
-            case 'StationMonth':
-                if (showShape === 'list' && tabIndex === 0) {
-                    $scope.query_station_month_elec_detail_timelist_his.getData({
-                        queryCode: 'query_station_month_elec_detail_timelist_his',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                }
-                else if (showShape === 'chart' && tabIndex === 0) {
-                    $scope.query_station_month_elec_detail_timeline_his.getData({
-                        queryCode: 'query_station_month_elec_detail_timeline_his',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                }
-                else if (showShape === 'list' && tabIndex === 1) {
-                    $scope.query_station_month_elec_devlist_his.getData({
-                        queryCode: 'query_station_month_elec_devlist_his',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                }
-                else if (showShape === 'chart' && tabIndex === 1) {
-                    $scope.query_station_month_elec_devline_his.getData({
-                        queryCode: 'query_station_month_elec_devline_his',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                }
-                break;
-
-            case 'StationYear':
-                if (showShape === 'list' && tabIndex === 0) {
-                    $scope.query_station_year_elec_detail_timelist_his.getData({
-                        queryCode: 'query_station_year_elec_detail_timelist_his',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                }
-                else if (showShape === 'chart' && tabIndex === 0) {
-                    $scope.query_station_year_elec_detail_timeline_his.getData({
-                        queryCode: 'query_station_year_elec_detail_timeline_his',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                }
-                else if (showShape === 'list' && tabIndex === 1) {
-                    $scope.query_station_year_elec_devlist_his.getData({
-                        queryCode: 'query_station_year_elec_devlist_his',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                }
-                else if (showShape === 'chart' && tabIndex === 1) {
-                    $scope.query_station_year_elec_devline_his.getData({
-                        queryCode: 'query_station_year_elec_devline_his',
-                        queryType: 3,
-                        date: dateTime.showDate
-                    });
-                }
-                break;
-
-            case 'CompanyDayToday':
-                
-                break;
-
-            case 'CompanyDayAgo':
-                
-                break;
-
-            case 'CompanyMonth':
-                
-                break;
-
-            case 'CompanyYear':
-                
-                break;
-
-            default:
-                break;
         }
-    }
 
-    // 数据处理
-    // 电站 今日
-    $scope.stationDayTodayData.getDataCallback = (success, res) => {
-        if (!success) return;
-        $scope.column = [
-            {
-                title: '状态',
-                dataIndex: 'statusDesc',
-                width: '15%',
-                sort: true,
-            },
-            {
-                title: '设备名称',
-                dataIndex: 'name',
-                width: '25%',
-                sort: true,
-            },
-            {
-                title: '装机容量(kW)',
-                dataIndex: 'acc_kw',
-                width: '15%',
-                sort: true,
-                align: 'right',
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+        // 轴线切换  可选项  判断
+        function diffSelectOptions() {
+            if ($scope.currentClass === 'StationDayAgo') {
+                $scope.selectOptions = {
+                    real_hours: '发电小时数(h)',
+                    inst_kw: '装机容量(kW)',
+                    real_kwh_chk: '发电量(kW/h)',
+                };
+            } else if ($scope.currentClass === 'StationMonth') {
+                if ($scope.tabIndex === 0) {
+                    $scope.selectOptions = {
+                        real_kwh_chk: '实发电量(kWh)',
+                        send_kwh_chk: '上网电量(kWh)',
+                        shd_kwh_chk: '应发电量(kWh)',
+                        we_rate: '其他损失电量(kWh)',
+                    };
+                } else if ($scope.tabIndex === 1) {
+                    $scope.selectOptions = {
+                        decay_we: '衰减损失电量(kWh)',
+                        dust_we: '灰尘损失电量(kWh)',
+                        fail_we: '故障损失电量(kWh)',
+                        inst_kw: '装机容量(kW)',
+                        other_we: '其他损失电量(kWh)',
+                        real_hours: '实际利用小时数(h)',
+                        real_kwh_chk: '实发电量(kWh)',
+                        repair_we: '检修损失电量(kWh)',
+                        restrict_we: '限电损失电量(kWh)',
+                        shade_we: '阴影损失电量(kWh)',
+                    };
                 }
-            },
-            {
-                title: '发电量(kW/h)',
-                dataIndex: 'dw',
-                width: '15%',
-                sort: true,
-                align: 'right',
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+            } else if ($scope.currentClass === 'StationYear') {
+                if ($scope.tabIndex === 0) {
+                    $scope.selectOptions = {
+                        real_kwh_chk: '实发电量(kWh)',
+                        send_kwh_chk: '上网电量(kWh)',
+                        shd_kwh_chk: '应发电量(kWh)',
+                        we_rate: '其他损失电量(kWh)',
+                    };
+                } else if ($scope.tabIndex === 1) {
+                    $scope.selectOptions = {
+                        decay_we: '衰减损失电量(kWh)',
+                        dust_we: '灰尘损失电量(kWh)',
+                        fail_we: '故障损失电量(kWh)',
+                        inst_kw: '装机容量(kW)',
+                        other_we: '其他损失电量(kWh)',
+                        real_hours: '实际利用小时数(h)',
+                        real_kwh_chk: '实发电量(kWh)',
+                        repair_we: '检修损失电量(kWh)',
+                        restrict_we: '限电损失电量(kWh)',
+                        shade_we: '阴影损失电量(kWh)',
+                    };
                 }
-            },
-            {
-                title: '发电小数数(h)',
-                dataIndex: 'dw',
-                width: '15%',
-                sort: true,
-                align: 'right',
-                render(text, item) {
-                    return `<span>${(text / item.acc_kw).toFixed(2)}</span>`
-                }
-            },
-        ];
-    };
-    // 电站 历史日 列表
-    $scope.query_station_day_elec_his_list.getDataCallback = (success, res) => {
-        if(!success) return;
-        $scope.column = [
-            {
-                title: '设备名称',
-                dataIndex: 'eq_name',
-                width: '25%',
-                sort: true,
-            },
-            {
-                title: '装机容量(kW)',
-                dataIndex: 'inst_kw',
-                width: '15%',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '发电量',
-                dataIndex: 'real_kwh_chk',
-                width: '15%',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '发电小时数(h)',
-                dataIndex: 'real_hours',
-                width: '15%',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '阴影损失电量(kWh)',
-                dataIndex: 'shade_we',
-                width: '15%',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '灰尘损失电量(kWh)',
-                dataIndex: 'dust_we',
-                width: '15%',
-                align: 'right',
-                sort: true,
-            },
-        ];
-    };
-    // 电站 历史日 图表
-    $scope.query_station_day_elec_his_line.getDataCallback = async (success, res) => {
-        if (!success) return;
-        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_hours';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
-        await $scope.selectChange('select1');
-        await $scope.selectChange('select2');
-        diffChartLineData();
-        $scope.$apply();
-    };
-    // 电站 月 时间 列表
-    $scope.query_station_month_elec_detail_timelist_his.getDataCallback =(success, res) => {
-        if (!success) return;
-        $scope.column = [
-            {
-                title: '时间',
-                dataIndex: 'dtime',
-                width: '20%',
-                sort: true,
-                align: 'center'
-            },
-            {
-                title: '实发电量(kWh)',
-                dataIndex: 'real_kwh_chk',
-                width: '20%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '应发电量(kWh)',
-                dataIndex: 'shd_kwh_chk',
-                width: '20%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '上网电量(kWh)',
-                dataIndex: 'send_kwh_chk',
-                width: '20%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '其他损失电量(kWh)',
-                dataIndex: 'we_rate',
-                width: '20%',
-                sort: true,
-                align: 'right'
-            },
-        ];
-    };
-    // 电站 月 时间 图表
-    $scope.query_station_month_elec_detail_timeline_his.getDataCallback = async (success, res) => {
-        if (!success) return;
-        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
-        await $scope.selectChange('select1');
-        await $scope.selectChange('select2');
-        diffChartLineData();
-        $scope.$apply();
-    };
-    // 电站 月 设备 列表
-    $scope.query_station_month_elec_devlist_his.getDataCallback = (success, res) => {
-        if (!success) return;
-        $scope.column = [
-            {
-                title: '设备名称',
-                dataIndex: 'eq_name',
-                width: '25%',
-                sort: true,
-            },
-            {
-                title: '装机容量(kW)',
-                dataIndex: 'inst_kw',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '发电量(kWh)',
-                dataIndex: 'real_kwh_chk',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '发电小时数(h)',
-                dataIndex: 'real_hours',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '故障损失电量(kWh)',
-                dataIndex: 'fail_we',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '限电损失电量(kWh)',
-                dataIndex: 'restrict_we',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '其他损失电量(kWh)',
-                dataIndex: 'other_we',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-        ]
-    };
-    // 电站 月 设备 曲线
-    $scope.query_station_month_elec_devline_his.getDataCallback = async (success, res) => {
-        if (!success) return;
-        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'inst_kw';
-        await $scope.selectChange('select1');
-        await $scope.selectChange('select2');
-        diffChartLineData();
-        $scope.$apply();
-    };
-    // 电站 年 时间 列表
-    $scope.query_station_year_elec_detail_timelist_his.getDataCallback =(success, res) => {
-        if (!success) return;
-        $scope.column = [
-            {
-                title: '时间',
-                dataIndex: 'dtime',
-                width: '20%',
-                sort: true,
-                align: 'center'
-            },
-            {
-                title: '实发电量(kWh)',
-                dataIndex: 'real_kwh_chk',
-                width: '20%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '应发电量(kWh)',
-                dataIndex: 'shd_kwh_chk',
-                width: '20%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '上网电量(kWh)',
-                dataIndex: 'send_kwh_chk',
-                width: '20%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '其他损失电量(kWh)',
-                dataIndex: 'we_rate',
-                width: '20%',
-                sort: true,
-                align: 'right'
-            },
-        ];
-    };
-    // 电站 年 时间 图表
-    $scope.query_station_year_elec_detail_timeline_his.getDataCallback = async (success, res) => {
-        if (!success) return;
-        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
-        await $scope.selectChange('select1');
-        await $scope.selectChange('select2');
-        diffChartLineData();
-        $scope.$apply();
-    };
-    // 电站 年 设备 列表
-    $scope.query_station_year_elec_devlist_his.getDataCallback = (success, res) => {
-        if (!success) return;
-        $scope.column = [
-            {
-                title: '设备名称',
-                dataIndex: 'eq_name',
-                width: '25%',
-                sort: true,
-            },
-            {
-                title: '装机容量(kW)',
-                dataIndex: 'inst_kw',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '发电量(kWh)',
-                dataIndex: 'real_kwh_chk',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '发电小时数(h)',
-                dataIndex: 'real_hours',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '故障损失电量(kWh)',
-                dataIndex: 'fail_we',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '限电损失电量(kWh)',
-                dataIndex: 'restrict_we',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-            {
-                title: '其他损失电量(kWh)',
-                dataIndex: 'other_we',
-                width: '15%',
-                sort: true,
-                align: 'right'
-            },
-        ]
-    };
-    // 电站 年 设备 曲线
-    $scope.query_station_year_elec_devline_his.getDataCallback = async (success, res) => {
-        if (!success) return;
-        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'inst_kw';
-        await $scope.selectChange('select1');
-        await $scope.selectChange('select2');
-        diffChartLineData();
-        $scope.$apply();
-    };
-
-    // 计算 图表 显示对应 轴
-    function diffChartLineData() {
-        if (!$scope.initComplete) return;
-        const { currentClass, selectOptions, select1, select2, tabIndex } = $scope;
-        if (currentClass === 'StationDayAgo') {
-            $scope.xdata = $scope.query_station_day_elec_his_line.res.body.data.eq_name
-            $scope.ydatas = [[$scope.query_station_day_elec_his_line.res.body.data[select1]], [$scope.query_station_day_elec_his_line.res.body.data[select2]]]
-        } else if (currentClass === 'StationMonth' && tabIndex === 0) {
-            $scope.xdata = $scope.query_station_month_elec_detail_timeline_his.res.body.data.dtime
-            $scope.ydatas = [[$scope.query_station_month_elec_detail_timeline_his.res.body.data[select1]], [$scope.query_station_month_elec_detail_timeline_his.res.body.data[select2]]]
-        } else if (currentClass === 'StationMonth' && tabIndex === 1) {
-            $scope.xdata = $scope.query_station_month_elec_devline_his.res.body.data.eq_name
-            $scope.ydatas = [[$scope.query_station_month_elec_devline_his.res.body.data[select1]], [$scope.query_station_month_elec_devline_his.res.body.data[select2]]]
-        } else if (currentClass === 'StationYear' && tabIndex === 0) {
-            $scope.xdata = $scope.query_station_year_elec_detail_timeline_his.res.body.data.dtime
-            $scope.ydatas = [[$scope.query_station_year_elec_detail_timeline_his.res.body.data[select1]], [$scope.query_station_year_elec_detail_timeline_his.res.body.data[select2]]]
-        } else if (currentClass === 'StationYear' && tabIndex === 1) {
-            $scope.xdata = $scope.query_station_year_elec_devline_his.res.body.data.eq_name
-            $scope.ydatas = [[$scope.query_station_year_elec_devline_his.res.body.data[select1]], [$scope.query_station_year_elec_devline_his.res.body.data[select2]]]
-        }
-    }
-
-    // 轴线切换  可选项  判断
-    function diffSelectOptions() {
-        if ($scope.currentClass === 'StationDayAgo') {
-            $scope.selectOptions = {
-                real_hours: '发电小时数(h)',
-                inst_kw: '装机容量(kW)',
-                real_kwh_chk: '发电量(kW/h)',
-            };
-        } else if ($scope.currentClass === 'StationMonth') {
-            if ($scope.tabIndex === 0) {
+            } else if ($scope.currentClass === 'CompanyDayAgo') {
+                $scope.selectOptions = {
+                    inst_kw: '装机容量(kW)',
+                    real_kwh_chk: '实发电量(kWh)',
+                    send_kwh_chk: '上网电量(kWh)',
+                    shd_kwh_chk: '应发电量(kWh)',
+                    rad_chk: '辐射总量(kWh/m²)',
+                    real_hours: '实际利用小时数(h)',
+                };
+            } else if ($scope.currentClass === 'CompanyMonth' && $scope.tabIndex === 0) {
                 $scope.selectOptions = {
                     real_kwh_chk: '实发电量(kWh)',
                     send_kwh_chk: '上网电量(kWh)',
                     shd_kwh_chk: '应发电量(kWh)',
-                    we_rate: '其他损失电量(kWh)',
-                };
-            } else if ($scope.tabIndex === 1) {
-                $scope.selectOptions = {
-                    decay_we: '衰减损失电量(kWh)',
-                    dust_we: '灰尘损失电量(kWh)',
-                    fail_we: '故障损失电量(kWh)',
-                    inst_kw: '装机容量(kW)',
-                    other_we: '其他损失电量(kWh)',
-                    real_hours: '实际利用小时数(h)',
-                    real_kwh_chk: '实发电量(kWh)',
-                    repair_we: '检修损失电量(kWh)',
-                    restrict_we: '限电损失电量(kWh)',
-                    shade_we: '阴影损失电量(kWh)',
+                    we_rate: '电量损失百分比(%)',
                 };
             }
-        } else if ($scope.currentClass === 'StationYear') {
-            if ($scope.tabIndex === 0) {
-                $scope.selectOptions = {
-                    real_kwh_chk: '实发电量(kWh)',
-                    send_kwh_chk: '上网电量(kWh)',
-                    shd_kwh_chk: '应发电量(kWh)',
-                    we_rate: '其他损失电量(kWh)',
-                };
-            } else if ($scope.tabIndex === 1) {
-                $scope.selectOptions = {
-                    decay_we: '衰减损失电量(kWh)',
-                    dust_we: '灰尘损失电量(kWh)',
-                    fail_we: '故障损失电量(kWh)',
-                    inst_kw: '装机容量(kW)',
-                    other_we: '其他损失电量(kWh)',
-                    real_hours: '实际利用小时数(h)',
-                    real_kwh_chk: '实发电量(kWh)',
-                    repair_we: '检修损失电量(kWh)',
-                    restrict_we: '限电损失电量(kWh)',
-                    shade_we: '阴影损失电量(kWh)',
-                };
-            }
-        } else if ($scope.currentClass === 'CompanyDayAgo') {
-            
         }
-    }
-    
-    // 数据置空
-    function setDataNull() {
-        $scope.column = [];
-        $scope.xdata = void 0;
-        $scope.ydatas = void 0;
-        $scope.stationDayTodayData.res = null;
-        $scope.query_station_day_elec_his_list.res = null;
-        $scope.query_station_day_elec_his_line.res = null;
-        $scope.query_station_month_elec_devlist_his.res = null;
-        $scope.query_station_month_elec_devline_his.res = null;
-        $scope.query_station_month_elec_detail_timelist_his.res = null;
-        $scope.query_station_month_elec_detail_timeline_his.res = null;
-        $scope.query_station_year_elec_devlist_his.res = null;
-        $scope.query_station_year_elec_devline_his.res = null;
-        $scope.query_station_year_elec_detail_timelist_his.res = null;
-        $scope.query_station_year_elec_detail_timeline_his.res = null;
-    }
-});
+
+        // 数据置空
+        function setDataNull() {
+            $scope.column = [];
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
+            $scope.stationDayTodayData.res = null;
+            $scope.query_station_day_elec_his_list.res = null;
+            $scope.query_station_day_elec_his_line.res = null;
+            $scope.query_station_month_elec_devlist_his.res = null;
+            $scope.query_station_month_elec_devline_his.res = null;
+            $scope.query_station_month_elec_detail_timelist_his.res = null;
+            $scope.query_station_month_elec_detail_timeline_his.res = null;
+            $scope.query_station_year_elec_devlist_his.res = null;
+            $scope.query_station_year_elec_devline_his.res = null;
+            $scope.query_station_year_elec_detail_timelist_his.res = null;
+            $scope.query_station_year_elec_detail_timeline_his.res = null;
+            $scope.companyDayToday.res = null;
+            $scope.query_company_day_elec_detail_stationlist_his.res = null;
+            $scope.query_company_day_elec_detail_stationline_his.res = null;
+            $scope.query_company_month_elec_detail_timelist_his.res = null;
+            $scope.query_company_month_elec_detail_timeline_his.res = null;
+            $scope.query_company_month_elec_detail_stationlist_his.res = null;
+            $scope.query_company_month_elec_detail_stationline_his.res = null;
+            $scope.query_company_year_elec_detail_timelist_his.res = null;
+            $scope.query_company_year_elec_detail_timeline_his.res = null;
+            $scope.query_company_year_elec_detail_stationlist_his.res = null;
+            $scope.query_company_year_elec_detail_stationline_his.res = null;
+
+        }
+
+        // 定时器  定时刷新接口
+        const timer = $interval(() => {
+            if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') diffGetData();
+        }, 10000);
+        $scope.$on('$destroy', () => $interval.cancel(timer));
+
+    });
