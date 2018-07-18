@@ -156,12 +156,14 @@ ajaxData({
 
     //父页面初始化完成
     $scope.mainPageInitComplete = () => {
+        $scope.themeElectricityIsLoding = true;
         initParams();
     };
 
     //切换日期类型
     $scope.dateUpdated = () => {
         if ($scope._dateType != 3) {
+            $scope.themeElectricityIsLoding = true;
             initParams();
         }
     }
@@ -169,6 +171,7 @@ ajaxData({
     //切换电站
     $scope.switchPowerCallback = () => {
         if ($scope._dateType != 3) {
+            $scope.themeElectricityIsLoding = true;
             initParams();
         }
     }
@@ -180,7 +183,7 @@ ajaxData({
 
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        $scope.themeElectricityIsLoding = !$scope.electricityCurrent.res;
+        // $scope.themeElectricityIsLoding = !$scope.electricityCurrent.res;
         if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
             $scope.electricityCurrent.getData({
                 'queryType': queryType,

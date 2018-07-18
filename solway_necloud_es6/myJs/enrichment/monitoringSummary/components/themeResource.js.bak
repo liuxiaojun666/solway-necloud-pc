@@ -26,12 +26,14 @@ ajaxData({
 
     //父页面初始化完成
     $scope.mainPageInitComplete = () => {
+        $scope.themeResourceIsLoding = true;
         initParams();
     };
 
     //切换日期类型
     $scope.dateUpdated = () => {
         if ($scope._dateType != 3) {
+            $scope.themeResourceIsLoding = true;
             initParams();
         }
     }
@@ -39,6 +41,7 @@ ajaxData({
     //切换电站
     $scope.switchPowerCallback = () => {
         if ($scope._dateType != 3) {
+            $scope.themeResourceIsLoding = true;
             initParams();
         }
     }
@@ -50,7 +53,7 @@ ajaxData({
 
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        $scope.themeResourceIsLoding = !$scope.pageData.res;//第一次请求接口，loading
+        // $scope.themeResourceIsLoding = !$scope.pageData.res;//第一次请求接口，loading
         $scope.pageData.getData({
             'queryType': queryType,
             'date': dateTime,
