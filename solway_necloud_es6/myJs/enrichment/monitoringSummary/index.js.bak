@@ -100,12 +100,15 @@ ajaxData({
         computeClass();
         $scope.getTopXhr = true;
     };
-
-    // 放大显示详情操作
-    $scope.switchDetailFullPage = (e, type) => {
+    // 双击 详情
+    $scope.switchDetailFullPagePre = (e, type) => {
         if (type === 'dblclick') {
             if (!e.ctrlKey) return;
         }
+        $scope.switchDetailFullPage();
+    };
+    // 放大显示详情操作
+    $scope.switchDetailFullPage = (e, type) => {
         historicalRecord.set({ 
             detailFullPage: $scope.detailFullPage = !$scope.detailFullPage 
         });

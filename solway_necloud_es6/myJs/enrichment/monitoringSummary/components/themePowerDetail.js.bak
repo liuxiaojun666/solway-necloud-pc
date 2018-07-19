@@ -273,7 +273,6 @@ ajaxData({
             switch ($scope.currentDeviceType) {
                 case '1':
                     $scope.getRunRealDataBBoxChange.getData({
-                        pageIndex: 0,
                         search: $scope.searchKey,
                         status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
                     });
@@ -282,7 +281,6 @@ ajaxData({
                 case '2':
                     if ($scope.getRunRealDataBInverter.isLoding) return
                     $scope.getRunRealDataBInverter.getData({
-                        pageIndex: 0,
                         search: $scope.searchKey,
                         status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
                     });
@@ -290,7 +288,6 @@ ajaxData({
             
                 case '3':
                     $scope.getRunRealDataBJunction.getData({
-                        pageIndex: 0,
                         search: $scope.searchKey,
                         status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
                     });
@@ -567,7 +564,7 @@ ajaxData({
                     render(text, item, index) {
                         return `
                         <div style="background: ${item.shadowFlags[i] ? 'rgba(0, 0, 0,0.3)' : ''}">
-                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags[i]]}">${text ? text.toFixed(2) : '-'}</span>
+                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags[i]]}">${(text ? text.toFixed(2) : '-')}</span>
                         </div>
                         `
                     }

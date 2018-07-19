@@ -113,7 +113,7 @@ ajaxData({
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
             let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeResource || {};
-            if (($scope.currentClass === 'CompanyDayToday') || ($scope.dataType > 0 && showShape === 'chart2')) showShape = 'list';
+            if (($scope.dateType === 0) || ($scope.dataType > 0 && showShape === 'chart2')) showShape = 'list';
             $scope.changeShowShape(showShape || 'list');
             const { dateType, dateTime } = historicalRecord.get();
             $scope.dateType = dateType;
@@ -133,7 +133,7 @@ ajaxData({
 
         // 切换电站 回调
         $scope.switchPowerCallback = () => {
-            if (($scope.currentClass === 'CompanyDayToday') || ($scope.dataType > 0 && $scope.showShape === 'chart2')) $scope.changeShowShape('list');
+            if (($scope.dateType === 0) || ($scope.dataType > 0 && $scope.showShape === 'chart2')) $scope.changeShowShape('list');
             $scope.xdata = void 0;
             $scope.ydatas = void 0;
             diffSelectOptions();
@@ -143,7 +143,7 @@ ajaxData({
         // 日期改变
         $scope.dateUpdated = async () => {
             await myAjaxData.timeout(0);
-            if ($scope.currentClass === 'CompanyDayToday' || ($scope.currentClass === 'StationYear' && $scope.showShape === 'chart2')) $scope.changeShowShape('list');
+            if ($scope.dateType === 0 || ($scope.currentClass === 'StationYear' && $scope.showShape === 'chart2')) $scope.changeShowShape('list');
             $scope.xdata = void 0;
             $scope.ydatas = void 0;
             diffSelectOptions();
@@ -479,21 +479,21 @@ ajaxData({
                     align: 'left'
                 },
                 {
-                    title: '装机容量',
+                    title: '装机容量(kW)',
                     dataIndex: 'inst_kw',
                     sort: 'true',
                     width: '10%',
                     align: 'right'
                 },
                 {
-                    title: '辐射总量kWh/m²',
+                    title: '辐射总量(kWh/m²)',
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     width: '15%',
                     align: 'right'
                 },
                 {
-                    title: '光照强度W/m²',
+                    title: '光照强度(W/m²)',
                     dataIndex: 'sun',
                     sort: 'true',
                     width: '10%',
@@ -507,13 +507,13 @@ ajaxData({
                     align: 'center'
                 },
                 {
-                    title: '温度',
+                    title: '温度(℃)',
                     dataIndex: 'tmp',
                     sort: 'true',
                     width: '10%',
                     align: 'center',
                     render(text) {
-                        return text ? '<span>' + text + ' ℃</span>' : '<span></span>';
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
                     }
                 },
                 {
@@ -582,7 +582,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '最大光照强度',
+                    title: '最大光照强度(' + res.body.units.max_sun + ')',
                     dataIndex: 'max_sun',
                     sort: 'true',
                     align: 'right',
@@ -600,7 +600,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '温度',
+                    title: '温度(℃)',
                     dataIndex: 'ta_avg',
                     sort: 'true',
                     align: 'right',
@@ -631,12 +631,12 @@ ajaxData({
                     sort: 'true',
                     align: 'center'
                 }, {
-                    title: '辐射总量kWh/㎡',
+                    title: '辐射总量(kWh/㎡)',
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     align: 'right',
                 }, {
-                    title: '发电小时数h',
+                    title: '发电小时数(h)',
                     dataIndex: 'real_hours',
                     sort: 'true',
                     align: 'right',
@@ -661,19 +661,19 @@ ajaxData({
                     width: '40%',
                     align: 'left'
                 }, {
-                    title: '装机容量kW',
+                    title: '装机容量(kW)',
                     dataIndex: 'inst_kw',
                     sort: 'true',
                     width: '20%',
                     align: 'right',
                 }, {
-                    title: '辐射总量kWh/㎡',
+                    title: '辐射总量(kWh/㎡)',
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     width: '20%',
                     align: 'right',
                 }, {
-                    title: '发电小时数h',
+                    title: '发电小时数(h)',
                     dataIndex: 'real_hours',
                     sort: 'true',
                     width: '20%',
@@ -698,12 +698,12 @@ ajaxData({
                     sort: 'true',
                     align: 'center'
                 }, {
-                    title: '辐射总量kWh/㎡',
+                    title: '辐射总量(kWh/㎡)',
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     align: 'right',
                 }, {
-                    title: '发电小时数h',
+                    title: '发电小时数(h)',
                     dataIndex: 'real_hours',
                     sort: 'true',
                     align: 'right',
@@ -728,19 +728,19 @@ ajaxData({
                     width: '40%',
                     align: 'left'
                 }, {
-                    title: '装机容量',
+                    title: '装机容量(kW)',
                     dataIndex: 'inst_kw',
                     sort: 'true',
                     width: '20%',
                     align: 'right',
                 }, {
-                    title: '辐射总量kWh/㎡',
+                    title: '辐射总量(kWh/㎡)',
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     width: '20%',
                     align: 'right',
                 }, {
-                    title: '发电小时数h',
+                    title: '发电小时数(h)',
                     dataIndex: 'real_hours',
                     sort: 'true',
                     width: '20%',
