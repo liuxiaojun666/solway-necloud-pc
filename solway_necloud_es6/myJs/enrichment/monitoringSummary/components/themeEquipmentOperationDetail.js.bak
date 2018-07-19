@@ -6,6 +6,80 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    //集团-历史日-列表
+    query_company_day_dev_detail_stationlist_his:{
+        name: 'GETquery_company_day_dev_detail_stationlist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //集团-历史日-曲线
+    query_company_day_dev_detail_stationline_his: {
+        name: 'GETquery_company_day_dev_detail_stationline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //集团-月-时间列表
+    query_company_month_dev_detail_timelist_his: {
+        name: 'GETquery_company_month_dev_detail_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //集团-月-时间曲线
+    query_company_month_dev_detail_timeline_his: {
+        name: 'GETquery_company_month_dev_detail_timeline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //集团-月-电站列表
+    query_company_month_dev_detail_stationlist_his: {
+        name: 'GETquery_company_month_dev_detail_stationlist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //集团-月-电站曲线
+    query_company_month_dev_detail_stationline_his: {
+        name: 'GETquery_company_month_dev_detail_stationline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //集团-年-时间列表
+    query_company_year_dev_detail_timelist_his: {
+        name: 'GETquery_company_year_dev_detail_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //集团-年-时间曲线
+    query_company_year_dev_detail_timeline_his: {
+        name: 'GETquery_company_year_dev_detail_timeline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //集团-年-电站列表
+    query_company_year_dev_detail_stationlist_his: {
+        name: 'GETquery_company_year_dev_detail_stationlist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //集团-年-电站曲线
+    query_company_year_dev_detail_stationline_his: {
+        name: 'GETquery_company_year_dev_detail_stationline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+
+
+
+
     //电站-今日-故障分析
     faultAlarmTotalStatistics: {
         name: 'GETfaultAlarmTotalStatistics',
@@ -22,7 +96,7 @@ ajaxData({
     },
 }, {
     __serviceName__: 'themeEquipmentOperationService'
-})('themeEquipmentOperationDetailCtrl', ['$scope', 'themeEquipmentOperationService', 'historicalRecord'], ($scope, myAjaxData, historicalRecord) => {
+    })('themeEquipmentOperationDetailCtrl', ['$scope', 'themeEquipmentOperationService', 'historicalRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
     // 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -34,21 +108,24 @@ ajaxData({
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
         await $scope.dateUpdated();
-        $scope.select1 = select1 || 2;
-        $scope.select2 = select2 || 2;
-        $scope.selectChange('select1');
-        $scope.selectChange('select2');
+        $scope.select1 = select1;
+        $scope.select2 = select2;
+        if (select1) await $scope.selectChange('select1');
+        if (select2) await $scope.selectChange('select2');
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
 
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
+
+        $scope.equipmentDetailLoading = true;
         diffGetData();
         $scope.$apply();
     };
 
     // 切换显示形式  图表 or 列表
     $scope.changeShowShape = showShape => {
+        if (showShape === $scope.showShape) return;
         $scope.showShape = showShape;
         historicalRecord.set({
             themeEquipmentOperation: {
@@ -56,9 +133,12 @@ ajaxData({
                 showShape
             }
         });
+        $scope.equipmentDetailLoading = true;
+        diffGetData();
     };
     // tab 切换
     $scope.changeTab = tabIndex => {
+        if (tabIndex === $scope.tabIndex) return;
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
             themeEquipmentOperation: {
@@ -66,6 +146,9 @@ ajaxData({
                 tabIndex
             }
         });
+        $scope.column = [];
+        $scope.equipmentDetailLoading = true;
+        diffSelectOptions();        
         diffGetData();
     };
     // 图标轴线切换
@@ -77,21 +160,26 @@ ajaxData({
                 [arg]: $scope[arg]
             }
         });
+        diffChartLineData();
+        $scope.$apply();
     };
+        
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
-       
+        $scope.equipmentDetailLoading = true;
+        diffSelectOptions();
         diffGetData();
     };
 
     // 日期改变
     $scope.dateUpdated = () => {
+        $scope.equipmentDetailLoading = true;
+        diffSelectOptions();
         diffGetData();
     };
 
     // 详情 放大缩小  回调
     $scope.switchDetailFullPage = () => {
-
     }
 
     // 判断 调用  对应 接口
@@ -100,12 +188,81 @@ ajaxData({
         await myAjaxData.timeout(0);
         const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
         switch (currentClass) {
-            case 'CompanyDayToday':
+            case 'CompanyDayToday':   //集团当日
                 $scope.companyToday.getData({
                     queryType: 1,
                     dateType: 3,
                     date: dateTime.showDate
                 });
+                break;
+            case 'CompanyDayAgo':     //集团历史日
+                if (showShape === 'list') {
+                    $scope.query_company_day_dev_detail_stationlist_his.getData({
+                        queryCode: 'query_company_day_dev_detail_stationlist_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                } else {
+                    $scope.query_company_day_dev_detail_stationline_his.getData({
+                        queryCode: 'query_company_day_dev_detail_stationline_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                }
+                break;
+            case 'CompanyMonth':   //集团月
+                if (showShape === 'list' && tabIndex === 0) {//时间
+                    $scope.query_company_month_dev_detail_timelist_his.getData({
+                        queryCode: 'query_company_month_dev_detail_timelist_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                } else if (showShape === 'chart' && tabIndex === 0) {
+                    $scope.query_company_month_dev_detail_timeline_his.getData({
+                        queryCode: 'query_company_month_dev_detail_timeline_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                } else if (showShape === 'list' && tabIndex === 1) {//电站
+                    $scope.query_company_month_dev_detail_stationlist_his.getData({
+                        queryCode: 'query_company_month_dev_detail_stationlist_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                } else if (showShape === 'chart' && tabIndex === 1) {
+                    $scope.query_company_month_dev_detail_stationline_his.getData({
+                        queryCode: 'query_company_month_dev_detail_stationline_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                }
+                break;
+            case 'CompanyYear':   //集团年
+                if (showShape === 'list' && tabIndex === 0) {//时间
+                    $scope.query_company_year_dev_detail_timelist_his.getData({
+                        queryCode: 'query_company_year_dev_detail_timelist_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                } else if (showShape === 'chart' && tabIndex === 0) {
+                    $scope.query_company_year_dev_detail_timeline_his.getData({
+                        queryCode: 'query_company_year_dev_detail_timeline_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                } else if (showShape === 'list' && tabIndex === 1) {//电站
+                    $scope.query_company_year_dev_detail_stationlist_his.getData({
+                        queryCode: 'query_company_year_dev_detail_stationlist_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                } else if (showShape === 'chart' && tabIndex === 1) {
+                    $scope.query_company_year_dev_detail_stationline_his.getData({
+                        queryCode: 'query_company_year_dev_detail_stationline_his',
+                        queryType: 1,
+                        date: dateTime.showDate
+                    });
+                }
                 break;
             case 'StationDayToday':
                 $scope.faultAlarmTotalStatistics.getData({});
@@ -114,6 +271,7 @@ ajaxData({
                     pageSize:10
                 });
                 break;
+            
             default:
                 break;
         }
@@ -121,6 +279,7 @@ ajaxData({
 
     //集团当日
     $scope.companyToday.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
         if (!success) return;
         $scope.column = [
             {
@@ -170,13 +329,335 @@ ajaxData({
         ];
     };
 
+    //集团历史日-列表
+    $scope.query_company_day_dev_detail_stationlist_his.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                align: 'center',
+            },
+            {
+                title: '总台数',
+                dataIndex: 'eqcount',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '故障台次',
+                dataIndex: 'fail_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '维护台次',
+                dataIndex: 'alarm_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '离线台次',
+                dataIndex: 'inter_count',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '故障损失电量',
+                dataIndex: 'fail_we',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: 'mttr',
+                dataIndex: 'run',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: 'mtbf',
+                dataIndex: 'mtbf',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: 'pba',
+                dataIndex: 'pba',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: 'pr',
+                dataIndex: 'pr',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+    };
+
+    //集团历史日-曲线
+    $scope.query_company_day_dev_detail_stationline_his.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_we';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
+        $scope.xdata = res.body.data.st_name;
+        $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
+    }
+
+    //集团月-时间-列表
+    $scope.query_company_month_dev_detail_timelist_his.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.dataSource = res.body.data;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'dtime',
+                align: 'center',
+            },
+            {
+                title: '故障台次',
+                dataIndex: 'fail_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '维护台次',
+                dataIndex: 'alarm_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '离线台次',
+                dataIndex: 'inter_count',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+    };
+
+    //集团月-时间-曲线
+    $scope.query_company_month_dev_detail_timeline_his.getDataCallback = (success, res) =>{
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_count';
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data[$scope.select1]]];
+    }
+
+    //集团月-电站-列表
+    $scope.query_company_month_dev_detail_stationlist_his.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.dataSource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                align: 'center',
+            },
+            {
+                title: '总台数',
+                dataIndex: 'eqcount',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '故障台次',
+                dataIndex: 'fail_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '维护台次',
+                dataIndex: 'alarm_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '离线台次',
+                dataIndex: 'inter_count',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '故障损失电量',
+                dataIndex: 'fail_we',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: 'mttr',
+                dataIndex: 'run',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: 'mtbf',
+                dataIndex: 'mtbf',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: 'pba',
+                dataIndex: 'pba',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: 'pr',
+                dataIndex: 'pr',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+    };
+
+    //集团月-电站-曲线
+    $scope.query_company_month_dev_detail_stationline_his.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_we';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
+        $scope.xdata = res.body.data.st_name;
+        $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
+    }
+
+    //集团年-时间-列表
+    $scope.query_company_year_dev_detail_timelist_his.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.dataSource = res.body.data;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'dtime',
+                align: 'center',
+            },
+            {
+                title: '故障台次',
+                dataIndex: 'fail_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '维护台次',
+                dataIndex: 'alarm_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '离线台次',
+                dataIndex: 'inter_count',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+    };
+
+    //集团年-时间-曲线
+    $scope.query_company_year_dev_detail_timeline_his.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_count';
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data[$scope.select1]]];
+    }
+
+    //集团年-电站-列表
+    $scope.query_company_year_dev_detail_stationlist_his.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.dataSource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                align: 'center',
+            },
+            {
+                title: '总台数',
+                dataIndex: 'eqcount',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '故障台次',
+                dataIndex: 'fail_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '维护台次',
+                dataIndex: 'alarm_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '离线台次',
+                dataIndex: 'inter_count',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '故障损失电量',
+                dataIndex: 'fail_we',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: 'mttr',
+                dataIndex: 'run',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: 'mtbf',
+                dataIndex: 'mtbf',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: 'pba',
+                dataIndex: 'pba',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: 'pr',
+                dataIndex: 'pr',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+    };
+
+    //集团年-电站-曲线
+    $scope.query_company_year_dev_detail_stationline_his.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_we';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
+        $scope.xdata = res.body.data.st_name;
+        $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
+    }
+
+
+
+
+
     //电站-故障分析
     $scope.faultAlarmTotalStatistics.getDataCallback = (success, res) => {
+        if (!success) return;
         $scope.faultData = res;
     }
 
     //电站-故障列表
     $scope.getStationFaultAlarmRtData.getDataCallback = (success, res) => {
+        $scope.equipmentDetailLoading = false;
+        if (!success) return;
         $scope.column = [
             {
                 title: '设备名称',
@@ -226,29 +707,73 @@ ajaxData({
         ];
     }
 
-    // const combineColumn = arr => {
-    //     const newArr = arr.map(item => {
-    //         return {
-    //             title: item,
-    //             dataIndex: '',
-    //             width: '',
-    //             align: 'left'
-    //         }
-    //     })
-    //     return newArr;
-    // }
+    // 计算 图表 显示对应 轴
+    function diffChartLineData() {
+        if (!$scope.initComplete) return;
+        const { currentClass, selectOptions, select1, select2 } = $scope;
+        if (currentClass === 'CompanyDayAgo') {
+            $scope.xdata = $scope.query_company_day_dev_detail_stationline_his.res.body.data.st_name;
+            $scope.ydatas = [[$scope.query_company_day_dev_detail_stationline_his.res.body.data[select1]], [$scope.query_company_day_dev_detail_stationline_his.res.body.data[select2]]]
+        } else if (currentClass === 'CompanyMonth') {
+            if ($scope.tabIndex === 0){
+                $scope.xdata = $scope.query_company_month_dev_detail_timeline_his.res.body.data.dtime;
+                $scope.ydatas = [[$scope.query_company_month_dev_detail_timeline_his.res.body.data[select1]]]
+            } else if ($scope.tabIndex === 1){
+                $scope.xdata = $scope.query_company_month_dev_detail_stationline_his.res.body.data.st_name;
+                $scope.ydatas = [[$scope.query_company_month_dev_detail_stationline_his.res.body.data[select1]], [$scope.query_company_month_dev_detail_stationline_his.res.body.data[select2]]]
+            }
+        } else if (currentClass === 'CompanyYear') {
+            if ($scope.tabIndex === 0) {
+                $scope.xdata = $scope.query_company_year_dev_detail_timeline_his.res.body.data.dtime;
+                $scope.ydatas = [[$scope.query_company_year_dev_detail_timeline_his.res.body.data[select1]]]
+            } else if ($scope.tabIndex === 1) {
+                $scope.xdata = $scope.query_company_year_dev_detail_stationline_his.res.body.data.st_name;
+                $scope.ydatas = [[$scope.query_company_year_dev_detail_stationline_his.res.body.data[select1]], [$scope.query_company_year_dev_detail_stationline_his.res.body.data[select2]]]
+            }
+        }
+    }
 
-    // $scope.currentColumn = () =>{
-    //     if($scope.currentClass === 'StationDayToday'){
-    //         $scope.column = combineColumn(['设备名称', '故障类型', '设备类型', '故障发生时间', '故障描述', '持续时间', '处理详情']);
-    //     }else if($scope.currentClass === 'CompanyDayToday'){
-    //         $scope.column = combineColumn(['电站名称', '总台数', '运行台数', '待机', '故障', '维护', '离线']);
-    //     } else if ($scope.currentClass === 'CompanyDayAgo'){
-    //         $scope.column = combineColumn(['电站名称', '总台数', '故障台次', '维护台次', '离线台次', '故障损失小时数', '故障损失电量', 'mttr', 'mtbf', 'pba', 'pr', '综合得分']);
-    //     } else {
-    //         $scope.column = combineColumn(['电站名称', '总台数', '故障台次', '维护台次', '离线台次', '故障损失小时数', '故障损失电量', 'mttr', 'mtbf', 'pba', 'pr', '综合得分']);
-    //     }
-    // }
+    // 轴线切换  可选项  判断
+    function diffSelectOptions() {
+        if ($scope.currentClass === 'CompanyDayAgo') {
+            $scope.selectOptions = {
+                eqcount: '总台数',
+                fail_count: '故障台次',
+                alarm_count: '维护台次',
+                inter_count: '离线台次',
+                fail_we: '故障损失电量(kwh)',
+                mttr: 'mttr',
+                mtbf: 'mtbf',
+                pba: 'pba',
+                pr: 'pr'
+            }
+        } else if ($scope.currentClass === 'CompanyMonth' || $scope.currentClass === 'CompanyYear'){
+            if ($scope.tabIndex === 0){
+                $scope.selectOptions = {
+                    fail_count: '故障台次',
+                    alarm_count: '维护台次',
+                    inter_count: '离线台次'
+                }
+            } else if($scope.tabIndex === 1){
+                $scope.selectOptions = {
+                    eqcount: '总台数',
+                    fail_count: '故障台次',
+                    alarm_count: '维护台次',
+                    inter_count: '离线台次',
+                    fail_we: '故障损失电量(kwh)',
+                    mttr: 'mttr',
+                    mtbf: 'mtbf',
+                    pba: 'pba',
+                    pr: 'pr'
+                }
+            }
+        }
+    }
 
+    // 定时器  定时刷新接口
+    const timer = $interval(() => {
+        if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') diffGetData();
+    }, 10000);
+    $scope.$on('$destroy', () => $interval.cancel(timer));
     
 });
