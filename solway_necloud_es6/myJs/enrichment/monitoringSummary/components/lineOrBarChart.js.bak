@@ -19,6 +19,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         splitNumber: '=',
         barColors: '=',
         imagesymboloptions: '=',
+        stack: '=',
     },
     link($scope, $element) {
         let myChart;
@@ -37,7 +38,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         }, 0);
 
         const drawing = () => {
-            const { backgroundColor, imagesymboloptions, symbolSize, splitNumber, barColors = [], splitLine, barWidth = 20, axisColor, fontColor, linenames = [], ynames = [], xdata = [], ydatas = [[[]]], types = [], colors = [], datazoom } = $scope;
+            const { stack = [[], []], backgroundColor, imagesymboloptions, symbolSize, splitNumber, barColors = [], splitLine, barWidth = 20, axisColor, fontColor, linenames = [], ynames = [], xdata = [], ydatas = [[[]]], types = [], colors = [], datazoom } = $scope;
 
             const option = {
                 backgroundColor,
@@ -134,6 +135,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         name: linenames[i][xi],
                         type: types[i][xi],
                         barWidth: barWidth,
+                        stack: stack[i][xi] || (i + '' + xi),
                         yAxisIndex: i,
                         smooth: true,
                         symbol: 'circle',
