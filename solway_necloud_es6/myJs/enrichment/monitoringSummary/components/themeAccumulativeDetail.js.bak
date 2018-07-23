@@ -40,7 +40,6 @@ ajaxData({
         if (select2) await $scope.selectChange('select2');
         $('.ng-clock').removeClass('ng-clock');
 
-        diffSelectOptions();//只有一种情况，无需判断
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
         diffGetData();
@@ -170,16 +169,19 @@ ajaxData({
                 align: 'right'
             }
         ];
-        // $scope.$apply();
     };
 
     // 集团柱状图--接口处理
     $scope.query_company_accum_detail_timebar_his.getDataCallback = (success, res) => {
-        $scope.accumulativeDetailLoading = false;        
+        $scope.accumulativeDetailLoading = false;    
+        diffSelectOptions(res.body.units);//图表设置selectOptions  
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
+
+       
+
     }
 
     // 电站列表--接口处理
@@ -247,6 +249,7 @@ ajaxData({
     // 电站柱状图--接口处理
     $scope.query_station_accum_detail_timebar_his.getDataCallback = (success, res) => {
         $scope.accumulativeDetailLoading = false;
+        diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
         $scope.xdata = res.body.data.dtime;
@@ -268,14 +271,14 @@ ajaxData({
     }
 
     // selectOption赋值
-    function diffSelectOptions() {
+    function diffSelectOptions(units) {
         $scope.selectOptions = {
-            shd_kwh_chk: '应发电量(kWh)',
-            real_kwh_chk: '实发电量(kWh)',
-            send_kwh_chk: '上网电量(kWh)',
-            fail_we: '损失电量(kWh)',
-            real_hours: '发电小时数',
-            rad_chk: '辐射总量',
+            shd_kwh_chk: '应发电量' + units.shd_kwh_chk,
+            real_kwh_chk: '实发电量' + units.real_kwh_chk,
+            send_kwh_chk: '上网电量' + units.send_kwh_chk,
+            fail_we: '损失电量' + units.fail_we,
+            real_hours: '发电小时数' + units.real_hours,
+            rad_chk: '辐射总量' + units.rad_chk,
             pba: 'pba',
             pr: 'pr'
         };

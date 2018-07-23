@@ -203,7 +203,6 @@ ajaxData({
         });
         $scope.column = [];
         $scope.equipmentDetailLoading = true;
-        diffSelectOptions();        
         diffGetData();
     };
     // 图标轴线切换
@@ -222,14 +221,12 @@ ajaxData({
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         $scope.equipmentDetailLoading = true;
-        diffSelectOptions();
         diffGetData();
     };
 
     // 日期改变
     $scope.dateUpdated = () => {
         $scope.equipmentDetailLoading = true;
-        diffSelectOptions();
         diffGetData();
     };
 
@@ -239,9 +236,12 @@ ajaxData({
 
     // 判断 调用  对应 接口
     async function diffGetData() {
-        $scope.column = [];
-        $scope.xdata = void 0;
-        $scope.ydatas = void 0;
+        if ($scope.currentClass != 'CompanyDayToday' && $scope.currentClass != 'StationDayToday'){
+            $scope.column = [];
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
+        }
+        
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
@@ -452,6 +452,7 @@ ajaxData({
         $scope.column = [
             {
                 title: '电站名称',
+                width:'20%',
                 dataIndex: 'st_name',
                 align: 'center',
             },
@@ -480,31 +481,36 @@ ajaxData({
                 align: 'right'
             },
             {
-                title: '故障损失电量',
+                title: '故障损失电量(' + res.body.units.fail_we + ')',
+                width:'150px',
                 dataIndex: 'fail_we',
                 sort: 'true',
                 align: 'right'
             },
             {
                 title: 'mttr',
+                width: '60px',
                 dataIndex: 'run',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'mtbf',
+                width: '60px',
                 dataIndex: 'mtbf',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'pba',
+                width: '60px',
                 dataIndex: 'pba',
                 sort: 'true',
                 align: 'right'
             },
             {
                 title: 'pr',
+                width: '60px',
                 dataIndex: 'pr',
                 sort: 'true',
                 align: 'right'
@@ -516,6 +522,7 @@ ajaxData({
     $scope.query_company_day_dev_detail_stationline_his.getDataCallback = (success, res) => {
         $scope.equipmentDetailLoading = false;
         if (!success) return;
+        diffSelectOptions(res.body.units);//图表设置selectOptions  
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_we';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
         $scope.xdata = res.body.data.st_name;
@@ -558,6 +565,7 @@ ajaxData({
     $scope.query_company_month_dev_detail_timeline_his.getDataCallback = (success, res) =>{
         $scope.equipmentDetailLoading = false;
         if (!success) return;
+        diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_count';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]]];
@@ -571,6 +579,7 @@ ajaxData({
         $scope.column = [
             {
                 title: '电站名称',
+                width:'20%',
                 dataIndex: 'st_name',
                 align: 'center',
             },
@@ -599,7 +608,7 @@ ajaxData({
                 align: 'right'
             },
             {
-                title: '故障损失电量',
+                title: '故障损失电量(' + res.body.units.fail_we + ')',
                 dataIndex: 'fail_we',
                 sort: 'true',
                 align: 'right'
@@ -607,23 +616,27 @@ ajaxData({
             {
                 title: 'mttr',
                 dataIndex: 'run',
+                width:'60px',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'mtbf',
+                width:'60px',
                 dataIndex: 'mtbf',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'pba',
+                width:'60px',
                 dataIndex: 'pba',
                 sort: 'true',
                 align: 'right'
             },
             {
                 title: 'pr',
+                width:'60px',
                 dataIndex: 'pr',
                 sort: 'true',
                 align: 'right'
@@ -635,6 +648,7 @@ ajaxData({
     $scope.query_company_month_dev_detail_stationline_his.getDataCallback = (success, res) => {
         $scope.equipmentDetailLoading = false;
         if (!success) return;
+        diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_we';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
         $scope.xdata = res.body.data.st_name;
@@ -677,6 +691,7 @@ ajaxData({
     $scope.query_company_year_dev_detail_timeline_his.getDataCallback = (success, res) => {
         $scope.equipmentDetailLoading = false;
         if (!success) return;
+        diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_count';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]]];
@@ -690,6 +705,7 @@ ajaxData({
         $scope.column = [
             {
                 title: '电站名称',
+                width:'20%',
                 dataIndex: 'st_name',
                 align: 'center',
             },
@@ -718,31 +734,35 @@ ajaxData({
                 align: 'right'
             },
             {
-                title: '故障损失电量',
+                title: '故障损失电量(' + res.body.units.fail_we + ')',
                 dataIndex: 'fail_we',
                 sort: 'true',
                 align: 'right'
             },
             {
                 title: 'mttr',
+                width:'60px',
                 dataIndex: 'run',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'mtbf',
+                width: '60px',
                 dataIndex: 'mtbf',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'pba',
+                width: '60px',
                 dataIndex: 'pba',
                 sort: 'true',
                 align: 'right'
             },
             {
                 title: 'pr',
+                width: '60px',
                 dataIndex: 'pr',
                 sort: 'true',
                 align: 'right'
@@ -754,6 +774,7 @@ ajaxData({
     $scope.query_company_year_dev_detail_stationline_his.getDataCallback = (success, res) => {
         $scope.equipmentDetailLoading = false;
         if (!success) return;
+        diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'fail_we';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
         $scope.xdata = res.body.data.st_name;
@@ -773,6 +794,7 @@ ajaxData({
         $scope.column = [
             {
                 title: '设备名称',
+                width:'20%',
                 dataIndex: 'name',
                 sort: 'true',
                 align: 'center',
@@ -850,31 +872,35 @@ ajaxData({
                 align: 'right'
             },
             {
-                title: '故障损失电量',
+                title: '故障损失电量(' + res.body.units.dust_we + ')', 
                 dataIndex: 'dust_we',
                 sort: 'true',
                 align: 'right'
             },
             {
                 title: 'mttr',
+                width:'60px',
                 dataIndex: 'mttr',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'mtbf',
+                width:'60px',
                 dataIndex: 'mtbf',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'pba',
+                width:'60px',
                 dataIndex: 'pba',
                 sort: 'true',
                 align: 'right'
             },
             {
                 title: 'pr',
+                width:'60px',
                 dataIndex: 'pr',
                 sort: 'true',
                 align: 'right'
@@ -886,6 +912,7 @@ ajaxData({
     $scope.query_station_month_dev_detail_timeline_his.getDataCallback = (success, res) => {
         $scope.equipmentDetailLoading = false;
         if (!success) return;
+        diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'dust_we';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
         $scope.xdata = res.body.data.dtime;
@@ -900,6 +927,7 @@ ajaxData({
         $scope.column = [
             {
                 title: '电站名称',
+                width:'20%',
                 dataIndex: 'eq_name',
                 align: 'center',
             },
@@ -928,7 +956,7 @@ ajaxData({
                 align: 'right'
             },
             {
-                title: '故障损失电量',
+                title: '故障损失电量(' + res.body.units.dust_we + ')',
                 dataIndex: 'dust_we',
                 sort: 'true',
                 align: 'right'
@@ -946,6 +974,7 @@ ajaxData({
     $scope.query_station_month_dev_detail_devline_his.getDataCallback = (success, res) => {
         $scope.equipmentDetailLoading = false;
         if (!success) return;
+        diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'dust_we';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
         $scope.xdata = res.body.data.eq_name;
@@ -982,31 +1011,35 @@ ajaxData({
                 align: 'right'
             },
             {
-                title: '故障损失电量',
+                title: '故障损失电量(' + res.body.units.dust_we + ')',
                 dataIndex: 'dust_we',
                 sort: 'true',
                 align: 'right'
             },
             {
                 title: 'mttr',
+                width:'60px',
                 dataIndex: 'mttr',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'mtbf',
+                width: '60px',
                 dataIndex: 'mtbf',
                 sort: 'true',
                 align: 'right',
             },
             {
                 title: 'pba',
+                width: '60px',
                 dataIndex: 'pba',
                 sort: 'true',
                 align: 'right'
             },
             {
                 title: 'pr',
+                width: '60px',
                 dataIndex: 'pr',
                 sort: 'true',
                 align: 'right'
@@ -1016,9 +1049,9 @@ ajaxData({
 
     //电站年-时间-曲线
     $scope.query_station_year_dev_detail_timeline_his.getDataCallback = (success, res) => {
-        debugger
         $scope.equipmentDetailLoading = false;
         if (!success) return;
+        diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'dust_we';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
         $scope.xdata = res.body.data.dtime;
@@ -1033,6 +1066,7 @@ ajaxData({
         $scope.column = [
             {
                 title: '电站名称',
+                width:'20%',
                 dataIndex: 'eq_name',
                 align: 'center',
             },
@@ -1061,7 +1095,7 @@ ajaxData({
                 align: 'right'
             },
             {
-                title: '故障损失电量',
+                title: '故障损失电量(' + res.body.units.dust_we + ')',
                 dataIndex: 'dust_we',
                 sort: 'true',
                 align: 'right'
@@ -1079,6 +1113,7 @@ ajaxData({
     $scope.query_station_year_dev_detail_devline_his.getDataCallback = (success, res) => {
         $scope.equipmentDetailLoading = false;
         if (!success) return;
+        diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'dust_we';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
         $scope.xdata = res.body.data.eq_name;
@@ -1128,14 +1163,14 @@ ajaxData({
     }
 
     // 轴线切换  可选项  判断
-    function diffSelectOptions() {
+    function diffSelectOptions(units) {
         if ($scope.currentClass === 'CompanyDayAgo') {
             $scope.selectOptions = {
                 eqcount: '总台数',
                 fail_count: '故障台次',
                 alarm_count: '维护台次',
                 inter_count: '离线台次',
-                fail_we: '故障损失电量(kwh)',
+                fail_we: '故障损失电量' + units.fail_we,
                 mttr: 'mttr',
                 mtbf: 'mtbf',
                 pba: 'pba',
@@ -1154,7 +1189,7 @@ ajaxData({
                     fail_count: '故障台次',
                     alarm_count: '维护台次',
                     inter_count: '离线台次',
-                    fail_we: '故障损失电量(kwh)',
+                    fail_we: '故障损失电量' + units.fail_we,
                     mttr: 'mttr',
                     mtbf: 'mtbf',
                     pba: 'pba',
@@ -1167,7 +1202,7 @@ ajaxData({
                     fail_count: '故障台次',
                     alarm_count: '告警台次',
                     inter_count: '离线台次',
-                    dust_we: '故障损失电量',
+                    dust_we: '故障损失电量' + units.dust_we,
                     mttr: 'mttr',
                     mtbf: 'mtbf',
                     pba: 'pba',
@@ -1179,7 +1214,7 @@ ajaxData({
                     fail_count: '故障台次',
                     alarm_count: '维护台次',
                     inter_count: '离线台次',
-                    dust_we: '故障损失电量(kwh)',
+                    dust_we: '故障损失电量' + units.dust_we,
                     title: '功率离散率'
                 }
             }
