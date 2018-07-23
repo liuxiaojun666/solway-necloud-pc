@@ -239,11 +239,15 @@ ajaxData({
 
     // 判断 调用  对应 接口
     async function diffGetData() {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
         switch (currentClass) {
             case 'CompanyDayToday':   //集团当日
+                $scope.companyToday.res = null;
                 $scope.companyToday.getData({
                     queryType: 1,
                     dateType: 3,
@@ -252,12 +256,14 @@ ajaxData({
                 break;
             case 'CompanyDayAgo':     //集团历史日
                 if (showShape === 'list') {
+                    $scope.query_company_day_dev_detail_stationlist_his.res = null;
                     $scope.query_company_day_dev_detail_stationlist_his.getData({
                         queryCode: 'query_company_day_dev_detail_stationlist_his',
                         queryType: 1,
                         date: dateTime.showDate
                     });
                 } else {
+                    $scope.query_company_day_dev_detail_stationline_his.res = null;
                     $scope.query_company_day_dev_detail_stationline_his.getData({
                         queryCode: 'query_company_day_dev_detail_stationline_his',
                         queryType: 1,
