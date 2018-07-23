@@ -10,4 +10,12 @@ app.directive('themeElectricitySlideshow', ['$timeout', ($timeout) => ({
             $element.css('display', 'block');
         }, 0)
     },
+    controller($scope) {
+        $scope.slideImgs = ['', '', '', ''];
+        $scope.$watch('imgs', (newValue, oldValue) => {
+            if (newValue && newValue[0]) {
+                $scope.slideImgs = newValue.slice(0, 4);
+            }
+        });
+    }
 })])

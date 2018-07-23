@@ -113,12 +113,12 @@ ajaxData({
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
             let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeResource || {};
-            if (($scope.dateType === 0) || ($scope.dataType > 0 && showShape === 'chart2')) showShape = 'list';
-            $scope.changeShowShape(showShape || 'list');
             const { dateType, dateTime } = historicalRecord.get();
             $scope.dateType = dateType;
             $scope.dateTime = dateTime;
             await $scope.dateUpdated();
+            if (($scope.dateType === 0) || ($scope.dataType > 0 && showShape === 'chart2')) showShape = 'list';
+            $scope.changeShowShape(showShape || 'list');
             $scope.select1 = select1;
             $scope.select2 = select2;
             if (select1) await $scope.selectChange('select1');
@@ -564,7 +564,7 @@ ajaxData({
                     align: 'left',
                 },
                 {
-                    title: '装机容量(' + res.body.units.inst_kw + ')',
+                    title: '装机容量(kW)',
                     dataIndex: 'inst_kw',
                     sort: 'true',
                     align: 'right',
@@ -573,7 +573,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '辐射总量(' + res.body.units.rad_chk + ')',
+                    title: '辐射总量(kWh/㎡)',
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     align: 'right',
@@ -582,7 +582,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '最大光照强度(' + res.body.units.max_sun + ')',
+                    title: '最大光照强度(W/m²)',
                     dataIndex: 'max_sun',
                     sort: 'true',
                     align: 'right',
@@ -702,11 +702,25 @@ ajaxData({
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     align: 'right',
+                    render(text, item, index) {
+                        return `
+                            <span>${text}</span>
+                            <i title="环比${item.rad_chk_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                    }
                 }, {
                     title: '发电小时数(h)',
                     dataIndex: 'real_hours',
                     sort: 'true',
                     align: 'right',
+                    render(text, item, index) {
+                        return `
+                            <span>${text}</span>
+                            <i title="环比${item.real_hours_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                    }
                 }
             ];
         };
