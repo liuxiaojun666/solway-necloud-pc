@@ -550,35 +550,35 @@ ajaxData({
                     sort: true,
                 },
                 {
-                    title: '装机容量(kW)',
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
                     dataIndex: 'inst_kw',
                     width: '15%',
                     align: 'right',
                     sort: true,
                 },
                 {
-                    title: '发电量',
+                    title: '发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '15%',
                     align: 'right',
                     sort: true,
                 },
                 {
-                    title: '发电小时数(h)',
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
                     dataIndex: 'real_hours',
                     width: '15%',
                     align: 'right',
                     sort: true,
                 },
                 {
-                    title: '阴影损失电量(kWh)',
+                    title: '阴影损失电量' + (res.body.units.shade_we ? '(' + res.body.units.shade_we + ')' : ''),
                     dataIndex: 'shade_we',
                     width: '15%',
                     align: 'right',
                     sort: true,
                 },
                 {
-                    title: '灰尘损失电量(kWh)',
+                    title: '灰尘损失电量' + (res.body.units.dust_we ? '(' + res.body.units.dust_we + ')' : ''),
                     dataIndex: 'dust_we',
                     width: '15%',
                     align: 'right',
@@ -593,6 +593,7 @@ ajaxData({
             $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
             await $scope.selectChange('select1');
             await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -608,28 +609,28 @@ ajaxData({
                     align: 'center'
                 },
                 {
-                    title: '实发电量(kWh)',
+                    title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '应发电量(kWh)',
+                    title: '应发电量' + (res.body.units.shd_kwh_chk ? '(' + res.body.units.shd_kwh_chk + ')' : ''),
                     dataIndex: 'shd_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '上网电量(kWh)',
+                    title: '上网电量' + (res.body.units.send_kwh_chk ? '(' + res.body.units.send_kwh_chk + ')' : ''),
                     dataIndex: 'send_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '损失百分比(%)',
+                    title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),
                     dataIndex: 'we_rate',
                     width: '20%',
                     sort: true,
@@ -644,6 +645,7 @@ ajaxData({
             $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
             await $scope.selectChange('select1');
             await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -658,14 +660,14 @@ ajaxData({
                     sort: true,
                 },
                 {
-                    title: '装机容量(kW)',
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
                     dataIndex: 'inst_kw',
                     width: '15%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '发电量(kWh)',
+                    title: '发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '15%',
                     sort: true,
@@ -679,7 +681,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '发电小时数(h)',
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
                     dataIndex: 'real_hours',
                     width: '15%',
                     sort: true,
@@ -693,7 +695,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '故障损失电量(kWh)',
+                    title: '故障损失电量' + (res.body.units.fail_we ? '(' + res.body.units.fail_we + ')' : ''),
                     dataIndex: 'fail_we',
                     width: '15%',
                     sort: true,
@@ -707,7 +709,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '阴影损失电量(kWh)',
+                    title: '阴影损失电量' + (res.body.units.shade_we ? '(' + res.body.units.shade_we + ')' : ''),
                     dataIndex: 'shade_we',
                     width: '15%',
                     sort: true,
@@ -721,7 +723,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '灰尘损失电量(kWh)',
+                    title: '灰尘损失电量' + (res.body.units.dust_we ? '(' + res.body.units.dust_we + ')' : ''),
                     dataIndex: 'dust_we',
                     width: '15%',
                     sort: true,
@@ -743,6 +745,7 @@ ajaxData({
             $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'inst_kw';
             await $scope.selectChange('select1');
             await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -758,28 +761,28 @@ ajaxData({
                     align: 'center'
                 },
                 {
-                    title: '实发电量(kWh)',
+                    title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '应发电量(kWh)',
+                    title: '应发电量' + (res.body.units.shd_kwh_chk ? '(' + res.body.units.shd_kwh_chk + ')' : ''),
                     dataIndex: 'shd_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '上网电量(kWh)',
+                    title: '上网电量' + (res.body.units.send_kwh_chk ? '(' + res.body.units.send_kwh_chk + ')' : ''),
                     dataIndex: 'send_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '损失百分比(%)',
+                    title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),
                     dataIndex: 'we_rate',
                     width: '20%',
                     sort: true,
@@ -794,6 +797,7 @@ ajaxData({
             $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
             await $scope.selectChange('select1');
             await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -808,14 +812,14 @@ ajaxData({
                     sort: true,
                 },
                 {
-                    title: '装机容量(kW)',
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
                     dataIndex: 'inst_kw',
                     width: '15%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '发电量(kWh)',
+                    title: '发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '15%',
                     sort: true,
@@ -829,7 +833,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '发电小时数(h)',
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
                     dataIndex: 'real_hours',
                     width: '15%',
                     sort: true,
@@ -843,7 +847,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '故障损失电量(kWh)',
+                    title: '故障损失电量' + (res.body.units.fail_we ? '(' + res.body.units.fail_we + ')' : ''),
                     dataIndex: 'fail_we',
                     width: '15%',
                     sort: true,
@@ -857,7 +861,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '阴影损失电量(kWh)',
+                    title: '阴影损失电量' + (res.body.units.shade_we ? '(' + res.body.units.shade_we + ')' : ''),
                     dataIndex: 'shade_we',
                     width: '15%',
                     sort: true,
@@ -871,7 +875,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '灰尘损失电量(kWh)',
+                    title: '灰尘损失电量' + (res.body.units.dust_we ? '(' + res.body.units.dust_we + ')' : ''),
                     dataIndex: 'dust_we',
                     width: '15%',
                     sort: true,
@@ -893,6 +897,7 @@ ajaxData({
             $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'inst_kw';
             await $scope.selectChange('select1');
             await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -961,42 +966,42 @@ ajaxData({
                     sort: true,
                 },
                 {
-                    title: '装机容量(kW)',
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
                     dataIndex: 'inst_kw',
                     width: '15%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '实发电量(kWh)',
+                    title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '15%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '应发电量(kWh)',
+                    title: '应发电量' + (res.body.units.shd_kwh_chk ? '(' + res.body.units.shd_kwh_chk + ')' : ''),
                     dataIndex: 'shd_kwh_chk',
                     width: '15%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '上网电量(kWh)',
+                    title: '上网电量' + (res.body.units.send_kwh_chk ? '(' + res.body.units.send_kwh_chk + ')' : ''),
                     dataIndex: 'send_kwh_chk',
                     width: '15%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '辐射总量(kWh/m²)',
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
                     dataIndex: 'rad_chk',
                     width: '15%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '发电小时数(h)',
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
                     dataIndex: 'real_hours',
                     width: '15%',
                     sort: true,
@@ -1011,6 +1016,7 @@ ajaxData({
             $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
             await $scope.selectChange('select1');
             await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -1025,28 +1031,28 @@ ajaxData({
                     sort: true,
                 },
                 {
-                    title: '实发电量(kWh)',
+                    title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '应发电量(kWh)',
+                    title: '应发电量' + (res.body.units.shd_kwh_chk ? '(' + res.body.units.shd_kwh_chk + ')' : ''),
                     dataIndex: 'shd_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '上网电量(kWh)',
+                    title: '上网电量' + (res.body.units.send_kwh_chk ? '(' + res.body.units.send_kwh_chk + ')' : ''),
                     dataIndex: 'send_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '损失百分比(%)',
+                    title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),
                     dataIndex: 'we_rate',
                     width: '20%',
                     sort: true,
@@ -1061,6 +1067,7 @@ ajaxData({
             // $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
             await $scope.selectChange('select1');
             // await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -1075,14 +1082,14 @@ ajaxData({
                     sort: true,
                 },
                 {
-                    title: '装机容量(kW)',
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
                     dataIndex: 'inst_kw',
                     width: '10%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '实发电量(kWh)',
+                    title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '10%',
                     sort: true,
@@ -1096,7 +1103,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '应发电量(kWh)',
+                    title: '应发电量' + (res.body.units.shd_kwh_chk ? '(' + res.body.units.shd_kwh_chk + ')' : ''),
                     dataIndex: 'shd_kwh_chk',
                     width: '10%',
                     sort: true,
@@ -1110,7 +1117,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '上网电量(kWh)',
+                    title: '上网电量' + (res.body.units.send_kwh_chk ? '(' + res.body.units.send_kwh_chk + ')' : ''),
                     dataIndex: 'send_kwh_chk',
                     width: '10%',
                     sort: true,
@@ -1124,7 +1131,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '损失百分比(%)',
+                    title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),
                     dataIndex: 'we_rate',
                     width: '10%',
                     sort: true,
@@ -1137,6 +1144,7 @@ ajaxData({
             if (!success) return;
             $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'shd_kwh_chk';
             await $scope.selectChange('select1');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -1151,28 +1159,28 @@ ajaxData({
                     sort: true,
                 },
                 {
-                    title: '实发电量(kWh)',
+                    title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '应发电量(kWh)',
+                    title: '应发电量' + (res.body.units.shd_kwh_chk ? '(' + res.body.units.shd_kwh_chk + ')' : ''),
                     dataIndex: 'shd_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '上网电量(kWh)',
+                    title: '上网电量' + (res.body.units.send_kwh_chk ? '(' + res.body.units.send_kwh_chk + ')' : ''),
                     dataIndex: 'send_kwh_chk',
                     width: '20%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '损失百分比(%)',
+                    title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),
                     dataIndex: 'we_rate',
                     width: '20%',
                     sort: true,
@@ -1187,6 +1195,7 @@ ajaxData({
             // $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
             await $scope.selectChange('select1');
             // await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -1201,14 +1210,14 @@ ajaxData({
                     sort: true,
                 },
                 {
-                    title: '装机容量(kW)',
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
                     dataIndex: 'inst_kw',
                     width: '10%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '实发电量(kWh)',
+                    title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
                     dataIndex: 'real_kwh_chk',
                     width: '10%',
                     sort: true,
@@ -1222,7 +1231,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '应发电量(kWh)',
+                    title: '应发电量' + (res.body.units.shd_kwh_chk ? '(' + res.body.units.shd_kwh_chk + ')' : ''),
                     dataIndex: 'shd_kwh_chk',
                     width: '10%',
                     sort: true,
@@ -1236,7 +1245,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '损失百分比(%)',
+                    title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),
                     dataIndex: 'we_rate',
                     width: '10%',
                     sort: true,
@@ -1249,6 +1258,7 @@ ajaxData({
             if (!success) return;
             $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'shd_kwh_chk';
             await $scope.selectChange('select1');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -1379,89 +1389,89 @@ ajaxData({
         }
 
         // 轴线切换  可选项  判断
-        function diffSelectOptions() {
+        function diffSelectOptions(units = {}) {
             if ($scope.currentClass === 'StationDayAgo') {
                 $scope.selectOptions = {
-                    real_hours: '发电小时数(h)',
-                    inst_kw: '装机容量(kW)',
-                    real_kwh_chk: '发电量(kW/h)',
+                    real_hours: '发电小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
+                    inst_kw: '装机容量' + (units.inst_kw ? '(' + units.inst_kw + ')' : ''),
+                    real_kwh_chk: '发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
                 };
             } else if ($scope.currentClass === 'StationMonth') {
                 if ($scope.tabIndex === 0) {
                     $scope.selectOptions = {
-                        real_kwh_chk: '实发电量(kWh)',
-                        send_kwh_chk: '上网电量(kWh)',
-                        shd_kwh_chk: '应发电量(kWh)',
-                        we_rate: '其他损失电量(kWh)',
+                        real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                        send_kwh_chk: '上网电量' + (units.send_kwh_chk ? '(' + units.send_kwh_chk + ')' : ''),
+                        shd_kwh_chk: '应发电量' + (units.shd_kwh_chk ? '(' + units.shd_kwh_chk + ')' : ''),
+                        we_rate: '其他损失电量' + (units.we_rate ? '(' + units.we_rate + ')' : ''),
                     };
                 } else if ($scope.tabIndex === 1) {
                     $scope.selectOptions = {
-                        decay_we: '衰减损失电量(kWh)',
-                        dust_we: '灰尘损失电量(kWh)',
-                        fail_we: '故障损失电量(kWh)',
-                        inst_kw: '装机容量(kW)',
-                        other_we: '其他损失电量(kWh)',
-                        real_hours: '实际利用小时数(h)',
-                        real_kwh_chk: '实发电量(kWh)',
-                        repair_we: '检修损失电量(kWh)',
-                        restrict_we: '限电损失电量(kWh)',
-                        shade_we: '阴影损失电量(kWh)',
+                        decay_we: '衰减损失电量' + (units.decay_we ? '(' + units.decay_we + ')' : ''),
+                        dust_we: '灰尘损失电量' + (units.dust_we ? '(' + units.dust_we + ')' : ''),
+                        fail_we: '故障损失电量' + (units.fail_we ? '(' + units.fail_we + ')' : ''),
+                        inst_kw: '装机容量' + (units.inst_kw ? '(' + units.inst_kw + ')' : ''),
+                        other_we: '其他损失电量' + (units.other_we ? '(' + units.other_we + ')' : ''),
+                        real_hours: '实际利用小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
+                        real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                        repair_we: '检修损失电量' + (units.repair_we ? '(' + units.repair_we + ')' : ''),
+                        restrict_we: '限电损失电量' + (units.restrict_we ? '(' + units.restrict_we + ')' : ''),
+                        shade_we: '阴影损失电量' + (units.shade_we ? '(' + units.shade_we + ')' : ''),
                     };
                 }
             } else if ($scope.currentClass === 'StationYear') {
                 if ($scope.tabIndex === 0) {
                     $scope.selectOptions = {
-                        real_kwh_chk: '实发电量(kWh)',
-                        send_kwh_chk: '上网电量(kWh)',
-                        shd_kwh_chk: '应发电量(kWh)',
-                        we_rate: '其他损失电量(kWh)',
+                        real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                        send_kwh_chk: '上网电量' + (units.send_kwh_chk ? '(' + units.send_kwh_chk + ')' : ''),
+                        shd_kwh_chk: '应发电量' + (units.shd_kwh_chk ? '(' + units.shd_kwh_chk + ')' : ''),
+                        we_rate: '其他损失电量' + (units.we_rate ? '(' + units.we_rate + ')' : ''),
                     };
                 } else if ($scope.tabIndex === 1) {
                     $scope.selectOptions = {
-                        decay_we: '衰减损失电量(kWh)',
-                        dust_we: '灰尘损失电量(kWh)',
-                        fail_we: '故障损失电量(kWh)',
-                        inst_kw: '装机容量(kW)',
-                        other_we: '其他损失电量(kWh)',
-                        real_hours: '实际利用小时数(h)',
-                        real_kwh_chk: '实发电量(kWh)',
-                        repair_we: '检修损失电量(kWh)',
-                        restrict_we: '限电损失电量(kWh)',
-                        shade_we: '阴影损失电量(kWh)',
+                        decay_we: '衰减损失电量' + (units.decay_we ? '(' + units.decay_we + ')' : ''),
+                        dust_we: '灰尘损失电量' + (units.dust_we ? '(' + units.dust_we + ')' : ''),
+                        fail_we: '故障损失电量' + (units.fail_we ? '(' + units.fail_we + ')' : ''),
+                        inst_kw: '装机容量' + (units.inst_kw ? '(' + units.inst_kw + ')' : ''),
+                        other_we: '其他损失电量' + (units.other_we ? '(' + units.other_we + ')' : ''),
+                        real_hours: '实际利用小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
+                        real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                        repair_we: '检修损失电量' + (units.repair_we ? '(' + units.repair_we + ')' : ''),
+                        restrict_we: '限电损失电量' + (units.restrict_we ? '(' + units.restrict_we + ')' : ''),
+                        shade_we: '阴影损失电量' + (units.shade_we ? '(' + units.shade_we + ')' : ''),
                     };
                 }
             } else if ($scope.currentClass === 'CompanyDayAgo') {
                 $scope.selectOptions = {
-                    inst_kw: '装机容量(kW)',
-                    real_kwh_chk: '实发电量(kWh)',
-                    send_kwh_chk: '上网电量(kWh)',
-                    shd_kwh_chk: '应发电量(kWh)',
-                    rad_chk: '辐射总量(kWh/m²)',
-                    real_hours: '实际利用小时数(h)',
+                    inst_kw: '装机容量' + (units.inst_kw ? '(' + units.inst_kw + ')' : ''),
+                    real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                    send_kwh_chk: '上网电量' + (units.send_kwh_chk ? '(' + units.send_kwh_chk + ')' : ''),
+                    shd_kwh_chk: '应发电量' + (units.shd_kwh_chk ? '(' + units.shd_kwh_chk + ')' : ''),
+                    rad_chk: '辐射总量' + (units.rad_chk ? '(' + units.rad_chk + ')' : ''),
+                    real_hours: '实际利用小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
                 };
             } else if ($scope.currentClass === 'CompanyMonth' && $scope.tabIndex === 0) {
                 $scope.selectOptions = {
-                    real_kwh_chk: '实发电量(kWh)',
-                    send_kwh_chk: '上网电量(kWh)',
-                    shd_kwh_chk: '应发电量(kWh)',
-                    we_rate: '电量损失百分比(%)',
+                    real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                    send_kwh_chk: '上网电量' + (units.send_kwh_chk ? '(' + units.send_kwh_chk + ')' : ''),
+                    shd_kwh_chk: '应发电量' + (units.shd_kwh_chk ? '(' + units.shd_kwh_chk + ')' : ''),
+                    we_rate: '电量损失百分比' + (units.we_rate ? '(' + units.we_rate + ')' : ''),
                 };
             } else if ($scope.currentClass === 'CompanyMonth' && $scope.tabIndex === 1) {
                 $scope.selectOptions = {
-                    real_kwh_chk: '实发电量(kWh)',
-                    shd_kwh_chk: '应发电量(kWh)',
+                    real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                    shd_kwh_chk: '应发电量' + (units.shd_kwh_chk ? '(' + units.shd_kwh_chk + ')' : ''),
                 };
             } else if ($scope.currentClass === 'CompanyYear' && $scope.tabIndex === 0) {
                 $scope.selectOptions = {
-                    real_kwh_chk: '实发电量(kWh)',
-                    send_kwh_chk: '上网电量(kWh)',
-                    shd_kwh_chk: '应发电量(kWh)',
-                    we_rate: '电量损失百分比(%)',
+                    real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                    send_kwh_chk: '上网电量' + (units.send_kwh_chk ? '(' + units.send_kwh_chk + ')' : ''),
+                    shd_kwh_chk: '应发电量' + (units.shd_kwh_chk ? '(' + units.shd_kwh_chk + ')' : ''),
+                    we_rate: '电量损失百分比' + (units.we_rate ? '(' + units.we_rate + ')' : ''),
                 };
             } else if ($scope.currentClass === 'CompanyYear' && $scope.tabIndex === 1) {
                 $scope.selectOptions = {
-                    real_kwh_chk: '实发电量(kWh)',
-                    shd_kwh_chk: '应发电量(kWh)',
+                    real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                    shd_kwh_chk: '应发电量' + (units.shd_kwh_chk ? '(' + units.shd_kwh_chk + ')' : ''),
                 };
             }
         }
