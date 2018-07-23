@@ -333,7 +333,7 @@ ajaxData({
                     align: 'center',
                 },
                 {
-                    title: '辐射总量(' + res.body.units.rad_chk + ')',
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     align: 'right',
@@ -342,13 +342,13 @@ ajaxData({
                     }
                 },
                 {
-                    title: '发电小时数(' + res.body.units.real_hours + ')',
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
                     dataIndex: 'real_hours',
                     sort: 'true',
                     align: 'right',
                 },
                 {
-                    title: '日照小时数(' + res.body.units.sun_hours + ')',
+                    title: '日照小时数' + (res.body.units.sun_hours ? '(' + res.body.units.sun_hours + ')' : ''),
                     dataIndex: 'sun_hours',
                     sort: 'true',
                     align: 'right',
@@ -357,7 +357,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '最大光照强度(W/m²)',
+                    title: '最大光照强度' + (res.body.units.max_sun ? '(' + res.body.units.max_sun + ')' : ''),
                     dataIndex: 'max_sun',
                     sort: 'true',
                     align: 'right',
@@ -375,10 +375,18 @@ ajaxData({
                     }
                 },
                 {
-                    title: '平均温度(℃)',
+                    title: '平均温度' + (res.body.units.ta_avg ? '(' + res.body.units.ta_avg + ')' : ''),
                     dataIndex: 'ta_avg',
                     sort: 'true',
                     align: 'right',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                }, {
+                    title: '降雨量' + (res.body.units.pcpn ? '(' + res.body.units.pcpn + ')' : ''),
+                    dataIndex: 'pcpn',
+                    sort: 'true',
+                    align: 'center',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
                     }
@@ -453,6 +461,7 @@ ajaxData({
                 const dateNum = date.getDate();
                 $scope.query_station_month_res_timeline_his.res.body.data.nullBlock2 = new Array(new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate() - dateNum + 1).fill('').map((v, i) => (i + dateNum) < 10 ? '0' + (i + dateNum) : i + dateNum);
             }
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -464,6 +473,7 @@ ajaxData({
             $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'sun_hours';
             await $scope.selectChange('select1');
             await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
             diffChartLineData();
             $scope.$apply();
         };
@@ -564,7 +574,7 @@ ajaxData({
                     align: 'left',
                 },
                 {
-                    title: '装机容量(kW)',
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
                     dataIndex: 'inst_kw',
                     sort: 'true',
                     align: 'right',
@@ -573,7 +583,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '辐射总量(kWh/㎡)',
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     align: 'right',
@@ -582,10 +592,11 @@ ajaxData({
                     }
                 },
                 {
-                    title: '最大光照强度(W/m²)',
+                    title: '最大光照强度' + (res.body.units.max_sun ? '(' + res.body.units.max_sun + ')' : ''),
                     dataIndex: 'max_sun',
                     sort: 'true',
                     align: 'right',
+                    width: '15%',
                     render(text) {
                         return text ? '<span>' + text + '</span>' : '<span></span>';
                     }
@@ -600,7 +611,7 @@ ajaxData({
                     }
                 },
                 {
-                    title: '温度(℃)',
+                    title: '温度' + (res.body.units.ta_avg ? '(' + res.body.units.ta_avg + ')' : ''),
                     dataIndex: 'ta_avg',
                     sort: 'true',
                     align: 'right',
@@ -609,8 +620,8 @@ ajaxData({
                     }
                 },
                 {
-                    title: '预测天气',
-                    dataIndex: 'pre_weather',
+                    title: '降雨量' + (res.body.units.pcpn ? '(' + res.body.units.pcpn + ')' : ''),
+                    dataIndex: 'pcpn',
                     sort: 'true',
                     align: 'center',
                     render(text) {
@@ -618,6 +629,7 @@ ajaxData({
                     }
                 },
             ];
+            diffSelectOptions(res.body.units);
             $scope.$apply();
         };
         // 公司 月 时间 列表
@@ -631,12 +643,12 @@ ajaxData({
                     sort: 'true',
                     align: 'center'
                 }, {
-                    title: '辐射总量(kWh/㎡)',
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     align: 'right',
                 }, {
-                    title: '发电小时数(h)',
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
                     dataIndex: 'real_hours',
                     sort: 'true',
                     align: 'right',
@@ -661,24 +673,26 @@ ajaxData({
                     width: '40%',
                     align: 'left'
                 }, {
-                    title: '装机容量(kW)',
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
                     dataIndex: 'inst_kw',
                     sort: 'true',
-                    width: '20%',
                     align: 'right',
                 }, {
-                    title: '辐射总量(kWh/㎡)',
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
                     dataIndex: 'rad_chk',
                     sort: 'true',
-                    width: '20%',
                     align: 'right',
                 }, {
-                    title: '发电小时数(h)',
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
                     dataIndex: 'real_hours',
                     sort: 'true',
-                    width: '20%',
                     align: 'right',
-                }
+                }, {
+                    title: '降雨量' + (res.body.units.pcpn ? '(' + res.body.units.pcpn + ')' : ''),
+                    dataIndex: 'pcpn',
+                    sort: 'true',
+                    align: 'center'
+                },
             ];
         };
         // 公司 月 电站 柱状图
@@ -698,7 +712,7 @@ ajaxData({
                     sort: 'true',
                     align: 'center'
                 }, {
-                    title: '辐射总量(kWh/㎡)',
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
                     dataIndex: 'rad_chk',
                     sort: 'true',
                     align: 'right',
@@ -710,7 +724,7 @@ ajaxData({
                                 style="color: #2ac2ad;cursor:pointer;"></i>`
                     }
                 }, {
-                    title: '发电小时数(h)',
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
                     dataIndex: 'real_hours',
                     sort: 'true',
                     align: 'right',
@@ -742,24 +756,29 @@ ajaxData({
                     width: '40%',
                     align: 'left'
                 }, {
-                    title: '装机容量(kW)',
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
                     dataIndex: 'inst_kw',
                     sort: 'true',
-                    width: '20%',
                     align: 'right',
                 }, {
-                    title: '辐射总量(kWh/㎡)',
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
                     dataIndex: 'rad_chk',
                     sort: 'true',
-                    width: '20%',
                     align: 'right',
                 }, {
-                    title: '发电小时数(h)',
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
                     dataIndex: 'real_hours',
                     sort: 'true',
-                    width: '20%',
                     align: 'right',
-                }
+                }, {
+                    title: '降雨量' + (res.body.units.pcpn ? '(' + res.body.units.pcpn + ')' : ''),
+                    dataIndex: 'pcpn',
+                    sort: 'true',
+                    align: 'center',
+                    render(text) {
+                        return text ? '<span>' + text + '</span>' : '<span></span>';
+                    }
+                },
             ];
         };
         // 公司 年 电站 柱状图
@@ -785,27 +804,29 @@ ajaxData({
         }
 
         // 轴线切换  可选项  判断
-        function diffSelectOptions() {
+        function diffSelectOptions(units = {}) {
             if ($scope.currentClass === 'StationMonth') {
                 $scope.selectOptions = {
-                    max_sun: '最大辐射强度(kWh/m²)',
-                    rad_chk: '辐射总量(kWh/m²)',
-                    sun_hours: '日照小时数(h)',
-                    ta_avg: '平均温度(℃)',
-                    real_hours: '发电小时数(h)'
+                    max_sun: '最大辐射强度' + (units.max_sun ? '(' + units.max_sun + ')' : ''),
+                    rad_chk: '辐射总量' + (units.rad_chk ? '(' + units.rad_chk + ')' : ''),
+                    sun_hours: '日照小时数' + (units.sun_hours ? '(' + units.sun_hours + ')' : ''),
+                    ta_avg: '平均温度' + (units.ta_avg ? '(' + units.ta_avg + ')' : ''),
+                    real_hours: '发电小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
+                    pcpn: '降雨量' + (units.pcpn ? '(' + units.pcpn + ')' : ''),
                 };
             } else if ($scope.currentClass === 'StationYear') {
                 $scope.selectOptions = {
-                    rad_chk: '辐射总量(kWh/m²)',
-                    sun_hours: '日照小时数(h)',
-                    ta_avg: '平均温度(℃)',
-                    real_hours: '发电小时数(h)'
+                    rad_chk: '辐射总量' + (units.rad_chk ? '(' + units.rad_chk + ')' : ''),
+                    sun_hours: '日照小时数' + (units.sun_hours ? '(' + units.sun_hours + ')' : ''),
+                    ta_avg: '平均温度' + (units.ta_avg ? '(' + units.ta_avg + ')' : ''),
+                    real_hours: '发电小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
+                    pcpn: '降雨量' + (units.pcpn ? '(' + units.pcpn + ')' : ''),
                 };
             } else if ($scope.currentClass === 'CompanyDayAgo') {
                 $scope.selectOptions = {
-                    inst_kw: '装机容量kW',
-                    rad_chk: '辐射总量kWh/m²',
-                    ta_avg: '平均温度(℃)',
+                    inst_kw: '装机容量' + (units.inst_kw ? '(' + units.inst_kw + ')' : ''),
+                    rad_chk: '辐射总量' + (units.rad_chk ? '(' + units.rad_chk + ')' : ''),
+                    ta_avg: '平均温度' + (units.ta_avg ? '(' + units.ta_avg + ')' : ''),
                 }
             }
         }

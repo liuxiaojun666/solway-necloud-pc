@@ -60,7 +60,7 @@ ajaxData({
         const { detailFullPage,
             dateType = 0,
             dateTime = new Date(),
-            theme = 'BasicSituation',
+            theme = 'Power',
             stationData } = historiData;
         if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope.dateTime = dateTime;
@@ -87,7 +87,8 @@ ajaxData({
         computeClass();
         if ((dateType === 1 || dateType === 2) && $scope.theme === 'Power') $scope.changeTheme('BasicSituation');
         else if (dateType === 3) $scope.changeTheme('Accumulative');
-        else if ($scope.theme === 'Accumulative') $scope.changeTheme('BasicSituation');
+        else if ($scope.theme === 'Accumulative' && dateType === 0) $scope.changeTheme('Power');
+        else if ($scope.theme === 'Accumulative' && (dateType === 1 || dateType === 2)) $scope.changeTheme('BasicSituation');
         $scope.getTopXhr = true;
     };
 
