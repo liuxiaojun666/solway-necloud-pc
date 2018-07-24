@@ -22,40 +22,69 @@ ajaxData({
         name: 'GETgetCurrentInfoNew',
         data: {},
         later: true
+    },
+    // 报表展示  tab
+    tab: {
+        name: 'GETreportShowTab',
+        data: {},
+        later: true
+    },
+    // 报表展示 view
+    view: {
+        name: 'GETreportShowView',
+        data: {},
+        later: true
+    },
+    // 报表展示  判断用户是否订阅
+    checkSubscribe: {
+        name: 'GETreportShowUserCheckSubscribe',
+        data: {},
+        later: true
+    },
+    // 报表展示  用户订阅操作
+    subscribe: {
+        name: 'reportShowUserDoSubscribe',
+        data: {},
+        later: true
     }
-}, {})('dataReportSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+}, {})('dataReportSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
     historicalRecord.init();
     $scope.beforeLoading = true; // 页面loading
-    $scope.moduleName = '数据共享';//当前页面名称；
+    $scope.moduleName = '数据报表';//当前页面名称；
     historyInitCallback();
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
         const historiData = historicalRecord.get();
         const {
             dateType = 0,
-            dateTime = new Date(),
-            stationData
+            dateTime = new Date((+new Date) - 1000 * 60 * 60 * 24),
+            stationData,
+            timeRange = 0,
         } = historiData;
         if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope.dateTime = dateTime;
         $scope.dateType = dateType;
         $scope._dateTime = dateTime;
         $scope._dateType = dateType;
+        $scope.timeRange = timeRange;
         if (!stationData) historicalRecord.set({ dateType, dateTime });
         await diffStationInfo(stationData);
         $scope.beforeLoading = false;
-        computeClass();
-        $scope.mainPageInitComplete && $scope.mainPageInitComplete($scope.currentClass);
+        getTabData();
         $scope.$apply();
     };
 
     // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
-    $scope.dateUpdated = (dateType, dateTime) => {
+    $scope.dateUpdated = async (dateType, dateTime) => {
+        await myAjaxData.timeout(0);
+        let getDataType = 0;
+        if (!Object.is(dateType, historicalRecord.get().dateType)) getDataType = 1;
         historicalRecord.set({ dateType, dateTime });
         if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope._dateType = dateType;
         $scope._dateTime = dateTime;
-        computeClass();
+        if (getDataType) getTabData();
+        else $scope.changeTab2($scope.tabIndex);
     };
 
     // 切换电站 回调
@@ -64,20 +93,9 @@ ajaxData({
         if (!switchArguments) return;
         $scope.dataType = switchArguments.dataType;
         historicalRecord.set({ stationData: switchArguments });
-        computeClass();
+        getTabData();
     };
 
-    // 计算当前 所属 哪一类
-    const computeClass = () => {
-        if ($scope.beforeLoading) return;
-        const { dateTime, dateType, stationData: { dataType } } = historicalRecord.get();
-        const str1 = ['Station', 'Company', 'Company'][dataType];
-        const str2 = ['Day', 'Month', 'Year', 'Accumulative'][dateType];
-        if (str2 !== 'Day') $scope.currentClass = str1 + str2;
-        else if (dateTime.Format('yyyy-MM-dd') === (new Date).Format('yyyy-MM-dd')) $scope.currentClass = str1 + str2 + 'Today';
-        else $scope.currentClass = str1 + str2 + 'Ago';
-        historicalRecord.set({ currentClass: $scope.currentClass });
-    };
 
     // 电站 信息  对比
     async function diffStationInfo(stationData) {
@@ -100,5 +118,59 @@ ajaxData({
             $scope.switchPowerScope.currentDataName = currentDataName;
             $scope.switchPowerCallback(stationData);
         }
+    };
+
+    // 获取tab
+    function getTabData() {
+        if ($scope.beforeLoading) return;
+        const {dataType, _dateType} = $scope;
+        $scope.tab.getData({
+            useSt: dataType === 0 ? 1 : 0,
+            reportType: [4, 2, 1, null, 3][_dateType]
+        });
+    }
+
+    // 默认操作 选择第一个tab 第一个子tab
+    $scope.tab.getDataCallback = (success, res) => {
+        if (!success) return;
+        res.body[0] && $scope.changeTab1(0);
+    };
+
+    // 切换 第一层 tab
+    $scope.changeTab1 = index => {
+        $scope.timeRange = index;
+        historicalRecord.set({ timeRange: index });
+        $scope.checkSubscribe.getData({ tabId: $scope.tab.res.body[index].id });
+        $scope.changeTab2($scope.tab.res.body[index].subTabs[(historicalRecord.get().tab2Index || 0)] ? (historicalRecord.get().tab2Index || 0) : 0);
+    };
+
+    // 切换 第二次 tab
+    $scope.changeTab2 = index => {
+        if (index === void 0) return;
+        $scope.tabIndex = index;
+        historicalRecord.set({ tab2Index: index });
+        $scope.timeType = [null, 'YEAR', 'MONTH', 'WEEK', 'DAY'][$scope.tab.res.body[$scope.timeRange].reportType];
+        const { timeType, _dateTime, dataType } = $scope;
+        $scope.view.getData({
+            timeType,
+            subTabId: $scope.tab.res.body[$scope.timeRange].subTabs[index].id,
+            style: 0,
+            useSt: dataType === 0 ? 1 : 0,
+            dateStr: _dateTime.showDate
+        });
+    };
+
+    // view 处理
+    $scope.view.getDataCallback = (success, res) => {
+        if (!success) return;
+        document.getElementById('automaticReportView').innerHTML = res;
+    };
+
+    // 订阅操作 后处理
+    $scope.subscribe.getDataCallback = (success, res) => {
+        if (!success) return;
+        if (res.code !== 0) return toaster.pop("error", "", "error:" + res.msg);
+        toaster.pop("success", "", res.msg);
+        $scope.checkSubscribe.getData({});
     };
 });
