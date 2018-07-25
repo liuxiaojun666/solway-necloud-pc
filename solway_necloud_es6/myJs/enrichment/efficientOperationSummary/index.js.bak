@@ -1,4 +1,91 @@
-ajaxData({}, {})('efficientOperationSummaryCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-    $(".align-middle").css('paddingTop', ($(window).height() - 200) / 2)
-    $scope.moduleName = '高效运维';//当前页面名称；
+ajaxData({
+    // 给默认选中电站
+    getuserAuthHandleSetSTClass: {
+        name: 'GETUserAuthHandleSetSTClass',
+        data: {},
+        later: true
+    },
+    // 切换电站
+    changeStation: {
+        name: 'GETUserAuthHandleChangeDataType',
+        data: {},
+        later: true
+    },
+    // 基本电站信息
+    getUserAuthHandleGetCurrentInfo: {
+        name: 'GETUserAuthHandleGetCurrentInfo',
+        data: {},
+        later: true
+    },
+    // 电站基本信息 新
+    getCurrentInfoNew: {
+        name: 'GETgetCurrentInfoNew',
+        data: {},
+        later: true
+    }
+}, {})('efficientOperationSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    historicalRecord.init();
+    $scope.beforeLoading = true; // 页面loading
+    $scope.moduleName = '电站监视';//当前页面名称；
+    historyInitCallback();
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const {
+            dateType = 0,
+            dateTime = new Date((+new Date) - 1000 * 60 * 60 * 24),
+            stationData,
+        } = historiData;
+        if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
+        $scope.dateTime = dateTime;
+        $scope.dateType = dateType;
+        $scope._dateTime = dateTime;
+        $scope._dateType = dateType;
+        if (!stationData) historicalRecord.set({ dateType, dateTime });
+        await diffStationInfo(stationData);
+        $scope.beforeLoading = false;
+        // getTabData();
+        $scope.$apply();
+    };
+
+    // 电站 信息  对比
+    async function diffStationInfo(stationData) {
+        await myAjaxData.timeout(100);
+        const currentStationData = await $scope._getStationInfo;
+        if (currentStationData.isMan === 1) return;
+        if (!currentStationData.currentSTID) { // 没有选择过电站
+            await $scope.getuserAuthHandleSetSTClass.getData({});
+            return window.location.reload();
+        }
+        if (!stationData) { // 没有记录电站信息  
+            const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
+            $scope.switchPowerCallback({ id, isGroup, dataType, stClass });
+        } else if (Object.is(currentStationData.currentSTID, stationData.id)) { // 电站信息 没有变化
+            await myAjaxData.timeout(500);
+            $scope.switchPowerCallback(stationData);
+        } else { // 电站信息  发生变化   切换到记录中的电站
+            await $scope.changeStation.getData(stationData);
+            const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            $scope.switchPowerScope.currentDataName = currentDataName;
+            $scope.switchPowerCallback(stationData);
+        }
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = (switchArguments, switchPowerScope) => {
+        if (switchPowerScope) $scope.switchPowerScope = switchPowerScope;
+        if (!switchArguments) return;
+        $scope.dataType = switchArguments.dataType;
+        historicalRecord.set({ stationData: switchArguments });
+        // getTabData();
+    };
+
+    // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
+    $scope.dateUpdated = async (dateType, dateTime) => {
+        await myAjaxData.timeout(0);
+        historicalRecord.set({ dateType, dateTime });
+        if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
+        $scope._dateType = dateType;
+        $scope._dateTime = dateTime;
+    };
 });
