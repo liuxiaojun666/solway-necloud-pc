@@ -133,7 +133,8 @@ ajaxData({
     // 默认操作 选择第一个tab 第一个子tab
     $scope.tab.getDataCallback = (success, res) => {
         if (!success) return;
-        res.body[0] && $scope.changeTab1(0);
+        if (!res.body) toaster.pop("error", "", res.msg);
+        res.body && res.body[0] && $scope.changeTab1(0);
     };
 
     // 切换 第一层 tab
