@@ -33,18 +33,21 @@ ajaxData({
         const historiData = historicalRecord.get();
         const {
             dateType = 0,
-            dateTime = new Date((+new Date) - 1000 * 60 * 60 * 24),
+            dateTime = new Date,
             stationData,
+            theme = 'Profession',
         } = historiData;
         if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope.dateTime = dateTime;
         $scope.dateType = dateType;
         $scope._dateTime = dateTime;
         $scope._dateType = dateType;
+        $scope.theme = theme;
+        $scope.themeDetail = `tpl/enrichment/efficientOperationSummary/components/theme${theme}.html`;
         if (!stationData) historicalRecord.set({ dateType, dateTime });
         await diffStationInfo(stationData);
         $scope.beforeLoading = false;
-        // getTabData();
+        $scope.mainPageInitComplete && $scope.mainPageInitComplete();
         $scope.$apply();
     };
 
@@ -87,5 +90,67 @@ ajaxData({
         if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope._dateType = dateType;
         $scope._dateTime = dateTime;
+    };
+
+    // 切换主题模块
+    $scope.changeTheme = theme => {
+        if (theme !== $scope.theme) $scope.themeLoading = true;
+        $scope.theme = theme;
+        historicalRecord.set({ theme });
+        $scope.themeDetail = `tpl/enrichment/efficientOperationSummary/components/theme${theme}.html`;
+    };
+
+
+
+    // 初始化子页面scope
+    $scope.initChildScope = async (__childScope, __myAjaxData) => {
+        $scope.themeLoading = false;
+        // 主页面初始化完成
+        const mainPageInitComplete = __childScope.$parent.$parent.mainPageInitComplete;
+        __childScope.$parent.$parent.mainPageInitComplete = (...arg) => {
+            mainPageInitComplete && mainPageInitComplete(...arg);
+            if (__childScope.hasOwnProperty('mainPageInitComplete')) {
+                __childScope.mainPageInitComplete();
+                // __childScope.$apply();
+            }
+        };
+
+        // 日期切换
+        const dateUpdated = __childScope.$parent.$parent.dateUpdated;
+        __childScope.$parent.$parent.dateUpdated = (...arg) => {
+            dateUpdated && dateUpdated(...arg);
+            if ($scope.beforeLoading) return;
+            if (__childScope.hasOwnProperty('dateUpdated')) {
+                __childScope.dateUpdated();
+                const { dateTime, dateType } = historicalRecord.get();
+                __childScope.dateTime = dateTime;
+                __childScope.dateType = dateType;
+                // __childScope.$apply();
+            }
+        };
+
+        // 电站切换
+        const switchPowerCallback = __childScope.$parent.$parent.switchPowerCallback;
+        __childScope.$parent.$parent.switchPowerCallback = (...arg) => {
+            switchPowerCallback && switchPowerCallback(...arg);
+            if ($scope.beforeLoading) return;
+            if (__childScope.hasOwnProperty('switchPowerCallback')) {
+                __childScope.switchPowerCallback();
+                // __childScope.$apply();
+            }
+        };
+
+        // 如果已初始化  尝试调用初始化完成函数
+        if (!$scope.beforeLoading) {
+            await myAjaxData.timeout(0);
+            __childScope.hasOwnProperty('mainPageInitComplete') && __childScope.mainPageInitComplete($scope.currentClass);
+        }
+
+        // 子页面销毁 删除监听
+        __childScope.$on('$destroy', () => {
+            delete __childScope.mainPageInitComplete;
+            delete __childScope.dateUpdated;
+            delete __childScope.switchPowerCallback;
+        });
     };
 });
