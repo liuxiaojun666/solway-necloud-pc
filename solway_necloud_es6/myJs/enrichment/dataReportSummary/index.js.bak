@@ -48,16 +48,17 @@ ajaxData({
         later: true
     }
 }, {})('dataReportSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
-    historicalRecord.init();
+    historicalRecord.init();// 历史记录 初始化
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '数据报表';//当前页面名称；
+    $scope.endDate = new Date((+new Date) - 1000 * 60 * 60 * 24); // 日历可选 的截止日期
     historyInitCallback();
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
         const historiData = historicalRecord.get();
         const {
             dateType = 0,
-            dateTime = new Date((+new Date) - 1000 * 60 * 60 * 24),
+            dateTime = new Date(+$scope.endDate),
             stationData,
             timeRange = 0,
         } = historiData;

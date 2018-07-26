@@ -1,0 +1,24 @@
+/**
+ * [分页]
+ * params{
+ * get-data="接口自定义名.getData",  
+ * paging="接口返回数据中包含分页信息部分"    
+ * pageSize="none"} pageSize为none时不显示每页多少条默认10条
+ */
+app.directive('myPaging', ['myAjaxData', (myAjaxData) => ({
+    restrict: 'E',
+    replace: !1,
+    templateUrl: 'tpl/publicComponent/paging.jsp',
+    scope: {
+        getData: '=',
+        paging: '=',
+        pageSize: '@',
+        defaultPageSize: '='
+    },
+    controller($scope, $element) {
+        $scope.mygetData = (obj, arg2) => {
+            if (arg2) return
+            $scope.getData(obj)
+        }
+    }
+})])
