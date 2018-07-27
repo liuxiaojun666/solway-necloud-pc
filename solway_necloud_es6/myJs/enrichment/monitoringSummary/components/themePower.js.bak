@@ -159,13 +159,16 @@ ajaxData({
         if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();
     }, 10000);
 
-    window.addEventListener("resize", () => {
+    function setThemepowerWidth() {
         $("#themePowerGaugeEchart").width($("#themePower").width())
         myChart.resize();
-    });
+    }
+
+    window.addEventListener('resize', setThemepowerWidth);
 
     $scope.$on('$destroy', () => {
         myChart = null;
         $interval.cancel(interval);
+        window.removeEventListener('resize', setThemepowerWidth);
     });
 });

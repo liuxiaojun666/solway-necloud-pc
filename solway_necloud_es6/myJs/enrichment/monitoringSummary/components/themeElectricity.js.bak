@@ -250,12 +250,11 @@ ajaxData({
         if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();
     }, 10000);
 
+    window.addEventListener('resize', initEchartHeightWidth);
+    
     $scope.$on('$destroy', () => {
         $interval.cancel(interval)
+        window.removeEventListener('resize', initEchartHeightWidth);
     });
-
-    window.addEventListener("resize", function () {
-        initEchartHeightWidth();
-    });
-
+    
 });

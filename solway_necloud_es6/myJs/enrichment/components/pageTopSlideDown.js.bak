@@ -33,9 +33,10 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$timeout', ($
 
         setMainHeight()
 
-        $(window).resize(() => {
-            setMainHeight()
-        })
+        window.addEventListener('resize', setMainHeight);
+        $scope.$on('$destroy', () => {
+            window.removeEventListener('resize', setMainHeight);
+        });
 
         $timeout(() => {
             $('body').on('mouseover','.hover-header-con',()=>{
@@ -47,15 +48,12 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$timeout', ($
             $('body').on('mouseout', '.hover-header-con', () => {
                 if (timer) clearTimeout(timer);
             })
-            // $(".hover-header-con").hover(() => {
-            //     if (localStorage['monitoringSummary'] ? false : true) return;
-            //     timer = setTimeout(() => {
-            //         $(".systems-page").slideDown();
-            //     }, 500);
-            // }, () => {
-            //     if (timer) clearTimeout(timer);
-            // });
         }, 0)
+
+        $('body').on('click', '.hover-header-con', () => {
+            if (localStorage['monitoringSummary'] ? false : true) return;
+            $(".systems-page").slideDown();
+        })
 
         $(".systems-page").click(() => {
             $(".systems-page").slideUp();

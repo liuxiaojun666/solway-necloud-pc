@@ -42,9 +42,6 @@ ajaxData({
 
     let pieChart = echarts.init(document.getElementById('themeEquipmentPieEchart'))
     const initPieEchart = (fault, comm, maintain, run, wait) => {
-        window.addEventListener("resize", function () {
-            pieChart.resize();
-        });
         const option = {
             tooltip: {
                 trigger: 'item',
@@ -238,11 +235,14 @@ ajaxData({
         if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();
     }, 10000);
 
-    $scope.$on('$destroy', () => {
-        $interval.cancel(interval)
-    });
+    const pieChartResize = () => {
+        pieChart.resize();
+    }
+    window.addEventListener('resize', pieChartResize);
 
     $scope.$on('$destroy', () => {
         pieChart = null;
+        $interval.cancel(interval);
+        window.removeEventListener('resize', pieChartResize);
     });
 });
