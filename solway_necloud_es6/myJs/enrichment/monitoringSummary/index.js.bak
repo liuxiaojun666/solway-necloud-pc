@@ -155,7 +155,11 @@ ajaxData({
         const currentStationData = await $scope._getStationInfo;
         if (currentStationData.isMan === 1) return;
         if (!currentStationData.currentSTID) { // 没有选择过电站
-            await $scope.getuserAuthHandleSetSTClass.getData({});
+            const res = await $scope.getuserAuthHandleSetSTClass.getData({});
+            if (res.result === false) {
+                alert('没有选择任何 公司 或 电站，请联系管理员');
+                return window.location.href = '/index.jsp'
+            }
             return window.location.reload();
         }
         if (!stationData) { // 没有记录电站信息  

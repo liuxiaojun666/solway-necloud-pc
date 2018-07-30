@@ -1,4 +1,25 @@
-ajaxData({},{
+ajaxData({
+    allSTListForPCBySession: {
+        name: 'GETAllSTListForPCBySession',
+        data: {}
+    }, 
+    getBaseMessageListNew: {
+        name: 'GETBaseMessageListNew',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    readBaseMessages: {
+        name: 'GETreadBaseMessages',
+        data: {},
+        later: true,
+    },
+    readBaseAllMessages: {
+        name: 'GETreadBaseAllMessages',
+        data: {},
+        later: true
+    }
+},{
     __serviceName__: 'themeProfessionService'
 })('themeProfessionCtrl', ['$scope', 'themeProfessionService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     // 初始化 scope
@@ -6,11 +27,30 @@ ajaxData({},{
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { hello } = historicalRecord.get().themeProfession || {};
-        $('.ng-clock').removeClass('ng-clock');
+        const { 
+            startDate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365), 
+            endDate = new Date,
+            pStationId,
+            isHis = '0',
+            handStatus = {
+                '00': true,
+                '01': true,
+                '02': true,
+                '04': true,
+                '05': true,
+            },
+            searchKey = ''
+        } = historicalRecord.get().themeProfession || {};
+        $scope.startDate = startDate;
+        $scope.endDate = endDate;
+        $scope.pStationId = pStationId,
+        $scope.isHis = isHis;
+        $scope.handStatus = handStatus;
+        $scope.searchKey = searchKey;
         await myAjaxData.timeout(0);
+        $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
-        // await $scope.diffGetData();
+        getBaseMessageList();
         $scope.$apply();
     };
 
@@ -28,6 +68,36 @@ ajaxData({},{
         $scope.searchActive = false;
     };
 
+    // 查询
+    $scope.search = () => {
+        $scope.searchActive = false;
+        const {startDate, endDate, pStationId, isHis, handStatus, searchKey} = $scope;
+        historicalRecord.set({
+            themeProfession: {
+                ...historicalRecord.get().themeProfession || {},
+                startDate, endDate, pStationId, isHis, handStatus, searchKey
+            }
+        });
+        getBaseMessageList();
+    };
+
+    // 消息列表 接口 请求
+    function getBaseMessageList() {
+        const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+        $scope.getBaseMessageListNew.getData({
+            startDate: startDate.showDate, 
+            endDate: endDate.showDate, 
+            pStationId: pStationId || '', 
+            searchKey: searchKey || '', 
+            isHis: isHis == '2' ? 1 : 0,
+            queryType: isHis == '0' ? 2 : 1, 
+            handStatus: Object.keys(handStatus).filter(v => handStatus[v]).join(),
+            pageIndex: 0,
+            pageSize: 10
+        });
+    }
+
+    // 页面 点击  影藏 弹出
     document.addEventListener('click', eventListen);
     function eventListen() {
         $scope.searchActive = false;
@@ -41,88 +111,69 @@ ajaxData({},{
     // 列表
     $scope.column = [
         {
-            title: '<label class="i-checks m-b-none"><input type="checkbox" checked><i style="background:#244470;"></i></label>',
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
             dataIndex: '',
             width: '60px',
             align: 'center',
             checkboxName: 'batchprocessing',
-            render: function () {
-                function render(text, record, index) {
-                    return '<label class="i-checks m-b-none"><input data-identifies="' + record.busino + '_' + record.mid + '" name="batchprocessing" type="checkbox" checked /><i style="background:#244470;"></i></label>';
-                }
-
-                return render;
-            }()
+            render (text, record, index) {
+                return '<label class="i-checks m-b-none"><input data-identifies="' + record.busino + '_' + record.mid + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+            }
         },
         {
             title: '电站名称',
-            dataIndex: '',
+            dataIndex: 'stname',
             width: '25%',
             sort: true,
-            render(text) {
-                return `<span>马鞍石蒙牛</span>`
+            render(text, item) {
+                return `${(item.unread_num > 0) ? '<span style="margin-right:1em;display:inline-block;width:6px;height:6px;background:#ed5454;border-radius:50%;"></span>' : ''}<span style="color: #3ae2ca;">${text}</span>`
             }
         },
         {
             title: '发布时间',
-            dataIndex: '',
+            dataIndex: 'ct',
             align: 'center',
             sort: true,
+            width: '15%',
             render(text) {
-                new Date(text).Format('yyyy-MM-dd hh:mm:ss')
-                return `<span>2018-02-23</span>`
+                
+                return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm:ss')}</span>`
             }
         },
         {
             title: '发布人',
-            dataIndex: '',
+            dataIndex: 'musname_real',
             sort: true,
-            render(text) {
-                return `<span>成龙</span>`
-            }
         },
         {
             title: '处理人',
-            dataIndex: '',
+            dataIndex: 'lurname_real',
             sort: true,
-            render(text) {
-                return `<span>李小龙</span>`
-            }
         },
         {
             title: '内容',
             dataIndex: 'mc',
             sort: true,
             width: '30%',
-            render(text) {
-                return `<span>马鞍hello石蒙world牛</span>`
-            }
         },
         {
             title: '状态',
-            dataIndex: '',
+            dataIndex: 'mhs',
             sort: true,
             render(text) {
-                return `<span>待处理</span>`
                 switch (text) {
                     case '00':
                         return '待确认'
-                        break;
                     case '01':
                         return '待受理'
-                        break;
                     case '02':
                         return '待处理'
-                        break;
                     case '03':
                         return '已关闭'
-                        break;
                     case '04':
                         return '被确认'
-                        break;
                     case '05':
                         return '验收中'
-                        break;
 
                     default:
                         break;
