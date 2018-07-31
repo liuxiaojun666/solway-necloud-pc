@@ -119,6 +119,12 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
             }
         }
 
+        if ($scope.trClick) {
+            $scope.__trClick = (e, item, index) => {
+                if (e.target.parentElement.localName === 'label') return;
+                $scope.trClick(item, index, e);
+            };
+        }
 
         if ($scope.tableExportFileName) {
             $ocLazyLoad.load([

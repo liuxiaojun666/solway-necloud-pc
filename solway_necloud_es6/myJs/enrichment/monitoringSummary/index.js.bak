@@ -151,7 +151,7 @@ ajaxData({
 
     // 电站 信息  对比
     async function diffStationInfo(stationData) {
-        await myAjaxData.timeout(100);
+        while (!$scope._getStationInfo) await myAjaxData.timeout(100);
         const currentStationData = await $scope._getStationInfo;
         if (currentStationData.isMan === 1) return;
         if (!currentStationData.currentSTID) { // 没有选择过电站

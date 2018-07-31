@@ -1,184 +1,251 @@
 ajaxData({
+    // 该角色 电站列表
     allSTListForPCBySession: {
         name: 'GETAllSTListForPCBySession',
         data: {}
-    }, 
+    },
+    // 消息列表
     getBaseMessageListNew: {
         name: 'GETBaseMessageListNew',
         data: {},
         later: true,
         onlyLatest: true
     },
+    // 标记选中为已读
     readBaseMessages: {
-        name: 'GETreadBaseMessages',
+        name: 'readBaseMessages',
         data: {},
         later: true,
     },
+    // 全部消息标记为已读
     readBaseAllMessages: {
-        name: 'GETreadBaseAllMessages',
+        name: 'readBaseAllMessages',
+        data: {},
+        later: true
+    },
+    // 批量关闭 消息
+    eventNoHandles: {
+        name: 'eventNoHandles',
         data: {},
         later: true
     }
-},{
-    __serviceName__: 'themeProfessionService'
-})('themeProfessionCtrl', ['$scope', 'themeProfessionService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
-    // 初始化 scope
-    $scope.initChildScope($scope, myAjaxData);
+}, {
+        __serviceName__: 'themeProfessionService'
+    })('themeProfessionCtrl', ['$scope', 'themeProfessionService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
 
-    // 主页面初始化完成 回调
-    $scope.mainPageInitComplete = async () => {
-        const { 
-            startDate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365), 
-            endDate = new Date,
-            pStationId,
-            isHis = '0',
-            handStatus = {
-                '00': true,
-                '01': true,
-                '02': true,
-                '04': true,
-                '05': true,
-            },
-            searchKey = ''
-        } = historicalRecord.get().themeProfession || {};
-        $scope.startDate = startDate;
-        $scope.endDate = endDate;
-        $scope.pStationId = pStationId,
-        $scope.isHis = isHis;
-        $scope.handStatus = handStatus;
-        $scope.searchKey = searchKey;
-        await myAjaxData.timeout(0);
-        $('.ng-clock').removeClass('ng-clock');
-        $scope.initComplete = true;
-        getBaseMessageList();
-        $scope.$apply();
-    };
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            const {
+                startDate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365),
+                endDate = new Date,
+                pStationId,
+                isHis = '0',
+                handStatus = {
+                    '00': true,
+                    '01': true,
+                    '02': true,
+                    '04': true,
+                    '05': true,
+                },
+                searchKey = ''
+            } = historicalRecord.get().themeProfession || {};
+            $scope.startDate = startDate;
+            $scope.endDate = endDate;
+            $scope.pStationId = pStationId,
+                $scope.isHis = isHis;
+            $scope.handStatus = handStatus;
+            $scope.searchKey = searchKey;
+            await myAjaxData.timeout(0);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            getBaseMessageList();
+            $scope.$apply();
+        };
 
-    // 查询 弹出 事件
-    $scope.searchPopUp = (e) => {
-        e.stopPropagation();
-        $scope.searchActive = true;
-        $scope.batchCloseActive = false;
-    };
-    
-    // 批量标记关闭 弹出 事件
-    $scope.batchClosePopUp = (e) => {
-        e.stopPropagation();
-        $scope.batchCloseActive = true;
-        $scope.searchActive = false;
-    };
+        // 查询 弹出 事件
+        $scope.searchPopUp = (e) => {
+            e.stopPropagation();
+            $scope.searchActive = true;
+            $scope.batchCloseActive = false;
+            // $scope.messagePopUp = false;
+        };
 
-    // 查询
-    $scope.search = () => {
-        $scope.searchActive = false;
-        const {startDate, endDate, pStationId, isHis, handStatus, searchKey} = $scope;
-        historicalRecord.set({
-            themeProfession: {
-                ...historicalRecord.get().themeProfession || {},
-                startDate, endDate, pStationId, isHis, handStatus, searchKey
-            }
-        });
-        getBaseMessageList();
-    };
+        // 批量标记关闭 弹出 事件
+        $scope.batchClosePopUp = (e) => {
+            e.stopPropagation();
+            // if ($scope.messagePopUp) return;
+            $scope.batchCloseActive = true;
+            $scope.searchActive = false;
+            // $scope.messagePopUp = false;
+        };
 
-    // 消息列表 接口 请求
-    function getBaseMessageList() {
-        const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
-        $scope.getBaseMessageListNew.getData({
-            startDate: startDate.showDate, 
-            endDate: endDate.showDate, 
-            pStationId: pStationId || '', 
-            searchKey: searchKey || '', 
-            isHis: isHis == '2' ? 1 : 0,
-            queryType: isHis == '0' ? 2 : 1, 
-            handStatus: Object.keys(handStatus).filter(v => handStatus[v]).join(),
-            pageIndex: 0,
-            pageSize: 10
-        });
-    }
+        // 发布任务 弹出 事件
+        $scope.releaseTaskPopUp = () => {
+            // if ($scope.messagePopUp) return;
+            $scope.releaseTask = true;
+        };
 
-    // 页面 点击  影藏 弹出
-    document.addEventListener('click', eventListen);
-    function eventListen() {
-        $scope.searchActive = false;
-        $scope.batchCloseActive = false;
-        $scope.$apply();
-    }
-    $scope.$on('$destroy', () => {
-        document.removeEventListener('click', eventListen);
-    });
-
-    // 列表
-    $scope.column = [
-        {
-            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
-            dataIndex: '',
-            width: '60px',
-            align: 'center',
-            checkboxName: 'batchprocessing',
-            render (text, record, index) {
-                return '<label class="i-checks m-b-none"><input data-identifies="' + record.busino + '_' + record.mid + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
-            }
-        },
-        {
-            title: '电站名称',
-            dataIndex: 'stname',
-            width: '25%',
-            sort: true,
-            render(text, item) {
-                return `${(item.unread_num > 0) ? '<span style="margin-right:1em;display:inline-block;width:6px;height:6px;background:#ed5454;border-radius:50%;"></span>' : ''}<span style="color: #3ae2ca;">${text}</span>`
-            }
-        },
-        {
-            title: '发布时间',
-            dataIndex: 'ct',
-            align: 'center',
-            sort: true,
-            width: '15%',
-            render(text) {
-                
-                return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm:ss')}</span>`
-            }
-        },
-        {
-            title: '发布人',
-            dataIndex: 'musname_real',
-            sort: true,
-        },
-        {
-            title: '处理人',
-            dataIndex: 'lurname_real',
-            sort: true,
-        },
-        {
-            title: '内容',
-            dataIndex: 'mc',
-            sort: true,
-            width: '30%',
-        },
-        {
-            title: '状态',
-            dataIndex: 'mhs',
-            sort: true,
-            render(text) {
-                switch (text) {
-                    case '00':
-                        return '待确认'
-                    case '01':
-                        return '待受理'
-                    case '02':
-                        return '待处理'
-                    case '03':
-                        return '已关闭'
-                    case '04':
-                        return '被确认'
-                    case '05':
-                        return '验收中'
-
-                    default:
-                        break;
+        // 查询
+        $scope.search = () => {
+            $scope.searchActive = false;
+            $scope.closeMessagePopUp();
+            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+            historicalRecord.set({
+                themeProfession: {
+                    ...historicalRecord.get().themeProfession || {},
+                    startDate, endDate, pStationId, isHis, handStatus, searchKey
                 }
-            }
-        },
-    ];
-});
+            });
+            getBaseMessageList();
+        };
+
+        // 消息列表 接口 请求
+        function getBaseMessageList() {
+            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+            $scope.getBaseMessageListNew.getData({
+                startDate: startDate.showDate,
+                endDate: endDate.showDate,
+                pStationId: pStationId || '',
+                searchKey: searchKey || '',
+                isHis: isHis == '2' ? 1 : 0,
+                queryType: isHis == '0' ? 2 : 1,
+                handStatus: Object.keys(handStatus).filter(v => handStatus[v]).join(),
+                pageIndex: 0,
+                pageSize: 20
+            });
+        }
+
+        // 消息 批量 标记为 已读
+        const batchReadMsg = async all => {
+            let res = null;
+            if (all) res = await $scope.readBaseAllMessages.getData({});
+            else res = await $scope.readBaseMessages.getData({
+                ids: document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies.split('_')[1]).join(',')
+            });
+            if (res.code === 0) toaster.pop('success', '', res.msg || '批量处理成功');
+            else toaster.pop('error', '', res.msg || '批量处理失败');
+            $scope.batchReadHandle = '0';
+            $scope.getBaseMessageListNew.getData({});
+        };
+
+        $scope.batchReadHandleFunc = () => {
+            const {batchReadHandle} = $scope;
+            if (batchReadHandle == '1') batchReadMsg();
+            else if (batchReadHandle == '2') batchReadMsg(true);
+        };
+
+        // 批量关闭 未确认消息
+        $scope.batchClose = async () => {
+            const { otherreason, notprocereason } = $scope;
+            const res = await $scope.eventNoHandles.getData({
+                notprocereason,
+                otherreason,
+                e_m_ids: document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies).join(',')
+            });
+            if (res.code === 0) toaster.pop('success', '', res.msg || '批量处理成功');
+            else toaster.pop('error', '', res.msg || '批量处理失败');
+            $scope.getBaseMessageListNew.getData({});
+        };
+
+        // 点击行
+        $scope.trClick = (item, index, e) => {
+            e.stopPropagation();
+            $scope.searchActive = false;
+            $scope.batchCloseActive = false;
+            $scope.messagePopUp = true;
+            $('.my-table tbody tr').removeClass('active').eq(index + 1).addClass('active');
+            $scope.$broadcast("chatPanelObj", item);
+        };
+
+        $scope.closeMessagePopUp = () => {
+            $scope.messagePopUp = false;
+            $('.my-table tbody tr').removeClass('active');
+        };
+
+        // 页面 点击  影藏 弹出
+        document.addEventListener('click', eventListen);
+        function eventListen() {
+            $scope.searchActive = false;
+            $scope.batchCloseActive = false;
+            // $scope.messagePopUp = false;
+            $scope.$apply();
+        }
+        $scope.$on('$destroy', () => {
+            document.removeEventListener('click', eventListen);
+        });
+
+        // 列表
+        $scope.column = [
+            {
+                title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+                dataIndex: '',
+                width: '60px',
+                align: 'center',
+                checkboxName: 'batchprocessing',
+                render(text, record, index) {
+                    return '<label class="i-checks m-b-none"><input data-identifies="' + record.busino + '_' + record.mid + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                }
+            },
+            {
+                title: '电站名称',
+                dataIndex: 'stname',
+                width: '25%',
+                sort: true,
+                render(text, item) {
+                    return `${(item.unread_num > 0) ? '<span style="margin-right:1em;display:inline-block;width:6px;height:6px;background:#ed5454;border-radius:50%;"></span>' : ''}<span style="color: #3ae2ca;">${text}</span>`
+                }
+            },
+            {
+                title: '发布时间',
+                dataIndex: 'ct',
+                align: 'center',
+                sort: true,
+                width: '15%',
+                render(text) {
+                    return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm:ss')}</span>`
+                }
+            },
+            {
+                title: '发布人',
+                dataIndex: 'musname_real',
+                sort: true,
+            },
+            {
+                title: '处理人',
+                dataIndex: 'murname_real',
+                sort: true,
+            },
+            {
+                title: '内容',
+                dataIndex: 'mc',
+                sort: true,
+                width: '30%',
+            },
+            {
+                title: '状态',
+                dataIndex: 'mhs',
+                sort: true,
+                render(text) {
+                    switch (text) {
+                        case '00':
+                            return '待确认'
+                        case '01':
+                            return '待受理'
+                        case '02':
+                            return '待处理'
+                        case '03':
+                            return '已关闭'
+                        case '04':
+                            return '被确认'
+                        case '05':
+                            return '验收中'
+
+                        default:
+                            break;
+                    }
+                }
+            },
+        ];
+    });
