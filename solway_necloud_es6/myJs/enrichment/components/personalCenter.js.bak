@@ -1,4 +1,4 @@
-app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', (myAjaxData, $timeout, $http) => ({
+app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval', (myAjaxData, $timeout, $http, $interval) => ({
     restrict: 'E',
     replace: !0,
     scope: {
@@ -30,6 +30,36 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', (myAjaxData,
             
         })
 
+        var intervalInvites = $interval(function() {
+            getInvitesNum();
+        },60000)
+
+        getInvitesNum();
+
+        //获取邀请消息条数
+        function getInvitesNum() {
+            $http({
+                method: "POST",
+                url: window.baseUrl + "/BaseMessage/queryCompanyInviteCount.htm"
+            }).success(function (res) {
+                if(res.code == 1 && res.data>0){
+                    $scope.ifInviteNote = true;
+                }else{
+                    $scope.ifInviteNote = false;
+                }
+            });
+        }
+
+        //接受or 拒绝后，列表为空，图标显示变化
+        $scope.$on('noInviteNote',function(e,v) {
+            $scope.ifInviteNote = false;            
+        });
+
+        //打开邀请消息弹框
+        $scope.showInviteListModel = function(params) {
+            $('#invitePersonNoteModel').modal('show');
+            $scope.$broadcast('invitePersonNote', true);
+        }
         //电站组
         $scope.powerStationManage = function () {
             $('#powerStationManageModal').modal('show');
@@ -62,7 +92,9 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', (myAjaxData,
             });
         }
 
-
+        $scope.$on('$destroy', () => {
+            $interval.cancel(intervalInvites);
+        });
 
         //根据数组中每项的每个属性的值查找在数组中的排序，找不到返回-1
         function getArrAtrNum(arr, atr, value) {//getArrAtrNum([{id:1},{id:2}], "id", 3)
