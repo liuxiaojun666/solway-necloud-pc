@@ -150,13 +150,16 @@ ajaxData({
         };
 
         // 点击行
-        $scope.trClick = (item, index, e) => {
+        $scope.trClick = async (item, index, e) => {
             e.stopPropagation();
             $scope.searchActive = false;
             $scope.batchCloseActive = false;
+            $scope.closeMessagePopUp();
+            await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
-            $('.my-table tbody tr').removeClass('active').eq(index + 1).addClass('active');
+            $('.my-table tbody tr').eq(index + 1).addClass('active');
             $scope.$broadcast("chatPanelObj", item);
+            $scope.$apply();
         };
 
         $scope.closeMessagePopUp = () => {
@@ -192,7 +195,7 @@ ajaxData({
                 title: '电站名称',
                 dataIndex: 'stname',
                 width: '25%',
-                sort: true,
+                // sort: true,
                 render(text, item) {
                     return `${(item.unread_num > 0) ? '<span style="margin-right:1em;display:inline-block;width:6px;height:6px;background:#ed5454;border-radius:50%;"></span>' : ''}<span style="color: #3ae2ca;">${text}</span>`
                 }
@@ -201,7 +204,7 @@ ajaxData({
                 title: '发布时间',
                 dataIndex: 'ct',
                 align: 'center',
-                sort: true,
+                // sort: true,
                 width: '15%',
                 render(text) {
                     return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm:ss')}</span>`
@@ -210,23 +213,23 @@ ajaxData({
             {
                 title: '发布人',
                 dataIndex: 'musname_real',
-                sort: true,
+                // sort: true,
             },
             {
                 title: '处理人',
                 dataIndex: 'murname_real',
-                sort: true,
+                // sort: true,
             },
             {
                 title: '内容',
                 dataIndex: 'mc',
-                sort: true,
+                // sort: true,
                 width: '30%',
             },
             {
                 title: '状态',
                 dataIndex: 'mhs',
-                sort: true,
+                // sort: true,
                 render(text) {
                     switch (text) {
                         case '00':
