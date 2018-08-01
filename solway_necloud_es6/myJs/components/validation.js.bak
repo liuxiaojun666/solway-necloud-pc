@@ -4,13 +4,15 @@
  * @param {要验证的数据} data 
  * @param {验证的元素所在的元素  只验证该DOM元素内的} element 
  */
-app.lxj_validation = (data, element) => {
+app.lxj_validation = (data, element, toaster) => {
     let verificationBy = true;
     Array.from(document.querySelectorAll(`${element} [data-require]`)).map(ele => ele.dataset.require).forEach(v => {
         if (data[v]) return;
         if (data[v] === 0) return;
         verificationBy = false;
-        promptObj("error", "", "验证失败:" + document.querySelectorAll(`[data-require="${v}"]`)[0].firstChild.data + '必填');
+        toaster && toaster.pop("error", "", "验证失败:" + document.querySelectorAll(`${element} [data-require="${v}"]`)[0].firstChild.data + '必填');
+        if (toaster) return;
+        promptObj && promptObj("error", "", "验证失败:" + document.querySelectorAll(`${element} [data-require="${v}"]`)[0].firstChild.data + '必填');
     });
     return verificationBy;
 };

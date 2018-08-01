@@ -28,6 +28,19 @@ ajaxData({
         name: 'eventNoHandles',
         data: {},
         later: true
+    },
+    // 电站id  查询  电站人员
+    selectAllUserBySTID: {
+        name: 'GETselectAllUserBySTID',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 发布任务
+    opTimeTaskUpdate: {
+        name: 'opTimeTaskUpdate',
+        data: {},
+        later: true
     }
 }, {
         __serviceName__: 'themeProfessionService'
@@ -52,9 +65,10 @@ ajaxData({
                 searchKey = ''
             } = historicalRecord.get().themeProfession || {};
             $scope.startDate = startDate;
+            $scope.startDate.showDate = ''
             $scope.endDate = endDate;
-            $scope.pStationId = pStationId,
-                $scope.isHis = isHis;
+            $scope.pStationId = pStationId;
+            $scope.isHis = isHis;
             $scope.handStatus = handStatus;
             $scope.searchKey = searchKey;
             await myAjaxData.timeout(0);
@@ -85,7 +99,26 @@ ajaxData({
         $scope.releaseTaskPopUp = () => {
             // if ($scope.messagePopUp) return;
             $scope.releaseTask = true;
+            $scope.releaseTaskParame = {
+                timerType: '0',
+                ...($scope.releaseTaskParame || {}),
+            };
         };
+
+        // 发布任务 发布时间 类型 默认时间 定义
+        $scope.releaseTaskDateUpdate = dateStr => $scope.releaseTaskParame.timerDate = dateStr;
+
+        // 发布任务 提交
+        $scope.releaseTaskSubmit = () => {
+            if (!app.lxj_validation($scope.releaseTaskParame, '.releaseTask', toaster)) return;
+            $scope.releaseTask = false;
+            $scope.opTimeTaskUpdate.getData({ ...$scope.releaseTaskParame, dateArr: null }).then((res) => {
+                if (res.code === 0) toaster.pop('success', '', res.msg || '发布任务成功');
+                else return toaster.pop('error', '', res.msg || '发布任务失败');
+                $scope.releaseTaskParame.taskContent = '';
+            });
+        };
+
 
         // 查询
         $scope.search = () => {
@@ -117,6 +150,12 @@ ajaxData({
             });
         }
 
+        // 列表 接口 数据 回调
+        $scope.getBaseMessageListNew.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.closeMessagePopUp();
+        };
+
         // 消息 批量 标记为 已读
         const batchReadMsg = async all => {
             let res = null;
@@ -130,8 +169,9 @@ ajaxData({
             $scope.getBaseMessageListNew.getData({});
         };
 
+        // 批量 标记已读 事件触发
         $scope.batchReadHandleFunc = () => {
-            const {batchReadHandle} = $scope;
+            const { batchReadHandle } = $scope;
             if (batchReadHandle == '1') batchReadMsg();
             else if (batchReadHandle == '2') batchReadMsg(true);
         };
@@ -157,11 +197,13 @@ ajaxData({
             $scope.closeMessagePopUp();
             await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
-            $('.my-table tbody tr').eq(index + 1).addClass('active');
             $scope.$broadcast("chatPanelObj", item);
+            $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
+            if (item.unread_num > 0) $scope.readBaseMessages.getData({ ids: item.mid });
             $scope.$apply();
         };
 
+        // 关闭 聊天 消息 面板
         $scope.closeMessagePopUp = () => {
             $scope.messagePopUp = false;
             $('.my-table tbody tr').removeClass('active');
@@ -197,7 +239,9 @@ ajaxData({
                 width: '25%',
                 // sort: true,
                 render(text, item) {
-                    return `${(item.unread_num > 0) ? '<span style="margin-right:1em;display:inline-block;width:6px;height:6px;background:#ed5454;border-radius:50%;"></span>' : ''}<span style="color: #3ae2ca;">${text}</span>`
+                    return `
+                    <span style="color: #3ae2ca;">${text || ''}</span>
+                    ${(item.unread_num > 0) ? '<span class="unread" style="margin-left:0.5em;display:inline-block;width:15px;height:15px;text-align:center;line-height:15px;background:#ed5454;border-radius:50%;">' + item.unread_num + '</span>' : ''}`
                 }
             },
             {

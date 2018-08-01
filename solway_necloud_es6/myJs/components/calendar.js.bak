@@ -91,7 +91,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
             'vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
             'vendor/libs/moment.min.js'
         ])).then(() => {
-            const showDate = $scope.dateTime.showDate || $scope.dateTime.Format($scope.calendarType)
+            const showDate = Object.is($scope.dateTime.showDate, '') ? '' : $scope.dateTime.Format($scope.calendarType)
             $input.val(showDate)
             $scope.dateTime = new Date($scope.dateTime)
             $scope.dateTime.showDate = showDate
@@ -157,9 +157,10 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
                 $scope.dateTime.weekStart = $scope.weekStart
                 $scope.dateTime.weekEnd = $scope.weekEnd
             }
-            showDate = $scope.dateTime.Format($scope.calendarType)
+            showDate = showDate && $scope.dateTime.Format($scope.calendarType)
             $element.find('input').val(showDate)
             $scope.dateTime.showDate = showDate
+            showDate = $scope.dateTime.Format($scope.calendarType)
             window.moment && $scope.showArrow && $scope.disabled()
             $scope.updated && $scope.updated($scope, $element)
         })
