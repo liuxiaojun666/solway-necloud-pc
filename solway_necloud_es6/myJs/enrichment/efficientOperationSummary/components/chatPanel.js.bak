@@ -27,7 +27,6 @@ ajaxData({
 
     resizeHeight();
     window.addEventListener('resize', resizeHeight);
-    
 
     //列表接口
     const getChatList = () =>{
@@ -38,7 +37,6 @@ ajaxData({
             pageIndex: 0,
             pageSize: 20
         }).then(res => {
-            console.log(res)
             $scope.chatList = res;
         });
     }
@@ -59,9 +57,7 @@ ajaxData({
         $scope.getShareTaskDetailList.getData({
             taskId: taskId
         }).then(res => {
-            // debugger
-            console.log(res)
-            $scope.shareList = [1, 2, 5]
+            $scope.shareList = res.body;
         });
         
     }
@@ -74,9 +70,11 @@ ajaxData({
 
     //打开共享处理情况列表
     $scope.shareHandle = (index, busino) =>{
-        $scope.currentIndex = index;
-        $scope.handle = true;
-        getShareList(busino);
+        $scope.handle = !$scope.handle;
+        if ($scope.handle){
+            $scope.currentIndex = index;
+            getShareList(busino);
+        }
     }
 
     //收回处理列表接口
