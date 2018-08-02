@@ -112,7 +112,10 @@ ajaxData({
             if (!app.lxj_validation($scope.releaseTaskParame, '.releaseTask', toaster)) return;
             $scope.releaseTask = false;
             $scope.opTimeTaskUpdate.getData({ ...$scope.releaseTaskParame, dateArr: null }).then((res) => {
-                if (res.code === 0) toaster.pop('success', '', res.msg || '发布任务成功');
+                if (res.code === 0) {
+                    toaster.pop('success', '', res.msg || '发布任务成功');
+                    getBaseMessageList();
+                }
                 else return toaster.pop('error', '', res.msg || '发布任务失败');
                 $scope.releaseTaskParame.taskContent = '';
             });
@@ -159,18 +162,18 @@ ajaxData({
         const batchReadMsg = async all => {
             $scope.batchReadHandle = '0';
             let res = null;
-            if (all) {
+            if (all && confirm('确定标记全部消息为已读？')) {
                 res = await $scope.readBaseAllMessages.getData({});
             }
-            else {
+            else if (confirm('确定标记选中消息为已读？')) {
                 const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies.split('_')[1]);
                 if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
                 res = await $scope.readBaseMessages.getData({
                     ids: ids.join(',')
                 });
             }
-            if (res.code === 0) toaster.pop('success', '', res.msg || '批量处理成功');
-            else toaster.pop('error', '', res.msg || '批量处理失败');
+            if (res.code === 0) toaster.pop('success', '', '批量处理成功');
+            else toaster.pop('error', '', '批量处理失败');
             $scope.getBaseMessageListNew.getData({});
         };
 
@@ -187,14 +190,15 @@ ajaxData({
             const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
             if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
             if (notprocereason == '0' && !otherreason) return toaster.pop('error', '', '请填写其他原因具体内容');
+            if (!confirm('确定关闭选中消息为 关闭？')) return;
             const res = await $scope.eventNoHandles.getData({
                 notprocereason,
                 otherreason,
                 e_m_ids: ids.join(',')
             });
             eventListen();
-            if (res.code === 0) toaster.pop('success', '', res.msg || '批量处理成功');
-            else toaster.pop('error', '', res.msg || '批量处理失败');
+            if (res.code === 0) toaster.pop('success', '', '批量处理成功');
+            else toaster.pop('error', '', '批量处理失败');
             $scope.getBaseMessageListNew.getData({});
         };
 
