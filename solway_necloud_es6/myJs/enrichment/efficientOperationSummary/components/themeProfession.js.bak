@@ -65,7 +65,6 @@ ajaxData({
                 searchKey = ''
             } = historicalRecord.get().themeProfession || {};
             $scope.startDate = startDate;
-            $scope.startDate.showDate = ''
             $scope.endDate = endDate;
             $scope.pStationId = pStationId;
             $scope.isHis = isHis;
@@ -158,14 +157,20 @@ ajaxData({
 
         // 消息 批量 标记为 已读
         const batchReadMsg = async all => {
+            $scope.batchReadHandle = '0';
             let res = null;
-            if (all) res = await $scope.readBaseAllMessages.getData({});
-            else res = await $scope.readBaseMessages.getData({
-                ids: document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies.split('_')[1]).join(',')
-            });
+            if (all) {
+                res = await $scope.readBaseAllMessages.getData({});
+            }
+            else {
+                const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies.split('_')[1]);
+                if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
+                res = await $scope.readBaseMessages.getData({
+                    ids: ids.join(',')
+                });
+            }
             if (res.code === 0) toaster.pop('success', '', res.msg || '批量处理成功');
             else toaster.pop('error', '', res.msg || '批量处理失败');
-            $scope.batchReadHandle = '0';
             $scope.getBaseMessageListNew.getData({});
         };
 
@@ -179,11 +184,15 @@ ajaxData({
         // 批量关闭 未确认消息
         $scope.batchClose = async () => {
             const { otherreason, notprocereason } = $scope;
+            const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
+            if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
+            if (notprocereason == '0' && !otherreason) return toaster.pop('error', '', '请填写其他原因具体内容');
             const res = await $scope.eventNoHandles.getData({
                 notprocereason,
                 otherreason,
-                e_m_ids: document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies).join(',')
+                e_m_ids: ids.join(',')
             });
+            eventListen();
             if (res.code === 0) toaster.pop('success', '', res.msg || '批量处理成功');
             else toaster.pop('error', '', res.msg || '批量处理失败');
             $scope.getBaseMessageListNew.getData({});
@@ -197,7 +206,7 @@ ajaxData({
             $scope.closeMessagePopUp();
             await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
-            $scope.$broadcast("chatPanelObj", item);
+            $scope.$broadcast("chatPanelObj", { ...item, isHis: [0, 0, 1][$scope.isHis] });
             $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
             if (item.unread_num > 0) $scope.readBaseMessages.getData({ ids: item.mid });
             $scope.$apply();
