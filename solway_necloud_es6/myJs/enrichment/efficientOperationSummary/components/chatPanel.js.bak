@@ -1,7 +1,63 @@
-ajaxData({},{
+ajaxData({
+    getLoginUserInfo:{
+        name:'loginUserInfo',
+        data: {},
+        later: true
+    },
+    getChatList:{
+        name: 'noteDetailChatlist',
+        data: {},
+        later: true,
+        onlyLatest: true
+        
+    }
+},{
     __serviceName__: 'chatPanelService'
 })('chatPanelCtrl', ['$scope', 'chatPanelService'], ($scope, myAjaxData) => {
+
+    $(".chat-panel-list").height($(window).height()-230)
+    const getChatList = () =>{
+        $scope.getChatList.getData({
+            busitype: $scope.busitype,
+            parentid: $scope.parentid,
+            isHis:1,
+            pageIndex: 0,
+            pageSize: 20
+        }).then(res => {
+            console.log(res)
+            $scope.chatList = res.data;
+        });
+    }
     $scope.$on('chatPanelObj', (e, obj) => {
-        $scope.currentData = obj;
+        debugger
+        $scope.busitype = obj.busitype;
+        $scope.parentid = obj.mid;
+        getChatList();
     });
+
+    //获取当前用户
+    $scope.getLoginUserInfo.getData({
+    }).then(res => {
+        $scope.userId = res.userId;
+    });
+
+    $scope.handle = false;
+
+    //共享处理情况
+    $scope.shareHandle = index =>{
+        $scope.currentIndex = index;
+        $scope.handle = true;
+    }
+
+    //记录处理情况
+    $scope.recordHandle = index => {
+        $scope.currentIndex = index;
+        $scope.handle = true;
+    }
+
+    //发布共享运维任务
+    $scope.publishShareTask = index =>{
+
+    }
+
 });
