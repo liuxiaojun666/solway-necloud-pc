@@ -206,7 +206,7 @@ ajaxData({
             $scope.closeMessagePopUp();
             await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
-            $scope.$broadcast("chatPanelObj", item);
+            $scope.$broadcast("chatPanelObj", { ...item, isHis: [0, 0, 1][$scope.isHis] });
             $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
             if (item.unread_num > 0) $scope.readBaseMessages.getData({ ids: item.mid });
             $scope.$apply();
