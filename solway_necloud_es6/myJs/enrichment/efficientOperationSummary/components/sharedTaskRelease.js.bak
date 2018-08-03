@@ -20,11 +20,12 @@ ajaxData({
 }, {
         __serviceName__: 'sharedTaskReleaseService'
     })('sharedTaskReleaseCtrl', ['$scope', 'sharedTaskReleaseService', 'toaster'], ($scope, maAjaxData, toaster) => {
-        $scope.$on('releaseTask', (e, obj) => {
+        $scope.$on('releaseTask', (e, taskId = null) => {
             $scope.releaseTaskParame = {
                 timerType: '0',
                 userIds: {},
                 taskImgs: [],
+                taskId,
                 ...($scope.releaseTaskParame || {}),
             };
         });
