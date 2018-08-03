@@ -18,11 +18,25 @@ ajaxData({
         later: true
     },
     // 发布任务
-    opShareTimeTaskUpdateV2: {
+    opShareTimeTaskUpdate: {
         name: 'opShareTimeTaskUpdateV2',
         data: {},
         later: true
-    }
+    },
+    // 发布任务 可推送人员 列表
+    opShareUserStationRelSelectByCondition: {
+        name: 'GETopShareUserStationRelSelectByCondition',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 共享任务详情列表
+    shareTaskDetailList: {
+        name: 'GETShareTaskDetailList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
     __serviceName__: 'themeShareService'
     })('themeShareCtrl', ['$scope', 'themeShareService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
@@ -47,7 +61,9 @@ ajaxData({
                 searchKey = ''
             } = historicalRecord.get().themeShare || {};
             $scope.startDate = startDate;
+            $scope.startDate.showDate = '';
             $scope.endDate = endDate;
+            $scope.endDate.showDate = '';
             $scope.isHis = isHis;
             $scope.handStatus = handStatus;
             $scope.searchKey = searchKey;
@@ -62,7 +78,6 @@ ajaxData({
         $scope.searchPopUp = (e) => {
             e.stopPropagation();
             $scope.searchActive = true;
-            $scope.batchCloseActive = false;
             // $scope.messagePopUp = false;
         };
 
@@ -72,8 +87,42 @@ ajaxData({
             $scope.releaseTask = true;
             $scope.releaseTaskParame = {
                 timerType: '0',
+                userIds: {},
+                taskImgs: [],
                 ...($scope.releaseTaskParame || {}),
             };
+        };
+
+        // 发布任务 提交
+        $scope.releaseTaskSubmit = () => {
+            const { taskImgs, timerType, timerDate, userIds } = $scope.releaseTaskParame;
+            const obj = {
+                ...$scope.releaseTaskParame,
+                autoPub: 1,
+                taskImgs: taskImgs.join(','),
+                timerDate: timerType == '0' ? null : timerDate,
+                userIds: Object.keys(userIds).filter(v => userIds[v]).join(',')
+            };
+            if (!app.lxj_validation(obj, '.releaseTask', toaster)) return;
+            $scope.releaseTask = false;
+            $scope.opShareTimeTaskUpdate.getData({ ...obj, dateArr: null }).then((res) => {
+                if (res.code === 0) {
+                    toaster.pop('success', '', res.msg || '发布任务成功');
+                    getBaseMessageList();
+                }
+                else return toaster.pop('error', '', res.msg || '发布任务失败');
+                $scope.releaseTaskParame.taskContent = '';
+            });
+        };
+
+        // 时间选择 回调
+        $scope.releaseTaskDateUpdate = dateStr => $scope.releaseTaskParame.timerDate = dateStr;
+
+        // 发布任务 接收人接口列表
+        $scope.opShareUserStationRelSelectByCondition.getDataCallback = (success, res) => {
+            if (!success) return;
+            if (res.code !== 0) return;
+            $scope.releaseTaskParame.userIds = res.body.reduce((a, b) => ({ ...a, [b.userId]: true }), {});
         };
 
         // 查询
@@ -114,6 +163,7 @@ ajaxData({
             const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
             if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
             if (confirm('确定作废选择消息？')) await $scope.wxaTaskDoInvalids.getData({ ids: ids.join(','), opType: 3 });
+            else return;
             if ($scope.wxaTaskDoInvalids.res.code === 0) {
                 toaster.pop('success', '', '处理成功');
                 $scope.taskList.getData({});
@@ -126,13 +176,13 @@ ajaxData({
         $scope.trClick = async (item, index, e) => {
             e.stopPropagation();
             $scope.searchActive = false;
-            $scope.batchCloseActive = false;
+            if ($scope.shareTaskDetailList.res && $scope.shareTaskDetailList.res.body[0].id === item.id) return;
             $scope.closeMessagePopUp();
             await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
-            $scope.$broadcast("chatPanelObj", { ...item, isHis: [0, 0, 1][$scope.isHis] });
+            const res = await $scope.shareTaskDetailList.getData({id: item.id});
+            $scope.$broadcast("chatPanelObj", res);
             $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
-            if (item.unread_num > 0) $scope.readBaseMessages.getData({ ids: item.mid });
             $scope.$apply();
         };
 
@@ -142,9 +192,10 @@ ajaxData({
             $('.my-table tbody tr').removeClass('active');
         };
 
-        $("#fileaaa").on('change', () => {
+        // 上传图片
+        $("body").on('change', '#fileaaa', () => {
             $.ajaxFileUpload({
-                url: 'wxa/img.htm',
+                url: window.baseUrl + '/wxa/img.htm',
                 secureuri: false,
                 fileElementId: 'fileaaa',
                 type: "POST",
@@ -153,23 +204,22 @@ ajaxData({
                 data: {
                     classify: 'task',
                 },
-                success: function (data) {
+                success(data) {
                     if (data && data.length >= 0) {
-                        $scope.responseImgs.push(data[0]);
+                        $scope.taskImgs.responseImgs.push(data[0]);
                         $scope.$apply()
                     }
                 },
-                error: function (data, status, e) {
-                    promptObj('error', "", "上传失败");
+                error (e) {
+                    toaster.pop('error', '', '上传失败')
                 }
-            })
+            });
         });
 
         // 页面 点击  影藏 弹出
         document.addEventListener('click', eventListen);
         function eventListen() {
             $scope.searchActive = false;
-            $scope.batchCloseActive = false;
             // $scope.messagePopUp = false;
             $scope.$apply();
         }
