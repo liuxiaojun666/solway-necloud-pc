@@ -1,0 +1,38 @@
+ajaxData({
+    getLoginUserInfo: {
+        name: 'loginUserInfo',
+        data: {},
+        later: true
+    },
+    getShareTaskDetailList: {
+        name: 'GETShareTaskDetailList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+        __serviceName__: 'sharedTaskDetailService'
+    })('sharedTaskDetailCtrl', ['$scope', 'sharedTaskDetailService'], ($scope, myAjaxData) => {
+
+        const resizeHeight = () => {
+            $(".chat-panel-list").height($(window).height() - 230)
+        }
+
+        resizeHeight();
+        window.addEventListener('resize', resizeHeight);
+
+
+        //接收
+        $scope.$on('chatPanelObj', (e, obj) => {
+            console.log(obj.body)
+            $scope.chatList = obj.body;
+        });
+
+       
+
+
+        $scope.$on('$destroy', () => {
+            window.removeEventListener('resize', resizeHeight);
+        });
+
+    });
