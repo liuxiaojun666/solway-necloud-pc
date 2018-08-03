@@ -43,6 +43,7 @@ ajaxData({
 
     //接收
     $scope.$on('chatPanelObj', (e, obj) => {
+        $scope.chatList = []
         $scope.handle = false;
 
         $scope.busitype = obj.busitype;
@@ -53,7 +54,6 @@ ajaxData({
 
     //共享处理列表接口
     const getShareList = taskId =>{
-        //测试
         $scope.getShareTaskDetailList.getData({
             taskId: taskId
         }).then(res => {
@@ -84,11 +84,23 @@ ajaxData({
     }
 
     //查看详情
-    $scope.showDetail = () =>{
+    $scope.noteDetails = function (messageId, busitype, busino) {
+        $scope.isInspected = false;
+        // if (busitype == '00') {
+        //     $scope.getEventDetailById(busino);
+        //     $('#noteDetails00').modal({ backdrop: 'static', keyboard: false });
+        // } else if (busitype == '01') {
+        //     $scope.getTaskDetailById(busino);
+        //     $('#noteDetails01').modal({ backdrop: 'static', keyboard: false });
+        // } else if (busitype == '02') {
+        //     $scope.getEventHandleDetailById(busino);
+        //     $('#noteDetails02').modal({ backdrop: 'static', keyboard: false });
+        // }
+
+        //测试
         $('#chatDetail').modal({ backdrop: 'static', keyboard: false });
-        //接口？？
-        $scope.aa = '1fsafsdfa'
     }
+    
 
     //记录处理情况
     $scope.recordHandle = index => {
