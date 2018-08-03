@@ -85,45 +85,13 @@ ajaxData({
         $scope.releaseTaskPopUp = () => {
             // if ($scope.messagePopUp) return;
             $scope.releaseTask = true;
-            $scope.releaseTaskParame = {
-                timerType: '0',
-                userIds: {},
-                taskImgs: [],
-                ...($scope.releaseTaskParame || {}),
-            };
+            $scope.$broadcast('releaseTask', {});
         };
 
-        // 发布任务 提交
-        $scope.releaseTaskSubmit = () => {
-            const { taskImgs, timerType, timerDate, userIds } = $scope.releaseTaskParame;
-            const obj = {
-                ...$scope.releaseTaskParame,
-                autoPub: 1,
-                taskImgs: taskImgs.join(','),
-                timerDate: timerType == '0' ? null : timerDate,
-                userIds: Object.keys(userIds).filter(v => userIds[v]).join(',')
-            };
-            if (!app.lxj_validation(obj, '.releaseTask', toaster)) return;
+        $scope.$on('releaseTaskCallback', (e, success) => {
+            if (success) getBaseMessageList();
             $scope.releaseTask = false;
-            $scope.opShareTimeTaskUpdate.getData({ ...obj, dateArr: null }).then((res) => {
-                if (res.code === 0) {
-                    toaster.pop('success', '', res.msg || '发布任务成功');
-                    getBaseMessageList();
-                }
-                else return toaster.pop('error', '', res.msg || '发布任务失败');
-                $scope.releaseTaskParame.taskContent = '';
-            });
-        };
-
-        // 时间选择 回调
-        $scope.releaseTaskDateUpdate = dateStr => $scope.releaseTaskParame.timerDate = dateStr;
-
-        // 发布任务 接收人接口列表
-        $scope.opShareUserStationRelSelectByCondition.getDataCallback = (success, res) => {
-            if (!success) return;
-            if (res.code !== 0) return;
-            $scope.releaseTaskParame.userIds = res.body.reduce((a, b) => ({ ...a, [b.userId]: true }), {});
-        };
+        });
 
         // 查询
         $scope.search = () => {
@@ -176,7 +144,7 @@ ajaxData({
         $scope.trClick = async (item, index, e) => {
             e.stopPropagation();
             $scope.searchActive = false;
-            if ($scope.shareTaskDetailList.res && $scope.shareTaskDetailList.res.body[0].id === item.id) return;
+            if ($scope.shareTaskDetailList.res && $scope.shareTaskDetailList.res.body[0].id === item.id && $scope.messagePopUp === true) return;
             $scope.closeMessagePopUp();
             await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
@@ -191,30 +159,6 @@ ajaxData({
             $scope.messagePopUp = false;
             $('.my-table tbody tr').removeClass('active');
         };
-
-        // 上传图片
-        $("body").on('change', '#fileaaa', () => {
-            $.ajaxFileUpload({
-                url: window.baseUrl + '/wxa/img.htm',
-                secureuri: false,
-                fileElementId: 'fileaaa',
-                type: "POST",
-                formName: "file",
-                dataType: 'json',
-                data: {
-                    classify: 'task',
-                },
-                success(data) {
-                    if (data && data.length >= 0) {
-                        $scope.taskImgs.responseImgs.push(data[0]);
-                        $scope.$apply()
-                    }
-                },
-                error (e) {
-                    toaster.pop('error', '', '上传失败')
-                }
-            });
-        });
 
         // 页面 点击  影藏 弹出
         document.addEventListener('click', eventListen);
