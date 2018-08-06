@@ -16,7 +16,25 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
-    }
+    },
+    //事件详情
+    eventDetail:{
+        name:'POSTeventDetail',
+        data:{},
+        later:true
+    },
+    //任务详情
+    taskDetail: {
+        name: 'POSTtaskDetail',
+        data: {},
+        later: true
+    },
+    //事件处理详情
+    eventHandleDetail: {
+        name: 'POSTeventHandleDetail',
+        data: {},
+        later: true
+    },
 },{
     __serviceName__: 'chatPanelService'
 })('chatPanelCtrl', ['$scope', 'chatPanelService'], ($scope, myAjaxData) => {
@@ -85,21 +103,20 @@ ajaxData({
 
     //查看详情
     $scope.noteDetails = function (messageId, busitype, busino) {
-        $scope.isInspected = false;
-        // if (busitype == '00') {
-        //     $scope.getEventDetailById(busino);
-        //     $('#noteDetails00').modal({ backdrop: 'static', keyboard: false });
-        // } else if (busitype == '01') {
-        //     $scope.getTaskDetailById(busino);
-        //     $('#noteDetails01').modal({ backdrop: 'static', keyboard: false });
-        // } else if (busitype == '02') {
-        //     $scope.getEventHandleDetailById(busino);
-        //     $('#noteDetails02').modal({ backdrop: 'static', keyboard: false });
-        // }
 
-        //测试
+        $scope.isInspected = false;//是否为验收，普通详情false，验收true
+
+        var interfaceMap = {'00': 'eventDetail', '01': 'taskDetail', '02': 'eventHandleDetail'};
+        var currentInterface = interfaceMap[busitype];
+        $scope[currentInterface].getData({
+            id: busino
+        }).then(res => {
+            $scope.$broadcast('showChatDetail',{'busitype':busitype,'data':res})
+        });
+
         $('#chatDetail').modal({ backdrop: 'static', keyboard: false });
     }
+
     
 
     //记录处理情况
