@@ -4,6 +4,7 @@ ajaxData({
     historicalRecord.init();
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '高效运维';//当前页面名称；
+    $scope.themeShareUsable = window.localStorage.wxuser;
     historyInitCallback();
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
@@ -22,6 +23,7 @@ ajaxData({
 
     // 切换主题模块
     $scope.changeTheme = theme => {
+        if (!$scope.themeShareUsable && theme === 'Share') return;
         if (theme !== $scope.theme) $scope.themeLoading = true;
         $scope.theme = theme;
         historicalRecord.set({ theme });
@@ -52,8 +54,6 @@ ajaxData({
         // 子页面销毁 删除监听
         __childScope.$on('$destroy', () => {
             delete __childScope.mainPageInitComplete;
-            delete __childScope.dateUpdated;
-            delete __childScope.switchPowerCallback;
         });
     };
 });
