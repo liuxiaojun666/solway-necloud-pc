@@ -41,6 +41,25 @@ ajaxData({
         name: 'opTimeTaskUpdate',
         data: {},
         later: true
+    },
+    // 定时任务管理 列表
+    timeTaskList: {
+        name: 'GETopTimeTaskList',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+    // 定时任务 删除
+    automaticTaskDelete: {
+        name: 'opTimeTaskDelete',
+        data: {},
+        later: true,
+    },
+    // 定时任务 打开关闭
+    opShareTimeTaskAutoPub: {
+        name: 'opTimeTaskAutoPub',
+        data: {},
+        later: true,
     }
 }, {
         __serviceName__: 'themeProfessionService'
@@ -224,9 +243,80 @@ ajaxData({
             $('.my-table tbody tr').removeClass('active');
         };
 
+        // 定时任务 删除操作 函数 挂载   打开关闭 操作 函数 挂载
+        $scope.timeTaskListCreated = (scope) => {
+            scope.deleteTimeTask = id => {
+                $scope.automaticTaskDelete.getData({ id }).then(res => {
+                    if (res.code === 0) {
+                        toaster.pop('success', '', res.msg);
+                        $scope.timeTaskList.getData({});
+                    }
+                    else toaster.pop('error', '', res.msg || '删除失败');
+                });
+            };
+            scope.autoPubHandle = (id, oldValue, e) => {
+                const autoPub = e.currentTarget.children[0].checked ? '1' : '0';
+                if (autoPub === oldValue) return;
+                $scope.opShareTimeTaskAutoPub.getData({ id, autoPub }).then(res => {
+                    $scope.timeTaskList.getData({});
+                });
+            };
+        };
+
         // 定时任务管理
         $scope.timingTaskManagement = () => {
             $scope.timingTask = true;
+            $scope.timeTaskList.getData({}).then(res => {
+                $scope.timeTaskListColumn = [
+                    {
+                        title: '电站名称',
+                        dataIndex: 'stationName',
+                        width: '25%',
+                        align: 'left'
+                    },
+                    {
+                        title: '发布人',
+                        dataIndex: 'distMan',
+                    },
+                    {
+                        title: '受理人',
+                        dataIndex: 'respMan',
+                    },
+                    {
+                        title: '内容',
+                        dataIndex: 'taskContent',
+                        width: '30%',
+                    },
+                    {
+                        title: '执行策略',
+                        dataIndex: 'timerDate',
+                        render(text) {
+                            if (!text) return;
+                            if (text.length < 6) return '每天' + text;
+                            const arr = text.split(' ');
+                            let date, dateStr, timeStr = arr[1];
+                            if (arr[1]) date = arr[0].split('-');
+                            if (date[1]) dateStr = '每年' + date.join('月') + '日';
+                            else dateStr = '每月' + date[0] + '日'
+                            return dateStr + arr[1];
+                        }
+                    },
+                    {
+                        dataIndex: 'autoPub',
+                        align: 'center',
+                        width: '150px',
+                        render(text, item, index) {
+                            return `
+                                <span lxj-click="deleteTimeTask(${item.id});" style="color:red;margin-right:1em;">删除</span>
+                                <label lxj-click="autoPubHandle(${item.id},${text});" class="i-switch i-switch-sm" style="vertical-align: bottom;background-color: #1cbbb4;">
+                                    <input type="checkbox" ${text === '1' ? 'checked' : ''} >
+                                    <i></i>
+                                </label>
+                                `
+                        }
+                    }
+                ];
+            });
         };
 
         // 页面 点击  影藏 弹出
