@@ -183,19 +183,24 @@ ajaxData({
         const batchReadMsg = async all => {
             $scope.batchReadHandle = '0';
             let res = null;
-            if (all && confirm('确定标记全部消息为已读？')) {
-                res = await $scope.readBaseAllMessages.getData({});
-            }
-            else if (confirm('确定标记选中消息为已读？')) {
-                const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies.split('_')[1]);
-                if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
-                res = await $scope.readBaseMessages.getData({
-                    ids: ids.join(',')
+            if (all) {
+                lxj_confirm({ message: '确定标记所有消息为已读？' }, async () => {
+                    res = await $scope.readBaseAllMessages.getData({});
+                    resultCallback();
+                });
+            } else {
+                lxj_confirm({ message: '确定标记选中消息为已读？'}, async () => {
+                    const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies.split('_')[1]);
+                    if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
+                    res = await $scope.readBaseMessages.getData({ ids: ids.join(',') });
+                    resultCallback();
                 });
             }
-            if (res.code === 0) toaster.pop('success', '', '批量处理成功');
-            else toaster.pop('error', '', '批量处理失败');
-            $scope.getBaseMessageListNew.getData({});
+            function resultCallback () {
+                if (res && res.code === 0) toaster.pop('success', '', '批量处理成功');
+                else toaster.pop('error', '', '批量处理失败');
+                $scope.getBaseMessageListNew.getData({});
+            }
         };
 
         // 批量 标记已读 事件触发
@@ -211,16 +216,18 @@ ajaxData({
             const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
             if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
             if (notprocereason == '0' && !otherreason) return toaster.pop('error', '', '请填写其他原因具体内容');
-            if (!confirm('确定关闭选中消息为 关闭？')) return;
-            const res = await $scope.eventNoHandles.getData({
-                notprocereason,
-                otherreason,
-                e_m_ids: ids.join(',')
+            // if (!confirm('确定关闭选中消息为 关闭？')) return;
+            lxj_confirm({ message: '确定标记选中消息为关闭？' }, async () => {
+                const res = await $scope.eventNoHandles.getData({
+                    notprocereason,
+                    otherreason,
+                    e_m_ids: ids.join(',')
+                });
+                eventListen();
+                if (res.code === 0) toaster.pop('success', '', '批量处理成功');
+                else toaster.pop('error', '', '批量处理失败');
+                $scope.getBaseMessageListNew.getData({});
             });
-            eventListen();
-            if (res.code === 0) toaster.pop('success', '', '批量处理成功');
-            else toaster.pop('error', '', '批量处理失败');
-            $scope.getBaseMessageListNew.getData({});
         };
 
         // 点击行
@@ -246,12 +253,14 @@ ajaxData({
         // 定时任务 删除操作 函数 挂载   打开关闭 操作 函数 挂载
         $scope.timeTaskListCreated = (scope) => {
             scope.deleteTimeTask = id => {
-                $scope.automaticTaskDelete.getData({ id }).then(res => {
-                    if (res.code === 0) {
-                        toaster.pop('success', '', res.msg);
-                        $scope.timeTaskList.getData({});
-                    }
-                    else toaster.pop('error', '', res.msg || '删除失败');
+                lxj_confirm({ message: '确定删除吗？此操作不可恢复！'}, () => {
+                    $scope.automaticTaskDelete.getData({ id }).then(res => {
+                        if (res.code === 0) {
+                            toaster.pop('success', '', res.msg);
+                            $scope.timeTaskList.getData({});
+                        }
+                        else toaster.pop('error', '', res.msg || '删除失败');
+                    });
                 });
             };
             scope.autoPubHandle = (id, oldValue, e) => {
@@ -276,11 +285,11 @@ ajaxData({
                     },
                     {
                         title: '发布人',
-                        dataIndex: 'distMan',
+                        dataIndex: 'distManName',
                     },
                     {
                         title: '受理人',
-                        dataIndex: 'respMan',
+                        dataIndex: 'respManName',
                     },
                     {
                         title: '内容',

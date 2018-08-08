@@ -149,14 +149,15 @@ ajaxData({
         $scope.batchClose = async () => {
             const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
             if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
-            if (confirm('确定作废选择消息？')) await $scope.wxaTaskDoInvalids.getData({ ids: ids.join(','), opType: 3 });
-            else return;
-            if ($scope.wxaTaskDoInvalids.res.code === 0) {
-                toaster.pop('success', '', '处理成功');
-                $scope.taskList.getData({});
-            }
-            else toaster.pop('error', '', '处理失败');
-            $scope.$apply();
+            lxj_confirm({ message: '确定作废选择消息？'}, async () => {
+                const res = await $scope.wxaTaskDoInvalids.getData({ ids: ids.join(','), opType: 3 });
+                if (res.code === 0) {
+                    toaster.pop('success', '', '处理成功');
+                    $scope.taskList.getData({});
+                }
+                else toaster.pop('error', '', '处理失败');
+                $scope.$apply();
+            });
         };
 
         // 点击行
@@ -183,12 +184,14 @@ ajaxData({
         // 定时任务 删除操作 函数 挂载   打开关闭 操作 函数 挂载
         $scope.timeTaskListCreated = (scope) => {
             scope.deleteTimeTask = id => {
-                $scope.automaticTaskDelete.getData({id}).then(res => {
-                    if (res.code === 0) {
-                        toaster.pop('success', '', res.msg);
-                        $scope.timeTaskList.getData({});
-                    }
-                    else toaster.pop('error', '', res.msg || '删除失败');
+                lxj_confirm({message: '确定删除吗？此操作不可恢复！'}, () => {
+                    $scope.automaticTaskDelete.getData({id}).then(res => {
+                        if (res.code === 0) {
+                            toaster.pop('success', '', res.msg);
+                            $scope.timeTaskList.getData({});
+                        }
+                        else toaster.pop('error', '', res.msg || '删除失败');
+                    });
                 });
             };
             scope.autoPubHandle = (id, oldValue, e) => {
