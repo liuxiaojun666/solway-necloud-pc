@@ -35,6 +35,36 @@ ajaxData({
         data: {},
         later: true
     },
+    //派人处理
+    eventToHandle:{
+        name:'POSTpersonHandle',
+        data:{},
+        later:true
+    },
+    //不处理
+    eventNoHandle:{
+        name:'POSTnohandle',
+        data:{},
+        later:true
+    },
+    //事件日志
+    eventDiary:{
+        name: 'POSTeventDiary',
+        data: {},
+        later: true
+    },
+    //人员列表
+    personList:{
+        name:'POSTpersonList',
+        data:{},
+        later:true
+    },
+    //指派给他人处理
+    otherToHandle:{
+        name: 'POSTotherToHandle',
+        data: {},
+        later: true
+    },
 },{
     __serviceName__: 'chatPanelService'
 })('chatPanelCtrl', ['$scope', 'chatPanelService'], ($scope, myAjaxData) => {
@@ -70,6 +100,11 @@ ajaxData({
         getChatList();
     });
 
+    //重新获取列表
+    $scope.$on('initChatList',(e,v)=>{
+        getChatList();
+    })
+
     //共享处理列表接口
     const getShareList = taskId =>{
         $scope.getShareTaskDetailList.getData({
@@ -101,11 +136,27 @@ ajaxData({
         $scope.handle = false;
     }
 
+    //获取人员列表
+    $scope.getUserList = function (busino) {
+        $scope.managerd01 = {};
+        $scope.eventDiary.getData({
+            id: busino
+        }).then(res => {
+            $scope.pstationId = res.pstationid;
+            $scope.personList.getData({
+                sid: $scope.pstationId
+            }).then(result => {
+                $scope.manager01 = result;
+                $scope.managerd01.selected = { realName: $scope.manager01[0].realName, userId: $scope.manager01[0].userId };
+                $scope.respman = $scope.managerd01.selected.userId;
+
+            });
+        });
+    }
+
     //查看详情
     $scope.noteDetails = function (messageId, busitype, busino) {
-
         $scope.isInspected = false;//是否为验收，普通详情false，验收true
-
         var interfaceMap = {'00': 'eventDetail', '01': 'taskDetail', '02': 'eventHandleDetail'};
         var currentInterface = interfaceMap[busitype];
         $scope[currentInterface].getData({
@@ -117,7 +168,14 @@ ajaxData({
         $('#chatDetail').modal({ backdrop: 'static', keyboard: false });
     }
 
-    
+    //确认---》处理（派给他人、自己、不处理）
+    $scope.toHandle = (who,id) =>{
+        
+        $scope.$broadcast('showEventHandle',{'who':who,'id':id})
+
+        $('#toHandleModal').modal({ backdrop: 'static', keyboard: false });
+    }  
+
 
     //记录处理情况
     $scope.recordHandle = index => {
