@@ -1,0 +1,45 @@
+window.$solway = {};
+window.$solway.baidumap = () => {
+    const ele = document.createElement('div');
+    ele.style.position = 'fixed';
+    ele.style.top = '0';
+    ele.style.left = '0';
+    ele.style.right = '0';
+    ele.style.bottom = '0';
+    ele.style.background = 'rgba(0,0,0,.2)';
+    ele.style.zIndex = '999';
+    ele.addEventListener('click', eventNone);
+    function eventNone(e) {
+        if (e.target.className === 'close') close();
+        e.stopPropagation();
+        return false;
+    }
+    function close() {
+        ele.removeEventListener('click', eventNone);
+        document.body.removeChild(ele);
+    }
+    ele.innerHTML = `
+            <div style="background:#fff;padding:20px;top: 100px;position:absolute;left:50%;margin-left:-400px;">
+                <button style="position:absolute;right:-20px;top:-20px;border-radius:50%;width:30px;height:30px;font-size:30px;background:#fff;opacity:1;" class="close">×</button>
+                <iframe id="baidumap"
+                    title="Example2"
+                    width="800"
+                    height="500"
+                    frameborder="0"
+                    scrolling="no"
+                    marginheight="0"
+                    marginwidth="0"
+                    src="tpl/enrichment/components/baidumap.html">
+                </iframe>
+            </div>`;
+    document.body.appendChild(ele);
+    setTimeout(() => {
+        const ifreame = document.getElementById("baidumap").contentWindow;
+        if (ifreame != null && ifreame != undefined) {
+            ifreame.childFunction({
+                longitude: $scope.stationData.res.body.resultList.longitude,
+                latitude: $scope.stationData.res.body.resultList.latitude,
+            });
+        }
+    }, 500);
+}
