@@ -65,9 +65,15 @@ ajaxData({
         data: {},
         later: true
     },
+    //受理
+    acceptHandle:{
+        name: 'POSTacceptHandle',
+        data: {},
+        later: true
+    },
 },{
     __serviceName__: 'chatPanelService'
-})('chatPanelCtrl', ['$scope', 'chatPanelService'], ($scope, myAjaxData) => {
+    })('chatPanelCtrl', ['$scope', 'chatPanelService', 'toaster'], ($scope, myAjaxData, toaster) => {
 
     const resizeHeight = () =>{
         $(".chat-panel-list").height($(window).height() - 230)
@@ -138,7 +144,7 @@ ajaxData({
 
     //获取人员列表
     $scope.getUserList = function (busino) {
-        $scope.managerd01 = {};
+        $scope.managerd01 = {}; 
         $scope.eventDiary.getData({
             id: busino
         }).then(res => {
@@ -147,9 +153,10 @@ ajaxData({
                 sid: $scope.pstationId
             }).then(result => {
                 $scope.manager01 = result;
-                $scope.managerd01.selected = { realName: $scope.manager01[0].realName, userId: $scope.manager01[0].userId };
-                $scope.respman = $scope.managerd01.selected.userId;
-
+                if(result.length){
+                    $scope.managerd01.selected = { realName: $scope.manager01[0].realName, userId: $scope.manager01[0].userId };
+                    $scope.respman = $scope.managerd01.selected.userId;
+                }
             });
         });
     }
@@ -170,17 +177,39 @@ ajaxData({
 
     //确认---》处理（派给他人、自己、不处理）
     $scope.toHandle = (who,id) =>{
-        
         $scope.$broadcast('showEventHandle',{'who':who,'id':id})
-
         $('#toHandleModal').modal({ backdrop: 'static', keyboard: false });
     }  
 
+    //受理
+    $scope.handleAccept = function (id, topmessageId) {
+        if (confirm('确定受理？')){
+            $scope.acceptHandle.getData({
+                'id': id,
+                'topmessageId': topmessageId
+            }).then(msg => {
+                if (msg.result) {
+                    toaster.pop('success', '', msg.infoMsg);
+                    getChatList();
+                } else {
+                    toaster.pop('error', '', msg.infoMsg);
+                }
+            });
+        }
+    }
+
+    //拒绝
+    $scope.handleRefuse = function (id, topmessageId) {
+        $scope.$broadcast('handleRefuse', { 'id': id, 'topmessageId': topmessageId })
+        $('#handleRefuseModal').modal({ backdrop: 'static', keyboard: false });
+    }
+
 
     //记录处理情况
-    $scope.recordHandle = index => {
-        // $scope.currentIndex = index;
-        // $scope.handle = true;
+    $scope.handleRecord = (id,topmessageId) => {
+        $scope.$broadcast('handleRecord', { 'id': id, 'topmessageId': topmessageId })
+        $('#handleRecordModal').modal({ backdrop: 'static', keyboard: false });
+
     }
 
     //发布共享运维任务
