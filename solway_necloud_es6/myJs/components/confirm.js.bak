@@ -1,0 +1,34 @@
+window.lxj_confirm = (option = {}, callback = () => {console.log('点击确定');}) => {
+    const {title = '', message = '确定吗？'} = option;
+    const ele = document.createElement('div');
+    ele.style.position = 'fixed';
+    ele.style.top = '0';
+    ele.style.left = '0';
+    ele.style.right = '0';
+    ele.style.bottom = '0';
+    ele.style.background = 'rgba(0,0,0,.2)';
+    ele.style.zIndex = '999';
+    ele.addEventListener('click', eventNone);
+    function eventNone(e) {
+        if (e.target.className === 'cancel') cancel();
+        if (e.target.className === 'assured') assured();
+        e.stopPropagation();
+        return false;
+    }
+    function cancel() {
+        ele.removeEventListener('click', eventNone);
+        document.body.removeChild(ele);
+    }
+    function assured() {
+        cancel();
+        callback();
+    }
+    ele.innerHTML = `
+        <div class="clearfix" style="width: 400px;margin:100px auto;background:#fff;color:#333;border-radius:2px;">
+            <h4 style="margin-top:30px;">${title}</h4>
+            <p style="margin-bottom: 30px;padding: 0 2em;font-size:16px;">${message}</p>
+            <button style="width: 50%;border:none;background:transparent;height: 50px;font-size:22px;padding:0;float:left;border-top:1px solid #ccc;box-sizing:border-box;color: #ff3737;border-right:1px solid #ccc;" class="assured">确认</button>
+            <button style="width: 50%;border:none;background:transparent;height: 50px;font-size:22px;padding:0;float:left;border-top:1px solid #ccc;box-sizing:border-box;color: #868686;" class="cancel">取消</button>
+        </div>`;
+    document.body.appendChild(ele);
+};
