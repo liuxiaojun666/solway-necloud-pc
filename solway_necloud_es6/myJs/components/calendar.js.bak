@@ -179,6 +179,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
         }
         $element.on('$destroy', async () => {
             $scope.beforeDestroy && $scope.beforeDestroy($scope, $element)
+            $('#' + $scope.randomId).datetimepicker('remove')
             await $scope.timeout(0)
             $scope.destroyed && $scope.destroyed($scope, $element)
         })
