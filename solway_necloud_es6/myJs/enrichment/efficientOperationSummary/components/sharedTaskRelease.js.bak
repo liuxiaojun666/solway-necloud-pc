@@ -31,15 +31,16 @@ ajaxData({
         });
         // 发布任务 提交
         $scope.releaseTaskSubmit = () => {
-            const { taskImgs, timerType, timerDate, userIds } = $scope.releaseTaskParame;
+            const { taskImgs, timerType, timerDate, userIds, taskId } = $scope.releaseTaskParame;
             const obj = {
                 ...$scope.releaseTaskParame,
+                taskId,
                 autoPub: 1,
                 taskImgs: taskImgs.join(','),
                 timerDate: timerType == '0' ? null : timerDate,
                 userIds: Object.keys(userIds).filter(v => userIds[v]).join(',')
             };
-            if (!app.lxj_validation(obj, '.releaseTask', toaster)) return;
+            if (!app.lxj_validation(obj, '.releaseTask .parames', toaster)) return;
             $scope.releaseTask = false;
             $scope.opShareTimeTaskUpdate.getData({ ...obj, dateArr: null }).then((res) => {
                 if (res.code === 0) {

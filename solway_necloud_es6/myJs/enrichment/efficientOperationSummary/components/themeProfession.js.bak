@@ -184,12 +184,12 @@ ajaxData({
             $scope.batchReadHandle = '0';
             let res = null;
             if (all) {
-                lxj_confirm({ message: '确定标记所有消息为已读？' }, async () => {
+                $solway.confirm({ message: '确定标记所有消息为已读？' }, async () => {
                     res = await $scope.readBaseAllMessages.getData({});
                     resultCallback();
                 });
             } else {
-                lxj_confirm({ message: '确定标记选中消息为已读？'}, async () => {
+                $solway.confirm({ message: '确定标记选中消息为已读？'}, async () => {
                     const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies.split('_')[1]);
                     if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
                     res = await $scope.readBaseMessages.getData({ ids: ids.join(',') });
@@ -217,7 +217,7 @@ ajaxData({
             if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
             if (notprocereason == '0' && !otherreason) return toaster.pop('error', '', '请填写其他原因具体内容');
             // if (!confirm('确定关闭选中消息为 关闭？')) return;
-            lxj_confirm({ message: '确定标记选中消息为关闭？' }, async () => {
+            $solway.confirm({ message: '确定标记选中消息为关闭？' }, async () => {
                 const res = await $scope.eventNoHandles.getData({
                     notprocereason,
                     otherreason,
@@ -253,7 +253,7 @@ ajaxData({
         // 定时任务 删除操作 函数 挂载   打开关闭 操作 函数 挂载
         $scope.timeTaskListCreated = (scope) => {
             scope.deleteTimeTask = id => {
-                lxj_confirm({ message: '确定删除吗？此操作不可恢复！'}, () => {
+                $solway.confirm({ message: '确定删除吗？此操作不可恢复！'}, () => {
                     $scope.automaticTaskDelete.getData({ id }).then(res => {
                         if (res.code === 0) {
                             toaster.pop('success', '', res.msg);
