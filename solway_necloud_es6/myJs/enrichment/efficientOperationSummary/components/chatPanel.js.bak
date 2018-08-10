@@ -169,9 +169,20 @@ ajaxData({
         $scope[currentInterface].getData({
             id: busino
         }).then(res => {
-            $scope.$broadcast('showChatDetail',{'busitype':busitype,'data':res})
+            $scope.$broadcast('showChatDetail', { 'busitype': busitype, 'topmessageid': messageId,'data':res})
         });
 
+        $('#chatDetail').modal({ backdrop: 'static', keyboard: false });
+    }
+
+    //验收（详情弹框里）
+        $scope.handleInspected = function (busino, busitype,topmessageid) {
+        $scope.taskDetail.getData({
+            id: busino
+        }).then(res => {
+            $scope.$broadcast('showChatDetail', { 'busitype': busitype, 'topmessageid': topmessageid, 'data': res })
+        });
+        $scope.isInspected = true;
         $('#chatDetail').modal({ backdrop: 'static', keyboard: false });
     }
 
@@ -228,6 +239,12 @@ ajaxData({
         $scope.releaseTask = true;
         $scope.$broadcast('releaseTask', item.busino);
     }
+
+    //发布共享任务回调
+    $scope.$on('releaseTaskCallback', (e, success) => {
+        if (success) getChatList();
+        $scope.releaseTask = false;
+    });
 
 
     $scope.$on('$destroy', () => {
