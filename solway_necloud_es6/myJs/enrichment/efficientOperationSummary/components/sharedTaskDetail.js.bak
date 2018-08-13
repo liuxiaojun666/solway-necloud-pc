@@ -4,12 +4,12 @@ ajaxData({
         data: {},
         later: true
     },
-    getShareTaskDetailList: {
+    shareTaskDetailList: {
         name: 'GETShareTaskDetailList',
         data: {},
         later: true,
         onlyLatest: true
-    }
+    },
 }, {
         __serviceName__: 'sharedTaskDetailService'
     })('sharedTaskDetailCtrl', ['$scope', 'sharedTaskDetailService'], ($scope, myAjaxData) => {
@@ -24,11 +24,11 @@ ajaxData({
         //接收
         $scope.$on('chatPanelObj', (e, obj) => {
             $scope.shareList = [];
-
-            $scope.shareList = obj.body;
+            $scope.shareListResult = true;
+            $scope.id = obj.id;
             $scope.distMan = obj.distMan;
+            getShareList();
             getUserID();
-            console.log($scope.shareList)
         });
 
         //获取当前用户ID
@@ -37,8 +37,18 @@ ajaxData({
             }).then(res => {
                 $scope.userId = res.userId;
             });
-
         } 
+
+        //列表接口
+        const getShareList = () => {
+            $scope.shareTaskDetailList.getData({
+                id: $scope.id
+            }).then(res => {
+                $scope.shareList = res.body;
+                $scope.shareListResult = false;
+            });
+        }
+
         //详情
         $scope.showDetail = () =>{
             $('#chatDetailShare').modal({ backdrop: 'static', keyboard: false });            
