@@ -36,17 +36,20 @@ ajaxData({
             dateType = 1,
             dateTime = new Date,
             stationData,
-            // timeRange = 0,
+            theme = 'default',
         } = historiData;
         if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope.dateTime = dateTime;
         $scope.dateType = dateType;
         $scope._dateTime = dateTime;
         $scope._dateType = dateType;
+        $scope.theme = theme;
         // $scope.timeRange = timeRange;
         if (!stationData) historicalRecord.set({ dateType, dateTime });
         await diffStationInfo(stationData);
         $scope.beforeLoading = false;
+        computeThemeDetail(theme);
+        $scope.mainPageInitComplete && $scope.mainPageInitComplete($scope.currentClass);
         // getTabData();
         $scope.$apply();
     };
@@ -54,14 +57,10 @@ ajaxData({
     // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
     $scope.dateUpdated = async (dateType, dateTime) => {
         await myAjaxData.timeout(0);
-        // let getDataType = 0;
-        // if (!Object.is(dateType, historicalRecord.get().dateType)) getDataType = 1;
         historicalRecord.set({ dateType, dateTime });
         if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope._dateType = dateType;
         $scope._dateTime = dateTime;
-        // if (getDataType) getTabData();
-        // else $scope.changeTab2($scope.tabIndex);
     };
 
     // 切换电站 回调
@@ -70,7 +69,6 @@ ajaxData({
         if (!switchArguments) return;
         $scope.dataType = switchArguments.dataType;
         historicalRecord.set({ stationData: switchArguments });
-        // getTabData();
     };
 
 
@@ -100,6 +98,14 @@ ajaxData({
             $scope.switchPowerCallback(stationData);
         }
     };
+
+    function computeThemeDetail(theme) {
+        if (theme !== $scope.theme && theme !== 'default') $scope.themeLoading = true;
+        $scope.themeDetail = theme === 'default' ? void 0 : 
+        `tpl/enrichment/analyzeSummary/components/default${
+            ('/' + ["Station", "Company", "Company"][$scope.dataType] + ['Day', 'Month', 'Year', 'Accumulative'][$scope.dateType])
+        }.html`;
+    }
 
 
     // 初始化子页面scope
