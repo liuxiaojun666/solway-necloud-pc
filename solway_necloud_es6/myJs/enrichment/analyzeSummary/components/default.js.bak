@@ -1,0 +1,320 @@
+ajaxData({
+
+}, {
+        __serviceName__: 'themeAnalyzeDefaultService'
+    })('themeAnalyzeDefaultCtrl', ['$scope', 'themeAnalyzeDefaultService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
+        /// 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+        let myChart;
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            const {
+                searchKey = ''
+            } = historicalRecord.get().themeAnalyzeDefault || {};
+            $scope.searchKey = searchKey;
+            await myAjaxData.timeout(0);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            initChart();
+            $scope.$apply();
+        };
+
+
+        function initChart() {
+            myChart = echartsSankey.init(document.getElementById('main'));
+            drawing();
+            // 宽高改变  重新画
+            const resizeFunc = async () => {
+                await myAjaxData.timeout(0);
+                myChart.resize();
+            };
+            window.addEventListener('resize', resizeFunc);
+            $scope.$on('$destroy', () => {
+                window.removeEventListener('resize', resizeFunc);
+                echarts.dispose(document.getElementById('main'));
+                myChart = null;
+            });
+
+            myChart.on('click', function (obj) {
+                // debugger
+            });
+        }
+
+        function drawing() {
+            const option = {
+                series: {
+                    type: 'sankey',
+                    layout: 'none',
+                    draggable: false,
+                    data: [{
+                        name: 'a'
+                    },
+                    {
+                        name: 'b1'
+                    }, {
+                        name: 'b2'
+                    }, {
+                        name: 'c1'
+                    }
+                        , {
+                        name: 'c2'
+                    },
+                    {
+                        name: 'c3',
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    },
+                    {
+                        name: 'd1'
+                    }, {
+                        name: 'd2'
+                    }, {
+                        name: 'd3'
+                    }, {
+                        name: 'd4'
+                    }, {
+                        name: 'd5'
+                    }, {
+                        name: 'd6'
+                    }, {
+                        name: 'd7'
+                    }, {
+                        name: 'd9',
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    },
+                    {
+                        name: 'd8',
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    },
+                    {
+                        name: 'e1'
+                    },
+                    {
+                        name: 'e2'
+                    },
+                    {
+                        name: 'e3',
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    },
+                    {
+                        name: 'e4',
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    },
+                    {
+                        name: 'e5',
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    },
+                    {
+                        name: 'e6',
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    },
+                    {
+                        name: 'e7',
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    },
+                    {
+                        name: 'e8',
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    },
+
+                    ],
+                    links: [
+
+                        {
+                            source: 'a',
+                            target: 'b1',
+                            value: 90
+                        }, {
+                            source: 'a',
+                            target: 'b2',
+                            value: 10
+                        }, {
+                            source: 'b1',
+                            target: 'c1',
+                            value: 80
+                        }, {
+                            source: 'b1',
+                            target: 'c2',
+                            value: 10
+                        },
+                        {
+                            source: 'b2',
+                            target: 'c3',
+                            value: 10,
+                            emphasis: {
+                                lineStyle: {
+                                    opacity: 0
+                                }
+                            },
+                            lineStyle: {
+                                opacity: 0
+                            }
+                        },
+                        {
+                            source: 'c3',
+                            target: 'd9',
+                            value: 10,
+                            emphasis: {
+                                lineStyle: {
+                                    opacity: 0
+                                }
+                            },
+                            lineStyle: {
+                                opacity: 0
+                            }
+                        },
+                        {
+                            source: 'c1',
+                            target: 'd1',
+                            value: 40
+                        },
+                        {
+                            source: 'c1',
+                            target: 'd2',
+                            value: 5
+                        },
+                        {
+                            source: 'c1',
+                            target: 'd3',
+                            value: 5
+                        },
+                        {
+                            source: 'c1',
+                            target: 'd4',
+                            value: 5
+                        },
+                        {
+                            source: 'c1',
+                            target: 'd5',
+                            value: 5
+                        },
+                        {
+                            source: 'c1',
+                            target: 'd6',
+                            value: 5
+                        },
+                        {
+                            source: 'c1',
+                            target: 'd7',
+                            value: 5
+                        },
+                        {
+                            source: 'c2',
+                            target: 'd8',
+                            value: 10,
+                            emphasis: {
+                                lineStyle: {
+                                    opacity: 0
+                                }
+                            },
+                            lineStyle: {
+                                opacity: 0
+                            }
+                        },
+                        {
+                            source: 'd1',
+                            target: 'e1',
+                            value: 30,
+                        },
+                        {
+                            source: 'd1',
+                            target: 'e2',
+                            value: 10,
+                        }, {
+                            source: 'd2',
+                            target: 'e3',
+                            value: 5,
+                            emphasis: {
+                                lineStyle: {
+                                    opacity: 0
+                                }
+                            },
+                            lineStyle: {
+                                opacity: 0
+                            }
+                        }, {
+                            source: 'd3',
+                            target: 'e4',
+                            value: 5,
+                            emphasis: {
+                                lineStyle: {
+                                    opacity: 0
+                                }
+                            },
+                            lineStyle: {
+                                opacity: 0
+                            }
+                        }, {
+                            source: 'd4',
+                            target: 'e5',
+                            value: 5,
+                            emphasis: {
+                                lineStyle: {
+                                    opacity: 0
+                                }
+                            },
+                            lineStyle: {
+                                opacity: 0
+                            }
+                        }, {
+                            source: 'd5',
+                            target: 'e6',
+                            value: 5,
+                            emphasis: {
+                                lineStyle: {
+                                    opacity: 0
+                                }
+                            },
+                            lineStyle: {
+                                opacity: 0
+                            }
+                        }, {
+                            source: 'd6',
+                            target: 'e7',
+                            value: 5,
+                            emphasis: {
+                                lineStyle: {
+                                    opacity: 0
+                                }
+                            },
+                            lineStyle: {
+                                opacity: 0
+                            }
+                        }, {
+                            source: 'd7',
+                            target: 'e8',
+                            value: 5,
+                            emphasis: {
+                                lineStyle: {
+                                    opacity: 0
+                                }
+                            },
+                            lineStyle: {
+                                opacity: 0
+                            }
+                        }
+
+                    ]
+                }
+            };
+            myChart.setOption(option);
+        }
+    });
