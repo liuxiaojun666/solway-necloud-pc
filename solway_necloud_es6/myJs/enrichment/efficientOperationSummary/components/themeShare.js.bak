@@ -169,7 +169,7 @@ ajaxData({
             await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
             const res = await $scope.shareTaskDetailList.getData({id: item.id});
-            $scope.$broadcast("chatPanelObj", res);
+            $scope.$broadcast("chatPanelObj", {...res, distMan: item.distMan});
             $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
             $scope.$apply();
         };
