@@ -112,13 +112,13 @@ ajaxData({
     })
 
     //共享处理列表接口
-    const getShareList = taskId =>{
-        $scope.getShareTaskDetailList.getData({
-            taskId: taskId
-        }).then(res => {
-            $scope.shareList = res.body;
-        });
-        
+    const getShareList = (distMan,taskId) =>{
+        // $scope.getShareTaskDetailList.getData({
+        //     taskId: taskId
+        // }).then(res => {
+        //     $scope.shareList = res.body;
+        // });
+        $scope.$broadcast("chatPanelObj", { taskId: taskId, distMan: distMan});
     }
 
     //获取当前用户
@@ -128,11 +128,11 @@ ajaxData({
     });
 
     //打开共享处理情况列表
-    $scope.shareHandle = (index, busino) =>{
+    $scope.shareHandle = (index,distMan, busino) =>{
         $scope.handle = !$scope.handle;
         if ($scope.handle){
             $scope.currentIndex = index;
-            getShareList(busino);
+            getShareList(distMan,busino);
         }
     }
 

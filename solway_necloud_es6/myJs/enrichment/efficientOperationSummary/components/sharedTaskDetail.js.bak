@@ -14,18 +14,12 @@ ajaxData({
         __serviceName__: 'sharedTaskDetailService'
     })('sharedTaskDetailCtrl', ['$scope', 'sharedTaskDetailService'], ($scope, myAjaxData) => {
 
-        const resizeHeight = () => {
-            $(".chat-panel-list").height($(window).height() - 230)
-        }
-
-        resizeHeight();
-        window.addEventListener('resize', resizeHeight);
-
         //接收
         $scope.$on('chatPanelObj', (e, obj) => {
             $scope.shareList = [];
             $scope.shareListResult = true;
             $scope.id = obj.id;
+            $scope.taskId = obj.taskId;
             $scope.distMan = obj.distMan;
             getShareList();
             getUserID();
@@ -41,17 +35,20 @@ ajaxData({
 
         //列表接口
         const getShareList = () => {
-            $scope.shareTaskDetailList.getData({
-                id: $scope.id
-            }).then(res => {
+            const params = {id: $scope.id}
+            $scope.shareTaskDetailList.getData(
+                params
+            ).then(res => {
+                debugger
                 $scope.shareList = res.body;
                 $scope.shareListResult = false;
             });
         }
 
         //详情
-        $scope.showDetail = () =>{
-            $('#chatDetailShare').modal({ backdrop: 'static', keyboard: false });            
+        $scope.showDetail = id =>{
+            $scope.shareTaskDetailShow = true;
+            $scope.$broadcast('shareTaskDetailBro',id);
         }
 
         $scope.getSendList = arr =>{
@@ -70,7 +67,7 @@ ajaxData({
 
 
         $scope.$on('$destroy', () => {
-            window.removeEventListener('resize', resizeHeight);
+            // window.removeEventListener('resize', resizeHeight);
         });
 
     });
