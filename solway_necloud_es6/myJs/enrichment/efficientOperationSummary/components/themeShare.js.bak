@@ -31,12 +31,12 @@ ajaxData({
         onlyLatest: true
     },
     // 共享任务详情列表
-    shareTaskDetailList: {
-        name: 'GETShareTaskDetailList',
-        data: {},
-        later: true,
-        onlyLatest: true
-    },
+    // shareTaskDetailList: {
+    //     name: 'GETShareTaskDetailList',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // },
     // 定时任务管理 列表
     timeTaskList: {
         name: 'GETopShareTimeTaskList',
@@ -164,12 +164,12 @@ ajaxData({
         $scope.trClick = async (item, index, e) => {
             e.stopPropagation();
             $scope.searchActive = false;
-            if ($scope.shareTaskDetailList.res && $scope.shareTaskDetailList.res.body[0].id === item.id && $scope.messagePopUp === true) return;
+            // if ($scope.shareTaskDetailList.res && $scope.shareTaskDetailList.res.body[0].id === item.id && $scope.messagePopUp === true) return;
             $scope.closeMessagePopUp();
             await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
-            const res = await $scope.shareTaskDetailList.getData({id: item.id});
-            $scope.$broadcast("chatPanelObj", {...res, distMan: item.distMan});
+            // const res = await $scope.shareTaskDetailList.getData({id: item.id});
+            $scope.$broadcast("chatPanelObj", { id: item.id, distMan: item.distMan});
             $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
             $scope.$apply();
         };
