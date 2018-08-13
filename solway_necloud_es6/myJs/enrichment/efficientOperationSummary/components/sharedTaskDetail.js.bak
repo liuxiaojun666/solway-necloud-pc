@@ -21,11 +21,39 @@ ajaxData({
         resizeHeight();
         window.addEventListener('resize', resizeHeight);
 
-
         //接收
         $scope.$on('chatPanelObj', (e, obj) => {
             $scope.shareList = obj.body;
+            getUserID();
+            console.log($scope.shareList)
         });
+
+        //获取当前用户ID
+        const getUserID = () =>{
+            $scope.getLoginUserInfo.getData({
+            }).then(res => {
+                $scope.userId = res.userId;
+            });
+
+        } 
+        //详情
+        $scope.showDetail = () =>{
+            $('#chatDetailShare').modal({ backdrop: 'static', keyboard: false });            
+        }
+
+        $scope.getSendList = arr =>{
+            return arr.replace(/,/g, "   ")
+        }
+
+        //审核
+        $scope.examine = () => {
+
+        }
+
+        //发红包
+        $scope.handOutMoney = () => {
+
+        }
 
 
         $scope.$on('$destroy', () => {
