@@ -91,6 +91,7 @@ ajaxData({
             pageIndex: 0,
             pageSize: 20
         }).then(res => {
+            $scope.chatListResult = false;
             $scope.chatList = res;
         });
     }
@@ -99,7 +100,9 @@ ajaxData({
     $scope.$on('chatPanelObj', (e, obj) => {
         $scope.chatList = []
         $scope.handle = false;
+        $scope.chatListResult = true;
 
+        $scope.stationId = obj.stid;
         $scope.busitype = obj.busitype;
         $scope.parentid = obj.mid;
         $scope.isHis = obj.isHis;
@@ -111,16 +114,6 @@ ajaxData({
         getChatList();
     })
 
-    //共享处理列表接口
-    const getShareList = taskId =>{
-        $scope.getShareTaskDetailList.getData({
-            taskId: taskId
-        }).then(res => {
-            $scope.shareList = res.body;
-        });
-        
-    }
-
     //获取当前用户
     $scope.getLoginUserInfo.getData({
     }).then(res => {
@@ -128,11 +121,11 @@ ajaxData({
     });
 
     //打开共享处理情况列表
-    $scope.shareHandle = (index, busino) =>{
+    $scope.shareHandle = (index, distMan, taskId) =>{
         $scope.handle = !$scope.handle;
         if ($scope.handle){
             $scope.currentIndex = index;
-            getShareList(busino);
+            $scope.$broadcast("chatPanelObjTaskId", { 'taskId': taskId, 'distMan': distMan });
         }
     }
 
@@ -237,7 +230,7 @@ ajaxData({
     //发布共享运维任务
     $scope.publishShareTask = item =>{
         $scope.releaseTask2 = true;
-        $scope.$broadcast('releaseTask', item.busino);
+        $scope.$broadcast('releaseTask', { 'taskId': item.busino, 'stationId': $scope.stationId} );
     }
 
     //发布共享任务回调
