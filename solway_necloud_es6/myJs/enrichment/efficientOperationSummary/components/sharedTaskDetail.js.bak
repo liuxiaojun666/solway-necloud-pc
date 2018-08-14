@@ -4,6 +4,11 @@ ajaxData({
         data: {},
         later: true
     },
+    getCurrentInfoNew:{
+        name:'GETgetCurrentInfoNew',
+        data:{},
+        later:true
+    },
     shareTaskDetailList: {
         name: 'GETShareTaskDetailList',
         data: {},
@@ -38,11 +43,19 @@ ajaxData({
             getUserID();
         });
 
-        //获取当前用户ID
+        //获取当前用户ID 和 权限信息
         const getUserID = () =>{
+            $scope.userId = '';
+            $scope.miniAppAuthType = '';
+
             $scope.getLoginUserInfo.getData({
             }).then(res => {
                 $scope.userId = res.userId;
+            });
+
+            $scope.getCurrentInfoNew.getData({
+            }).then(res => {
+                $scope.miniAppAuthType = res.miniAppAuthType;
             });
         } 
 
@@ -75,7 +88,7 @@ ajaxData({
         //详情
         $scope.showDetail = id =>{
             $scope.shareTaskDetailShow = true;
-            $scope.$broadcast('shareTaskDetailBro',id);
+            $scope.$broadcast('shareTaskDetailBro',{id:id});
         }
 
         $scope.getSendList = arr =>{
