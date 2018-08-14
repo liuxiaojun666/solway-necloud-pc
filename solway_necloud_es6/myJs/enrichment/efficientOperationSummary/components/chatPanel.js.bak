@@ -102,6 +102,7 @@ ajaxData({
         $scope.handle = false;
         $scope.chatListResult = true;
 
+        $scope.stationId = obj.stid;
         $scope.busitype = obj.busitype;
         $scope.parentid = obj.mid;
         $scope.isHis = obj.isHis;
@@ -229,7 +230,7 @@ ajaxData({
     //发布共享运维任务
     $scope.publishShareTask = item =>{
         $scope.releaseTask2 = true;
-        $scope.$broadcast('releaseTask', item.busino);
+        $scope.$broadcast('releaseTask', { 'taskId': item.busino, 'stationId': $scope.stationId} );
     }
 
     //发布共享任务回调
