@@ -1,7 +1,14 @@
 ajaxData({
 
 }, {
-        __serviceName__: 'themeAnalyzeDefaultService'
+        __serviceName__: 'themeAnalyzeDefaultService',
+        themeMap: {
+            b1: 'dust',
+            b2: 'resourcesDeviation',
+            c1: 'evaluationElectricity',
+            c2: 'shadow',
+            c3: 'modelDeviation'
+        }
     })('themeAnalyzeDefaultCtrl', ['$scope', 'themeAnalyzeDefaultService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
         /// 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
@@ -36,8 +43,11 @@ ajaxData({
                 myChart = null;
             });
 
+            // 点击事件监听
             myChart.on('click', function (obj) {
-                // debugger
+                const theme = myAjaxData.config.themeMap[obj.data.target];
+                if (!theme) return;
+                $scope.$emit('changeTheme', 'dust');
             });
         }
 

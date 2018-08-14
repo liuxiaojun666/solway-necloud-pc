@@ -61,6 +61,8 @@ ajaxData({
         if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope._dateType = dateType;
         $scope._dateTime = dateTime;
+        computeThemeDetail();
+        $scope.$apply();
     };
 
     // 切换电站 回调
@@ -69,6 +71,7 @@ ajaxData({
         if (!switchArguments) return;
         $scope.dataType = switchArguments.dataType;
         historicalRecord.set({ stationData: switchArguments });
+        computeThemeDetail();
     };
 
 
@@ -99,12 +102,27 @@ ajaxData({
         }
     };
 
-    function computeThemeDetail(theme) {
-        if (theme !== $scope.theme && theme !== 'default') $scope.themeLoading = true;
+    // 主题切换
+    $scope.$on('changeTheme', (e, theme) => {
+        computeThemeDetail(theme);
+        $scope.$apply();
+    });
+
+    // 返回 首页 能流图
+    $scope.goIndex = () => {
+        computeThemeDetail('default');
+    };
+
+    // theme 切换 计算
+    function computeThemeDetail(theme = $scope.theme) {
+        if ($scope.beforeLoading) return;
+        // if (theme !== 'default') $scope.themeLoading = true;
         $scope.themeDetail = theme === 'default' ? void 0 : 
-        `tpl/enrichment/analyzeSummary/components/default${
-            ('/' + ["Station", "Company", "Company"][$scope.dataType] + ['Day', 'Month', 'Year', 'Accumulative'][$scope.dateType])
+        `tpl/enrichment/analyzeSummary/components/${theme}${
+            ('/' + ["station", "company", "company"][$scope.dataType] + ['Day', 'Month', 'Year', 'Accumulative'][$scope._dateType])
         }.html`;
+        $scope.theme = theme;
+        historicalRecord.set({ theme });
     }
 
 
