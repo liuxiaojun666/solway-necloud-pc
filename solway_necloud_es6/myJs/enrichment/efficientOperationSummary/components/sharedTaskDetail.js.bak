@@ -18,10 +18,23 @@ ajaxData({
         $scope.$on('chatPanelObj', (e, obj) => {
             $scope.shareList = [];
             $scope.shareListResult = true;
+            $scope.noShareList = false;
+
             $scope.id = obj.id;
-            $scope.taskId = obj.taskId;
             $scope.distMan = obj.distMan;
             getShareList();
+            getUserID();
+        });
+
+
+        $scope.$on('chatPanelObjTaskId', (e, obj) => {
+            $scope.shareList = [];
+            $scope.shareListResult = true;
+            $scope.noShareList = false;
+
+            $scope.taskId = obj.taskId;
+            $scope.distMan = obj.distMan;
+            getShareListTaskId();
             getUserID();
         });
 
@@ -35,13 +48,27 @@ ajaxData({
 
         //列表接口
         const getShareList = () => {
-            const params = {id: $scope.id}
             $scope.shareTaskDetailList.getData(
-                params
+                { id: $scope.id }
             ).then(res => {
-                debugger
-                $scope.shareList = res.body;
                 $scope.shareListResult = false;
+                $scope.shareList = res.body;
+                if ($scope.shareList.length == 0){
+                    $scope.noShareList = true;
+                }
+            });
+        }
+
+        const getShareListTaskId = () => {
+            
+            $scope.shareTaskDetailList.getData(
+                { taskId: $scope.taskId }
+            ).then(res => {
+                $scope.shareListResult = false;
+                $scope.shareList = res.body;
+                if ($scope.shareList.length == 0) {
+                    $scope.noShareList = true;
+                }
             });
         }
 
