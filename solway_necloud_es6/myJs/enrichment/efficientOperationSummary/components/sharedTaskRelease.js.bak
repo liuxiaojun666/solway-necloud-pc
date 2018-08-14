@@ -22,7 +22,10 @@ ajaxData({
     })('sharedTaskReleaseCtrl', ['$scope', 'sharedTaskReleaseService', 'toaster'], ($scope, maAjaxData, toaster) => {
         $scope.$on('releaseTask', (e, obj = {}) => {
             const { taskId = null, stationId = $scope.releaseTaskParame.stationId } = obj;
-            if (stationId) $scope.disabledSlecetStation = true;
+            if (stationId) {
+                $scope.disabledSlecetStation = true;
+                $scope.opShareUserStationRelSelectByCondition.getData({ stationId });
+            }
             $scope.releaseTaskParame = {
                 timerType: '0',
                 userIds: {},
