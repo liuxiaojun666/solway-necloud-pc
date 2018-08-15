@@ -74,6 +74,24 @@ ajaxData({
                     type: 'sankey',
                     layout: 'none',
                     draggable: false,
+                    itemStyle: {
+                        normal: {
+                            color: '#419eff',
+                            borderColor: '#419eff',
+                            borderWidth: 2,
+                            opacity: 0.5,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            shadowBlur: 10
+                        }
+                    },
+                    lineStyle: {
+                        normal: {
+                            color: '#419eff',
+                        },
+                        emphasis: {
+                            color: '#419eff'
+                        }
+                    },
                     data: $scope.analysisEnergyFlowDiagram.res.body.data,
                     links: $scope.analysisEnergyFlowDiagram.res.body.links,
                 }
@@ -87,15 +105,15 @@ ajaxData({
             const { dateTime, dateType, dataType } = $scope;
             $scope.analysisEnergyFlowDiagram.getData({
                 queryType: dataType === 0 ? 3 : 1,
-                dateType: 1,
-                date: dateTime.showDate
+                dateType: [4, 2, 1, 0][dateType],
+                date: dateType === 3 ? (new Date).Format('yyyy-MM-dd') : dateTime.showDate
             });
         }
 
         // 接口回调
         $scope.analysisEnergyFlowDiagram.getDataCallback = (success, res) => {
             if (!success) return;
-            if (!res.body) return;
+            $scope.analysisEnergyFlowDiagram.res.body = res.body || {data: [], links: []};
             drawing();
         };
     });
