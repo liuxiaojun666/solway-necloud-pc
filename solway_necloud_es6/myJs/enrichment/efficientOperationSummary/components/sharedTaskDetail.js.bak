@@ -44,6 +44,26 @@ ajaxData({
             getUserID();
         });
 
+        //重新获取列表
+        $scope.$on('initShareTaskList',(e,v)=>{
+            initWhichInterface();
+        })
+
+        //操作审核，发红包等回调
+        $scope.$on('clickBtnTaskCallback', (e, success) => {
+            if (success) initWhichInterface();
+            $scope.shareTaskDetailShow = false;
+        });
+
+        function initWhichInterface(){
+            if($scope.taskId){
+                getShareListTaskId();
+            }else{
+                getShareList();
+            }
+            getUserID();
+        }
+
         //获取当前用户ID 和 权限信息
         const getUserID = () =>{
             $scope.userId = '';
