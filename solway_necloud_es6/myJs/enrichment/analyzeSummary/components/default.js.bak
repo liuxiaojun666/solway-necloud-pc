@@ -8,17 +8,47 @@ ajaxData({
 }, {
         __serviceName__: 'themeAnalyzeDefaultService',
         themeMap: {
-            b1: 'dust',
-            b2: 'resourcesDeviation',
-            c1: 'evaluationElectricity',
-            c2: 'shadow',
-            c3: 'modelDeviation'
+            '灰尘损失电量': {
+                name: 'dust',
+                color: '#83a3c6',
+            },
+            '资源偏差': {
+                name: 'dust',
+                color: '#e7cb5d',
+            },
+            '模型偏差': {
+                name: 'dust',
+                color: '#c36deb',
+            },
+            '故障损失电量': {
+                name: 'dust',
+                color: '#ff7777',
+            },
+            '检修损失电量': {
+                name: 'dust',
+                color: '#ff8e56',
+            },
+            '衰减损失电量': {
+                name: 'dust',
+                color: '#38ba9a',
+            },
+            '限电损失电量': {
+                name: 'dust',
+                color: '#6c5bd1',
+            },
+            '阴影损失电量': {
+                name: 'dust',
+                color: '#43a2eb',
+            },
+            '线损电量': {
+                name: 'dust',
+                color: '#72db44',
+            },
         }
-    })('themeAnalyzeDefaultCtrl', ['$scope', 'themeAnalyzeDefaultService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
+    })('themeAnalyzeDefaultCtrl', ['$scope', 'themeAnalyzeDefaultService', 'actionRecord', 'toaster', '$timeout'], ($scope, myAjaxData, historicalRecord, toaster, $timeout) => {
         /// 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
         let myChart;
-
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
             const { searchKey = '' } = historicalRecord.get().themeAnalyzeDefault || {};
@@ -27,8 +57,8 @@ ajaxData({
             $scope.dateTime = dateTime;
             await myAjaxData.timeout(0);
             $('.ng-clock').removeClass('ng-clock');
-            $scope.initComplete = true;
             initChart();
+            $scope.initComplete = true;
             getData();
             $scope.$apply();
         };
@@ -44,6 +74,7 @@ ajaxData({
             getData();
         };
 
+        // 初始化 能流图
         function initChart() {
             myChart = echartsSankey.init(document.getElementById('main'));
 
@@ -61,25 +92,34 @@ ajaxData({
 
             // 点击事件监听
             myChart.on('click', function (obj) {
-                const theme = myAjaxData.config.themeMap[obj.data.target];
+                const {themeMap} = myAjaxData.config;
+                const {target, source, name} = obj.data;
+                const theme = themeMap[(Object.keys(themeMap).includes(target) ? target : source) || name];
                 if (!theme) return;
-                $scope.$emit('changeTheme', 'dust');
+                $scope.$emit('changeTheme', theme.name);
             });
         }
 
         // echarts 绘制
         function drawing() {
             const option = {
+                tooltip: {
+                    show: true,
+                },
                 series: {
                     type: 'sankey',
                     layout: 'none',
                     draggable: false,
+                    left: 70,
+                    right: 100,
+                    top: 50,
+                    bottom: 30,
                     itemStyle: {
                         normal: {
-                            color: '#419eff',
-                            borderColor: '#419eff',
-                            borderWidth: 2,
-                            opacity: 0.5,
+                            color: '#2b5d95',
+                            borderColor: 'rgba(163,202,245,.1)',
+                            borderWidth: 3,
+                            opacity: 1,
                             shadowColor: 'rgba(0, 0, 0, 0.5)',
                             shadowBlur: 10
                         }
@@ -87,33 +127,73 @@ ajaxData({
                     lineStyle: {
                         normal: {
                             color: '#419eff',
+                            opacity: 0.2
                         },
                         emphasis: {
-                            color: '#419eff'
+                            opacity: 0.3
                         }
                     },
-                    data: $scope.analysisEnergyFlowDiagram.res.body.data,
-                    links: $scope.analysisEnergyFlowDiagram.res.body.links,
+                    label: {
+                        normal: {
+                            color: '#fff',
+                            fontSize: 14,
+                        }
+                    },
+                    data: $scope.analysisEnergyFlowDiagram.res.body.data.map(v => {
+                        const { themeMap } = myAjaxData.config;
+                        if (Object.keys(themeMap).includes(v.name)) {
+                            return {
+                                ...v,
+                                itemStyle: {
+                                    normal: {
+                                        color: themeMap[v.name].color,
+                                    }
+                                },
+                            };
+                        }
+                        return v;
+                    }),
+                    links: $scope.analysisEnergyFlowDiagram.res.body.links.map(v => {
+                        const { themeMap } = myAjaxData.config;
+                        if (Object.keys(themeMap).includes(v.target) || Object.keys(themeMap).includes(v.source)) {
+                            return {
+                                ...v,
+                                lineStyle: {
+                                    color: (themeMap[v.target] || themeMap[v.source]).color,
+                                    opacity: 0.3,
+                                },
+                            };
+                        }
+                        return v;
+                    }),
                 }
             };
-            myChart.setOption(option);
+            myChart.setOption(option, true);
+            $timeout(() => {
+                $scope.firstDrawingComplete = true;
+            },1000);
         }
 
         // 请求接口
         async function getData() {
+            if (!$scope.initComplete) return;
             await myAjaxData.timeout(0);
             const { dateTime, dateType, dataType } = $scope;
             $scope.analysisEnergyFlowDiagram.getData({
-                queryType: dataType === 0 ? 3 : 1,
-                dateType: [4, 2, 1, 0][dateType],
-                date: dateType === 3 ? (new Date).Format('yyyy-MM-dd') : dateTime.showDate
+                // queryType: dataType === 0 ? 3 : 1,
+                // dateType: [4, 2, 1, 0][dateType],
+                // date: dateType === 3 ? (new Date).Format('yyyy-MM-dd') : dateTime.showDate
+                queryType: 1,
+                dateType: 1,
+                date: 2018
             });
+            $scope.$apply();
         }
 
         // 接口回调
         $scope.analysisEnergyFlowDiagram.getDataCallback = (success, res) => {
             if (!success) return;
-            $scope.analysisEnergyFlowDiagram.res.body = res.body || {data: [], links: []};
+            $scope.analysisEnergyFlowDiagram.res.body = res.body || { data: [], links: [] };
             drawing();
         };
     });
