@@ -104,10 +104,10 @@ gulp.task('watch', [], () => {
 })
 
 
-gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:88/login.html'))
+gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:8080/NECloud/login.jsp'))
 
 gulp.task('updateCode', () => {
-	svnUpdate()
+	// svnUpdate()
 	cmd.get(`git pull`, (err, data, stderr) => {
 		if (err) return console.log(`git pull error\n`, err, data, stderr)
 		console.log('git pull dong', data, stderr)
@@ -135,7 +135,7 @@ function svnUpdate() {
 
 
 /****************************************非代理启动************************************** */
-gulp.task('start', gulpSequence('updateCode', 'watch', 'openChrome'))
+gulp.task('start', gulpSequence('updateCode','watch', 'openChrome'))
 
 gulp.task('es6Rename', () => {
 	gulp.src('solway_necloud_es6/myJs/**/*.js')

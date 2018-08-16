@@ -71,6 +71,12 @@ ajaxData({
         data: {},
         later: true
     },
+    //是否发布过共享运维
+    checkTaskId:{
+        name:'GETcheckTaskId',
+        data:{},
+        later:true
+    }
 },{
     __serviceName__: 'chatPanelService'
     })('chatPanelCtrl', ['$scope', 'chatPanelService', 'toaster'], ($scope, myAjaxData, toaster) => {
@@ -169,7 +175,7 @@ ajaxData({
     }
 
     //验收（详情弹框里）
-        $scope.handleInspected = function (busino, busitype,topmessageid) {
+    $scope.handleInspected = function (busino, busitype,topmessageid) {
         $scope.taskDetail.getData({
             id: busino
         }).then(res => {
@@ -229,8 +235,19 @@ ajaxData({
 
     //发布共享运维任务
     $scope.publishShareTask = item =>{
-        $scope.releaseTask2 = true;
-        $scope.$broadcast('releaseTask', { 'taskId': item.busino, 'stationId': $scope.stationId} );
+        $scope.checkTaskId.getData({
+            'taskId': item.busino
+        }).then(msg => {
+            if (msg.code == 1) {
+                $solway.confirm({ message:'已创建过共享任务，仍要继续创建？'}, () => {
+                    $scope.releaseTask2 = true;
+                    $scope.$broadcast('releaseTask', { 'taskId': item.busino, 'stationId': $scope.stationId });
+                });
+            }else{
+                $scope.releaseTask2 = true;
+                $scope.$broadcast('releaseTask', { 'taskId': item.busino, 'stationId': $scope.stationId });
+            }
+        });
     }
 
     //发布共享任务回调
@@ -238,7 +255,6 @@ ajaxData({
         if (success) getChatList();
         $scope.releaseTask2 = false;
     });
-
 
     $scope.$on('$destroy', () => {
         window.removeEventListener('resize', resizeHeight);
