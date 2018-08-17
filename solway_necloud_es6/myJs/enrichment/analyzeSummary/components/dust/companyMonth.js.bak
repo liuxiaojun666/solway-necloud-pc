@@ -171,6 +171,52 @@ ajaxData({
         $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.dust_we], [res.body.data.dust_we_r]];
     };
 
+    // 电站 列表
+    $scope.analysis_company_dust_month_stationlist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站',
+                dataIndex: 'st_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+            },
+            {
+                title: '装机容量' + '(' + res.body.units.inst_kw + ')',
+                dataIndex: 'inst_kw',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '灰尘损失电量' + '(' + res.body.units.dust_we + ')',
+                dataIndex: 'dust_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '灰尘损失比例' + '(' + res.body.units.dust_we_r + ')',
+                dataIndex: 'dust_we_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 电站 曲线
+    $scope.analysis_company_dust_month_stationline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.st_name;
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.dust_we], [res.body.data.dust_we_r]];
+    };
+
     // 数据置空
     function setDataNull(getInfo) {
         $scope.column = [];
