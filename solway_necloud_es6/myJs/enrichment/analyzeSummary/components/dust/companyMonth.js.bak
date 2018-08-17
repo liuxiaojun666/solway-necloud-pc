@@ -41,7 +41,7 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0} = historicalRecord.get().themeElectricity || {};
+        let { showShape, tabIndex = 0} = historicalRecord.get().themeDustCompanyMonth || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -72,8 +72,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeElectricity: {
-                ...historicalRecord.get().themeElectricity || {},
+            themeDustCompanyMonth: {
+                ...historicalRecord.get().themeDustCompanyMonth || {},
                 tabIndex
             }
         });
@@ -84,8 +84,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeElectricity: {
-                ...historicalRecord.get().themeElectricity || {},
+            themeDustCompanyMonth: {
+                ...historicalRecord.get().themeDustCompanyMonth || {},
                 showShape
             }
         });
@@ -97,7 +97,9 @@ ajaxData({
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         setDataNull(getInfo);
-        const { showShape, dateTime, tabIndex, dateType } = $scope;
+        const { showShape, dateTime, tabIndex, dateType, dataType } = $scope;
+        if (dateType !== 1) return;
+        if (dataType <= 0) return;
         if (getInfo) {
             $scope.analysis_company_dust_month_info.getData({
                 queryCode: 'analysis_company_dust_month_info',

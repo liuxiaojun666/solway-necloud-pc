@@ -97,7 +97,9 @@ ajaxData({
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         setDataNull(getInfo);
-        const { showShape, dateTime, tabIndex, dateType } = $scope;
+        const { showShape, dateTime, tabIndex, dateType, dataType } = $scope;
+        if (dateType !== 2) return;
+        if (dataType <= 0) return;
         if (getInfo) {
             $scope.analysis_company_dust_year_info.getData({
                 queryCode: 'analysis_company_dust_year_info',
