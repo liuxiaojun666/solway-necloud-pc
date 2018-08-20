@@ -34,14 +34,14 @@ ajaxData({
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'dustStationMonthService',
-})('dustStationMonthCtrl', ['$scope', 'dustStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'shadowStationMonthService',
+})('shadowStationMonthCtrl', ['$scope', 'shadowStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0 } = historicalRecord.get().themeDustStationMonth || {};
+        let { showShape, tabIndex = 0 } = historicalRecord.get().themeShadowStationMonth || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -72,8 +72,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeDustStationMonth: {
-                ...historicalRecord.get().themeDustStationMonth || {},
+            themeShadowStationMonth: {
+                ...historicalRecord.get().themeShadowStationMonth || {},
                 tabIndex
             }
         });
@@ -84,8 +84,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeDustStationMonth: {
-                ...historicalRecord.get().themeDustStationMonth || {},
+            themeShadowStationMonth: {
+                ...historicalRecord.get().themeShadowStationMonth || {},
                 showShape
             }
         });
@@ -156,13 +156,13 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '灰尘损失电量' + '(' + res.body.units.dust_we + ')',
+                title: '阴影损失电量' + '(' + res.body.units.dust_we + ')',
                 dataIndex: 'dust_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '灰尘损失比例' + '(' + res.body.units.dust_we_r + ')',
+                title: '阴影损失比例' + '(' + res.body.units.dust_we_r + ')',
                 dataIndex: 'dust_we_r',
                 align: 'right',
                 sort: true,
@@ -205,13 +205,13 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '灰尘损失电量' + '(' + res.body.units.dust_we + ')',
+                title: '阴影损失电量' + '(' + res.body.units.dust_we + ')',
                 dataIndex: 'dust_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '灰尘损失比例' + '(' + res.body.units.dust_we_r + ')',
+                title: '阴影损失比例' + '(' + res.body.units.dust_we_r + ')',
                 dataIndex: 'dust_we_r',
                 align: 'right',
                 sort: true,

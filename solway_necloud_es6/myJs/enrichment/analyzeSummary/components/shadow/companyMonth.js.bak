@@ -1,0 +1,158 @@
+ajaxData({
+    // info
+    analysis_company_dust_month_info: {
+        name: 'GETanalysis_company_dust_month_info',
+        data: {},
+        later: true
+    },
+    // 电站 列表
+    analysis_company_dust_month_stationlist: {
+        name: 'GETanalysis_company_dust_month_stationlist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 曲线
+    analysis_company_dust_month_stationline: {
+        name: 'GETanalysis_company_dust_month_stationline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
+    __serviceName__: 'shadowCompanyMonthService',
+})('shadowCompanyMonthCtrl', ['$scope', 'shadowCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape} = historicalRecord.get().themeShadowCompanyMonth || {};
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        $scope.diffGetData();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeShadowCompanyMonth: {
+                ...historicalRecord.get().themeShadowCompanyMonth || {},
+                showShape
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 接口请求
+    $scope.diffGetData = async (getInfo) => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull(getInfo);
+        const { showShape, dateTime, dateType, dataType } = $scope;
+        if (dateType !== 1) return;
+        if (dataType <= 0) return;
+        if (getInfo) {
+            $scope.analysis_company_dust_month_info.getData({
+                queryCode: 'analysis_company_dust_month_info',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        }
+        if (showShape === 'list') {
+            $scope.analysis_company_dust_month_stationlist.getData({
+                queryCode: 'analysis_company_dust_month_stationlist',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        } else if (showShape === 'chart') {
+            $scope.analysis_company_dust_month_stationline.getData({
+                queryCode: 'analysis_company_dust_month_stationline',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        }
+    };
+
+    // 电站 列表
+    $scope.analysis_company_dust_month_stationlist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站',
+                dataIndex: 'st_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+            },
+            {
+                title: '装机容量' + '(' + res.body.units.inst_kw + ')',
+                dataIndex: 'inst_kw',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失电量' + '(' + res.body.units.dust_we + ')',
+                dataIndex: 'dust_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失比例' + '(' + res.body.units.dust_we_r + ')',
+                dataIndex: 'dust_we_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 电站 曲线
+    $scope.analysis_company_dust_month_stationline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.st_name;
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.dust_we], [res.body.data.dust_we_r]];
+    };
+
+    // 数据置空
+    function setDataNull(getInfo) {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.analysis_company_dust_month_stationlist.res = null;
+        $scope.analysis_company_dust_month_stationline.res = null;
+        if (getInfo) $scope.analysis_company_dust_month_info.res = null;
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});
