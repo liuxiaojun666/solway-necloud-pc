@@ -170,11 +170,11 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 .reduce((a, b) => a.concat(b), [])
                 .concat(imagesymboloptions &&  {
                     type: 'pictorialBar',
-                    yAxisIndex: 0,
+                    yAxisIndex: imagesymboloptions.yAxisIndex,
                     symbolPosition: 'end',
                     symbolSize: imagesymboloptions.symbolSize,
                     symbolOffset: imagesymboloptions.symbolOffset,
-                    data: ydatas[imagesymboloptions.ydatasIndex[0]][imagesymboloptions.ydatasIndex[1]].map((v, i) => ({
+                    data: (imagesymboloptions.data || ydatas[imagesymboloptions.ydatasIndex[0]][imagesymboloptions.ydatasIndex[1]]).map((v, i) => ({
                         value: imagesymboloptions.images[i] && v,
                         symbol: imagesymboloptions.images[i],
                     }))
