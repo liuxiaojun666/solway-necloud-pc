@@ -38,7 +38,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         }, 0);
 
         const drawing = () => {
-            const { stack = [[], []], backgroundColor, imagesymboloptions, symbolSize, splitNumber, barColors = [], splitLine, barWidth = 20, axisColor, fontColor, linenames = [], ynames = [], xdata = [], ydatas = [[[]]], types = [], colors = [], datazoom } = $scope;
+            const { stack = [[], []],width, backgroundColor, imagesymboloptions, symbolSize, splitNumber, barColors = [], splitLine, barWidth = 20, axisColor, fontColor, linenames = [], ynames = [], xdata = [], ydatas = [[[]]], types = [], colors = [], datazoom } = $scope;
 
             const option = {
                 backgroundColor,
@@ -127,7 +127,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     type: 'slider',
                     xAxisIndex: 0,
                     filterMode: 'empty',
-                    end: 1000 / ydatas[0][0].length
+                    end: (width - 100) / ydatas[0][0].length
                     // handleSize: $scope.width
                 }],
                 series: ydatas.map((v, i) => {
@@ -168,13 +168,13 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     }))
                 })
                 .reduce((a, b) => a.concat(b), [])
-                .concat(imagesymboloptions &&  {
+                    .concat(imagesymboloptions && imagesymboloptions.show &&  {
                     type: 'pictorialBar',
-                    yAxisIndex: 0,
+                    yAxisIndex: imagesymboloptions.yAxisIndex,
                     symbolPosition: 'end',
                     symbolSize: imagesymboloptions.symbolSize,
                     symbolOffset: imagesymboloptions.symbolOffset,
-                    data: ydatas[imagesymboloptions.ydatasIndex[0]][imagesymboloptions.ydatasIndex[1]].map((v, i) => ({
+                    data: (imagesymboloptions.data || ydatas[imagesymboloptions.ydatasIndex[0]][imagesymboloptions.ydatasIndex[1]]).map((v, i) => ({
                         value: imagesymboloptions.images[i] && v,
                         symbol: imagesymboloptions.images[i],
                     }))
