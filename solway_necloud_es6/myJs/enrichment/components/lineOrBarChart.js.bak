@@ -20,6 +20,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         barColors: '=',
         imagesymboloptions: '=',
         stack: '=',
+        itemClick: '=',
     },
     link($scope, $element) {
         let myChart;
@@ -35,6 +36,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 if (!newValue) return;
                 await resizeFunc();
             });
+            regestEvent();
         }, 0);
 
         const drawing = () => {
@@ -150,7 +152,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                                 lineStyle: {
                                     width: 1
                                 },
-                                color: (types[i][xi] === 'bar') && (colors[i][xi].length > 7) ? {
+                                color: (types[i][xi] === 'bar') && (colors[i][xi].includes('rgb')) ? {
                                     type: 'linear',
                                     x: 0,
                                     y: 0,
@@ -193,6 +195,11 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
             myChart.resize();
             drawing();
         };
+        function regestEvent() {
+            myChart.on('click', (params) => {
+                $scope.itemClick && $scope.itemClick(params);
+            });
+        }
         window.addEventListener('resize', resizeFunc);
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', resizeFunc);
