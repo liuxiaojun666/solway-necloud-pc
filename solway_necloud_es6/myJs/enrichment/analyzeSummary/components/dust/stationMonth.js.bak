@@ -142,8 +142,9 @@ ajaxData({
     };
 
     // 设备详情 弹出 处理 函数
-    $scope.equipmentDetail = (item, index) => {
+    $scope.equipmentDetail = (obj) => {
         $scope.equipmentDetailShow = true;
+        $scope.$broadcast('equipmentDetails', obj);
     };
 
 
@@ -155,7 +156,11 @@ ajaxData({
             if (params.data.symbol.length <= 1458) return;
             $scope.cleanReport($scope.dateTime.showDate + '-' + params.name);
         } else if ($scope.tabIndex === 1) {
-            $scope.equipmentDetail();
+            const { eq_name, eqid } = $scope.analysis_station_dust_month_deviceline.res.body.data;
+            $scope.equipmentDetail({
+                eq_name: params.name,
+                eqid: eqid[eq_name.indexOf(params.name)]
+            });
             $scope.$apply();
         }
     };
@@ -168,7 +173,8 @@ ajaxData({
 
     // 设备 列表 点击行
     $scope.equipmentListTrClick = (item, index) => {
-        $scope.equipmentDetail();
+        const {eqid, eq_name} = item;
+        $scope.equipmentDetail({eqid, eq_name});
     };
 
     // 时间 列表

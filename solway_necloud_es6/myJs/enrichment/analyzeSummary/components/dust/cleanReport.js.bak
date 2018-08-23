@@ -31,20 +31,18 @@ ajaxData({
             queryCode: 'analysis_station_clean_info',
             queryType: 3,
             date: date
-        }).then(res => {
-            diffGetdata(date);
-        });
+        }).then(res => res.body.start_date && $scope.diffGetdata(date));
     });
     
-    function diffGetdata(date) {
-        const { cShowShap = 'list' } = $scope;
-        if (cShowShap === 'list') {
+    $scope.diffGetdata = () => {
+        const { cShowShape = 'list', date = $scope.cDatetime } = $scope;
+        if (cShowShape === 'list') {
             $scope.analysis_station_clean_invlist.getData({
                 queryCode: 'analysis_station_clean_invlist',
                 queryType: 3,
                 date
             });
-        } else {
+        } else if (cShowShape === 'chart') {
             $scope.analysis_station_clean_invline.getData({
                 queryCode: 'analysis_station_clean_invline',
                 queryType: 3,
@@ -67,19 +65,19 @@ ajaxData({
             {
                 title: '提升前发电效率(%)',
                 dataIndex: 'before_pge',
-                align: 'center',
+                align: 'right',
                 sort: true,
             },
             {
                 title: '提升后发电效率(%)',
                 dataIndex: 'after_pge',
-                align: 'center',
+                align: 'right',
                 sort: true,
             },
             {
                 title: '提升比例(%)',
                 dataIndex: 'pge_r',
-                align: 'center',
+                align: 'right',
                 sort: true,
             },
         ];
@@ -88,7 +86,7 @@ ajaxData({
     $scope.analysis_station_clean_invline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.cxdata = res.body.data.eq_name;
-        $scope.cydata = [[res.body.data.before_pge, res.body.data.after_pge], [res.body.data.pge_r]];
+        $scope.cydatas = [[res.body.data.before_pge, res.body.data.after_pge], [res.body.data.pge_r]];
     };
 
 });
