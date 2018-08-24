@@ -1,8 +1,8 @@
-const win = window
+const win = window;
 app.factory("apiService", ["$http", "$q", (d, b) => {
-    const c = win.interface, k = win.noFormSubmit, a = {}
+    const c = win.interface, k = win.noFormSubmit, a = {};
     a.getData = (e) => {
-        const m = k.includes(e.name), f = b.defer(), j = e.name.startsWith('GET') ? 'GET' : 'POST', l = Object.is(j, 'POST') && !m ? { "Content-Type": "application/x-www-form-urlencoded" } : {}
+        const m = k.includes(e.name), f = b.defer(), j = e.name.startsWith('GET') ? 'GET' : 'POST', l = Object.is(j, 'POST') && !m ? { "Content-Type": "application/x-www-form-urlencoded" } : {};
         d({
             method: j,
             url: c[e.name],
@@ -13,158 +13,170 @@ app.factory("apiService", ["$http", "$q", (d, b) => {
             params: j === 'GET' ? e.data : {},
             data: j === 'POST' ? e.data : {},
             transformRequest(g) {
-                return m ? JSON.stringify(g) : $.param(g)
+                return m ? JSON.stringify(g) : $.param(g);
             }
         }).success(h => {
             if (h.status >= 500) {
-                promptObj("error", "", "error" + "\n" + c[e.name] + "\n" + "服务器错误，请稍后再试")
-                console.error(e.name, c[e.name], h)
-                return f.reject(h.status)
+                promptObj("error", "", "error" + "\n" + c[e.name] + "\n" + "服务器错误，请稍后再试");
+                console.error(e.name, c[e.name], h);
+                return f.reject(h.status);
             }
-            f.resolve(h)
+            f.resolve(h);
         }).error((h, g) => {
             if (g == 404) {
-                promptObj("error", "", "error" + "\n" + c[e.name] + "\n" + "您请求的资源不存在")
+                promptObj("error", "", "error" + "\n" + c[e.name] + "\n" + "您请求的资源不存在");
             } else if (g >= 500) {
-                promptObj("error", "", "error" + "\n" + c[e.name] + "\n" + "服务器错误，请稍后再试")
+                promptObj("error", "", "error" + "\n" + c[e.name] + "\n" + "服务器错误，请稍后再试");
             }
-            console.error("error", c[e.name], g)
-            f.reject(g)
+            console.error("error", c[e.name], g);
+            f.reject(g);
         })
-        return f.promise
+        return f.promise;
     }
-    return a
-}])
+    return a;
+}]);
 win.ajaxData = (b, a) => {
     app.factory((a.__serviceName__ || "myAjaxData"), ["apiService", '$q', '$timeout', (d, q, m) => {
-        let i = {}
-        let j = {}
-        let c = {}
+        let i = {};
+        let j = {};
+        let c = {};
         c.init = (b, a) => {
-            i = {}
-            j = {}
-            c.isLoding = !0
+            i = {};
+            j = {};
+            c.isLoding = !0;
             for (let f in b) {
-                i[b[f].name] = {}
-                c[f] = {}
-                c[f].isLoding = !0
-                c[f].res = null
+                i[b[f].name] = {};
+                c[f] = {};
+                c[f].isLoding = !0;
+                c[f].res = null;
             }
-            c.config = a
-            c.currentStationData = j
-        }
+            c.config = a;
+            c.currentStationData = j;
+        };
         c.setCurrentStationData = o => {
-            for (let key in o) j[key] = o[key]
+            for (let key in o) j[key] = o[key];
         }
         c.timeout = t => {
-            let d = q.defer()
-            m(() => d.resolve(), t)
-            return d.promise
-        }
+            let d = q.defer();
+            m(() => d.resolve(), t);
+            return d.promise;
+        };
         c.getData = o => {
-            if (!i[o.name]) return d.getData(o)
-            if (Array.isArray(o.data)) return d.getData({name: o.name, data: o.data})
+            if (!i[o.name]) return d.getData(o);
+            if (Array.isArray(o.data)) return d.getData({name: o.name, data: o.data});
             for (let key in o.data) {
-                i[o.name][key] = o.data[key]
-                if (i[o.name][key] === null) delete i[o.name][key]
+                i[o.name][key] = o.data[key];
+                if (i[o.name][key] === null) delete i[o.name][key];
             }
             return d.getData({
                 name: o.name,
                 data: i[o.name]
-            })
-        }
+            });
+        };
         c.setData = (g, f, h) => {
-            c[g].isLoding = f ? !1 : !0
-            c[g].res = f || c[g].res
-            c.isLoding = h
-        }
-        return c
-    }])
+            c[g].isLoding = f ? !1 : !0;
+            c[g].res = f || c[g].res;
+            c.isLoding = h;
+        };
+        return c;
+    }]);
     return (f, c, e) => {
         let d = (N, Z, Y, X, W, V, U, T, S, R, Q, P, O, M, L, K, J, I, H, G, F, D, C, B, A, j) => {
-            Z.init(b, a)
+            Z.init(b, a);
             let E = () => {
-                for (let key in b) if (N[key].isLoding) return !0
-                N.allGetDataCallback && N.allGetDataCallback()
-                return !1
-            }
-            N.isLoding = !1
+                for (let key in b) if (N[key].isLoding) return !0;
+                N.allGetDataCallback && N.allGetDataCallback();
+                return !1;
+            };
+            N.isLoding = !1;
             N.reload = () => {
                 for (let key in b) {
-                    if (b[key].later) continue
-                    N[key].getData(b[key].data)
+                    if (b[key].later) continue;
+                    N[key].getData(b[key].data);
                 }
-            }
+            };
             N.getData = (g, i) => {
                 return Z.getData({
                     name: g,
                     data: i
-                })
-            }
+                });
+            };
             for (let g in b) {
-                N[g] = {}
+                N[g] = {};
                 N[g].getData = k => {
                     if (N[g].sameTimeOnce && N[g].isLoding) return;
-                    const _number = ++N[g].getData.reqNumber
-                    let i = Z.getData({
-                        name: b[g].name,
-                        data: k
-                    })
-                    N[g].promise = i
-                    N[g].isLoding = !0
-                    N.isLoding = E()
-                    Z.setData(g, null, N.isLoding)
+                    const _number = ++N[g].getData.reqNumber;
+                    let i = Z.getData({ name: b[g].name, data: k });
+                    N[g].promise = i;
+                    N[g].isLoding = !0;
+                    N.isLoding = E();
+                    Z.setData(g, null, N.isLoding);
                     i.then(l => {
-                        N[g].getData.resNumber++
-                        if (N[g].onlyLatest && (N[g].getData.reqNumber !== _number)) return
-                        N[g].res = l
-                        N[g].isLoding = !1
-                        N[g].getDataCallback && N[g].getDataCallback(true, l)
-                        N.isLoding = E()
-                        Z.setData(g, l, N.isLoding)
+                        N[g].getData.resNumber++;
+                        if (N[g].onlyLatest && (N[g].getData.reqNumber !== _number)) return;
+                        N[g].res = l;
+                        N[g].isLoding = !1;
+                        N[g].getDataCallback && N[g].getDataCallback(true, l);
+                        N[g].subscribeArr.forEach((v) => {
+                            const {s, c} = v;
+                            s && s(l);
+                            c && c(l);
+                        });
+                        N.isLoding = E();
+                        Z.setData(g, l, N.isLoding);
                     }, l => {
-                        N[g].isLoding = !1
-                        N[g].getDataCallback && N[g].getDataCallback(false, l)
-                        N.isLoding = E()
-                    })
-                    return i
-                }
-                N[g].getData.reqNumber = 0
-                N[g].getData.resNumber = 0
-                N[g].onlyLatest = b[g].onlyLatest
-                N[g].sameTimeOnce = b[g].sameTimeOnce
-                N[g].isLoding = !1
-                if (b[g].later) continue
+                        N[g].isLoding = !1;
+                        N[g].getDataCallback && N[g].getDataCallback(false, l);
+                        N[g].subscribeArr.forEach((v) => {
+                            const { e, c } = v;
+                            e && e(l);
+                            c && c(l);
+                        });
+                        N.isLoding = E();
+                    });
+                    return i;
+                };
+                N[g].subscribeArr = [];
+                N[g].subscribe = (s, e, c) => N[g].subscribeArr.push({ s, e, c });
+                N[g].getData.reqNumber = 0;
+                N[g].getData.resNumber = 0;
+                N[g].onlyLatest = b[g].onlyLatest;
+                N[g].sameTimeOnce = b[g].sameTimeOnce;
+                N[g].isLoding = !1;
+                if (b[g].later) continue;
                 if (b[g].data.__stationId__) {
                     if (Z.currentStationData.currentSTID) {
-                        b[g].data[b[g].data.__stationId__] = Z.currentStationData.currentSTID
-                        N[g].promise = N[g].getData(b[g].data)
+                        b[g].data[b[g].data.__stationId__] = Z.currentStationData.currentSTID;
+                        N[g].promise = N[g].getData(b[g].data);
                     } else {
                         N.getData('GETgetCurrentInfoNew', {
                             currentView: '00',
                             isGroup: 0
                         }).then(d => {
-                            Z.setCurrentStationData(d)
-                            b[g].data[b[g].data.__stationId__] = d.currentSTID
-                            N[g].promise = N[g].getData(b[g].data)
-                        })
+                            Z.setCurrentStationData(d);
+                            b[g].data[b[g].data.__stationId__] = d.currentSTID;
+                            N[g].promise = N[g].getData(b[g].data);
+                        });
                     }
-                    continue
+                    continue;
                 }
-                N[g].promise = N[g].getData(b[g].data)
+                N[g].promise = N[g].getData(b[g].data);
             }
+            let windowResizeCount = 0;
             const GWH = () => {
+                const num = ++windowResizeCount;
                 setTimeout(() => {
-                    N.winHeight = document.body.clientHeight
-                    N.winWidth = document.body.clientWidth
-                    N.$apply()
-                }, 0);
-            }
-            GWH()
-            win.addEventListener('resize', GWH)
-            N.$on('$destroy', () => win.removeEventListener('resize', GWH))
-            e(N, Z, Y, X, W, V, U, T, S, R, Q, P, O, M, L, K, J, I, H, G, F, D, C, B, A, j)
-        }
-        app.controller(f, [...c, d])
-    }
-}
+                    if (num !== windowResizeCount) return;
+                    N.winHeight = document.body.clientHeight;
+                    N.winWidth = document.body.clientWidth;
+                    N.$apply();
+                }, 200);
+            };
+            GWH();
+            win.addEventListener('resize', GWH);
+            N.$on('$destroy', () => win.removeEventListener('resize', GWH));
+            e(N, Z, Y, X, W, V, U, T, S, R, Q, P, O, M, L, K, J, I, H, G, F, D, C, B, A, j);
+        };
+        app.controller(f, [...c, d]);
+    };
+};
