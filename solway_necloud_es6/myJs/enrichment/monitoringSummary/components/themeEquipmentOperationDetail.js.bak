@@ -249,7 +249,6 @@ ajaxData({
                 $scope.column = [];
                 $scope.xdata = void 0;
                 $scope.ydatas = void 0;
-                console.log(11)
             }
             const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
             switch (currentClass) {
@@ -1256,8 +1255,8 @@ ajaxData({
 
         // 定时器  定时刷新接口
         const timer = $interval(() => {
-            if (($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') && !$scope.equipmentDetailLoading) diffGetData();
-        }, 5000);
+            if (($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday')) diffGetData();
+        }, 10000);
         $scope.$on('$destroy', () => $interval.cancel(timer));
 
     });

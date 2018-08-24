@@ -47,11 +47,13 @@ ajaxData({
         //重新获取列表
         $scope.$on('initShareTaskList',(e,v)=>{
             initWhichInterface();
+            if(v.refresh){
+                $scope.taskList.getData({});
+            }
         })
 
         //操作审核，发红包等回调
         $scope.$on('clickBtnTaskCallback', (e, success) => {
-            if (success) initWhichInterface();
             $scope.shareTaskDetailShow = false;
         });
 
