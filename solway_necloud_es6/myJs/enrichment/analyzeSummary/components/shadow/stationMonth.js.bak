@@ -1,34 +1,34 @@
 ajaxData({
     // info
-    analysis_station_dust_month_info: {
-        name: 'GETanalysis_station_dust_month_info',
+    analysis_station_shade_month_info: {
+        name: 'GETanalysis_station_shade_month_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_station_dust_month_timelist: {
-        name: 'GETanalysis_station_dust_month_timelist',
+    analysis_station_shade_month_timelist: {
+        name: 'GETanalysis_station_shade_month_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_station_dust_month_timeline: {
-        name: 'GETanalysis_station_dust_month_timeline',
+    analysis_station_shade_month_timeline: {
+        name: 'GETanalysis_station_shade_month_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 列表
-    analysis_station_dust_month_devicelist: {
-        name: 'GETanalysis_station_dust_month_devicelist',
+    analysis_station_shade_month_devicelist: {
+        name: 'GETanalysis_station_shade_month_devicelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_station_dust_month_deviceline: {
-        name: 'GETanalysis_station_dust_month_deviceline',
+    analysis_station_shade_month_deviceline: {
+        name: 'GETanalysis_station_shade_month_deviceline',
         data: {},
         later: true,
         onlyLatest: true
@@ -101,33 +101,33 @@ ajaxData({
         if (dateType !== 1) return;
         if (dataType !== 0) return;
         if (getInfo) {
-            $scope.analysis_station_dust_month_info.getData({
-                queryCode: 'analysis_station_dust_month_info',
+            $scope.analysis_station_shade_month_info.getData({
+                queryCode: 'analysis_station_shade_month_info',
                 queryType: 3,
                 date: dateTime.showDate
             });
         }
         if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_station_dust_month_timelist.getData({
-                queryCode: 'analysis_station_dust_month_timelist',
+            $scope.analysis_station_shade_month_timelist.getData({
+                queryCode: 'analysis_station_shade_month_timelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_station_dust_month_timeline.getData({
-                queryCode: 'analysis_station_dust_month_timeline',
+            $scope.analysis_station_shade_month_timeline.getData({
+                queryCode: 'analysis_station_shade_month_timeline',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_station_dust_month_devicelist.getData({
-                queryCode: 'analysis_station_dust_month_devicelist',
+            $scope.analysis_station_shade_month_devicelist.getData({
+                queryCode: 'analysis_station_shade_month_devicelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_station_dust_month_deviceline.getData({
-                queryCode: 'analysis_station_dust_month_deviceline',
+            $scope.analysis_station_shade_month_deviceline.getData({
+                queryCode: 'analysis_station_shade_month_deviceline',
                 queryType: 3,
                 date: dateTime.showDate
             });
@@ -135,7 +135,7 @@ ajaxData({
     };
 
     // 时间 列表
-    $scope.analysis_station_dust_month_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_station_shade_month_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -146,7 +146,10 @@ ajaxData({
                 style: 'position:relative;',
                 sort: true,
                 render(text, item, index) {
-                    return text + (item.clean_status ? `<span title="清洗" style="cursor:pointer;position: absolute;right: 0.1em;top:0;line-height:50px;color:#57a2ff;font-size: 30px;" class="iconfont icon-qingxi1"></span>` : '')
+                    return text + `
+                        <svg style="width: 30px;height: 30px;cursor:pointer;position: absolute;right: 1em;top:10px;" class="symbol-icon" aria-hidden="true">
+                            <use xlink:href="#icon-${['', 'qingtian', 'yintian', 'yu-', 'xue-', 'wumai', 'other'][item.weather_code]}"></use>
+                        </svg>`;
                 }
             },
             {
@@ -156,14 +159,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.dust_we + ')',
-                dataIndex: 'dust_we',
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.dust_we_r + ')',
-                dataIndex: 'dust_we_r',
+                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                dataIndex: 'shade_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -171,17 +174,18 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_station_dust_month_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_station_shade_month_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.dust_we], [res.body.data.dust_we_r]];
-        $scope.imageSymbolsData = res.body.data.real_kwh_chk.map((v, i) => v + res.body.data.dust_we[i]);
-        const base64str = 'image://data:image/png;base64,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'
-        $scope.imageSymbols = res.body.data.clean_status.map(v => v && base64str);
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+        $scope.imageSymbolsData = res.body.data.real_kwh_chk.map((v, i) => v + res.body.data.shade_we[i]);
+        $scope.imageSymbols = res.body.data.weather_code.map(v => {
+            return 'image://' + window.baseUrl + '/theme/images/enrichment/public/' + ['', 'qingtian', 'yintian', 'yu', 'xue', 'wumai', 'other'][v] + '.png'
+        });
     };
 
     // 设备 列表
-    $scope.analysis_station_dust_month_devicelist.getDataCallback = (success, res) => {
+    $scope.analysis_station_shade_month_devicelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -205,14 +209,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.dust_we + ')',
-                dataIndex: 'dust_we',
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.dust_we_r + ')',
-                dataIndex: 'dust_we_r',
+                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                dataIndex: 'shade_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -220,10 +224,10 @@ ajaxData({
     };
 
     // 设备 曲线
-    $scope.analysis_station_dust_month_deviceline.getDataCallback = (success, res) => {
+    $scope.analysis_station_shade_month_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.eq_name;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.dust_we], [res.body.data.dust_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
     };
 
     // 数据置空
@@ -231,11 +235,11 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_station_dust_month_timelist.res = null;
-        $scope.analysis_station_dust_month_timeline.res = null;
-        $scope.analysis_station_dust_month_devicelist.res = null;
-        $scope.analysis_station_dust_month_deviceline.res = null;
-        if (getInfo) $scope.analysis_station_dust_month_info.res = null;
+        $scope.analysis_station_shade_month_timelist.res = null;
+        $scope.analysis_station_shade_month_timeline.res = null;
+        $scope.analysis_station_shade_month_devicelist.res = null;
+        $scope.analysis_station_shade_month_deviceline.res = null;
+        if (getInfo) $scope.analysis_station_shade_month_info.res = null;
     }
 
     // 销毁 事件

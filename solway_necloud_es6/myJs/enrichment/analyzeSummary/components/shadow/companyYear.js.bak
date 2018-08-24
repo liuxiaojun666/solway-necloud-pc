@@ -1,34 +1,34 @@
 ajaxData({
     // info
-    analysis_company_dust_year_info: {
-        name: 'GETanalysis_company_dust_year_info',
+    analysis_company_shade_year_info: {
+        name: 'GETanalysis_company_shade_year_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_company_dust_year_timelist: {
-        name: 'GETanalysis_company_dust_year_timelist',
+    analysis_company_shade_year_timelist: {
+        name: 'GETanalysis_company_shade_year_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_company_dust_year_timeline: {
-        name: 'GETanalysis_company_dust_year_timeline',
+    analysis_company_shade_year_timeline: {
+        name: 'GETanalysis_company_shade_year_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 列表
-    analysis_company_dust_year_stationlist: {
-        name: 'GETanalysis_company_dust_year_stationlist',
+    analysis_company_shade_year_stationlist: {
+        name: 'GETanalysis_company_shade_year_stationlist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_company_dust_year_stationline: {
-        name: 'GETanalysis_company_dust_year_stationline',
+    analysis_company_shade_year_stationline: {
+        name: 'GETanalysis_company_shade_year_stationline',
         data: {},
         later: true,
         onlyLatest: true
@@ -101,33 +101,33 @@ ajaxData({
         if (dateType !== 2) return;
         if (dataType <= 0) return;
         if (getInfo) {
-            $scope.analysis_company_dust_year_info.getData({
-                queryCode: 'analysis_company_dust_year_info',
+            $scope.analysis_company_shade_year_info.getData({
+                queryCode: 'analysis_company_shade_year_info',
                 queryType: 1,
                 date: dateTime.showDate
             });
         }
         if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_company_dust_year_timelist.getData({
-                queryCode: 'analysis_company_dust_year_timelist',
+            $scope.analysis_company_shade_year_timelist.getData({
+                queryCode: 'analysis_company_shade_year_timelist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_company_dust_year_timeline.getData({
-                queryCode: 'analysis_company_dust_year_timeline',
+            $scope.analysis_company_shade_year_timeline.getData({
+                queryCode: 'analysis_company_shade_year_timeline',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_company_dust_year_stationlist.getData({
-                queryCode: 'analysis_company_dust_year_stationlist',
+            $scope.analysis_company_shade_year_stationlist.getData({
+                queryCode: 'analysis_company_shade_year_stationlist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_company_dust_year_stationline.getData({
-                queryCode: 'analysis_company_dust_year_stationline',
+            $scope.analysis_company_shade_year_stationline.getData({
+                queryCode: 'analysis_company_shade_year_stationline',
                 queryType: 1,
                 date: dateTime.showDate
             });
@@ -135,7 +135,7 @@ ajaxData({
     };
 
     // 时间 列表
-    $scope.analysis_company_dust_year_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_company_shade_year_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -152,14 +152,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.dust_we + ')',
-                dataIndex: 'dust_we',
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.dust_we_r + ')',
-                dataIndex: 'dust_we_r',
+                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                dataIndex: 'shade_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -167,14 +167,14 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_company_dust_year_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_company_shade_year_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.dust_we], [res.body.data.dust_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
     };
 
     // 电站 列表
-    $scope.analysis_company_dust_year_stationlist.getDataCallback = (success, res) => {
+    $scope.analysis_company_shade_year_stationlist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -198,14 +198,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.dust_we + ')',
-                dataIndex: 'dust_we',
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.dust_we_r + ')',
-                dataIndex: 'dust_we_r',
+                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                dataIndex: 'shade_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -213,10 +213,10 @@ ajaxData({
     };
 
     // 电站 曲线
-    $scope.analysis_company_dust_year_stationline.getDataCallback = (success, res) => {
+    $scope.analysis_company_shade_year_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.dust_we], [res.body.data.dust_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
     };
 
     // 数据置空
@@ -224,11 +224,11 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_company_dust_year_timelist.res = null;
-        $scope.analysis_company_dust_year_timeline.res = null;
-        $scope.analysis_company_dust_year_stationlist.res = null;
-        $scope.analysis_company_dust_year_stationline.res = null;
-        if (getInfo) $scope.analysis_company_dust_year_info.res = null;
+        $scope.analysis_company_shade_year_timelist.res = null;
+        $scope.analysis_company_shade_year_timeline.res = null;
+        $scope.analysis_company_shade_year_stationlist.res = null;
+        $scope.analysis_company_shade_year_stationline.res = null;
+        if (getInfo) $scope.analysis_company_shade_year_info.res = null;
     }
 
     // 销毁 事件
