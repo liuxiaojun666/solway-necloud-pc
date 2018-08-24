@@ -193,7 +193,7 @@ ajaxData({
 
     //受理
     $scope.handleAccept = function (id, topmessageId) {
-        if (confirm('确定受理？')){
+        $solway.confirm({ message:'确定受理？'}, () => {
             $scope.acceptHandle.getData({
                 'id': id,
                 'topmessageId': topmessageId
@@ -205,7 +205,7 @@ ajaxData({
                     toaster.pop('error', '', msg.infoMsg);
                 }
             });
-        }
+        });
     }
 
     //拒绝
