@@ -104,6 +104,7 @@ win.ajaxData = (b, a) => {
             for (let g in b) {
                 N[g] = {}
                 N[g].getData = k => {
+                    if (N[g].sameTimeOnce && N[g].isLoding) return;
                     const _number = ++N[g].getData.reqNumber
                     let i = Z.getData({
                         name: b[g].name,
@@ -131,6 +132,7 @@ win.ajaxData = (b, a) => {
                 N[g].getData.reqNumber = 0
                 N[g].getData.resNumber = 0
                 N[g].onlyLatest = b[g].onlyLatest
+                N[g].sameTimeOnce = b[g].sameTimeOnce
                 N[g].isLoding = !1
                 if (b[g].later) continue
                 if (b[g].data.__stationId__) {
