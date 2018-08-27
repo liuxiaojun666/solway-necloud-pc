@@ -78,10 +78,12 @@ ajaxData({
                     '00': true,
                     '01': true,
                     '02': true,
+                    '03': true,
                     '04': true,
                     '05': true,
                 },
-                searchKey = ''
+                searchKey = '',
+                isDefaultList = true,
             } = historicalRecord.get().themeProfession || {};
             $scope.startDate = startDate;
             $scope.startDate.showDate = '';
@@ -91,6 +93,7 @@ ajaxData({
             $scope.isHis = isHis;
             $scope.handStatus = handStatus;
             $scope.searchKey = searchKey;
+            $scope.isDefaultList = isDefaultList;
             await myAjaxData.timeout(0);
             $('.ng-clock').removeClass('ng-clock');
             $scope.initComplete = true;
@@ -142,19 +145,32 @@ ajaxData({
             });
         };
 
+        // 对比是否 默认 查询 条件
+        function diffIsDefaultList() {
+            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+            if (startDate.showDate !== '') return $scope.isDefaultList = false;
+            if (endDate.showDate !== '') return $scope.isDefaultList = false;
+            if (pStationId) return $scope.isDefaultList = false;
+            if (searchKey !== '') return $scope.isDefaultList = false;
+            if (isHis !== '0') return $scope.isDefaultList = false;
+            if (Object.keys(handStatus).filter(v => handStatus[v] === false)[0]) return $scope.isDefaultList = false;
+            return $scope.isDefaultList = true;
+        }
+
 
         // 查询
         $scope.search = () => {
             $scope.searchActive = false;
             $scope.closeMessagePopUp();
             const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+            diffIsDefaultList();
             historicalRecord.set({
                 themeProfession: {
                     ...historicalRecord.get().themeProfession || {},
-                    startDate, endDate, pStationId, isHis, handStatus, searchKey
+                    startDate, endDate, pStationId, isHis, handStatus, searchKey, isDefaultList: $scope.isDefaultList
                 }
             });
-            getBaseMessageList();
+            return getBaseMessageList();
         };
 
         // 消息列表 接口 请求
@@ -165,13 +181,38 @@ ajaxData({
                 endDate: endDate.showDate,
                 pStationId: pStationId || '',
                 searchKey: searchKey || '',
-                isHis: isHis == '2' ? 1 : 0,
-                queryType: isHis == '0' ? 2 : 1,
+                isHis,
                 handStatus: isHis == '0' ? Object.keys(handStatus).filter(v => handStatus[v]).join() : '03',
                 pageIndex: 0,
                 pageSize: 20
             });
         }
+
+        // 消息列表 缺省 参数
+        $scope.resetList = () => {
+            $scope.startDate.showDate = '';
+            $scope.endDate.showDate = '';
+            $scope.pStationId = '';
+            $scope.searchKey = '';
+            $scope.isHis = '0';
+            $scope.handStatus = {
+                '00': true,
+                '01': true,
+                '02': true,
+                '03': true,
+                '04': true,
+                '05': true,
+            };
+            Array.from(document.querySelectorAll('#searchParams input'), v => v.value = '');
+            $scope.isDefaultList = true;
+            historicalRecord.set({
+                themeProfession: {
+                    ...historicalRecord.get().themeProfession || {},
+                    isDefaultList: $scope.isDefaultList
+                }
+            });
+            getBaseMessageList();
+        };
 
         // 列表 接口 数据 回调
         $scope.getBaseMessageListNew.getDataCallback = (success, res) => {
