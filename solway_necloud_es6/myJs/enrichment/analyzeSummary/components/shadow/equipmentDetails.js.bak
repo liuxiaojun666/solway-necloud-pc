@@ -1,0 +1,106 @@
+ajaxData({
+    analysis_station_clean_invlist: {
+        name: 'GETinvShadeWeMList',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+    analysis_station_clean_invline: {
+        name: 'GETinvShadeWeMLine',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+    selectEqPaintingData: {
+        name: 'GETselectEqPaintingData',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    }
+}, {
+        __serviceName__: 'shadeEquipmentDetailsService',
+    })('shadowEquipmentDetailsCtrl', ['$scope', 'shadeEquipmentDetailsService'], ($scope, myAjaxData) => {
+        $scope.$on('equipmentDetails', (e, {eqid, eq_name}) => {
+            $scope.eqid = eqid;
+            $scope.eq_name = eq_name;
+            $scope.analysis_station_clean_invlist.res = null;
+            $scope.analysis_station_clean_invline.res = null;
+            $scope.cColumn = [];
+            $scope.cxdata = void 0;
+            $scope.cydata = void 0;
+            $scope.diffGetdata();
+        });
+
+        $scope.diffGetdata = () => {
+            const { cShowShape = 'list', eqid, dateTime } = $scope;
+            if (cShowShape === 'list') {
+                $scope.analysis_station_clean_invlist.getData({
+                    queryType: 3,
+                    date: dateTime.showDate,
+                    dateType: 2,
+                    eqid,
+                });
+            } else if (cShowShape === 'chart') {
+                $scope.analysis_station_clean_invline.getData({
+                    queryType: 3,
+                    date: dateTime.showDate,
+                    dateType: 2,
+                    eqid,
+                });
+            } else if (cShowShape === 'shadow') {
+                $scope.selectEqPaintingData.getData({
+                    deviceId: eqid,
+                    dtime: dateTime.showDate
+                });
+            }
+        };
+
+        $scope.analysis_station_clean_invlist.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.cDatasource = res.body;
+            $scope.cColumn = [
+                {
+                    title: '日期',
+                    dataIndex: 'dtime',
+                    align: 'center',
+                    style: 'position:relative;',
+                    sort: true,
+                },
+                {
+                    title: '实发电量(kWh)',
+                    dataIndex: 'real_kwh_chk',
+                    align: 'right',
+                    sort: true,
+                },
+                {
+                    title: '阴影损失电量(kWh)',
+                    dataIndex: 'shade_we',
+                    align: 'right',
+                    sort: true,
+                },
+                {
+                    title: '阴影损失比例(%)',
+                    dataIndex: 'shade_we_r',
+                    align: 'right',
+                    sort: true,
+                },
+                {
+                    title: '天气',
+                    dataIndex: 'weather',
+                    align: 'center',
+                    sort: true,
+                },
+            ];
+        };
+
+        $scope.analysis_station_clean_invline.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.cxdata = res.body.dtime;
+            $scope.cydatas = [[res.body.real_kwh_chk, res.body.shade_we], [res.body.shade_we_r]];
+            $scope.imageSymbolsData = res.body.real_kwh_chk.map((v, i) => v + res.body.shade_we[i]);
+            $scope.imageSymbols = res.body.weather_code.map((v, i) => {
+                return 'image://' + window.baseUrl + '/theme/images/enrichment/public/' + ['', 'qingtian', 'yintian', 'yu', 'xue', 'wumai', 'other'][v] + '.png'
+            });
+        };
+
+    });

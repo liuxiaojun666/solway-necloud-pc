@@ -105,13 +105,15 @@ ajaxData({
             const option = {
                 tooltip: {
                     show: true,
+                    trigger: 'item',
+                    formatter: '{b}: {c}kWh'
                 },
                 series: {
                     type: 'sankey',
                     layout: 'none',
                     draggable: false,
                     left: 70,
-                    right: 100,
+                    right: 130,
                     top: 50,
                     bottom: 30,
                     nodeGap: 15,
@@ -136,6 +138,7 @@ ajaxData({
                     },
                     label: {
                         normal: {
+                            formatter: p => p.data.name + ((p.data.r === + p.data.r) ? ': ' + p.data.r + '%' : ''),
                             color: '#fff',
                             fontSize: 14,
                         }

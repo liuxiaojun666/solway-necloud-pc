@@ -204,11 +204,12 @@ ajaxData({
                 '05': true,
             };
             Array.from(document.querySelectorAll('#searchParams input'), v => v.value = '');
-            $scope.isDefaultList = true;
+            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
             historicalRecord.set({
                 themeProfession: {
                     ...historicalRecord.get().themeProfession || {},
-                    isDefaultList: $scope.isDefaultList
+                    startDate, endDate, pStationId, isHis, handStatus, searchKey,
+                    isDefaultList: $scope.isDefaultList = true
                 }
             });
             getBaseMessageList();
