@@ -77,6 +77,7 @@ ajaxData({
                     '04': true,
                     '05': true,
                     '06': true,
+                    '07': true,
                 },
                 searchKey = '',
                 isDefaultList = true
@@ -124,7 +125,7 @@ ajaxData({
             historicalRecord.set({
                 themeShare: {
                     ...historicalRecord.get().themeShare || {},
-                    startDate, endDate, searchKey, isHis, handStatus, pStationId, isDefaultList: false
+                    startDate, endDate, searchKey, isHis, handStatus, pStationId, isDefaultList: $scope.isDefaultList = false
                 }
             });
             getBaseMessageList();
@@ -134,7 +135,7 @@ ajaxData({
         function getBaseMessageList() {
             const { startDate, endDate, searchKey, isHis, handStatus, pStationId } = $scope;
             $scope.taskList.getData({
-                pStationId,
+                stationId: pStationId,
                 distDateStartStr: startDate.showDate,
                 distDateEndStr: endDate.showDate,
                 ss: isHis || Object.keys(handStatus).filter(v => handStatus[v]).join(),
@@ -143,6 +144,33 @@ ajaxData({
                 pageSize: 20
             });
         }
+
+        // 消息列表 缺省 参数
+        $scope.resetList = () => {
+            $scope.startDate.showDate = '';
+            $scope.endDate.showDate = '';
+            $scope.pStationId = '';
+            $scope.searchKey = '';
+            $scope.isHis = '';
+            $scope.handStatus = {
+                '00': true,
+                '01': true,
+                '02': true,
+                '03': true,
+                '04': true,
+                '05': true,
+                '06': true,
+                '07': true,
+            };
+            Array.from(document.querySelectorAll('#searchParams input'), v => v.value = '');
+            historicalRecord.set({
+                themeProfession: {
+                    ...historicalRecord.get().themeProfession || {},
+                    isDefaultList: $scope.isDefaultList = true
+                }
+            });
+            getBaseMessageList();
+        };
 
         // 列表 接口 数据 回调
         $scope.taskList.getDataCallback = (success, res) => {
