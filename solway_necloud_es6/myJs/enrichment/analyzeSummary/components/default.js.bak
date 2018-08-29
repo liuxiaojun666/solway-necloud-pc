@@ -106,7 +106,10 @@ ajaxData({
                 tooltip: {
                     show: true,
                     trigger: 'item',
-                    formatter: '{b}: {c}kWh'
+                    formatter(params) {
+                        if (params.data.target) return '';
+                        return params.name + '(kWh): ' + params.value;
+                    }
                 },
                 series: {
                     type: 'sankey',
@@ -151,6 +154,7 @@ ajaxData({
                                 itemStyle: {
                                     normal: {
                                         color: themeMap[v.name].color,
+                                        borderWidth: 13,
                                     }
                                 },
                             };
