@@ -134,6 +134,7 @@ ajaxData({
         // 消息列表 接口 请求
         function getBaseMessageList() {
             const { startDate, endDate, searchKey, isHis, handStatus, pStationId } = $scope;
+            $scope.column = [];
             $scope.taskList.getData({
                 stationId: pStationId,
                 distDateStartStr: startDate.showDate,
@@ -177,6 +178,79 @@ ajaxData({
         // 列表 接口 数据 回调
         $scope.taskList.getDataCallback = (success, res) => {
             if (!success) return;
+
+            // 列表
+            $scope.column = [
+                {
+                    title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+                    dataIndex: '',
+                    width: '60px',
+                    align: 'center',
+                    checkboxName: 'batchprocessing',
+                    render(text, record, index) {
+                        return '<label class="i-checks m-b-none"><input data-identifies="' + record.id + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    }
+                },
+                {
+                    title: '电站名称',
+                    dataIndex: 'stationName',
+                    width: '20%',
+                },
+                {
+                    title: '发布时间',
+                    dataIndex: 'distDate',
+                    align: 'center',
+                    // sort: true,
+                    width: '15%',
+                    render(text) {
+                        return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm')}</span>`
+                    }
+                },
+                {
+                    title: '发布人',
+                    dataIndex: 'distManName',
+                    // sort: true,
+                },
+                {
+                    title: '处理人',
+                    dataIndex: 'handleManName',
+                    // sort: true,
+                },
+                {
+                    title: '内容',
+                    dataIndex: 'taskContent',
+                    // sort: true,
+                    width: '25%',
+                },
+                {
+                    title: '红包金额',
+                    dataIndex: 'bounsFinal',
+                    // sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '状态',
+                    dataIndex: 'publishStatus',
+                    // sort: true,
+                    render(text) {
+                        return `<span>
+                    ${
+                            {
+                                '00': "未发布",
+                                '01': "已发布",
+                                '02': "处理中",
+                                '03': "处理未完成",
+                                '04': "审核中",
+                                '05': "审核通过",
+                                '06': "审核未通过",
+                                '07': "已完成",
+                                '99': "已作废"
+                            }[text]
+                            }
+                    </span>`;
+                    }
+                },
+            ];
             $scope.closeMessagePopUp();
         };
 
@@ -309,76 +383,4 @@ ajaxData({
             document.removeEventListener('click', eventListen);
         });
 
-        // 列表
-        $scope.column = [
-            {
-                title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
-                dataIndex: '',
-                width: '60px',
-                align: 'center',
-                checkboxName: 'batchprocessing',
-                render(text, record, index) {
-                    return '<label class="i-checks m-b-none"><input data-identifies="' + record.id + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
-                }
-            },
-            {
-                title: '电站名称',
-                dataIndex: 'stationName',
-                width: '20%',
-            },
-            {
-                title: '发布时间',
-                dataIndex: 'distDate',
-                align: 'center',
-                // sort: true,
-                width: '15%',
-                render(text) {
-                    return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm')}</span>`
-                }
-            },
-            {
-                title: '发布人',
-                dataIndex: 'distManName',
-                // sort: true,
-            },
-            {
-                title: '处理人',
-                dataIndex: 'handleManName',
-                // sort: true,
-            },
-            {
-                title: '内容',
-                dataIndex: 'taskContent',
-                // sort: true,
-                width: '25%',
-            },
-            {
-                title: '红包金额',
-                dataIndex: 'bounsFinal',
-                // sort: true,
-                align: 'right'
-            },
-            {
-                title: '状态',
-                dataIndex: 'publishStatus',
-                // sort: true,
-                render(text) {
-                    return `<span>
-                    ${
-                        {
-                            '00': "未发布",
-                            '01': "已发布",
-                            '02': "处理中",
-                            '03': "处理未完成",
-                            '04': "审核中",
-                            '05': "审核通过",
-                            '06': "审核未通过",
-                            '07': "已完成",
-                            '99': "已作废"
-                        }[text]
-                    }
-                    </span>`;
-                }
-            },
-        ];
 });

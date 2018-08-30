@@ -176,6 +176,7 @@ ajaxData({
         // 消息列表 接口 请求
         function getBaseMessageList() {
             const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+            $scope.column = [];
             $scope.getBaseMessageListNew.getData({
                 startDate: startDate.showDate,
                 endDate: endDate.showDate,
@@ -218,6 +219,81 @@ ajaxData({
         // 列表 接口 数据 回调
         $scope.getBaseMessageListNew.getDataCallback = (success, res) => {
             if (!success) return;
+
+            // 列表
+            $scope.column = [
+                {
+                    title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+                    dataIndex: '',
+                    width: '60px',
+                    align: 'center',
+                    checkboxName: 'batchprocessing',
+                    render(text, record, index) {
+                        return '<label class="i-checks m-b-none"><input data-identifies="' + record.busino + '_' + record.mid + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    }
+                },
+                {
+                    title: '电站名称',
+                    dataIndex: 'stname',
+                    width: '25%',
+                    // sort: true,
+                    render(text, item) {
+                        return `
+                    <span style="color: #3ae2ca;">${text || ''}</span>
+                    ${(item.unread_num > 0) ? '<span class="unread" style="margin-left:0.5em;display:inline-block;width:15px;height:15px;text-align:center;line-height:15px;background:#ed5454;border-radius:50%;">' + item.unread_num + '</span>' : ''}`
+                    }
+                },
+                {
+                    title: '发布时间',
+                    dataIndex: 'ct',
+                    align: 'center',
+                    // sort: true,
+                    width: '15%',
+                    render(text) {
+                        return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm:ss')}</span>`
+                    }
+                },
+                {
+                    title: '发布人',
+                    dataIndex: 'musname_real',
+                    // sort: true,
+                },
+                {
+                    title: '处理人',
+                    dataIndex: 'murname_real',
+                    // sort: true,
+                },
+                {
+                    title: '内容',
+                    dataIndex: 'mc',
+                    // sort: true,
+                    width: '30%',
+                },
+                {
+                    title: '状态',
+                    dataIndex: 'mhs',
+                    // sort: true,
+                    render(text) {
+                        switch (text) {
+                            case '00':
+                                return '待确认'
+                            case '01':
+                                return '待受理'
+                            case '02':
+                                return '待处理'
+                            case '03':
+                                return '已关闭'
+                            case '04':
+                                return '被确认'
+                            case '05':
+                                return '验收中'
+
+                            default:
+                                break;
+                        }
+                    }
+                },
+            ];
             $scope.closeMessagePopUp();
         };
 
@@ -384,78 +460,4 @@ ajaxData({
             document.removeEventListener('click', eventListen);
         });
 
-        // 列表
-        $scope.column = [
-            {
-                title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
-                dataIndex: '',
-                width: '60px',
-                align: 'center',
-                checkboxName: 'batchprocessing',
-                render(text, record, index) {
-                    return '<label class="i-checks m-b-none"><input data-identifies="' + record.busino + '_' + record.mid + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
-                }
-            },
-            {
-                title: '电站名称',
-                dataIndex: 'stname',
-                width: '25%',
-                // sort: true,
-                render(text, item) {
-                    return `
-                    <span style="color: #3ae2ca;">${text || ''}</span>
-                    ${(item.unread_num > 0) ? '<span class="unread" style="margin-left:0.5em;display:inline-block;width:15px;height:15px;text-align:center;line-height:15px;background:#ed5454;border-radius:50%;">' + item.unread_num + '</span>' : ''}`
-                }
-            },
-            {
-                title: '发布时间',
-                dataIndex: 'ct',
-                align: 'center',
-                // sort: true,
-                width: '15%',
-                render(text) {
-                    return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm:ss')}</span>`
-                }
-            },
-            {
-                title: '发布人',
-                dataIndex: 'musname_real',
-                // sort: true,
-            },
-            {
-                title: '处理人',
-                dataIndex: 'murname_real',
-                // sort: true,
-            },
-            {
-                title: '内容',
-                dataIndex: 'mc',
-                // sort: true,
-                width: '30%',
-            },
-            {
-                title: '状态',
-                dataIndex: 'mhs',
-                // sort: true,
-                render(text) {
-                    switch (text) {
-                        case '00':
-                            return '待确认'
-                        case '01':
-                            return '待受理'
-                        case '02':
-                            return '待处理'
-                        case '03':
-                            return '已关闭'
-                        case '04':
-                            return '被确认'
-                        case '05':
-                            return '验收中'
-
-                        default:
-                            break;
-                    }
-                }
-            },
-        ];
     });
