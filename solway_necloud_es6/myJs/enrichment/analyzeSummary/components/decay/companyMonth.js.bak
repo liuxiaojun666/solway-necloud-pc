@@ -1,47 +1,47 @@
 ajaxData({
     // info
-    analysis_company_shade_accum_info: {
-        name: 'GETanalysis_company_shade_accum_info',
+    analysis_company_decay_month_info: {
+        name: 'GETanalysis_company_decay_month_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_company_shade_accum_timelist: {
-        name: 'GETanalysis_company_shade_accum_timelist',
+    analysis_company_decay_month_timelist: {
+        name: 'GETanalysis_company_decay_month_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_company_shade_accum_timeline: {
-        name: 'GETanalysis_company_shade_accum_timeline',
+    analysis_company_decay_month_timeline: {
+        name: 'GETanalysis_company_decay_month_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 列表
-    analysis_company_shade_accum_stationlist: {
-        name: 'GETanalysis_company_shade_accum_stationlist',
+    analysis_company_decay_month_stationlist: {
+        name: 'GETanalysis_company_decay_month_stationlist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_company_shade_accum_stationline: {
-        name: 'GETanalysis_company_shade_accum_stationline',
+    analysis_company_decay_month_stationline: {
+        name: 'GETanalysis_company_decay_month_stationline',
         data: {},
         later: true,
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'shadowCompanyAccumulativeService',
-})('shadowCompanyAccumulativeCtrl', ['$scope', 'shadowCompanyAccumulativeService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'decayCompanyMonthService',
+})('decayCompanyMonthCtrl', ['$scope', 'decayCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0 } = historicalRecord.get().themeShadowCompanyAccum || {};
+        let { showShape, tabIndex = 0} = historicalRecord.get().themeDecayCompanyMonth || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -71,8 +71,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeShadeCompanyAccum: {
-                ...historicalRecord.get().themeShadeCompanyAccum || {},
+            themeDecayCompanyMonth: {
+                ...historicalRecord.get().themeDecayCompanyMonth || {},
                 tabIndex
             }
         });
@@ -83,8 +83,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeShadowCompanyAccum: {
-                ...historicalRecord.get().themeShadowCompanyAccum || {},
+            themeDecayCompanyMonth: {
+                ...historicalRecord.get().themeDecayCompanyMonth || {},
                 showShape
             }
         });
@@ -96,37 +96,37 @@ ajaxData({
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         setDataNull(getInfo);
-        const { showShape, dateTime = {showDate: null}, tabIndex, dateType, dataType } = $scope;
-        if (dateType !== 3) return;
+        const { showShape, dateTime, dateType, dataType, tabIndex } = $scope;
+        if (dateType !== 1) return;
         if (dataType <= 0) return;
         if (getInfo) {
-            $scope.analysis_company_shade_accum_info.getData({
-                queryCode: 'analysis_company_shade_accum_info',
+            $scope.analysis_company_decay_month_info.getData({
+                queryCode: 'analysis_company_decay_month_info',
                 queryType: 1,
                 date: dateTime.showDate
             });
         }
         if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_company_shade_accum_timelist.getData({
-                queryCode: 'analysis_company_shade_accum_timelist',
+            $scope.analysis_company_decay_month_timelist.getData({
+                queryCode: 'analysis_company_decay_month_timelist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_company_shade_accum_timeline.getData({
-                queryCode: 'analysis_company_shade_accum_timeline',
+            $scope.analysis_company_decay_month_timeline.getData({
+                queryCode: 'analysis_company_decay_month_timeline',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_company_shade_accum_stationlist.getData({
-                queryCode: 'analysis_company_shade_accum_stationlist',
+            $scope.analysis_company_decay_month_stationlist.getData({
+                queryCode: 'analysis_company_decay_month_stationlist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_company_shade_accum_stationline.getData({
-                queryCode: 'analysis_company_shade_accum_stationline',
+            $scope.analysis_company_decay_month_stationline.getData({
+                queryCode: 'analysis_company_decay_month_stationline',
                 queryType: 1,
                 date: dateTime.showDate
             });
@@ -134,7 +134,7 @@ ajaxData({
     };
 
     // 时间 列表
-    $scope.analysis_company_shade_accum_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_company_decay_month_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -151,14 +151,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
-                dataIndex: 'shade_we',
+                title: '衰减损失电量' + '(' + res.body.units.decay_we + ')',
+                dataIndex: 'decay_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
-                dataIndex: 'shade_we_r',
+                title: '衰减损失比例' + '(' + res.body.units.decay_we_r + ')',
+                dataIndex: 'decay_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -166,14 +166,14 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_company_shade_accum_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_company_decay_month_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.decay_we], [res.body.data.decay_we_r]];
     };
 
     // 电站 列表
-    $scope.analysis_company_shade_accum_stationlist.getDataCallback = (success, res) => {
+    $scope.analysis_company_decay_month_stationlist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -197,14 +197,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
-                dataIndex: 'shade_we',
+                title: '衰减损失电量' + '(' + res.body.units.decay_we + ')',
+                dataIndex: 'decay_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
-                dataIndex: 'shade_we_r',
+                title: '衰减损失比例' + '(' + res.body.units.decay_we_r + ')',
+                dataIndex: 'decay_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -212,21 +212,22 @@ ajaxData({
     };
 
     // 电站 曲线
-    $scope.analysis_company_shade_accum_stationline.getDataCallback = (success, res) => {
+    $scope.analysis_company_decay_month_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.decay_we], [res.body.data.decay_we_r]];
     };
+
     // 数据置空
     function setDataNull(getInfo) {
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_company_shade_accum_timelist.res = null;
-        $scope.analysis_company_shade_accum_timeline.res = null;
-        $scope.analysis_company_shade_accum_stationlist.res = null;
-        $scope.analysis_company_shade_accum_stationline.res = null;
-        if (getInfo) $scope.analysis_company_shade_accum_info.res = null;
+        $scope.analysis_company_decay_month_timelist.res = null;
+        $scope.analysis_company_decay_month_timeline.res = null;
+        $scope.analysis_company_decay_month_stationlist.res = null;
+        $scope.analysis_company_decay_month_stationline.res = null;
+        if (getInfo) $scope.analysis_company_decay_month_info.res = null;
     }
 
     // 销毁 事件
