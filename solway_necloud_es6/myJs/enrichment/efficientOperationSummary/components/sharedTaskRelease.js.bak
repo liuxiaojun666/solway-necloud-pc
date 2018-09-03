@@ -21,7 +21,7 @@ ajaxData({
         __serviceName__: 'sharedTaskReleaseService'
     })('sharedTaskReleaseCtrl', ['$scope', 'sharedTaskReleaseService', 'toaster'], ($scope, maAjaxData, toaster) => {
         $scope.$on('releaseTask', (e, obj = {}) => {
-            const { taskId = null, stationId = $scope.releaseTaskParame.stationId } = obj;
+            const { taskId = null, stationId } = obj;
             if (stationId) {
                 $scope.disabledSlecetStation = true;
                 $scope.opShareUserStationRelSelectByCondition.getData({ stationId });
@@ -32,7 +32,7 @@ ajaxData({
                 taskImgs: [],
                 ...($scope.releaseTaskParame || {}),
                 taskId,
-                stationId
+                stationId: stationId || ($scope.releaseTaskParame || {}).stationId
             };
         });
         // 发布任务 提交

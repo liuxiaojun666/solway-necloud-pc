@@ -38,11 +38,14 @@
                 </iframe>
             </div>`;
         document.body.appendChild(ele);
-        setTimeout(() => {
-            const ifreame = document.getElementById("baidumap").contentWindow;
-            if (!ifreame) return;
-            ifreame.childFunction({ longitude, latitude });
-        }, 500);
+        const timeout = () => {
+            setTimeout(() => {
+                const ifreame = document.getElementById("baidumap").contentWindow;
+                if (!ifreame) return;
+                if (!ifreame.childFunction) return timeout();
+                ifreame.childFunction({ longitude, latitude });
+            }, 500);
+        };
     };
 
     exports.baidumap = baidumap;
