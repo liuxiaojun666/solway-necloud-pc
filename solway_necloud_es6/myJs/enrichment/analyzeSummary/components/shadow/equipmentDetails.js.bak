@@ -111,8 +111,8 @@ ajaxData({
             }
             $scope.cxdata = cxdata;
             const len = res.body.length;
-            $scope.types = [['bar', 'bar', 'bar', ...new Array(len).fill('line')]];
-            $scope.cydatas = [[[], [], [], ...res.body.map(computDataArr)]];
+            $scope.types = [['bar', 'bar', 'bar', ...new Array(len).fill('line'), 'line']];
+            $scope.cydatas = [[[], [], [], ...res.body.map(computDataArr), [16]]];
             $scope.colors = [['#7e4bb4', '#dd5859', '#b08e73', ...res.body.map(v => ({ AbnormalShadow: '#dd5859', AlwaysShadow: '#b08e73', Shadow: '#7e4bb4' }[v.property]))]];
             function computDataArr (data) {
                 const arr = [];
@@ -138,8 +138,9 @@ ajaxData({
         });
 
         $scope.selectEqPaintingData.subscribe(res => {
-            $scope.barDatas = res.body.map(v => v.reduce);
-            $scope.barNames = res.body.map(v => v.stringId);
+            $scope.barDatas = new Array(18).fill(0);
+            res.body.forEach(v => $scope.barDatas[v.stringId - 1] = v.reduce);
+            $scope.barNames = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,];
             $scope.tooltipFormatter2 = (params, b, c) => '组串编号' + params[0].name + '损失(%): ' + params[0].value;
         });
     });
