@@ -1,33 +1,33 @@
 ajaxData({
     // info
-    analysis_company_line_month_info: {
-        name: 'GETanalysis_company_line_month_info',
+    analysis_company_restrict_month_info: {
+        name: 'GETanalysis_company_restrict_month_info',
         data: {},
         later: true
     },
     // 电站 列表
-    analysis_company_line_month_stationlist: {
-        name: 'GETanalysis_company_line_month_stationlist',
+    analysis_company_restrict_month_stationlist: {
+        name: 'GETanalysis_company_restrict_month_stationlist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_company_line_month_stationline: {
-        name: 'GETanalysis_company_line_month_stationline',
+    analysis_company_restrict_month_stationline: {
+        name: 'GETanalysis_company_restrict_month_stationline',
         data: {},
         later: true,
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'lineLossCompanyMonthService',
-})('lineLossCompanyMonthCtrl', ['$scope', 'lineLossCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'restrictCompanyMonthService',
+})('restrictCompanyMonthCtrl', ['$scope', 'restrictCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape} = historicalRecord.get().themeLineLossCompanyMonth || {};
+        let { showShape} = historicalRecord.get().themeRestrictCompanyMonth || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -57,8 +57,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeLineLossCompanyMonth: {
-                ...historicalRecord.get().themeLineLossCompanyMonth || {},
+            themeRestrictCompanyMonth: {
+                ...historicalRecord.get().themeRestrictCompanyMonth || {},
                 showShape
             }
         });
@@ -74,21 +74,21 @@ ajaxData({
         if (dateType !== 1) return;
         if (dataType <= 0) return;
         if (getInfo) {
-            $scope.analysis_company_line_month_info.getData({
-                queryCode: 'analysis_company_line_month_info',
+            $scope.analysis_company_restrict_month_info.getData({
+                queryCode: 'analysis_company_restrict_month_info',
                 queryType: 1,
                 date: dateTime.showDate
             });
         }
         if (showShape === 'list') {
-            $scope.analysis_company_line_month_stationlist.getData({
-                queryCode: 'analysis_company_line_month_stationlist',
+            $scope.analysis_company_restrict_month_stationlist.getData({
+                queryCode: 'analysis_company_restrict_month_stationlist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (showShape === 'chart') {
-            $scope.analysis_company_line_month_stationline.getData({
-                queryCode: 'analysis_company_line_month_stationline',
+            $scope.analysis_company_restrict_month_stationline.getData({
+                queryCode: 'analysis_company_restrict_month_stationline',
                 queryType: 1,
                 date: dateTime.showDate
             });
@@ -96,7 +96,7 @@ ajaxData({
     };
 
     // 电站 列表
-    $scope.analysis_company_line_month_stationlist.getDataCallback = (success, res) => {
+    $scope.analysis_company_restrict_month_stationlist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -120,20 +120,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '上网电量' + '(' + res.body.units.send_kwh_chk + ')',
-                dataIndex: 'send_kwh_chk',
+                title: '限电损失电量' + '(' + res.body.units.restrict_we + ')',
+                dataIndex: 'restrict_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '线损损失电量' + '(' + res.body.units.line_we + ')',
-                dataIndex: 'line_we',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '线损损失比例' + '(' + res.body.units.line_we_r + ')',
-                dataIndex: 'line_we_r',
+                title: '限电损失比例' + '(' + res.body.units.restrict_we_r + ')',
+                dataIndex: 'restrict_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -141,10 +135,10 @@ ajaxData({
     };
 
     // 电站 曲线
-    $scope.analysis_company_line_month_stationline.getDataCallback = (success, res) => {
+    $scope.analysis_company_restrict_month_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
-        $scope.ydatas = [[res.body.data.send_kwh_chk, res.body.data.line_we], [res.body.data.line_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.restrict_we], [res.body.data.restrict_we_r]];
     };
 
     // 数据置空
@@ -152,9 +146,9 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_company_line_month_stationlist.res = null;
-        $scope.analysis_company_line_month_stationline.res = null;
-        if (getInfo) $scope.analysis_company_line_month_info.res = null;
+        $scope.analysis_company_restrict_month_stationlist.res = null;
+        $scope.analysis_company_restrict_month_stationline.res = null;
+        if (getInfo) $scope.analysis_company_restrict_month_info.res = null;
     }
 
     // 销毁 事件

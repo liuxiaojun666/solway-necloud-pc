@@ -954,26 +954,54 @@ ajaxData({
                     align: 'right'
                 },
                 {
-                    title: '预测当日发电量(kWh)',
-                    dataIndex: 'pre_real_kwh',
-                    width: '13%',
+                    title: '辐射总量(kWh/㎡)',
+                    dataIndex: 'real_ld_kw',
+                    width: '10%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '预测明日发电量(kWh)',
-                    dataIndex: 'pre_real_kwh_day2',
-                    width: '13%',
+                    title: '发电小时数(h)',
+                    dataIndex: 'real_hours_h',
+                    width: '10%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '预测后日发电量(kWh)',
-                    dataIndex: 'pre_real_kwh_day3',
-                    width: '13%',
+                    title: '通讯状态',
+                    dataIndex: 'status',
+                    width: '10%',
                     sort: true,
-                    align: 'right'
+                    align: 'left',
+                    render(text, item, index) {
+                        if (item.comm == 1) return '通讯中断';
+                        else if (item.comm == 2) return '通讯初始化';
+                        else if (text == 99) return '正常';
+                        else if (text == 1) return '故障';
+                        else if (text == 2) return '告警';
+                    }
                 },
+                // {
+                //     title: '预测当日发电量(kWh)',
+                //     dataIndex: 'pre_real_kwh',
+                //     width: '13%',
+                //     sort: true,
+                //     align: 'right'
+                // },
+                // {
+                //     title: '预测明日发电量(kWh)',
+                //     dataIndex: 'pre_real_kwh_day2',
+                //     width: '13%',
+                //     sort: true,
+                //     align: 'right'
+                // },
+                // {
+                //     title: '预测后日发电量(kWh)',
+                //     dataIndex: 'pre_real_kwh_day3',
+                //     width: '13%',
+                //     sort: true,
+                //     align: 'right'
+                // },
             ];
         };
         // 集团 历史 日 列表
