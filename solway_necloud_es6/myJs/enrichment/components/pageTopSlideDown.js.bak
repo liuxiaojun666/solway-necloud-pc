@@ -1,4 +1,4 @@
-app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$timeout', ($ocLazyLoad, $http, $state, $timeout) => ({
+app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$timeout','$rootScope', ($ocLazyLoad, $http, $state, $timeout,$rootScope) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -24,9 +24,12 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$timeout', ($
         }
 
         //到不同首页
-        $scope.goIndexPage = type =>{
-            $state.go(type);
+        $scope.goMainPage = () =>{
+            $state.go($rootScope.mainPageUrl);
         }
+        // $scope.goIndexPage = type =>{
+        //     $state.go(type);
+        // }
 
         //鼠标悬浮0.5s页面头部，出现下拉页面
         let timer = null;
