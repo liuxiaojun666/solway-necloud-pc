@@ -113,6 +113,12 @@ ajaxData({
                 sort: true,
             },
             {
+                title: '上网电量' + '(' + res.body.units.send_kwh_chk + ')',
+                dataIndex: 'send_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
                 title: '线损损失电量' + '(' + res.body.units.line_we + ')',
                 dataIndex: 'line_we',
                 align: 'right',
@@ -131,7 +137,7 @@ ajaxData({
     $scope.analysis_station_line_year_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.line_we], [res.body.data.line_we_r]];
+        $scope.ydatas = [[res.body.data.send_kwh_chk, res.body.data.line_we], [res.body.data.line_we_r]];
     };
 
     // 数据置空

@@ -68,20 +68,22 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
         }
 
         function trCheckeboxApply() {
-            Array.from($element.find('th')).forEach(dv => {
-                const { name } = dv.dataset;
-                if (!name) return;
-                const $inputs = () => $element.find(`input[name=${name}]`);
-                $(dv).find('input:checkbox').on('click', function (e) {
-                    e.stopPropagation();
-                    if (this.checked) Array.from($inputs()).forEach(v => v.checked = true);
-                    else Array.from($inputs()).forEach(v => v.checked = false);
-                });
-
-                $element.on('click', `input[name=${name}]`, e => {
-                    e.stopPropagation();
-                    $(dv).find('input:checkbox').prop('checked', Array.from($inputs()).every(v => v.checked === true));
-                });
+            const {name} = $element.find('th[data-name]')[0].dataset;
+            const $inputs = () => $element.find(`input[name=${name}]`);
+            $element.on('click', 'th input:checkbox', allHandle);
+            $element.on('click', `input[name=${name}]`, everyHandle);
+            function allHandle (e) {
+                e.stopPropagation();
+                if (this.checked) Array.from($inputs()).forEach(v => v.checked = true);
+                else Array.from($inputs()).forEach(v => v.checked = false);
+            }
+            function everyHandle(e) {
+                e.stopPropagation();
+                $element.find('th input:checkbox').prop('checked', Array.from($inputs()).every(v => v.checked === true));
+            }
+            $element.on('$destroy', () => {
+                $element.off('click', 'th input:checkbox', allHandle);
+                $element.off('click', `input[name=${name}]`, everyHandle);
             });
         }
 
