@@ -23,6 +23,24 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         calculateListHeight();
         window.addEventListener('resize', calculateListHeight);
 
+         //语音
+        function speak(textToSpeak) {
+            let newUtterance = new SpeechSynthesisUtterance();
+            newUtterance.text = textToSpeak;
+            window.speechSynthesis.speak(newUtterance);
+
+            document.onkeydown=function(event){ 
+                var e = event || window.event || arguments.callee.caller.arguments[0];               
+                if (e.keyCode == 65 ) {  
+                    window.speechSynthesis.speak(newUtterance);
+                }
+             };  
+        }
+
+        $timeout(()=>{
+            speak('中华人民共和国哈哈哈 the People\'s Republic of China;');
+        },0)
+
         //下拉或者收缩
         $scope.toggleAlarmList = () =>{
             $scope.alarmListPageShow = !$scope.alarmListPageShow;
@@ -35,52 +53,74 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             }
         }
 
-        //测试
-        $scope.datalist = [{"mid":1976674,"mc":"锅炉房逆变器C4\r\n通讯中断","mbc":null,"mhs":"05","musname":"系统","musname_real":"1234","murname":"1234","murname_real":"郭宗军",
-        "unread_num":0,"lid":null,"lusname":"1234","lusname_real":"1234","lurname":"郭宗军","lurname_real":"郭宗军","lc":"完成了工作任务T20180904100609，申请验收","ct":1536026797000,
-        "busitype":"00","busino":"1620625","musid_real":null,"recoveryTime":1536009959000,"stid":3002,"stname":"马鞍山蒙牛"}]
-        $scope.column = [
-            {
-                title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
-                dataIndex: '',
-                width: '60px',
-                align: 'center',
-                checkboxName: 'batchprocessing',
-                render(text, record, index) {
-                    return '<label class="i-checks m-b-none"><input data-identifies="' + record.id + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+        //批量标记为已确认
+        $scope.toConfirm = () =>{
+            const checkedIds = [];
+            $("input[name='alarmCheckedName']:checked").map((index,v)=>{
+                checkedIds.push(v.dataset.ids)
+            })
+            console.log(checkedIds)
+
+        }
+        
+        $scope.initData = () =>{
+            const checkedCondition = [];
+          
+            $("input[name='conditionType']:checked").map((index,v)=>{
+                checkedCondition.push(v.dataset.status)
+            })
+
+            console.log(checkedCondition)
+
+            //测试
+            $scope.datalist = [{"stid":3002,"stname":"马鞍山蒙牛1"},{"stid":3003,"stname":"马鞍山蒙牛2"},{"stid":3004,"stname":"马鞍山蒙牛3"}]
+            $scope.column = [
+                {
+                    title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+                    dataIndex: '',
+                    width: '60px',
+                    align: 'center',
+                    checkboxName: 'alarmCheckedName',
+                    render(text, record, index) {
+                        return '<label class="i-checks m-b-none"><input data-ids="' + record.stid + '" name="alarmCheckedName" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    }
+                },
+                {
+                    title: '电站名称',
+                    dataIndex: 'stname',
+                    width: '20%',
+                },
+                {
+                    title: '设备名称',
+                    dataIndex: '',
+                    width: '20%',
+                },
+                {
+                    title: '故障类型',
+                    dataIndex: '',
+                },
+                {
+                    title: '发生时间',
+                    dataIndex: '',
+                },
+                {
+                    title: '事件描述',
+                    dataIndex: '',
+                },
+                {
+                    title: '确认时间',
+                    dataIndex: '',
+                },
+                {
+                    title: '确认',
+                    dataIndex: '',
                 }
-            },
-            {
-                title: '电站名称',
-                dataIndex: 'stationName',
-                width: '20%',
-            },
-            {
-                title: '设备名称',
-                dataIndex: '',
-                width: '20%',
-            },
-            {
-                title: '故障类型',
-                dataIndex: '',
-            },
-            {
-                title: '发生时间',
-                dataIndex: '',
-            },
-            {
-                title: '事件描述',
-                dataIndex: '',
-            },
-            {
-                title: '确认时间',
-                dataIndex: '',
-            },
-            {
-                title: '确认',
-                dataIndex: '',
-            }
-        ];
+            ];
+
+        }
+
+        $scope.initData();
+        
 
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', calculateListHeight);
