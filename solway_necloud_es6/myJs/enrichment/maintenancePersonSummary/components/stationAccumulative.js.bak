@@ -1,0 +1,242 @@
+ajaxData({
+    // info
+    analysis_station_shade_accum_info: {
+        name: 'GETanalysis_station_shade_accum_info',
+        data: {},
+        later: true
+    },
+    // 时间 列表
+    analysis_station_shade_accum_timelist: {
+        name: 'GETanalysis_station_shade_accum_timelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 时间 曲线
+    analysis_station_shade_accum_timeline: {
+        name: 'GETanalysis_station_shade_accum_timeline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 列表
+    analysis_station_shade_accum_devicelist: {
+        name: 'GETanalysis_station_shade_accum_devicelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 曲线
+    analysis_station_shade_accum_deviceline: {
+        name: 'GETanalysis_station_shade_accum_deviceline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
+    __serviceName__: 'shadowStationAccumulativeService',
+})('shadowStationAccumulativeCtrl', ['$scope', 'shadowStationAccumulativeService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, tabIndex = 0 } = historicalRecord.get().themeShadowStationAccum || {};
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        $scope.diffGetData();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeShadowStationMonth: {
+                ...historicalRecord.get().themeShadowStationMonth || {},
+                tabIndex
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeShadowStationAccum: {
+                ...historicalRecord.get().themeShadowStationAccum || {},
+                showShape
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 接口请求
+    $scope.diffGetData = async (getInfo) => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull(getInfo);
+        $scope.$apply();
+        const { showShape, dateTime = {showDate: null}, dateType, dataType, tabIndex } = $scope;
+        if (dateType !== 3) return;
+        if (dataType !== 0) return;
+        if (getInfo) {
+            $scope.analysis_station_shade_accum_info.getData({
+                queryCode: 'analysis_station_shade_accum_info',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        }
+        if (tabIndex === 0 && showShape === 'list') {
+            $scope.analysis_station_shade_accum_timelist.getData({
+                queryCode: 'analysis_station_shade_accum_timelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 0 && showShape === 'chart') {
+            $scope.analysis_station_shade_accum_timeline.getData({
+                queryCode: 'analysis_station_shade_accum_timeline',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 1 && showShape === 'list') {
+            $scope.analysis_station_shade_accum_devicelist.getData({
+                queryCode: 'analysis_station_shade_accum_devicelist',
+                queryType: 3,
+                date: dateTime.showDate,
+                shade_status: 1
+            });
+        } else if (tabIndex === 1 && showShape === 'chart') {
+            $scope.analysis_station_shade_accum_deviceline.getData({
+                queryCode: 'analysis_station_shade_accum_deviceline',
+                queryType: 3,
+                date: dateTime.showDate,
+                shade_status: 1
+            });
+        }
+    };
+
+    // 时间 列表
+    $scope.analysis_station_shade_accum_timelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '日期',
+                dataIndex: 'dtime',
+                align: 'center',
+                sort: true,
+            },
+            {
+                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                dataIndex: 'shade_we_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 时间 曲线
+    $scope.analysis_station_shade_accum_timeline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+    };
+
+    // 设备 列表
+    $scope.analysis_station_shade_accum_devicelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '设备',
+                dataIndex: 'eq_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+            },
+            {
+                title: '装机容量' + '(' + res.body.units.inst_kw + ')',
+                dataIndex: 'inst_kw',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                dataIndex: 'shade_we_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 设备 曲线
+    $scope.analysis_station_shade_accum_deviceline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.eq_name;
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+    };
+
+
+    // 数据置空
+    function setDataNull(getInfo) {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.analysis_station_shade_accum_timelist.res = null;
+        $scope.analysis_station_shade_accum_timeline.res = null;
+        $scope.analysis_station_shade_accum_devicelist.res = null;
+        $scope.analysis_station_shade_accum_deviceline.res = null;
+        if (getInfo) $scope.analysis_station_shade_accum_info.res = null;
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});
