@@ -7,39 +7,51 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
     },
     templateUrl: 'tpl/enrichment/components/alarmTemplate.html',
     link($scope, $element) {
+
         //报警状态
-        $scope.currentStatus = 'abnormal'; //abnormal,normal
+        $scope.currentStatus = 'normal'; //abnormal,normal
 
-        if($scope.currentStatus == 'abnormal'){
-            $scope.alarmListPageShow = false;
-            $scope.ifTwinkle = true;
+        const newUtterance = new SpeechSynthesisUtterance();
+
+        const judgeIfAlarm = () =>{
+            if($scope.currentStatus == 'abnormal'){
+                $scope.alarmListPageShow = false;
+                if($scope.total_sure_no) $scope.ifTwinkle = true;
+            }else{
+                $scope.alarmListPageShow = true;
+                $scope.ifTwinkle = false;
+            }
         }
-
+        
         //设置列表高度
         const calculateListHeight = () =>{
-            $(".alarm-list").height($(window).height()-68);
+            $scope.winHeight = $(window).height();
+            $(".alarm-list").height($scope.winHeight-68);
         }
     
         calculateListHeight();
         window.addEventListener('resize', calculateListHeight);
 
+        document.onkeydown=function(event){ 
+            var e = event || window.event || arguments.callee.caller.arguments[0];               
+            if (e.keyCode == 65 ) { 
+                newUtterance.text = $scope.voiceContent;
+                window.speechSynthesis.speak(newUtterance);
+            }
+        };  
          //语音
-        function speak(textToSpeak) {
-            let newUtterance = new SpeechSynthesisUtterance();
-            newUtterance.text = textToSpeak;
-            window.speechSynthesis.speak(newUtterance);
+        // function speak(textToSpeak) {
+        //     let newUtterance = new SpeechSynthesisUtterance();
+        //     newUtterance.text = textToSpeak;
+        //     window.speechSynthesis.speak(newUtterance);
+            
+        // }
 
-            document.onkeydown=function(event){ 
-                var e = event || window.event || arguments.callee.caller.arguments[0];               
-                if (e.keyCode == 65 ) {  
-                    window.speechSynthesis.speak(newUtterance);
-                }
-             };  
-        }
+        // speak();
 
-        $timeout(()=>{
-            speak('中华人民共和国哈哈哈 the People\'s Republic of China;');
-        },0)
+        // $timeout(()=>{
+        //     speak('中华人民共和国哈哈哈 the People\'s Republic of China;');
+        // },0)
 
         //下拉或者收缩
         $scope.toggleAlarmList = () =>{
@@ -59,9 +71,15 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             $("input[name='alarmCheckedName']:checked").map((index,v)=>{
                 checkedIds.push(v.dataset.ids)
             })
-            console.log(checkedIds)
 
         }
+
+        $scope.trClick = (item, index, e) => {
+            $scope.voiceContent = item.voiceContent;
+            // e.stopPropagation();
+            
+            //$scope.$apply();
+        };
         
         $scope.initData = () =>{
             const checkedCondition = [];
@@ -70,10 +88,31 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 checkedCondition.push(v.dataset.status)
             })
 
-            console.log(checkedCondition)
+            $http({
+                method: "GET",
+                url: window.baseUrl + "/pv/alarm/getRunAlarmList.htm",
+                params: {
+                    startId:0
+                }
+            }).success(function (res) {
+                if(res.code == 0){
+                    const alarmList = res.body.alarmList;
+                    const alarmInfo = res.body.alarmTotalInfo;
+                    $scope.total = alarmInfo.total;
+                    $scope.total_sure_no = alarmInfo.total_sure_no;
+                    $scope.total_sure_yes = alarmInfo.total_sure_yes;
+
+                    if($scope.total) $scope.currentStatus = 'abnormal';
+                    if(alarmList.length) $scope.datalist = alarmList;
+
+                    judgeIfAlarm();
+                }else{
+                    alert(res.msg);
+                }
+            });
 
             //测试
-            $scope.datalist = [{"stid":3002,"stname":"马鞍山蒙牛1"},{"stid":3003,"stname":"马鞍山蒙牛2"},{"stid":3004,"stname":"马鞍山蒙牛3"}]
+            // $scope.datalist = [{"stid":3002,"stname":"马鞍山蒙牛1"},{"stid":3003,"stname":"马鞍山蒙牛2"},{"stid":3004,"stname":"马鞍山蒙牛3"}]
             $scope.column = [
                 {
                     title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
@@ -87,25 +126,25 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 },
                 {
                     title: '电站名称',
-                    dataIndex: 'stname',
+                    dataIndex: 'pstationname',
                     width: '20%',
                 },
                 {
                     title: '设备名称',
-                    dataIndex: '',
+                    dataIndex: 'devicename',
                     width: '20%',
                 },
                 {
                     title: '故障类型',
-                    dataIndex: '',
+                    dataIndex: 'faultclassStr',
                 },
                 {
                     title: '发生时间',
-                    dataIndex: '',
+                    dataIndex: 'sStartTime',
                 },
                 {
                     title: '事件描述',
-                    dataIndex: '',
+                    dataIndex: 'eventDesc',
                 },
                 {
                     title: '确认时间',
@@ -113,7 +152,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 },
                 {
                     title: '确认',
-                    dataIndex: '',
+                    dataIndex: 'handstatusStr',
                 }
             ];
 
