@@ -1,4 +1,4 @@
-app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$rootScope', ($ocLazyLoad, $http, $state, $timeout,$rootScope) => ({
+app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$rootScope','toaster', ($ocLazyLoad, $http, $state, $timeout,$rootScope,toaster) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -8,50 +8,24 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
     templateUrl: 'tpl/enrichment/components/alarmTemplate.html',
     link($scope, $element) {
 
+        $ocLazyLoad.load([
+            window.baseUrl+"/theme/js/dist/components/confirm.js"
+        ]).then(()=>{
+            $scope.initData();
+        })
+
         //报警状态
         $scope.currentStatus = 'normal'; //abnormal,normal
+        $scope.ifVoiced = true;
 
         const newUtterance = new SpeechSynthesisUtterance();
 
         const judgeIfAlarm = () =>{
-            if($scope.currentStatus == 'abnormal'){
+            if($scope.currentStatus == 'abnormal' && !$scope.alarmListPageShow){
                 $scope.alarmListPageShow = false;
                 if($scope.total_sure_no) $scope.ifTwinkle = true;
-            }else{
-                $scope.alarmListPageShow = true;
-                $scope.ifTwinkle = false;
             }
         }
-        
-        //设置列表高度
-        const calculateListHeight = () =>{
-            $scope.winHeight = $(window).height();
-            $(".alarm-list").height($scope.winHeight-68);
-        }
-    
-        calculateListHeight();
-        window.addEventListener('resize', calculateListHeight);
-
-        document.onkeydown=function(event){ 
-            var e = event || window.event || arguments.callee.caller.arguments[0];               
-            if (e.keyCode == 65 ) { 
-                newUtterance.text = $scope.voiceContent;
-                window.speechSynthesis.speak(newUtterance);
-            }
-        };  
-         //语音
-        // function speak(textToSpeak) {
-        //     let newUtterance = new SpeechSynthesisUtterance();
-        //     newUtterance.text = textToSpeak;
-        //     window.speechSynthesis.speak(newUtterance);
-            
-        // }
-
-        // speak();
-
-        // $timeout(()=>{
-        //     speak('中华人民共和国哈哈哈 the People\'s Republic of China;');
-        // },0)
 
         //下拉或者收缩
         $scope.toggleAlarmList = () =>{
@@ -65,20 +39,58 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             }
         }
 
+        //设置列表高度
+        const calculateListHeight = () =>{
+            $scope.winHeight = $(window).height();
+            $(".alarm-list").height($scope.winHeight-68);
+        }
+    
+        calculateListHeight();
+        window.addEventListener('resize', calculateListHeight);
+
+        document.addEventListener('dblclick',function(e){
+            if (e.ctrlKey && $scope.ifVoiced) { 
+                newUtterance.text = $scope.voiceContent;
+                window.speechSynthesis.speak(newUtterance);
+            }
+        },false);
+
+        //控制是否可以语音播放
+        $scope.changeInput = (e) =>{
+            $scope.ifVoiced = e.target.checked;
+        }
+
         //批量标记为已确认
         $scope.toConfirm = () =>{
             const checkedIds = [];
             $("input[name='alarmCheckedName']:checked").map((index,v)=>{
                 checkedIds.push(v.dataset.ids)
             })
-
+            if(checkedIds.length){
+                $solway.confirm({ message: '确定标记所选定消息为已确认？'}, () => {
+                    $http({
+                        method: "GET",
+                        url: window.baseUrl + "/pv/alarm/getRunAlarmConfirmBatch.htm",
+                        params: {
+                            ids:checkedIds.join(',')
+                        }
+                    }).success(function (res) {
+                        if(res.code == 0){
+                            toaster.pop('success', '', res.msg);
+                            $scope.initData();
+                        }else{
+                            toaster.pop('error', '', res.msg);
+                        }
+                    });
+                });
+            }else{
+                alert('请选择要确认的消息')
+            }
         }
 
         $scope.trClick = (item, index, e) => {
             $scope.voiceContent = item.voiceContent;
             // e.stopPropagation();
-            
-            //$scope.$apply();
         };
         
         $scope.initData = () =>{
@@ -88,19 +100,25 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 checkedCondition.push(v.dataset.status)
             })
 
+            if(!checkedCondition.length){
+                alert('至少选择一种消息类型')
+                return false;
+            }
+
             $http({
                 method: "GET",
                 url: window.baseUrl + "/pv/alarm/getRunAlarmList.htm",
                 params: {
-                    startId:0
+                    maxUpdateTime:0,
+                    eventTypes:checkedCondition.join(',')
                 }
             }).success(function (res) {
                 if(res.code == 0){
                     const alarmList = res.body.alarmList;
                     const alarmInfo = res.body.alarmTotalInfo;
-                    $scope.total = alarmInfo.total;
-                    $scope.total_sure_no = alarmInfo.total_sure_no;
-                    $scope.total_sure_yes = alarmInfo.total_sure_yes;
+                    $scope.total = alarmInfo.rsTotal;
+                    $scope.total_sure_no = alarmInfo.sureNoTotal;
+                    $scope.total_sure_yes = alarmInfo.sureOkTotal;
 
                     if($scope.total) $scope.currentStatus = 'abnormal';
                     if(alarmList.length) $scope.datalist = alarmList;
@@ -111,8 +129,6 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 }
             });
 
-            //测试
-            // $scope.datalist = [{"stid":3002,"stname":"马鞍山蒙牛1"},{"stid":3003,"stname":"马鞍山蒙牛2"},{"stid":3004,"stname":"马鞍山蒙牛3"}]
             $scope.column = [
                 {
                     title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
@@ -121,26 +137,35 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     align: 'center',
                     checkboxName: 'alarmCheckedName',
                     render(text, record, index) {
-                        return '<label class="i-checks m-b-none"><input data-ids="' + record.stid + '" name="alarmCheckedName" type="checkbox" /><i style="background:transparent;"></i></label>';
+                        return '<label class="i-checks m-b-none"><input data-ids="' + record.id + '" name="alarmCheckedName" type="checkbox" /><i style="background:transparent;"></i></label>';
                     }
                 },
                 {
                     title: '电站名称',
                     dataIndex: 'pstationname',
-                    width: '20%',
+                    width: '180px',
                 },
                 {
                     title: '设备名称',
                     dataIndex: 'devicename',
-                    width: '20%',
-                },
-                {
-                    title: '故障类型',
-                    dataIndex: 'faultclassStr',
+                    width: '180px',
                 },
                 {
                     title: '发生时间',
                     dataIndex: 'sStartTime',
+                    width: '135px',
+                    align: 'center',
+                    render:function(text, item, index){
+                        return text ? new Date(text).Format('yyyy-MM-dd hh:mm') : '-';
+                    }
+                },
+                {
+                    title: '故障类型',
+                    dataIndex: 'faultclassStr',
+                    width: '100px',
+                    render(text, item, index) {
+                        return '<span class="'+(item.eventType==1?'fault':(item.eventType==2?'alarm':(item.eventType==-9?'interrupt':'normal')))+'">'+text+'</span>';
+                    }
                 },
                 {
                     title: '事件描述',
@@ -148,21 +173,25 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 },
                 {
                     title: '确认时间',
-                    dataIndex: '',
+                    dataIndex: 'sureTime',
+                    width: '135px',
+                    align: 'center',
+                    render:function(text, item, index){
+                        return text ? new Date(text).Format('yyyy-MM-dd hh:mm') : '-';
+                    }
                 },
                 {
                     title: '确认',
                     dataIndex: 'handstatusStr',
+                    width: '100px'
                 }
             ];
 
-        }
-
-        $scope.initData();
-        
+        }       
 
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', calculateListHeight);
+            $scope.voiceContent = '';
         });
     }
 })])
