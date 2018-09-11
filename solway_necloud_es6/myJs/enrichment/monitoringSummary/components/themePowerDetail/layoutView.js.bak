@@ -1,0 +1,17 @@
+ajaxData({
+    getDeviceLayoutSvg: {
+        name: 'GETDeviceLayoutSvg',
+        data: {}
+    }
+}, {
+        __serviceName__: 'themePowerLayoutViewService'
+    })('themePowerLayoutViewCtrl', ['$scope', 'themePowerLayoutViewService'], ($scope, myAjaxData) => {
+        $scope.getDeviceLayoutSvg.subscribe(res => {
+            const drag = $solway.drag({
+                ele: $("#svgView").html(res.data).find('svg')[0],
+                scale: 2
+            });
+            $scope.$on('$destroy', () => drag.destroy());
+        });
+
+    });
