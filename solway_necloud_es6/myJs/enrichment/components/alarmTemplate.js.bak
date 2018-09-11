@@ -12,6 +12,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             window.baseUrl+"/theme/js/dist/components/confirm.js"
         ]).then(()=>{
             $scope.maxUpdateTime = 0;
+            $scope.initColumns();
             $scope.initData();
         })
 
@@ -86,7 +87,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     });
                 });
             }else{
-                alert('请选择要确认的消息')
+                toaster.pop('info', '', '请选择要确认的消息');
             }
         }
 
@@ -102,7 +103,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             })
 
             if(!checkedCondition.length){
-                alert('至少选择一种消息类型')
+                $scope.datalist = [];
                 return false;
             }
 
@@ -127,10 +128,13 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
                     judgeIfAlarm();
                 }else{
-                    alert(res.msg);
+                    toaster.pop('error', '', '请求报警列表失败');
                 }
             });
 
+        }     
+        
+        $scope.initColumns = () =>{
             $scope.column = [
                 {
                     title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
@@ -162,6 +166,15 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     }
                 },
                 {
+                    title: '消缺时间',
+                    dataIndex: 'sEndTime',
+                    width: '135px',
+                    align: 'center',
+                    render:function(text, item, index){
+                        return text ? new Date(text).Format('yyyy-MM-dd hh:mm') : '-';
+                    }
+                },
+                {
                     title: '故障类型',
                     dataIndex: 'faultclassStr',
                     width: '100px',
@@ -183,20 +196,20 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     }
                 },
                 {
-                    title: '确认',
+                    title: '状态',
                     dataIndex: 'handstatusStr',
                     width: '100px'
                 }
             ];
+        }
 
-        }       
-
-        $interval(()=>{
+        const interval = $interval(()=>{
             $scope.initData();
         },60000);
 
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', calculateListHeight);
+            $interval.cancel(interval);
             $scope.voiceContent = '';
         });
     }
