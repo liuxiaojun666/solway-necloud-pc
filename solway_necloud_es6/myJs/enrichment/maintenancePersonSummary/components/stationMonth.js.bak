@@ -1,0 +1,143 @@
+ajaxData({
+    // 时间 列表
+    // analysis_station_shade_month_timelist: {
+    //     name: 'GETanalysis_station_shade_month_timelist',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // },
+}, {
+    __serviceName__: 'maintenancePersonStationMonth',
+})('maintenancePersonStationMonthCtrl', ['$scope', 'maintenancePersonStationMonth', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { tabIndex = 2 ,personTab = 'profession'} = historicalRecord.get().themeMaintenanceStationMonth || {};
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.changeTab(tabIndex);
+        $scope.changePersonTab(personTab);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        $scope.diffGetData();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeShadowStationMonth: {
+                ...historicalRecord.get().themeMaintenanceStationMonth || {},
+                tabIndex
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    //专业和共享 切换
+    $scope.changePersonTab = tab =>{
+        $scope.personTab = tab;
+    }
+    // 判断 调用  对应 接口
+    $scope.diffGetData = ()=>{
+        if (!$scope.initComplete) return;
+
+        //测试 人员列表
+        // $scope.column = [
+        //     {
+        //         title: '姓名',
+        //         width: '25%',
+        //         dataIndex: 'st_name',
+        //         align: 'left',
+        //     },
+        //     {
+        //         title: '检修台次',
+        //         dataIndex: '',
+        //         sort: 'true',
+        //         align: 'right',
+        //         render(text, item, index) {
+        //             return `<span>${item.comm + item.fault + item.maintain + item.run + item.wait || ''}</span>`
+        //         }
+        //     },
+        //     {
+        //         title: '响应时间',
+        //         dataIndex: 'run',
+        //         sort: 'true',
+        //         align: 'right',
+        //     },
+        //     {
+        //         title: '检修时间',
+        //         dataIndex: 'wait',
+        //         sort: 'true',
+        //         align: 'right',
+        //     },
+        //     {
+        //         title: '检修成功率',
+        //         dataIndex: 'fault',
+        //         sort: 'true',
+        //         align: 'right'
+        //     }
+        // ];
+        // await myAjaxData.timeout(0);
+        
+        // const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+        // switch (currentClass) {
+        //     case 'StationMonth': //电站月
+        //         if (showShape === 'list' && tabIndex === 0) {//时间
+        //             $scope.query_station_month_dev_detail_timelist_his.getData({
+        //                 queryCode: 'query_station_month_dev_detail_timelist_his',
+        //                 queryType: 3,
+        //                 date: dateTime.showDate
+        //             });
+        //         } else if (showShape === 'chart' && tabIndex === 0) {
+        //             $scope.query_station_month_dev_detail_timeline_his.getData({
+        //                 queryCode: 'query_station_month_dev_detail_timeline_his',
+        //                 queryType: 3,
+        //                 date: dateTime.showDate
+        //             });
+        //         } else if (showShape === 'list' && tabIndex === 1) {//设备
+        //             $scope.query_station_month_dev_detail_devlist_his.getData({
+        //                 queryCode: 'query_station_month_dev_detail_devlist_his',
+        //                 queryType: 3,
+        //                 date: dateTime.showDate
+        //             });
+        //         } else if (showShape === 'chart' && tabIndex === 1) {
+        //             $scope.query_station_month_dev_detail_devline_his.getData({
+        //                 queryCode: 'query_station_month_dev_detail_devline_his',
+        //                 queryType: 3,
+        //                 date: dateTime.showDate
+        //             });
+        //         }
+        //         break;
+            
+        //     default:
+        //         break;
+        // }
+    }
+
+
+
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+    });
+});
