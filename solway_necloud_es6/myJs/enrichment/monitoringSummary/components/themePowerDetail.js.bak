@@ -175,7 +175,7 @@ ajaxData({
         $scope.changeTab = tabIndex => {
             if (tabIndex === $scope.tabIndex) return;
             $scope.tabIndex = tabIndex;
-            if (tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') $scope.changeShowShape('list');
+            $scope.changeShowShape('chart');
             historicalRecord.set({
                 themePower: {
                     ...historicalRecord.get().themePower || {},
@@ -562,20 +562,20 @@ ajaxData({
                         return `<span>${text.toFixed(2)}</span>`
                     }
                 }, 
-                ...new Array(20).fill('c').map((v, i) => ({
-                    dataIndex: v + (i + 1),
-                    title: `<span>${i + 1}</span>`,
-                    width: '80px',
-                    align: 'right',
-                    render(text, item, index) {
-                        return `
+                
+            ].concat(new Array(20).fill('c').map((v, i) => ({
+                dataIndex: v + (i + 1),
+                title: `<span>${i + 1}</span>`,
+                width: '80px',
+                align: 'right',
+                render(text, item, index) {
+                    return item.hasJB === '0' ? '' : `
                         <div style="background: ${item.shadowFlags && item.shadowFlags[i] ? 'rgba(0, 0, 0,0.3)' : ''}">
-                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags[i] && text) ? text.toFixed(2) : '-')}</span>
+                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags && item.statuFlags[i] && text) ? text.toFixed(2) : '-')}</span>
                         </div>
                         `
-                    }
-                }))
-            ];
+                }
+            })));
         };
         // 电站 今日 时间 列表 列表
         $scope.stationDayTodayTime.getDataCallback = (success, res) => {
