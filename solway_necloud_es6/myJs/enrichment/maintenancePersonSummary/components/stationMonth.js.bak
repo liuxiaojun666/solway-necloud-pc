@@ -53,50 +53,58 @@ ajaxData({
         $scope.diffGetData();
     };
 
+    $scope.selectedBrands = [],$scope.selectedFaults = [];
+    $scope.$watch("selectedBrands", function(n, o){
+        // console.log(n)
+    })
+    $scope.$watch("selectedFaults", function(n, o){
+        // console.log(n)
+    })
+
     //专业和共享 切换
     $scope.changePersonTab = tab =>{
         $scope.personTab = tab;
     }
+
+    $scope.trClick = (item,index) =>{
+        console.log(item)
+    }
     // 判断 调用  对应 接口
     $scope.diffGetData = ()=>{
         if (!$scope.initComplete) return;
-
+        $scope.testArr = [{id:1,test:'测试name1'},{id:2,test:'测试name2'},{id:3,test:'测试name3'},]
         //测试 人员列表
-        // $scope.column = [
-        //     {
-        //         title: '姓名',
-        //         width: '25%',
-        //         dataIndex: 'st_name',
-        //         align: 'left',
-        //     },
-        //     {
-        //         title: '检修台次',
-        //         dataIndex: '',
-        //         sort: 'true',
-        //         align: 'right',
-        //         render(text, item, index) {
-        //             return `<span>${item.comm + item.fault + item.maintain + item.run + item.wait || ''}</span>`
-        //         }
-        //     },
-        //     {
-        //         title: '响应时间',
-        //         dataIndex: 'run',
-        //         sort: 'true',
-        //         align: 'right',
-        //     },
-        //     {
-        //         title: '检修时间',
-        //         dataIndex: 'wait',
-        //         sort: 'true',
-        //         align: 'right',
-        //     },
-        //     {
-        //         title: '检修成功率',
-        //         dataIndex: 'fault',
-        //         sort: 'true',
-        //         align: 'right'
-        //     }
-        // ];
+        $scope.column = [
+            {
+                title: '姓名',
+                width: '25%',
+                dataIndex: 'test',
+                align: 'left',
+            },
+            {
+                title: '检修台次',
+                dataIndex: '',
+                
+            },
+            {
+                title: '响应时间',
+                dataIndex: '',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '检修时间',
+                dataIndex: '',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '检修成功率',
+                dataIndex: '',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
         // await myAjaxData.timeout(0);
         
         // const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;

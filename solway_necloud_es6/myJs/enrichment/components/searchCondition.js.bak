@@ -1,15 +1,65 @@
-app.directive('searchCondition', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
+app.directive('searchCondition', ['myAjaxData', '$ocLazyLoad','$timeout', (myAjaxData, $ocLazyLoad,$timeout) => ({
     restrict: 'E',
     replace: !0,
     templateUrl: 'tpl/enrichment/components/searchConditionTpl.html',
     scope: {
-        tabNames: "=",
-        changeTab: '='
+        selectedBrands: '=',
+        selectedFaults: '='
     },
     link($scope, $element) {
+        
+        const checkControl = () =>{
+            let $checkAllBrand =  $element.find('input[name="brandCheckAll"]');
+            let $checkEveryBrand = $element.find('input[name="brandType"]');
+
+            let $checkAllFault =  $element.find('input[name="faultCheckAll"]');
+            let $checkEveryFault = $element.find('input[name="faultType"]');
+            
+
+            $element.on('click','input[name="brandCheckAll"]', (e)=>{
+                Array.from($checkEveryBrand).forEach(item=>item.checked = e.target.checked)
+            });
+            $element.on('click','input[name="brandType"]', (e)=>{
+                $checkAllBrand.prop('checked', Array.from($checkEveryBrand).every(item => item.checked== true));
+            });
+
+            $element.on('click','input[name="faultCheckAll"]', (e)=>{
+                Array.from($checkEveryFault).forEach(item=>item.checked = e.target.checked)
+            });
+            $element.on('click','input[name="faultType"]', (e)=>{
+                $checkAllFault.prop('checked', Array.from($checkEveryFault).every(item => item.checked== true));
+            });
+            
+        }
+
+        //全选控制
+        $timeout(()=>{
+            $scope.ifShowModel = false;//默认不显示弹框
+            checkControl();
+        },0);
+
+
+        $scope.search = () =>{
+            $scope.ifShowModel = false;
+            
+            const brandArr = [],faultArr = [];
+            $("input[name='brandType']:checked").map((index,v)=>{
+                brandArr.push(v.dataset.ids)
+            })
+            $("input[name='faultType']:checked").map((index,v)=>{
+                faultArr.push(v.dataset.ids)
+            })
+            
+            $scope.selectedBrands = brandArr;
+            $scope.selectedFaults = faultArr;
+        }
+
+        $scope.cancel = () =>{
+            $scope.ifShowModel = false;
+        }
 
         $scope.showSearchModel = () =>{
-            
+            $scope.ifShowModel = !$scope.ifShowModel;
         }
 
         $scope.$on('$destroy',function(){
