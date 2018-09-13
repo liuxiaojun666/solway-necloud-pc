@@ -23,6 +23,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         interval: '=',
         tooltipFormatter: '=',
         lineWidth: '=',
+        toFixed: '='
     },
     link($scope, $element) {
         let myChart;
@@ -45,6 +46,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
             const { 
                 stack = [[], []], 
                 width, 
+                toFixed = 1,
                 interval = void 0, 
                 lineWidth = 1, 
                 tooltipFormatter = (params, ticket, callback) => {
@@ -167,7 +169,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         showSymbol: symbolSize ? true : false,
                         symbolSize: symbolSize,
                         data: data.map((xxv, xxi) => {
-                            if (!Number.isNaN(xxv + '' - 0)) return (+xxv).toFixed(1) - 0;
+                            if (!Number.isNaN(xxv + '' - 0)) return (+xxv).toFixed(toFixed) - 0;
                             else return xxv === null ? '-' : xxv;
                         }),
                         itemStyle: {
