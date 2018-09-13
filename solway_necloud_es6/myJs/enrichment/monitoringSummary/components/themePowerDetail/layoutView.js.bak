@@ -37,7 +37,8 @@ ajaxData({
 
         // 渲染svg 绑定id与名称 并 注册拖拽缩放功能
         $scope.getDeviceLayoutSvg.subscribe(res => {
-            const $svg = $("#svgView").html(res.data).find('svg');
+            const $svgView = $("#svgView").html(res.data)
+            const $svg = $svgView.find('svg');
             res.allDevice.forEach(v => $svg.find("g[deviceid='" + v.serialNumber + "'][type!='videoImage']")
                 .attr('title', v.name)
                 .attr('id', v.id)
@@ -45,7 +46,16 @@ ajaxData({
                 .attr('data-placement', 'right')
                 .tooltip({ 'container': 'body' })
             );
-            $scope.drag = $solway.drag({ ele: $svg[0] });
+            const viewWidth = $svgView.width();
+            const svgWidth = $svg.width();
+            $scope.drag = $solway.drag({ 
+                ele: $svg[0], 
+                translateX: (viewWidth - svgWidth) / 2,
+                originX: '50%',
+                originY: '0',
+                scale: (svgWidth < viewWidth) ? 1 : (viewWidth / svgWidth),
+                minScale: 0.1
+            });
             $scope.$on('$destroy', () => $scope.drag.destroy());
         });
 
@@ -74,7 +84,7 @@ ajaxData({
 
         // 注册事件
         $scope.getDeviceLayoutSvg.subscribe(res => {
-            $("#svgView").find("g rect.rectLayout").on('click', function () {
+            $("#svgView").find("g rect.rectLayout").on('dblclick', function () {
                 const $device = $(this).parents("g");
                 const type = $device.attr("type");
                 const deviceId = $device.attr("deviceId");
@@ -150,11 +160,10 @@ ajaxData({
                             position:relative;
                             float:left;
                             display:block;
-                            left: 50%;
-                            margin-left: -${($scope.winWidth - 46) / 6}px;
+                            margin-left: ${($scope.winWidth - 800) / 2}px;
                             margin-top: 50px;
-                            width:${($scope.winWidth - 46) / 3}px;
-                            height:${($scope.winWidth - 46) / 4}px" 
+                            width: 700px;
+                            height: 525px" 
                         id="player"></a>`
             );
         }
