@@ -37,7 +37,8 @@ ajaxData({
 
         // 渲染svg 绑定id与名称 并 注册拖拽缩放功能
         $scope.getDeviceLayoutSvg.subscribe(res => {
-            const $svg = $("#svgView").html(res.data).find('svg');
+            const $svgView = $("#svgView").html(res.data)
+            const $svg = $svgView.find('svg');
             res.allDevice.forEach(v => $svg.find("g[deviceid='" + v.serialNumber + "'][type!='videoImage']")
                 .attr('title', v.name)
                 .attr('id', v.id)
@@ -45,7 +46,15 @@ ajaxData({
                 .attr('data-placement', 'right')
                 .tooltip({ 'container': 'body' })
             );
-            $scope.drag = $solway.drag({ ele: $svg[0] });
+            const viewWidth = $svgView.width();
+            const svgWidth = $svg.width();
+            $scope.drag = $solway.drag({ 
+                ele: $svg[0], 
+                translateX: (viewWidth - svgWidth) / 2,
+                originX: '50%',
+                originY: '0',
+                scale: (svgWidth < viewWidth) ? 1 : (svgWidth / viewWidth)
+            });
             $scope.$on('$destroy', () => $scope.drag.destroy());
         });
 
