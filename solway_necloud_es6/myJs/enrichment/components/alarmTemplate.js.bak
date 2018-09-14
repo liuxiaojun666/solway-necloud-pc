@@ -9,15 +9,18 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
     link($scope, $element) {
 
         $ocLazyLoad.load([
-            window.baseUrl+"/theme/js/dist/components/confirm.js"
+            window.baseUrl+"/theme/js/dist/components/confirm.js",
+			window.baseUrl+'/theme/js/dist/components/myTable.js', // table 列表组件
         ]).then(()=>{
             $scope.maxUpdateTime = 0;
+            $scope.voiceTime = 0;
             $scope.initColumns();
             $scope.initData();
         })
 
         $scope.$on('broadcastSwitchStation',(e,v)=>{
             $scope.maxUpdateTime = 0;
+            $scope.voiceTime = 0;
             $scope.datalist = [];
             $scope.initData();
         })
@@ -59,7 +62,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
         document.addEventListener('dblclick',function(e){
             if (e.ctrlKey && $scope.ifVoiced && $scope.voiceContent) { 
-                newUtterance.text = $scope.voiceContent;
+                newUtterance.text = '2018年09月14日14点45分28秒 金峰财富HL0109告警.2018年09月14日14点50分58秒 金峰财富HL0110告警';
                 window.speechSynthesis.speak(newUtterance);
             }
         },false);
@@ -118,6 +121,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 url: window.baseUrl + "/pv/alarm/getRunAlarmList.htm",
                 params: {
                     maxUpdateTime:$scope.maxUpdateTime,
+                    voiceTime:$scope.voiceTime,
                     eventTypes:checkedCondition.join(',')
                 }
             }).success(function (res) {
@@ -128,6 +132,13 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     $scope.total_sure_no = alarmInfo.sureNoTotal;
                     $scope.total_sure_yes = alarmInfo.sureOkTotal;
                     $scope.maxUpdateTime = alarmInfo.maxUpdateTime;
+                    $scope.voiceTime = alarmInfo.voiceTime;
+
+                    if(alarmInfo.voiceContent){
+                        console.log(alarmInfo.voiceContent)
+                        newUtterance.text = alarmInfo.voiceContent;
+                        window.speechSynthesis.speak(newUtterance);
+                    }
 
                     if($scope.total){
                         $scope.currentStatus = 'abnormal';
