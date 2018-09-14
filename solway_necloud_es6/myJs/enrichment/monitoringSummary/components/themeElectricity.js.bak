@@ -39,100 +39,15 @@ ajaxData({
     })('themeElectricityCtrl', ['$scope', 'themeElectricityAjaxData', '$timeout', '$interval'], ($scope, myAjaxData, $timeout, $interval) => {
 
     $scope.initChildScope($scope, myAjaxData);
-    
-    const pieChart = echarts.init(document.getElementById('themeElePieEchart'));
-    const pieChartSmall = echarts.init(document.getElementById('themeElePieEchartSmall'));
-
-    const initPieEchart = (fail_kwh, grid_disc_kwh, other_loss_kwh) => {
-        let pieId;
-        if ($scope.currentClass == 'StationMonth' || $scope.currentClass == 'StationYear' || $scope.currentClass == 'CompanyMonth' || $scope.currentClass == 'CompanyYear') {
-            pieId = pieChartSmall;//小Pie
-        } else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo') {
-            pieId = pieChart;     //大Pie       
-        }
-        const option = {
-            tooltip: {
-                trigger: 'item',
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
-            },
-            series: [
-                {
-                    name: '',
-                    type: 'pie',
-                    radius: ['25%', '85%'],
-                    center: ['50%', '40%'],
-                    roseType: 'radius',
-                    label: {
-                        normal: {
-                            show: false
-                        },
-                        emphasis: {
-                            show: true
-                        }
-                    },
-                    lableLine: {
-                        normal: {
-                            show: false
-                        },
-                        emphasis: {
-                            show: true
-                        }
-                    },
-                    data: [
-                        {
-                            value: grid_disc_kwh, name: '限电',
-                            itemStyle: {
-                                normal: {
-                                    color: '#e3887c'
-                                }
-                            }
-                        },
-                        {
-                            value: other_loss_kwh, name: '其他',
-                            itemStyle: {
-                                normal: {
-                                    color: '#b196e2'
-                                }
-                            }
-                        },
-                        {
-                            value: fail_kwh, name: '故障',
-                            itemStyle: {
-                                normal: {
-                                    color: '#51a7d3'
-                                }
-                            }
-                        }
-
-                    ]
-                }
-            ]
-        };
-        pieId.setOption(option);
-        pieId.resize();
-    }
 
     const initEchartHeightWidth = () =>{
         //左侧柱状图占的比例
-        if ($scope.currentClass == 'StationMonth' || $scope.currentClass == 'StationYear' || $scope.currentClass == 'CompanyMonth' || $scope.currentClass == 'CompanyYear') {
-            $scope.whichPart = 'part1-3';
-            $scope.barWidth = $("#themeElectricity").width() * 0.62;
-            $("#themeElePieEchartSmall").width($("#themeElectricity").width() * 0.38 * 0.5)
-
-            $scope.xAxis = ['应发电量','实发电量', '上网电量', '计划电量'];
-        } else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo') {
-            $scope.whichPart = 'part1-2';
-            $scope.barWidth = $("#themeElectricity").width() * 0.7;
-            // $("#themeElePieEchart").width($("#themeElectricity").width() * 0.3)
-            $("#themeElePieEchart").width(142)
+        $scope.barWidth = $("#themeElectricity").width();
+        if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo' || $scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
             $scope.xAxis = ['应发电量','实发电量', '上网电量'];
         } else {
-            $scope.whichPart = 'part1-1';
-            $scope.barWidth = $("#themeElectricity").width();
-
-            $scope.xAxis = ['实发电量', '上网电量', '今日预测', '明日预测', '后日预测'];
+            $scope.xAxis = ['应发电量','实发电量', '上网电量','预测发电量'];
         }
-
         $scope.$apply();
     }
 
@@ -241,7 +156,6 @@ ajaxData({
                 }else{
                     $scope.yAxis = [[[data.shd_kwh_chk,data.real_kwh, data.send_kwh_chk, data.plan_kwh]]];
                 }
-                initPieEchart(data.fail_kwh, data.grid_disc_kwh, data.other_loss_kwh);
             }
         })
     }
