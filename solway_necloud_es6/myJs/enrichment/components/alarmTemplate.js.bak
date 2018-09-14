@@ -16,6 +16,12 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             $scope.initData();
         })
 
+        $scope.$on('broadcastSwitchStation',(e,v)=>{
+            $scope.maxUpdateTime = 0;
+            $scope.datalist = [];
+            $scope.initData();
+        })
+
         //报警状态
         $scope.currentStatus = 'normal'; //abnormal,normal
         $scope.ifVoiced = true;
@@ -123,7 +129,11 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     $scope.total_sure_yes = alarmInfo.sureOkTotal;
                     $scope.maxUpdateTime = alarmInfo.maxUpdateTime;
 
-                    if($scope.total) $scope.currentStatus = 'abnormal';
+                    if($scope.total){
+                        $scope.currentStatus = 'abnormal';
+                    }else{
+                        $scope.currentStatus = 'normal';
+                    }
                     if(alarmList.length) $scope.datalist = alarmList;
 
                     judgeIfAlarm();
