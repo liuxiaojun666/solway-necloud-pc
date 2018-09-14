@@ -3,9 +3,10 @@
         typeof define === 'function' && define.amd ? define(['exports'], factory) :
             (factory((global.$solway = global.$solway || {})));
 }(window, ((exports) => {
+    const win = window;
     let store = {};
     const persist = obj => {
-        const persistStr = window.localStorage.persist;
+        const persistStr = win.localStorage.persist;
 
         if (obj === void 0) return store;
 
@@ -13,7 +14,7 @@
 
         if (obj.__set__) {
             delete obj.__set__;
-            window.localStorage.persist = JSON.stringify(obj);
+            win.localStorage.persist = JSON.stringify(obj);
             return store = obj;
         }
 
@@ -23,7 +24,7 @@
             return store = JSON.parse(persistStr);
         }
 
-        window.localStorage.persist = JSON.stringify(obj);
+        win.localStorage.persist = JSON.stringify(obj);
         return store = obj;
 
     };

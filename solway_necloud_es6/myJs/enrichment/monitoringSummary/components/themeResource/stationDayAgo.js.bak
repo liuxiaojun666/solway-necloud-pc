@@ -1,0 +1,50 @@
+ajaxData({
+    query_station_day_res_timeone_his: {
+        name: 'GETquery_station_day_res_timeone_his',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+}, {
+
+        __serviceName__: 'themeResourceDayAgoService'
+    })('themeResourceDayAgoCtrl', ['$scope', 'themeResourceDayAgoService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            await $scope.dateUpdated();
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        };
+
+
+        // 日期改变
+        $scope.dateUpdated = async () => {
+            await myAjaxData.timeout(0);
+            if ($scope.currentClass === 'StationDayAgo') $scope.query_station_day_res_timeone_his.getData({
+                queryType: 3,
+                queryCode: 'query_station_day_res_timeone_his',
+                date: $scope.dateTime.showDate
+            });
+        };
+
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            if (!$scope.initComplete) return;
+            $scope.query_station_day_res_timeone_his.res = null;
+            if ($scope.dateType === 0) return $scope.query_station_day_res_timeone_his.getData({});
+        };
+
+        $scope.$on('$destroy', () => {
+            $scope.query_station_day_res_timeone_his.res = null;
+        });
+
+    });

@@ -1,0 +1,118 @@
+ajaxData({
+    // 电站日
+    companyDayToday: {
+        name: 'GETresourceDetailCompanyDayToday',
+        data: {
+            queryType: 1,
+            dateType: 3,
+            date: (new Date).Format('yyyy-MM-dd')
+        },
+        onlyLatest: true,
+        sameTimeOnce: true,
+    },
+}, {
+
+        __serviceName__: 'themeResourceCompanyDayTodayService'
+    })('themeResourceCompanyDayTodayCtrl', ['$scope', 'themeResourceCompanyDayTodayService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        };
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            $scope.companyDayToday.res = null;
+            if ($scope.dateType === 0) return $scope.companyDayToday.getData({});
+        };
+
+        $scope.companyDayToday.subscribe(res => {
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'st_name',
+                    sort: 'true',
+                    width: '25%',
+                    align: 'left'
+                },
+                {
+                    title: '装机容量(kW)',
+                    dataIndex: 'inst_kw',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'right'
+                },
+                {
+                    title: '辐射总量(kWh/m²)',
+                    dataIndex: 'rad_chk',
+                    sort: 'true',
+                    width: '15%',
+                    align: 'right'
+                },
+                {
+                    title: '光照强度(W/m²)',
+                    dataIndex: 'sun',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'right'
+                },
+                {
+                    title: '天气',
+                    dataIndex: 'weater',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'center'
+                },
+                {
+                    title: '温度(℃)',
+                    dataIndex: 'tmp',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'center',
+                },
+                {
+                    title: '今日预报',
+                    dataIndex: 'pre_weater',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'center',
+                    render(text, item) {
+                        return text ? '<span>' + text + ' ' + item.pre_tmp + '℃' + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '明日预报',
+                    dataIndex: 'pre_weater2',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'center',
+                    render(text, item) {
+                        return text ? '<span>' + text + ' ' + item.pre_tmp2 + '℃' + '</span>' : '<span></span>';
+                    }
+                },
+                {
+                    title: '后日预报',
+                    dataIndex: 'pre_weater3',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'center',
+                    render(text, item) {
+                        return text ? '<span>' + text + ' ' + item.pre_tmp3 + '℃' + '</span>' : '<span></span>';
+                    }
+                },
+            ];
+        });
+
+        // 定时器  定时刷新接口
+        const timer = $interval(() => $scope.companyDayToday.getData({}), 10000);
+        $scope.$on('$destroy', () => {
+            $interval.cancel(timer);
+            $scope.companyDayToday.res = null;
+        });
+
+    });
