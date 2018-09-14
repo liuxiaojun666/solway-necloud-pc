@@ -32,7 +32,7 @@ ajaxData({
     $scope.$on('lastUpdate',(i,val)=>{
         $scope.comm = val.comm;
         $scope.dtime = val.dtime;
-    })
+    });
     
 
     // 当前页面行为记录初始化回调 获取行为记录
@@ -41,7 +41,7 @@ ajaxData({
         const { detailFullPage,
             dateType = 0,
             dateTime = new Date(),
-            theme = 'Power',
+            theme = 'BasicSituation',
             stationData } = historiData;
         if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope.dateTime = dateTime;
@@ -50,11 +50,11 @@ ajaxData({
         $scope._dateType = dateType;
         $scope.theme = theme;
         $scope.detailFullPage = detailFullPage;
-        $scope.themeDetail = `tpl/enrichment/monitoringSummary/components/theme${theme}Detail.html`;
         if (!stationData) historicalRecord.set({ dateType, dateTime, theme });
         await diffStationInfo(stationData);
         $scope.beforeLoading = false;
         computeClass();
+        $scope.changeTheme(theme);
         $scope.mainPageInitComplete && $scope.mainPageInitComplete($scope.currentClass);
         $scope.$apply();
     };
@@ -66,10 +66,12 @@ ajaxData({
         $scope._dateType = dateType;
         $scope._dateTime = dateTime;
         computeClass();
-        if ((dateType === 1 || dateType === 2) && $scope.theme === 'Power') $scope.changeTheme('BasicSituation');
-        else if (dateType === 3) $scope.changeTheme('Accumulative');
-        else if ($scope.theme === 'Accumulative' && dateType === 0) $scope.changeTheme('Power');
-        else if ($scope.theme === 'Accumulative' && (dateType === 1 || dateType === 2)) $scope.changeTheme('BasicSituation');
+        if (dateType === 3 && $scope.theme !== 'Accumulative') {
+            historicalRecord.set({ preTheme: $scope.theme });
+            $scope.changeTheme('Accumulative');
+        }
+        else if (dateType !== 3 && $scope.theme === 'Accumulative') $scope.changeTheme(historicalRecord.get().preTheme); 
+        else $scope.changeTheme($scope.theme);
         $scope.getTopXhr = true;
     };
 
@@ -99,11 +101,14 @@ ajaxData({
 
     // 切换主题模块
     $scope.changeTheme = theme => {
-        if (theme === 'Expense') return;
-        if (theme !== $scope.theme) $scope.themeLoading = true;
         $scope.theme = theme;
         historicalRecord.set({ theme });
-        $scope.themeDetail = `tpl/enrichment/monitoringSummary/components/theme${theme}Detail.html`;
+        const folder = 'theme' + theme;
+        let file = (theme === 'BasicSituation' || theme === 'Accumulative') ? 'index' : $scope.currentClass;
+            file = file.substring(0, 1).toLowerCase() + file.substring(1);
+        if ($scope.themeDetail === `tpl/enrichment/monitoringSummary/components/${folder}/${file}.html`) return;
+        $scope.themeLoading = true;
+        $scope.themeDetail = `tpl/enrichment/monitoringSummary/components/${folder}/${file}.html`;
     };
 
     // 计算当前 所属 哪一类
@@ -123,7 +128,7 @@ ajaxData({
     $(document).on('keydown', keyChangeTheme);
     $scope.$on('$destroy', () => $(document).off('keydown', keyChangeTheme));
     function keyChangeTheme(event) {
-        const themeArr = ['BasicSituation', 'Resource', 'Power', 'Electricity', 'EquipmentOperation'];
+        const themeArr = ['BasicSituation', 'Resource', 'Power', 'Electricity'];
         if ($scope._dateType > 0) themeArr.splice(2, 1);
         const { theme } = $scope;
         switch (event.keyCode) {
