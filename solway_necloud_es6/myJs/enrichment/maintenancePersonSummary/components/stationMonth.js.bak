@@ -80,6 +80,9 @@ ajaxData({
                 width: '25%',
                 dataIndex: 'test',
                 align: 'left',
+                render(text, record, index) {
+                    return `<span class="alert-name" id="${record.id}">${text}</span>`
+                }
             },
             {
                 title: '检修台次',
@@ -107,6 +110,9 @@ ajaxData({
         ];
         // await myAjaxData.timeout(0);
         
+        $(".maintenanceStationMonth").on('click','.alert-name',function(){
+            let a = $(this).attr('id')
+        })
         // const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
         // switch (currentClass) {
         //     case 'StationMonth': //电站月
