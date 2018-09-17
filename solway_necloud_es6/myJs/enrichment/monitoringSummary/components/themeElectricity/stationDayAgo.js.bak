@@ -21,7 +21,7 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, select1, select2 } = historicalRecord.get().themeElectricity || {};
+        let { showShape, select1, select2 } = historicalRecord.get().themeElectricityStationDayAgo || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -58,8 +58,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeElectricity: {
-                ...historicalRecord.get().themeElectricity || {},
+            themeElectricityStationDayAgo: {
+                ...historicalRecord.get().themeElectricityStationDayAgo || {},
                 showShape
             }
         });
@@ -72,8 +72,8 @@ ajaxData({
     $scope.selectChange = async (arg) => {
         await myAjaxData.timeout(0);
         historicalRecord.set({
-            themeElectricity: {
-                ...historicalRecord.get().themeElectricity || {},
+            themeElectricityStationDayAgo: {
+                ...historicalRecord.get().themeElectricityStationDayAgo || {},
                 [arg]: $scope[arg]
             }
         });
@@ -100,7 +100,7 @@ ajaxData({
         }
     };
 
-    $scope.$scope.query_station_day_elec_his_list.subscribe(res => {
+    $scope.query_station_day_elec_his_list.subscribe(res => {
         $scope.column = [
             {
                 title: '设备名称',
@@ -167,7 +167,7 @@ ajaxData({
     // 计算 图表 显示对应 轴
     function diffChartLineData() {
         if (!$scope.initComplete) return;
-        const { currentClass, selectOptions, select1, select2, tabIndex } = $scope;
+        const {select1, select2} = $scope;
         
         $scope.xdata = $scope.query_station_day_elec_his_line.res.body.data.eq_name
         $scope.ydatas = [[$scope.query_station_day_elec_his_line.res.body.data[select1]], [$scope.query_station_day_elec_his_line.res.body.data[select2]]]
