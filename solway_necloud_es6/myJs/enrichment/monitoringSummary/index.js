@@ -41,7 +41,7 @@ ajaxData({
         const { detailFullPage,
             dateType = 0,
             dateTime = new Date(),
-            theme = 'BasicSituation',
+            theme = 'EquipmentOperation',
             stationData } = historiData;
         if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope.dateTime = dateTime;
@@ -82,6 +82,7 @@ ajaxData({
         $scope.dataType = switchArguments.dataType;
         historicalRecord.set({ stationData: switchArguments });
         computeClass();
+        $scope.changeTheme($scope.theme);
         $scope.getTopXhr = true;
     };
     // 双击 详情
@@ -101,6 +102,7 @@ ajaxData({
 
     // 切换主题模块
     $scope.changeTheme = theme => {
+        if ($scope.beforeLoading) return;
         $scope.theme = theme;
         historicalRecord.set({ theme });
         const folder = 'theme' + theme;
