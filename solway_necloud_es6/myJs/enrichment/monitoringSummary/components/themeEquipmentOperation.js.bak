@@ -1,155 +1,106 @@
 ajaxData({
-    //集团、电站---------当日
-    deviceCurrent: {
-        name: 'GETEquipmentInfo',
+    //当日
+    currentPowerInfo: {
+        name: 'GETPowerCurrentInfo',
         later: true
     },
-    //电站---------历史日
-    query_station_day_dev_subject_his: {
-        name: 'GETquery_station_day_dev_subject_his',
-        later: true
-    },
-    //电站---------月
-    query_station_month_dev_subject_his: {
-        name: 'GETquery_station_month_dev_subject_his',
-        later: true
-    },
-    //电站---------年
-    query_station_year_dev_subject_his: {
-        name: 'GETquery_station_year_dev_subject_his',
-        later: true
-    },
-    //集团---------历史日
-    query_company_day_dev_subject_his: {
-        name: 'GETquery_company_day_dev_subject_his',
-        later: true
-    },
-    //集团---------月
-    query_company_month_dev_subject_his: {
-        name: 'GETquery_company_month_dev_subject_his',
-        later: true
-    },
-    //集团---------年
-    query_company_year_dev_subject_his: {
-        name: 'GETquery_company_year_dev_subject_his',
-        later: true
+    //历史日
+    query_station_day_kw_subject_his:{
+        name:'GETquery_station_day_kw_subject_his',
+        later:true
     }
 }, {
     __serviceName__: 'themeEqumentOperationAjaxData'
-    })('themeEqumentOperationCtrl', ['$scope', 'themeEqumentOperationAjaxData', '$interval'], ($scope, myAjaxData,$interval) => {
+    })('themeEqumentOperationCtrl', ['$scope', 'themeEqumentOperationAjaxData', '$timeout', '$interval'], ($scope, myAjaxData, $timeout, $interval) => {
 
     $scope.initChildScope($scope, myAjaxData);
 
-    let pieChart = echarts.init(document.getElementById('themeEquipmentPieEchart'))
-    const initPieEchart = (fault, comm, maintain, run, wait) => {
+    let myChart = echarts.init(document.getElementById('themePowerGaugeEchart'))
+    
+    const initEchart = (currentPower) => {
         const option = {
             tooltip: {
-                trigger: 'item',
-                confine:true
+                formatter: "{a} <br/>{b}  {c}%"
+            },
+            toolbox: {
+                show: false,
+                feature: {
+                    restore: {},
+                    saveAsImage: {}
+                }
             },
             series: [
                 {
-                    type: 'pie',
-                    radius: ['40%', '73%'],
-                    center: ['50%', '45%'],
-                    label: {
-                        normal: {
-                            show: false,
-                            position: 'inside'
-                        },
-                        emphasis: {
-                            show: false
+                    name: '出力比',
+                    type: 'gauge',
+                    radius: '82px',
+                    // max:maxValue,
+                    splitLine: {
+                        length: 10
+                    },
+                    axisLine: {            // 坐标轴线
+                        lineStyle: {       // 属性lineStyle控制线条样式
+                            color: [[1, 'rgba(94,188,212,1)']],
+                            width: 20,
+                            // shadowColor: 'rgba(255,255,255,0.5)', //默认透明
+                            // shadowBlur: 2
                         }
                     },
-                    lableLine: {
-                        normal: {
-                            show: false
-                        },
-                        emphasis: {
-                            show: false
+                    axisTick: {
+                        lineStyle: {
+                            color: '#76a8d9'
                         }
                     },
-                    
-                    data: [
-                        {
-                            value:fault,
-                            name: '故障台数',
-                            itemStyle: {
-                                normal: {
-                                    color: '#e57d70'
-                                }
-                            }
-                        },
-                        {
-                            value: comm,
-                            name: '离线台数',
-                            itemStyle: {
-                                normal: {
-                                    color: '#a99bac'
-                                }
-                            }
-                        },
-                        {
-                            value: maintain,
-                            name: $scope.pieThirdItemName,//第三个参数，不同情况显示名称不一样
-                            itemStyle: {
-                                normal: {
-                                    color: '#efc185'
-                                }
-                            }
-                        },
-                        {
-                            value: wait,
-                            name: '待机台数',
-                            itemStyle: {
-                                normal: {
-                                    color: '#62a6c9'
-                                }
-                            }
-                        },
-                        {
-                            value: run,
-                            name: '运行台数',
-                            itemStyle: {
-                                normal: {
-                                    color: '#7072c9'
-                                }
-                            }
-                        }
-                    ]
+                    axisLabel: {
+                        color: 'white',
+                        distance: 2
+                    },
+                    pointer: {
+                        width: 5,
+                        length: '100%'
+                    },
+                    itemStyle: {
+                        //color:'#5086c0'
+                        color: 'red',
+                        borderWidth: 10,
+                        borderColor: 'pink'
+                    },
+                    detail: { formatter: '{value}%', show: false },
+                    data: [{ value: currentPower, name: '' }]
                 }
             ]
         };
-        pieChart.setOption(option)
-        pieChart.resize();
+        myChart.setOption(option)
+        myChart.resize();
     }
 
-    const initParams = async () => {
+    const initParams = async() => {
         if ($scope.detailFullPage) {
-            return false; //放大状态，不做处理
+            return false;
         } else {
-            if ($scope.getTopXhr === false) return false; //条件未改变，不做处理
+            if ($scope.getTopXhr === false) return false; 
 
             const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
             const dateType = ($scope._dateType == 0) ? 3 : ($scope._dateType == 1 ? 2 : 1);
             const dateTime = $scope._dateTime.showDate;
 
             await myAjaxData.timeout(0)
-
+            $("#themePowerGaugeEchart").width($("#themePower").width()*0.44);
+            
             $scope.getAjaxData(queryType, dateTime, dateType)
-        };
+        }
     }
-    
+
     //父页面初始化完成
     $scope.mainPageInitComplete = () => {
-        $scope.themeEquipmentIsLoding = true;
+        $scope.themePowerIsLoding = true;
         initParams();
     };
 
     //切换日期类型
     $scope.dateUpdated = () => {
         if ($scope._dateType != 3) {
-            $scope.themeEquipmentIsLoding = true;
+            $scope.themePowerIsLoding = true;
             initParams();
         }
     }
@@ -157,7 +108,7 @@ ajaxData({
     //切换电站
     $scope.switchPowerCallback = () => {
         if ($scope._dateType != 3) {
-            $scope.themeEquipmentIsLoding = true;
+            $scope.themePowerIsLoding = true;
             initParams();
         }
     }
@@ -166,83 +117,61 @@ ajaxData({
     $scope.switchDetailFullPage = () => {
         initParams();
     }
-
+    
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        // $scope.themeEquipmentIsLoding = !$scope.deviceCurrent.res;
-        if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
-            $scope.deviceCurrent.getData({
+        // $scope.themePowerIsLoding = !$scope.currentPowerInfo.res;
+        if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday'){
+            $scope.currentPowerInfo.getData({
                 'queryType': queryType,
                 'date': dateTime,
                 'dateType': dateType
             }).then(res => {
-                $scope.themeEquipmentIsLoding = false;
+                $scope.themePowerIsLoding = false;
                 if (res.code == 0) {
-                    const data = res.body;
-                    $scope.eqcount = data.fault + data.comm + data.maintain + data.run + data.wait ;
-                    $scope.pieThirdItemName = '维护台数';
-                    initPieEchart(data.fault, data.comm, data.maintain, data.run, data.wait);//故障、离线、维护、运行、待机
+                    $scope.data = res.body;
+                    initEchart(res.body.kw_r[0]);
+                }else{
+                    $scope.data = {};
+                    initEchart('');
+                }
+                $scope.$emit('lastUpdate', { comm: res.body.comm, dtime: res.body.dtime})
+            })
+        } else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo'){
+            $scope.query_station_day_kw_subject_his.getData({
+                'queryCode': 'query_station_day_kw_subject_his',
+                'queryType': queryType,
+                'date': dateTime
+            }).then(res => {
+                $scope.themePowerIsLoding = false;
+                if (res.code == 0) {
+                    $scope.data = res.body;
+                    initEchart(res.body.max_p_rate[0]);
+                }else{
+                    $scope.data = {};
+                    initEchart('');
                 }
             })
-        } else {
-            let params = '';
-            switch ($scope.currentClass) {
-                case 'StationDayAgo':
-                    params = 'query_station_day_dev_subject_his'
-                    break;
-                case 'StationMonth':
-                    params = 'query_station_month_dev_subject_his'
-                    break;
-                case 'StationYear':
-                    params = 'query_station_year_dev_subject_his'
-                    break;
-                case 'CompanyDayAgo':
-                    params = 'query_company_day_dev_subject_his'
-                    break;
-                case 'CompanyMonth':
-                    params = 'query_company_month_dev_subject_his'
-                    break;
-                case 'CompanyYear':
-                    params = 'query_company_year_dev_subject_his'
-                    break;
-                default:
-                    break;
-            }
-            $scope.getHistoryData(params, queryType, dateTime)
+        }else{
+            //月年待测
+            $scope.themePowerIsLoding = false;
         }
-    }
-
-    //历史接口
-    $scope.getHistoryData = (params, queryType, dateTime) => {
-        $scope[params].getData({
-            'queryCode': params,
-            'queryType': queryType,
-            'date': dateTime
-        }).then(res => {
-            $scope.themeEquipmentIsLoding = false;
-            if (res.code == 0) {
-                const data = res.body;
-                $scope.comp_score = data.comp_score;
-                $scope.eqcount = data.eqcount;
-                $scope.pieThirdItemName = '告警台数';
-
-                initPieEchart(data.fail_count, data.inter_count, data.alarm_count);//故障、离线、告警
-            }
-        })
     }
 
     const interval = $interval(() => {
         if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();
     }, 10000);
 
-    const pieChartResize = () => {
-        pieChart.resize();
+    function setThemepowerWidth() {
+        $("#themePowerGaugeEchart").width($("#themePower").width()*0.44)
+        myChart.resize();
     }
-    window.addEventListener('resize', pieChartResize);
+
+    window.addEventListener('resize', setThemepowerWidth);
 
     $scope.$on('$destroy', () => {
-        pieChart = null;
+        myChart = null;
         $interval.cancel(interval);
-        window.removeEventListener('resize', pieChartResize);
+        window.removeEventListener('resize', setThemepowerWidth);
     });
 });
