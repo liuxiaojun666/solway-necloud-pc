@@ -61,7 +61,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
         //测试
         document.addEventListener('dblclick',function(e){
-            if (e.ctrlKey && $scope.ifVoiced && $scope.voiceContent) { 
+            if (e.ctrlKey && $scope.ifVoiced) { 
                 newUtterance.text = '2018年09月14日14点45分28秒 金峰财富HL0109告警';
                 window.speechSynthesis.speak(newUtterance);
             }
@@ -227,7 +227,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
         const interval = $interval(()=>{
             $scope.initData();
-        },10000);
+        },60000);
 
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', calculateListHeight);
