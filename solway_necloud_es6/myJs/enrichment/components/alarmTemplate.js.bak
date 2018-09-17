@@ -10,17 +10,16 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
         $ocLazyLoad.load([
             window.baseUrl+"/theme/js/dist/components/confirm.js",
-			window.baseUrl+'/theme/js/dist/components/myTable.js', // table 列表组件
+			// window.baseUrl+'/theme/js/dist/components/myTable.js', // table 列表组件
         ]).then(()=>{
             $scope.maxUpdateTime = 0;
-            $scope.voiceTime = 0;
             $scope.initColumns();
             $scope.initData();
         })
 
         $scope.$on('broadcastSwitchStation',(e,v)=>{
             $scope.maxUpdateTime = 0;
-            $scope.voiceTime = 0;
+            $solway.setStore('alarm', {'voiceTime':0}); 
             $scope.datalist = [];
             $scope.initData();
         })
@@ -60,9 +59,10 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         calculateListHeight();
         window.addEventListener('resize', calculateListHeight);
 
+        //测试
         document.addEventListener('dblclick',function(e){
-            if (e.ctrlKey && $scope.ifVoiced && $scope.voiceContent) { 
-                newUtterance.text = '2018年09月14日14点45分28秒 金峰财富HL0109告警.2018年09月14日14点50分58秒 金峰财富HL0110告警';
+            if (e.ctrlKey && $scope.ifVoiced) { 
+                newUtterance.text = '2018年09月14日14点45分28秒 金峰财富HL0109告警';
                 window.speechSynthesis.speak(newUtterance);
             }
         },false);
@@ -100,9 +100,9 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             }
         }
 
-        $scope.trClick = (item, index, e) => {
-            $scope.voiceContent = item.voiceContent;
-        };
+        // $scope.trClick = (item, index, e) => {
+        //     $scope.voiceContent = item.voiceContent;
+        // };
         
         $scope.initData = () =>{
             const checkedCondition = [];
@@ -115,13 +115,14 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 $scope.datalist = [];
                 return false;
             }
+            var voiceTime = $solway.getStore().alarm.voiceTime?$solway.getStore().alarm.voiceTime:0;
 
             $http({
                 method: "GET",
                 url: window.baseUrl + "/pv/alarm/getRunAlarmList.htm",
                 params: {
                     maxUpdateTime:$scope.maxUpdateTime,
-                    voiceTime:$scope.voiceTime,
+                    voiceTime:voiceTime,
                     eventTypes:checkedCondition.join(',')
                 }
             }).success(function (res) {
@@ -132,10 +133,10 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     $scope.total_sure_no = alarmInfo.sureNoTotal;
                     $scope.total_sure_yes = alarmInfo.sureOkTotal;
                     $scope.maxUpdateTime = alarmInfo.maxUpdateTime;
-                    $scope.voiceTime = alarmInfo.voiceTime;
+
+                    $solway.setStore('alarm', {'voiceTime':alarmInfo.voiceTime}); 
 
                     if(alarmInfo.voiceContent){
-                        console.log(alarmInfo.voiceContent)
                         newUtterance.text = alarmInfo.voiceContent;
                         window.speechSynthesis.speak(newUtterance);
                     }
