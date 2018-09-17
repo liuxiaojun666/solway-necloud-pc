@@ -1,0 +1,325 @@
+ajaxData(
+    {
+        // 集团 月 时间 列表
+        query_company_year_elec_detail_timelist_his: {
+            name: 'GETquery_company_year_elec_detail_timelist_his',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 集团 月 时间 图表
+        query_company_year_elec_detail_timeline_his: {
+            name: 'GETquery_company_year_elec_detail_timeline_his',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 集团 月 电站 列表
+        query_company_year_elec_detail_stationlist_his: {
+            name: 'GETquery_company_year_elec_detail_stationlist_his',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 集团 月 电站 图表
+        query_company_year_elec_detail_stationline_his: {
+            name: 'GETquery_company_year_elec_detail_stationline_his',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+    },
+    {
+        __serviceName__: 'themeElectricityCompanyYearService'
+    }
+)('themeElectricityCompanyYearCtrl', ['$scope', 'themeElectricityCompanyYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeElectricityCompanyYear || {};
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.select1 = select1 || 2;
+        $scope.select2 = select2 || 2;
+        if (select1) await $scope.selectChange('select1');
+        if (select2) await $scope.selectChange('select2');
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.dataType === 0) return;
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeElectricityCompanyYear: {
+                ...historicalRecord.get().themeElectricityCompanyYear || {},
+                tabIndex
+            }
+        });
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeElectricityCompanyYear: {
+                ...historicalRecord.get().themeElectricityCompanyYear || {},
+                showShape
+            }
+        });
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+    // 图标轴线切换
+    $scope.selectChange = async (arg) => {
+        await myAjaxData.timeout(0);
+        historicalRecord.set({
+            themeElectricityCompanyYear: {
+                ...historicalRecord.get().themeElectricityCompanyYear || {},
+                [arg]: $scope[arg]
+            }
+        });
+        diffChartLineData();
+        $scope.$apply();
+    };
+
+    $scope.diffGetData = async () => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+        if (showShape === 'list' && tabIndex === 0) {
+            $scope.query_company_year_elec_detail_timelist_his.getData({
+                queryCode: 'query_company_year_elec_detail_timelist_his',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        }
+        else if (showShape === 'chart' && tabIndex === 0) {
+            $scope.query_company_year_elec_detail_timeline_his.getData({
+                queryCode: 'query_company_year_elec_detail_timeline_his',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        }
+        else if (showShape === 'list' && tabIndex === 1) {
+            $scope.query_company_year_elec_detail_stationlist_his.getData({
+                queryCode: 'query_company_year_elec_detail_stationlist_his',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        }
+        else if (showShape === 'chart' && tabIndex === 1) {
+            $scope.query_company_year_elec_detail_stationline_his.getData({
+                queryCode: 'query_company_year_elec_detail_stationline_his',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        }
+    }
+
+    // 集团 月 时间 列表
+    $scope.query_company_year_elec_detail_timelist_his.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'dtime',
+                width: '20%',
+                sort: true,
+            },
+            {
+                title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
+                dataIndex: 'real_kwh_chk',
+                width: '20%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '应发电量' + (res.body.units.shd_kwh_chk ? '(' + res.body.units.shd_kwh_chk + ')' : ''),
+                dataIndex: 'shd_kwh_chk',
+                width: '20%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '上网电量' + (res.body.units.send_kwh_chk ? '(' + res.body.units.send_kwh_chk + ')' : ''),
+                dataIndex: 'send_kwh_chk',
+                width: '20%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),
+                dataIndex: 'we_rate',
+                width: '20%',
+                sort: true,
+                align: 'right',
+            },
+        ];
+    };
+    // 集团 月 时间 图表
+    $scope.query_company_year_elec_detail_timeline_his.getDataCallback = async (success, res) => {
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'shd_kwh_chk';
+        // $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh_chk';
+        await $scope.selectChange('select1');
+        // await $scope.selectChange('select2');
+        diffSelectOptions(res.body.units);
+        diffChartLineData();
+        $scope.$apply();
+    };
+    // 集团 月 电站 列表
+    $scope.query_company_year_elec_detail_stationlist_his.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                width: '20%',
+                sort: true,
+            },
+            {
+                title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
+                dataIndex: 'inst_kw',
+                width: '10%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
+                dataIndex: 'real_kwh_chk',
+                width: '10%',
+                sort: true,
+                align: 'right',
+                render(text, item, index) {
+                    return `
+                            <span>${text}</span>
+                            <i title="同比${item.real_kwh_chk_tb_rate || '-'}%, 环比${item.real_kwh_chk_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                }
+            },
+            {
+                title: '应发电量' + (res.body.units.shd_kwh_chk ? '(' + res.body.units.shd_kwh_chk + ')' : ''),
+                dataIndex: 'shd_kwh_chk',
+                width: '10%',
+                sort: true,
+                align: 'right',
+                render(text, item, index) {
+                    return `
+                            <span>${text}</span>
+                            <i title="同比${item.shd_kwh_chk_tb_rate || '-'}%, 环比${item.shd_kwh_chk_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                }
+            },
+            {
+                title: '上网电量' + (res.body.units.send_kwh_chk ? '(' + res.body.units.send_kwh_chk + ')' : ''),
+                dataIndex: 'send_kwh_chk',
+                width: '10%',
+                sort: true,
+                align: 'right',
+                render(text, item, index) {
+                    return `
+                            <span>${text}</span>
+                            <i title="同比${item.send_kwh_chk_tb_rate || '-'}%, 环比${item.send_kwh_chk_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                }
+            },
+            {
+                title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),
+                dataIndex: 'we_rate',
+                width: '10%',
+                sort: true,
+                align: 'right'
+            },
+        ];
+    };
+    // 集团 月 电站 图表
+    $scope.query_company_year_elec_detail_stationline_his.getDataCallback = async (success, res) => {
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'shd_kwh_chk';
+        await $scope.selectChange('select1');
+        diffSelectOptions(res.body.units);
+        diffChartLineData();
+        $scope.$apply();
+    };
+
+
+    // 计算 图表 显示对应 轴
+    function diffChartLineData() {
+        if (!$scope.initComplete) return;
+        const { select1, select2, tabIndex } = $scope;
+        if (tabIndex === 0) {
+            $scope.xdata = $scope.query_company_year_elec_detail_timeline_his.res.body.data.dtime
+            $scope.ydatas = [[$scope.query_company_year_elec_detail_timeline_his.res.body.data['real_kwh_chk'], $scope.query_company_year_elec_detail_timeline_his.res.body.data[select1]], [$scope.query_company_year_elec_detail_timeline_his.res.body.data['we_rate']]]
+        } else if (tabIndex === 1) {
+            $scope.xdata = $scope.query_company_year_elec_detail_stationline_his.res.body.data.st_name
+            $scope.ydatas = [[$scope.query_company_year_elec_detail_stationline_his.res.body.data['real_kwh_chk'], $scope.query_company_year_elec_detail_stationline_his.res.body.data[select1]]]
+        }
+    }
+
+    // 轴线切换  可选项  判断
+    function diffSelectOptions(units = {}) {
+
+        if ($scope.tabIndex === 0) {
+            $scope.selectOptions = {
+                real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                send_kwh_chk: '上网电量' + (units.send_kwh_chk ? '(' + units.send_kwh_chk + ')' : ''),
+                shd_kwh_chk: '应发电量' + (units.shd_kwh_chk ? '(' + units.shd_kwh_chk + ')' : ''),
+                we_rate: '电量损失百分比' + (units.we_rate ? '(' + units.we_rate + ')' : ''),
+            };
+        } else if ($scope.tabIndex === 1) {
+            $scope.selectOptions = {
+                real_kwh_chk: '实发电量' + (units.real_kwh_chk ? '(' + units.real_kwh_chk + ')' : ''),
+                shd_kwh_chk: '应发电量' + (units.shd_kwh_chk ? '(' + units.shd_kwh_chk + ')' : ''),
+            };
+        }
+
+    }
+
+    // 数据置空
+    function setDataNull() {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.query_company_year_elec_detail_timelist_his.res = null;
+        $scope.query_company_year_elec_detail_timeline_his.res = null;
+        $scope.query_company_year_elec_detail_stationlist_his.res = null;
+        $scope.query_company_year_elec_detail_stationline_his.res = null;
+
+    }
+
+});
