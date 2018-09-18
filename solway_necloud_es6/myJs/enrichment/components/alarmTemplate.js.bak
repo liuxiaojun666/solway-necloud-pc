@@ -14,6 +14,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         ]).then(()=>{
             $scope.maxUpdateTime = 0;
             $scope.initColumns();
+            $scope.pendding = false;
             $scope.initData();
         })
 
@@ -21,6 +22,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             $scope.maxUpdateTime = 0;
             $solway.setStore('alarm', {'voiceTime':0}); 
             $scope.datalist = [];
+            $scope.pendding = false;
             $scope.initData();
         })
 
@@ -105,6 +107,9 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         // };
         
         $scope.initData = () =>{
+            if($scope.pendding) return;
+            $scope.pendding = true;
+
             const checkedCondition = [];
           
             $("input[name='conditionType']:checked").map((index,v)=>{
@@ -126,6 +131,8 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     eventTypes:checkedCondition.join(',')
                 }
             }).success(function (res) {
+                $scope.pendding = false;
+
                 if(res.code == 0){
                     const alarmList = res.body.alarmList;
                     const alarmInfo = res.body.alarmTotalInfo;

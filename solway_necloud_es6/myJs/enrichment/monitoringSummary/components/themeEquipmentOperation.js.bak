@@ -81,6 +81,100 @@ ajaxData({
         myChart.resize();
     }
 
+    let pieChart = echarts.init(document.getElementById('themeEquipmentPieEchart'))
+    const initPieEchart = (fault, comm, maintain, run, wait) => {
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                confine:true
+            },
+            series: [
+                {
+                    type: 'pie',
+                    radius: ['50', '75px'],
+                    center: ['50%', '48%'],
+                    // animation:false,
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'inside'
+                        },
+                        emphasis: {
+                            show: false
+                        }
+                    },
+                    lableLine: {
+                        normal: {
+                            show: false
+                        },
+                        emphasis: {
+                            show: false
+                        }
+                    },
+                    itemStyle:{
+                        normal:{
+                            // borderColor:'rgba(255,255,255,0.08)',
+                            // borderWidth:'10',
+                            // shadowColor:'rgba(255,255,255,0.8)',
+                            // shadowOffsetX:0,
+                            // shadowOffsetY:0,
+                            // shadowBlur:10
+                        }
+                    },
+                    data: [
+                        {
+                            value:fault,
+                            name: '故障台数',
+                            itemStyle: {
+                                normal: {
+                                    color: '#e57d70'
+                                }
+                            }
+                        },
+                        {
+                            value: comm,
+                            name: '离线台数',
+                            itemStyle: {
+                                normal: {
+                                    color: '#a99bac'
+                                }
+                            }
+                        },
+                        {
+                            value: maintain,
+                            name: $scope.pieThirdItemName,//第三个参数，不同情况显示名称不一样
+                            itemStyle: {
+                                normal: {
+                                    color: '#efc185'
+                                }
+                            }
+                        },
+                        {
+                            value: wait,
+                            name: '待机台数',
+                            itemStyle: {
+                                normal: {
+                                    color: '#62a6c9'
+                                }
+                            }
+                        },
+                        {
+                            value: run,
+                            name: '运行台数',
+                            itemStyle: {
+                                normal: {
+                                    color: '#7072c9'
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+        pieChart.setOption(option)
+        pieChart.resize();
+    }
+
     const initParams = async() => {
         if ($scope.detailFullPage) {
             return false;
@@ -92,9 +186,10 @@ ajaxData({
             const dateTime = $scope._dateTime.showDate;
 
             await myAjaxData.timeout(0)
-            $("#themePowerGaugeEchart").width($("#themePower").width()*0.44);
+            $("#themePowerGaugeEchart").width($("#themePower").width()*0.5);
             
             $scope.getAjaxData(queryType, dateTime, dateType)
+
         }
     }
 
@@ -163,6 +258,9 @@ ajaxData({
             //月年待测
             $scope.themePowerIsLoding = false;
         }
+
+        //测试
+        initPieEchart(12,34,5,23,10)
     }
 
     const interval = $interval(() => {
@@ -170,7 +268,7 @@ ajaxData({
     }, 10000);
 
     function setThemepowerWidth() {
-        $("#themePowerGaugeEchart").width($("#themePower").width()*0.44)
+        $("#themePowerGaugeEchart").width($("#themePower").width()*0.5)
         myChart.resize();
     }
 
