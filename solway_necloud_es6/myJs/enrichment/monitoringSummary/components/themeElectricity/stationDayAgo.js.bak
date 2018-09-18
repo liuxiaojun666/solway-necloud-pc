@@ -41,6 +41,7 @@ ajaxData({
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'StationDayAgo') return;
         setDataNull();
         diffSelectOptions();
         $scope.diffGetData();
@@ -48,6 +49,7 @@ ajaxData({
 
     // 日期改变
     $scope.dateUpdated = async () => {
+        if ($scope.currentClass !== 'StationDayAgo') return;
         await myAjaxData.timeout(0);
         setDataNull();
         diffSelectOptions();

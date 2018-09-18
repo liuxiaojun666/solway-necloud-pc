@@ -68,7 +68,9 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
         }
 
         function trCheckeboxApply() {
-            const {name} = $element.find('th[data-name]')[0].dataset;
+            const checkboxTh = $element.find('th[data-name]');
+            if (!checkboxTh[0]) return;
+            const { name } = checkboxTh[0].dataset;
             const $inputs = () => $element.find(`input[name=${name}]`);
             $element.on('click', 'th input:checkbox', allHandle);
             $element.on('click', `input[name=${name}]`, everyHandle);

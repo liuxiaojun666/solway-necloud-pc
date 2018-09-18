@@ -27,6 +27,7 @@ ajaxData({
 
         // 日期改变
         $scope.dateUpdated = async () => {
+            if ($scope.currentClass !== 'StationDayAgo') return;
             await myAjaxData.timeout(0);
             if ($scope.currentClass === 'StationDayAgo') $scope.query_station_day_res_timeone_his.getData({
                 queryType: 3,
@@ -38,6 +39,7 @@ ajaxData({
 
         // 切换电站 回调
         $scope.switchPowerCallback = () => {
+            if ($scope.currentClass !== 'StationDayAgo') return;
             if (!$scope.initComplete) return;
             $scope.query_station_day_res_timeone_his.res = null;
             if ($scope.dateType === 0) return $scope.query_station_day_res_timeone_his.getData({});
