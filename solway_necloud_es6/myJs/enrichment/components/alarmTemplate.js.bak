@@ -91,6 +91,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     }).success(function (res) {
                         if(res.code == 0){
                             toaster.pop('success', '', res.msg);
+                            $scope.maxUpdateTime = 0;
                             $scope.initData();
                         }else{
                             toaster.pop('error', '', res.msg);
@@ -226,7 +227,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 },
                 {
                     title: '状态',
-                    dataIndex: 'handstatusStr',
+                    dataIndex: 'sureStatus',
                     width: '100px'
                 }
             ];

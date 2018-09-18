@@ -8,6 +8,42 @@ ajaxData({
     query_station_day_kw_subject_his:{
         name:'GETquery_station_day_kw_subject_his',
         later:true
+    },
+    
+    //集团、电站---------当日
+    deviceCurrent: {
+        name: 'GETEquipmentInfo',
+        later: true
+    },
+    //电站---------历史日
+    query_station_day_dev_subject_his: {
+        name: 'GETquery_station_day_dev_subject_his',
+        later: true
+    },
+    //电站---------月
+    query_station_month_dev_subject_his: {
+        name: 'GETquery_station_month_dev_subject_his',
+        later: true
+    },
+    //电站---------年
+    query_station_year_dev_subject_his: {
+        name: 'GETquery_station_year_dev_subject_his',
+        later: true
+    },
+    //集团---------历史日
+    query_company_day_dev_subject_his: {
+        name: 'GETquery_company_day_dev_subject_his',
+        later: true
+    },
+    //集团---------月
+    query_company_month_dev_subject_his: {
+        name: 'GETquery_company_month_dev_subject_his',
+        later: true
+    },
+    //集团---------年
+    query_company_year_dev_subject_his: {
+        name: 'GETquery_company_year_dev_subject_his',
+        later: true
     }
 }, {
     __serviceName__: 'themeEqumentOperationAjaxData'
@@ -239,28 +275,87 @@ ajaxData({
                 }
                 $scope.$emit('lastUpdate', { comm: res.body.comm, dtime: res.body.dtime})
             })
-        } else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo'){
-            $scope.query_station_day_kw_subject_his.getData({
-                'queryCode': 'query_station_day_kw_subject_his',
+
+            $scope.deviceCurrent.getData({
                 'queryType': queryType,
-                'date': dateTime
+                'date': dateTime,
+                'dateType': dateType
             }).then(res => {
                 $scope.themePowerIsLoding = false;
                 if (res.code == 0) {
-                    $scope.data = res.body;
-                    initEchart(res.body.max_p_rate[0]);
-                }else{
-                    $scope.data = {};
-                    initEchart('');
+                    const data = res.body;
+                    $scope.data = data;
+                    $scope.eqcount = data.fault + data.comm + data.maintain + data.run + data.wait ;
+                    $scope.pieThirdItemName = '维护台数';
+                    initPieEchart(data.fault, data.comm, data.maintain, data.run, data.wait);//故障、离线、维护、运行、待机
                 }
             })
-        }else{
-            //月年待测
-            $scope.themePowerIsLoding = false;
         }
+        // else if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo'){
+        //     $scope.query_station_day_kw_subject_his.getData({
+        //         'queryCode': 'query_station_day_kw_subject_his',
+        //         'queryType': queryType,
+        //         'date': dateTime
+        //     }).then(res => {
+        //         $scope.themePowerIsLoding = false;
+        //         if (res.code == 0) {
+        //             $scope.data = res.body;
+        //             initEchart(res.body.max_p_rate[0]);
+        //         }else{
+        //             $scope.data = {};
+        //             initEchart('');
+        //         }
+        //     })
+        // }
+        else{
+            let params = '';
+            switch ($scope.currentClass) {
+                case 'StationDayAgo':
+                    params = 'query_station_day_dev_subject_his'
+                    break;
+                case 'StationMonth':
+                    params = 'query_station_month_dev_subject_his'
+                    break;
+                case 'StationYear':
+                    params = 'query_station_year_dev_subject_his'
+                    break;
+                case 'CompanyDayAgo':
+                    params = 'query_company_day_dev_subject_his'
+                    break;
+                case 'CompanyMonth':
+                    params = 'query_company_month_dev_subject_his'
+                    break;
+                case 'CompanyYear':
+                    params = 'query_company_year_dev_subject_his'
+                    break;
+                default:
+                    break;
+            }
+            $scope.getHistoryData(params, queryType, dateTime)
+        }
+    }
 
-        //测试
-        initPieEchart(12,34,5,23,10)
+    //历史接口
+    $scope.getHistoryData = (params, queryType, dateTime) => {
+        $scope[params].getData({
+            'queryCode': params,
+            'queryType': queryType,
+            'date': dateTime
+        }).then(res => {
+            $scope.themePowerIsLoding = false;
+            if (res.code == 0) {
+                const data = res.body;
+                $scope.data = data;
+                $scope.pieThirdItemName = '告警台数';
+
+                initPieEchart(data.fail_count, data.inter_count, data.alarm_count);//故障、离线、告警
+                if(data.max_p_rate){
+                    initEchart(data.max_p_rate[0]);
+                }else{
+                    initEchart('');
+                }
+            }
+        })
     }
 
     const interval = $interval(() => {
@@ -270,6 +365,7 @@ ajaxData({
     function setThemepowerWidth() {
         $("#themePowerGaugeEchart").width($("#themePower").width()*0.5)
         myChart.resize();
+        pieChart.resize();
     }
 
     window.addEventListener('resize', setThemepowerWidth);
