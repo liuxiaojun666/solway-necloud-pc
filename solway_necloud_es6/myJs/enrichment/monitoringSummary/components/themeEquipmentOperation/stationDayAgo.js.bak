@@ -25,12 +25,13 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape = 'chart' } = historicalRecord.get().themePower || {};
+        let { showShape = 'chart', tabIndex = 0 } = historicalRecord.get().themeEquipmentOperationStationDayAgo || {};
         $scope.changeShowShape(showShape);
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
         await $scope.dateUpdated();
+        $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await diffGetData();
@@ -57,13 +58,26 @@ ajaxData(
         if (showShape === $scope.showShape) return;
         $scope.showShape = showShape;
         historicalRecord.set({
-            themePower: {
-                ...historicalRecord.get().themePower || {},
+            themeEquipmentOperationStationDayAgo: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayAgo || {},
                 showShape
             }
         });
         diffGetData();
     };
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeEquipmentOperationStationDayAgo: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayAgo || {},
+                tabIndex
+            }
+        });
+        diffGetData();
+    };
+
     // 判断 调用  对应 接口
     async function diffGetData() {
         if (!$scope.initComplete) return;
@@ -74,13 +88,13 @@ ajaxData(
         $scope.stationDayAgoTimeList.res = null;
         $scope.stationDayAgoTimeLine.res = null;
         const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
-        if (showShape === 'list') {
+        if (showShape === 'list' && tabIndex === 0) {
             $scope.stationDayAgoTimeList.getData({
                 queryType: 3,
                 dateType: 3,
                 date: dateTime.showDate
             });
-        } else if (showShape === 'chart') {
+        } else if (showShape === 'chart' && tabIndex === 0) {
             $scope.stationDayAgoTimeLine.getData({
                 queryType: 3,
                 dateType: 3,

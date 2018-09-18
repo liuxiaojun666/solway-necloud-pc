@@ -1,9 +1,16 @@
 app.factory('actionRecord', function ($state) {
-    const record = {};
+    let record = {};
     let currentKey = $state.current.name;
     function init() {
         currentKey = $state.current.name;
-        if (!record[currentKey]) record[currentKey] = {data: {}};
+        if (!$solway.getStore().actionRecord[currentKey]) {
+            record[currentKey] = { data: {} };
+            $solway.setStore('actionRecord', {
+                ...$solway.getStore().actionRecord,
+                ...record,
+            });
+        }
+        record = $solway.getStore().actionRecord;
     }
 
     // 记录 当前页的 行为
@@ -12,10 +19,17 @@ app.factory('actionRecord', function ($state) {
             ...record[currentKey].data,
             ...obj
         };
+        $solway.setStore('actionRecord', record);
     }
     // 获取当前页 所有行为记录
-    function get(obj) {
-        return record[currentKey].data;
+    function get() {
+        const currentDataPageData = record[currentKey].data;
+        if (currentDataPageData.dateTime) {
+            const date = new Date(currentDataPageData.dateTime);
+            currentDataPageData.dateTime = date;
+            currentDataPageData.dateTime.showDate = date.Format('yyyy-MM-dd');
+        }
+        return currentDataPageData;
     }
 
 
