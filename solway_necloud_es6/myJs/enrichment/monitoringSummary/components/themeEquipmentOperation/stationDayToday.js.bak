@@ -80,7 +80,15 @@ ajaxData(
             later: true,
             onlyLatest: true,
             sameTimeOnce: true,
-        }
+        },
+        //电站-今日-故障列表
+        getStationFaultAlarmRtData: {
+            name: 'GETgetStationFaultAlarmRtData',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
     },
     {
         __serviceName__: 'themeEquipmentOperationStationDayTodayService'
@@ -111,10 +119,6 @@ ajaxData(
     $scope.switchPowerCallback = () => {
         if ($scope.currentClass !== 'StationDayToday') return;
         $scope.$broadcast("switchPowerCallback");
-        stationDayTodayTimeLineData.xdata = [];
-        stationDayTodayTimeLineData.line1 = [];
-        stationDayTodayTimeLineData.line2 = [];
-        stationDayTodayTimeLineData.line3 = [];
         setDataNull();
         diffGetData();
     };
@@ -289,6 +293,11 @@ ajaxData(
                 queryType: 3,
                 pgc: 0,
                 date: dateTime.showDate
+            });
+        } else if (tabIndex === 4) {
+            $scope.getStationFaultAlarmRtData.getData({
+                pageIndex: 0,
+                pageSize: 10
             });
         }
     };
@@ -512,15 +521,73 @@ ajaxData(
         $scope.ydatas = [[res.body.data.map(v => v.pgc)], [res.body.data.map(v => v.pcpn)]];
     };
 
+    //电站-故障列表
+    $scope.getStationFaultAlarmRtData.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '设备名称',
+                width: '25%',
+                dataIndex: 'name',
+                sort: 'true',
+                align: 'left',
+            },
+            {
+                title: '故障类型',
+                dataIndex: 'eventType',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '设备类型',
+                dataIndex: 'deviceType',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '故障发生时间',
+                dataIndex: 'sStartTime',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '故障描述',
+                dataIndex: 'eventDesc',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '持续时间',
+                dataIndex: 'hours',
+                sort: 'true',
+                align: 'center'
+            },
+            // {
+            //     title: '处理详情',
+            //     dataIndex: '',
+            //     sort: 'true',
+            //     align: 'right',
+            //     render(text, item, index) {
+            //         return `<span>待写</span>`
+            //     }
+            // }
+        ];
+    }
+
     function setDataNull() {
         $scope.getDeviceLayout.res = null;
         $scope.rtmSingleStationComm.res = null;
         $scope.stationDayTodayTime.res = null;
         $scope.stationDayTodayTime2.res = null;
+        $scope.getStationFaultAlarmRtData.res = null;
         $scope.query_station_day_dev_power_timelist_his.res = null;
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
         $scope.column = [];
+        stationDayTodayTimeLineData.xdata = [];
+        stationDayTodayTimeLineData.line1 = [];
+        stationDayTodayTimeLineData.line2 = [];
+        stationDayTodayTimeLineData.line3 = [];
     }
 
     // 定时器  定时刷新接口
