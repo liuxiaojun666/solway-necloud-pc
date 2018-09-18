@@ -1,14 +1,17 @@
-ajaxData({
-    stationDayTodayData: {
-        name: 'GETpvMonitorDataGetRunKWPowerList',
-        data: {},
-        later: true,
-        onlyLatest: true,
-        sameTimeOnce: true,
+ajaxData(
+    {
+        stationDayTodayData: {
+            name: 'GETpvMonitorDataGetRunKWPowerList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
     },
-}, {
-    __serviceName__: 'themeElectricityStationDayTodayService'
-    })('themeElectricityStationDayTodayCtrl', ['$scope', 'themeElectricityStationDayTodayService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+    {
+        __serviceName__: 'themeElectricityStationDayTodayService'
+    }
+)('themeElectricityStationDayTodayCtrl', ['$scope', 'themeElectricityStationDayTodayService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
     // 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -27,6 +30,7 @@ ajaxData({
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'StationDayToday') return;
         $scope.stationDayTodayData.res = null;
         if ($scope.dateType === 0) return $scope.stationDayTodayData.getData({});
     };
@@ -54,7 +58,7 @@ ajaxData({
             status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
         });
     }
-    
+
     $scope.stationDayTodayData.subscribe(res => {
         historicalRecord.set({
             themeElectricityStationDayToday: {
