@@ -285,7 +285,7 @@ ajaxData({
                 if (res.code == 0) {
                     const data = res.body;
                     $scope.data = data;
-                    $scope.eqcount = data.fault + data.comm + data.maintain + data.run + data.wait ;
+                    $scope.devTotal = data.fault + data.comm + data.maintain + data.run + data.wait ;
                     $scope.pieThirdItemName = '维护台数';
                     initPieEchart(data.fault, data.comm, data.maintain, data.run, data.wait);//故障、离线、维护、运行、待机
                 }
@@ -346,6 +346,8 @@ ajaxData({
             if (res.code == 0) {
                 const data = res.body;
                 $scope.data = data;
+                $scope.devTotal = data.alarm_count + data.fail_count + data.inter_count;
+
                 $scope.pieThirdItemName = '告警台数';
 
                 initPieEchart(data.fail_count, data.inter_count, data.alarm_count);//故障、离线、告警
