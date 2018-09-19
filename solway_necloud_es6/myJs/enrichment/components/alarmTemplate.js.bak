@@ -35,7 +35,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         const judgeIfAlarm = () =>{
             if($scope.currentStatus == 'abnormal' && !$scope.alarmListPageShow){
                 $scope.alarmListPageShow = false;
-                if($scope.total_sure_no) $scope.ifTwinkle = true;
+                $scope.ifTwinkle = $scope.total_sure_no?true:false;
             }
         }
 
@@ -46,7 +46,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 $scope.ifTwinkle = false;
                 $(".alarm-list").slideDown();
             } else {
-                $scope.ifTwinkle = true;
+                $scope.ifTwinkle = $scope.total_sure_no?true:false;
                 $scope.voiceContent = '';
                 $(".alarm-list").slideUp();
             }
