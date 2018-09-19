@@ -1,0 +1,58 @@
+ajaxData(
+    {
+
+    },
+    {
+        __serviceName__: 'actionPlanSummaryStationCleaningAdviceService',
+    }
+)('actionPlanSummaryStationCleaningAdviceCtrl', ['$scope', 'actionPlanSummaryStationCleaningAdviceService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { tabIndex = 0 } = historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {};
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        $scope.diffGetData();
+    };
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            actionPlanSummaryStationCleaningAdvice: {
+                ...historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {},
+                tabIndex
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 接口请求
+    $scope.diffGetData = async (getInfo) => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull(getInfo);
+        const { tabIndex, dataType } = $scope;
+        if (dataType !== 0) return;
+    };
+
+    // 数据置空
+    function setDataNull(getInfo) {
+        
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});

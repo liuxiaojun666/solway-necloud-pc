@@ -65,8 +65,8 @@ ajaxData({
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
             const {
-                startDate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365),
-                endDate = new Date,
+                startDate: __sdate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365),
+                endDate: __edate = new Date,
                 isHis = '',
                 pStationId,
                 handStatus = {
@@ -82,9 +82,9 @@ ajaxData({
                 searchKey = '',
                 isDefaultList = true
             } = historicalRecord.get().themeShare || {};
-            $scope.startDate = startDate;
+            $scope.startDate = new Date(__sdate);
             $scope.startDate.showDate = '';
-            $scope.endDate = endDate;
+            $scope.endDate = new Date(__edate);
             $scope.endDate.showDate = '';
             $scope.isHis = isHis;
             $scope.handStatus = handStatus;
