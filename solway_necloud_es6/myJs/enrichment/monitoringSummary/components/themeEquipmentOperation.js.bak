@@ -10,6 +10,7 @@ ajaxData({
     //     later: true
     // },
 
+    //集团、电站---------当日
     getRunAcpStatus:{
         name: 'GETgetRunAcpStatus',
         later: true
@@ -303,26 +304,29 @@ ajaxData({
             }).then(res => {
                 $scope.themePowerIsLoding = false;
                 if (res.code == 0) {
+
                     let acpInfo = res.body.acpInfo;
-                    let acpStatusInfo =  res.body.acpStatusInfo;
-                    
                     $scope.data = acpInfo;
-
-                    $scope.devTotal = acpStatusInfo.count;
-                    $scope.fail_count = acpStatusInfo.fault;
-
-                    initPieEchart(acpStatusInfo.fault, acpStatusInfo.interrupt, acpStatusInfo.warn, acpStatusInfo.run, acpStatusInfo.wait);//故障、离线、维护、运行、待机
+                    $scope.$emit('lastUpdate', { comm:acpInfo.comm, dtime: acpInfo.dtime})
                     if(acpInfo.kw_r){
                         initEchart(acpInfo.kw_r[0]);
                     }else{
                         initEchart('');
                     }
+
+                    let acpStatusInfo =  res.body.acpStatusInfo;
+                    
+                    $scope.devTotal = acpStatusInfo.fault + acpStatusInfo.comm + acpStatusInfo.maintain + acpStatusInfo.run + acpStatusInfo.wait ;
+                    $scope.fail_count = acpStatusInfo.fault;
+
+                    $scope.pieThirdItemName = '维护台数';
+                    initPieEchart(acpStatusInfo.fault, acpStatusInfo.comm, acpStatusInfo.maintain, acpStatusInfo.run, acpStatusInfo.wait);//故障、离线、维护、运行、待机
+                    
                 }else{
                     $scope.data = {};
                     initEchart('');
                     initPieEchart('','','','','');
                 }
-                $scope.$emit('lastUpdate', { comm: res.body.comm, dtime: res.body.dtime})
             })
         }else{
             let params = '';
@@ -365,6 +369,7 @@ ajaxData({
                 $scope.data = data;
                 $scope.devTotal = data.alarm_count + data.fail_count + data.inter_count;
                 $scope.fail_count = data.fail_count;
+                
                 $scope.pieThirdItemName = '告警台数';
 
                 initPieEchart(data.fail_count, data.inter_count, data.alarm_count);//故障、离线、告警
