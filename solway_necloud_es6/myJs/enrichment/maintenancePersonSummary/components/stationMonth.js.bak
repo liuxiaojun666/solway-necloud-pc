@@ -71,13 +71,7 @@ ajaxData({
         $scope.diffGetData();
     };
 
-    $scope.selectedBrands = [],$scope.selectedFaults = [];
-    $scope.$watch("selectedBrands", function(n, o){
-        // console.log(n)
-    })
-    $scope.$watch("selectedFaults", function(n, o){
-        // console.log(n)
-    })
+    
 
     //专业和共享 切换
     $scope.changePersonTab = tab =>{
@@ -126,11 +120,9 @@ ajaxData({
 
         // 时间列表
         $scope.analysis_station_operation_time_month_list.getDataCallback = (success, res) => {
-            console.log(res)
             if (!success) return;
-            
             $scope.listSource = res.body.data;
-            //测试 人员列表
+
             $scope.column = [
                 {
                     title: '时间',
@@ -140,11 +132,6 @@ ajaxData({
                     // render(text, record, index) {
                     //     return `<span class="alert-name" id="${record.id}">${text}</span>`
                     // }
-                },
-                {
-                    title: '检修时间',
-                    dataIndex: 'repair_hours_avg',
-                    
                 },
                 {
                     title: '检修台次',
@@ -163,6 +150,11 @@ ajaxData({
                     align: 'right',
                 },
                 {
+                    title: '检修时间',
+                    dataIndex: 'repair_hours_avg',
+                    
+                },
+                {
                     title: '检修成功率',
                     dataIndex: 'repair_finish_r',
                     sort: 'true',
@@ -170,6 +162,132 @@ ajaxData({
                 }
             ];
             
+            // $scope.selectedBrands = [],$scope.selectedFaults = [];
+            // $scope.$watch("selectedBrands", function(n, o){
+            //     // console.log(n)
+            // })
+            // $scope.$watch("selectedFaults", function(n, o){
+            //     // console.log(n)
+            // })
+
+            // $(".maintenanceStationMonth").on('click','.alert-name',function(){
+            //     let a = $(this).attr('id')
+            // })
+            // 
+            // 
+        };
+
+        // 设备列表
+        $scope.analysis_station_operation_dev_month_list.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.listSource = res.body.data;
+            
+            $scope.column = [
+                {
+                    title: '设备',
+                    width: '25%',
+                    dataIndex: 'dtime',
+                    align: 'left',
+                    // render(text, record, index) {
+                    //     return `<span class="alert-name" id="${record.id}">${text}</span>`
+                    // }
+                },
+                {
+                    title: '检修台次',
+                    dataIndex: 'repair_count',
+                    
+                },
+                {
+                    title: '检修台数',
+                    dataIndex: 'repair_number',
+                    
+                },
+                {
+                    title: '响应时间',
+                    dataIndex: 'res_hours_avg',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '检修时间',
+                    dataIndex: 'repair_hours_avg',
+                    
+                },
+                {
+                    title: '检修成功率',
+                    dataIndex: 'repair_finish_r',
+                    sort: 'true',
+                    align: 'right'
+                }
+            ];
+            
+            // $scope.selectedBrands = [],$scope.selectedFaults = [];
+            // $scope.$watch("selectedBrands", function(n, o){
+            //     // console.log(n)
+            // })
+            // $scope.$watch("selectedFaults", function(n, o){
+            //     // console.log(n)
+            // })
+
+            // $(".maintenanceStationMonth").on('click','.alert-name',function(){
+            //     let a = $(this).attr('id')
+            // })
+            // 
+            // 
+        };
+
+        // 专业人员列表
+        $scope.analysis_station_operation_person_month_list.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.listSource = res.body.data.data;
+            $scope.pageData = res.body.data;
+            $scope.column = [
+                {
+                    title: '姓名',
+                    width: '25%',
+                    dataIndex: 'dtime',
+                    align: 'left',
+                    // render(text, record, index) {
+                    //     return `<span class="alert-name" id="${record.id}">${text}</span>`
+                    // }
+                },
+                {
+                    title: '检修台次',
+                    dataIndex: 'repair_count',
+                    
+                },
+                {
+                    title: '检修台数',
+                    dataIndex: 'repair_number',
+                    
+                },
+                {
+                    title: '响应时间',
+                    dataIndex: 'res_hours_avg',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '检修时间',
+                    dataIndex: 'repair_hours_avg',
+                    
+                },
+                {
+                    title: '检修成功率',
+                    dataIndex: 'repair_finish_r',
+                    sort: 'true',
+                    align: 'right'
+                }
+            ];
+            
+            // $scope.selectedBrands = [],$scope.selectedFaults = [];
+            // $scope.$watch("selectedBrands", function(n, o){
+            //     // console.log(n)
+            // })
+            // $scope.$watch("selectedFaults", function(n, o){
+            //     // console.log(n)
+            // })
+
             // $(".maintenanceStationMonth").on('click','.alert-name',function(){
             //     let a = $(this).attr('id')
             // })
