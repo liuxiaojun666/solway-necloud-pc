@@ -137,9 +137,10 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 if(res.code == 0){
                     const alarmList = res.body.alarmList;
                     const alarmInfo = res.body.alarmTotalInfo;
-                    $scope.total = alarmInfo.rsTotal;
-                    $scope.total_sure_no = alarmInfo.sureNoTotal;
-                    $scope.total_sure_yes = alarmInfo.sureOkTotal;
+                    $scope.total = alarmInfo.rsTotal;//总数
+                    $scope.unCloseTotal = alarmInfo.unCloseTotal;//未关闭
+                    $scope.total_sure_no = alarmInfo.sureNoTotal;//未确认
+                    $scope.total_sure_yes = alarmInfo.sureOkTotal;//已确认
                     $scope.maxUpdateTime = alarmInfo.maxUpdateTime;
 
                     $solway.setStore('alarm', {'voiceTime':alarmInfo.voiceTime}); 
@@ -149,7 +150,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                         window.speechSynthesis.speak(newUtterance);
                     }
 
-                    if($scope.total){
+                    if($scope.unCloseTotal){
                         $scope.currentStatus = 'abnormal';
                     }else{
                         $scope.currentStatus = 'normal';
