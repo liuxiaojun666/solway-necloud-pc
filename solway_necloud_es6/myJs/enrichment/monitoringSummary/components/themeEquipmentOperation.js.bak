@@ -220,7 +220,11 @@ ajaxData({
         if ($scope.detailFullPage) {
             return false;
         } else {
-            if ($scope.getTopXhr === false) return false; 
+            if ($scope.getTopXhr === false){
+                await myAjaxData.timeout(0);
+                setThemepowerWidth()
+                return false; 
+            } 
 
             const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
             const dateType = ($scope._dateType == 0) ? 3 : ($scope._dateType == 1 ? 2 : 1);
@@ -265,38 +269,7 @@ ajaxData({
     
     //接口
     $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        // $scope.themePowerIsLoding = !$scope.currentPowerInfo.res;
         if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday'){
-            // $scope.currentPowerInfo.getData({
-            //     'queryType': queryType,
-            //     'date': dateTime,
-            //     'dateType': dateType
-            // }).then(res => {
-            //     $scope.themePowerIsLoding = false;
-            //     if (res.code == 0) {
-            //         $scope.data = res.body;
-            //         initEchart(res.body.kw_r[0]);
-            //     }else{
-            //         $scope.data = {};
-            //         initEchart('');
-            //     }
-            //     $scope.$emit('lastUpdate', { comm: res.body.comm, dtime: res.body.dtime})
-            // })
-
-            // $scope.deviceCurrent.getData({
-            //     'queryType': queryType,
-            //     'date': dateTime,
-            //     'dateType': dateType
-            // }).then(res => {
-            //     $scope.themePowerIsLoding = false;
-            //     if (res.code == 0) {
-            //         const data = res.body;
-            //         $scope.data = data;
-            //         $scope.devTotal = data.fault + data.comm + data.maintain + data.run + data.wait ;
-            //         $scope.pieThirdItemName = '维护台数';
-            //         initPieEchart(data.fault, data.comm, data.maintain, data.run, data.wait);//故障、离线、维护、运行、待机
-            //     }
-            // })
             $scope.getRunAcpStatus.getData({
                 'queryType': queryType,
                 'date': dateTime,
