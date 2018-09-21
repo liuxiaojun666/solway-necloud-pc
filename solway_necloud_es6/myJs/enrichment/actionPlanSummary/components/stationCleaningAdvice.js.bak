@@ -31,6 +31,35 @@ ajaxData(
             [31, 1, 2, 53, 54, 525, 526, 527, 528, 529, 521, 5211, 25122, 13, 214, 15, 16, 17, 18, 19, 20,]
         ]
     ];
+    $scope.xdata2 = [
+        '设备-31', '设备-01', '设备-02', '设备-03', '设备-04', '设备-05', '设备-06', '设备-07', '设备-08', '设备-09', '设备-10', '设备-11', '设备-12', '设备-13', '设备-14', '设备-15', '设备-16', '设备-17', '设备-18', '设备-19', '设备-20',
+    ];
+    $scope.ydatas2 = [
+        [
+            [31, 1, 42, 3, 442, 253, 6, 475, 8, 96, 160, 181, 912, 213, 114, 15, 16, 17, 18, 19, 20,]
+        ],
+    ];
+
+    $scope.markLine = [[{
+        label: {
+            normal: {
+                formatter: '{b}: {c}%',
+                position: 'middle'
+            }
+        },
+        lineStyle: {
+            normal: {
+                type: 'solid',
+                color: '#FF929C'
+            }
+        },
+        data: [
+            {
+                name: '清洗临界值',
+                yAxis: 100
+            },
+        ]
+    }]];
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
@@ -63,6 +92,29 @@ ajaxData(
 
     }
 
+
+    // 键盘 左右 键   切换主题  组合键 放大缩小（ctrl + M）
+    $(document).on('keydown', keyChangeTheme);
+    $scope.$on('$destroy', () => $(document).off('keydown', keyChangeTheme));
+    function keyChangeTheme(event) {
+        const { tabIndex } = $scope;
+        switch (event.keyCode) {
+            case 38:
+                if (tabIndex === 0) return;
+                $scope.changeTab(tabIndex - 1);
+                $scope.$apply();
+                break;
+
+            case 40:
+                if (tabIndex === 1) return;
+                $scope.changeTab(tabIndex + 1);
+                $scope.$apply();
+                break;
+
+            default:
+                break;
+        }
+    }
     // 销毁 事件
     $scope.$on('$destroy', () => {
         setDataNull();

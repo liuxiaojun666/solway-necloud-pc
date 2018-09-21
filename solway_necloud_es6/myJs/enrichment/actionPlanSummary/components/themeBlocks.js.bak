@@ -1,6 +1,10 @@
 ajaxData(
     {
-
+        action_station_clean_suggest_subject: {
+            name: 'GETaction_station_clean_suggest_subject',
+            data: { },
+            later: true
+        }
     },
     {
         __serviceName__: 'actionPlanSummaryThemeBlocksService',
@@ -11,7 +15,11 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-
+        $scope.action_station_clean_suggest_subject.getData({
+            queryCode: 'action_station_clean_suggest_subject',
+            queryType: 3,
+            date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+        });
         $('.ng-clock').removeClass('ng-clock');
     };
 

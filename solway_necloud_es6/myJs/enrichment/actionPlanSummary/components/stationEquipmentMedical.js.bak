@@ -21,6 +21,83 @@ ajaxData(
             $scope.$apply();
         };
 
+        $scope.column = [
+            {
+                title: '设备名称',
+                dataIndex: '',
+                align: 'left',
+                render(text) {
+                    return 'hello'
+                }
+            },
+            {
+                title: '故障类型',
+                dataIndex: '',
+                align: 'left',
+                render(text) {
+                    return 'hello'
+                }
+            },
+            {
+                title: '故障内容',
+                dataIndex: '',
+                align: 'left',
+                render(text) {
+                    return 'hello'
+                }
+            },
+            {
+                title: '故障时间',
+                dataIndex: '',
+                align: 'left',
+                render(text) {
+                    return 'hello'
+                }
+            },
+            {
+                title: '设备状态',
+                dataIndex: '',
+                align: 'left',
+                render(text) {
+                    return 'hello'
+                }
+            },
+            {
+                title: '处理状态',
+                dataIndex: '',
+                align: 'left',
+                render(text) {
+                    return 'hello'
+                }
+            },
+        ];
+
+        $scope.column1 = [
+            {
+                title: '设备名称',
+                dataIndex: '',
+                align: 'left',
+                render(text) {
+                    return 'hello'
+                }
+            },
+            {
+                title: '故障类型',
+                dataIndex: '',
+                align: 'left',
+                render(text) {
+                    return 'hello'
+                }
+            },
+            {
+                title: '故障内容',
+                dataIndex: '',
+                align: 'left',
+                render(text) {
+                    return 'hello'
+                }
+            },
+        ];
         // 切换电站 回调
         $scope.switchPowerCallback = () => {
             $scope.diffGetData();
@@ -52,6 +129,29 @@ ajaxData(
 
         }
 
+
+        // 键盘 左右 键   切换主题  组合键 放大缩小（ctrl + M）
+        $(document).on('keydown', keyChangeTheme);
+        $scope.$on('$destroy', () => $(document).off('keydown', keyChangeTheme));
+        function keyChangeTheme(event) {
+            const { tabIndex } = $scope;
+            switch (event.keyCode) {
+                case 38:
+                    if (tabIndex === 0) return;
+                    $scope.changeTab(tabIndex - 1);
+                    $scope.$apply();
+                    break;
+
+                case 40:
+                    if (tabIndex === 1) return;
+                    $scope.changeTab(tabIndex + 1);
+                    $scope.$apply();
+                    break;
+
+                default:
+                    break;
+            }
+        }
         // 销毁 事件
         $scope.$on('$destroy', () => {
             setDataNull();

@@ -20,10 +20,12 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         imagesymboloptions: '=',
         stack: '=',
         itemClick: '=',
-        interval: '=',
-        tooltipFormatter: '=',
-        lineWidth: '=',
-        toFixed: '='
+        interval: '=', 
+        tooltipFormatter: '=', // 自定义 tooltip
+        lineWidth: '=', // 线宽
+        toFixed: '=', // 保留小数位数  精度
+        areaFill: '=', // 填充， 线性渐变
+        markLine: '=', // 标记线
     },
     link($scope, $element) {
         let myChart;
@@ -67,7 +69,9 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 ydatas = [[[]]], 
                 types = [], 
                 colors = [], 
-                datazoom 
+                datazoom,
+                areaFill, 
+                markLine,
             } = $scope;
             const option = {
                 backgroundColor,
@@ -150,7 +154,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         }
                     }
                 })),
-                dataZoom: datazoom && [{
+                dataZoom: datazoom && (width - 100) / ydatas[0][0].length < 50 && [{
                     type: 'slider',
                     xAxisIndex: 0,
                     filterMode: 'empty',
@@ -191,7 +195,21 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                                     globalCoord: true
                                 } : colors[i][xi]
                             }
-                        }
+                        },
+                        areaStyle: (areaFill && areaFill[i][xi]) && {
+                            normal: {
+                                color: {
+                                    type: 'linear',
+                                    x: 0,
+                                    y: 0,
+                                    x2: 0,
+                                    y2: 1,
+                                    colorStops: areaFill[i][xi],
+                                    globalCoord: false // 缺省为 false
+                                }
+                            }
+                        },
+                        markLine: markLine && markLine[i][xi]
                     }))
                 })
                 .reduce((a, b) => a.concat(b), [])
