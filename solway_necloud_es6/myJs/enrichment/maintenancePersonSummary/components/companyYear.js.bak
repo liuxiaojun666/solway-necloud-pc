@@ -1,23 +1,23 @@
 ajaxData({
-    //电站----累计
+    //公司----年
 
     //时间
-    analysis_station_operation_time_accum_list: {
-        name: 'GETanalysis_station_operation_time_accum_list',
+    analysis_company_operation_time_year_list: {
+        name: 'GETanalysis_company_operation_time_year_list',
         data: {},
         later: true,
         onlyLatest: true
     },
-    //设备
-    analysis_station_operation_dev_accum_list: {
-        name: 'GETanalysis_station_operation_dev_accum_list',
+    //电站
+    analysis_company_operation_station_year_list: {
+        name: 'GETanalysis_company_operation_station_year_list',
         data: {},
         later: true,
         onlyLatest: true
     },
     //专业人员
-    analysis_station_operation_person_accum_list: {
-        name: 'GETanalysis_station_operation_person_accum_list',
+    analysis_company_operation_person_year_list: {
+        name: 'GETanalysis_company_operation_person_year_list',
         data: {},
         later: true,
         onlyLatest: true
@@ -25,16 +25,17 @@ ajaxData({
     //共享人员
 
 }, {
-    __serviceName__: 'maintenancePersonStationAccumulative',
-})('maintenancePersonStationAccumulativeCtrl', ['$scope', 'maintenancePersonStationAccumulative', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'maintenancePersonCompanyYear',
+})('maintenancePersonCompanyYearCtrl', ['$scope', 'maintenancePersonCompanyYear', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceStationAccum || {};
-        const { dateType } = historicalRecord.get();
+        let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceCompanyYear || {};
+        const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
         await $scope.dateUpdated();
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
@@ -61,8 +62,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeMaintenanceStationAccum: {
-                ...historicalRecord.get().themeMaintenanceStationAccum || {},
+            themeMaintenanceCompanyYear: {
+                ...historicalRecord.get().themeMaintenanceCompanyYear || {},
                 tabIndex
             }
         });
@@ -76,32 +77,32 @@ ajaxData({
     }
     // 判断 调用  对应 接口
     $scope.diffGetData = async()=>{
-        if (!$scope.initComplete  || $scope.dateType!=3) return;
+        if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
-
-        const { tabIndex } = $scope;
+        
+        const {dateTime, tabIndex } = $scope;
         switch (tabIndex) {
             case 0: //时间
-                $scope.analysis_station_operation_time_accum_list.getData({
-                    queryCode: 'analysis_station_operation_time_accum_list',
-                    queryType: 3,
-                    // date: dateTime.showDate
+                $scope.analysis_company_operation_time_year_list.getData({
+                    queryCode: 'analysis_company_operation_time_year_list',
+                    queryType: 1,
+                    date: dateTime.showDate
                 });
                 break;
-            case 1: //设备
-                $scope.analysis_station_operation_dev_accum_list.getData({
-                    queryCode: 'analysis_station_operation_dev_accum_list',
-                    queryType: 3,
-                    // date: dateTime.showDate
+            case 1: //电站
+                $scope.analysis_company_operation_station_year_list.getData({
+                    queryCode: 'analysis_company_operation_station_year_list',
+                    queryType: 1,
+                    date: dateTime.showDate
                 });
                 break;
             case 2: //专业人员
-                $scope.analysis_station_operation_person_accum_list.getData({
-                    queryCode: 'analysis_station_operation_person_accum_list',
-                    queryType: 3,
+                $scope.analysis_company_operation_person_year_list.getData({
+                    queryCode: 'analysis_company_operation_person_year_list',
+                    queryType: 1,
+                    date: dateTime.showDate,
                     pageIndex: 0,
-                    pageSize: 20,
-                    //date: dateTime.showDate,
+                    pageSize: 20
                 });
                 break;
             case 3: //共享人员
@@ -114,7 +115,7 @@ ajaxData({
     }
 
     // 时间列表
-    $scope.analysis_station_operation_time_accum_list.getDataCallback = (success, res) => {
+    $scope.analysis_company_operation_time_year_list.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.listSource = res.body.data;
 
@@ -172,16 +173,16 @@ ajaxData({
         // 
     };
 
-    // 设备列表
-    $scope.analysis_station_operation_dev_accum_list.getDataCallback = (success, res) => {
+    // 电站列表
+    $scope.analysis_company_operation_station_year_list.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.listSource = res.body.data;
         
         $scope.column = [
             {
-                title: '设备',
+                title: '电站',
                 width: '25%',
-                dataIndex: 'eq_name',
+                dataIndex: 'st_name',
                 align: 'left',
                 // render(text, record, index) {
                 //     return `<span class="alert-name" id="${record.id}">${text}</span>`
@@ -232,9 +233,10 @@ ajaxData({
     };
 
     // 专业人员列表
-    $scope.analysis_station_operation_person_accum_list.getDataCallback = (success, res) => {
+    $scope.analysis_company_operation_person_year_list.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.listSource = res.body.data.data;
+
         $scope.column = [
             {
                 title: '姓名',

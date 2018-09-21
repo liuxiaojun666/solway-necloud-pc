@@ -76,9 +76,9 @@ ajaxData({
         }
     }
     // 判断 调用  对应 接口
-    $scope.diffGetData = ()=>{
-        if (!$scope.initComplete || $scope.dateType!=1) return;
-
+    $scope.diffGetData = async()=>{
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
         const {dateTime, tabIndex } = $scope;
         switch (tabIndex) {
             case 0: //时间

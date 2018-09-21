@@ -1,23 +1,23 @@
 ajaxData({
-    //电站----累计
+    //公司----累计
 
     //时间
-    analysis_station_operation_time_accum_list: {
-        name: 'GETanalysis_station_operation_time_accum_list',
+    analysis_company_operation_time_accum_list: {
+        name: 'GETanalysis_company_operation_time_accum_list',
         data: {},
         later: true,
         onlyLatest: true
     },
-    //设备
-    analysis_station_operation_dev_accum_list: {
-        name: 'GETanalysis_station_operation_dev_accum_list',
+    //电站
+    analysis_company_operation_station_accum_list: {
+        name: 'GETanalysis_company_operation_station_accum_list',
         data: {},
         later: true,
         onlyLatest: true
     },
     //专业人员
-    analysis_station_operation_person_accum_list: {
-        name: 'GETanalysis_station_operation_person_accum_list',
+    analysis_company_operation_person_accum_list: {
+        name: 'GETanalysis_company_operation_person_accum_list',
         data: {},
         later: true,
         onlyLatest: true
@@ -25,14 +25,14 @@ ajaxData({
     //共享人员
 
 }, {
-    __serviceName__: 'maintenancePersonStationAccumulative',
-})('maintenancePersonStationAccumulativeCtrl', ['$scope', 'maintenancePersonStationAccumulative', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'maintenancePersonCompanyAccumulative',
+})('maintenancePersonCompanyAccumCtrl', ['$scope', 'maintenancePersonCompanyAccumulative', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceStationAccum || {};
+        let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceCompanyAccum || {};
         const { dateType } = historicalRecord.get();
         $scope.dateType = dateType;
         await $scope.dateUpdated();
@@ -61,8 +61,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeMaintenanceStationAccum: {
-                ...historicalRecord.get().themeMaintenanceStationAccum || {},
+            themeMaintenanceCompanyAccum: {
+                ...historicalRecord.get().themeMaintenanceCompanyAccum || {},
                 tabIndex
             }
         });
@@ -82,23 +82,23 @@ ajaxData({
         const { tabIndex } = $scope;
         switch (tabIndex) {
             case 0: //时间
-                $scope.analysis_station_operation_time_accum_list.getData({
-                    queryCode: 'analysis_station_operation_time_accum_list',
-                    queryType: 3,
+                $scope.analysis_company_operation_time_accum_list.getData({
+                    queryCode: 'analysis_company_operation_time_accum_list',
+                    queryType:1,
                     // date: dateTime.showDate
                 });
                 break;
-            case 1: //设备
-                $scope.analysis_station_operation_dev_accum_list.getData({
-                    queryCode: 'analysis_station_operation_dev_accum_list',
-                    queryType: 3,
+            case 1: //电站
+                $scope.analysis_company_operation_station_accum_list.getData({
+                    queryCode: 'analysis_company_operation_station_accum_list',
+                    queryType: 1,
                     // date: dateTime.showDate
                 });
                 break;
             case 2: //专业人员
-                $scope.analysis_station_operation_person_accum_list.getData({
-                    queryCode: 'analysis_station_operation_person_accum_list',
-                    queryType: 3,
+                $scope.analysis_company_operation_person_accum_list.getData({
+                    queryCode: 'analysis_company_operation_person_accum_list',
+                    queryType: 1,
                     pageIndex: 0,
                     pageSize: 20,
                     //date: dateTime.showDate,
@@ -114,7 +114,7 @@ ajaxData({
     }
 
     // 时间列表
-    $scope.analysis_station_operation_time_accum_list.getDataCallback = (success, res) => {
+    $scope.analysis_company_operation_time_accum_list.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.listSource = res.body.data;
 
@@ -172,16 +172,16 @@ ajaxData({
         // 
     };
 
-    // 设备列表
-    $scope.analysis_station_operation_dev_accum_list.getDataCallback = (success, res) => {
+    // 电站列表
+    $scope.analysis_company_operation_station_accum_list.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.listSource = res.body.data;
         
         $scope.column = [
             {
-                title: '设备',
+                title: '电站',
                 width: '25%',
-                dataIndex: 'eq_name',
+                dataIndex: 'st_name',
                 align: 'left',
                 // render(text, record, index) {
                 //     return `<span class="alert-name" id="${record.id}">${text}</span>`
@@ -232,7 +232,7 @@ ajaxData({
     };
 
     // 专业人员列表
-    $scope.analysis_station_operation_person_accum_list.getDataCallback = (success, res) => {
+    $scope.analysis_company_operation_person_accum_list.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.listSource = res.body.data.data;
         $scope.column = [
@@ -296,8 +296,6 @@ ajaxData({
         $scope.pageData = {};
         $scope.column = []
     }
-
-
 
 
     // 销毁 事件
