@@ -32,13 +32,12 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { tabIndex = 2 ,personTab = 'profession'} = historicalRecord.get().themeMaintenanceStationMonth || {};
+        let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceStationMonth || {};
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
         await $scope.dateUpdated();
         $scope.changeTab(tabIndex);
-        $scope.changePersonTab(personTab);
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
@@ -63,7 +62,7 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeShadowStationMonth: {
+            themeMaintenanceStationMonth: {
                 ...historicalRecord.get().themeMaintenanceStationMonth || {},
                 tabIndex
             }
@@ -71,16 +70,10 @@ ajaxData({
         $scope.diffGetData();
     };
 
-    
-
-    //专业和共享 切换
-    $scope.changePersonTab = tab =>{
-        $scope.personTab = tab;
-    }
-
     $scope.trClick = (item,index) =>{
-        console.log(item)
-        $scope.showPeopleInfo = true;
+        if($scope.tabIndex == 2 || $scope.tabIndex == 3){
+            $scope.showPeopleInfo = true;
+        }
     }
     // 判断 调用  对应 接口
     $scope.diffGetData = ()=>{
@@ -106,11 +99,13 @@ ajaxData({
                 $scope.analysis_station_operation_person_month_list.getData({
                     queryCode: 'analysis_station_operation_person_month_list',
                     queryType: 3,
-                    date: dateTime.showDate
+                    date: dateTime.showDate,
+                    pageIndex: 0,
+                    pageSize: 20
                 });
                 break;
-            case '3': //共享人员
-                
+            case 3: //共享人员
+                test();
                 break;
             default:
                 break;
@@ -118,182 +113,189 @@ ajaxData({
         
     }
 
-        // 时间列表
-        $scope.analysis_station_operation_time_month_list.getDataCallback = (success, res) => {
-            if (!success) return;
-            $scope.listSource = res.body.data;
+    // 时间列表
+    $scope.analysis_station_operation_time_month_list.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.listSource = res.body.data;
 
-            $scope.column = [
-                {
-                    title: '时间',
-                    width: '25%',
-                    dataIndex: 'dtime',
-                    align: 'left',
-                    // render(text, record, index) {
-                    //     return `<span class="alert-name" id="${record.id}">${text}</span>`
-                    // }
-                },
-                {
-                    title: '检修台次',
-                    dataIndex: 'repair_count',
-                    
-                },
-                {
-                    title: '检修台数',
-                    dataIndex: 'repair_number',
-                    
-                },
-                {
-                    title: '响应时间',
-                    dataIndex: 'res_hours_avg',
-                    sort: 'true',
-                    align: 'right',
-                },
-                {
-                    title: '检修时间',
-                    dataIndex: 'repair_hours_avg',
-                    
-                },
-                {
-                    title: '检修成功率',
-                    dataIndex: 'repair_finish_r',
-                    sort: 'true',
-                    align: 'right'
-                }
-            ];
-            
-            // $scope.selectedBrands = [],$scope.selectedFaults = [];
-            // $scope.$watch("selectedBrands", function(n, o){
-            //     // console.log(n)
-            // })
-            // $scope.$watch("selectedFaults", function(n, o){
-            //     // console.log(n)
-            // })
+        $scope.column = [
+            {
+                title: '时间',
+                width: '25%',
+                dataIndex: 'dtime',
+                align: 'left',
+                // render(text, record, index) {
+                //     return `<span class="alert-name" id="${record.id}">${text}</span>`
+                // }
+            },
+            {
+                title: '检修台次',
+                dataIndex: 'repair_count',
+                
+            },
+            {
+                title: '检修台数',
+                dataIndex: 'repair_number',
+                
+            },
+            {
+                title: '响应时间',
+                dataIndex: 'res_hours_avg',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '检修时间',
+                dataIndex: 'repair_hours_avg',
+                
+            },
+            {
+                title: '检修成功率',
+                dataIndex: 'repair_finish_r',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+        
+        // $scope.selectedBrands = [],$scope.selectedFaults = [];
+        // $scope.$watch("selectedBrands", function(n, o){
+        //     // console.log(n)
+        // })
+        // $scope.$watch("selectedFaults", function(n, o){
+        //     // console.log(n)
+        // })
 
-            // $(".maintenanceStationMonth").on('click','.alert-name',function(){
-            //     let a = $(this).attr('id')
-            // })
-            // 
-            // 
-        };
+        // $(".maintenanceStationMonth").on('click','.alert-name',function(){
+        //     let a = $(this).attr('id')
+        // })
+        // 
+        // 
+    };
 
-        // 设备列表
-        $scope.analysis_station_operation_dev_month_list.getDataCallback = (success, res) => {
-            if (!success) return;
-            $scope.listSource = res.body.data;
-            
-            $scope.column = [
-                {
-                    title: '设备',
-                    width: '25%',
-                    dataIndex: 'dtime',
-                    align: 'left',
-                    // render(text, record, index) {
-                    //     return `<span class="alert-name" id="${record.id}">${text}</span>`
-                    // }
-                },
-                {
-                    title: '检修台次',
-                    dataIndex: 'repair_count',
-                    
-                },
-                {
-                    title: '检修台数',
-                    dataIndex: 'repair_number',
-                    
-                },
-                {
-                    title: '响应时间',
-                    dataIndex: 'res_hours_avg',
-                    sort: 'true',
-                    align: 'right',
-                },
-                {
-                    title: '检修时间',
-                    dataIndex: 'repair_hours_avg',
-                    
-                },
-                {
-                    title: '检修成功率',
-                    dataIndex: 'repair_finish_r',
-                    sort: 'true',
-                    align: 'right'
-                }
-            ];
-            
-            // $scope.selectedBrands = [],$scope.selectedFaults = [];
-            // $scope.$watch("selectedBrands", function(n, o){
-            //     // console.log(n)
-            // })
-            // $scope.$watch("selectedFaults", function(n, o){
-            //     // console.log(n)
-            // })
+    // 设备列表
+    $scope.analysis_station_operation_dev_month_list.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.listSource = res.body.data;
+        
+        $scope.column = [
+            {
+                title: '设备',
+                width: '25%',
+                dataIndex: 'eq_name',
+                align: 'left',
+                // render(text, record, index) {
+                //     return `<span class="alert-name" id="${record.id}">${text}</span>`
+                // }
+            },
+            {
+                title: '检修台次',
+                dataIndex: 'repair_count',
+                
+            },
+            {
+                title: '检修台数',
+                dataIndex: 'repair_number',
+                
+            },
+            {
+                title: '响应时间',
+                dataIndex: 'res_hours_avg',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '检修时间',
+                dataIndex: 'repair_hours_avg',
+                
+            },
+            {
+                title: '检修成功率',
+                dataIndex: 'repair_finish_r',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+        
+        // $scope.selectedBrands = [],$scope.selectedFaults = [];
+        // $scope.$watch("selectedBrands", function(n, o){
+        //     // console.log(n)
+        // })
+        // $scope.$watch("selectedFaults", function(n, o){
+        //     // console.log(n)
+        // })
 
-            // $(".maintenanceStationMonth").on('click','.alert-name',function(){
-            //     let a = $(this).attr('id')
-            // })
-            // 
-            // 
-        };
+        // $(".maintenanceStationMonth").on('click','.alert-name',function(){
+        //     let a = $(this).attr('id')
+        // })
+        // 
+        // 
+    };
 
-        // 专业人员列表
-        $scope.analysis_station_operation_person_month_list.getDataCallback = (success, res) => {
-            if (!success) return;
-            $scope.listSource = res.body.data.data;
-            $scope.pageData = res.body.data;
-            $scope.column = [
-                {
-                    title: '姓名',
-                    width: '25%',
-                    dataIndex: 'dtime',
-                    align: 'left',
-                    // render(text, record, index) {
-                    //     return `<span class="alert-name" id="${record.id}">${text}</span>`
-                    // }
-                },
-                {
-                    title: '检修台次',
-                    dataIndex: 'repair_count',
-                    
-                },
-                {
-                    title: '检修台数',
-                    dataIndex: 'repair_number',
-                    
-                },
-                {
-                    title: '响应时间',
-                    dataIndex: 'res_hours_avg',
-                    sort: 'true',
-                    align: 'right',
-                },
-                {
-                    title: '检修时间',
-                    dataIndex: 'repair_hours_avg',
-                    
-                },
-                {
-                    title: '检修成功率',
-                    dataIndex: 'repair_finish_r',
-                    sort: 'true',
-                    align: 'right'
-                }
-            ];
-            
-            // $scope.selectedBrands = [],$scope.selectedFaults = [];
-            // $scope.$watch("selectedBrands", function(n, o){
-            //     // console.log(n)
-            // })
-            // $scope.$watch("selectedFaults", function(n, o){
-            //     // console.log(n)
-            // })
+    // 专业人员列表
+    $scope.analysis_station_operation_person_month_list.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.listSource = res.body.data.data;
+        $scope.column = [
+            {
+                title: '姓名',
+                width: '25%',
+                dataIndex: 'user_name',
+                align: 'left',
+                // render(text, record, index) {
+                //     return `<span class="alert-name" id="${record.id}">${text}</span>`
+                // }
+            },
+            {
+                title: '检修台次',
+                dataIndex: 'repair_count',
+                
+            },
+            {
+                title: '检修台数',
+                dataIndex: 'repair_number',
+                
+            },
+            {
+                title: '响应时间',
+                dataIndex: 'res_hours_avg',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '检修时间',
+                dataIndex: 'repair_hours_avg',
+                
+            },
+            {
+                title: '检修成功率',
+                dataIndex: 'repair_finish_r',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+        
+        // $scope.selectedBrands = [],$scope.selectedFaults = [];
+        // $scope.$watch("selectedBrands", function(n, o){
+        //     // console.log(n)
+        // })
+        // $scope.$watch("selectedFaults", function(n, o){
+        //     // console.log(n)
+        // })
 
-            // $(".maintenanceStationMonth").on('click','.alert-name',function(){
-            //     let a = $(this).attr('id')
-            // })
-            // 
-            // 
-        };
+        // $(".maintenanceStationMonth").on('click','.alert-name',function(){
+        //     let a = $(this).attr('id')
+        // })
+        // 
+        // 
+    };
+
+    //共享人员列表
+    function test(){
+        // if (!success) return;
+        $scope.listSource = [];
+        $scope.pageData = {};
+        $scope.column = []
+    }
 
 
 

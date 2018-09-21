@@ -1,4 +1,4 @@
-app.directive('searchCondition', ['myAjaxData', '$ocLazyLoad','$timeout', (myAjaxData, $ocLazyLoad,$timeout) => ({
+app.directive('searchCondition', ['myAjaxData', '$ocLazyLoad','$timeout','$http', (myAjaxData, $ocLazyLoad,$timeout,$http) => ({
     restrict: 'E',
     replace: !0,
     templateUrl: 'tpl/enrichment/components/searchConditionTpl.html',
@@ -8,34 +8,66 @@ app.directive('searchCondition', ['myAjaxData', '$ocLazyLoad','$timeout', (myAja
     },
     link($scope, $element) {
         
-        const checkControl = () =>{
-            let $checkAllBrand =  $element.find('input[name="brandCheckAll"]');
-            let $checkEveryBrand = $element.find('input[name="brandType"]');
+        const getBrandsData = ()=>{
+            $http({
+                method: "GET",
+                url: window.baseUrl + "/Manufacturer/selectByPowerType.htm",
+                params: {
+                    powerType: 'PV'
+                }
+            }).success(function (res) {
+                console.log(res)
+                if(res.code == 0){
+                    $scope.brandsList = res.body;
+                    $timeout(()=>{
+                        let $checkAllBrand =  $element.find('input[name="brandCheckAll"]');
+                        let $checkEveryBrand = $element.find('input[name="brandType"]');
 
-            let $checkAllFault =  $element.find('input[name="faultCheckAll"]');
-            let $checkEveryFault = $element.find('input[name="faultType"]');
-            
-
-            $element.on('click','input[name="brandCheckAll"]', (e)=>{
-                Array.from($checkEveryBrand).forEach(item=>item.checked = e.target.checked)
+                        $element.on('click','input[name="brandCheckAll"]', (e)=>{
+                            Array.from($checkEveryBrand).forEach(item=>item.checked = e.target.checked)
+                        });
+                        $element.on('click','input[name="brandType"]', (e)=>{
+                            $checkAllBrand.prop('checked', Array.from($checkEveryBrand).every(item => item.checked== true));
+                        });
+                    },0);
+                }else{
+                    $scope.brandsList = [];
+                    // toaster.pop('error', '', res.msg);
+                }
             });
-            $element.on('click','input[name="brandType"]', (e)=>{
-                $checkAllBrand.prop('checked', Array.from($checkEveryBrand).every(item => item.checked== true));
-            });
-
-            $element.on('click','input[name="faultCheckAll"]', (e)=>{
-                Array.from($checkEveryFault).forEach(item=>item.checked = e.target.checked)
-            });
-            $element.on('click','input[name="faultType"]', (e)=>{
-                $checkAllFault.prop('checked', Array.from($checkEveryFault).every(item => item.checked== true));
-            });
-            
         }
+
+        const getfaultTypesData = ()=>{
+            $http({
+                method: "GET",
+                url: window.baseUrl + "/Basedictionary/selectAll.htm",
+                params: {
+                    dictType: 'FAULT_REAL_TYPE'
+                }
+            }).success(function (res) {
+                $scope.faultTypesList = res;
+                $timeout(()=>{
+                    let $checkAllFault =  $element.find('input[name="faultCheckAll"]');
+                    let $checkEveryFault = $element.find('input[name="faultType"]');
+
+                    $element.on('click','input[name="faultCheckAll"]', (e)=>{
+                        Array.from($checkEveryFault).forEach(item=>item.checked = e.target.checked)
+                    });
+                    $element.on('click','input[name="faultType"]', (e)=>{
+                        $checkAllFault.prop('checked', Array.from($checkEveryFault).every(item => item.checked== true));
+                    });
+                },0);
+            });
+        }
+
+        //获取品牌
+        getBrandsData();
+        //获取故障类型
+        getfaultTypesData();
 
         //全选控制
         $timeout(()=>{
             $scope.ifShowModel = false;//默认不显示弹框
-            checkControl();
         },0);
 
 
