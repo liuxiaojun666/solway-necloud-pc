@@ -1,23 +1,23 @@
 ajaxData({
-    //电站----月
+    //电站----年
 
     //时间
-    analysis_station_operation_time_month_list: {
-        name: 'GETanalysis_station_operation_time_month_list',
+    analysis_station_operation_time_year_list: {
+        name: 'GETanalysis_station_operation_time_year_list',
         data: {},
         later: true,
         onlyLatest: true
     },
     //设备
-    analysis_station_operation_dev_month_list: {
-        name: 'GETanalysis_station_operation_dev_month_list',
+    analysis_station_operation_dev_year_list: {
+        name: 'GETanalysis_station_operation_dev_year_list',
         data: {},
         later: true,
         onlyLatest: true
     },
     //专业人员
-    analysis_station_operation_person_month_list: {
-        name: 'GETanalysis_station_operation_person_month_list',
+    analysis_station_operation_person_year_list: {
+        name: 'GETanalysis_station_operation_person_year_list',
         data: {},
         later: true,
         onlyLatest: true
@@ -25,14 +25,14 @@ ajaxData({
     //共享人员
 
 }, {
-    __serviceName__: 'maintenancePersonStationMonth',
-})('maintenancePersonStationMonthCtrl', ['$scope', 'maintenancePersonStationMonth', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'maintenancePersonStationYear',
+})('maintenancePersonStationYearCtrl', ['$scope', 'maintenancePersonStationYear', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceStationMonth || {};
+        let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceStationYear || {};
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
@@ -62,8 +62,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeMaintenanceStationMonth: {
-                ...historicalRecord.get().themeMaintenanceStationMonth || {},
+            themeMaintenanceStationYear: {
+                ...historicalRecord.get().themeMaintenanceStationYear || {},
                 tabIndex
             }
         });
@@ -77,27 +77,27 @@ ajaxData({
     }
     // 判断 调用  对应 接口
     $scope.diffGetData = ()=>{
-        if (!$scope.initComplete || $scope.dateType!=1) return;
+        if (!$scope.initComplete || $scope.dateType!=2) return;
 
         const {dateTime, tabIndex } = $scope;
         switch (tabIndex) {
             case 0: //时间
-                $scope.analysis_station_operation_time_month_list.getData({
-                    queryCode: 'analysis_station_operation_time_month_list',
+                $scope.analysis_station_operation_time_year_list.getData({
+                    queryCode: 'analysis_station_operation_time_year_list',
                     queryType: 3,
                     date: dateTime.showDate
                 });
                 break;
             case 1: //设备
-                $scope.analysis_station_operation_dev_month_list.getData({
-                    queryCode: 'analysis_station_operation_dev_month_list',
+                $scope.analysis_station_operation_dev_year_list.getData({
+                    queryCode: 'analysis_station_operation_dev_year_list',
                     queryType: 3,
                     date: dateTime.showDate
                 });
                 break;
             case 2: //专业人员
-                $scope.analysis_station_operation_person_month_list.getData({
-                    queryCode: 'analysis_station_operation_person_month_list',
+                $scope.analysis_station_operation_person_year_list.getData({
+                    queryCode: 'analysis_station_operation_person_year_list',
                     queryType: 3,
                     date: dateTime.showDate,
                     pageIndex: 0,
@@ -114,7 +114,7 @@ ajaxData({
     }
 
     // 时间列表
-    $scope.analysis_station_operation_time_month_list.getDataCallback = (success, res) => {
+    $scope.analysis_station_operation_time_year_list.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.listSource = res.body.data;
 
@@ -173,7 +173,7 @@ ajaxData({
     };
 
     // 设备列表
-    $scope.analysis_station_operation_dev_month_list.getDataCallback = (success, res) => {
+    $scope.analysis_station_operation_dev_year_list.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.listSource = res.body.data;
         
@@ -232,9 +232,10 @@ ajaxData({
     };
 
     // 专业人员列表
-    $scope.analysis_station_operation_person_month_list.getDataCallback = (success, res) => {
+    $scope.analysis_station_operation_person_year_list.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.listSource = res.body.data.data;
+
         $scope.column = [
             {
                 title: '姓名',
