@@ -1,6 +1,30 @@
 ajaxData(
     {
-
+        resourceDetailStationDay: {
+            name: 'GETresourceDetailStationDay',
+            data: { },
+            later: true,
+        },
+        action_station_clean_suggest_mark_30day_line: {
+            name: 'GETaction_station_clean_suggest_mark_30day_line',
+            data: { },
+            later: true
+        },
+        action_station_clean_suggest_dust_30day_line: {
+            name: 'GETaction_station_clean_suggest_dust_30day_line',
+            data: {},
+            later: true
+        },
+        action_station_clean_suggest_subject: {
+            name: 'GETaction_station_clean_suggest_subject',
+            data: {},
+            later: true
+        },
+        action_station_clean_suggest_dust_30day_dust_we: {
+            name: 'GETaction_station_clean_suggest_dust_30day_dust_we',
+            data: {},
+            later: true
+        }
     },
     {
         __serviceName__: 'actionPlanSummaryStationCleaningAdviceService',
@@ -20,49 +44,10 @@ ajaxData(
         $scope.$apply();
     };
 
-    $scope.xdata = [
-        '8-31', '9-01', '9-02', '9-03', '9-04', '9-05', '9-06', '9-07', '9-08', '9-09', '9-10', '9-11', '9-12', '9-13', '9-14', '9-15', '9-16', '9-17', '9-18', '9-19', '9-20',
-    ];
-    $scope.ydatas = [
-        [
-            [31, 1, 42, 3, 442, 253, 6, 475, 8, 96, 160, 181, 912, 213, 114, 15, 16, 17, 18, 19, 20,]
-        ],
-        [
-            [31, 1, 2, 53, 54, 525, 526, 527, 528, 529, 521, 5211, 25122, 13, 214, 15, 16, 17, 18, 19, 20,]
-        ]
-    ];
-    $scope.xdata2 = [
-        '设备-31', '设备-01', '设备-02', '设备-03', '设备-04', '设备-05', '设备-06', '设备-07', '设备-08', '设备-09', '设备-10', '设备-11', '设备-12', '设备-13', '设备-14', '设备-15', '设备-16', '设备-17', '设备-18', '设备-19', '设备-20',
-    ];
-    $scope.ydatas2 = [
-        [
-            [31, 1, 42, 3, 442, 253, 6, 475, 8, 96, 160, 181, 912, 213, 114, 15, 16, 17, 18, 19, 20,]
-        ],
-    ];
-
-    $scope.markLine = [[{
-        label: {
-            normal: {
-                formatter: '{b}: {c}%',
-                position: 'middle'
-            }
-        },
-        lineStyle: {
-            normal: {
-                type: 'solid',
-                color: '#FF929C'
-            }
-        },
-        data: [
-            {
-                name: '清洗临界值',
-                yAxis: 100
-            },
-        ]
-    }]];
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
+        if ($scope.dataType !== 0) return;
         $scope.diffGetData();
     };
 
@@ -79,17 +64,90 @@ ajaxData(
     };
 
     // 接口请求
-    $scope.diffGetData = async (getInfo) => {
+    $scope.diffGetData = async () => {
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
-        setDataNull(getInfo);
+        setDataNull();
         const { tabIndex, dataType } = $scope;
         if (dataType !== 0) return;
+        if (tabIndex === 0) {
+            $scope.resourceDetailStationDay.getData({
+                date: (new Date).Format('yyyy-MM-dd'),
+                dateType: 3,
+                queryType: 3
+            });
+            $scope.action_station_clean_suggest_mark_30day_line.getData({
+                queryCode: 'action_station_clean_suggest_mark_30day_line',
+                queryType: 3,
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            });
+            $scope.action_station_clean_suggest_subject.getData({
+                queryCode: 'action_station_clean_suggest_subject',
+                queryType: 3,
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            }).then((res) => {
+                if (res.body.data.pre_clean_status !== 1) return;
+                $scope.action_station_clean_suggest_dust_30day_dust_we.getData({
+                    queryCode: 'action_station_clean_suggest_dust_30day_dust_we',
+                    queryType: 3,
+                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                });
+            });
+        } else if (tabIndex === 1) {
+            $scope.action_station_clean_suggest_subject.getData({
+                queryCode: 'action_station_clean_suggest_subject',
+                queryType: 3,
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            }).then(() => {
+                $scope.action_station_clean_suggest_dust_30day_line.getData({
+                    queryCode: 'action_station_clean_suggest_dust_30day_line',
+                    queryType: 3,
+                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                });
+            });
+        }
     };
 
-    // 数据置空
-    function setDataNull(getInfo) {
+    $scope.action_station_clean_suggest_mark_30day_line.subscribe(res => {
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data.clean_mark.some(v => (v === null)) ? [] : res.body.data.clean_mark], [res.body.data.pcpn]];
+    });
 
+    $scope.action_station_clean_suggest_subject.subscribe(res => {
+        $scope.markLine = res.body.data.clean_th && [[{
+            label: {
+                normal: {
+                    formatter: '{b}: {c}%',
+                    position: 'middle'
+                }
+            },
+            lineStyle: {
+                normal: {
+                    type: 'solid',
+                    color: '#FF929C'
+                }
+            },
+            data: [
+                {
+                    name: '清洗临界值',
+                    yAxis: res.body.data.clean_th
+                },
+            ]
+        }]];
+    });
+
+    $scope.action_station_clean_suggest_dust_30day_line.subscribe(res => {
+        $scope.xdata = res.body.data.eq_name;
+        $scope.ydatas = [[res.body.data.clean_mark]];
+    });
+
+    // 数据置空
+    function setDataNull() {
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.action_station_clean_suggest_mark_30day_line.res = null;
+        $scope.action_station_clean_suggest_subject.res = null;
+        $scope.action_station_clean_suggest_dust_30day_line.res = null;
     }
 
 

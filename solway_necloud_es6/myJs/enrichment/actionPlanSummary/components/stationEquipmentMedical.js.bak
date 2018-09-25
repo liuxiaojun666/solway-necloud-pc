@@ -1,6 +1,25 @@
 ajaxData(
     {
-
+        pvAlarmGetRunFaultList: {
+            name: 'GETpvAlarmGetRunFaultList',
+            data: {},
+            later:true,
+        },
+        action_station_clean_suggest_dev_shade_list: {
+            name: 'GETaction_station_clean_suggest_dev_shade_list',
+            data: {},
+            later: true
+        },
+        action_station_clean_suggest_dev_dr_list: {
+            name: 'GETaction_station_clean_suggest_dev_dr_list',
+            data: {},
+            later: true
+        },
+        action_station_clean_suggest_dev_decay_list: {
+            name: 'GETaction_station_clean_suggest_dev_decay_list',
+            data: {},
+            later: true
+        },
     },
     {
         __serviceName__: 'actionPlanSummaryStationEquipmentMedicalService',
@@ -21,85 +40,9 @@ ajaxData(
             $scope.$apply();
         };
 
-        $scope.column = [
-            {
-                title: '设备名称',
-                dataIndex: '',
-                align: 'left',
-                render(text) {
-                    return 'hello'
-                }
-            },
-            {
-                title: '故障类型',
-                dataIndex: '',
-                align: 'left',
-                render(text) {
-                    return 'hello'
-                }
-            },
-            {
-                title: '故障内容',
-                dataIndex: '',
-                align: 'left',
-                render(text) {
-                    return 'hello'
-                }
-            },
-            {
-                title: '故障时间',
-                dataIndex: '',
-                align: 'left',
-                render(text) {
-                    return 'hello'
-                }
-            },
-            {
-                title: '设备状态',
-                dataIndex: '',
-                align: 'left',
-                render(text) {
-                    return 'hello'
-                }
-            },
-            {
-                title: '处理状态',
-                dataIndex: '',
-                align: 'left',
-                render(text) {
-                    return 'hello'
-                }
-            },
-        ];
-
-        $scope.column1 = [
-            {
-                title: '设备名称',
-                dataIndex: '',
-                align: 'left',
-                render(text) {
-                    return 'hello'
-                }
-            },
-            {
-                title: '故障类型',
-                dataIndex: '',
-                align: 'left',
-                render(text) {
-                    return 'hello'
-                }
-            },
-            {
-                title: '故障内容',
-                dataIndex: '',
-                align: 'left',
-                render(text) {
-                    return 'hello'
-                }
-            },
-        ];
         // 切换电站 回调
         $scope.switchPowerCallback = () => {
+            if ($scope.dataType !== 0) return;
             $scope.diffGetData();
         };
 
@@ -122,11 +65,129 @@ ajaxData(
             setDataNull(getInfo);
             const { tabIndex, dataType } = $scope;
             if (dataType !== 0) return;
+            if (tabIndex === 0) {
+                $scope.pvAlarmGetRunFaultList.getData({
+                    pageIndex: 0,
+                    pageSize: 2000
+                });
+            } else if (tabIndex === 1) {
+                $scope.action_station_clean_suggest_dev_shade_list.getData({
+                    queryCode: 'action_station_clean_suggest_dev_shade_list',
+                    queryType: 3,
+                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                });
+                $scope.action_station_clean_suggest_dev_dr_list.getData({
+                    queryCode: 'action_station_clean_suggest_dev_dr_list',
+                    queryType: 3,
+                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                });
+                $scope.action_station_clean_suggest_dev_decay_list.getData({
+                    queryCode: 'action_station_clean_suggest_dev_decay_list',
+                    queryType: 3,
+                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                });
+            }
         };
+
+        $scope.pvAlarmGetRunFaultList.subscribe(res => {
+
+            $scope.column = [
+                {
+                    title: '设备名称',
+                    dataIndex: 'devicename',
+                    align: 'left',
+                },
+                {
+                    title: '故障类型',
+                    dataIndex: '',
+                    align: 'left',
+                    render(text) {
+                        return ''
+                    }
+                },
+                {
+                    title: '故障时间',
+                    dataIndex: '',
+                    align: 'left',
+                    render(text) {
+                        return ''
+                    }
+                },
+                {
+                    title: '设备状态',
+                    dataIndex: '',
+                    align: 'left',
+                    render(text) {
+                        return ''
+                    }
+                },
+                {
+                    title: '故障内容',
+                    dataIndex: '',
+                    align: 'left',
+                    width: '30%',
+                    render(text) {
+                        return ''
+                    }
+                },
+                {
+                    title: '处理状态',
+                    dataIndex: '',
+                    align: 'left',
+                    render(text) {
+                        return ''
+                    }
+                },
+            ];
+
+        });
+
+        $scope.action_station_clean_suggest_dev_shade_list.subscribe(res => {
+            $scope.column1 = [
+                {
+                    title: '设备名称',
+                    dataIndex: 'eq_name',
+                },
+                {
+                    title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                    dataIndex: 'shade_we_r',
+                },
+            ]
+        });
+
+        $scope.action_station_clean_suggest_dev_dr_list.subscribe(res => {
+            $scope.column2 = [
+                {
+                    title: '设备名称',
+                    dataIndex: 'eq_name',
+                },
+                {
+                    title: '组串电流离散率' + '(' + res.body.units.c_dr_avg + ')',
+                    dataIndex: 'c_dr_avg',
+                },
+            ]
+        });
+
+        $scope.action_station_clean_suggest_dev_decay_list.subscribe(res => {
+            $scope.column3 = [
+                {
+                    title: '设备名称',
+                    dataIndex: 'eq_name',
+                },
+                {
+                    title: '累计衰减率' + '(' + res.body.units.decay_r_all + ')',
+                    dataIndex: 'decay_r_all',
+                },
+            ]
+        });
+
 
         // 数据置空
         function setDataNull(getInfo) {
-
+            // $scope.column = [];
+            $scope.action_station_clean_suggest_dev_shade_list.res = null;
+            $scope.action_station_clean_suggest_dev_dr_list.res = null;
+            $scope.action_station_clean_suggest_dev_decay_list.res = null;
         }
 
 
