@@ -3,9 +3,9 @@ ajaxData(
 
     },
     {
-        __serviceName__: 'actionPlanSummaryCompanyCleaningAdviceService',
+        __serviceName__: 'actionPlanSummaryCompanyEquipmentMedicalService',
     }
-)('actionPlanSummaryCompanyCleaningAdviceCtrl', ['$scope', 'actionPlanSummaryCompanyCleaningAdviceService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+)('actionPlanSummaryCompanyEquipmentMedicalCtrl', ['$scope', 'actionPlanSummaryCompanyEquipmentMedicalService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -13,7 +13,6 @@ ajaxData(
     $scope.mainPageInitComplete = async () => {
         $('.ng-clock').removeClass('ng-clock');
     };
-
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
@@ -26,35 +25,43 @@ ajaxData(
             title: '电站名称',
             dataIndex: '',
             align: 'left',
+            width: '30%',
             render(text) {
                 return '蒙牛马鞍山'
             }
         },
         {
-            title: '电池板清洁指数',
+            title: '待处理故障设备',
             dataIndex: '',
             align: 'right',
             render(text) {
-                return '10'
+                return '2'
             }
         },
         {
-            title: '积灰程度',
+            title: '阴影异常设备',
             dataIndex: '',
-            align: 'left',
+            align: 'right',
             render(text) {
-                return '优'
+                return '3'
             }
         },
         {
-            title: '清洗建议',
+            title: '组串离散率异常',
             dataIndex: '',
-            align: 'left',
-            width: '30%',
+            align: 'right',
             render(text) {
-                return '不用清洗'
+                return '4'
+            }
+        },
+        {
+            title: '衰减异常台数',
+            dataIndex: '',
+            align: 'right',
+            render(text) {
+                return '5'
             }
         },
     ];
-
+    
 });
