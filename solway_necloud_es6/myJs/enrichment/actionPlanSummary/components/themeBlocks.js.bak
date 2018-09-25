@@ -1,8 +1,18 @@
 ajaxData(
     {
+        pvAlarmGetRunFaultInfo: {
+            name: 'GETpvAlarmGetRunFaultInfo',
+            data: {},
+            later: true
+        },
         action_station_clean_suggest_subject: {
             name: 'GETaction_station_clean_suggest_subject',
             data: { },
+            later: true
+        },
+        action_station_clean_suggest_people_effic_name_list: {
+            name: 'GETaction_station_clean_suggest_people_effic_name_list',
+            data: {},
             later: true
         }
     },
@@ -15,12 +25,38 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        $scope.action_station_clean_suggest_subject.getData({
-            queryCode: 'action_station_clean_suggest_subject',
-            queryType: 3,
-            date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
-        });
-        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData();
+        // $('.ng-clock').removeClass('ng-clock');
+        $scope.$apply();
     };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        $scope.diffGetData();
+    };
+
+    $scope.diffGetData = async (getInfo) => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        const { dataType } = $scope;
+        if (dataType === 0) {
+            $scope.pvAlarmGetRunFaultInfo.getData({});
+            $scope.action_station_clean_suggest_subject.getData({
+                queryCode: 'action_station_clean_suggest_subject',
+                queryType: 3,
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            });
+            $scope.action_station_clean_suggest_people_effic_name_list.getData({
+                queryCode: 'action_station_clean_suggest_people_effic_name_list',
+                queryType: 3,
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            });
+        }
+        
+    };
+
 
 });

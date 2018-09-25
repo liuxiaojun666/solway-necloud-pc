@@ -19,6 +19,11 @@ ajaxData(
             name: 'GETaction_station_clean_suggest_subject',
             data: {},
             later: true
+        },
+        action_station_clean_suggest_dust_30day_dust_we: {
+            name: 'GETaction_station_clean_suggest_dust_30day_dust_we',
+            data: {},
+            later: true
         }
     },
     {
@@ -75,6 +80,18 @@ ajaxData(
                 queryCode: 'action_station_clean_suggest_mark_30day_line',
                 queryType: 3,
                 date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            });
+            $scope.action_station_clean_suggest_subject.getData({
+                queryCode: 'action_station_clean_suggest_subject',
+                queryType: 3,
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            }).then((res) => {
+                if (res.body.data.pre_clean_status !== 1) return;
+                $scope.action_station_clean_suggest_dust_30day_dust_we.getData({
+                    queryCode: 'action_station_clean_suggest_dust_30day_dust_we',
+                    queryType: 3,
+                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                });
             });
         } else if (tabIndex === 1) {
             $scope.action_station_clean_suggest_subject.getData({
