@@ -1,0 +1,297 @@
+ajaxData({
+   
+}, {
+        __serviceName__: 'peopleInfoTplProfessionalService'
+    })('peopleInfoProfessionalCtrl', ['$scope', 'peopleInfoTplProfessionalService'], ($scope, myAjaxData) => {
+
+        $scope.dateTime1 = new Date();
+        $scope.dateTime2 = new Date();
+
+      
+        //测试
+        $scope.datasource = [{id:1},{id:2},{id:3}]
+        $scope.column = [
+            {
+                title: '时间',
+                width: '25%',
+                dataIndex: '',
+                align: 'left',
+                // render(text, record, index) {
+                //     return `<span class="alert-name" id="${record.id}">${text}</span>`
+                // }
+            },
+            {
+                title: '电站名称',
+                dataIndex: '',
+                
+            },
+            {
+                title: '设备型号',
+                dataIndex: '',
+                
+            },
+            {
+                title: '设备名称',
+                dataIndex: '',
+                align: 'right',
+            },
+            {
+                title: '设备故障',
+                dataIndex: '',
+            }
+            
+        ];
+
+        let faultPieEchart = echarts.init(document.getElementById('faultPieEchart'))
+        let brandPieEchart = echarts.init(document.getElementById('brandPieEchart'))
+        let modelPieEchart = echarts.init(document.getElementById('modelPieEchart'))
+
+        const initFaultPieEchart = (a, b, c) => {
+            const option = {
+                title : {
+                    text: '故障',
+                    y:'center',
+                    x:'left'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    confine:true
+                },
+                legend: {
+                    data:[a,b,c],
+                    orient: 'vertical',
+                    right: 10,
+                    top: 30,
+                },
+                series: [
+                    {
+                        type: 'pie',
+                        radius: ['25', '55px'],
+                        center: ['50%', '50%'],
+                        label: {
+                            normal: {
+                                show: false,
+                                position: 'inside'
+                            },
+                            emphasis: {
+                                show: false
+                            }
+                        },
+                        lableLine: {
+                            normal: {
+                                show: false
+                            },
+                            emphasis: {
+                                show: false
+                            }
+                        },
+                        itemStyle:{
+                            normal:{
+                                
+                            }
+                        },
+                        data: [
+                            {
+                                value:a,
+                                name: a,
+                                itemStyle: {
+                                    normal: {
+                                        color: '#e57d70'
+                                    }
+                                }
+                            },
+                            {
+                                value: b,
+                                name: b,
+                                itemStyle: {
+                                    normal: {
+                                        color: '#a99bac'
+                                    }
+                                }
+                            },
+                            {
+                                value:c,
+                                name: c,
+                                itemStyle: {
+                                    normal: {
+                                        color: '#efc185'
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+            faultPieEchart.setOption(option)
+            faultPieEchart.resize();
+        }
+        const initBrandPieEchart = (a, b, c) => {
+            const option = {
+                title : {
+                    text: '品牌',
+                    y:'center',
+                    x:'left'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    confine:true
+                },
+                legend: {
+                    data:[a,b,c],
+                    orient: 'vertical',
+                    right: 10,
+                    top: 30,
+                },
+                series: [
+                    {
+                        type: 'pie',
+                        radius: ['25', '55px'],
+                        center: ['50%', '50%'],
+                        // animation:false,
+                        label: {
+                            normal: {
+                                show: false,
+                                position: 'inside'
+                            },
+                            emphasis: {
+                                show: false
+                            }
+                        },
+                        lableLine: {
+                            normal: {
+                                show: false
+                            },
+                            emphasis: {
+                                show: false
+                            }
+                        },
+                        itemStyle:{
+                            normal:{
+                                
+                            }
+                        },
+                        data: [
+                            {
+                                value:a,
+                                name: a,
+                                itemStyle: {
+                                    normal: {
+                                        color: '#e57d70'
+                                    }
+                                }
+                            },
+                            {
+                                value: b,
+                                name: b,
+                                itemStyle: {
+                                    normal: {
+                                        color: '#a99bac'
+                                    }
+                                }
+                            },
+                            {
+                                value:c,
+                                name: c,
+                                itemStyle: {
+                                    normal: {
+                                        color: '#efc185'
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+            brandPieEchart.setOption(option)
+            brandPieEchart.resize();
+        }
+
+        const initModelPieEchart = (a, b, c) => {
+            const option = {
+                title : {
+                    text: '型号',
+                    y:'center',
+                    x:'left'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    confine:true
+                },
+                legend: {
+                    data:[a,b,c],
+                    orient: 'vertical',
+                    right: 10,
+                    top: 30,
+                },
+                series: [
+                    {
+                        type: 'pie',
+                        radius: ['25', '55px'],
+                        center: ['50%', '50%'],
+                        label: {
+                            normal: {
+                                show: false,
+                                position: 'inside'
+                            },
+                            emphasis: {
+                                show: false
+                            }
+                        },
+                        lableLine: {
+                            normal: {
+                                show: false
+                            },
+                            emphasis: {
+                                show: false
+                            }
+                        },
+                        itemStyle:{
+                            normal:{
+                                
+                            }
+                        },
+                        data: [
+                            {
+                                value:a,
+                                name: a,
+                                itemStyle: {
+                                    normal: {
+                                        color: '#e57d70'
+                                    }
+                                }
+                            },
+                            {
+                                value: b,
+                                name: b,
+                                itemStyle: {
+                                    normal: {
+                                        color: '#a99bac'
+                                    }
+                                }
+                            },
+                            {
+                                value:c,
+                                name: c,
+                                itemStyle: {
+                                    normal: {
+                                        color: '#efc185'
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+            modelPieEchart.setOption(option)
+            modelPieEchart.resize();
+        }
+
+        initFaultPieEchart(1,2,3);
+        initBrandPieEchart(1,2,3);
+        initModelPieEchart(1,2,3);
+
+        $scope.$on('$destroy', () => {
+            // window.removeEventListener('resize', resizeHeight);
+        });
+
+    });
