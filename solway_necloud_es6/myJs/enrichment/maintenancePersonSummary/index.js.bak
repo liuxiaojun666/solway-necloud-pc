@@ -102,12 +102,14 @@ ajaxData({
     // theme 切换 计算
     async function computeThemeDetail() {
         if ($scope.beforeLoading) return;
-        $scope.themeLoading = true;
-        await myAjaxData.timeout(0);
-        $scope.themeDetail =  `
-            tpl/enrichment/maintenancePersonSummary/components/${
+        const themeDetail = `
+                tpl/enrichment/maintenancePersonSummary/components/${
                 (["station", "company", "company"][$scope.dataType] + ['Day', 'Month', 'Year', 'Accumulative'][$scope._dateType])
             }.html`;
+        if (themeDetail === $scope.themeDetail) return;
+        $scope.themeLoading = true;
+        await myAjaxData.timeout(0);
+        $scope.themeDetail = themeDetail;
         $scope.$apply();
     }
 
