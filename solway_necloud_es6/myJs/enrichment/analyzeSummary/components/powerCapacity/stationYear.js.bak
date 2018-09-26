@@ -1,47 +1,47 @@
 ajaxData({
     // info
-    analysis_company_shade_month_info: {
-        name: 'GETanalysis_company_shade_month_info',
+    analysis_station_shade_year_info: {
+        name: 'GETanalysis_station_shade_year_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_company_shade_month_timelist: {
-        name: 'GETanalysis_company_shade_month_timelist',
+    analysis_station_shade_year_timelist: {
+        name: 'GETanalysis_station_shade_year_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_company_shade_month_timeline: {
-        name: 'GETanalysis_company_shade_month_timeline',
+    analysis_station_shade_year_timeline: {
+        name: 'GETanalysis_station_shade_year_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 列表
-    analysis_company_shade_month_stationlist: {
-        name: 'GETanalysis_company_shade_month_stationlist',
+    analysis_station_shade_year_devicelist: {
+        name: 'GETanalysis_station_shade_year_devicelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_company_shade_month_stationline: {
-        name: 'GETanalysis_company_shade_month_stationline',
+    analysis_station_shade_year_deviceline: {
+        name: 'GETanalysis_station_shade_year_deviceline',
         data: {},
         later: true,
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'shadowCompanyMonthService',
-})('shadowCompanyMonthCtrl', ['$scope', 'shadowCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'powerCapacityStationYearService',
+})('powerCapacityStationYearCtrl', ['$scope', 'powerCapacityStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0} = historicalRecord.get().themeShadowCompanyMonth || {};
+        let { showShape, tabIndex = 0 } = historicalRecord.get().themePowerCapacityStationYear || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -66,12 +66,13 @@ ajaxData({
         $scope.diffGetData(true);
     };
 
+
     // tab 切换
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeShadowCompanyMonth: {
-                ...historicalRecord.get().themeShadowCompanyMonth || {},
+            themePowerCapacityStationYear: {
+                ...historicalRecord.get().themePowerCapacityStationYear || {},
                 tabIndex
             }
         });
@@ -82,8 +83,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeShadowCompanyMonth: {
-                ...historicalRecord.get().themeShadowCompanyMonth || {},
+            themePowerCapacityStationYear: {
+                ...historicalRecord.get().themePowerCapacityStationYear || {},
                 showShape
             }
         });
@@ -95,45 +96,47 @@ ajaxData({
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         setDataNull(getInfo);
-        const { showShape, dateTime, dateType, dataType, tabIndex } = $scope;
-        if (dateType !== 1) return;
-        if (dataType <= 0) return;
+        const { showShape, dateTime, tabIndex, dateType, dataType } = $scope;
+        if (dateType !== 2) return;
+        if (dataType !== 0) return;
         if (getInfo) {
-            $scope.analysis_company_shade_month_info.getData({
-                queryCode: 'analysis_company_shade_month_info',
-                queryType: 1,
+            $scope.analysis_station_shade_year_info.getData({
+                queryCode: 'analysis_station_shade_year_info',
+                queryType: 3,
                 date: dateTime.showDate
             });
         }
         if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_company_shade_month_timelist.getData({
-                queryCode: 'analysis_company_shade_month_timelist',
-                queryType: 1,
+            $scope.analysis_station_shade_year_timelist.getData({
+                queryCode: 'analysis_station_shade_year_timelist',
+                queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_company_shade_month_timeline.getData({
-                queryCode: 'analysis_company_shade_month_timeline',
-                queryType: 1,
+            $scope.analysis_station_shade_year_timeline.getData({
+                queryCode: 'analysis_station_shade_year_timeline',
+                queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_company_shade_month_stationlist.getData({
-                queryCode: 'analysis_company_shade_month_stationlist',
-                queryType: 1,
-                date: dateTime.showDate
+            $scope.analysis_station_shade_year_devicelist.getData({
+                queryCode: 'analysis_station_shade_year_devicelist',
+                queryType: 3,
+                date: dateTime.showDate,
+                shade_status: 1
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_company_shade_month_stationline.getData({
-                queryCode: 'analysis_company_shade_month_stationline',
-                queryType: 1,
-                date: dateTime.showDate
+            $scope.analysis_station_shade_year_deviceline.getData({
+                queryCode: 'analysis_station_shade_year_deviceline',
+                queryType: 3,
+                date: dateTime.showDate,
+                shade_status: 1
             });
         }
     };
 
     // 时间 列表
-    $scope.analysis_company_shade_month_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_station_shade_year_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -150,13 +153,13 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                title: '发电能力电量' + '(' + res.body.units.shade_we + ')',
                 dataIndex: 'shade_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                title: '发电能力比例' + '(' + res.body.units.shade_we_r + ')',
                 dataIndex: 'shade_we_r',
                 align: 'right',
                 sort: true,
@@ -165,20 +168,20 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_company_shade_month_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_station_shade_year_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
     };
 
-    // 电站 列表
-    $scope.analysis_company_shade_month_stationlist.getDataCallback = (success, res) => {
+    // 设备 列表
+    $scope.analysis_station_shade_year_devicelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
             {
-                title: '电站',
-                dataIndex: 'st_name',
+                title: '设备',
+                dataIndex: 'eq_name',
                 align: 'left',
                 width: '25%',
                 sort: true,
@@ -196,13 +199,13 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                title: '发电能力电量' + '(' + res.body.units.shade_we + ')',
                 dataIndex: 'shade_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                title: '发电能力比例' + '(' + res.body.units.shade_we_r + ')',
                 dataIndex: 'shade_we_r',
                 align: 'right',
                 sort: true,
@@ -210,10 +213,10 @@ ajaxData({
         ];
     };
 
-    // 电站 曲线
-    $scope.analysis_company_shade_month_stationline.getDataCallback = (success, res) => {
+    // 设备 曲线
+    $scope.analysis_station_shade_year_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
-        $scope.xdata = res.body.data.st_name;
+        $scope.xdata = res.body.data.eq_name;
         $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
     };
 
@@ -222,11 +225,11 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_company_shade_month_timelist.res = null;
-        $scope.analysis_company_shade_month_timeline.res = null;
-        $scope.analysis_company_shade_month_stationlist.res = null;
-        $scope.analysis_company_shade_month_stationline.res = null;
-        if (getInfo) $scope.analysis_company_shade_month_info.res = null;
+        $scope.analysis_station_shade_year_timelist.res = null;
+        $scope.analysis_station_shade_year_timeline.res = null;
+        $scope.analysis_station_shade_year_devicelist.res = null;
+        $scope.analysis_station_shade_year_deviceline.res = null;
+        if (getInfo) $scope.analysis_station_shade_year_info.res = null;
     }
 
     // 销毁 事件
