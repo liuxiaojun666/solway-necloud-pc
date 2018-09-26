@@ -1,6 +1,10 @@
 ajaxData(
     {
-
+        actionCompanyDevCheckup: {
+            name: 'GETactionCompanyDevCheckup',
+            data: {},
+            later: true
+        },
     },
     {
         __serviceName__: 'actionPlanSummaryCompanyEquipmentMedicalService',
@@ -12,56 +16,57 @@ ajaxData(
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
         $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true
+        diffGetData();
     };
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         if ($scope.dataType === 0) return;
-        $scope.diffGetData();
+        return $scope.diffGetData();
     };
 
-    $scope.column = [
-        {
-            title: '电站名称',
-            dataIndex: '',
-            align: 'left',
-            width: '30%',
-            render(text) {
-                return '蒙牛马鞍山'
-            }
-        },
-        {
-            title: '待处理故障设备',
-            dataIndex: '',
-            align: 'right',
-            render(text) {
-                return '2'
-            }
-        },
-        {
-            title: '阴影异常设备',
-            dataIndex: '',
-            align: 'right',
-            render(text) {
-                return '3'
-            }
-        },
-        {
-            title: '组串离散率异常',
-            dataIndex: '',
-            align: 'right',
-            render(text) {
-                return '4'
-            }
-        },
-        {
-            title: '衰减异常台数',
-            dataIndex: '',
-            align: 'right',
-            render(text) {
-                return '5'
-            }
-        },
-    ];
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        $scope.actionCompanyDevCheckup.getData({
+            dateType: 3,
+            queryType: 1,
+            date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+        });
+    }
+
+    $scope.actionCompanyDevCheckup.subscribe(res => {
+
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                align: 'left',
+                width: '30%',
+            },
+            {
+                title: '待处理故障设备',
+                dataIndex: 'dev_no_handler_num',
+                align: 'right',
+            },
+            {
+                title: '阴影异常设备',
+                dataIndex: 'dev_shade_num',
+                align: 'right',
+            },
+            {
+                title: '组串离散率异常',
+                dataIndex: 'dev_dr_num',
+                align: 'right',
+            },
+            {
+                title: '衰减异常台数',
+                dataIndex: 'dev_decay_num',
+                align: 'right',
+            },
+        ];
+    });
+
     
 });

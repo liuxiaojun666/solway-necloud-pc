@@ -34,14 +34,14 @@ ajaxData({
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'shadowCompanyMonthService',
-})('shadowCompanyMonthCtrl', ['$scope', 'shadowCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'powerCapacityCompanyMonthService',
+})('powerCapacityCompanyMonthCtrl', ['$scope', 'powerCapacityCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0} = historicalRecord.get().themeShadowCompanyMonth || {};
+        let { showShape, tabIndex = 0} = historicalRecord.get().themePowerCapacityCompanyMonth || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -70,8 +70,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeShadowCompanyMonth: {
-                ...historicalRecord.get().themeShadowCompanyMonth || {},
+            themePowerCapacityCompanyMonth: {
+                ...historicalRecord.get().themePowerCapacityCompanyMonth || {},
                 tabIndex
             }
         });
@@ -82,8 +82,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeShadowCompanyMonth: {
-                ...historicalRecord.get().themeShadowCompanyMonth || {},
+            themePowerCapacityCompanyMonth: {
+                ...historicalRecord.get().themePowerCapacityCompanyMonth || {},
                 showShape
             }
         });
@@ -150,13 +150,13 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                title: '发电能力电量' + '(' + res.body.units.shade_we + ')',
                 dataIndex: 'shade_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                title: '发电能力比例' + '(' + res.body.units.shade_we_r + ')',
                 dataIndex: 'shade_we_r',
                 align: 'right',
                 sort: true,
@@ -196,13 +196,13 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                title: '发电能力电量' + '(' + res.body.units.shade_we + ')',
                 dataIndex: 'shade_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                title: '发电能力比例' + '(' + res.body.units.shade_we_r + ')',
                 dataIndex: 'shade_we_r',
                 align: 'right',
                 sort: true,

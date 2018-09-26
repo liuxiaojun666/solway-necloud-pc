@@ -13,11 +13,11 @@ ajaxData({
                 color: '#83a3c6',
             },
             '资源偏差': {
-                name: 'dust',
+                name: 'null',
                 color: '#e7cb5d',
             },
             '模型偏差': {
-                name: 'dust',
+                name: 'null',
                 color: '#c36deb',
             },
             '故障损失电量': {
@@ -60,18 +60,16 @@ ajaxData({
             initChart();
             $scope.initComplete = true;
             getData();
-            $scope.$apply();
+            return $scope.$apply();
         };
 
         // 切换电站 回调
-        $scope.switchPowerCallback = () => {
-            getData();
-        };
+        $scope.switchPowerCallback = () => getData();
 
         // 日期改变
         $scope.dateUpdated = async () => {
             await myAjaxData.timeout(0);
-            getData();
+            return getData();
         };
 
         // 初始化 能流图
@@ -96,6 +94,7 @@ ajaxData({
                 const {target, source, name} = obj.data;
                 const theme = themeMap[(Object.keys(themeMap).includes(target) ? target : source) || name];
                 if (!theme) return;
+                if (theme.name === 'null') return;
                 $scope.$emit('changeTheme', theme.name);
                 $scope.$apply();
             });
@@ -179,9 +178,7 @@ ajaxData({
                 }
             };
             myChart.setOption(option, true);
-            $timeout(() => {
-                $scope.firstDrawingComplete = true;
-            },1000);
+            $timeout(() => $scope.firstDrawingComplete = true, 1000);
         }
 
         // 请求接口
@@ -194,13 +191,13 @@ ajaxData({
                 dateType: [4, 2, 1, 0][dateType],
                 date: dateType === 3 ? '2018' : dateTime.showDate
             });
-            $scope.$apply();
+            return $scope.$apply();
         }
 
         // 接口回调
         $scope.analysisEnergyFlowDiagram.getDataCallback = (success, res) => {
             if (!success) return;
             $scope.analysisEnergyFlowDiagram.res.body = res.body || { data: [], links: [] };
-            drawing();
+            return drawing();
         };
     });

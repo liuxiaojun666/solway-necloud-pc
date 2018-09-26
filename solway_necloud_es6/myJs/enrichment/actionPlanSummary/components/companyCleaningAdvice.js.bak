@@ -1,6 +1,10 @@
 ajaxData(
     {
-
+        actionCompanyCleanSuggest: {
+            name: 'GETactionCompanyCleanSuggest',
+            data: {},
+            later: true
+        },
     },
     {
         __serviceName__: 'actionPlanSummaryCompanyCleaningAdviceService',
@@ -12,49 +16,53 @@ ajaxData(
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
         $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true
+        diffGetData();
     };
 
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         if ($scope.dataType === 0) return;
-        $scope.diffGetData();
+        diffGetData();
     };
 
-    $scope.column = [
-        {
-            title: '电站名称',
-            dataIndex: '',
-            align: 'left',
-            render(text) {
-                return '蒙牛马鞍山'
-            }
-        },
-        {
-            title: '电池板清洁指数',
-            dataIndex: '',
-            align: 'right',
-            render(text) {
-                return '10'
-            }
-        },
-        {
-            title: '积灰程度',
-            dataIndex: '',
-            align: 'left',
-            render(text) {
-                return '优'
-            }
-        },
-        {
-            title: '清洗建议',
-            dataIndex: '',
-            align: 'left',
-            width: '30%',
-            render(text) {
-                return '不用清洗'
-            }
-        },
-    ];
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        $scope.actionCompanyCleanSuggest.getData({
+            dateType: 3,
+            queryType: 1,
+            date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+        });
+    }
 
+    $scope.actionCompanyCleanSuggest.subscribe(res => {
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                align: 'left',
+            },
+            {
+                title: '电池板清洁指数(%)',
+                dataIndex: 'clean_mark',
+                align: 'right',
+            },
+            {
+                title: '积灰程度',
+                dataIndex: 'clean_level',
+                align: 'left',
+            },
+            {
+                title: '清洗建议',
+                dataIndex: 'clean_mark',
+                align: 'left',
+                width: '30%',
+            },
+        ];
+
+    });
+
+    
 });
