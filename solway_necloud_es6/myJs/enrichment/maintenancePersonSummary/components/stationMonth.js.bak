@@ -26,7 +26,7 @@ ajaxData({
 
 }, {
     __serviceName__: 'maintenancePersonStationMonth',
-})('maintenancePersonStationMonthCtrl', ['$scope', 'maintenancePersonStationMonth', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+})('maintenancePersonStationMonthCtrl', ['$scope', 'maintenancePersonStationMonth', 'actionRecord','$timeout'], ($scope, myAjaxData, historicalRecord,$timeout) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -70,11 +70,20 @@ ajaxData({
         $scope.diffGetData();
     };
 
-    $scope.trClick = (item,index) =>{
+    $scope.trClick = (item,index,e) =>{
+        e.stopPropagation();
         if($scope.tabIndex == 2 || $scope.tabIndex == 3){
+            $scope.$broadcast('paramsPeopleInfoProfessional',{'userId':item.userid});
             $scope.showPeopleInfoProfessional = true;
         }
     }
+
+    $scope.$watch('showPeopleInfoProfessional',(n,o)=>{
+        if(!n){
+            $scope.$broadcast('clearDate');
+        }
+    });
+
     // 判断 调用  对应 接口
     $scope.diffGetData = async()=>{
         if (!$scope.initComplete) return;

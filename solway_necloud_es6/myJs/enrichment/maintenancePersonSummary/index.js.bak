@@ -48,7 +48,7 @@ ajaxData({
         await diffStationInfo(stationData);
         $scope.beforeLoading = false;
         computeThemeDetail();
-        $scope.mainPageInitComplete && $scope.mainPageInitComplete($scope.currentClass);
+        $scope.mainPageInitComplete && $scope.mainPageInitComplete();
         // getTabData();
         $scope.$apply();
     };
@@ -155,7 +155,7 @@ ajaxData({
         // 如果已初始化  尝试调用初始化完成函数
         if (!$scope.beforeLoading) {
             await myAjaxData.timeout(0);
-            __childScope.hasOwnProperty('mainPageInitComplete') && __childScope.mainPageInitComplete($scope.currentClass);
+            __childScope.hasOwnProperty('mainPageInitComplete') && __childScope.mainPageInitComplete();
         }
 
         // 子页面销毁 删除监听
