@@ -1,34 +1,34 @@
 ajaxData({
     // info
-    analysis_station_shade_month_info: {
-        name: 'GETanalysis_station_shade_month_info',
+    analysis_station_pgc_month_info: {
+        name: 'GETanalysis_station_pgc_month_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_station_shade_month_timelist: {
-        name: 'GETanalysis_station_shade_month_timelist',
+    analysis_station_pgc_month_timelist: {
+        name: 'GETanalysis_station_pgc_month_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_station_shade_month_timeline: {
-        name: 'GETanalysis_station_shade_month_timeline',
+    analysis_station_pgc_month_timeline: {
+        name: 'GETanalysis_station_pgc_month_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 列表
-    analysis_station_shade_month_devicelist: {
-        name: 'GETanalysis_station_shade_month_devicelist',
+    analysis_station_pgc_month_devicelist: {
+        name: 'GETanalysis_station_pgc_month_devicelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_station_shade_month_deviceline: {
-        name: 'GETanalysis_station_shade_month_deviceline',
+    analysis_station_pgc_month_deviceline: {
+        name: 'GETanalysis_station_pgc_month_deviceline',
         data: {},
         later: true,
         onlyLatest: true
@@ -100,34 +100,34 @@ ajaxData({
         if (dateType !== 1) return;
         if (dataType !== 0) return;
         if (getInfo) {
-            $scope.analysis_station_shade_month_info.getData({
-                queryCode: 'analysis_station_shade_month_info',
+            $scope.analysis_station_pgc_month_info.getData({
+                queryCode: 'analysis_station_pgc_month_info',
                 queryType: 3,
                 date: dateTime.showDate
             });
         }
         if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_station_shade_month_timelist.getData({
-                queryCode: 'analysis_station_shade_month_timelist',
+            $scope.analysis_station_pgc_month_timelist.getData({
+                queryCode: 'analysis_station_pgc_month_timelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_station_shade_month_timeline.getData({
-                queryCode: 'analysis_station_shade_month_timeline',
+            $scope.analysis_station_pgc_month_timeline.getData({
+                queryCode: 'analysis_station_pgc_month_timeline',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_station_shade_month_devicelist.getData({
-                queryCode: 'analysis_station_shade_month_devicelist',
+            $scope.analysis_station_pgc_month_devicelist.getData({
+                queryCode: 'analysis_station_pgc_month_devicelist',
                 queryType: 3,
                 date: dateTime.showDate,
                 shade_status: 1
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_station_shade_month_deviceline.getData({
-                queryCode: 'analysis_station_shade_month_deviceline',
+            $scope.analysis_station_pgc_month_deviceline.getData({
+                queryCode: 'analysis_station_pgc_month_deviceline',
                 queryType: 3,
                 date: dateTime.showDate,
                 shade_status: 1
@@ -144,7 +144,7 @@ ajaxData({
     // 图表 点击 事件 处理 函数
     $scope.chartClick = (params) => {
         if ($scope.tabIndex !== 1) return;
-        const { eq_name, eqid } = $scope.analysis_station_shade_month_deviceline.res.body.data;
+        const { eq_name, eqid } = $scope.analysis_station_pgc_month_deviceline.res.body.data;
         $scope.equipmentDetail({
             eq_name: params.name,
             eqid: eqid[eq_name.indexOf(params.name)]
@@ -159,7 +159,7 @@ ajaxData({
     };
 
     // 时间 列表
-    $scope.analysis_station_shade_month_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_station_pgc_month_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -198,7 +198,7 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_station_shade_month_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_station_pgc_month_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
@@ -209,7 +209,7 @@ ajaxData({
     };
 
     // 设备 列表
-    $scope.analysis_station_shade_month_devicelist.getDataCallback = (success, res) => {
+    $scope.analysis_station_pgc_month_devicelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -248,7 +248,7 @@ ajaxData({
     };
 
     // 设备 曲线
-    $scope.analysis_station_shade_month_deviceline.getDataCallback = (success, res) => {
+    $scope.analysis_station_pgc_month_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.eq_name;
         $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
@@ -259,11 +259,11 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_station_shade_month_timelist.res = null;
-        $scope.analysis_station_shade_month_timeline.res = null;
-        $scope.analysis_station_shade_month_devicelist.res = null;
-        $scope.analysis_station_shade_month_deviceline.res = null;
-        if (getInfo) $scope.analysis_station_shade_month_info.res = null;
+        $scope.analysis_station_pgc_month_timelist.res = null;
+        $scope.analysis_station_pgc_month_timeline.res = null;
+        $scope.analysis_station_pgc_month_devicelist.res = null;
+        $scope.analysis_station_pgc_month_deviceline.res = null;
+        if (getInfo) $scope.analysis_station_pgc_month_info.res = null;
     }
 
     // 销毁 事件

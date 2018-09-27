@@ -57,7 +57,11 @@ ajaxData({
     $scope.dateUpdated = (dateType, dateTime) => {
         historicalRecord.set({ dateType, dateTime });
         if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM');
-        if (dateType !== $scope._dateType) computeThemeDetail();
+        if (dateType !== $scope._dateType) {
+            $scope._dateType = dateType;
+            $scope._dateTime = dateTime;
+            return computeThemeDetail();
+        }
         $scope._dateType = dateType;
         $scope._dateTime = dateTime;
     };
@@ -104,7 +108,8 @@ ajaxData({
         if ($scope.beforeLoading) return;
         const themeDetail = `
                 tpl/enrichment/maintenancePersonSummary/components/${
-                (["station", "company", "company"][$scope.dataType] + ['Day', 'Month', 'Year', 'Accumulative'][$scope._dateType])
+                    ["station", "company", "company"][$scope.dataType] 
+                    + ['Day', 'Month', 'Year', 'Accumulative'][$scope._dateType]
             }.html`;
         if (themeDetail === $scope.themeDetail) return;
         $scope.themeLoading = true;

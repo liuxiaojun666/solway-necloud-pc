@@ -1,34 +1,34 @@
 ajaxData({
     // info
-    analysis_station_shade_year_info: {
-        name: 'GETanalysis_station_shade_year_info',
+    analysis_station_pgc_year_info: {
+        name: 'GETanalysis_station_pgc_year_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_station_shade_year_timelist: {
-        name: 'GETanalysis_station_shade_year_timelist',
+    analysis_station_pgc_year_timelist: {
+        name: 'GETanalysis_station_pgc_year_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_station_shade_year_timeline: {
-        name: 'GETanalysis_station_shade_year_timeline',
+    analysis_station_pgc_year_timeline: {
+        name: 'GETanalysis_station_pgc_year_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 列表
-    analysis_station_shade_year_devicelist: {
-        name: 'GETanalysis_station_shade_year_devicelist',
+    analysis_station_pgc_year_devicelist: {
+        name: 'GETanalysis_station_pgc_year_devicelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_station_shade_year_deviceline: {
-        name: 'GETanalysis_station_shade_year_deviceline',
+    analysis_station_pgc_year_deviceline: {
+        name: 'GETanalysis_station_pgc_year_deviceline',
         data: {},
         later: true,
         onlyLatest: true
@@ -100,34 +100,34 @@ ajaxData({
         if (dateType !== 2) return;
         if (dataType !== 0) return;
         if (getInfo) {
-            $scope.analysis_station_shade_year_info.getData({
-                queryCode: 'analysis_station_shade_year_info',
+            $scope.analysis_station_pgc_year_info.getData({
+                queryCode: 'analysis_station_pgc_year_info',
                 queryType: 3,
                 date: dateTime.showDate
             });
         }
         if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_station_shade_year_timelist.getData({
-                queryCode: 'analysis_station_shade_year_timelist',
+            $scope.analysis_station_pgc_year_timelist.getData({
+                queryCode: 'analysis_station_pgc_year_timelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_station_shade_year_timeline.getData({
-                queryCode: 'analysis_station_shade_year_timeline',
+            $scope.analysis_station_pgc_year_timeline.getData({
+                queryCode: 'analysis_station_pgc_year_timeline',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_station_shade_year_devicelist.getData({
-                queryCode: 'analysis_station_shade_year_devicelist',
+            $scope.analysis_station_pgc_year_devicelist.getData({
+                queryCode: 'analysis_station_pgc_year_devicelist',
                 queryType: 3,
                 date: dateTime.showDate,
                 shade_status: 1
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_station_shade_year_deviceline.getData({
-                queryCode: 'analysis_station_shade_year_deviceline',
+            $scope.analysis_station_pgc_year_deviceline.getData({
+                queryCode: 'analysis_station_pgc_year_deviceline',
                 queryType: 3,
                 date: dateTime.showDate,
                 shade_status: 1
@@ -136,7 +136,7 @@ ajaxData({
     };
 
     // 时间 列表
-    $scope.analysis_station_shade_year_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_station_pgc_year_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -147,20 +147,20 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '发电能力' + '(' + res.body.units.pgc + ')',
+                dataIndex: 'pgc',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '发电能力电量' + '(' + res.body.units.shade_we + ')',
-                dataIndex: 'shade_we',
+                title: '衰减程度' + '(' + res.body.units.decay_we_r + ')',
+                dataIndex: 'decay_we_r',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '发电能力比例' + '(' + res.body.units.shade_we_r + ')',
-                dataIndex: 'shade_we_r',
+                title: '积灰程度' + '(' + res.body.units.dust_we_r + ')',
+                dataIndex: 'dust_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -168,14 +168,14 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_station_shade_year_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_station_pgc_year_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r], [res.body.data.pgc]];
     };
 
     // 设备 列表
-    $scope.analysis_station_shade_year_devicelist.getDataCallback = (success, res) => {
+    $scope.analysis_station_pgc_year_devicelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -187,26 +187,20 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '装机容量' + '(' + res.body.units.inst_kw + ')',
-                dataIndex: 'inst_kw',
+                title: '发电能力' + '(' + res.body.units.pgc + ')',
+                dataIndex: 'pgc',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '衰减程度' + '(' + res.body.units.decay_we_r + ')',
+                dataIndex: 'decay_we_r',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '发电能力电量' + '(' + res.body.units.shade_we + ')',
-                dataIndex: 'shade_we',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '发电能力比例' + '(' + res.body.units.shade_we_r + ')',
-                dataIndex: 'shade_we_r',
+                title: '积灰程度' + '(' + res.body.units.dust_we_r + ')',
+                dataIndex: 'dust_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -214,10 +208,10 @@ ajaxData({
     };
 
     // 设备 曲线
-    $scope.analysis_station_shade_year_deviceline.getDataCallback = (success, res) => {
+    $scope.analysis_station_pgc_year_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.eq_name;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r], [res.body.data.pgc]];
     };
 
     // 数据置空
@@ -225,11 +219,11 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_station_shade_year_timelist.res = null;
-        $scope.analysis_station_shade_year_timeline.res = null;
-        $scope.analysis_station_shade_year_devicelist.res = null;
-        $scope.analysis_station_shade_year_deviceline.res = null;
-        if (getInfo) $scope.analysis_station_shade_year_info.res = null;
+        $scope.analysis_station_pgc_year_timelist.res = null;
+        $scope.analysis_station_pgc_year_timeline.res = null;
+        $scope.analysis_station_pgc_year_devicelist.res = null;
+        $scope.analysis_station_pgc_year_deviceline.res = null;
+        if (getInfo) $scope.analysis_station_pgc_year_info.res = null;
     }
 
     // 销毁 事件

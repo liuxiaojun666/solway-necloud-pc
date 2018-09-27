@@ -44,22 +44,44 @@ ajaxData(
                 title: '电站名称',
                 dataIndex: 'st_name',
                 align: 'left',
+                sort: true,
             },
             {
                 title: '电池板清洁指数(%)',
                 dataIndex: 'clean_mark',
                 align: 'right',
+                sort: true,
             },
             {
                 title: '积灰程度',
                 dataIndex: 'clean_level',
-                align: 'left',
+                align: 'center',
+                sort: true,
+                render(text) {
+                    return `<span style="color: ${[
+                        'rgba(80, 182, 118, 1)',
+                        'rgba(80, 182, 118, 1)',
+                        'rgba(80, 182, 118, 1)',
+                        '#FF732E',
+                        '#FF732E',
+                        '#F75D5D'
+                    ][text]}">${['', '优', '良', '轻度积灰', '中度积灰', '严重积灰'][text] || ''}</span>`;
+                }
             },
             {
                 title: '清洗建议',
-                dataIndex: 'clean_mark',
+                dataIndex: 'pre_clean_status',
                 align: 'left',
                 width: '30%',
+                sort: true,
+                render(text, item, index) {
+                    if (text === 0) return '<span style="color:rgba(80, 182, 118, 1);">不用清洗</span>'
+                    else if (text === 1) return `<span style="color: #F75D5D;">
+                            建议清洗，电池板清洗后，按照最近30天的光照条件，预计可提高发电量
+                            ${item.dust_we.data.dust_we}${item.dust_we.units.dust_we}
+                        </span>`;
+                    return '';
+                }
             },
         ];
 
