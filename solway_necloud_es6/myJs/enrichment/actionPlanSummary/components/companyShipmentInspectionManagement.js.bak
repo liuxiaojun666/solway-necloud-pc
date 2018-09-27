@@ -1,6 +1,10 @@
 ajaxData(
     {
-
+        actionCompanyRunningManage: {
+            name: 'GETActionCompanyRunningManage',
+            data: {},
+            later: true,
+        }
     },
     {
         __serviceName__: 'actionPlanSummaryCompanyShipmentInspectionManagementService',
@@ -12,6 +16,8 @@ ajaxData(
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
         $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true
+        diffGetData();    
     };
 
     // 切换电站 回调
@@ -19,41 +25,42 @@ ajaxData(
         if ($scope.dataType === 0) return;
         $scope.diffGetData();
     };
+
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        $scope.actionCompanyRunningManage.getData({
+            dateType: 3,
+            queryType: 1,
+            date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+        });
+    }
+
+    $scope.actionCompanyRunningManage.subscribe(res => {
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                align: 'left',
+                width: '30%',
+            },
+            {
+                title: '检修人员数量',
+                dataIndex: 'p_num',
+                align: 'right',
+            },
+            {
+                title: '两票合格率',
+                dataIndex: '',
+                align: 'right',
+            },
+            {
+                title: '检修任务',
+                dataIndex: '',
+                align: 'right',
+            },
+        ];
+    });
     
-    $scope.column = [
-        {
-            title: '电站名称',
-            dataIndex: '',
-            align: 'left',
-            width: '30%',
-            render(text) {
-                return '蒙牛马鞍山'
-            }
-        },
-        {
-            title: '检修人员数量',
-            dataIndex: '',
-            align: 'right',
-            render(text) {
-                return '10'
-            }
-        },
-        {
-            title: '两票合格率',
-            dataIndex: '',
-            align: 'right',
-            render(text) {
-                return '10'
-            }
-        },
-        {
-            title: '检修任务',
-            dataIndex: '',
-            align: 'right',
-            render(text) {
-                return '20'
-            }
-        },
-    ];
 
 });
