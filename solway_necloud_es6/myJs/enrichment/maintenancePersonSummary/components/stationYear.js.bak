@@ -86,6 +86,7 @@ ajaxData({
     // 判断 调用  对应 接口
     $scope.diffGetData = async()=>{
         if (!$scope.initComplete) return;
+        $scope.stationYearLoading = true;
         await myAjaxData.timeout(0);
         
         const {dateTime, tabIndex } = $scope;
@@ -124,6 +125,8 @@ ajaxData({
 
     // 时间列表
     $scope.analysis_station_operation_time_year_list.getDataCallback = (success, res) => {
+        $scope.stationYearLoading = false;
+
         if (!success) return;
         $scope.listSource = res.body.data;
 
@@ -183,6 +186,8 @@ ajaxData({
 
     // 设备列表
     $scope.analysis_station_operation_dev_year_list.getDataCallback = (success, res) => {
+        $scope.stationYearLoading = false;
+
         if (!success) return;
         $scope.listSource = res.body.data;
         
@@ -242,6 +247,8 @@ ajaxData({
 
     // 专业人员列表
     $scope.analysis_station_operation_person_year_list.getDataCallback = (success, res) => {
+        $scope.stationYearLoading = false;
+
         if (!success) return;
         $scope.listSource = res.body.data.data;
 
@@ -302,9 +309,12 @@ ajaxData({
     //共享人员列表
     function test(){
         // if (!success) return;
+        $scope.stationYearLoading = false;
+
         $scope.listSource = [];
         $scope.pageData = {};
         $scope.column = []
+        $scope.$apply();
     }
 
 
