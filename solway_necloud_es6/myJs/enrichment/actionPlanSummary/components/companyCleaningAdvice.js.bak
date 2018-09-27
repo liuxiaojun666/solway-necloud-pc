@@ -75,11 +75,12 @@ ajaxData(
                 width: '30%',
                 sort: true,
                 render(text, item, index) {
-                    if (text !== 1) return '<span style="color:rgba(80, 182, 118, 1);">不用清洗</span>'
-                    return `<span style="color: #F75D5D;">
+                    if (text === 0) return '<span style="color:rgba(80, 182, 118, 1);">不用清洗</span>'
+                    else if (text === 1) return `<span style="color: #F75D5D;">
                             建议清洗，电池板清洗后，按照最近30天的光照条件，预计可提高发电量
                             ${item.dust_we.data.dust_we}${item.dust_we.units.dust_we}
-                        </span>`
+                        </span>`;
+                    return '';
                 }
             },
         ];
