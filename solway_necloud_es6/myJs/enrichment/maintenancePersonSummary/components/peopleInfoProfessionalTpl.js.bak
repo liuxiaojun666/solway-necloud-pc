@@ -204,15 +204,34 @@ ajaxData({
             $scope.endTime = null
         })
         
+        const colorMap = ['rgb(124,192,246)','rgb(250,144,141)','rgb(249,173,129)']
 
         let faultPieEchart = echarts.init(document.getElementById('faultPieEchart'))
         let brandPieEchart = echarts.init(document.getElementById('brandPieEchart'))
         let modelPieEchart = echarts.init(document.getElementById('modelPieEchart'))
 
-        const initFaultPieEchart = (a, b, c) => {
+        const initFaultPieEchart = (data) => {
+            const ft_name = data.ft_name;
+            const repair_number = data.repair_number;
+            const seriesData = []
+            for(var i=0;i<repair_number.length;i++){
+                seriesData.push({
+                    value:repair_number[i],
+                    name:ft_name[i],
+                    itemStyle: {
+                        normal: {
+                            color: colorMap[i]
+                        }
+                    }
+                });
+            }
             const option = {
                 title : {
                     text: '故障',
+                    textStyle:{
+                        color:'white',
+                        fontSize:'16'
+                    },
                     y:'center',
                     x:'left'
                 },
@@ -221,7 +240,11 @@ ajaxData({
                     confine:true
                 },
                 legend: {
-                    data:[a,b,c],
+                    data:ft_name,
+                    textStyle:{
+                        color:'white',
+                        fontSize:'12'
+                    },
                     orient: 'vertical',
                     right: 10,
                     top: 30,
@@ -248,50 +271,35 @@ ajaxData({
                                 show: false
                             }
                         },
-                        itemStyle:{
-                            normal:{
-                                
-                            }
-                        },
-                        data: [
-                            {
-                                value:a,
-                                name: a,
-                                itemStyle: {
-                                    normal: {
-                                        color: '#e57d70'
-                                    }
-                                }
-                            },
-                            {
-                                value: b,
-                                name: b,
-                                itemStyle: {
-                                    normal: {
-                                        color: '#a99bac'
-                                    }
-                                }
-                            },
-                            {
-                                value:c,
-                                name: c,
-                                itemStyle: {
-                                    normal: {
-                                        color: '#efc185'
-                                    }
-                                }
-                            }
-                        ]
+                        data: seriesData
                     }
                 ]
             };
             faultPieEchart.setOption(option)
             faultPieEchart.resize();
         }
-        const initBrandPieEchart = (a, b, c) => {
+        const initBrandPieEchart = (data) => {
+            const manuf_name = data.manuf_name;
+            const repair_number = data.repair_number;
+            const seriesData = []
+            for(var i=0;i<repair_number.length;i++){
+                seriesData.push({
+                    value:repair_number[i],
+                    name:manuf_name[i],
+                    itemStyle: {
+                        normal: {
+                            color: colorMap[i]
+                        }
+                    }
+                });
+            }
             const option = {
                 title : {
                     text: '品牌',
+                    textStyle:{
+                        color:'white',
+                        fontSize:'16'
+                    },
                     y:'center',
                     x:'left'
                 },
@@ -300,7 +308,11 @@ ajaxData({
                     confine:true
                 },
                 legend: {
-                    data:[a,b,c],
+                    data:manuf_name,
+                    textStyle:{
+                        color:'white',
+                        fontSize:'12'
+                    },
                     orient: 'vertical',
                     right: 10,
                     top: 30,
@@ -333,35 +345,7 @@ ajaxData({
                                 
                             }
                         },
-                        data: [
-                            {
-                                value:a,
-                                name: a,
-                                itemStyle: {
-                                    normal: {
-                                        color: '#e57d70'
-                                    }
-                                }
-                            },
-                            {
-                                value: b,
-                                name: b,
-                                itemStyle: {
-                                    normal: {
-                                        color: '#a99bac'
-                                    }
-                                }
-                            },
-                            {
-                                value:c,
-                                name: c,
-                                itemStyle: {
-                                    normal: {
-                                        color: '#efc185'
-                                    }
-                                }
-                            }
-                        ]
+                        data:seriesData
                     }
                 ]
             };
@@ -369,10 +353,28 @@ ajaxData({
             brandPieEchart.resize();
         }
 
-        const initModelPieEchart = (a, b, c) => {
+        const initModelPieEchart = (data) => {
+            const product_name = data.product_name;
+            const repair_number = data.repair_number;
+            const seriesData = []
+            for(var i=0;i<repair_number.length;i++){
+                seriesData.push({
+                    value:repair_number[i],
+                    name:product_name[i],
+                    itemStyle: {
+                        normal: {
+                            color: colorMap[i]
+                        }
+                    }
+                });
+            }
             const option = {
                 title : {
                     text: '型号',
+                    textStyle:{
+                        color:'white',
+                        fontSize:'16'
+                    },
                     y:'center',
                     x:'left'
                 },
@@ -381,7 +383,11 @@ ajaxData({
                     confine:true
                 },
                 legend: {
-                    data:[a,b,c],
+                    data:product_name,
+                    textStyle:{
+                        color:'white',
+                        fontSize:'12'
+                    },
                     orient: 'vertical',
                     right: 10,
                     top: 30,
@@ -413,35 +419,7 @@ ajaxData({
                                 
                             }
                         },
-                        data: [
-                            {
-                                value:a,
-                                name: a,
-                                itemStyle: {
-                                    normal: {
-                                        color: '#e57d70'
-                                    }
-                                }
-                            },
-                            {
-                                value: b,
-                                name: b,
-                                itemStyle: {
-                                    normal: {
-                                        color: '#a99bac'
-                                    }
-                                }
-                            },
-                            {
-                                value:c,
-                                name: c,
-                                itemStyle: {
-                                    normal: {
-                                        color: '#efc185'
-                                    }
-                                }
-                            }
-                        ]
+                        data: seriesData
                     }
                 ]
             };
@@ -449,9 +427,7 @@ ajaxData({
             modelPieEchart.resize();
         }
 
-        initFaultPieEchart(1,2,3);
-        initBrandPieEchart(1,2,3);
-        initModelPieEchart(1,2,3);
+        
 
         $scope.diffGetData = async()=>{
             // if (!$scope.initComplete) return;
@@ -462,6 +438,9 @@ ajaxData({
             $scope.startEventTime = $scope.beginTime.showDate;
             $scope.endEventTime = $scope.endTime.showDate;
 
+            $scope.regInfo.getData({ //故障
+                userId:userId
+            });
             if(dataType){//集团
                 switch (dateType) {
                     case 1: 
@@ -648,74 +627,81 @@ ajaxData({
                         break;
                 }
             }
+            
+        }
+
+        //人员注册信息
+        $scope.regInfo.getDataCallback = (success, res) =>{
+            if (!success) return;
+            $scope.registInfo = res.body;
         }
 
         //公司-月
         $scope.analysis_company_operation_person_ft_month_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initFaultPieEchart(res.body.data);
         }
         $scope.analysis_company_operation_person_manuf_month_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initBrandPieEchart(res.body.data);
         }
         $scope.analysis_company_operation_person_product_month_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initModelPieEchart(res.body.data);
         }
         $scope.analysis_company_operation_person_oprecord_month_list.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            $scope.datasource = res.body.data;
         }
 
         //公司-年
         $scope.analysis_company_operation_person_ft_year_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initFaultPieEchart(res.body.data);
         }
         $scope.analysis_company_operation_person_manuf_year_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initBrandPieEchart(res.body.data);
         }
         $scope.analysis_company_operation_person_product_year_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initModelPieEchart(res.body.data);
         }
         $scope.analysis_company_operation_person_oprecord_year_list.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            $scope.datasource = res.body.data;
         }
 
         //公司-累计
         $scope.analysis_company_operation_person_ft_accum_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initFaultPieEchart(res.body.data);
         }
         $scope.analysis_company_operation_person_manuf_accum_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initBrandPieEchart(res.body.data);
         }
         $scope.analysis_company_operation_person_product_accum_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initModelPieEchart(res.body.data);
         }
         $scope.analysis_company_operation_person_oprecord_accum_list.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            $scope.datasource = res.body.data;
         }
 
         //电站-月
         $scope.analysis_station_operation_person_ft_month_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initFaultPieEchart(res.body.data);
         }
         $scope.analysis_station_operation_person_manuf_month_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initBrandPieEchart(res.body.data);
         }
         $scope.analysis_station_operation_person_product_month_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initModelPieEchart(res.body.data);
         }
         $scope.analysis_station_operation_person_oprecord_month_list.getDataCallback = (success, res) => {
             if (!success) return;
@@ -751,47 +737,77 @@ ajaxData({
                 }
                 
             ];
-    
-            console.log(res)
         }
 
         //电站-年
         $scope.analysis_station_operation_person_ft_year_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initFaultPieEchart(res.body.data);
         }
         $scope.analysis_station_operation_person_manuf_year_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initBrandPieEchart(res.body.data);
         }
         $scope.analysis_station_operation_person_product_year_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initModelPieEchart(res.body.data);
         }
         $scope.analysis_station_operation_person_oprecord_year_list.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            $scope.datasource = res.body.data;
         }
 
         //电站-累计
         $scope.analysis_station_operation_person_ft_accum_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initFaultPieEchart(res.body.data);
         }
         $scope.analysis_station_operation_person_manuf_accum_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initBrandPieEchart(res.body.data);
         }
         $scope.analysis_station_operation_person_product_accum_line.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            initModelPieEchart(res.body.data);
         }
         $scope.analysis_station_operation_person_oprecord_accum_list.getDataCallback = (success, res) => {
             if (!success) return;
-            console.log(res)
+            $scope.datasource = res.body.data;
         }
 
         
+        $scope.column = [
+            {
+                title: '时间',
+                width: '25%',
+                dataIndex: 'event_time',
+                align: 'left',
+                // render(text, record, index) {
+                //     return `<span class="alert-name" id="${record.id}">${text}</span>`
+                // }
+            },
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                
+            },
+            {
+                title: '设备型号',
+                dataIndex: 'product_name',
+                
+            },
+            {
+                title: '设备名称',
+                dataIndex: 'eq_name',
+                align: 'right',
+            },
+            {
+                title: '设备故障',
+                dataIndex: 'ft_name',
+            }
+            
+        ];
+    
 
         $scope.$on('$destroy', () => {
             $scope.beginTime = null
