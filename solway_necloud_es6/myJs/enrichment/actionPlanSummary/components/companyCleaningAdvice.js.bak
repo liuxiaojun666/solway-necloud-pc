@@ -27,6 +27,19 @@ ajaxData(
         diffGetData();
     };
 
+    // 点击电站名  跳转到电站页面
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.reloadParentPage({
+            stationData: {
+                dataType: 0,
+                id: item.stid,
+                isGroup: "0",
+                stClass: '01'
+            }
+        });
+    };
+
     async function diffGetData() {
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
@@ -45,6 +58,9 @@ ajaxData(
                 dataIndex: 'st_name',
                 align: 'left',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '电池板清洁指数(%)',

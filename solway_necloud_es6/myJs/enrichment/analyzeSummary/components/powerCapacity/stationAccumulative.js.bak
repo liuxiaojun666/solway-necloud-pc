@@ -47,6 +47,14 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 电站 发电能力
+    query_station_day_dev_power_timelist_his: {
+        name: 'GETquery_station_day_dev_power_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true,
+        sameTimeOnce: true,
+    },
 }, {
     __serviceName__: 'powerCapacityStationAccumulativeService',
 })('powerCapacityStationAccumulativeCtrl', ['$scope', 'powerCapacityStationAccumulativeService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -55,7 +63,7 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0 } = historicalRecord.get().themePowerCapacityStationAccum || {};
+        let { showShape, tabIndex = 3 } = historicalRecord.get().themePowerCapacityStationAccum || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -157,6 +165,13 @@ ajaxData({
                 queryType: 3,
                 date: dateTime.showDate,
             });
+        } else if (tabIndex === 3) {
+            $scope.query_station_day_dev_power_timelist_his.getData({
+                queryCode: 'query_station_day_dev_power_timelist_his',
+                queryType: 3,
+                pgc: 0,
+                date: (new Date).Format('yyyy-MM-dd')
+            });
         }
     };
 
@@ -196,7 +211,7 @@ ajaxData({
     $scope.analysis_station_pgc_accum_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r], [res.body.data.pgc]];
+        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r, res.body.data.pgc]];
     };
 
     // 设备 列表
@@ -236,7 +251,7 @@ ajaxData({
     $scope.analysis_station_pgc_accum_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.eq_name;
-        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r], [res.body.data.pgc]];
+        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r, res.body.data.pgc]];
     };
 
     // 设备 基因 列表
@@ -266,6 +281,12 @@ ajaxData({
         $scope.ydatas = [[res.body.data.init_pgc]]
     });
 
+    // 电站 发电能力
+    $scope.query_station_day_dev_power_timelist_his.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.map(v => v.dtime);
+        $scope.ydatas = [[res.body.data.map(v => v.pgc)], [res.body.data.map(v => v.pcpn)]];
+    };
 
     // 数据置空
     function setDataNull(getInfo) {
@@ -278,6 +299,7 @@ ajaxData({
         $scope.analysis_station_pgc_accum_deviceline.res = null;
         $scope.analysis_station_pgc_accum_devicebaselist.res = null;
         $scope.analysis_station_pgc_accum_devicebaseline.res = null;
+        $scope.query_station_day_dev_power_timelist_his.res = null;
         if (getInfo) $scope.analysis_station_pgc_accum_info.res = null;
     }
 
