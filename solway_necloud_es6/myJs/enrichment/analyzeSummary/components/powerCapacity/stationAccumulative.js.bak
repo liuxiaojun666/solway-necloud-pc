@@ -19,16 +19,30 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
-    // 电站 列表
+    // 设备 列表
     analysis_station_pgc_accum_devicelist: {
         name: 'GETanalysis_station_pgc_accum_devicelist',
         data: {},
         later: true,
         onlyLatest: true
     },
-    // 电站 曲线
+    // 设备 曲线
     analysis_station_pgc_accum_deviceline: {
         name: 'GETanalysis_station_pgc_accum_deviceline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 设备基因 列表
+    analysis_station_pgc_accum_devicebaselist: {
+        name: 'GETanalysis_station_pgc_accum_devicebaselist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 设备基因 曲线
+    analysis_station_pgc_accum_devicebaseline: {
+        name: 'GETanalysis_station_pgc_accum_devicebaseline',
         data: {},
         later: true,
         onlyLatest: true
@@ -71,8 +85,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themePowerCapacityStationMonth: {
-                ...historicalRecord.get().themePowerCapacityStationMonth || {},
+            themePowerCapacityStationAccum: {
+                ...historicalRecord.get().themePowerCapacityStationAccum || {},
                 tabIndex
             }
         });
@@ -124,14 +138,24 @@ ajaxData({
                 queryCode: 'analysis_station_pgc_accum_devicelist',
                 queryType: 3,
                 date: dateTime.showDate,
-                shade_status: 1
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
             $scope.analysis_station_pgc_accum_deviceline.getData({
                 queryCode: 'analysis_station_pgc_accum_deviceline',
                 queryType: 3,
                 date: dateTime.showDate,
-                shade_status: 1
+            });
+        } else if (tabIndex === 2 && showShape === 'list') {
+            $scope.analysis_station_pgc_accum_devicebaselist.getData({
+                queryCode: 'analysis_station_pgc_accum_devicebaselist',
+                queryType: 3,
+                date: dateTime.showDate,
+            });
+        } else if (tabIndex === 2 && showShape === 'chart') {
+            $scope.analysis_station_pgc_accum_devicebaseline.getData({
+                queryCode: 'analysis_station_pgc_accum_devicebaseline',
+                queryType: 3,
+                date: dateTime.showDate,
             });
         }
     };
@@ -148,20 +172,20 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '发电能力' + '(' + res.body.units.pgc + ')',
+                dataIndex: 'pgc',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '发电能力电量' + '(' + res.body.units.shade_we + ')',
-                dataIndex: 'shade_we',
+                title: '衰减程度' + '(' + res.body.units.decay_we_r + ')',
+                dataIndex: 'decay_we_r',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '发电能力比例' + '(' + res.body.units.shade_we_r + ')',
-                dataIndex: 'shade_we_r',
+                title: '积灰程度' + '(' + res.body.units.dust_we_r + ')',
+                dataIndex: 'dust_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -172,7 +196,7 @@ ajaxData({
     $scope.analysis_station_pgc_accum_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r], [res.body.data.pgc]];
     };
 
     // 设备 列表
@@ -188,26 +212,20 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '装机容量' + '(' + res.body.units.inst_kw + ')',
-                dataIndex: 'inst_kw',
+                title: '发电能力' + '(' + res.body.units.pgc + ')',
+                dataIndex: 'pgc',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '衰减程度' + '(' + res.body.units.decay_we_r + ')',
+                dataIndex: 'decay_we_r',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '发电能力电量' + '(' + res.body.units.shade_we + ')',
-                dataIndex: 'shade_we',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '发电能力比例' + '(' + res.body.units.shade_we_r + ')',
-                dataIndex: 'shade_we_r',
+                title: '积灰程度' + '(' + res.body.units.dust_we_r + ')',
+                dataIndex: 'dust_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -218,8 +236,35 @@ ajaxData({
     $scope.analysis_station_pgc_accum_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.eq_name;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r], [res.body.data.pgc]];
     };
+
+    // 设备 基因 列表
+    $scope.analysis_station_pgc_accum_devicebaselist.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '设备',
+                dataIndex: 'eq_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+            },
+            {
+                title: '初始发电能力' + '(' + res.body.units.init_pgc + ')',
+                dataIndex: 'init_pgc',
+                align: 'right',
+                sort: true,
+            },
+        ];
+
+    });
+
+    // 设备 基因 曲线
+    $scope.analysis_station_pgc_accum_devicebaseline.subscribe(res => {
+        $scope.xdata = res.body.data.eq_name;
+        $scope.ydatas = [[res.body.data.init_pgc]]
+    });
 
 
     // 数据置空
@@ -231,6 +276,8 @@ ajaxData({
         $scope.analysis_station_pgc_accum_timeline.res = null;
         $scope.analysis_station_pgc_accum_devicelist.res = null;
         $scope.analysis_station_pgc_accum_deviceline.res = null;
+        $scope.analysis_station_pgc_accum_devicebaselist.res = null;
+        $scope.analysis_station_pgc_accum_devicebaseline.res = null;
         if (getInfo) $scope.analysis_station_pgc_accum_info.res = null;
     }
 

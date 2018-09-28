@@ -10,8 +10,8 @@ ajaxData(
             data: {},
             later: true
         },
-        action_station_clean_suggest_dev_dr_list: {
-            name: 'GETaction_station_clean_suggest_dev_dr_list',
+        action_station_clean_suggest_dev_pr_list: {
+            name: 'GETaction_station_clean_suggest_dev_pr_list',
             data: {},
             later: true
         },
@@ -77,8 +77,8 @@ ajaxData(
                     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
                     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
                 });
-                $scope.action_station_clean_suggest_dev_dr_list.getData({
-                    queryCode: 'action_station_clean_suggest_dev_dr_list',
+                $scope.action_station_clean_suggest_dev_pr_list.getData({
+                    queryCode: 'action_station_clean_suggest_dev_pr_list',
                     queryType: 3,
                     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
                     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
@@ -117,16 +117,16 @@ ajaxData(
                     }
                 },
                 {
-                    title: '设备状态',
-                    dataIndex: 'sysstatusStr',
-                    align: 'center',
-                    sort: true,
-                },
-                {
                     title: '故障内容',
                     dataIndex: 'eventDesc',
                     align: 'left',
                     width: '30%',
+                    sort: true,
+                },
+                {
+                    title: '故障状态',
+                    dataIndex: 'sysstatusStr',
+                    align: 'center',
                     sort: true,
                 },
                 {
@@ -154,7 +154,7 @@ ajaxData(
             ]
         });
 
-        $scope.action_station_clean_suggest_dev_dr_list.subscribe(res => {
+        $scope.action_station_clean_suggest_dev_pr_list.subscribe(res => {
             $scope.column2 = [
                 {
                     title: '设备名称',
@@ -162,8 +162,8 @@ ajaxData(
                     sort: true,
                 },
                 {
-                    title: '组串电流离散率' + '(' + res.body.units.c_dr_avg + ')',
-                    dataIndex: 'c_dr_avg',
+                    title: 'PR异常设备' + '(' + res.body.units.pr + ')',
+                    dataIndex: 'pr',
                     sort: true,
                 },
             ]
@@ -189,7 +189,7 @@ ajaxData(
         function setDataNull(getInfo) {
             // $scope.column = [];
             $scope.action_station_clean_suggest_dev_shade_list.res = null;
-            $scope.action_station_clean_suggest_dev_dr_list.res = null;
+            $scope.action_station_clean_suggest_dev_pr_list.res = null;
             $scope.action_station_clean_suggest_dev_decay_list.res = null;
         }
 

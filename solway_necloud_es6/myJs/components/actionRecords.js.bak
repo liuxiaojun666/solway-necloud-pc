@@ -12,7 +12,17 @@ app.factory('actionRecord', function ($state) {
         }
         record = $solway.getStore().actionRecord;
     }
-
+    // 篡改记录 伪造记录
+    function falsify(key, data) {
+        if (!$solway.getStore().actionRecord[key]) {
+            record[key] = { data: {} };
+        }
+        record[key].data = {
+            ...record[key].data,
+            ...data
+        };
+        $solway.setStore('actionRecord', record);
+    }
     // 记录 当前页的 行为
     function set(obj) {
         record[currentKey].data = {
@@ -35,6 +45,7 @@ app.factory('actionRecord', function ($state) {
 
     return {
         init,
+        falsify,
         set,
         get
     };
