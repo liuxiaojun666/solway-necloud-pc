@@ -124,6 +124,9 @@ ajaxData({
 
     let pieChart = echarts.init(document.getElementById('themeEquipmentPieEchart'))
     const initPieEchart = (fault, comm, maintain, run, wait) => {
+        if($scope.currentClass != 'StationDayToday' && $scope.currentClass != 'CompanyDayToday' && !fault && !comm && !maintain){
+            run = $scope.devTotal;
+        }
         const option = {
             tooltip: {
                 trigger: 'item',
