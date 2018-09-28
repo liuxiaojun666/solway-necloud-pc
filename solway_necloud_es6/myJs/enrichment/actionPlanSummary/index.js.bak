@@ -34,6 +34,13 @@ ajaxData(
     $scope.moduleName = '行动方案';//当前页面名称；
     historyInitCallback();
 
+    // 父页面重载  可修改记录
+    $scope.reloadParentPage = (data = {}) => {
+        historicalRecord.set(data);
+        $scope.beforeLoading = true;
+        return historyInitCallback();
+    };
+
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
         const historiData = historicalRecord.get();
