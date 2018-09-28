@@ -107,12 +107,13 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         //     $scope.voiceContent = item.voiceContent;
         // };
         
-        $scope.initData = () =>{
+        $scope.initData = (flag) =>{
             if($scope.pendding) return;
             $scope.pendding = true;
-           
+
+            if(flag) $scope.maxUpdateTime = 0;
+
             const checkedCondition = [];
-          
             $("input[name='conditionType']:checked").map((index,v)=>{
                 checkedCondition.push(v.dataset.status)
             })
