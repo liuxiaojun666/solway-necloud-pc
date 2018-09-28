@@ -15,14 +15,17 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             $scope.maxUpdateTime = 0;
             $scope.initColumns();
             $scope.pendding = false;
+            
             $scope.initData();
         })
 
         $scope.$on('broadcastSwitchStation',(e,v)=>{
             $scope.maxUpdateTime = 0;
+            $scope.initColumns();
             $solway.setStore('alarm', {'voiceTime':0}); 
-            $scope.datalist = [];
             $scope.pendding = false;
+            $scope.datalist = [];
+
             $scope.initData();
         })
 
