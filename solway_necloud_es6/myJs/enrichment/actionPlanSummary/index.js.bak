@@ -35,14 +35,21 @@ ajaxData(
     historyInitCallback();
 
     // 父页面重载  可修改记录
-    $scope.reloadParentPage = (data = {}) => {
+    $scope.reloadParentPage = async (data = {}) => {
         historicalRecord.set(data);
         $scope.beforeLoading = true;
+        if (data.stationData) {
+            await $scope.changeStation.getData(data.stationData);
+            const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            $scope.switchPowerScope.currentDataName = currentDataName;
+            $scope.switchPowerCallback(data.stationData);
+        }
         return historyInitCallback();
     };
 
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
+        await myAjaxData.timeout(0);
         const historiData = historicalRecord.get();
         const {
             theme = 'CleaningAdvice',
@@ -117,7 +124,7 @@ ajaxData(
             const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
             $scope.switchPowerCallback({ id, isGroup, dataType, stClass });
         } else if (Object.is(currentStationData.currentSTID, stationData.id)) { // 电站信息 没有变化
-            await myAjaxData.timeout(500);
+            await myAjaxData.timeout(200);
             $scope.switchPowerCallback(stationData);
         } else { // 电站信息  发生变化   切换到记录中的电站
             await $scope.changeStation.getData(stationData);
