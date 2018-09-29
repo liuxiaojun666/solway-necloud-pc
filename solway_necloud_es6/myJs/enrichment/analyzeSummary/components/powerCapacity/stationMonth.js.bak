@@ -34,13 +34,13 @@ ajaxData({
         onlyLatest: true
     },
     // 电站 发电能力
-    query_station_day_dev_power_timelist_his: {
-        name: 'GETquery_station_day_dev_power_timelist_his',
-        data: {},
-        later: true,
-        onlyLatest: true,
-        sameTimeOnce: true,
-    },
+    // query_station_day_dev_power_timelist_his: {
+    //     name: 'GETquery_station_day_dev_power_timelist_his',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true,
+    //     sameTimeOnce: true,
+    // },
 }, {
     __serviceName__: 'powerCapacityStationMonthService',
 })('powerCapacityStationMonthCtrl', ['$scope', 'powerCapacityStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -49,8 +49,8 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 2 } = historicalRecord.get().themePowerCapacityStationMonth || {};
-        $scope.changeShowShape(showShape || 'list');
+        let { showShape, tabIndex = 0 } = historicalRecord.get().themePowerCapacityStationMonth || {};
+        $scope.changeShowShape(showShape || 'chart2');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
@@ -78,6 +78,9 @@ ajaxData({
     // tab 切换
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
+        if (tabIndex !== 0 && $scope.showShape === 'chart2') {
+            $scope.changeShowShape('chart');
+        }
         historicalRecord.set({
             themePowerCapacityStationMonth: {
                 ...historicalRecord.get().themePowerCapacityStationMonth || {},
@@ -126,6 +129,12 @@ ajaxData({
                 queryType: 3,
                 date: dateTime.showDate
             });
+        } else if (tabIndex === 0 && showShape === 'chart2') {
+            $scope.analysis_station_pgc_month_timeline.getData({
+                queryCode: 'analysis_station_pgc_month_timeline',
+                queryType: 3,
+                date: dateTime.showDate
+            });
         } else if (tabIndex === 1 && showShape === 'list') {
             $scope.analysis_station_pgc_month_devicelist.getData({
                 queryCode: 'analysis_station_pgc_month_devicelist',
@@ -139,13 +148,6 @@ ajaxData({
                 queryType: 3,
                 date: dateTime.showDate,
                 shade_status: 1
-            });
-        } else if (tabIndex === 2) {
-            $scope.query_station_day_dev_power_timelist_his.getData({
-                queryCode: 'query_station_day_dev_power_timelist_his',
-                queryType: 3,
-                pgc: 0,
-                date: dateTime.showDate
             });
         }
     };
@@ -218,8 +220,8 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_station_pgc_month_timeline.getDataCallback = (success, res) => {
-        if (!success) return;
+    $scope.analysis_station_pgc_month_timeline.subscribe((res) => {
+        if ($scope.showShape !== 'chart') return;
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_r, res.body.data.decay_r_all, res.body.data.pgc], [res.body.data.pcpn]];
         $scope.imageSymbolsData = res.body.data.pgc.map((v, i) => v + res.body.data.dust_r[i] + res.body.data.decay_r_all[i]);
@@ -230,7 +232,13 @@ ajaxData({
             if (res.body.data.pcpn[i]) return base64str2;
             return void 0;
         });
-    };
+    });
+
+    $scope.analysis_station_pgc_month_timeline.subscribe((res) => {
+        if ($scope.showShape !== 'chart2') return;
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data.pgc], [res.body.data.pcpn]];
+    });
 
     // 设备 列表
     $scope.analysis_station_pgc_month_devicelist.getDataCallback = (success, res) => {
@@ -272,13 +280,6 @@ ajaxData({
         $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_r, res.body.data.decay_r_all, res.body.data.pgc]];
     };
 
-    // 电站 发电能力
-    $scope.query_station_day_dev_power_timelist_his.getDataCallback = (success, res) => {
-        if (!success) return;
-        $scope.xdata = res.body.data.map(v => v.dtime);
-        $scope.ydatas = [[res.body.data.map(v => v.pgc)], [res.body.data.map(v => v.pcpn)]];
-    };
-
     // 数据置空
     function setDataNull(getInfo) {
         $scope.column = [];
@@ -288,7 +289,6 @@ ajaxData({
         $scope.analysis_station_pgc_month_timeline.res = null;
         $scope.analysis_station_pgc_month_devicelist.res = null;
         $scope.analysis_station_pgc_month_deviceline.res = null;
-        $scope.query_station_day_dev_power_timelist_his.res = null;
         if (getInfo) $scope.analysis_station_pgc_month_info.res = null;
     }
 

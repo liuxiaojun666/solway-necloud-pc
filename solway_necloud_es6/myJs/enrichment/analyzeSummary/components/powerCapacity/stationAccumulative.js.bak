@@ -63,8 +63,8 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 3 } = historicalRecord.get().themePowerCapacityStationAccum || {};
-        $scope.changeShowShape(showShape || 'list');
+        let { showShape, tabIndex = 0 } = historicalRecord.get().themePowerCapacityStationAccum || {};
+        $scope.changeShowShape(showShape || 'chart2');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
@@ -92,6 +92,9 @@ ajaxData({
     // tab 切换
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
+        if (tabIndex !== 0 && $scope.showShape === 'chart2') {
+            $scope.changeShowShape('chart');
+        }
         historicalRecord.set({
             themePowerCapacityStationAccum: {
                 ...historicalRecord.get().themePowerCapacityStationAccum || {},
@@ -141,6 +144,13 @@ ajaxData({
                 queryType: 3,
                 date: dateTime.showDate
             });
+        } else if (tabIndex === 0 && showShape === 'chart2') {
+            $scope.query_station_day_dev_power_timelist_his.getData({
+                queryCode: 'query_station_day_dev_power_timelist_his',
+                queryType: 3,
+                pgc: 0,
+                date: (new Date).Format('yyyy-MM-dd')
+            });
         } else if (tabIndex === 1 && showShape === 'list') {
             $scope.analysis_station_pgc_accum_devicelist.getData({
                 queryCode: 'analysis_station_pgc_accum_devicelist',
@@ -164,13 +174,6 @@ ajaxData({
                 queryCode: 'analysis_station_pgc_accum_devicebaseline',
                 queryType: 3,
                 date: dateTime.showDate,
-            });
-        } else if (tabIndex === 3) {
-            $scope.query_station_day_dev_power_timelist_his.getData({
-                queryCode: 'query_station_day_dev_power_timelist_his',
-                queryType: 3,
-                pgc: 0,
-                date: (new Date).Format('yyyy-MM-dd')
             });
         }
     };
