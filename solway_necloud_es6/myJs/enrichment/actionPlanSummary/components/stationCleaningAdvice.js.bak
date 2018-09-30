@@ -10,11 +10,6 @@ ajaxData(
             data: { },
             later: true
         },
-        action_station_clean_suggest_dust_30day_line: {
-            name: 'GETaction_station_clean_suggest_dust_30day_line',
-            data: {},
-            later: true
-        },
         action_station_clean_suggest_subject: {
             name: 'GETaction_station_clean_suggest_subject',
             data: {},
@@ -24,7 +19,17 @@ ajaxData(
             name: 'GETaction_station_clean_suggest_dust_30day_dust_we',
             data: {},
             later: true
-        }
+        },
+        action_station_clean_suggest_dust_top5_line: {
+            name: 'GETaction_station_clean_suggest_dust_top5_line',
+            data: {},
+            later: true
+        },
+        action_station_clean_suggest_dust_bottom5_line: {
+            name: 'GETaction_station_clean_suggest_dust_bottom5_line',
+            data: {},
+            later: true
+        },
     },
     {
         __serviceName__: 'actionPlanSummaryStationCleaningAdviceService',
@@ -79,7 +84,7 @@ ajaxData(
             $scope.action_station_clean_suggest_mark_30day_line.getData({
                 queryCode: 'action_station_clean_suggest_mark_30day_line',
                 queryType: 3,
-                start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+                start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 365).Format('yyyy-MM-dd'),
                 date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
             });
             $scope.action_station_clean_suggest_subject.getData({
@@ -97,19 +102,25 @@ ajaxData(
                 });
             });
         } else if (tabIndex === 1) {
-            // $scope.action_station_clean_suggest_subject.getData({
-            //     queryCode: 'action_station_clean_suggest_subject',
-            //     queryType: 3,
-            //     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
-            //     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
-            // }).then(() => {
-                $scope.action_station_clean_suggest_dust_30day_line.getData({
-                    queryCode: 'action_station_clean_suggest_dust_30day_line',
+            $scope.action_station_clean_suggest_subject.getData({
+                queryCode: 'action_station_clean_suggest_subject',
+                queryType: 3,
+                start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            }).then(() => {
+                $scope.action_station_clean_suggest_dust_top5_line.getData({
+                    queryCode: 'action_station_clean_suggest_dust_top5_line',
                     queryType: 3,
                     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
                     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
                 });
-            // });
+                $scope.action_station_clean_suggest_dust_bottom5_line.getData({
+                    queryCode: 'action_station_clean_suggest_dust_bottom5_line',
+                    queryType: 3,
+                    start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                });
+            });
         }
     };
 
@@ -119,7 +130,7 @@ ajaxData(
     });
 
     $scope.action_station_clean_suggest_subject.subscribe(res => {
-        $scope.markLine = res.body.data.clean_th && [[{
+        $scope.markLine = res.body.data.clean_th && [[void 0, {
             label: {
                 normal: {
                     formatter: '{b}: {c}%',
@@ -129,22 +140,35 @@ ajaxData(
             lineStyle: {
                 normal: {
                     type: 'solid',
-                    color: '#FF929C'
+                    color: '#f0cd81'
                 }
             },
             data: [
                 {
-                    name: '清洗临界值',
-                    yAxis: res.body.data.clean_th
+                    name: '平均清洁指数(%)',
+                    yAxis: res.body.data.clean_mark
                 },
             ]
         }]];
     });
 
-    $scope.action_station_clean_suggest_dust_30day_line.subscribe(res => {
-        $scope.xdata = res.body.data.eq_name;
-        $scope.ydatas = [[res.body.data.clean_mark]];
+    $scope.action_station_clean_suggest_dust_top5_line.subscribe(res => {
+        if (!$scope.action_station_clean_suggest_dust_bottom5_line.res) return;
+        topBottomMerge();
     });
+    
+    $scope.action_station_clean_suggest_dust_bottom5_line.subscribe(res => {
+        if (!$scope.action_station_clean_suggest_dust_top5_line.res) return;
+        topBottomMerge();
+    });
+
+    function topBottomMerge() {
+        const topRes = $scope.action_station_clean_suggest_dust_top5_line.res;
+        const bottomRes = $scope.action_station_clean_suggest_dust_bottom5_line.res;
+        $scope.xdata = [...bottomRes.body.data.eq_name, ...topRes.body.data.eq_name];
+        $scope.ydatas = [[bottomRes.body.data.clean_mark, [null, null, null, null, null, ...topRes.body.data.clean_mark.reverse()]]];
+    }
+
 
     // 数据置空
     function setDataNull() {
@@ -152,7 +176,8 @@ ajaxData(
         $scope.ydatas = void 0;
         $scope.action_station_clean_suggest_mark_30day_line.res = null;
         $scope.action_station_clean_suggest_subject.res = null;
-        $scope.action_station_clean_suggest_dust_30day_line.res = null;
+        $scope.action_station_clean_suggest_dust_top5_line.res = null;
+        $scope.action_station_clean_suggest_dust_bottom5_line.res = null;
     }
 
 

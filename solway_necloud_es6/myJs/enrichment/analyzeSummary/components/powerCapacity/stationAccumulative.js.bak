@@ -63,8 +63,8 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 3 } = historicalRecord.get().themePowerCapacityStationAccum || {};
-        $scope.changeShowShape(showShape || 'list');
+        let { showShape, tabIndex = 0 } = historicalRecord.get().themePowerCapacityStationAccum || {};
+        $scope.changeShowShape(showShape || 'chart2');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
@@ -92,6 +92,9 @@ ajaxData({
     // tab 切换
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
+        if (tabIndex !== 0 && $scope.showShape === 'chart2') {
+            $scope.changeShowShape('chart');
+        }
         historicalRecord.set({
             themePowerCapacityStationAccum: {
                 ...historicalRecord.get().themePowerCapacityStationAccum || {},
@@ -141,6 +144,13 @@ ajaxData({
                 queryType: 3,
                 date: dateTime.showDate
             });
+        } else if (tabIndex === 0 && showShape === 'chart2') {
+            $scope.query_station_day_dev_power_timelist_his.getData({
+                queryCode: 'query_station_day_dev_power_timelist_his',
+                queryType: 3,
+                pgc: 0,
+                date: (new Date).Format('yyyy-MM-dd')
+            });
         } else if (tabIndex === 1 && showShape === 'list') {
             $scope.analysis_station_pgc_accum_devicelist.getData({
                 queryCode: 'analysis_station_pgc_accum_devicelist',
@@ -165,13 +175,6 @@ ajaxData({
                 queryType: 3,
                 date: dateTime.showDate,
             });
-        } else if (tabIndex === 3) {
-            $scope.query_station_day_dev_power_timelist_his.getData({
-                queryCode: 'query_station_day_dev_power_timelist_his',
-                queryType: 3,
-                pgc: 0,
-                date: (new Date).Format('yyyy-MM-dd')
-            });
         }
     };
 
@@ -193,14 +196,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '衰减程度' + '(' + res.body.units.decay_we_r + ')',
-                dataIndex: 'decay_we_r',
+                title: '衰减程度' + '(' + res.body.units.decay_r_all + ')',
+                dataIndex: 'decay_r_all',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '积灰程度' + '(' + res.body.units.dust_we_r + ')',
-                dataIndex: 'dust_we_r',
+                title: '积灰程度' + '(' + res.body.units.dust_r + ')',
+                dataIndex: 'dust_r',
                 align: 'right',
                 sort: true,
             },
@@ -211,7 +214,7 @@ ajaxData({
     $scope.analysis_station_pgc_accum_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r, res.body.data.pgc]];
+        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_r, res.body.data.decay_r_all, res.body.data.pgc]];
     };
 
     // 设备 列表
@@ -233,14 +236,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '衰减程度' + '(' + res.body.units.decay_we_r + ')',
-                dataIndex: 'decay_we_r',
+                title: '衰减程度' + '(' + res.body.units.decay_r_all + ')',
+                dataIndex: 'decay_r_all',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '积灰程度' + '(' + res.body.units.dust_we_r + ')',
-                dataIndex: 'dust_we_r',
+                title: '积灰程度' + '(' + res.body.units.dust_r + ')',
+                dataIndex: 'dust_r',
                 align: 'right',
                 sort: true,
             },
@@ -251,7 +254,7 @@ ajaxData({
     $scope.analysis_station_pgc_accum_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.eq_name;
-        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_we_r, res.body.data.decay_we_r, res.body.data.pgc]];
+        $scope.ydatas = [[res.body.data.pgc, res.body.data.dust_r, res.body.data.decay_r_all, res.body.data.pgc]];
     };
 
     // 设备 基因 列表

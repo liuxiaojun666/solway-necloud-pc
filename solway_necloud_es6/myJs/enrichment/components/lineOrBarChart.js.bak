@@ -7,6 +7,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         linenames: '=',
         xdata: '=',
         ydatas: '=',
+        yMax: '=',
         colors: '=',
         types: '=',
         backgroundColor: '=',
@@ -67,6 +68,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 ynames = [], 
                 xdata = [], 
                 ydatas = [[[]]], 
+                yMax = [],
                 types = [], 
                 colors = [], 
                 datazoom,
@@ -122,7 +124,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     },
                     data: xdata
                 }],
-                yAxis: ynames.map(name => ({
+                yAxis: ynames.map((name, i) => ({
                     type: 'value',
                     name,
                     nameTextStyle: {
@@ -130,6 +132,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     },
                     splitNumber,
                     interval,
+                    max: yMax[i],
                     axisTick: {
                         show: false //是否显示坐标轴刻度
                     },
@@ -154,11 +157,11 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         }
                     }
                 })),
-                dataZoom: datazoom && (width - 100) / ydatas[0][0].length < 50 && [{
+                dataZoom: datazoom && (((width - 100) / ydatas[0][0].length / (types[0].concat(types[1]).filter(v => v === 'bar').length)) < (barWidth + 10)) && [{
                     type: 'slider',
                     xAxisIndex: 0,
                     filterMode: 'empty',
-                    end: (width - 100) / ydatas[0][0].length
+                    end: (width - 100) / ydatas[0][0].length * 2
                     // handleSize: $scope.width
                 }],
                 series: ydatas.map((v, i) => {
