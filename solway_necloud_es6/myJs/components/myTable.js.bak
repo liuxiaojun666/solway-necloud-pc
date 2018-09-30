@@ -44,6 +44,7 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
         beforeDestroy: '=',
         destroyed: '=',
         tableExportFileName: '=',
+        placeholder: '=',
     },
     templateUrl: 'tpl/publicComponent/myTable.html',
     link($scope, $element) {
@@ -162,6 +163,7 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
             $timeout(() => d.resolve(), t);
             return d.promise;
         }
+        $scope.npDataPlaceholder = '<img style="margin: 20px 0;" src="theme/images/enrichment/noData.png" alt="没有加载到数据插画"/>'
         $scope.__datasource = [];
         $scope.isWindows = window.navigator.userAgent.toLocaleLowerCase().includes('windows');
         $scope.orderBy = !0;
