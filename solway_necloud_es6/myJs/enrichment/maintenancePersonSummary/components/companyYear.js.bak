@@ -23,7 +23,12 @@ ajaxData({
         onlyLatest: true
     },
     //共享人员
-
+    sharePeopleList:{
+        name: 'GETsharePeopleList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
 }, {
     __serviceName__: 'maintenancePersonCompanyYear',
 })('maintenancePersonCompanyYearCtrl', ['$scope', 'maintenancePersonCompanyYear', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -123,6 +128,7 @@ ajaxData({
                     queryType: 1,
                     date: dateTime.showDate
                 });
+                $scope.tabName = "时间";                
                 break;
             case 1: //电站
                 $scope.analysis_company_operation_station_year_list.getData({
@@ -130,6 +136,7 @@ ajaxData({
                     queryType: 1,
                     date: dateTime.showDate
                 });
+                $scope.tabName = "电站";                
                 break;
             case 2: //专业人员
                 $scope.analysis_company_operation_person_year_list.getData({
@@ -139,9 +146,14 @@ ajaxData({
                     pageIndex: 0,
                     pageSize: 20
                 });
+                $scope.tabName = "专业人员";                
                 break;
             case 3: //共享人员
-                test();
+                $scope.sharePeopleList.getData({
+                    pageIndex: 0,
+                    pageSize: 20
+                });
+                $scope.tabName = "共享人员";                
                 break;
             default:
                 break;
@@ -351,14 +363,57 @@ ajaxData({
     };
 
     //共享人员列表
-    function test(){
-        $scope.companyYearLoading = false;
+    $scope.sharePeopleList.getDataCallback = (success, res) => {
 
-        // if (!success) return;
-        $scope.listSource = [];
-        $scope.pageData = {};
-        $scope.column = [];
-        $scope.$apply();
+        $scope.companyYearLoading = false;
+        if (!success) return;
+        $scope.listSource = res.body.data;
+        $scope.column = [
+            {
+                title: '姓名',
+                width: '25%',
+                dataIndex: 'realName',
+                align: 'center',
+                render(text, record, index) {
+                    return `<span style="color:#1ddabe" id="${record.id}">${text}</span>`
+                }
+            },
+            {
+                title: '手机号',
+                dataIndex: 'phone',
+                align: 'center',
+            },
+            {
+                title: '抢单次数',
+                dataIndex: '',
+                align: 'right',
+            },
+            {
+                title: '响应时间(h)',
+                dataIndex: 'res_hours',
+                sort: 'true',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+
+                }
+            },
+            {
+                title: '处理时间(h)',
+                dataIndex: 'repair_hours',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+
+                }
+            },
+            // {
+            //     title: '成功率(%)',
+            //     dataIndex: '',
+            //     sort: 'true',
+            //     align: 'right'
+            // }
+        ];
     }
 
 

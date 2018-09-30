@@ -1,10 +1,63 @@
 ajaxData({
-   
+   //人员注册信息
+    sharePeopleRegInfo:{
+        name: 'GETsharePeopleRegInfo',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //维修记录
+    sharePeopleRepairRecord:{
+        name: 'GETsharePeopleRepairRecord',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
         __serviceName__: 'peopleInfoTplShareService'
     })('peopleInfoShareCtrl', ['$scope', 'peopleInfoTplShareService'], ($scope, myAjaxData) => {
 
-      
+        $scope.$on('paramsPeopleInfoShare',(e,v)=>{
+            $scope.beginTime = new Date()
+            $scope.beginTime.showDate = ''
+            $scope.endTime = new Date()
+            $scope.endTime.showDate = ''
+
+            $scope.userId = v.userId;
+            $scope.diffGetData();
+        });
+
+
+        $scope.diffGetData = async()=>{
+
+            const {dataType,dateType,dateTime,userId} = $scope;
+
+            $scope.startEventTime = $scope.beginTime.showDate;
+            $scope.endEventTime = $scope.endTime.showDate;
+
+            $scope.sharePeopleRegInfo.getData({ //注册信息
+                userId:userId
+            });
+
+            $scope.sharePeopleRepairRecord.getData({ //维修
+                handleMan:userId,
+                keywords:$scope.keywords,
+                pageSize:100,
+                pageIndex:0,
+                distDateStartStr:$scope.startEventTime,
+                distDateEndStr:$scope.endEventTime
+            });
+        }
+
+        $scope.sharePeopleRegInfo.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.registInfo = res.body;
+        }
+
+        $scope.sharePeopleRepairRecord.getDataCallback = (success, res) => {
+            if (!success) return;
+            // $scope.datasource = res.body.data;
+        }
 
         $scope.$on('$destroy', () => {
             // window.removeEventListener('resize', resizeHeight);

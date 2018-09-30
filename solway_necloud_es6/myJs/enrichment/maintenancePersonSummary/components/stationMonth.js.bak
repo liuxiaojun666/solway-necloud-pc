@@ -98,9 +98,12 @@ ajaxData({
     
     $scope.trClick = (item,index,e) =>{
         e.stopPropagation();
-        if($scope.tabIndex == 2 || $scope.tabIndex == 3){
+        if($scope.tabIndex == 2 ){
             $scope.$broadcast('paramsPeopleInfoProfessional',{'userId':item.userid});
             $scope.showPeopleInfoProfessional = true;
+        }else if($scope.tabIndex == 3){
+            $scope.$broadcast('paramsPeopleInfoShare',{'userId':item.userid});
+            $scope.showPeopleInfoShare = true;
         }
     }
 
@@ -125,6 +128,7 @@ ajaxData({
                     queryType: 3,
                     date: dateTime.showDate
                 });
+                $scope.tabName = "时间";
                 break;
             case 1: //设备
                 $scope.analysis_station_operation_dev_month_list.getData({
@@ -132,6 +136,8 @@ ajaxData({
                     queryType: 3,
                     date: dateTime.showDate
                 });
+                $scope.tabName = "设备";
+
                 break;
             case 2: //专业人员
                 $scope.analysis_station_operation_person_month_list.getData({
@@ -141,12 +147,14 @@ ajaxData({
                     pageIndex: 0,
                     pageSize: 20
                 });
+                $scope.tabName = "专业人员";
                 break;
             case 3: //共享人员
                 $scope.sharePeopleList.getData({
                     pageIndex: 0,
                     pageSize: 20
                 });
+                $scope.tabName = "共享人员";
                 break;
             default:
                 break;
@@ -395,7 +403,7 @@ ajaxData({
                 }
             },
             {
-                title: '检修时间(h)',
+                title: '处理时间(h)',
                 dataIndex: 'repair_hours',
                 align: 'right',
                 render(text, record, index) {
