@@ -78,6 +78,28 @@ ajaxData({
         }
     }
 
+    //监听刷新
+    $scope.$on('refresh',()=>{
+        $scope.brandCondition = [];
+        $scope.brandArr = [];
+        $scope.diffGetData();
+    });
+
+    //监听退回
+    $scope.$on('beback',()=>{
+        $scope.brandCondition = [];
+        $scope.brandArr = [];
+        $scope.diffGetData();
+    });
+
+    //监听查询
+    $scope.$on('search',(e,val)=>{
+        $scope.brandCondition = val.brandCondition;
+        $scope.brandArr = val.brandArr;
+        $scope.diffGetData()
+    });
+
+
     $scope.$watch('showPeopleInfoProfessional',(n,o)=>{
         if(!n){
             $scope.$broadcast('clearDate');
