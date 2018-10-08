@@ -46,7 +46,7 @@ ajaxData({
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
-        await $scope.diffGetData(true);
+        await $scope.diffGetData();
         $scope.$apply();
     };
 
@@ -59,7 +59,7 @@ ajaxData({
     // 日期改变
     $scope.dateUpdated = async () => {
         await myAjaxData.timeout(0);
-        $scope.diffGetData(true);
+        $scope.diffGetData();
     };
 
 
@@ -75,18 +75,11 @@ ajaxData({
         $scope.diffGetData();
     };
 
-    $scope.trClick = (item,index,e) =>{
-        e.stopPropagation();
-        if($scope.tabIndex == 2 || $scope.tabIndex == 3){
-            $scope.$broadcast('paramsPeopleInfoProfessional',{'userId':item.userid});
-            $scope.showPeopleInfoProfessional = true;
-        }
-    }
-
     //监听刷新
     $scope.$on('refresh',()=>{
         $scope.brandCondition = [];
         $scope.brandArr = [];
+        $scope.keywords = '';
         $scope.diffGetData();
     });
 
@@ -94,22 +87,48 @@ ajaxData({
     $scope.$on('beback',()=>{
         $scope.brandCondition = [];
         $scope.brandArr = [];
+        $scope.keywords = '';
         $scope.diffGetData();
     });
 
-    //监听查询
+    //监听查询-专业
     $scope.$on('search',(e,val)=>{
         $scope.brandCondition = val.brandCondition;
         $scope.brandArr = val.brandArr;
         $scope.diffGetData()
     });
 
+    //监听查询-共享
+    $scope.$on('searchShare',(e,val)=>{
+        $scope.keywords = val.keywords;
+        $scope.diffGetData()
+    });
 
+    $scope.trClick = (item,index,e) =>{
+        e.stopPropagation();
+        if($scope.tabIndex == 2 ){
+            $scope.$broadcast('paramsPeopleInfoProfessional',{'userId':item.userid});
+            $scope.showPeopleInfoProfessional = true;
+        }else if($scope.tabIndex == 3){
+            $scope.$broadcast('paramsPeopleInfoShare',{'userId':item.id,'phone':item.phone});
+            $scope.showPeopleInfoShare = true;
+        }
+    }
+
+    //清除专业---弹框的查询时间
     $scope.$watch('showPeopleInfoProfessional',(n,o)=>{
         if(!n){
             $scope.$broadcast('clearDate');
         }
     });
+
+    //清除共享---弹框的查询时间
+    $scope.$watch('showPeopleInfoShare',(n,o)=>{
+        if(!n){
+            $scope.$broadcast('clearDateShare');
+        }
+    });
+
     // 判断 调用  对应 接口
     $scope.diffGetData = async()=>{
         if (!$scope.initComplete ) return;
@@ -151,7 +170,8 @@ ajaxData({
             case 3: //共享人员
                 $scope.sharePeopleList.getData({
                     pageIndex: 0,
-                    pageSize: 20
+                    pageSize: 20,
+                    keywords:$scope.keywords
                 });
                 $scope.tabName = "共享人员";
                 break;
@@ -384,7 +404,7 @@ ajaxData({
             },
             {
                 title: '抢单次数',
-                dataIndex: '',
+                dataIndex: 'h_num',
                 align: 'right',
             },
             {

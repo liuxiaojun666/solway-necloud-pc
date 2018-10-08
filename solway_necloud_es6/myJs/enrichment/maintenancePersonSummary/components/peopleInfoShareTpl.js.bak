@@ -1,7 +1,7 @@
 ajaxData({
    //人员注册信息
-    sharePeopleRegInfo:{
-        name: 'GETsharePeopleRegInfo',
+   auditDetail:{
+        name: 'GETAuditDetail',
         data: {},
         later: true,
         onlyLatest: true
@@ -17,6 +17,8 @@ ajaxData({
         __serviceName__: 'peopleInfoTplShareService'
     })('peopleInfoShareCtrl', ['$scope', 'peopleInfoTplShareService'], ($scope, myAjaxData) => {
 
+        const authorStatusMap = { "00": "未注册", "01": "未认证", "02": "待审核", "03": "认证通过", "04": "认证失败" };
+
         $scope.$on('paramsPeopleInfoShare',(e,v)=>{
             $scope.beginTime = new Date()
             $scope.beginTime.showDate = ''
@@ -24,20 +26,27 @@ ajaxData({
             $scope.endTime.showDate = ''
 
             $scope.userId = v.userId;
+            $scope.phone = v.phone;
             $scope.diffGetData();
         });
+
+        $scope.$on('clearDateShare',()=>{
+            $scope.beginTime = null
+            $scope.endTime = null
+        })
 
 
         $scope.diffGetData = async()=>{
 
-            const {dataType,dateType,dateTime,userId} = $scope;
-
+            const {dataType,dateType,dateTime,userId,phone} = $scope;
+            
             $scope.startEventTime = $scope.beginTime.showDate;
             $scope.endEventTime = $scope.endTime.showDate;
-
-            $scope.sharePeopleRegInfo.getData({ //注册信息
-                userId:userId
-            });
+      
+            $scope.auditDetail.getData({//注册信息
+                id: userId,
+                phone: phone
+            })
 
             $scope.sharePeopleRepairRecord.getData({ //维修
                 handleMan:userId,
@@ -49,18 +58,44 @@ ajaxData({
             });
         }
 
-        $scope.sharePeopleRegInfo.getDataCallback = (success, res) => {
+        $scope.auditDetail.getDataCallback = (success, res) => {
             if (!success) return;
             $scope.registInfo = res.body;
         }
 
+        //注册信息--状态
+        $scope.getStatus = sta => authorStatusMap[sta];
+
         $scope.sharePeopleRepairRecord.getDataCallback = (success, res) => {
             if (!success) return;
-            // $scope.datasource = res.body.data;
+            $scope.datasource = res.body.data;
+            $scope.column = [
+                {
+                    title: '时间',
+                    width: '25%',
+                    dataIndex: 'updateTime',
+                    render(text) {
+                        return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
+                    }
+                },
+                {
+                    title: '电站名称',
+                    dataIndex: 'stationName',
+                    
+                },
+                {
+                    title: '任务内容',
+                    dataIndex: 'taskContent',
+                    
+                }
+                
+            ];
         }
+        
 
         $scope.$on('$destroy', () => {
-            // window.removeEventListener('resize', resizeHeight);
+            $scope.beginTime = null
+            $scope.endTime = null
         });
 
     });
