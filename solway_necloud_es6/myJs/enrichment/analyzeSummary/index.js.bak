@@ -116,10 +116,14 @@ ajaxData({
         // if (theme !== 'default') $scope.themeLoading = true;
         $scope.themeDetail = theme === 'default' ? void 0 : 
         `tpl/enrichment/analyzeSummary/components/${theme}${
-            ('/' + ["station", "company", "company"][$scope.dataType] + ['Day', 'Month', 'Year', 'Accumulative'][$scope._dateType])
+            (
+                '/' + ["station", "company", "company"][$scope.dataType] 
+                + 
+                (theme === 'shadowChart' ? ''  : ['Day', 'Month', 'Year', 'Accumulative'][$scope._dateType])
+            )
         }.html`;
         $scope.theme = theme;
-        historicalRecord.set({ theme });
+        return historicalRecord.set({ theme });
     }
 
 

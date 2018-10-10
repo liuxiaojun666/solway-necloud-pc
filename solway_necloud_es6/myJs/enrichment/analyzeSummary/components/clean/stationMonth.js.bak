@@ -62,6 +62,7 @@ ajaxData({
     }
 }, {
     __serviceName__: 'cleanStationMonthService',
+        base64str2: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAgCAMAAACrZuH4AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAABCUExURUxpcVah/1ah/1ei/1Wj/1ai/1Sk/1ai/1ai/1ai/1ei/1eo/1ai/2Kh/1ei/1ah/1ai/1ai/1Kk/1ah/1eh/1ei/2BAiUsAAAAVdFJOUwBYR9Uj9hLwMMA/B3oCpeVihRywkxGe08QAAAC2SURBVDjL1ZJJEoMgEEUZRCYFHP79rxpBYxJtqMoueQuqF6+apvmM/Rr9pBEtH6uC0ShYX+twCEBgbHbO3IwVJ2LJp7w4XuGK7j6MDnfs+9AmEQbEq8ECkuEpOEULsMckY0SVvYtAA56NoWXIbPCWAV9ZxYkqg4SGEfZPs1Uhzsd7k6SvCPOXGXPl7cmc5S1CSpb1rVsUtKSMqaxYwuRyogyt+y0FsFsZVU8ZKafBD/k7uWB/yQNS9R/qm8zvWAAAAABJRU5ErkJggg=='
 })('cleanStationMonthCtrl', ['$scope', 'cleanStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
@@ -204,6 +205,12 @@ ajaxData({
                 dataIndex: 'dtime',
                 align: 'center',
                 sort: true,
+                width: '25%',
+                style: 'position: relative;',
+                render(text, item) {
+                    if (item.pcpn) return `<span>${text}<span><img style="position: absolute; right: 1em;top:0;top: 8px;" src="${myAjaxData.config.base64str2}" title="降雨量：${item.pcpn}mm" alt="降雨量：${item.pcpn}mm"/>`;
+                    return text;
+                }
             },
             {
                 title: '清洁指数' + '(' + res.body.units.clean_mark + ')',
@@ -214,6 +221,12 @@ ajaxData({
             {
                 title: '灰尘损失电量' + '(' + res.body.units.dust_we + ')',
                 dataIndex: 'dust_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '降雨量' + '(' + res.body.units.pcpn + ')',
+                dataIndex: 'pcpn',
                 align: 'right',
                 sort: true,
             },
@@ -232,12 +245,15 @@ ajaxData({
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data.clean_mark]];
         $scope.imageSymbolsData = res.body.data.clean_mark;
-
-        const base64str2 = 'image://data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAgCAMAAACrZuH4AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAABCUExURUxpcVah/1ah/1ei/1Wj/1ai/1Sk/1ai/1ai/1ai/1ei/1eo/1ai/2Kh/1ei/1ah/1ai/1ai/1Kk/1ah/1eh/1ei/2BAiUsAAAAVdFJOUwBYR9Uj9hLwMMA/B3oCpeVihRywkxGe08QAAAC2SURBVDjL1ZJJEoMgEEUZRCYFHP79rxpBYxJtqMoueQuqF6+apvmM/Rr9pBEtH6uC0ShYX+twCEBgbHbO3IwVJ2LJp7w4XuGK7j6MDnfs+9AmEQbEq8ECkuEpOEULsMckY0SVvYtAA56NoWXIbPCWAV9ZxYkqg4SGEfZPs1Uhzsd7k6SvCPOXGXPl7cmc5S1CSpb1rVsUtKSMqaxYwuRyogyt+y0FsFsZVU8ZKafBD/k7uWB/yQNS9R/qm8zvWAAAAABJRU5ErkJggg==';
         $scope.imageSymbols = res.body.data.pcpn.map((v, i) => {
-            if (v) return base64str2;
+            if (v) return 'image://' + myAjaxData.config.base64str2;
             return void 0;
         });
+        $scope.tooltipFormatter = (params, b, c, d, e) => {
+            if ($scope.tabIndex === 0) params.pop();
+            const str = params[0].name + '<br/>' + params.map(v => v.seriesName + ':    ' + v.value + '<br/>').join('');
+            return $scope.tabIndex === 0 ? (str + '降雨量(mm)：' + res.body.data.pcpn[params[0].dataIndex]) : str;
+        };
     };
 
     // 设备 列表
@@ -330,8 +346,8 @@ ajaxData({
                 title: '清洗报表',
                 dataIndex: 'report_site',
                 align: 'center',
-                render(text) {
-                    return `<i lxj-click title="下载清洗报告" style="color: #2ac2ad;font-size:20px;" class="iconfont icon-wenjianxiazai"></i>`
+                render(text, item, index) {
+                    return `<i lxj-click title="${text ? '下载清洗报告' : '清洗报告预计清洗一周后生成'}" style="color: ${text ? '#2ac2ad' : '#aaa'};font-size:20px;" class="iconfont icon-wenjianxiazai"></i>`
                 }
             }
         ];

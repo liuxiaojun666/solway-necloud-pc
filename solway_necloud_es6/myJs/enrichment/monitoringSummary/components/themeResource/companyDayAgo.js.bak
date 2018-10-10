@@ -45,6 +45,19 @@ ajaxData({
             if ($scope.dateType === 0) return $scope.companyDayAgo.getData({});
         };
 
+        // 点击电站名  跳转到电站页面
+        $scope.trClick = (item, index, event) => {
+            if (!event.target.className.includes('clickable')) return;
+            $scope.reloadParentPage({
+                stationData: {
+                    dataType: 0,
+                    id: item.stid,
+                    isGroup: "0",
+                    stClass: '01'
+                }
+            });
+        };
+
         $scope.companyDayAgo.subscribe(res => {
             $scope.column = [
                 {
@@ -53,6 +66,9 @@ ajaxData({
                     sort: 'true',
                     width: '30%',
                     align: 'left',
+                    render(text) {
+                        return `<span class="clickable">${text}</span>`
+                    }
                 },
                 {
                     title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),

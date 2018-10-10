@@ -66,6 +66,19 @@ ajaxData(
         $scope.diffGetData();
     };
 
+    // 点击电站名  跳转到电站页面
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.reloadParentPage({
+            stationData: {
+                dataType: 0,
+                id: item.stid,
+                isGroup: "0",
+                stClass: '01'
+            }
+        });
+    };
+
     // 日期改变
     $scope.dateUpdated = async () => {
         if ($scope.currentClass !== 'CompanyDayAgo') return;
@@ -146,6 +159,7 @@ ajaxData(
                 date: dateTime.showDate
             });
         }
+        $scope.$apply();
     }
 
     // 公司 历史日 时间 列表
@@ -199,6 +213,9 @@ ajaxData(
                 width: '25%',
                 dataIndex: 'st_name',
                 align: 'left',
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '总台数',
