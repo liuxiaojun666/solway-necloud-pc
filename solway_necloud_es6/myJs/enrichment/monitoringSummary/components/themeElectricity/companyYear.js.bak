@@ -65,6 +65,19 @@ ajaxData(
         $scope.diffGetData();
     };
 
+    // 点击电站名  跳转到电站页面
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.reloadParentPage({
+            stationData: {
+                dataType: 0,
+                id: item.stid,
+                isGroup: "0",
+                stClass: '01'
+            }
+        });
+    };
+
     // 日期改变
     $scope.dateUpdated = async () => {
         if ($scope.currentClass !== 'CompanyYear') return;
@@ -148,6 +161,7 @@ ajaxData(
                 date: dateTime.showDate
             });
         }
+        $scope.$apply();
     }
 
     // 集团 月 时间 列表
@@ -159,6 +173,7 @@ ajaxData(
                 dataIndex: 'dtime',
                 width: '20%',
                 sort: true,
+                align: 'center'
             },
             {
                 title: '实发电量' + (res.body.units.real_kwh_chk ? '(' + res.body.units.real_kwh_chk + ')' : ''),
@@ -180,6 +195,20 @@ ajaxData(
                 width: '20%',
                 sort: true,
                 align: 'right'
+            },
+            {
+                title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
+                dataIndex: 'real_hours',
+                width: '10%',
+                sort: true,
+                align: 'right',
+            },
+            {
+                title: 'PR' + (res.body.units.pr ? '(' + res.body.units.pr + ')' : ''),
+                dataIndex: 'pr',
+                width: '10%',
+                sort: true,
+                align: 'right',
             },
             {
                 title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),
@@ -210,6 +239,9 @@ ajaxData(
                 dataIndex: 'st_name',
                 width: '20%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
@@ -259,6 +291,20 @@ ajaxData(
                                 class="iconfont icon-zhuzhuangtu" 
                                 style="color: #2ac2ad;cursor:pointer;"></i>`
                 }
+            },
+            {
+                title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
+                dataIndex: 'real_hours',
+                width: '10%',
+                sort: true,
+                align: 'right',
+            },
+            {
+                title: 'PR' + (res.body.units.pr ? '(' + res.body.units.pr + ')' : ''),
+                dataIndex: 'pr',
+                width: '10%',
+                sort: true,
+                align: 'right',
             },
             {
                 title: '损失百分比' + (res.body.units.we_rate ? '(' + res.body.units.we_rate + ')' : ''),

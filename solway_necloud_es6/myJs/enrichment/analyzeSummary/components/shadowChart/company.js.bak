@@ -1,0 +1,70 @@
+ajaxData({
+
+}, {
+        __serviceName__: 'shadowChartCompanyService',
+    })('shadowChartCompanyCtrl', ['$scope', 'shadowChartCompanyService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+        /// 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            let { showShape, tabIndex = 0 } = historicalRecord.get().themeShadowChartCompany || {};
+            $scope.changeShowShape(showShape || 'list');
+            $scope.changeTab(tabIndex);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            await $scope.diffGetData(true);
+            $scope.$apply();
+        };
+
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+        // tab 切换
+        $scope.changeTab = tabIndex => {
+            $scope.tabIndex = tabIndex;
+            historicalRecord.set({
+                themeShadowChartCompany: {
+                    ...historicalRecord.get().themeShadowChartCompany || {},
+                    tabIndex
+                }
+            });
+            $scope.diffGetData();
+        };
+
+        // 切换显示形式  图表 or 列表
+        $scope.changeShowShape = showShape => {
+            $scope.showShape = showShape;
+            historicalRecord.set({
+                themeShadowChartCompany: {
+                    ...historicalRecord.get().themeShadowChartCompany || {},
+                    showShape
+                }
+            });
+            $scope.diffGetData();
+        };
+
+        // 接口请求
+        $scope.diffGetData = async (getInfo) => {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            setDataNull(getInfo);
+            const { showShape, tabIndex, dateType, dataType } = $scope;
+            if (dataType === 0) return;
+
+        };
+
+        // 数据置空
+        function setDataNull(getInfo) {
+            $scope.column = [];
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
+        }
+
+        // 销毁 事件
+        $scope.$on('$destroy', () => {
+            setDataNull();
+        });
+    });

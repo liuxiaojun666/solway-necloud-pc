@@ -1,0 +1,281 @@
+ajaxData({
+    // info
+    analysis_station_dust_accum_info: {
+        name: 'GETanalysis_station_dust_accum_info',
+        data: {},
+        later: true
+    },
+    // 时间 列表
+    analysis_station_dust_accum_timelist: {
+        name: 'GETanalysis_station_dust_accum_timelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 时间 曲线
+    analysis_station_dust_accum_timeline: {
+        name: 'GETanalysis_station_dust_accum_timeline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    resourceDetailStationDay: {
+        name: 'GETresourceDetailStationDay',
+        data: {},
+        later: true,
+    },
+    action_station_clean_suggest_mark_30day_line: {
+        name: 'GETaction_station_clean_suggest_mark_30day_line',
+        data: {},
+        later: true
+    },
+    action_station_clean_suggest_subject: {
+        name: 'GETaction_station_clean_suggest_subject',
+        data: {},
+        later: true
+    },
+    action_station_clean_suggest_dust_30day_dust_we: {
+        name: 'GETaction_station_clean_suggest_dust_30day_dust_we',
+        data: {},
+        later: true
+    },
+    // 清洗记录
+    analysis_station_clean_page: {
+        name: 'GETanalysis_station_clean_page',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'cleanStationAccumulativeService',
+})('cleanStationAccumulativeCtrl', ['$scope', 'cleanStationAccumulativeService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, tabIndex = 0} = historicalRecord.get().themeCleanStationAccumulative || {};
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换设备 回调
+    $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeCleanStationAccumulative: {
+                ...historicalRecord.get().themeCleanStationAccumulative || {},
+                tabIndex
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeCleanStationAccumulative: {
+                ...historicalRecord.get().themeCleanStationAccumulative || {},
+                showShape
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 接口请求
+    $scope.diffGetData = async (getInfo) => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull(getInfo);
+        const { showShape, dateTime = {showDate: null}, tabIndex, dateType, dataType } = $scope;
+        if (dateType !== 3) return;
+        if (dataType !== 0) return;
+        if (getInfo) {
+            $scope.analysis_station_dust_accum_info.getData({
+                queryCode: 'analysis_station_dust_accum_info',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        }
+        if (tabIndex === 0 && showShape === 'list') {
+            $scope.analysis_station_dust_accum_timelist.getData({
+                queryCode: 'analysis_station_dust_accum_timelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 0 && showShape === 'chart') {
+            $scope.analysis_station_dust_accum_timeline.getData({
+                queryCode: 'analysis_station_dust_accum_timeline',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 1) {
+            $scope.resourceDetailStationDay.getData({
+                date: (new Date).Format('yyyy-MM-dd'),
+                dateType: 3,
+                queryType: 3
+            });
+            $scope.action_station_clean_suggest_mark_30day_line.getData({
+                queryCode: 'action_station_clean_suggest_mark_30day_line',
+                queryType: 3,
+                start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 365).Format('yyyy-MM-dd'),
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            });
+            $scope.action_station_clean_suggest_subject.getData({
+                queryCode: 'action_station_clean_suggest_subject',
+                queryType: 3,
+                start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            }).then((res) => {
+                if (res.body.data.pre_clean_status !== 1) return;
+                $scope.action_station_clean_suggest_dust_30day_dust_we.getData({
+                    queryCode: 'action_station_clean_suggest_dust_30day_dust_we',
+                    queryType: 3,
+                    start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                });
+            });
+        } else if (tabIndex === 2) {
+            $scope.analysis_station_clean_page.getData({
+                queryCode: 'analysis_station_clean_page',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        }
+        $scope.$apply();
+    };
+
+    // 时间 列表
+    $scope.analysis_station_dust_accum_timelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '日期',
+                dataIndex: 'dtime',
+                align: 'center',
+                sort: true,
+            },
+            {
+                title: '清洁指数' + '(' + res.body.units.clean_mark + ')',
+                dataIndex: 'clean_mark',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '灰尘损失电量' + '(' + res.body.units.dust_we + ')',
+                dataIndex: 'dust_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '灰尘损失比例' + '(' + res.body.units.dust_we_r + ')',
+                dataIndex: 'dust_we_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 时间 曲线
+    $scope.analysis_station_dust_accum_timeline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data.clean_mark]];
+    };
+
+    $scope.action_station_clean_suggest_mark_30day_line.subscribe(res => {
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data.clean_mark.map(v => v || 0)], [res.body.data.pcpn]];
+    });
+
+
+    // 清洗报告 弹出 事件 处理 函数
+    $scope.cleanReport = (item) => {
+        $scope.cleanReportShow = true;
+        $scope.$broadcast('cleanReport', item.start_date);
+    };
+
+    // 清洗记录
+    $scope.analysis_station_clean_page.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body;
+        $scope.column = [
+            {
+                title: '清洗时间段',
+                dataIndex: 'start_date',
+                align: 'center',
+                sort: true,
+                width: '30%',
+                render(text, item) {
+                    return text + ' 至 ' + item.end_date
+                }
+            },
+            {
+                title: '清洗前发电效率(%)',
+                dataIndex: 'before_pge',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '清洗后发电效率(%)',
+                dataIndex: 'after_pge',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '提升效率(%)',
+                dataIndex: 'pge_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '清洗报表',
+                dataIndex: 'report_site',
+                align: 'center',
+                render(text) {
+                    return `<i lxj-click title="${text ? '下载清洗报告' : '清洗报告预计清洗一周后生成'}" style="color: ${text ? '#2ac2ad' : '#aaa'};font-size:20px;" class="iconfont icon-wenjianxiazai"></i>`
+                }
+            }
+        ];
+    };
+
+    // 数据置空
+    function setDataNull(getInfo) {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.analysis_station_dust_accum_timelist.res = null;
+        $scope.analysis_station_dust_accum_timeline.res = null;
+        $scope.action_station_clean_suggest_mark_30day_line.res = null;
+        $scope.analysis_station_clean_page.res = null;
+        if (getInfo) $scope.analysis_station_dust_accum_info.res = null;
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});
