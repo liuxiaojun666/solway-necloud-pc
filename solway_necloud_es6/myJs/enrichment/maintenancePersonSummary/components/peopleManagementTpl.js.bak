@@ -1,0 +1,164 @@
+ajaxData({
+    //人员列表
+    peopleManageList:{
+        name: 'GETpeopleManageList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //修改备注
+    personRemarkUpdate:{
+        name:'POSTPersonRemarkUpdate',
+        data:{},
+        later:true
+    },
+    //电站列表
+    stationsPosition:{
+        name:'GETStationsPos',
+        data: {},
+        later:true
+    },
+}, {
+    __serviceName__: 'peopleManagementTplService'
+})('peopleManagementTplCtrl', ['$scope', 'peopleManagementTplService','$timeout','toaster'], ($scope, myAjaxData,$timeout,toaster) => {
+
+    const authorStatusMap = { "00": "未注册", "01": "未认证", "02": "待审核", "03": "认证通过", "04": "认证失败" };
+
+    $("#peopleSearchKeywords").focus(function(){
+        $(this).css('border','1px solid rgba(88,155,231,1)')
+    }).blur(function(){
+        $(this).css('border','1px solid rgba(88,155,231,0.6)')
+    });
+
+    const renderPage = res =>{
+        $scope.column = [
+            {
+                title: '姓名',
+                dataIndex: 'realName',
+                align: 'left',
+                render(text,item,index) {
+                    return `<span class="realname" style="color:#1ddabe;">${text?text:''}</span>`
+                },
+            },
+            {
+                title: '电话',
+                dataIndex: 'phone',
+                align: 'center'
+            },
+            {
+                title: '时间',
+                dataIndex: 'createTime',
+                render(text) {
+                    return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
+                },
+                align: 'center'
+            },
+            {
+                title: '状态',
+                dataIndex: 'authStatus',
+                align: 'center',
+                render(text){
+                    return `${authorStatusMap[text]}`
+                }
+            },
+            {
+                title: '备注',
+                width: '25%',
+                dataIndex: 'remark',
+                align: 'left',
+                render(text,item,index) {
+                    return `<div style="position:relative;">
+                        <input value="${text?text:''}" class="disable-input" disabled="disabled">
+                        <i class="iconfont edit icon-bianji1" style="position:absolute;right: -5px;top: -6px;font-size: 28px;color:#1ddabe;"></i>
+                    </div>`
+                },
+            },
+            {
+                title: '电站',
+                width: '30%',
+                dataIndex: 'rels',
+                render(text,item,index) {
+                    return `
+                    <div class="clearfix" style="height:100%;">
+                        <div class="pull-left" style="width:20%;height:100%;display: flex;align-items: center;">
+                            <i class="iconfont icon-icon-power-powerstation" style="font-size: 25px;color: #1ddabe;"></i>
+                        </div>
+                        <div class="pull-left" style="width:80%;">
+                            <p style="margin:5px 0 0 0;">${text[0]?text[0].stationName:''}</p>
+                            <p style="margin:0;">${text[1]?text[1].stationName:''}</p>
+                        </div>
+                    </div>
+                    `
+                },
+            }
+        ];
+    }
+
+    $scope.trClick = (item, index, event) => {
+        if (event.target.className.includes('realname')){
+            $scope.ifPeopleDetailTpl = true;
+            $scope.$broadcast('peopleUserId',{'userId':item.id,'phone':item.phone});
+        }else if(event.target.className.includes('edit')){
+            if($(event.target).hasClass('icon-baocun1')){
+                $(event.target).removeClass('icon-baocun1').addClass('icon-bianji1');
+                $(event.target).siblings('input').removeClass('able-input').addClass('disable-input').attr('disabled',true);
+           
+                $scope.editRemark(item.id,$(event.target).siblings('input').val())
+            }else{
+                $(event.target).removeClass('icon-bianji1').addClass('icon-baocun1');
+                $(event.target).siblings('input').removeClass('disable-input').addClass('able-input').attr('disabled',false);
+            }
+        }else if(event.target.className.includes('icon-icon-power-powerstation')){
+            $scope.ifStationListTpl = true;
+            $scope.$broadcast('userId',item.id);
+        };
+        
+    };
+
+    //修改备注
+    $scope.editRemark = (id,remark) =>{
+        $scope.personRemarkUpdate.getData({
+            id: id,
+            remark :remark
+        }).then(res =>{
+            if(res.code == "0"){
+                toaster.pop('success', '',"修改成功");
+            }else{
+                toaster.pop('error', "", "修改失败")
+            }
+        })
+    }
+
+    //监听 ---添加电站成功
+    $scope.$on('addStationSuccessful',(e,v)=>{
+        $scope.getDataList();
+    });
+    
+
+    $scope.getDataList = () =>{
+        $scope.peopleManageList.getData({
+            authStatus:$scope.statusCondition,
+            keywords:$scope.peopleSearchKeywords,
+            pageIndex: 0,
+            pageSize: 10
+        }).then(res =>{
+            renderPage(res)
+        })
+    }
+
+    $timeout(()=>{
+        $("#peopleSearchKeywords").keydown(function() {
+            if(event.keyCode == "13") {//回车键
+                $scope.getDataList();
+            }
+        })
+        $scope.getDataList();
+    },0)
+
+
+    // $scope.statusCondition = 0;
+    $scope.$on('$destroy', () => {
+    
+    });
+
+});
