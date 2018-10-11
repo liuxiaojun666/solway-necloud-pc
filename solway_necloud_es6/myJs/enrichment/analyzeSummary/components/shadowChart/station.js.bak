@@ -1,5 +1,33 @@
 ajaxData({
-    
+
+    // 时间 列表
+    analysis_station_dust_month_timelist: {
+        name: 'GETanalysis_station_dust_month_timelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 时间 曲线
+    analysis_station_dust_month_timeline: {
+        name: 'GETanalysis_station_dust_month_timeline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 列表
+    analysis_station_dust_month_devicelist: {
+        name: 'GETanalysis_station_dust_month_devicelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 曲线
+    analysis_station_dust_month_deviceline: {
+        name: 'GETanalysis_station_dust_month_deviceline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
         __serviceName__: 'shadowChartStationService',
     })('shadowChartStationCtrl', ['$scope', 'shadowChartStationService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -46,14 +74,118 @@ ajaxData({
             $scope.diffGetData();
         };
 
+        $scope.equipmentListTrClick = (item, index, event) => {
+            $scope.equipmentDetailShow = true;
+            $scope.$broadcast('equipmentDetails', item);
+        };
+
         // 接口请求
         $scope.diffGetData = async (getInfo) => {
             if (!$scope.initComplete) return;
             await myAjaxData.timeout(0);
             setDataNull(getInfo);
-            const { showShape, tabIndex, dateType, dataType } = $scope;
+            const { showShape, tabIndex, dataType } = $scope;
             if (dataType !== 0) return;
-            
+
+            if (tabIndex === 0 && showShape === 'list') {
+                $scope.analysis_station_dust_month_timelist.getData({
+                    queryCode: 'analysis_station_dust_month_timelist',
+                    queryType: 3,
+                    date: '2018-10'
+                });
+            } else if (tabIndex === 0 && showShape === 'chart') {
+                $scope.analysis_station_dust_month_timeline.getData({
+                    queryCode: 'analysis_station_dust_month_timeline',
+                    queryType: 3,
+                    date: '2018-10'
+                });
+            } else if (tabIndex === 1 && showShape === 'list') {
+                $scope.analysis_station_dust_month_devicelist.getData({
+                    queryCode: 'analysis_station_dust_month_devicelist',
+                    queryType: 3,
+                    date: '2018-10'
+                });
+            } else if (tabIndex === 1 && showShape === 'chart') {
+                $scope.analysis_station_dust_month_deviceline.getData({
+                    queryCode: 'analysis_station_dust_month_deviceline',
+                    queryType: 3,
+                    date: '2018-10'
+                });
+            }
+            $scope.$apply();
+        };
+
+        // 时间 列表
+        $scope.analysis_station_dust_month_timelist.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.data;
+            $scope.column = [
+                {
+                    title: '日期',
+                    dataIndex: 'dtime',
+                    align: 'center',
+                    style: 'position:relative;',
+                    sort: true,
+                    render(text, item, index) {
+                        return text + (item.clean_status
+                            ? `<span lxj-click="cleanReport(${text});" title="清洗" style="cursor:pointer;position: absolute;right: 0.1em;top:0;line-height:50px;color:#57a2ff;font-size: 30px;" class="iconfont icon-qingxi1"></span>`
+                            : '');
+                    }
+                },
+                {
+                    title: '降雨量' + '(' + res.body.units.pcpn + ')',
+                    dataIndex: 'pcpn',
+                    align: 'right',
+                    sort: true,
+                },
+                {
+                    title: '天气',
+                    dataIndex: 'weather',
+                    align: 'center',
+                    sort: true,
+                },
+            ];
+        };
+
+        // 时间 曲线
+        $scope.analysis_station_dust_month_timeline.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.xdata = res.body.data.dtime;
+            $scope.ydatas = [[res.body.data.real_kwh_chk], [res.body.data.clean_mark]];
+        };
+
+        // 设备 列表
+        $scope.analysis_station_dust_month_devicelist.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.data;
+            $scope.column = [
+                {
+                    title: '设备',
+                    dataIndex: 'eq_name',
+                    align: 'left',
+                    width: '25%',
+                    sort: true,
+                },
+                {
+                    title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
+                    dataIndex: 'real_kwh_chk',
+                    align: 'right',
+                    sort: true,
+                },
+                {
+                    title: '阴影损失比例' + '(' + res.body.units.dust_we_r + ')',
+                    dataIndex: 'dust_we_r',
+                    align: 'right',
+                    sort: true,
+                },
+            ];
+        };
+
+        // 设备 曲线
+        $scope.analysis_station_dust_month_deviceline.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.xdata = res.body.data.eq_name;
+            $scope.ydatas = [[res.body.data.real_kwh_chk], [res.body.data.dust_we_r]];
         };
 
         // 数据置空
@@ -61,6 +193,11 @@ ajaxData({
             $scope.column = [];
             $scope.xdata = void 0;
             $scope.ydatas = void 0;
+            $scope.analysis_station_dust_month_timelist.res = null;
+            $scope.analysis_station_dust_month_timeline.res = null;
+            $scope.analysis_station_dust_month_devicelist.res = null;
+            $scope.analysis_station_dust_month_deviceline.res = null;
+
         }
 
         // 销毁 事件

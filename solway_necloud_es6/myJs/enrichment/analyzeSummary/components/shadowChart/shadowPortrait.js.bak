@@ -1,0 +1,208 @@
+ajaxData(
+    {},
+    {}
+)('shadowPortraitCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    $scope.$on('equipmentDetails', (event, item) => {
+        $scope.eq_name = item.eq_name;
+        getData();
+    });
+
+    function getData() {
+        $scope.xdata = ['2018-12-12', '2018-12-17', '2018-12-22'];
+        $scope.ydatas = [[[10, 34, 23], [8, 4, 3],]];
+        $scope.tooltipFormatter = (a, b, c) => {
+            setTimeout(() => {
+                c(b, `<div id="chartChild" style="width: 520px;height: 300px;"></div>`);
+                renderChildChart(document.getElementById('chartChild'));
+            }, 200);
+            return `<div style="font-size: 30px;width: 520px;height: 300px;text-align: center;line-height:300px;">加载ing...</div>`;
+        };
+    }
+
+
+    let myChart;
+    function renderChildChart(ele) {
+        if (!ele) return;
+        if (myChart) echarts.dispose(myChart);
+        myChart = echarts.init(ele);
+        const option = {
+            tooltip: {
+                show: false
+            },
+            legend: {
+                icon: 'rect',
+                itemWidth: 20,
+                itemHeight: 4,
+                itemGap: 20, //图例每项之间的间隔。横向布局时为水平间隔，纵向布局时为纵向间隔。[ default: 10 ] 
+                data: ['普通阴影', '异常阴影', '连续阴影', '损失比例(%)'],
+                right: 60,
+                top: 0,
+                textStyle: {
+                    fontSize: 12,
+                    color: '#fffeff'
+                }
+            },
+            grid: {
+                top: '50',
+                left: '20',
+                right: '20',
+                bottom: '0',
+                containLabel: true //grid 区域是否包含坐标轴的刻度标签[ default: false ] 
+            },
+            xAxis: [{
+                type: 'category',
+                // boundaryGap: false, //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样
+                axisLine: {
+                    lineStyle: {
+                        color: '#366090' //坐标轴线线的颜色。
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: '#fffeff'
+                    }
+                },
+                axisTick: {
+                    inside: true
+                },
+                data: ["组串1", "组串2", "组串4", "组串7", "组串12", "组串13"]
+            }],
+            yAxis: [{
+                type: 'value',
+                name: '时刻',
+                nameTextStyle: {
+                    color: '#fffeff'
+                },
+                // splitNumber,
+                // interval,
+                // max: yMax[i],
+                axisTick: {
+                    show: false //是否显示坐标轴刻度
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#366090' //坐标轴线线的颜色
+                    }
+                },
+                axisLabel: {
+                    margin: 5, //刻度标签与轴线之间的距离
+                    // inside: true,
+                    textStyle: {
+                        color: '#fffeff',
+                        fontSize: 12 //文字的字体大小
+                    }
+                },
+                splitLine: {
+                    show: false,
+                    lineStyle: {
+                        color: '#366090', //分隔线颜色设置
+                        type: 'dashed'
+                    }
+                }
+            }, {
+                type: 'value',
+                name: '%',
+                nameTextStyle: {
+                    color: '#fffeff'
+                },
+                // splitNumber,
+                // interval,
+                // max: yMax[i],
+                axisTick: {
+                    show: false //是否显示坐标轴刻度
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#366090' //坐标轴线线的颜色
+                    }
+                },
+                axisLabel: {
+                    margin: 5, //刻度标签与轴线之间的距离
+                    // inside: true,
+                    textStyle: {
+                        color: '#fffeff',
+                        fontSize: 12 //文字的字体大小
+                    }
+                },
+                splitLine: {
+                    show: false,
+                    lineStyle: {
+                        color: '#366090', //分隔线颜色设置
+                        type: 'dashed'
+                    }
+                }
+            }],
+            series: [{
+                name: '',
+                type: 'bar',
+                data: [5, 3, 4, 5, 9, 2],
+                barWidth: '6',
+                stack: '阴影',
+                yAxisIndex: 0,
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        color: 'transparent'
+                    }
+                },
+            }, {
+                name: '普通阴影',
+                type: 'bar',
+                data: [5, '-', '-', '-', '-', 12],
+                barWidth: '6',
+                stack: '阴影',
+                yAxisIndex: 0,
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        color: '#7e4bb4'
+                    }
+                },
+            }, {
+                name: '异常阴影',
+                type: 'bar',
+                data: ['-', 2, '-', '-', 10, '-'],
+                barWidth: '6',
+                stack: '阴影',
+                yAxisIndex: 0,
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        color: '#dd5859'
+                    }
+                },
+            }, {
+                name: '连续阴影',
+                type: 'bar',
+                data: ['-', '-', 6, 10, '-', '-'],
+                barWidth: '6',
+                stack: '阴影',
+                yAxisIndex: 0,
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        color: '#b08e73'
+                    }
+                },
+            }, {
+                name: '损失比例(%)',
+                type: 'line',
+                data: [5, 20, 36, 10, 10, 20],
+                barWidth: '6',
+                yAxisIndex: 1,
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        lineStyle: {
+                            width: 1
+                        },
+                        color: 'rgb(120, 238, 120)'
+                    }
+                },
+            }]
+        };
+        myChart.setOption(option);
+    }
+
+    $scope.$on('$destroy', () => echarts.dispose(myChart));
+});
