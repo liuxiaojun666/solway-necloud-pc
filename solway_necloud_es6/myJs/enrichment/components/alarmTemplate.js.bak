@@ -33,7 +33,16 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         $scope.currentStatus = 'normal'; //abnormal,normal
         $scope.ifVoiced = true;
 
-        const newUtterance = new SpeechSynthesisUtterance();
+        var newUtterance = new SpeechSynthesisUtterance();
+        newUtterance.lang = 'zh-cn';
+
+        //测试
+        document.addEventListener('dblclick',function(e){
+            if (e.ctrlKey && $scope.ifVoiced) { 
+                newUtterance.text = '2018年09月8日6点6分28秒 金峰财富HL0118告警';
+                window.speechSynthesis.speak(newUtterance);
+            }
+        },false);
 
         const judgeIfAlarm = () =>{
             if(!$scope.alarmListPageShow){
@@ -63,14 +72,6 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
     
         calculateListHeight();
         window.addEventListener('resize', calculateListHeight);
-
-        //测试
-        document.addEventListener('dblclick',function(e){
-            if (e.ctrlKey && $scope.ifVoiced) { 
-                newUtterance.text = '2018年09月8日6点6分28秒 金峰财富HL0118告警';
-                window.speechSynthesis.speak(newUtterance);
-            }
-        },false);
 
         //控制是否可以语音播放
         $scope.changeInput = (e) =>{
@@ -150,7 +151,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
                     $solway.setStore('alarm', {'voiceTime':alarmInfo.voiceTime}); 
 
-                    if(alarmInfo.voiceContent){
+                    if($.trim(alarmInfo.voiceContent)){
                         newUtterance.text = alarmInfo.voiceContent;
                         window.speechSynthesis.speak(newUtterance);
                     }

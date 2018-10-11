@@ -95,6 +95,8 @@ ajaxData({
     }
 
     $scope.trClick = (item, index, event) => {
+        item
+        debugger
         if (event.target.className.includes('realname')){
             $scope.ifPeopleDetailTpl = true;
             $scope.$broadcast('peopleUserId',{'userId':item.id,'phone':item.phone});

@@ -1,7 +1,7 @@
 ajaxData({
     //电站列表
-    stationsPosition:{
-        name:'GETStationsPos',
+    allSTListForPCBySession: {
+        name: 'GETAllSTListForPCBySession',
         data: {},
         later:true
     },
@@ -17,14 +17,15 @@ ajaxData({
 
     $scope.$on('userId',(e,v)=>{
         $scope.userId = v;
+
+        //获取电站列表
+        $scope.allSTListForPCBySession.getData({
+        }).then(res =>{
+            console.log(res)
+            $scope.stationList = res
+        })
     })
-    //获取电站列表
-    $scope.stationsPosition.getData({
-    }).then(res =>{
-        if(res.code == 0){
-            $scope.stationList = res.body
-        }
-    })
+    
 
     //确定---添加电站
     $scope.addStation = () =>{
@@ -37,6 +38,7 @@ ajaxData({
             userId:$scope.userId,
             stationIds:stationIdsArr.join(',')
         }).then(res =>{
+            debugger
             if(res.code == "0"){
                 toaster.pop('success', '',res.msg);
                 $scope.$parent.$parent.ifStationListTpl = false;
