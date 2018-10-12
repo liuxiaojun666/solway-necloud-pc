@@ -45,6 +45,11 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
+    },
+    getCleanReport: {
+        name: 'GETCleanReport',
+        data: {},
+        later: true,
     }
 }, {
     __serviceName__: 'cleanStationAccumulativeService',
@@ -213,7 +218,7 @@ ajaxData({
 
 
     // 清洗报告 弹出 事件 处理 函数
-    $scope.cleanReport = (item) => {
+    $scope.cleanReport = (item, index, event) => {
         $scope.cleanReportShow = true;
         $scope.$broadcast('cleanReport', item.start_date);
     };
@@ -256,7 +261,7 @@ ajaxData({
                 dataIndex: 'report_site',
                 align: 'center',
                 render(text) {
-                    return `<i lxj-click title="${text ? '下载清洗报告' : '清洗报告预计清洗一周后生成'}" style="color: ${text ? '#2ac2ad' : '#aaa'};font-size:20px;" class="iconfont icon-wenjianxiazai"></i>`
+                    return `<a lxj-click href="${text}" target="_blank"><i lxj-click title="${text ? '下载清洗报告' : '清洗报告预计清洗一周后生成'}" style="color: ${text ? '#2ac2ad' : '#aaa'};font-size:20px;" class="iconfont icon-wenjianxiazai"></i></a>`
                 }
             }
         ];

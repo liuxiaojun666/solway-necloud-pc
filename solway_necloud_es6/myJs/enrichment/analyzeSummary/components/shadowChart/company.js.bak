@@ -1,15 +1,15 @@
 ajaxData(
     {
         // 电站 列表
-        analysis_company_fail_month_stationlist: {
-            name: 'GETanalysis_company_fail_month_stationlist',
+        analysis_company_str_shade_stationlist: {
+            name: 'GETanalysis_company_str_shade_stationlist',
             data: {},
             later: true,
             onlyLatest: true
         },
         // 电站 曲线
-        analysis_company_fail_month_stationline: {
-            name: 'GETanalysis_company_fail_month_stationline',
+        analysis_company_str_shade_stationline: {
+            name: 'GETanalysis_company_str_shade_stationline',
             data: {},
             later: true,
             onlyLatest: true
@@ -82,14 +82,14 @@ ajaxData(
         const { showShape, tabIndex, dateType, dataType } = $scope;
         if (dataType === 0) return;
         if (showShape === 'list') {
-            $scope.analysis_company_fail_month_stationlist.getData({
-                queryCode: 'analysis_company_fail_month_stationlist',
+            $scope.analysis_company_str_shade_stationlist.getData({
+                queryCode: 'analysis_company_str_shade_stationlist',
                 queryType: 1,
                 date: '2018-10'
             });
         } else if (showShape === 'chart') {
-            $scope.analysis_company_fail_month_stationline.getData({
-                queryCode: 'analysis_company_fail_month_stationline',
+            $scope.analysis_company_str_shade_stationline.getData({
+                queryCode: 'analysis_company_str_shade_stationline',
                 queryType: 1,
                 date: '2018-10'
             });
@@ -98,7 +98,7 @@ ajaxData(
 
 
     // 电站 列表
-    $scope.analysis_company_fail_month_stationlist.getDataCallback = (success, res) => {
+    $scope.analysis_company_str_shade_stationlist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -113,20 +113,20 @@ ajaxData(
                 }
             },
             {
-                title: '阴影异常设备数' + '(' + res.body.units.inst_kw + ')',
-                dataIndex: 'inst_kw',
+                title: '阴影异常设备数' + '(' + res.body.units.ab_shade_eqcount + ')',
+                dataIndex: 'ab_shade_eqcount',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影异常组串' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '阴影异常组串' + '(' + res.body.units.ab_shade_count + ')',
+                dataIndex: 'ab_shade_count',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '电站阴影损失比例' + '(' + res.body.units.fail_we + ')',
-                dataIndex: 'fail_we',
+                title: '电站阴影损失比例' + '(' + res.body.units.eqreduce + ')',
+                dataIndex: 'eqreduce',
                 align: 'right',
                 sort: true,
             },
@@ -134,10 +134,10 @@ ajaxData(
     };
 
     // 电站 曲线
-    $scope.analysis_company_fail_month_stationline.getDataCallback = (success, res) => {
+    $scope.analysis_company_str_shade_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
-        $scope.ydatas = [[res.body.data.real_kwh_chk], [res.body.data.fail_we_r]];
+        $scope.ydatas = [[res.body.data.ab_shade_eqcount], [res.body.data.eqreduce]];
     };
 
     // 数据置空
@@ -145,8 +145,8 @@ ajaxData(
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_company_fail_month_stationlist.res = null;
-        $scope.analysis_company_fail_month_stationline.res = null;
+        $scope.analysis_company_str_shade_stationlist.res = null;
+        $scope.analysis_company_str_shade_stationline.res = null;
 
     }
 
