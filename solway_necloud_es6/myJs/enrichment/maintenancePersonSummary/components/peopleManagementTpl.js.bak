@@ -95,8 +95,6 @@ ajaxData({
     }
 
     $scope.trClick = (item, index, event) => {
-        item
-        debugger
         if (event.target.className.includes('realname')){
             $scope.ifPeopleDetailTpl = true;
             $scope.$broadcast('peopleUserId',{'userId':item.id,'phone':item.phone});
@@ -112,7 +110,7 @@ ajaxData({
             }
         }else if(event.target.className.includes('icon-icon-power-powerstation')){
             $scope.ifStationListTpl = true;
-            $scope.$broadcast('userId',item.id);
+            $scope.$broadcast('userId',{'id':item.id,'belongStations':item.rels});
         };
         
     };

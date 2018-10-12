@@ -29,6 +29,9 @@ ajaxData({
     $scope.themeLoading = true;
     $scope.moduleName = '运维人员';//当前页面名称；    
 
+    //测试----当前用户是否是创维互联的人---判定是否可以显示共享人员
+    $scope.ifShowShareTab = false;
+
     historyInitCallback();
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
@@ -89,15 +92,23 @@ ajaxData({
             }
             return window.location.reload();
         }
-        if (!stationData) { // 没有记录电站信息  
+        if (!stationData) { // 没有记录电站信息
             const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
             $scope.switchPowerCallback({ id, isGroup, dataType, stClass });
+            $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 }).then(res =>{
+                $scope.ifShowShareTab = res.hasShareUser;
+            });
         } else if (Object.is(currentStationData.currentSTID, stationData.id)) { // 电站信息 没有变化
             await myAjaxData.timeout(500);
             $scope.switchPowerCallback(stationData);
+            $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 }).then(res =>{
+                $scope.ifShowShareTab = res.hasShareUser;
+            });
         } else { // 电站信息  发生变化   切换到记录中的电站
             await $scope.changeStation.getData(stationData);
-            const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            const { currentDataName, hasShareUser} = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            $scope.ifShowShareTab = hasShareUser;
+            
             $scope.switchPowerScope.currentDataName = currentDataName;
             $scope.switchPowerCallback(stationData);
         }
