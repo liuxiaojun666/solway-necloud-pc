@@ -8,8 +8,8 @@ ajaxData(
     });
 
     function getData() {
-        $scope.xdata = ['2018-12-12', '2018-12-17', '2018-12-22'];
-        $scope.ydatas = [[[10, 34, 23], [8, 4, 3],]];
+        $scope.xdata_ = ['2018-12-12', '2018-12-17', '2018-12-22'];
+        $scope.ydatas_ = [[[10, 34, 23], [8, 4, 3],]];
         $scope.tooltipFormatter = (a, b, c) => {
             setTimeout(() => {
                 c(b, `<div id="chartChild" style="width: 520px;height: 300px;"></div>`);
@@ -69,13 +69,13 @@ ajaxData(
             }],
             yAxis: [{
                 type: 'value',
-                name: '时刻',
+                name: '         时刻(0:00 -- 24:00)',
                 nameTextStyle: {
                     color: '#fffeff'
                 },
-                // splitNumber,
+                splitNumber: 12,
                 // interval,
-                // max: yMax[i],
+                max: 24,
                 axisTick: {
                     show: false //是否显示坐标轴刻度
                 },
@@ -107,7 +107,7 @@ ajaxData(
                 },
                 // splitNumber,
                 // interval,
-                // max: yMax[i],
+                max: 100,
                 axisTick: {
                     show: false //是否显示坐标轴刻度
                 },
@@ -132,63 +132,33 @@ ajaxData(
                     }
                 }
             }],
-            series: [{
-                name: '',
+            series: [[
+                [5, 3, 4, 5, 9, 2],
+                [5, '-', '-', '-', '-', 12],
+                ['-', 2, '-', '-', 10, '-'],
+                ['-', '-', 6, 10, '-', '-'],
+            ], [
+                [0, 3, 0, 0, 0, 0],
+                ['-', '-', '-', '-', '-', '-'],
+                ['-', 2, '-', '-', '-', '-'],
+                ['-', '-', '-', '-', '-', '-'],
+            ]].map(v => (v.map((data, xi) => ({
+                name: ['', '普通阴影', '异常阴影', '连续阴影'][xi],
                 type: 'bar',
-                data: [5, 3, 4, 5, 9, 2],
+                data,
                 barWidth: '6',
                 stack: '阴影',
                 yAxisIndex: 0,
                 smooth: true,
                 itemStyle: {
                     normal: {
-                        color: 'transparent'
+                        color: ['transparent', '#7e4bb4', '#dd5859', '#b08e73'][xi]
                     }
                 },
-            }, {
-                name: '普通阴影',
-                type: 'bar',
-                data: [5, '-', '-', '-', '-', 12],
-                barWidth: '6',
-                stack: '阴影',
-                yAxisIndex: 0,
-                smooth: true,
-                itemStyle: {
-                    normal: {
-                        color: '#7e4bb4'
-                    }
-                },
-            }, {
-                name: '异常阴影',
-                type: 'bar',
-                data: ['-', 2, '-', '-', 10, '-'],
-                barWidth: '6',
-                stack: '阴影',
-                yAxisIndex: 0,
-                smooth: true,
-                itemStyle: {
-                    normal: {
-                        color: '#dd5859'
-                    }
-                },
-            }, {
-                name: '连续阴影',
-                type: 'bar',
-                data: ['-', '-', 6, 10, '-', '-'],
-                barWidth: '6',
-                stack: '阴影',
-                yAxisIndex: 0,
-                smooth: true,
-                itemStyle: {
-                    normal: {
-                        color: '#b08e73'
-                    }
-                },
-            }, {
+            })))).reduce((a, b) => a.concat(b), []).concat({
                 name: '损失比例(%)',
                 type: 'line',
                 data: [5, 20, 36, 10, 10, 20],
-                barWidth: '6',
                 yAxisIndex: 1,
                 smooth: true,
                 itemStyle: {
@@ -196,13 +166,13 @@ ajaxData(
                         lineStyle: {
                             width: 1
                         },
-                        color: 'rgb(120, 238, 120)'
+                        color: '#57bc6c'
                     }
                 },
-            }]
+            })
         };
         myChart.setOption(option);
     }
 
-    $scope.$on('$destroy', () => echarts.dispose(myChart));
+    $scope.$on('$destroy', () => (myChart && echarts.dispose(myChart)));
 });
