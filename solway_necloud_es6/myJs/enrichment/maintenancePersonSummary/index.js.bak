@@ -33,6 +33,20 @@ ajaxData({
     $scope.ifShowShareTab = false;
 
     historyInitCallback();
+    
+    // 父页面重载  可修改记录
+    $scope.reloadParentPage = async (data = {}) => {
+        historicalRecord.set(data);
+        $scope.beforeLoading = true;
+        if (data.stationData) {
+            await $scope.changeStation.getData(data.stationData);
+            const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            $scope.switchPowerScope.currentDataName = currentDataName;
+            $scope.switchPowerCallback(data.stationData);
+        }
+        return historyInitCallback();
+    };
+
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
         const historiData = historicalRecord.get();
