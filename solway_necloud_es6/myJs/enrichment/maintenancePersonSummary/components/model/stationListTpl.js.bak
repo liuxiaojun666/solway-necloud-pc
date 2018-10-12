@@ -16,13 +16,32 @@ ajaxData({
 })('stationListTplCtrl', ['$scope', 'stationListTplCtrlService','$timeout','toaster'], ($scope, myAjaxData,$timeout,toaster) => {
 
     $scope.$on('userId',(e,v)=>{
-        $scope.userId = v;
-
+        $scope.userId = v.id;
+        
+        let stationId = v.belongStations.map(item=>{
+            return item.stationId;
+        });
+        $scope.selectedIds = stationId;
+        let a = [];
+        
         //获取电站列表
         $scope.allSTListForPCBySession.getData({
         }).then(res =>{
-            console.log(res)
-            $scope.stationList = res
+            let b = res;
+            if(stationId.length){
+                for(let i=0;i<stationId.length;i++){
+                    for(let j=0;j<res.length;j++){
+                        if(res[j].id == stationId[i]){
+                            a.push(res[j]);
+                            b.splice(j,1); 
+                        }
+                    }
+                }
+                $scope.stationList = a.concat(b)
+            }else{
+                $scope.stationList = res
+            }
+
         })
     })
     
@@ -38,7 +57,6 @@ ajaxData({
             userId:$scope.userId,
             stationIds:stationIdsArr.join(',')
         }).then(res =>{
-            debugger
             if(res.code == "0"){
                 toaster.pop('success', '',res.msg);
                 $scope.$parent.$parent.ifStationListTpl = false;
