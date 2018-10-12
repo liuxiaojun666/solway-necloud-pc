@@ -127,6 +127,7 @@ ajaxData(
     $scope.action_station_clean_suggest_mark_30day_line.subscribe(res => {
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data.clean_mark.map(v => v || 0)], [res.body.data.pcpn]];
+        $scope.tooltipFormatter = a => `${a[0].name}<br/>${a[0].seriesName}：${a[0].value || '-'}<br/>${a[1].seriesName}：${a[1].value}`;
     });
 
     $scope.action_station_clean_suggest_subject.subscribe(res => {
@@ -175,6 +176,7 @@ ajaxData(
     function setDataNull() {
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
+        $scope.tooltipFormatter = void 0;
         $scope.action_station_clean_suggest_mark_30day_line.res = null;
         $scope.action_station_clean_suggest_subject.res = null;
         $scope.action_station_clean_suggest_dust_top5_line.res = null;

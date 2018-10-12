@@ -164,59 +164,55 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     end: (width - 100) / ydatas[0][0].length * 2
                     // handleSize: $scope.width
                 }],
-                series: ydatas.map((v, i) => {
-                    return v.map((data, xi) => ({
-                        name: linenames[i][xi],
-                        type: types[i][xi],
-                        barWidth: barWidth,
-                        stack: stack[i][xi] || (i + '' + xi),
-                        yAxisIndex: i,
-                        smooth: true,
-                        symbol: 'circle',
-                        showSymbol: symbolSize ? true : false,
-                        symbolSize: symbolSize,
-                        data: data.map((xxv, xxi) => {
-                            if (!Number.isNaN(xxv + '' - 0)) return (+xxv).toFixed(toFixed) - 0;
-                            else return xxv === null ? '-' : xxv;
-                        }),
-                        itemStyle: {
-                            normal: {
-                                lineStyle: {
-                                    width: lineWidth
-                                },
-                                color: (types[i][xi] === 'bar') && (colors[i][xi].includes('rgb')) ? {
-                                    type: 'linear',
-                                    x: 0,
-                                    y: 0,
-                                    x2: 0,
-                                    y2: 1,
-                                    colorStops: [{
-                                        offset: 0, color: colors[i][xi] // 0% 处的颜色
-                                    }, {
-                                        offset: 1, color: 'rgba' + colors[i][xi].slice(3, -1) + ',.1' + ')' // 100% 处的颜色
-                                    }],
-                                    globalCoord: true
-                                } : colors[i][xi]
+                series: ydatas.map((v, i) => (v.map((data, xi) => ({
+                    name: linenames[i][xi],
+                    type: types[i][xi],
+                    barWidth: barWidth,
+                    stack: stack[i][xi] || (i + '' + xi),
+                    yAxisIndex: i,
+                    smooth: true,
+                    symbol: 'circle',
+                    showSymbol: symbolSize ? true : false,
+                    symbolSize: symbolSize,
+                    data: data.map((xxv, xxi) => {
+                        if (!Number.isNaN(xxv + '' - 0)) return (+xxv).toFixed(toFixed) - 0;
+                        else return xxv === null ? '-' : xxv;
+                    }),
+                    itemStyle: {
+                        normal: {
+                            lineStyle: {
+                                width: lineWidth
+                            },
+                            color: (types[i][xi] === 'bar') && (colors[i][xi].includes('rgb')) ? {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0, color: colors[i][xi] // 0% 处的颜色
+                                }, {
+                                    offset: 1, color: 'rgba' + colors[i][xi].slice(3, -1) + ',.1' + ')' // 100% 处的颜色
+                                }],
+                                globalCoord: true
+                            } : colors[i][xi]
+                        }
+                    },
+                    areaStyle: (areaFill && areaFill[i][xi]) && {
+                        normal: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: areaFill[i][xi],
+                                globalCoord: false // 缺省为 false
                             }
-                        },
-                        areaStyle: (areaFill && areaFill[i][xi]) && {
-                            normal: {
-                                color: {
-                                    type: 'linear',
-                                    x: 0,
-                                    y: 0,
-                                    x2: 0,
-                                    y2: 1,
-                                    colorStops: areaFill[i][xi],
-                                    globalCoord: false // 缺省为 false
-                                }
-                            }
-                        },
-                        markLine: markLine && markLine[i][xi]
-                    }))
-                })
-                .reduce((a, b) => a.concat(b), [])
-                    .concat(imagesymboloptions && imagesymboloptions.show &&  {
+                        }
+                    },
+                    markLine: markLine && markLine[i][xi]
+                })))).reduce((a, b) => a.concat(b), []).concat(imagesymboloptions && imagesymboloptions.show &&  {
                     type: 'pictorialBar',
                     yAxisIndex: imagesymboloptions.yAxisIndex,
                     symbolPosition: 'end',
@@ -247,7 +243,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
             });
         }
         $scope.$on('$destroy', () => {
-            echarts.dispose($element[0]);
+            echarts.dispose(myChart);
             myChart = null;
         });
     }
