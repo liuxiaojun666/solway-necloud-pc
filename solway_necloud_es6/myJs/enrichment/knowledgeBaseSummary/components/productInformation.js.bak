@@ -1,0 +1,55 @@
+ajaxData({
+    knowledgeBaseList: {
+        name: 'GETknowledgeBaseList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'productInformationKnowledgeService',
+})('productInformationKnowledgeCtrl', ['$scope', 'productInformationKnowledgeService', 'actionRecord','$timeout'], ($scope, myAjaxData, historicalRecord,$timeout) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        // let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceStationMonth || {};
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData();
+        // $scope.$apply();
+    };
+
+    $scope.diffGetData = async() =>{
+        if (!$scope.initComplete) return;
+        $scope.stationMonthLoading = true;
+        await myAjaxData.timeout(0);
+
+        $scope.knowledgeBaseList.getData({
+            //公共
+            pageIndex: 0,
+            pageSize : 9,
+            queryType : 'proInfo',
+            // sortField : sortField,
+            // ascOrDesc : ascOrDesc,
+            // searchFieldType : searchFieldType,
+            // searchContent : searchContent,
+            // manuFId : $scope.manuFId,
+            // productId : $scope.productId,
+            // //产品资料
+            // repclass : $scope.repclass,
+            // //故障指导，历史检修
+            // devicetype : $scope.deviceType
+        });
+    }
+
+    $scope.knowledgeBaseList.getDataCallback = (success, res) => {
+        console.log(res)
+    }
+
+  
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+    });
+});
