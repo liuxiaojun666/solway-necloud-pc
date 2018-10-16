@@ -134,8 +134,14 @@ ajaxData(
                 }
             },
             {
-                title: '阴影异常设备数' + '(' + res.body.units.ab_shade_eqcount + ')',
+                title: '阴影异常设备数',
                 dataIndex: 'ab_shade_eqcount',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影设备比例' + '(' + res.body.units.ab_shade_eq_r + ')',
+                dataIndex: 'ab_shade_eq_r',
                 align: 'right',
                 sort: true,
             },
@@ -146,8 +152,8 @@ ajaxData(
                 sort: true,
             },
             {
-                title: '电站阴影损失比例' + '(' + res.body.units.eqreduce + ')',
-                dataIndex: 'eqreduce',
+                title: '阴影组串比例' + '(' + res.body.units.ab_shade_str_r + ')',
+                dataIndex: 'ab_shade_str_r',
                 align: 'right',
                 sort: true,
             },
@@ -158,7 +164,7 @@ ajaxData(
     $scope.analysis_station_str_shade_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.ab_shade_count], [res.body.data.eqreduce]];
+        $scope.ydatas = [[res.body.data.ab_shade_count], [res.body.data.ab_shade_str_r]];
     };
 
     // 设备 列表
@@ -174,7 +180,7 @@ ajaxData(
                 sort: true,
             },
             {
-                title: '阴影异常组串数' + '(' + res.body.units.ab_shade_count + ')',
+                title: '阴影异常组串数',
                 dataIndex: 'ab_shade_count',
                 align: 'right',
                 sort: true,
