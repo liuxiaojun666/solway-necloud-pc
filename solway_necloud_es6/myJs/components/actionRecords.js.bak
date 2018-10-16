@@ -13,10 +13,9 @@ app.factory('actionRecord', function ($state) {
         record = $solway.getStore().actionRecord;
     }
     // 篡改记录 伪造记录
-    function falsify(key, data, redirect) {
-        if (!$solway.getStore().actionRecord[key]) {
-            record[key] = { data: {} };
-        }
+    function falsify(key, arg = {}, redirect) {
+        if (!$solway.getStore().actionRecord[key]) record[key] = { data: {} };
+        const data = typeof(arg) === 'function' ? arg(record[key], record[currentKey], record) : arg;
         record[key].data = {
             ...record[key].data,
             ...data

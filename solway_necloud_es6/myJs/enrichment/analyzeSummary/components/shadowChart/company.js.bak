@@ -85,13 +85,13 @@ ajaxData(
             $scope.analysis_company_str_shade_stationlist.getData({
                 queryCode: 'analysis_company_str_shade_stationlist',
                 queryType: 1,
-                date: '2018-10'
+                date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
             });
         } else if (showShape === 'chart') {
             $scope.analysis_company_str_shade_stationline.getData({
                 queryCode: 'analysis_company_str_shade_stationline',
                 queryType: 1,
-                date: '2018-10'
+                date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
             });
         }
     };
@@ -113,8 +113,8 @@ ajaxData(
                 }
             },
             {
-                title: '阴影异常设备数',
-                dataIndex: 'ab_shade_eqcount',
+                title: '阴影遮挡设备数',
+                dataIndex: 'shade_eqcount',
                 align: 'right',
                 sort: true,
             },
@@ -125,8 +125,8 @@ ajaxData(
                 sort: true,
             },
             {
-                title: '阴影异常组串数',
-                dataIndex: 'ab_shade_count',
+                title: '阴影遮挡组串数',
+                dataIndex: 'shade_count',
                 align: 'right',
                 sort: true,
             },
@@ -143,7 +143,7 @@ ajaxData(
     $scope.analysis_company_str_shade_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
-        $scope.ydatas = [[res.body.data.ab_shade_eqcount], [res.body.data.ab_shade_eq_r]];
+        $scope.ydatas = [[res.body.data.shade_eqcount], [res.body.data.ab_shade_eq_r]];
     };
 
     // 数据置空
