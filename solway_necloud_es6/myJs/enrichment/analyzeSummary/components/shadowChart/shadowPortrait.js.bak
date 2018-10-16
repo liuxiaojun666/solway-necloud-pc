@@ -8,7 +8,8 @@ ajaxData(
         stationStrShadeOneDeviceStrShadeStatus: {
             name: 'GETstationStrShadeOneDeviceStrShadeStatus',
             data: {},
-            later: true
+            later: true,
+            onlyLatest: true
         },
     },
     {}
@@ -27,16 +28,19 @@ ajaxData(
 
     $scope.stationStrShadeOneDeviceStrLine.subscribe(res => {
         if (!res.body.x) return;
-        $scope.xdata_ = res.body.x;
-        $scope.ydatas_ = [[res.body.str_w_curve.map(v => res.body[v])]];
+        $scope.c_xdata_ = res.body.x;
+        $scope.c_linenames = [res.body.str_w_curve.map(v => '组串' + v.substr(12, 2))];
+        $scope.c_types = [res.body.str_w_curve.map(v => 'line')];
+        $scope.c_colors = [['#4eb0dd', '#57bc6c', '#977edc', '#20D779', '#00FFFF', 'rgb(245, 129, 139)', 'rgb(83, 202, 161)'].slice(0, res.body.str_w_curve.length)];
+        $scope.c_ydatas_ = [res.body.str_w_curve.map(v => res.body[v])];
         $scope.tooltipFormatter = (a, b, c) => {
             $scope.stationStrShadeOneDeviceStrShadeStatus.getData({
                 queryType: 3,
-                date: (new Date).Format('yyyy-MM-dd'),
+                date: a[0].name,
                 dateType: 3,
                 eqid: $scope.eqid
             }).then(res => {
-                c(b, `<div id="chartChild" style="width: 520px;height: 300px;"></div>`);
+                c(b, `<div><div style="text-align:center;">${a[0].name}</div><div id="chartChild" style="width: 520px;height: 300px;text-align: center;line-height:300px;">没有加载到数据</div></div>`);
                 renderChildChart(document.getElementById('chartChild'), res);
             });
             return `<div style="font-size: 30px;width: 520px;height: 300px;text-align: center;line-height:300px;">加载ing...</div>`;
@@ -46,21 +50,12 @@ ajaxData(
 
     let myChart;
     function renderChildChart(ele, data) {
-        // [[
-                //     [5, 3, 4, 5, 9, 2],
-                //     [5, '-', '-', '-', '-', 12],
-                //     ['-', 2, '-', '-', 10, '-'],
-                //     ['-', '-', 6, 10, '-', '-'],
-                // ], [
-                //     [0, 3, 0, 0, 0, 0],
-                //     ['-', '-', '-', '-', '-', '-'],
-                //     ['-', 2, '-', '-', '-', '-'],
-                //     ['-', '-', '-', '-', '-', '-'],
-                // ]]
         if (!ele) return;
+        if (!data.body.strids[0]) return;
         if (myChart) echarts.dispose(myChart);
         myChart = echarts.init(ele);
         const option = {
+            backgroundColor: '#2a3440',
             tooltip: {
                 show: false
             },
@@ -69,7 +64,7 @@ ajaxData(
                 itemWidth: 20,
                 itemHeight: 4,
                 itemGap: 20, //图例每项之间的间隔。横向布局时为水平间隔，纵向布局时为纵向间隔。[ default: 10 ] 
-                data: ['普通阴影', '异常阴影', '连续阴影', '损失比例(%)'],
+                data: ['普通阴影', '异常阴影', '持续偏小', '损失比例(%)'],
                 right: 60,
                 top: 0,
                 textStyle: {
@@ -142,7 +137,7 @@ ajaxData(
                 },
                 // splitNumber,
                 // interval,
-                max: 100,
+                // max: 100,
                 axisTick: {
                     show: false //是否显示坐标轴刻度
                 },
@@ -168,10 +163,10 @@ ajaxData(
                 }
             }],
             series: new Array(Math.max(...data.body.strtimes.map(v => v.length)) / 2).fill('').map((v, i) => [
-                Array.from(data.body.strids).fill('').map((v, xi) => (data.body.strtimes[xi][i * 2] || 0)),
+                Array.from(data.body.strids).fill('').map((v, xi) => ((data.body.strtimes[xi][i * 2] - (data.body.strtimes[xi][i * 2 - 1] || 0)) || 0)),
                 ...[0, 1, 2].map(xv => Array.from(data.body.properties).map((v, xi) => (xv === 0 ? ((data.body.strtimes[xi][i * 2 + 1] - data.body.strtimes[xi][i * 2]) || '-') : '-'))),
             ]).map(v => (v.map((data, xi) => ({
-                name: ['', '普通阴影', '异常阴影', '连续阴影'][xi],
+                name: ['', '普通阴影', '异常阴影', '持续偏小'][xi],
                 type: 'bar',
                 data,
                 barWidth: '6',
@@ -186,7 +181,7 @@ ajaxData(
             })))).reduce((a, b) => a.concat(b), []).concat({
                 name: '损失比例(%)',
                 type: 'line',
-                data: data.body.properties,
+                data: data.body.reduces,
                 yAxisIndex: 1,
                 smooth: true,
                 itemStyle: {
@@ -203,8 +198,8 @@ ajaxData(
     }
 
     function setDataNull() {
-        $scope.xdata_ = void 0;
-        $scope.ydatas_ = void 0;
+        $scope.c_xdata_ = void 0;
+        $scope.c_ydatas_ = void 0;
         $scope.stationStrShadeOneDeviceStrLine.res = null;
         $scope.stationStrShadeOneDeviceStrShadeStatus.res = null;
     }
