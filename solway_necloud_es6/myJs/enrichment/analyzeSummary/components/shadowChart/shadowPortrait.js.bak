@@ -1,27 +1,62 @@
 ajaxData(
-    {},
+    {
+        stationStrShadeOneDeviceStrLine: {
+            name: 'GETstationStrShadeOneDeviceStrLine',
+            data: {},
+            later: true
+        },
+        stationStrShadeOneDeviceStrShadeStatus: {
+            name: 'GETstationStrShadeOneDeviceStrShadeStatus',
+            data: {},
+            later: true
+        },
+    },
     {}
 )('shadowPortraitCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
     $scope.$on('equipmentDetails', (event, item) => {
+        setDataNull();
         $scope.eq_name = item.eq_name;
-        getData();
+        $scope.eqid = item.eqid;
+        $scope.stationStrShadeOneDeviceStrLine.getData({
+            queryType: 3,
+            date: (new Date).Format('yyyy-MM-dd'),
+            dateType: 3,
+            eqid: item.eqid
+        });
     });
 
-    function getData() {
-        $scope.xdata_ = ['2018-12-12', '2018-12-17', '2018-12-22'];
-        $scope.ydatas_ = [[[10, 34, 23], [8, 4, 3],]];
+    $scope.stationStrShadeOneDeviceStrLine.subscribe(res => {
+        if (!res.body.x) return;
+        $scope.xdata_ = res.body.x;
+        $scope.ydatas_ = [[res.body.str_w_curve.map(v => res.body[v])]];
         $scope.tooltipFormatter = (a, b, c) => {
-            setTimeout(() => {
+            $scope.stationStrShadeOneDeviceStrShadeStatus.getData({
+                queryType: 3,
+                date: (new Date).Format('yyyy-MM-dd'),
+                dateType: 3,
+                eqid: $scope.eqid
+            }).then(res => {
                 c(b, `<div id="chartChild" style="width: 520px;height: 300px;"></div>`);
-                renderChildChart(document.getElementById('chartChild'));
-            }, 200);
+                renderChildChart(document.getElementById('chartChild'), res);
+            });
             return `<div style="font-size: 30px;width: 520px;height: 300px;text-align: center;line-height:300px;">加载ing...</div>`;
         };
-    }
+    });
 
 
     let myChart;
-    function renderChildChart(ele) {
+    function renderChildChart(ele, data) {
+        // [[
+                //     [5, 3, 4, 5, 9, 2],
+                //     [5, '-', '-', '-', '-', 12],
+                //     ['-', 2, '-', '-', 10, '-'],
+                //     ['-', '-', 6, 10, '-', '-'],
+                // ], [
+                //     [0, 3, 0, 0, 0, 0],
+                //     ['-', '-', '-', '-', '-', '-'],
+                //     ['-', 2, '-', '-', '-', '-'],
+                //     ['-', '-', '-', '-', '-', '-'],
+                // ]]
         if (!ele) return;
         if (myChart) echarts.dispose(myChart);
         myChart = echarts.init(ele);
@@ -65,7 +100,7 @@ ajaxData(
                 axisTick: {
                     inside: true
                 },
-                data: ["组串1", "组串2", "组串4", "组串7", "组串12", "组串13"]
+                data: data.body.strids.map(v => '组串' + v)
             }],
             yAxis: [{
                 type: 'value',
@@ -132,17 +167,10 @@ ajaxData(
                     }
                 }
             }],
-            series: [[
-                [5, 3, 4, 5, 9, 2],
-                [5, '-', '-', '-', '-', 12],
-                ['-', 2, '-', '-', 10, '-'],
-                ['-', '-', 6, 10, '-', '-'],
-            ], [
-                [0, 3, 0, 0, 0, 0],
-                ['-', '-', '-', '-', '-', '-'],
-                ['-', 2, '-', '-', '-', '-'],
-                ['-', '-', '-', '-', '-', '-'],
-            ]].map(v => (v.map((data, xi) => ({
+            series: new Array(Math.max(...data.body.strtimes.map(v => v.length)) / 2).fill('').map((v, i) => [
+                Array.from(data.body.strids).fill('').map((v, xi) => (data.body.strtimes[xi][i * 2] || 0)),
+                ...[0, 1, 2].map(xv => Array.from(data.body.properties).map((v, xi) => (xv === 0 ? ((data.body.strtimes[xi][i * 2 + 1] - data.body.strtimes[xi][i * 2]) || '-') : '-'))),
+            ]).map(v => (v.map((data, xi) => ({
                 name: ['', '普通阴影', '异常阴影', '连续阴影'][xi],
                 type: 'bar',
                 data,
@@ -158,7 +186,7 @@ ajaxData(
             })))).reduce((a, b) => a.concat(b), []).concat({
                 name: '损失比例(%)',
                 type: 'line',
-                data: [5, 20, 36, 10, 10, 20],
+                data: data.body.properties,
                 yAxisIndex: 1,
                 smooth: true,
                 itemStyle: {
@@ -172,6 +200,13 @@ ajaxData(
             })
         };
         myChart.setOption(option);
+    }
+
+    function setDataNull() {
+        $scope.xdata_ = void 0;
+        $scope.ydatas_ = void 0;
+        $scope.stationStrShadeOneDeviceStrLine.res = null;
+        $scope.stationStrShadeOneDeviceStrShadeStatus.res = null;
     }
 
     $scope.$on('$destroy', () => (myChart && echarts.dispose(myChart)));

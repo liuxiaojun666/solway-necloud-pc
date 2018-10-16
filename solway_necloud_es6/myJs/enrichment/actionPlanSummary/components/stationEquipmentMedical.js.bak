@@ -10,8 +10,8 @@ ajaxData(
             data: {},
             later: true
         },
-        action_station_clean_suggest_dev_pr_list: {
-            name: 'GETaction_station_clean_suggest_dev_pr_list',
+        invPrBottom10: {
+            name: 'GETinvPrBottom10',
             data: {},
             later: true
         },
@@ -75,19 +75,19 @@ ajaxData(
                 $scope.action_station_clean_suggest_dev_shade_list.getData({
                     queryCode: 'action_station_clean_suggest_dev_shade_list',
                     queryType: 3,
-                    start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+                    // start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
                     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
                 });
-                $scope.action_station_clean_suggest_dev_pr_list.getData({
-                    queryCode: 'action_station_clean_suggest_dev_pr_list',
+                $scope.invPrBottom10.getData({
                     queryType: 3,
+                    dateType: 3,
                     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
                     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
                 });
                 $scope.action_station_clean_suggest_dev_decay_list.getData({
                     queryCode: 'action_station_clean_suggest_dev_decay_list',
                     queryType: 3,
-                    start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+                    // start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
                     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
                 });
             }
@@ -156,7 +156,7 @@ ajaxData(
             ]
         });
 
-        $scope.action_station_clean_suggest_dev_pr_list.subscribe(res => {
+        $scope.invPrBottom10.subscribe(res => {
             $scope.column2 = [
                 {
                     title: '设备名称',
@@ -167,6 +167,7 @@ ajaxData(
                     title: 'PR(%)',
                     dataIndex: 'pr',
                     sort: true,
+                    align: 'right'
                 },
             ]
         });
@@ -182,6 +183,7 @@ ajaxData(
                     title: '累计衰减率' + '(' + res.body.units.decay_r_all + ')',
                     dataIndex: 'decay_r_all',
                     sort: true,
+                    align: 'right'
                 },
             ]
         });
@@ -194,7 +196,7 @@ ajaxData(
             $scope.column2 = [];
             $scope.column3 = [];
             $scope.action_station_clean_suggest_dev_shade_list.res = null;
-            $scope.action_station_clean_suggest_dev_pr_list.res = null;
+            $scope.invPrBottom10.res = null;
             $scope.action_station_clean_suggest_dev_decay_list.res = null;
         }
 
