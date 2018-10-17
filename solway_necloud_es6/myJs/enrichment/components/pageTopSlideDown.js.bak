@@ -1,13 +1,14 @@
-app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$timeout','$rootScope', ($ocLazyLoad, $http, $state, $timeout,$rootScope) => ({
+app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams', '$timeout','$rootScope', ($ocLazyLoad, $http, $state, $stateParams,$timeout,$rootScope) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
     scope: {
 
     },
-    templateUrl: 'tpl/enrichment/components/pageSlideDown.html',
+    templateUrl: 'tpl/enrichment/components/pageSlideDown.html'+window.stamp,
     link($scope, $element) {
 
+        $scope.currentState = $state.current.name;
         $scope.goChildrenPage = type => {
             if ($state.current.name == 'power-index171024') {
                 $http({
@@ -71,5 +72,8 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             $(this).removeClass('active');
         })
 
+    },
+    controller($scope, $element){
+        $scope.stamp = window.stamp;
     }
 })])
