@@ -109,6 +109,7 @@ gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chro
 
 gulp.task('updateCode', () => {
 	// svnUpdate()
+	
 	cmd.get(`git pull`, (err, data, stderr) => {
 		if (err) return console.log(`git pull error\n`, err, data, stderr)
 		console.log('git pull dong', data, stderr)
