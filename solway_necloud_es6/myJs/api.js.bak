@@ -1,5 +1,5 @@
-const win = window;
 app.factory("apiService", ["$http", "$q", (d, b) => {
+    const win = window;
     const c = win.interface, k = win.noFormSubmit, a = {};
     a.getData = (e) => {
         const m = k.includes(e.name), f = b.defer(), j = e.name.startsWith('GET') ? 'GET' : 'POST', l = Object.is(j, 'POST') && !m ? { "Content-Type": "application/x-www-form-urlencoded" } : {};
@@ -35,7 +35,8 @@ app.factory("apiService", ["$http", "$q", (d, b) => {
     }
     return a;
 }]);
-win.ajaxData = (b, a) => {
+window.ajaxData = (b, a) => {
+    const win = window;
     app.factory((a.__serviceName__ || "myAjaxData"), ["apiService", '$q', '$timeout', (d, q, m) => {
         let i = {};
         let j = {};
@@ -89,6 +90,7 @@ win.ajaxData = (b, a) => {
                 return !1;
             };
             N.isLoding = !1;
+            N.stamp = win.stamp;
             N.reload = () => {
                 for (let key in b) {
                     if (b[key].later) continue;

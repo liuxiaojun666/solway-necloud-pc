@@ -136,7 +136,10 @@ ajaxData({
                 + 
                 (theme === 'shadowChart' ? ''  : ['Day', 'Month', 'Year', 'Accumulative'][$scope._dateType])
             )
-        }.html`;
+        }.html${window.stamp || ''}`;
+        if (theme === 'equipmentFailure') {
+            $scope.themeDetail = `tpl/enrichment/analyzeSummary/components/${theme}/index.html${window.stamp || ''}`
+        }
         $scope.theme = theme;
         return historicalRecord.set({ theme });
     }
