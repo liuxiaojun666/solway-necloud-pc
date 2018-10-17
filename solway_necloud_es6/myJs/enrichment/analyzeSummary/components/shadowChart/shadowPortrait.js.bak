@@ -81,7 +81,7 @@ ajaxData(
             },
             xAxis: [{
                 type: 'category',
-                // boundaryGap: false, //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样
+                boundaryGap: true, //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样
                 axisLine: {
                     lineStyle: {
                         color: '#366090' //坐标轴线线的颜色。
@@ -89,7 +89,8 @@ ajaxData(
                 },
                 axisLabel: {
                     textStyle: {
-                        color: '#fffeff'
+                        color: '#fffeff',
+                        fontSize: 10
                     }
                 },
                 axisTick: {
@@ -164,7 +165,7 @@ ajaxData(
             }],
             series: new Array(Math.max(...data.body.strtimes.map(v => v.length)) / 2).fill('').map((v, i) => [
                 Array.from(data.body.strids).fill('').map((v, xi) => ((data.body.strtimes[xi][i * 2] - (data.body.strtimes[xi][i * 2 - 1] || 0)) || 0)),
-                ...[0, 1, 2].map(xv => Array.from(data.body.properties).map((v, xi) => (xv === 0 ? ((data.body.strtimes[xi][i * 2 + 1] - data.body.strtimes[xi][i * 2]) || '-') : '-'))),
+                ...[0, 1, 2].map(n => Array.from(data.body.properties).map((v, xi) => (v === n ? ((data.body.strtimes[xi][i * 2 + 1] - data.body.strtimes[xi][i * 2]) || '-') : '-'))),
             ]).map(v => (v.map((data, xi) => ({
                 name: ['', '普通阴影', '异常阴影', '持续偏小'][xi],
                 type: 'bar',
@@ -175,7 +176,7 @@ ajaxData(
                 smooth: true,
                 itemStyle: {
                     normal: {
-                        color: ['transparent', '#7e4bb4', '#dd5859', '#b08e73'][xi]
+                        color: ['transparent', '#7e4bb4', '#dddd59', '#dd5859'][xi]
                     }
                 },
             })))).reduce((a, b) => a.concat(b), []).concat({
