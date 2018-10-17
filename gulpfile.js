@@ -26,7 +26,8 @@ gulp.task('watch', [], () => {
 				.pipe(babel({
 					"presets": [
 						"es2015",
-						"stage-0"
+						"stage-0",
+						// "minify"
 					],
 					"plugins": [
 						"transform-member-expression-literals",
@@ -74,7 +75,7 @@ gulp.task('watch', [], () => {
 					gulp.src(JSON.parse(data.toString()).compileScss.map(v => `scss/**/${v}.scss`))
 						.pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
 						.pipe(autoprefixer({
-							browsers: ['last 2 versions'],
+							browsers: ['last 100 versions'],
 							cascade: false
 						}))
 						.pipe(gulp.dest('theme/css/'))
@@ -92,7 +93,7 @@ gulp.task('watch', [], () => {
 					.pipe(less())
 					.pipe(cssmin())
 					.pipe(autoprefixer({
-						browsers: ['last 2 versions'],
+						browsers: ['last 100 versions'],
 						cascade: false
 					}))
 					.pipe(gulp.dest('theme/css/'))
