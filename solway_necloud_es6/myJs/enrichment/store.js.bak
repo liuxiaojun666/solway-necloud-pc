@@ -3,13 +3,18 @@
     const stationInfo = {};
     const alarm = {};
     const actionRecord = {};
+    const stamp = {};
 
     $solway.persist({
         userInfo,
         stationInfo,
         alarm,
         actionRecord,
+        stamp,
     });
+
+    $solway.setStore('stamp', { stamp: window.name || window.localStorage.stamp});
+    window.name = window.name || $solway.getStore().stamp.stamp;
 
     // $solway.getStore();   获取
     // $solway.setStore('userInfo', {});   设置
