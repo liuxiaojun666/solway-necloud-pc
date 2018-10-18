@@ -1,0 +1,27 @@
+ajaxData(
+    {
+        
+    }, {
+        __serviceName__: 'equipmentFailureService',
+    }
+)('equipmentFailureCtrl', ['$scope', 'equipmentFailureService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, } = historicalRecord.get().themeEquipmentFailure || {};
+        
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        // await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        // setDataNull();
+    });
+});
