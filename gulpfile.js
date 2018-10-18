@@ -17,6 +17,7 @@ let gulp = require('gulp'),
 	path = require('path'),
 	autoprefixer = require('gulp-autoprefixer')
 
+let lastTime = Date.now();
 gulp.task('watch', [], () => {
 	livereload.listen()
 	setTimeout(() => {
@@ -100,16 +101,25 @@ gulp.task('watch', [], () => {
 			})
 		})
 
-		watch(['theme/**', 'tpl/**', '!{theme/css}/**/*.less'], (event) => livereload.changed(event.path))
+		watch(['theme/**', 'tpl/**', '!{theme/css}/**/*.less'], (event) => {
+			const DateNow = Date.now();
+			if (lastTime + 1000 * 60 < DateNow) {
+				lastTime = DateNow;
+				gulp.src(['login.jsp'])
+					.pipe(replace(/\'\?_=[^d+$]*?\'/g, `'?_=${DateNow}'`))
+					.pipe(gulp.dest(''));
+			}
+			livereload.changed(event.path)
+		})
 	}, 5000)
 })
 
 
-gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:8080/login.jsp'))
+gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:88'))
 
 gulp.task('updateCode', () => {
-	// svnUpdate()
-	
+	svnUpdate()
+
 	cmd.get(`git pull`, (err, data, stderr) => {
 		if (err) return console.log(`git pull error\n`, err, data, stderr)
 		console.log('git pull dong', data, stderr)
@@ -137,7 +147,7 @@ function svnUpdate() {
 
 
 /****************************************非代理启动************************************** */
-gulp.task('start', gulpSequence('updateCode','watch', 'openChrome'))
+gulp.task('start', gulpSequence('updateCode', 'watch', 'openChrome'))
 
 gulp.task('es6Rename', () => {
 	gulp.src('solway_necloud_es6/myJs/**/*.js')
