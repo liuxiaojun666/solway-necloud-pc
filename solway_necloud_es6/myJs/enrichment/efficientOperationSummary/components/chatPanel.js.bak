@@ -190,12 +190,21 @@ ajaxData({
         $scope.isInspected = false;//是否为验收，普通详情false，验收true
         var interfaceMap = {'00': 'eventDetail', '01': 'taskDetail', '02': 'eventHandleDetail'};
         var currentInterface = interfaceMap[busitype];
-        $scope[currentInterface].getData({
-            id: busino
-        }).then(res => {
-            $scope.$broadcast('showChatDetail', { 'busitype': busitype, 'topmessageid': messageId,'data':res})
-        });
-
+        if(busitype == '01'){
+            $scope[currentInterface].getData({
+                id: busino
+            }).then(res => {
+                $scope.$broadcast('showChatDetail', { 'busitype': busitype, 'topmessageid': messageId,'data':res})
+            });
+        }else{
+            $scope[currentInterface].getData({
+                id: busino,
+                isHis:1
+            }).then(res => {
+                $scope.$broadcast('showChatDetail', { 'busitype': busitype, 'topmessageid': messageId,'data':res})
+            });
+        }
+        
         $('#chatDetail').modal({ backdrop: 'static', keyboard: false });
     }
 
