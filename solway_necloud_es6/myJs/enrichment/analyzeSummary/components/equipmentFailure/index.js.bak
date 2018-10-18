@@ -10,21 +10,42 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape } = historicalRecord.get().themeEquipmentFailure || {};
-        
+        let { activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
+        $scope.activeStatus = activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
         // await $scope.diffGetData(true);
+        $scope.$apply();
+        await myAjaxData.timeout(300);
+        $scope.pair = activeStatus.filter(v => v).length === 2;
+    };
+
+    // 点击 改变选中状态
+    $scope.changeActiveStatus = async index => {
+        if ($scope.activeStatus.filter(v => v).length >= 2 && !$scope.activeStatus[index]) return;
+        $scope.activeStatus[index] = !$scope.activeStatus[index];
+        historicalRecord.set({
+            themeEquipmentFailure: {
+                ...historicalRecord.get().themeEquipmentFailure || {},
+                activeStatus: $scope.activeStatus
+            }
+        });
+        if ($scope.activeStatus.filter(v => v).length !== 2) return $scope.pair = false;
+        await myAjaxData.timeout(400);
+        $scope.pair = true;
         $scope.$apply();
     };
 
     $scope.column1 = [
         {
             title: 'hello',
-            dataIndex: ''
+            dataIndex: '',
+            render(text) {
+                return 'world'
+            }
         }
-    ]
+    ];
 
 
     // 销毁 事件
