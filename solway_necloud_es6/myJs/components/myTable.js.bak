@@ -165,7 +165,7 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
         }
         $scope.npDataPlaceholder = '<img style="margin: 20px 0;" src="theme/images/enrichment/noData.png" alt="没有加载到数据插画"/>'
         $scope.__datasource = [];
-        $scope.isWindows = window.navigator.userAgent.toLocaleLowerCase().includes('windows');
+        $scope.isWindows = ($scope.scrollY || $scope.scrollHeight) && window.navigator.userAgent.toLocaleLowerCase().includes('windows');
         $scope.orderBy = !0;
         $scope.sort = (sort, dataIndex) => {
             if (void 0 === $scope.__datasource[0]) return;
