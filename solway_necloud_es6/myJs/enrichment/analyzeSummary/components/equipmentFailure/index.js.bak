@@ -1,6 +1,6 @@
 ajaxData(
     {
-        
+
     }, {
         __serviceName__: 'equipmentFailureService',
     }
@@ -10,15 +10,17 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
+        const { tabIndex = 0, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
+        $scope.tabIndex = tabIndex;
         $scope.activeStatus = activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
         // await $scope.diffGetData(true);
         $scope.$apply();
-        await myAjaxData.timeout(300);
+        await myAjaxData.timeout(400);
         $scope.pair = activeStatus.filter(v => v).length === 2;
+        $scope.$apply();
     };
 
     // 点击 改变选中状态
@@ -37,16 +39,169 @@ ajaxData(
         $scope.$apply();
     };
 
+    // 点击分析
+    $scope.analyze = () => {
+        if (!$scope.pair) return;
+        $scope.analyzeDetailShow = true;
+
+        drawingChart()
+    };
+
+    $scope.changeTab = index => {
+        $scope.tabIndex = index;
+        drawingChart();
+    }
+
     $scope.column1 = [
         {
-            title: 'hello',
+            title: '故障区域',
             dataIndex: '',
+            sort: true,
             render(text) {
-                return 'world'
+                return '北京'
             }
-        }
+        },
+        {
+            title: '故障率',
+            dataIndex: '',
+            align: 'right',
+            sort: true,
+            render(text) {
+                return '20'
+            }
+        },
+        {
+            title: '故障停机小时数',
+            dataIndex: '',
+            align: 'right',
+            sort: true,
+            width: '35%',
+            render(text) {
+                return '3'
+            }
+        },
+        {
+            title: '设备数量',
+            dataIndex: '',
+            align: 'right',
+            sort: true,
+            render(text) {
+                return '5'
+            }
+        },
     ];
 
+    function drawingChart() {
+        if (!$scope.myChart) {
+            $scope.myChart = echarts.init(document.getElementById('equipmentFailureChart'));
+        }
+        const { myChart } = $scope;
+        const { tabIndex } = $scope;
+        const option = {
+            tooltip: {
+                show: true,
+                trigger: 'item',
+                formatter(a, b, c) {
+                    return a.value[0] + ' - ' + a.value[1] + '<br/>' + ['故障率: ' + a.value[2] + '%' + '<br/>', '故障损失小时数: ' + a.value[3] + '<br/>'][tabIndex]
+                }
+            },
+            grid: {
+                top: 100,
+                containLabel: true,
+                left: 30,
+                right: '110'
+            },
+            xAxis: {
+                type: 'category',
+                name: '时间',
+                nameTextStyle: {
+                    color: '#fffeff',
+                    fontSize: 18
+                },
+                splitLine: {
+                    show: false,
+                    lineStyle: {
+                        color: '#366090',
+                        type: 'dashed'
+                    }
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#366090'
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: '#fffeff'
+                    }
+                },
+                data: ['2017', '2018', '2019']
+            },
+            yAxis: {
+                type: 'category',
+                name: '区域',
+                // boundaryGap: true,
+                nameTextStyle: {
+                    color: '#fffeff',
+                    fontSize: 18
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#366090'
+                    }
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: '#366090', 
+                        type: 'dashed'
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: '#fffeff'
+                    }
+                },
+                data: ['北京', '上海', '河北']
+            },
+            series: [
+                {
+                    name: ['故障率', '故障损失小时数'][tabIndex],
+                    type: 'scatter',
+                    itemStyle: {
+                        normal: {
+                            color: 'rgb(246, 107, 86)',
+                            opacity: 0.8,
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowOffsetY: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: [
+                        ['2017', '北京', 13, 12],
+                        ['2017', '上海', 5, 5],
+                        ['2019', '河北', 23, 66],
+                    ],
+                    symbolSize(val) {
+                        return [10 + val[2] / 100 * 40, 10 + val[3] / 100 * 40][tabIndex]
+                    }
+                }
+            ],
+        };
+
+        const resize = async () => {
+            await myAjaxData.timeout(100);
+            myChart.resize();
+        };
+        window.addEventListener('resize', resize);
+        $scope.$on('$destroy', () => {
+            window.removeEventListener('resize', resize);
+            echarts.dispose(myChart);
+        });
+
+        myChart.setOption(option);
+    }
 
     // 销毁 事件
     $scope.$on('$destroy', () => {
