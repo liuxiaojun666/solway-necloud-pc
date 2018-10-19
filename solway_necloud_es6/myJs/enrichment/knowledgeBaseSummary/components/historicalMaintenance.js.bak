@@ -19,29 +19,31 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
-    //文档分类列表
-    repClass: {
-        name: 'GETrepClass',
+    //设备分类
+    deviceTypeList: {
+        name: 'GETdeviceTypeList',
         data: {},
         later: true,
         onlyLatest: true
     }
 }, {
-    __serviceName__: 'productInformationKnowledgeService',
-})('productInformationKnowledgeCtrl', ['$scope', 'productInformationKnowledgeService', 'actionRecord','$timeout'], ($scope, myAjaxData, historicalRecord,$timeout) => {
+    __serviceName__: 'historicalMaintenanceKnowledgeService',
+})('historicalMaintenanceKnowledgeCtrl', ['$scope', 'historicalMaintenanceKnowledgeService', 'actionRecord','$timeout'], ($scope, myAjaxData, historicalRecord,$timeout) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => { 
-        let { sortField ='views',arrowView='desc',arrowTime = 'desc' } = historicalRecord.get().knowledgeBaseProductInformation || {};
+        let { sortField ='time',arrowView='desc',arrowCode = 'desc',arrowTime = 'desc' } = historicalRecord.get().knowledgeBaseHistoricalMaintenance || {};
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
 
         $scope.sortField = sortField;
         $scope.arrowView = arrowView;
+        $scope.arrowCode = arrowCode;
         $scope.arrowTime = arrowTime;
+        $scope.$apply();
         judgeDescOrAsc($scope.sortField);
 
         await $scope.diffGetData();
@@ -52,7 +54,6 @@ ajaxData({
         $(".searchConditionTpl").on('click',(e)=>{
             e.stopPropagation();
         })
-        // $scope.$apply();
     };
 
     //切换排序方式
@@ -61,8 +62,8 @@ ajaxData({
         judgeDescOrAsc($scope.sortField);
 
         historicalRecord.set({
-            knowledgeBaseProductInformation: {
-                ...historicalRecord.get().knowledgeBaseProductInformation || {},
+            knowledgeBaseHistoricalMaintenance: {
+                ...historicalRecord.get().knowledgeBaseHistoricalMaintenance || {},
                 sortField
             }
         });
@@ -74,6 +75,8 @@ ajaxData({
     const judgeDescOrAsc = sortField =>{
         if(sortField == 'views'){
             $scope.ascOrDesc = $scope.arrowView;
+        }else if(sortField == 'code'){
+            $scope.ascOrDesc = $scope.arrowCode;
         }else if(sortField == 'time'){
             $scope.ascOrDesc = $scope.arrowTime;
         }
@@ -85,16 +88,24 @@ ajaxData({
         if(sortField == 'views'){
             let arrowView = $scope.arrowView = $scope.arrowView=='asc'?'desc':'asc';
             historicalRecord.set({
-                knowledgeBaseProductInformation: {
-                    ...historicalRecord.get().knowledgeBaseProductInformation || {},
+                knowledgeBaseHistoricalMaintenance: {
+                    ...historicalRecord.get().knowledgeBaseHistoricalMaintenance || {},
                     arrowView
+                }
+            });
+        }else if(sortField == 'code'){
+            let arrowCode = $scope.arrowCode = $scope.arrowCode=='asc'?'desc':'asc';
+            historicalRecord.set({
+                knowledgeBaseHistoricalMaintenance: {
+                    ...historicalRecord.get().knowledgeBaseHistoricalMaintenance || {},
+                    arrowCode
                 }
             });
         }else if(sortField == 'time'){
             let arrowTime = $scope.arrowTime = $scope.arrowTime=='asc'?'desc':'asc';
             historicalRecord.set({
-                knowledgeBaseProductInformation: {
-                    ...historicalRecord.get().knowledgeBaseProductInformation || {},
+                knowledgeBaseHistoricalMaintenance: {
+                    ...historicalRecord.get().knowledgeBaseHistoricalMaintenance || {},
                     arrowTime
                 }
             });
@@ -110,7 +121,7 @@ ajaxData({
         $scope.searchContent = '';
         $scope.manufacturerId = '';
         $scope.productId = '';
-        $scope.repclass = '';
+        $scope.deviceType = '';
 
         $scope.diffGetData();
     }
@@ -123,7 +134,7 @@ ajaxData({
         $scope.searchContent = '';
         $scope.manufacturerId = '';
         $scope.productId = '';
-        $scope.repclass = '';
+        $scope.deviceType = '';
 
         $scope.diffGetData();
     }
@@ -147,10 +158,9 @@ ajaxData({
     
     //获取设备分类列表
     $scope.getDeviceTypeList = ()=>{
-        $scope.repClass.getData({
-            dictType: "REPOSITORY_CLASS"
+        $scope.deviceTypeList.getData({
         }).then(res=>{
-            $scope.repClassList = res;
+            $scope.deviceTypeList = res;
         });
     }
 
@@ -182,20 +192,60 @@ ajaxData({
             //公共
             pageIndex: 0,
             pageSize : 9,
-            queryType : 'proInfo',
+            queryType : 'historyRepair',
             sortField : $scope.sortField,
             ascOrDesc : $scope.ascOrDesc,
             searchFieldType : $scope.searchFieldType,
             searchContent : $scope.searchContent,
             manuFId : $scope.manufacturerId,
             productId : $scope.productId,
-            // //产品资料
-            repclass : $scope.repclass,
+            //故障指导，历史检修
+            devicetype : $scope.deviceType
         });
     }
 
     $scope.knowledgeBaseList.getDataCallback = (success, res) => {
         $scope.loading = false;
+        // $scope.column =  [
+        //     {
+        //         title: '故障码',
+        //         width: '25%',
+        //         dataIndex: 'st_name',
+        //         align: 'left',
+        //         render(text) {
+        //             return `<span class="clickable">${text}</span>`
+        //         }
+        //     },
+        //     {
+        //         title: '故障内容',
+        //         dataIndex: 'repair_count',
+        //         align: 'right',
+        //     },
+        //     {
+        //         title: '厂家名称',
+        //         dataIndex: 'repair_number',
+        //         align: 'right',
+        //     },
+        //     {
+        //         title: '产品型号',
+        //         dataIndex: 'repair_number',
+        //         align: 'right',
+        //     },
+        //     {
+        //         title: '维修内容',
+        //         dataIndex: 'repair_number',
+        //         align: 'right',
+        //     },
+        //     {
+        //         title: '维修时间',
+        //         dataIndex: 'res_hours_avg',
+        //         sort: 'true',
+        //         align: 'right',
+        //         render(text, record, index) {
+        //             return `<span>${text===null?0:text}</span>`
+        //         }
+        //     }
+        // ];
     }
 
     //点击页面其他地方，搜索框消失
