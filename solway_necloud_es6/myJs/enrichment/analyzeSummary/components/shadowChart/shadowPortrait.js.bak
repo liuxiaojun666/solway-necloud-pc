@@ -35,7 +35,7 @@ ajaxData(
         $scope.c_colors = [['#4eb0dd', '#57bc6c', '#977edc', '#20D779', '#00FFFF', 'rgb(245, 129, 139)', 'rgb(83, 202, 161)'].slice(0, res.body.str_w_curve.length)];
         $scope.c_ydatas_ = [res.body.str_w_curve.map(v => res.body[v])];
         $scope.tooltipFormatter = (a, b, c) => {
-            if (a[0].name === lastParams.date && $scope.eqid === lastParams.eqid && $scope.stationStrShadeOneDeviceStrShadeStatus.res) {
+            if (a[0].name === lastParams.date && $scope.eqid === lastParams.eqid && $scope.stationStrShadeOneDeviceStrShadeStatus.res && !$scope.stationStrShadeOneDeviceStrShadeStatus.isLoding) {
                 setTimeout(() => {
                     c(b, `<div><div style="text-align:center;">${a[0].name}</div><div id="chartChild" style="width: 520px;height: 300px;text-align: center;line-height:300px;">没有加载到数据</div></div>`);
                     renderChildChart(document.getElementById('chartChild'), $scope.stationStrShadeOneDeviceStrShadeStatus.res);
