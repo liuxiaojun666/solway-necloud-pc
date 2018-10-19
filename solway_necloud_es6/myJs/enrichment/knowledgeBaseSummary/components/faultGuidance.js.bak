@@ -19,30 +19,28 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
-    //文档分类列表
-    repClass: {
-        name: 'GETrepClass',
+    //设备分类
+    deviceTypeList: {
+        name: 'GETdeviceTypeList',
         data: {},
         later: true,
         onlyLatest: true
     }
 }, {
-    __serviceName__: 'productInformationKnowledgeService',
-})('productInformationKnowledgeCtrl', ['$scope', 'productInformationKnowledgeService', 'actionRecord','$timeout'], ($scope, myAjaxData, historicalRecord,$timeout) => {
+    __serviceName__: 'faultGuidanceKnowledgeService',
+})('faultGuidanceKnowledgeCtrl', ['$scope', 'faultGuidanceKnowledgeService', 'actionRecord','$timeout'], ($scope, myAjaxData, historicalRecord,$timeout) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => { 
-        let { sortField ='views',arrowView='desc',arrowTime = 'desc' } = historicalRecord.get().knowledgeBaseProductInformation || {};
+        let {arrowFaultCode ='desc'} = historicalRecord.get().knowledgeBaseFaultGuidance || {};
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
 
-        $scope.sortField = sortField;
-        $scope.arrowView = arrowView;
-        $scope.arrowTime = arrowTime;
-        judgeDescOrAsc($scope.sortField);
+        $scope.arrowFaultCode = arrowFaultCode;
+        judgeDescOrAsc();
 
         await $scope.diffGetData();
 
@@ -52,54 +50,23 @@ ajaxData({
         $(".searchConditionTpl").on('click',(e)=>{
             e.stopPropagation();
         })
-        // $scope.$apply();
     };
 
-    //切换排序方式
-    $scope.setSortField = sortField =>{
-        $scope.sortField = sortField;
-        judgeDescOrAsc($scope.sortField);
-
-        historicalRecord.set({
-            knowledgeBaseProductInformation: {
-                ...historicalRecord.get().knowledgeBaseProductInformation || {},
-                sortField
-            }
-        });
-
-        $scope.diffGetData();
-    }
-
     //判断升序还是降序
-    const judgeDescOrAsc = sortField =>{
-        if(sortField == 'views'){
-            $scope.ascOrDesc = $scope.arrowView;
-        }else if(sortField == 'time'){
-            $scope.ascOrDesc = $scope.arrowTime;
-        }
+    const judgeDescOrAsc = () =>{
+        $scope.ascOrDesc = $scope.arrowFaultCode;
     }
 
     //点击排序箭头
-    $scope.ascOrDescRank = sortField =>{
-        if(sortField !== $scope.sortField) return;
-        if(sortField == 'views'){
-            let arrowView = $scope.arrowView = $scope.arrowView=='asc'?'desc':'asc';
-            historicalRecord.set({
-                knowledgeBaseProductInformation: {
-                    ...historicalRecord.get().knowledgeBaseProductInformation || {},
-                    arrowView
-                }
-            });
-        }else if(sortField == 'time'){
-            let arrowTime = $scope.arrowTime = $scope.arrowTime=='asc'?'desc':'asc';
-            historicalRecord.set({
-                knowledgeBaseProductInformation: {
-                    ...historicalRecord.get().knowledgeBaseProductInformation || {},
-                    arrowTime
-                }
-            });
-        }
-        judgeDescOrAsc($scope.sortField);
+    $scope.ascOrDescRank = () =>{
+        let arrowFaultCode = $scope.arrowFaultCode = $scope.arrowFaultCode=='asc'?'desc':'asc';
+        historicalRecord.set({
+            knowledgeBaseFaultGuidance: {
+                ...historicalRecord.get().knowledgeBaseFaultGuidance || {},
+                arrowFaultCode
+            }
+        });
+        judgeDescOrAsc();
 
         $scope.diffGetData();
     }
@@ -110,7 +77,7 @@ ajaxData({
         $scope.searchContent = '';
         $scope.manufacturerId = '';
         $scope.productId = '';
-        $scope.repclass = '';
+        $scope.deviceType = '';
 
         $scope.diffGetData();
     }
@@ -123,7 +90,7 @@ ajaxData({
         $scope.searchContent = '';
         $scope.manufacturerId = '';
         $scope.productId = '';
-        $scope.repclass = '';
+        $scope.deviceType = '';
 
         $scope.diffGetData();
     }
@@ -147,10 +114,9 @@ ajaxData({
     
     //获取设备分类列表
     $scope.getDeviceTypeList = ()=>{
-        $scope.repClass.getData({
-            dictType: "REPOSITORY_CLASS"
+        $scope.deviceTypeList.getData({
         }).then(res=>{
-            $scope.repClassList = res;
+            $scope.deviceTypeList = res;
         });
     }
 
@@ -172,7 +138,6 @@ ajaxData({
         $scope.ifShowModel = !$scope.ifShowModel;
     }
 
-    //卡片列表
     $scope.diffGetData = async() =>{
         if (!$scope.initComplete) return;
         $scope.loading = true;
@@ -182,15 +147,15 @@ ajaxData({
             //公共
             pageIndex: 0,
             pageSize : 9,
-            queryType : 'proInfo',
-            sortField : $scope.sortField,
+            queryType : 'faultGuidance',
+            sortField : 'code',
             ascOrDesc : $scope.ascOrDesc,
             searchFieldType : $scope.searchFieldType,
             searchContent : $scope.searchContent,
             manuFId : $scope.manufacturerId,
             productId : $scope.productId,
-            // //产品资料
-            repclass : $scope.repclass,
+            //故障指导，历史检修
+            devicetype : $scope.deviceType
         });
     }
 
