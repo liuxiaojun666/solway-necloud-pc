@@ -1,8 +1,110 @@
 ajaxData(
     {
-
-    }, {
+        analysis_sun_dev_falt_year_common_list1: {
+            name: 'GETanalysis_sun_dev_falt_year_common_list1',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_year_common_list2: {
+            name: 'GETanalysis_sun_dev_falt_year_common_list2',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_year_common_list3: {
+            name: 'GETanalysis_sun_dev_falt_year_common_list3',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_year_common_list4: {
+            name: 'GETanalysis_sun_dev_falt_year_common_list4',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_year_common_list5: {
+            name: 'GETanalysis_sun_dev_falt_year_common_list5',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_year_common_list6: {
+            name: 'GETanalysis_sun_dev_falt_year_common_list6',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_year_common_line: {
+            name: 'GETanalysis_sun_dev_falt_year_common_line',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_accum_common_list1: {
+            name: 'GETanalysis_sun_dev_falt_accum_common_list1',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_accum_common_list2: {
+            name: 'GETanalysis_sun_dev_falt_accum_common_list2',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_accum_common_list3: {
+            name: 'GETanalysis_sun_dev_falt_accum_common_list3',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_accum_common_list4: {
+            name: 'GETanalysis_sun_dev_falt_accum_common_list4',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_accum_common_list5: {
+            name: 'GETanalysis_sun_dev_falt_accum_common_list5',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_accum_common_list6: {
+            name: 'GETanalysis_sun_dev_falt_accum_common_list6',
+            data: {},
+            later: true,
+        },
+        analysis_sun_dev_falt_accum_common_line: {
+            name: 'GETanalysis_sun_dev_falt_accum_common_line',
+            data: {},
+            later: true,
+        },
+    }, 
+    {
         __serviceName__: 'equipmentFailureService',
+        listMap: [
+            {
+                dataIndex: 'province_name',
+                dataId: 'provinceid',
+                name: '区域'
+            },
+            {
+                dataIndex: 'manuf_name',
+                dataId: 'manufid',
+                name: '品牌'
+            },
+            {
+                dataIndex: 'ft_name',
+                dataId: 'ftid',
+                name: '类型'
+            },
+            {
+                dataIndex: 'dtime',
+                dataId: 'dtime',
+                name: '时间'
+            },
+            {
+                dataIndex: 'st_name',
+                dataId: 'stid',
+                name: '电站'
+            },
+            {
+                dataIndex: 'product_name',
+                dataId: 'productid',
+                name: '型号'
+            },
+        ]
     }
 )('equipmentFailureCtrl', ['$scope', 'equipmentFailureService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
@@ -10,21 +112,34 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        const { tabIndex = 0, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
+        const { tabIndex = 0, guidePage = true, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
         $scope.tabIndex = tabIndex;
+        $scope.guidePage = guidePage;
         $scope.activeStatus = activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
-        // await $scope.diffGetData(true);
+        getListData();
         $scope.$apply();
         await myAjaxData.timeout(400);
         $scope.pair = activeStatus.filter(v => v).length === 2;
         $scope.$apply();
     };
 
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.datasource1 = void 0;
+        $scope.datasource2 = void 0;
+        $scope.datasource3 = void 0;
+        $scope.datasource4 = void 0;
+        $scope.datasource5 = void 0;
+        $scope.datasource6 = void 0;
+        getListData();
+    };
+
     // 点击 改变选中状态
-    $scope.changeActiveStatus = async index => {
+    $scope.changeActiveStatus = async (index, event) => {
         if ($scope.activeStatus.filter(v => v).length >= 2 && !$scope.activeStatus[index]) return;
         $scope.activeStatus[index] = !$scope.activeStatus[index];
         historicalRecord.set({
@@ -33,6 +148,13 @@ ajaxData(
                 activeStatus: $scope.activeStatus
             }
         });
+        if ($scope.guidePage) {
+            if ($scope.activeStatus[index]) {
+                event.currentTarget.style.opacity = '1';
+            } else {
+                event.currentTarget.style.opacity = '0.3';
+            }
+        }
         if ($scope.activeStatus.filter(v => v).length !== 2) return $scope.pair = false;
         await myAjaxData.timeout(400);
         $scope.pair = true;
@@ -42,9 +164,34 @@ ajaxData(
     // 点击分析
     $scope.analyze = () => {
         if (!$scope.pair) return;
+        if ($scope.guidePage) {
+            Array.from(document.querySelectorAll('.analyzeSummary .a-content>div.a-container .themeDetail .equipmentFailure .classify .item')).forEach(v => {
+                v.style.opacity = '1';
+            });
+            $scope.guidePage = false;
+            historicalRecord.set({
+                themeEquipmentFailure: {
+                    ...historicalRecord.get().themeEquipmentFailure || {},
+                    guidePage: false
+                }
+            });
+        }
+        $scope.chartData = void 0;
         $scope.analyzeDetailShow = true;
-
-        drawingChart()
+        $scope.analysis_sun_dev_falt_year_common_line.res = null;
+        $scope.analysis_sun_dev_falt_accum_common_line.res = null;
+        const apiStr = `analysis_sun_dev_falt_${['', '', 'year', 'accum'][$scope._dateType]}_common_line`;
+        $scope[apiStr].getData({
+            queryCode: apiStr,
+            queryType: 1,
+            date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd'),
+            GROUPBY: $scope.activeStatus.map((v, i) => v && ['provinceid', 'manufid', 'ftid', 'dtime,' + ['', '', 'MONTH', 'YEAR'][$scope._dateType], 'stid', 'productid'][i]).filter(v => v).join(';')
+        }).then(async res => {
+            $scope.chartData = res;
+            await myAjaxData.timeout(0);
+            drawingChart();
+            $scope.$apply();
+        });
     };
 
     $scope.changeTab = index => {
@@ -52,44 +199,49 @@ ajaxData(
         drawingChart();
     }
 
-    $scope.column1 = [
-        {
-            title: '故障区域',
-            dataIndex: '',
-            sort: true,
-            render(text) {
-                return '北京'
-            }
-        },
-        {
-            title: '故障率',
-            dataIndex: '',
-            align: 'right',
-            sort: true,
-            render(text) {
-                return '20'
-            }
-        },
-        {
-            title: '故障停机小时数',
-            dataIndex: '',
-            align: 'right',
-            sort: true,
-            width: '35%',
-            render(text) {
-                return '3'
-            }
-        },
-        {
-            title: '设备数量',
-            dataIndex: '',
-            align: 'right',
-            sort: true,
-            render(text) {
-                return '5'
-            }
-        },
-    ];
+    const getListData = () => {
+        if ($scope._dateType < 2) return;
+        const apiStr = `analysis_sun_dev_falt_${['', '', 'year', 'accum'][$scope._dateType]}_common_list`;
+        ['provinceid', 'manufid', 'ftid', 'dtime,' + ['', '', 'MONTH', 'YEAR'][$scope._dateType], 'stid', 'productid'].forEach((v, i, arr) => {
+            $scope[apiStr + (i + 1)].getData({
+                queryCode: apiStr,
+                queryType: 1,
+                date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd'),
+                GROUPBY: v
+            }).then(res => {
+                $scope['datasource' + (i + 1)] = res.body.data;
+                $scope['column' + (i + 1)] = [
+                    {
+                        title: myAjaxData.config.listMap[i].name,
+                        dataIndex: myAjaxData.config.listMap[i].dataIndex,
+                        sort: true,
+                        width: '130px',
+                    },
+                    {
+                        title: '故障率',
+                        dataIndex: 'fail_r',
+                        align: 'right',
+                        sort: true,
+                        width: '60px',
+                    },
+                    {
+                        title: '故障停机小时数',
+                        dataIndex: 'fail_hours',
+                        align: 'right',
+                        sort: true,
+                        width: '100px',
+                    },
+                    {
+                        title: '设备数量',
+                        dataIndex: 'device_count',
+                        align: 'right',
+                        sort: true,
+                        width: '70px',
+                    },
+                ];
+            });
+        });
+    };
 
     function drawingChart() {
         if (!$scope.myChart) {
@@ -97,12 +249,16 @@ ajaxData(
         }
         const { myChart } = $scope;
         const { tabIndex } = $scope;
+        const [xDataId, yDataId] = $scope.activeStatus.map((v, i) => v && myAjaxData.config.listMap[i].dataId).filter(v => v);
+        const [xDataIndex, yDataIndex] = $scope.activeStatus.map((v, i) => v && myAjaxData.config.listMap[i].dataIndex).filter(v => v);
+        const [xName, yName] = $scope.activeStatus.map((v, i) => v && ['区域', '设备品牌', '故障类型', '故障时间', '电站', '设备型号'][i]).filter(v => v);
+        $scope.xName = xName; $scope.yName = yName;
         const option = {
             tooltip: {
                 show: true,
                 trigger: 'item',
                 formatter(a, b, c) {
-                    return a.value[0] + ' - ' + a.value[1] + '<br/>' + ['故障率: ' + a.value[2] + '%' + '<br/>', '故障损失小时数: ' + a.value[3] + '<br/>'][tabIndex]
+                    return a.value[0] + ' - ' + a.value[1] + '<br/>' + ['故障率: ' + a.value[2] + '%' + '<br/>', '故障损失小时数: ' + a.value[2] + 'h' + '<br/>'][tabIndex]
                 }
             },
             grid: {
@@ -113,7 +269,7 @@ ajaxData(
             },
             xAxis: {
                 type: 'category',
-                name: '时间',
+                name: xName,
                 nameTextStyle: {
                     color: '#fffeff',
                     fontSize: 18
@@ -135,11 +291,11 @@ ajaxData(
                         color: '#fffeff'
                     }
                 },
-                data: ['2017', '2018', '2019']
+                data: $scope.chartData.body.data[xDataIndex]
             },
             yAxis: {
                 type: 'category',
-                name: '区域',
+                name: yName,
                 // boundaryGap: true,
                 nameTextStyle: {
                     color: '#fffeff',
@@ -162,11 +318,11 @@ ajaxData(
                         color: '#fffeff'
                     }
                 },
-                data: ['北京', '上海', '河北']
+                data: $scope.chartData.body.data[yDataIndex]
             },
             series: [
                 {
-                    name: ['故障率', '故障损失小时数'][tabIndex],
+                    name: ['故障率', '故障停机小时数'][tabIndex],
                     type: 'scatter',
                     itemStyle: {
                         normal: {
@@ -178,13 +334,13 @@ ajaxData(
                             shadowColor: 'rgba(0, 0, 0, 0.5)'
                         }
                     },
-                    data: [
-                        ['2017', '北京', 13, 12],
-                        ['2017', '上海', 5, 5],
-                        ['2019', '河北', 23, 66],
-                    ],
+                    data: $scope.chartData.body.data[['fail_r', 'fail_hours'][tabIndex]].map(v => [
+                        xDataId === 'dtime' ? v[0] : $scope.chartData.body.data[xDataIndex][$scope.chartData.body.data[xDataId].indexOf(v[0])],
+                        yDataId === 'dtime' ? v[1] : $scope.chartData.body.data[yDataIndex][$scope.chartData.body.data[yDataId].indexOf(v[1])],
+                        v[2]
+                    ]),
                     symbolSize(val) {
-                        return [10 + val[2] / 100 * 40, 10 + val[3] / 100 * 40][tabIndex]
+                        return [10 + val[2] / 100 * 40, 10 + val[2] / 100 * 40][tabIndex]
                     }
                 }
             ],
