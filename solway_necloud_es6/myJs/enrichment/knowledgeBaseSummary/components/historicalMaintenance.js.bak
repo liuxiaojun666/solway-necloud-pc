@@ -206,47 +206,53 @@ ajaxData({
 
     $scope.knowledgeBaseList.getDataCallback = (success, res) => {
         $scope.loading = false;
-        // $scope.column =  [
-        //     {
-        //         title: '故障码',
-        //         width: '25%',
-        //         dataIndex: 'st_name',
-        //         align: 'left',
-        //         render(text) {
-        //             return `<span class="clickable">${text}</span>`
-        //         }
-        //     },
-        //     {
-        //         title: '故障内容',
-        //         dataIndex: 'repair_count',
-        //         align: 'right',
-        //     },
-        //     {
-        //         title: '厂家名称',
-        //         dataIndex: 'repair_number',
-        //         align: 'right',
-        //     },
-        //     {
-        //         title: '产品型号',
-        //         dataIndex: 'repair_number',
-        //         align: 'right',
-        //     },
-        //     {
-        //         title: '维修内容',
-        //         dataIndex: 'repair_number',
-        //         align: 'right',
-        //     },
-        //     {
-        //         title: '维修时间',
-        //         dataIndex: 'res_hours_avg',
-        //         sort: 'true',
-        //         align: 'right',
-        //         render(text, record, index) {
-        //             return `<span>${text===null?0:text}</span>`
-        //         }
-        //     }
-        // ];
+        $scope.column =  [
+            {
+                title: '故障码',
+                width: '25%',
+                dataIndex: '',
+                align: 'left',
+                // render(text) {
+                //     return `<span class="clickable">${text}</span>`
+                // }
+            },
+            {
+                title: '故障内容',
+                dataIndex: '',
+                align: 'right',
+            },
+            {
+                title: '厂家名称',
+                dataIndex: 'field2',
+                align: 'right',
+            },
+            {
+                title: '产品型号',
+                dataIndex: 'field3',
+                align: 'right',
+            },
+            {
+                title: '维修内容',
+                dataIndex: '',
+                align: 'right',
+            },
+            {
+                title: '维修时间',
+                dataIndex: 'field4',
+                sort: 'true',
+                align: 'right',
+                // render(text, record, index) {
+                //     return `<span>${text===null?0:text}</span>`
+                // }
+            }
+        ];
     }
+
+    //详情
+    $scope.trClick = (item, index, event) => {
+        $scope.showHistoricalMaintenanceDetail = true;
+        $scope.$broadcast('historicalMaintenanceId',item);
+    };
 
     //点击页面其他地方，搜索框消失
     document.addEventListener('click', closeSearchAlert);

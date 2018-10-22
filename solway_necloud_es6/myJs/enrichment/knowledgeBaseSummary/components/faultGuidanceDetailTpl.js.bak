@@ -1,0 +1,53 @@
+ajaxData({
+    cardDetail: {
+        name: 'GETcardDetail',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    addViewsCount:{
+        name: 'POSTaddViewsCount',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'faultGuidanceDetailService',
+})('faultGuidanceDetailCtrl', ['$scope', 'faultGuidanceDetailService', 'actionRecord','$timeout','$http'], ($scope, myAjaxData, historicalRecord,$timeout,$http) => {
+    
+    $scope.$on('faultGuidanceId',(e,v)=>{
+        $scope.detail = v;
+        $scope.id = v.id;
+        getDetailData();
+    });
+
+    const getDetailData = ()=>{
+        $scope.cardDetail.getData({
+            id : $scope.id,
+			queryType : 'faultGuidance'
+        }).then(res=>{
+            if (res.code == 0) {
+                $scope.data = res.data;
+                $http({
+					method : "POST",
+					url : window.baseUrl+"/shareRepository/addViewsCount.htm",
+					params : {
+						'id' : $scope.id,
+						'queryType' : 'faultGuidance'
+					}
+				});
+            }
+        });
+    }
+
+    //附件下载
+    $scope.downloadFaultFile = (id, index,file) =>{
+        if(file){
+            window.open(window.baseUrl+"/PFaultCodeReal/downloadAttachment.htm?id=" + id + "&index=" + index);
+        }
+	}
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+    });
+});
