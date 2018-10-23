@@ -112,9 +112,10 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        const { tabIndex = 0, guidePage = true, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
+        const { tabIndex = 0, guidePage = true, maximize = false, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
         $scope.tabIndex = tabIndex;
         $scope.guidePage = guidePage;
+        $scope.maximize = maximize;
         $scope.activeStatus = guidePage ? [false, false, false, false, false, false] :activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -135,6 +136,7 @@ ajaxData(
         $scope.datasource4 = void 0;
         $scope.datasource5 = void 0;
         $scope.datasource6 = void 0;
+        $scope.maximizeListData = void 0;
         getListData();
     };
 
@@ -168,6 +170,19 @@ ajaxData(
         await myAjaxData.timeout(400);
         $scope.pair = true;
         $scope.$apply();
+    };
+
+    // 双击放大
+    $scope.maximizeList = (index, event) => {
+        $scope.maximize = index;
+        historicalRecord.set({
+            themeEquipmentFailure: {
+                ...historicalRecord.get().themeEquipmentFailure || {},
+                maximize: index
+            }
+        });
+        $scope.maximizeListData = $scope['datasource' + index];
+        $scope.maximizeListColumn = $scope['column' + index];
     };
 
     // 点击分析
@@ -248,6 +263,10 @@ ajaxData(
                         width: '70px',
                     },
                 ];
+                if ($scope.maximize === (i + 1)) {
+                    $scope.maximizeListData = res.body.data;
+                    $scope.maximizeListColumn = $scope['column' + (i + 1)];
+                }
             });
         });
     };
@@ -349,7 +368,7 @@ ajaxData(
                         v[2]
                     ]),
                     symbolSize(val) {
-                        return [10 + val[2] / 100 * 40, 10 + val[2] / 100 * 40][tabIndex]
+                        return val[2] ? [10 + val[2] / 100 * 40, 10 + val[2] / 100 * 40][tabIndex] : 0;
                     }
                 }
             ],
