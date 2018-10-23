@@ -115,7 +115,7 @@ ajaxData(
         const { tabIndex = 0, guidePage = true, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
         $scope.tabIndex = tabIndex;
         $scope.guidePage = guidePage;
-        $scope.activeStatus = activeStatus;
+        $scope.activeStatus = guidePage ? [false, false, false, false, false, false] :activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
@@ -148,13 +148,22 @@ ajaxData(
                 activeStatus: $scope.activeStatus
             }
         });
+        // 引导页
         if ($scope.guidePage) {
             if ($scope.activeStatus[index]) {
                 event.currentTarget.style.opacity = '1';
             } else {
                 event.currentTarget.style.opacity = '0.3';
             }
+            if ($scope.activeStatus.filter(v => v).length === 0) {
+                $scope.guidePageText = '选中任意一个列表';
+            } else if ($scope.activeStatus.filter(v => v).length === 1) {
+                $scope.guidePageText = '再次选中任意一个列表';
+            } else if ($scope.activeStatus.filter(v => v).length === 2) {
+                $scope.guidePageText = '进入多维矩阵分析>>';
+            }
         }
+        // end 引导页
         if ($scope.activeStatus.filter(v => v).length !== 2) return $scope.pair = false;
         await myAjaxData.timeout(400);
         $scope.pair = true;
