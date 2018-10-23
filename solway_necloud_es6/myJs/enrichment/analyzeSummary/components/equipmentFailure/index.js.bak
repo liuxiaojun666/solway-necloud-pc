@@ -112,9 +112,10 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        const { tabIndex = 0, guidePage = true, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
+        const { tabIndex = 0, guidePage = true, maximize = false, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
         $scope.tabIndex = tabIndex;
         $scope.guidePage = guidePage;
+        $scope.maximize = maximize;
         $scope.activeStatus = guidePage ? [false, false, false, false, false, false] :activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -135,6 +136,7 @@ ajaxData(
         $scope.datasource4 = void 0;
         $scope.datasource5 = void 0;
         $scope.datasource6 = void 0;
+        $scope.maximizeListData = void 0;
         getListData();
     };
 
@@ -170,6 +172,20 @@ ajaxData(
         $scope.$apply();
     };
 
+    // 双击放大
+    $scope.maximizeList = (index, event) => {
+        if ($scope.guidePage) return;
+        $scope.maximize = index;
+        historicalRecord.set({
+            themeEquipmentFailure: {
+                ...historicalRecord.get().themeEquipmentFailure || {},
+                maximize: index
+            }
+        });
+        $scope.maximizeListData = $scope['datasource' + index];
+        $scope.maximizeListColumn = $scope['column' + index];
+    };
+
     // 点击分析
     $scope.analyze = () => {
         if (!$scope.pair) return;
@@ -193,6 +209,7 @@ ajaxData(
         $scope[apiStr].getData({
             queryCode: apiStr,
             queryType: 1,
+            queryStType: 1,
             date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd'),
             GROUPBY: $scope.activeStatus.map((v, i) => v && ['provinceid', 'manufid', 'ftid', 'dtime,' + ['', '', 'MONTH', 'YEAR'][$scope._dateType], 'stid', 'productid'][i]).filter(v => v).join(';')
         }).then(async res => {
@@ -206,7 +223,7 @@ ajaxData(
     $scope.changeTab = index => {
         $scope.tabIndex = index;
         drawingChart();
-    }
+    };
 
     const getListData = () => {
         if ($scope._dateType < 2) return;
@@ -215,6 +232,7 @@ ajaxData(
             $scope[apiStr + (i + 1)].getData({
                 queryCode: apiStr,
                 queryType: 1,
+                queryStType: 1,
                 date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd'),
                 GROUPBY: v
             }).then(res => {
@@ -248,6 +266,10 @@ ajaxData(
                         width: '70px',
                     },
                 ];
+                if ($scope.maximize === (i + 1)) {
+                    $scope.maximizeListData = res.body.data;
+                    $scope.maximizeListColumn = $scope['column' + (i + 1)];
+                }
             });
         });
     };
@@ -349,7 +371,7 @@ ajaxData(
                         v[2]
                     ]),
                     symbolSize(val) {
-                        return [10 + val[2] / 100 * 40, 10 + val[2] / 100 * 40][tabIndex]
+                        return val[2] ? [10 + val[2] / 100 * 40, 10 + val[2] / 100 * 40][tabIndex] : 0;
                     }
                 }
             ],
