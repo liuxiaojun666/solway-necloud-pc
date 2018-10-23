@@ -70,7 +70,7 @@ ajaxData(
             data: {},
             later: true,
         },
-    }, 
+    },
     {
         __serviceName__: 'equipmentFailureService',
         listMap: [
@@ -116,7 +116,7 @@ ajaxData(
         $scope.tabIndex = tabIndex;
         $scope.guidePage = guidePage;
         $scope.maximize = maximize;
-        $scope.activeStatus = guidePage ? [false, false, false, false, false, false] :activeStatus;
+        $scope.activeStatus = guidePage ? [false, false, false, false, false, false] : activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
@@ -174,6 +174,7 @@ ajaxData(
 
     // 双击放大
     $scope.maximizeList = (index, event) => {
+        event && event.stopPropagation();
         if ($scope.guidePage) return;
         $scope.maximize = index;
         historicalRecord.set({
@@ -293,7 +294,8 @@ ajaxData(
                 }
             },
             grid: {
-                top: 100,
+                top: 50,
+                bottom: 50,
                 containLabel: true,
                 left: 30,
                 right: '110'
@@ -340,7 +342,7 @@ ajaxData(
                 splitLine: {
                     show: true,
                     lineStyle: {
-                        color: '#366090', 
+                        color: '#366090',
                         type: 'dashed'
                     }
                 },
@@ -351,6 +353,14 @@ ajaxData(
                 },
                 data: $scope.chartData.body.data[yDataIndex]
             },
+
+            dataZoom: [
+                {
+                    xAxisIndex: 0,
+                    filterMode: 'empty',
+                    type: 'slider',
+                }
+            ],
             series: [
                 {
                     name: ['故障率', '故障停机小时数'][tabIndex],
@@ -390,8 +400,24 @@ ajaxData(
         myChart.setOption(option);
     }
 
+    // 取消选中  
+    function cancelActive() {
+        $scope.activeStatus = [false, false, false, false, false, false];
+        $scope.pair = false;
+        historicalRecord.set({
+            themeEquipmentFailure: {
+                ...historicalRecord.get().themeEquipmentFailure || {},
+                activeStatus: $scope.activeStatus,
+                pair: $scope.pair,
+            }
+        });
+        $scope.$apply();
+    }
+
+    document.addEventListener('dblclick', cancelActive);
+
     // 销毁 事件
     $scope.$on('$destroy', () => {
-        // setDataNull();
+        document.removeEventListener('dblclick', cancelActive);
     });
 });
