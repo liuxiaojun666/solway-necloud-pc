@@ -106,16 +106,17 @@ ajaxData(
             },
         ]
     }
-)('equipmentFailureCtrl', ['$scope', 'equipmentFailureService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+)('equipmentFailureCtrl', ['$scope', 'equipmentFailureService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        const { tabIndex = 0, guidePage = true, maximize = false, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
+        const { tabIndex = 0, guidePage = true, notCombined = false, maximize = false, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
         $scope.tabIndex = tabIndex;
         $scope.guidePage = guidePage;
         $scope.maximize = maximize;
+        $scope.notCombined = notCombined;
         $scope.activeStatus = guidePage ? [false, false, false, false, false, false] : activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -166,9 +167,25 @@ ajaxData(
             }
         }
         // end 引导页
-        if ($scope.activeStatus.filter(v => v).length !== 2) return $scope.pair = false;
-        await myAjaxData.timeout(400);
-        $scope.pair = true;
+        if ($scope.activeStatus.filter(v => v).length !== 2) {
+            await myAjaxData.timeout(0);
+            $scope.pair = false;
+        }
+        else {
+            await myAjaxData.timeout(400);
+            $scope.pair = true;
+        }
+        if (($scope.activeStatus[0] && $scope.activeStatus[4]) || ($scope.activeStatus[1] && $scope.activeStatus[5])) {
+            $scope.notCombined = true;
+        } else {
+            $scope.notCombined = false;
+        }
+        historicalRecord.set({
+            themeEquipmentFailure: {
+                ...historicalRecord.get().themeEquipmentFailure || {},
+                notCombined: $scope.notCombined
+            }
+        });
         $scope.$apply();
     };
 
@@ -190,6 +207,7 @@ ajaxData(
     // 点击分析
     $scope.analyze = () => {
         if (!$scope.pair) return;
+        if ($scope.notCombined) return toaster.pop('msg', '', '所选模块不能结合分析，请重新选择。');;
         if ($scope.guidePage) {
             Array.from(document.querySelectorAll('.analyzeSummary .a-content>div.a-container .themeDetail .equipmentFailure .classify .item')).forEach(v => {
                 v.style.opacity = '1';
@@ -244,27 +262,35 @@ ajaxData(
                         dataIndex: myAjaxData.config.listMap[i].dataIndex,
                         sort: true,
                         width: '130px',
+                        align: i === 3 ? 'center' : 'left'
                     },
                     {
                         title: '故障率',
                         dataIndex: 'fail_r',
                         align: 'right',
                         sort: true,
-                        width: '60px',
+                        width: '50px',
                     },
                     {
-                        title: '故障停机小时数',
+                        title: '故障时间',
                         dataIndex: 'fail_hours',
                         align: 'right',
                         sort: true,
-                        width: '100px',
+                        width: '60px',
                     },
                     {
-                        title: '设备数量',
+                        title: '故障数量',
+                        dataIndex: 'fail_count',
+                        align: 'right',
+                        sort: true,
+                        width: '60px',
+                    },
+                    {
+                        title: '设备总量',
                         dataIndex: 'device_count',
                         align: 'right',
                         sort: true,
-                        width: '70px',
+                        width: '60px',
                     },
                 ];
                 if ($scope.maximize === (i + 1)) {

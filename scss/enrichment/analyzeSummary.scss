@@ -205,11 +205,24 @@
                                     border-radius: 21px;
                                 }
                             }
+                            &.active.notCombined {
+                                border: 1px solid #ff9e57;
+                                box-shadow: 0 0 20px 2px #ff9e57;
+                                >div {
+                                    box-shadow: 0 0 20px 2px #ff9e57 inset;
+                                }
+                            }
+                            &.active.notCombined+div.line {
+                                background-color: #ff9e57;
+                            }
                         }
                         .line {
                             background-color: #40B7AB;
                             position: absolute;
                             margin: 0;
+                            &.notCombined {
+                                background-color: #ff9e57;
+                            }
                             &.line-x {
                                 transition: all 0.2s linear 0.2s;
                                 height: 1px;
@@ -288,23 +301,27 @@
                         }
                         .aside {
                             float: right;
-                            width: 200px;
+                            width: 150px;
                             height: 100%;
                             position: relative;
+                            overflow: hidden;
                             ul {
                                 margin: 0;
                                 padding-left: 30px;
+                                height: 100%;
                                 li {
+                                    height: calc((100% - 75px) / 6); // padding-top: 10%;
                                     cursor: pointer;
                                     list-style: none;
                                     background-image: linear-gradient( 103deg, rgb(36, 65, 99) 0%, rgb(59, 51, 91) 100%);
-                                    margin-bottom: 1em;
-                                    padding: 5px 10px;
+                                    margin-bottom: 15px; // padding: 5px 10px;
+                                    line-height: 2em;
+                                    text-align: center;
                                     &.active {
                                         background-image: linear-gradient( 103deg, rgb(57, 104, 155) 0%, rgb(129, 88, 168) 100%);
                                     }
                                     i {
-                                        margin-right: 10px;
+                                        vertical-align: middle; // margin-right: 10px;
                                     }
                                 }
                             }
@@ -316,8 +333,7 @@
                                 margin: 0 auto;
                                 height: 100px;
                                 text-align: center;
-                                line-height: 100px;
-                                // background: linear-gradient(209deg, #0e335d, #0e366d, #23245b);
+                                line-height: 100px; // background: linear-gradient(209deg, #0e335d, #0e366d, #23245b);
                                 cursor: pointer;
                                 border: none;
                                 table {
