@@ -286,6 +286,45 @@ ajaxData({
         });
     }
 
+    //查看故障小助手
+    $scope.showFaultGuideModal = ()=>{
+        $scope.faultGuideData = true;
+        $scope.$broadcast('faultAssistant',$scope.chatList[0].busino);
+        $('#aaa').modal({ backdrop: 'static', keyboard: false });
+        
+    }
+
+    //查看设备运行数据
+    $scope.showDeviceDataModal = () =>{
+        $scope.deviceOperationData = true;
+
+        const chatList = $scope.chatList[0];
+        let deviceTypeNow = chatList.deviceType;
+        let pstationid = chatList.pStationId;
+        const {deviceSerialNnumber, deviceId,hasJB} = chatList;
+        // if(!deviceId){
+        //     $scope.deviceId = false;
+        //     return false;
+        // }else{
+        //     $scope.deviceId = true;
+        // }
+        const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, defaultShowPage: '1' };
+
+        $scope.deviceTypeNow = deviceTypeNow;
+        $scope.inverterType = hasJB;//点击逆变器，不同类型跳转不同样式页面（1->inverterDetailNew.jsp,2->inverterDetailNewType1.jsp）
+        
+        if (deviceTypeNow == '3') {
+            $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
+            $scope.$broadcast("showDeviceDetail3broad", res);
+        } else if (deviceTypeNow == '2') {
+            $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
+            $scope.$broadcast("showDeviceDetail2broad", res);
+        } else if (deviceTypeNow == '1') {
+            $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
+            $scope.$broadcast("showDeviceDetail1broad", res);
+        }
+    }
+
     //发布共享任务回调
     $scope.$on('releaseTaskCallback', (e, success) => {
         if (success) getChatList();
