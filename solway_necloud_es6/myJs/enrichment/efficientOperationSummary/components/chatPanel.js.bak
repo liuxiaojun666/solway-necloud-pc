@@ -95,6 +95,13 @@ ajaxData({
     resizeHeight();
     window.addEventListener('resize', resizeHeight);
 
+    const judgeIfDeviceModal = data =>{
+        if(data.busitype =='00' && data.deviceType && data.deviceId){
+            $scope.ifDeviceDataModal = true;
+        }else{
+            $scope.ifDeviceDataModal = false;
+        }
+    }
     //列表接口
     const getChatList = () =>{
         $scope.getChatList.getData({
@@ -106,6 +113,8 @@ ajaxData({
         }).then(res => {
             $scope.chatListResult = false;
             $scope.chatList = res;
+            
+            judgeIfDeviceModal(res[0]);
         });
     }
 
@@ -199,7 +208,7 @@ ajaxData({
         }else{
             $scope[currentInterface].getData({
                 id: busino,
-                isHis:1
+                isHis:$scope.isHis
             }).then(res => {
                 $scope.$broadcast('showChatDetail', { 'busitype': busitype, 'topmessageid': messageId,'data':res})
             });
@@ -296,18 +305,14 @@ ajaxData({
 
     //查看设备运行数据
     $scope.showDeviceDataModal = () =>{
+        if(!$scope.ifDeviceDataModal) return;
+
         $scope.deviceOperationData = true;
 
         const chatList = $scope.chatList[0];
         let deviceTypeNow = chatList.deviceType;
         let pstationid = chatList.pStationId;
         const {deviceSerialNnumber, deviceId,hasJB} = chatList;
-        // if(!deviceId){
-        //     $scope.deviceId = false;
-        //     return false;
-        // }else{
-        //     $scope.deviceId = true;
-        // }
         const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, defaultShowPage: '1' };
 
         $scope.deviceTypeNow = deviceTypeNow;
