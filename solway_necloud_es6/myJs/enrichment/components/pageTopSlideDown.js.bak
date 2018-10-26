@@ -1,4 +1,4 @@
-app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams', '$timeout','$rootScope', ($ocLazyLoad, $http, $state, $stateParams,$timeout,$rootScope) => ({
+app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams', '$timeout','$rootScope','actionRecord',($ocLazyLoad, $http, $state, $stateParams,$timeout,$rootScope,historicalRecord) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -8,8 +8,9 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
     templateUrl: 'tpl/enrichment/components/pageSlideDown.html'+window.stamp,
     link($scope, $element) {
 
-        $scope.currentState = $state.current.name;
         $scope.goChildrenPage = type => {
+            $solway.setStore('systemInfo', {'systemTab':$scope.systemTab,'module':[type]}); 
+
             if ($state.current.name == 'power-index171024') {
                 $http({
                     method: "POST",
@@ -24,20 +25,28 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
             }
         }
 
+        $scope.goBoughtModulePage = (routerUrl,theme) =>{
+            $solway.setStore('systemInfo', {'systemTab':$scope.systemTab,'module':[routerUrl,theme]}); 
+            if(routerUrl == theme){
+                historicalRecord.falsify(routerUrl,{},true);
+            }else{
+                historicalRecord.falsify(routerUrl,{'theme':theme},true);
+            }
+        }
+
+
         //到不同首页
         $scope.goMainPage = () =>{
             $state.go($rootScope.mainPageUrl);
         }
-        // $scope.goIndexPage = type =>{
-        //     $state.go(type);
-        // }
 
         //鼠标悬浮0.5s页面头部，出现下拉页面
         let timer = null;
         const setMainHeight = () => {
             let wHeight = $(window).height();
-            let muduleHeight = 375;
+            let muduleHeight = 500;
             $(".module-list").css('marginTop', (wHeight - muduleHeight)/2)
+            $(".function-list").css('marginTop', (wHeight - 660)/2)
         }
 
         setMainHeight()
@@ -73,8 +82,24 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
             $(this).removeClass('active');
         })
 
+
     },
     controller($scope, $element){
         $scope.stamp = window.stamp;
+
+        historyInitCallback();
+
+        // 获取记录
+        function historyInitCallback() {
+            const record = $solway.getStore().systemInfo;
+            const {systemTab = 'concept'} = record;
+            $scope.systemTab = systemTab;
+
+            if(systemTab == 'concept'){
+                $scope.currentState = record.module?record.module[0]:'';
+            }else if(systemTab == 'function'){
+                $scope.currentFun = record.module?record.module[1]:'';
+            }
+        };
     }
 })])
