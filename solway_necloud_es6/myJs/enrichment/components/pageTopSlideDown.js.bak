@@ -11,7 +11,11 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
         $scope.goChildrenPage = type => {
             $solway.setStore('systemInfo', {'systemTab':$scope.systemTab,'module':[type]}); 
 
-            if ($state.current.name == 'power-index171024') {
+            if($scope.currentState == type){
+                $(".systems-page").slideUp();
+                return false;
+            }
+            if ($scope.currentState == 'power-index171024') {
                 $http({
                     method: "POST",
                     url: window.baseUrl + "/UserAuthHandle/setSTClass.htm",
@@ -30,7 +34,12 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
             if(routerUrl == theme){
                 historicalRecord.falsify(routerUrl,{},true);
             }else{
-                historicalRecord.falsify(routerUrl,{'theme':theme},true);
+                const falsify = historicalRecord.falsify(routerUrl,{'theme':theme},true);
+                if(falsify.redirect == 'failure'){
+                    $scope.currentFun = theme;
+                    $scope.$parent.reloadParentPage({});
+                    $(".systems-page").slideUp();
+                }
             }
         }
 
