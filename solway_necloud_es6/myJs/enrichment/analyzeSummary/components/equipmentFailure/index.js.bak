@@ -229,7 +229,7 @@ ajaxData(
             queryCode: apiStr,
             queryType: 1,
             queryStType: 1,
-            date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd'),
+            date: ($scope.dateTime || {showDate: null}).showDate,
             GROUPBY: $scope.activeStatus.map((v, i) => v && ['provinceid', 'manufid', 'ftid', 'dtime,' + ['', '', 'MONTH', 'YEAR'][$scope._dateType], 'stid', 'productid'][i]).filter(v => v).join(';')
         }).then(async res => {
             $scope.chartData = res;
@@ -252,7 +252,7 @@ ajaxData(
                 queryCode: apiStr,
                 queryType: 1,
                 queryStType: 1,
-                date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd'),
+                date: ($scope.dateTime || {showDate: null}).showDate,
                 GROUPBY: v
             }).then(res => {
                 $scope['datasource' + (i + 1)] = res.body.data;
@@ -316,7 +316,7 @@ ajaxData(
                 show: true,
                 trigger: 'item',
                 formatter(a, b, c) {
-                    return a.value[0] + ' - ' + a.value[1] + '<br/>' + ['故障率: ' + a.value[2] + '%' + '<br/>', '故障损失小时数: ' + a.value[2] + 'h' + '<br/>'][tabIndex]
+                    return a.value[0] + ' - ' + a.value[1] + '<br/>' + ['故障率: ' + a.value[2] + '' + '<br/>', '故障损失小时数: ' + a.value[2] + 'h' + '<br/>'][tabIndex]
                 }
             },
             grid: {
@@ -407,7 +407,7 @@ ajaxData(
                         v[2]
                     ]),
                     symbolSize(val) {
-                        return val[2] ? [10 + val[2] / 100 * 40, 10 + val[2] / 100 * 40][tabIndex] : 0;
+                        return val[2] ? ((8 + val[2] / 100 * 40) > 80 ? 80 : (8 + val[2] / 100 * 40)) : 0;
                     }
                 }
             ],
