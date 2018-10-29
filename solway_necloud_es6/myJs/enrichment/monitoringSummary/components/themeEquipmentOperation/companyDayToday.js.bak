@@ -35,6 +35,9 @@ ajaxData(
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
         let { showShape = 'chart', tabIndex = 0 } = historicalRecord.get().themeEquipmentOperationCompanyDayToday || {};
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
         $scope.changeShowShape(showShape);
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
