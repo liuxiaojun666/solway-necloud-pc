@@ -44,6 +44,14 @@ ajaxData({
                 name: 'lineLoss',
                 color: '#72db44',
             },
+            // '评估电量': {
+            //     name: 'assess',
+            //     color: '#2b5d95',
+            // },
+            // '实发电量': {
+            //     name: 'real',
+            //     color: '#2b5d95',
+            // },
         }
     })('themeAnalyzeDefaultCtrl', ['$scope', 'themeAnalyzeDefaultService', 'actionRecord', 'toaster', '$timeout'], ($scope, myAjaxData, historicalRecord, toaster, $timeout) => {
         /// 初始化 scope
@@ -90,6 +98,7 @@ ajaxData({
 
             // 点击事件监听
             myChart.on('click', function (obj) {
+                if (obj.data.target || obj.data.source) return;
                 const {themeMap} = myAjaxData.config;
                 const {target, source, name} = obj.data;
                 const theme = themeMap[(Object.keys(themeMap).includes(target) ? target : source) || name];
