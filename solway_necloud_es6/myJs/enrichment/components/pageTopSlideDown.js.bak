@@ -37,6 +37,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
                 }
             }else{
                 const falsify = historicalRecord.falsify(routerUrl,{'theme':theme},true);
+                // debugger
                 if(falsify.redirect == 'failure'){
                     $scope.currentFun = theme;
                     if($scope.currentState == 'analyzeSummary'){
@@ -57,7 +58,8 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
         $scope.changeSystemTab = type =>{
             $scope.systemTab = type;
             const record = $solway.getStore().systemInfo;
-            $scope.currentState = record.module?record.module[0]:'';
+            // $scope.currentState = record.module?record.module[0]:'';
+            $scope.currentState = $state.current.name;
             $scope.currentFun = record.module?record.module[1]:'';
         }
 
@@ -116,7 +118,8 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
             const {systemTab = 'concept'} = record;
             $scope.systemTab = systemTab;
 
-            $scope.currentState = record.module?record.module[0]:'';
+            $scope.currentState = $state.current.name;
+            // $scope.currentState = record.module?record.module[0]:'';
             $scope.currentFun = record.module?record.module[1]:'';
         };
     }
