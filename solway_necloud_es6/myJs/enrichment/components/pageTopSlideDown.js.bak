@@ -8,10 +8,9 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
     templateUrl: 'tpl/enrichment/components/pageSlideDown.html'+window.stamp,
     link($scope, $element) {
 
-        $scope.goChildrenPage = type => {
-            $solway.setStore('systemInfo', {'systemTab':$scope.systemTab,'module':[type]}); 
-
-            if($scope.currentState == type){
+        $scope.goChildrenPage = (routerUrl,theme) => {
+            $solway.setStore('systemInfo', {'systemTab':$scope.systemTab,'module':[routerUrl,theme]}); 
+            if($scope.currentState == routerUrl){
                 $(".systems-page").slideUp();
                 return false;
             }
@@ -22,22 +21,27 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
                     params: {
                     }
                 }).success(function (res) {
-                    $state.go(type);
+                    $state.go(routerUrl);
                 });
             } else {
-                $state.go(type);
+                $state.go(routerUrl);
             }
         }
 
         $scope.goBoughtModulePage = (routerUrl,theme) =>{
             $solway.setStore('systemInfo', {'systemTab':$scope.systemTab,'module':[routerUrl,theme]}); 
             if(routerUrl == theme){
-                historicalRecord.falsify(routerUrl,{},true);
+                const falsify = historicalRecord.falsify(routerUrl,{},true);
+                if(falsify.redirect == 'failure'){
+                    $(".systems-page").slideUp();
+                }
             }else{
                 const falsify = historicalRecord.falsify(routerUrl,{'theme':theme},true);
                 if(falsify.redirect == 'failure'){
                     $scope.currentFun = theme;
-                    $scope.$parent.reloadParentPage({});
+                    if($scope.currentState == 'analyzeSummary'){
+                        $scope.$parent.reloadParentPage({});
+                    }
                     $(".systems-page").slideUp();
                 }
             }
@@ -47,6 +51,14 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
         //到不同首页
         $scope.goMainPage = () =>{
             $state.go($rootScope.mainPageUrl);
+        }
+
+        //切换不同体系
+        $scope.changeSystemTab = type =>{
+            $scope.systemTab = type;
+            const record = $solway.getStore().systemInfo;
+            $scope.currentState = record.module?record.module[0]:'';
+            $scope.currentFun = record.module?record.module[1]:'';
         }
 
         //鼠标悬浮0.5s页面头部，出现下拉页面
@@ -104,11 +116,8 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
             const {systemTab = 'concept'} = record;
             $scope.systemTab = systemTab;
 
-            if(systemTab == 'concept'){
-                $scope.currentState = record.module?record.module[0]:'';
-            }else if(systemTab == 'function'){
-                $scope.currentFun = record.module?record.module[1]:'';
-            }
+            $scope.currentState = record.module?record.module[0]:'';
+            $scope.currentFun = record.module?record.module[1]:'';
         };
     }
 })])
