@@ -48,15 +48,21 @@ ajaxData({
             );
             const viewWidth = $svgView.width();
             const svgWidth = $svg.width();
-            $scope.drag = $solway.drag({ 
-                ele: $svg[0], 
-                translateX: (viewWidth - svgWidth) / 2,
-                originX: '50%',
-                originY: '0',
-                scale: (svgWidth < viewWidth) ? 1 : (viewWidth / svgWidth),
-                minScale: 0.1
+            const scale = (viewWidth / svgWidth) - 0.1;
+            const zoom = $solway.zoom({
+                ele: $svg[0],
+                ... (scale < 1 ? {
+                    scale,
+                    translate: [(viewWidth - svgWidth) / 2, $svg.height() / 2],
+                } : {}),
+                minScale: 0.1,
+                rate: 0.05
             });
-            $scope.$on('$destroy', () => $scope.drag.destroy());
+            const drag = $solway.drag({ ele: $svgView[0] });
+            $scope.$on('$destroy', () => {
+                zoom.destroy();
+                drag.destroy();
+            });
         });
 
         // 获取 设备id   并获取设备状态
@@ -74,12 +80,12 @@ ajaxData({
         $scope.getDeviceLayoutSvg.subscribe(res => {
             const ids = document.querySelectorAll('#svgView g[type="videoImage"]'):: [].map(v => v.attributes.deviceid.value).join();
             ids && $scope.getVideoNames.getData({ ids })
-            .then(res => res.data.forEach(v => $("#svgView g[type='videoImage'][deviceid='" + v.id + "']")
-                .attr('title', v.pointName)
-                .attr('data-toggle', 'tooltip')
-                .attr('data-placement', 'right')
-                .tooltip({ 'container': 'body' })
-            ))
+                .then(res => res.data.forEach(v => $("#svgView g[type='videoImage'][deviceid='" + v.id + "']")
+                    .attr('title', v.pointName)
+                    .attr('data-toggle', 'tooltip')
+                    .attr('data-placement', 'right')
+                    .tooltip({ 'container': 'body' })
+                ))
         });
 
         // 注册事件
@@ -123,7 +129,7 @@ ajaxData({
         });
 
         // 事件处理函数   弹出窗
-        function showHistoryData_byRTMDeviceLogId (pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
+        function showHistoryData_byRTMDeviceLogId(pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
             var res = { deviceSerialNnumber: deviceSerialNnumber, deviceId: deviceid, pstationid: pstationid, deviceTypeNow: deviceType, };
             $scope.deviceTypeNow = deviceType;
             $scope.inverterType = hasJB;
