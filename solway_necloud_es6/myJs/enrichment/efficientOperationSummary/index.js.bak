@@ -19,6 +19,14 @@ ajaxData({
         $scope.$apply();
     };
 
+    // 父页面重载  可修改记录
+    $scope.reloadParentPage = async (data = {}) => {
+        historicalRecord.set(data);
+        $scope.beforeLoading = true;
+        
+        return historyInitCallback();
+    };
+
 
     // 切换主题模块
     $scope.changeTheme = theme => {

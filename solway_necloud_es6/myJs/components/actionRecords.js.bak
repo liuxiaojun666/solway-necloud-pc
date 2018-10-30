@@ -17,7 +17,7 @@ app.factory('actionRecord', function ($state) {
         if (!$solway.getStore().actionRecord[key]) record[key] = { data: {} };
         const data = typeof(arg) === 'function' ? arg(record[key], record[currentKey], record) : arg;
         record[key].data = {
-            ...record[key].data,
+            ...(record[key].data || {}),
             ...data
         };
         $solway.setStore('actionRecord', record);
