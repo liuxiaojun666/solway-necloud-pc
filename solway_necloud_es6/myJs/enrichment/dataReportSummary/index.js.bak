@@ -74,6 +74,19 @@ ajaxData({
         getTabData();
         $scope.$apply();
     };
+    
+    // 父页面重载  可修改记录
+    $scope.reloadParentPage = async (data = {}) => {
+        historicalRecord.set(data);
+        $scope.beforeLoading = true;
+        if (data.stationData) {
+            await $scope.changeStation.getData(data.stationData);
+            const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            $scope.switchPowerScope.currentDataName = currentDataName;
+            $scope.switchPowerCallback(data.stationData);
+        }
+        return historyInitCallback();
+    };
 
     // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
     $scope.dateUpdated = async (dateType, dateTime) => {
@@ -118,7 +131,11 @@ ajaxData({
             await myAjaxData.timeout(500);
             $scope.switchPowerCallback(stationData);
         } else { // 电站信息  发生变化   切换到记录中的电站
-            await $scope.changeStation.getData(stationData);
+            const { result } = await $scope.changeStation.getData(stationData);
+            if (!result) {
+                const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
+                return $scope.reloadParentPage({ stationData: { id, isGroup, dataType, stClass } });
+            }
             const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
             $scope.switchPowerScope.currentDataName = currentDataName;
             $scope.switchPowerCallback(stationData);

@@ -109,11 +109,14 @@ ajaxData({
             await myAjaxData.timeout(500);
             $scope.switchPowerCallback(stationData);
         } else { // 电站信息  发生变化   切换到记录中的电站
-            await $scope.changeStation.getData(stationData);
+            const { result } = await $scope.changeStation.getData(stationData);
+            if (!result) {
+                const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
+                return $scope.reloadParentPage({ stationData: { id, isGroup, dataType, stClass } });
+            }
             const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
             $scope.switchPowerScope.currentDataName = currentDataName;
             $scope.switchPowerCallback(stationData);
-            // $scope.reloadParentPage({});
         }
     };
 
