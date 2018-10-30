@@ -119,7 +119,11 @@ ajaxData({
                 $scope.ifShowShareTab = res.hasShareUser;
             });
         } else { // 电站信息  发生变化   切换到记录中的电站
-            await $scope.changeStation.getData(stationData);
+            const { result } = await $scope.changeStation.getData(stationData);
+            if (!result) {
+                const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
+                return $scope.reloadParentPage({ stationData: { id, isGroup, dataType, stClass } });
+            }
             const { currentDataName, hasShareUser} = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
             $scope.ifShowShareTab = hasShareUser;
             
