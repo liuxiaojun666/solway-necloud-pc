@@ -1,33 +1,33 @@
 ajaxData({
     // info
-    analysis_company_fra_shd_month_info: {
-        name: 'GETanalysis_company_fra_shd_month_info',
+    analysis_company_real_shd_month_info: {
+        name: 'GETanalysis_company_real_shd_month_info',
         data: {},
         later: true
     },
     // 电站 列表
-    analysis_company_fra_shd_month_stationlist: {
-        name: 'GETanalysis_company_fra_shd_month_stationlist',
+    analysis_company_real_shd_month_stationlist: {
+        name: 'GETanalysis_company_real_shd_month_stationlist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_company_fra_shd_month_stationline: {
-        name: 'GETanalysis_company_fra_shd_month_stationline',
+    analysis_company_real_shd_month_stationline: {
+        name: 'GETanalysis_company_real_shd_month_stationline',
         data: {},
         later: true,
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'modelDeviationCompanyMonthService',
-})('modelDeviationCompanyMonthCtrl', ['$scope', 'modelDeviationCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'realCompanyMonthService',
+})('realCompanyMonthCtrl', ['$scope', 'realCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape} = historicalRecord.get().themeModelDeviationCompanyMonth || {};
+        let { showShape} = historicalRecord.get().themeRealCompanyMonth || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -69,8 +69,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeModelDeviationCompanyMonth: {
-                ...historicalRecord.get().themeModelDeviationCompanyMonth || {},
+            themeRealCompanyMonth: {
+                ...historicalRecord.get().themeRealCompanyMonth || {},
                 showShape
             }
         });
@@ -86,21 +86,21 @@ ajaxData({
         if (dateType !== 1) return;
         if (dataType <= 0) return;
         if (getInfo) {
-            $scope.analysis_company_fra_shd_month_info.getData({
-                queryCode: 'analysis_company_fra_shd_month_info',
+            $scope.analysis_company_real_shd_month_info.getData({
+                queryCode: 'analysis_company_real_shd_month_info',
                 queryType: 1,
                 date: dateTime.showDate
             });
         }
         if (showShape === 'list') {
-            $scope.analysis_company_fra_shd_month_stationlist.getData({
-                queryCode: 'analysis_company_fra_shd_month_stationlist',
+            $scope.analysis_company_real_shd_month_stationlist.getData({
+                queryCode: 'analysis_company_real_shd_month_stationlist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (showShape === 'chart') {
-            $scope.analysis_company_fra_shd_month_stationline.getData({
-                queryCode: 'analysis_company_fra_shd_month_stationline',
+            $scope.analysis_company_real_shd_month_stationline.getData({
+                queryCode: 'analysis_company_real_shd_month_stationline',
                 queryType: 1,
                 date: dateTime.showDate
             });
@@ -108,7 +108,7 @@ ajaxData({
     };
 
     // 电站 列表
-    $scope.analysis_company_fra_shd_month_stationlist.getDataCallback = (success, res) => {
+    $scope.analysis_company_real_shd_month_stationlist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -116,7 +116,7 @@ ajaxData({
                 title: '电站',
                 dataIndex: 'st_name',
                 align: 'left',
-                width: '25%',
+                width: '15%',
                 sort: true,
                 render(text) {
                     return `<span class="clickable">${text}</span>`
@@ -129,20 +129,62 @@ ajaxData({
                 sort: true,
             },
             {
+                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '限电损失电量' + '(' + res.body.units.restrict_we + ')',
+                dataIndex: 'restrict_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '检修损失电量' + '(' + res.body.units.repair_we + ')',
+                dataIndex: 'repair_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '故障损失电量' + '(' + res.body.units.fail_we + ')',
+                dataIndex: 'fail_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '衰减损失电量' + '(' + res.body.units.decay_we + ')',
+                dataIndex: 'decay_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '积灰损失电量' + '(' + res.body.units.dust_we + ')',
+                dataIndex: 'dust_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '其他损失电量' + '(' + res.body.units.other_we + ')',
+                dataIndex: 'other_we',
+                align: 'right',
+                sort: true,
+            },
+            {
                 title: '应发电量' + '(' + res.body.units.shd_kwh_chk + ')',
                 dataIndex: 'shd_kwh_chk',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '理论电量' + '(' + res.body.units.fra_kwh_chk + ')',
-                dataIndex: 'fra_kwh_chk',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '模型偏差率' + '(' + res.body.units.mod_dev_we_r + ')',
-                dataIndex: 'mod_dev_we_r',
+                title: '能量可利用率' + '(' + res.body.units.pba + ')',
+                dataIndex: 'pba',
                 align: 'right',
                 sort: true,
             },
@@ -150,10 +192,19 @@ ajaxData({
     };
 
     // 电站 曲线
-    $scope.analysis_company_fra_shd_month_stationline.getDataCallback = (success, res) => {
+    $scope.analysis_company_real_shd_month_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
-        $scope.ydatas = [[res.body.data.shd_kwh_chk, res.body.data.fra_kwh_chk], [res.body.data.mod_dev_we_r]];
+        $scope.ydatas = [[
+            res.body.data.real_kwh_chk,
+            res.body.data.shade_we,
+            res.body.data.restrict_we,
+            res.body.data.repair_we,
+            res.body.data.other_we,
+            res.body.data.fail_we,
+            res.body.data.decay_we,
+            res.body.data.dust_we,
+            res.body.data.shd_kwh_chk], [res.body.data.pba]];
     };
 
     // 数据置空
@@ -161,9 +212,9 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_company_fra_shd_month_stationlist.res = null;
-        $scope.analysis_company_fra_shd_month_stationline.res = null;
-        if (getInfo) $scope.analysis_company_fra_shd_month_info.res = null;
+        $scope.analysis_company_real_shd_month_stationlist.res = null;
+        $scope.analysis_company_real_shd_month_stationline.res = null;
+        if (getInfo) $scope.analysis_company_real_shd_month_info.res = null;
     }
 
     // 销毁 事件
