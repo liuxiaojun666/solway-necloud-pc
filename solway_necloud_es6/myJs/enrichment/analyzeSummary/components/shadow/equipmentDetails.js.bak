@@ -20,7 +20,7 @@ ajaxData({
 }, {
         __serviceName__: 'shadeEquipmentDetailsService',
     })('shadowEquipmentDetailsCtrl', ['$scope', 'shadeEquipmentDetailsService'], ($scope, myAjaxData) => {
-        $scope.$on('equipmentDetails', (e, {eqid, eq_name}) => {
+        $scope.$on('equipmentDetails', (e, { eqid, eq_name }) => {
             $scope.eqid = eqid;
             $scope.eq_name = eq_name;
             $scope.diffGetdata();
@@ -49,9 +49,13 @@ ajaxData({
                     eqid,
                 });
             } else if (cShowShape === 'shadow') {
-                $scope.selectEqPaintingData.getData({
-                    deviceId: eqid,
-                    dtime: dateTime.showDate.substr(0, 7)
+                // $scope.selectEqPaintingData.getData({
+                //     deviceId: eqid,
+                //     dtime: dateTime.showDate.substr(0, 7)
+                // });
+                $scope.$broadcast('equipmentShadowDetails', {
+                    eqid: $scope.eqid,
+                    eq_name: $scope.eq_name
                 });
             }
         };
@@ -114,7 +118,7 @@ ajaxData({
             $scope.types = [['bar', 'bar', 'bar', ...new Array(len).fill('line'), 'line']];
             $scope.cydatas = [[[], [], [], ...res.body.map(computDataArr), [16]]];
             $scope.colors = [['#7e4bb4', '#dd5859', '#b08e73', ...res.body.map(v => ({ AbnormalShadow: '#dd5859', AlwaysShadow: '#b08e73', Shadow: '#7e4bb4' }[v.property]))]];
-            function computDataArr (data) {
+            function computDataArr(data) {
                 const arr = [];
                 arr.length = 1440;
                 const startTimeArr = [];
@@ -140,7 +144,7 @@ ajaxData({
         $scope.selectEqPaintingData.subscribe(res => {
             $scope.barDatas = new Array(18).fill(0);
             res.body.forEach(v => $scope.barDatas[v.stringId - 1] = v.reduce);
-            $scope.barNames = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,];
+            $scope.barNames = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,];
             $scope.tooltipFormatter2 = (params, b, c) => '组串编号' + params[0].name + '损失(%): ' + params[0].value;
         });
     });
