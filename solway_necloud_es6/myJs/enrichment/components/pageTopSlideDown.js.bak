@@ -37,9 +37,8 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
                 }
             }else{
                 const falsify = historicalRecord.falsify(routerUrl,{'theme':theme},true);
-                // debugger
+                $scope.currentFun = theme;
                 if(falsify.redirect == 'failure'){
-                    $scope.currentFun = theme;
                     $scope.$parent.reloadParentPage({});
                     $(".systems-page").slideUp();
                 }
@@ -54,11 +53,8 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
 
         //切换不同体系
         $scope.changeSystemTab = type =>{
-            $scope.systemTab = type;
-            const record = $solway.getStore().systemInfo;
-            // $scope.currentState = record.module?record.module[0]:'';
-            $scope.currentState = $state.current.name;
-            $scope.currentFun = record.module?record.module[1]:'';
+            $scope.systemTab = type;  
+            $scope.setActiveClass();       
         }
 
         //鼠标悬浮0.5s页面头部，出现下拉页面
@@ -79,6 +75,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
 
         $timeout(() => {
             $('body').on('mouseover','.hover-header-con',()=>{
+                $scope.setActiveClass();
                 timer = setTimeout(() => {
                     $(".systems-page").slideDown();
                 }, 500);
@@ -90,6 +87,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
 
         $('body').on('click', '.hover-header-con-click', () => {
             $(".systems-page").slideDown();
+            $scope.setActiveClass();
         })
 
         $(".close_btn_slide").click(() => {
@@ -110,6 +108,21 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
         
         $scope.stamp = window.stamp;
 
+        $scope.setActiveClass = ()=>{
+            $scope.currentState = $state.current.name;
+
+            if($scope.currentState == 'analyzeSummary'){
+                $scope.currentFun = historicalRecord.get().theme?historicalRecord.get().theme:'default';
+                // $scope.$apply();
+            }else if($scope.currentState == 'efficientOperationSummary'){
+                $scope.currentFun = historicalRecord.get().theme?historicalRecord.get().theme:'Profession';
+                // $scope.$apply();
+            }else{
+                $scope.currentFun = $scope.currentState;
+            }
+
+        }
+
         historyInitCallback();
 
         // 获取记录
@@ -118,9 +131,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
             const {systemTab = 'concept'} = record;
             $scope.systemTab = systemTab;
 
-            $scope.currentState = $state.current.name;
-            // $scope.currentState = record.module?record.module[0]:'';
-            $scope.currentFun = record.module?record.module[1]:'';
+            $scope.setActiveClass();
         };
     }
 })])
