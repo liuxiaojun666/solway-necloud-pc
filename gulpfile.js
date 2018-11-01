@@ -15,7 +15,8 @@ let gulp = require('gulp'),
 	del = require('del'),
 	fs = require('fs'),
 	path = require('path'),
-	autoprefixer = require('gulp-autoprefixer')
+	autoprefixer = require('gulp-autoprefixer'),
+	imageMin = require('gulp-imagemin');
 
 let lastTime = Date.now();
 gulp.task('watch', [], () => {
@@ -87,6 +88,19 @@ gulp.task('watch', [], () => {
 			})
 		})
 
+		watch('theme/images/**', (file) => {
+			if (file.event === 'change') return;
+			const absolutePath = file.history[0];
+			const relativePath = absolutePath.replace(file.cwd, '').substr(1);
+			const fileName = (/([^<>/\\\|:""\*\?]+)\.\w+$/).exec(absolutePath)[0];
+			const distPath = relativePath.replace(fileName, '');
+
+			gulp.src(relativePath)
+				.pipe(imageMin({ progressive: true }))
+				.pipe(gulp.dest(distPath))
+
+		})
+
 		watch('theme/css/**/*.less', () => {
 			fs.readFile(__dirname + "/myConfig.json", (err, data) => {
 				if (err) throw err
@@ -102,14 +116,16 @@ gulp.task('watch', [], () => {
 		})
 
 		watch(['theme/**', 'tpl/**', '!{theme/css}/**/*.less'], (event) => {
-			const DateNow = Date.now();
-			if (lastTime + 1000 * 60 < DateNow) {
-				lastTime = DateNow;
-				gulp.src(['login.jsp'])
-					.pipe(replace(/\'\?_=[^d+$]*?\'/g, `'?_=${DateNow}'`))
-					.pipe(gulp.dest(''));
-			}
-			livereload.changed(event.path)
+			setTimeout(() => {
+				const DateNow = Date.now();
+				if (lastTime + 1000 * 60 < DateNow) {
+					lastTime = DateNow;
+					gulp.src(['login.html'])
+						.pipe(replace(/\'\?_=[^d+$]*?\'/g, `'?_=${DateNow}'`))
+						.pipe(gulp.dest(''));
+				}
+				livereload.changed(event.path)
+			}, 1000);
 		})
 	}, 5000)
 })
