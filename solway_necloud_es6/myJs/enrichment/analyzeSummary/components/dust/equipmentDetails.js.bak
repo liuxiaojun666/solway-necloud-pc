@@ -14,9 +14,10 @@ ajaxData({
 }, {
         __serviceName__: 'dustEquipmentDetailsService',
     })('dustEquipmentDetailsCtrl', ['$scope', 'dustEquipmentDetailsService'], ($scope, myAjaxData) => {
-        $scope.$on('equipmentDetails', (e, {eqid, eq_name}) => {
+        $scope.$on('equipmentDetails', (e, {eqid, eq_name, stid}) => {
             $scope.eqid = eqid;
             $scope.eq_name = eq_name;
+            $scope.stid = stid;
             $scope.analysis_station_clean_invlist.res = null;
             $scope.analysis_station_clean_invline.res = null;
             $scope.cColumn = [];
@@ -26,13 +27,14 @@ ajaxData({
         });
 
         $scope.diffGetdata = () => {
-            const { cShowShape = 'list', eqid, dateTime, dateType } = $scope;
+            const { cShowShape = 'list', eqid, dateTime, dateType, stid } = $scope;
             if (cShowShape === 'list') {
                 $scope.analysis_station_clean_invlist.getData({
                     queryType: 3,
                     date: dateTime.showDate,
                     dateType: ['', 2, 1, ''][dateType],
                     eqid,
+                    stid
                 });
             } else if (cShowShape === 'chart') {
                 $scope.analysis_station_clean_invline.getData({
@@ -40,6 +42,7 @@ ajaxData({
                     date: dateTime.showDate,
                     dateType: ['', 2, 1, ''][dateType],
                     eqid,
+                    stid
                 });
             }
         }
