@@ -1,83 +1,266 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-ng-app="app">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>代理登录</title>
-    <script src="/vendor/jquery/jquery.min.js" type="text/javascript"></script>
-</head>
-<body style="text-align: center;">
-    <h1>登录</h1>
+    <meta charset="utf-8" />
+    <title></title>
+    <meta name="description" content="app, web app, responsive, responsive layout, admin, admin panel, admin dashboard, flat, flat ui, ui kit, AngularJS, ui route, charts, widgets, components" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <link type="image/x-icon" rel="shortcut icon" href="theme/images/favicon.ico">
+    <link rel="stylesheet" href="theme/css/app.css" type="text/css" />
+    <script src="vendor/jquery/jquery.min.js" type="text/javascript"></script>
+    <style>
+        html,body{
+            margin:0;
+        }
+        .clearfix:before,
+        .clearfix:after {
+            content:"";
+            display:table;
+            clear:both;
+        }
+        .clearfix {
+            *zoom:1;
+        }
+        .login .login-input{
+            width:100%;
+            height:40px;
+            background:rgba(248,248,248,1);
+            border-radius:4px;
+            border: none;
+            text-indent: 1em;
+        }
+        input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0px 1000px rgba(248,248,248,1) inset !important;
+        }
 
-    <!-- <form action="javascript:;" onsubmit="login()"> -->
-        <label for="myUsername">自定义账号</label>
-        <input type="text" id="myUsername" value=""><br><br>
-    
-        <label for="username">选择账号：</label>
-        <select name="" id="username">
-            <option value="gkdemo" selected>gkdemo</option>
-            <option value="ydghb">ydghb</option>
-            <option value="ydgsh">ydgsh</option>
-            <option value="18401540500">18401540500</option>
-            <option value="15010158381">15010158381</option>
-            <option value="18611897671">18611897671</option>
-        </select><br><br>
-    
-        <label for="password">密    码：</label>
-        <input type="text" id="password" value="123456"><br><br>
-    
-        <img style="vertical-align: middle;" src="/Login/randomValidateCode.htm" onclick="this.src='/Login/randomValidateCode.htm?' + Math.random()" alt="">
-        <input type="text" id="code" placeholder="请输入验证码" autofocus><br><br>
-    
-        <button onclick="login()">登录</button>
-    <!-- </form> -->
-
+    </style>
     <script>
-        function login () {
-            var username = $('#myUsername').val().trim() || $('#username').val()
-            var loginUrl = "/Login/doLogin.htm"
-            if (username === 'ydgsh' || username === 'ydghb') loginUrl = '/wxa/user/doLoginForPC.htm'
-            $.post(loginUrl, {
+        window.stamp = window.name = '?_=1540881961335';
+    </script>
+</head>
+
+<body class="login" style="background: url('./theme/images/login/login-bg-new.png') no-repeat;background-size: cover;color:rgba(69,69,69,1);">
+    <div class="logo-con clearfix" style="width:791px;height:525px;margin:0 auto;position: absolute;top: 50%;margin-top: -262px;left: 50%;margin-left: -395px;">
+        <div style="width:394px;height:525px;float:left;background:url('./theme/images/login/company-bg.png') no-repeat;background-size: cover"></div>
+        <div style="width:394px;height:525px;float:left;background:rgba(255,255,255,1);border-radius: 0 12px 12px 0;">
+            <div class="text-center" style="margin:40px 0 48px;">
+                <div><img src="theme/images/login/logo.png" alt=""></div>
+                <div style="font-size:24px;margin:18px 0 3px;">新能云</div>
+                <div style="font-size:14px;">新能源智能运营管理平台</div>
+            </div>
+            <div style="padding:0px 36px;">
+                <div style="margin-bottom:18px;"><input type="text" placeholder="用户名" class="login-input" id="login_username"></div>
+                <div style="margin-bottom:18px;"><input type="password" placeholder="密码" class="login-input" id="login_pass"></div>
+                <div style="margin-bottom:18px;" class="clearfix">
+                    <div style="float:left;width:45%;">
+                        <input type="text" placeholder="验证码" class="login-input" id="login_code">
+                    </div>
+                    <div style="float:left;width:55%;padding-left: 20px;box-sizing: border-box;">
+                        <img class="validate-x1" id="validateCode" title="点击更换" onclick="javascript:aRefresh();" src="Login/randomValidateCode.htm"
+                            style="border: 1px solid rgb(0,0,0,0.2);height: 37px;width: 98px;">
+                        <a onclick="javascript:aRefresh();" class="validate-x2" href="javascript:void(0);" style="vertical-align: text-bottom;">换一张</a>
+                    </div>
+                </div>
+                <p id="loginMessage" style="font-size: 14px; font-family: '黑体'; color: red; text-align: center; margin-bottom: -10px; display: none;"></p>
+                <div onclick="login()" style="height:40px;line-height: 40px;margin-top: 40px;background:rgba(31,141,225,1);border-radius:4px;text-align: center;color:white;font-size:20px;cursor: pointer;">
+                    登录
+                </div>
+                <div class="clearfix" style="color:rgba(69,69,69,0.8);margin-top:10px;">
+                    <div style="float:left;cursor: pointer;" onclick="forgetPwd()">忘记密码？</div>
+                    <div style="float:right;cursor: pointer;" onclick="goRegistPage()">注册新用户</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        var platformAgent = navigator.userAgent;
+        if(/(iPhone|iPad|iPod|iOS|android)/i.test(platformAgent)){
+            window.location = "http://necloud.solway.cn/necloud-m";
+        }
+        if (!navigator.cookieEnabled) {
+            alert("当前浏览器禁止使用Cookie，请开启Cookie否则您将无法正常浏览本网站！谢谢合作！！！");
+        } 
+
+        function aRefresh() {
+            $("#validateCode").attr("src", "Login/randomValidateCode.htm?" + Math.random());
+        }
+
+        function login() {
+            var persist = localStorage.persist;
+            var stamp = localStorage.stamp;
+            localStorage.clear();//清除角色Ids
+            if (stamp === window.stamp) {
+                localStorage.persist = persist;
+            }
+            $("#loginMessage").html("");
+
+            var username = $("#login_username").val();
+            var password = $("#login_pass").val();
+            var code = $("#login_code").val();
+            if (username == "" || null == username || null == password
+                || password == "") {
+                $("#loginMessage").html("用户名和密码不能为空");
+                $("#loginMessage").show();
+                return false;
+            }
+            if (code == "" || null == code) {
+                $("#loginMessage").html("验证码不能为空");
+                $("#loginMessage").show();
+                return false;
+            }
+            $.post("Login/doLogin.htm", {
                 "userName": username,
-                "password": $('#password').val().trim() || '123456',
-                "randomCode": $('#code').val().trim()
-            }, function(msg) {
-                if (msg.status === 1) successFun(msg.wxaUserSimpleInfo)
-                    
-                else if (msg.body && msg.body.status === 1) successFun(msg.body.wxaUserSimpleInfo)
-
-                else {
-                    $('img').attr('src', '/Login/randomValidateCode.htm?' + Math.random())
-                    $('#code').val('').focus()
-                }
-
-                function successFun(params) {
-                    window.localStorage.wxuser = JSON.stringify(params)
-                    window.localStorage.hasComInvite = 1
-                    toUrl()
-                }
-            })
-        }
-
-        $(document).keydown(function (e) {
-            if (e.keyCode == 13) login()
-        })
-
-        function toUrl() {
-            $.post("/UserAuthHandle/getRightListForPCNew.htm", {},
-                function (result) {
-                    if (result.result) {
-                        if (result.roleType == 3 || result.roleType == 99) window.location.href = "index.jsp#/app" + getArrRealVal(result.rightlist, "uiurl")
-                        else window.location.href = "/index.jsp#/app"
+                "password": password,
+                "randomCode": code
+            }, function (msg) {
+                if (msg.status == 2) {
+                    $("#loginMessage").html("用户名或密码有误!");
+                    $("#loginMessage").show();
+                } else if (msg.status == 3) {
+                    $("#loginMessage").html("验证码有误!");
+                    $("#loginMessage").show();
+                    aRefresh();
+                } else if (msg.status == 4) {
+                    $("#loginMessage").html("用户已被锁定，请联系管理员!");
+                    $("#loginMessage").show();
+                } else if (msg.status == 5) {
+                    $("#loginMessage").html("用户已被注销，请联系管理员!");
+                    $("#loginMessage").show();
+                } else if (msg.status == 6) {
+                    $("#loginMessage").html("用户已在其它地方登录!");
+                    $("#loginMessage").show();
+                } else if (msg.status == 1) {
+                    var storage = window.localStorage;
+                    storage["hasComInvite"] = 1;
+                    storage["username"] = username;
+                    if (msg.wxuser) storage["wxuser"] = JSON.stringify(msg.wxuser);
+                    if (username === "xndemo") {
+                        $.get("PowerStation/renames.htm").done(function (response) {
+                            var obj = {};
+                            Object.keys(response.body).filter(function (val) {
+                                return (+val + '') === 'NaN';
+                            }).forEach(function (val) {
+                                obj[val] = response.body[val];
+                            });
+                            storage.testUserData = JSON.stringify(obj);
+                            window.localStorage.stamp = window.stamp;
+                            window.location.href = "index.jsp" + window.stamp;
+                        });
+                    } else {
+                        storage.testUserData = '';
+                        window.localStorage.stamp = window.stamp;
+                        window.location.href = "index.jsp" + window.stamp;
                     }
+
+
                 }
-            )
+            });
         }
 
-        function getArrRealVal(arr, atr) {
-            for (var i = 0; i < arr.length; i++) if (arr[i][atr]) return arr[i][atr]
+        //点击  Enter  键  登陆
+        document.onkeydown = function (e) {
+			var e = window.event ? window.event : e;
+			if (e.keyCode == 13) {
+				login();
+			}
         }
+        
+        function forgetPwd() {
+            window.location.href = 'tpl/registPage/forgetPassword.html';
+        }
+
+        function goRegistPage() {
+            window.location.href = "tpl/registPage/regist.html";
+        }
+
+        $(function () {
+            var support_css3 = (function () {
+                var div = document.createElement('div'),
+                    vendors = 'Ms O Moz Webkit'.split(' '),
+                    len = vendors.length;
+
+                return function (prop) {
+                    if (prop in div.style) return true;
+
+                    prop = prop.replace(/^[a-z]/, function (val) {
+                        return val.toUpperCase();
+                    });
+
+                    while (len--) {
+                        if (vendors[len] + prop in div.style) {
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+            })();
+            function IEVersion() {
+                var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串  
+                var isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1; //判断是否IE<11浏览器  
+                var isEdge = userAgent.indexOf("Edge") > -1 && !isIE; //判断是否IE的Edge浏览器  
+                var isIE11 = userAgent.indexOf('Trident') > -1 && userAgent.indexOf("rv:11.0") > -1;
+                if (isIE) {
+                    var reIE = new RegExp("MSIE (\\d+\\.\\d+);");
+                    reIE.test(userAgent);
+                    var fIEVersion = parseFloat(RegExp["$1"]);
+                    if (fIEVersion == 7) {
+                        return 7;
+                    } else if (fIEVersion == 8) {
+                        return 8;
+                    } else if (fIEVersion == 9) {
+                        return 9;
+                    } else if (fIEVersion == 10) {
+                        return 10;
+                    } else {
+                        return 6;//IE版本<=7
+                    }
+                } else if (isEdge) {
+                    return true;//edge
+                } else if (isIE11) {
+                    return 11; //IE11  
+                } else {
+                    if (
+                        support_css3('transform')
+                        && support_css3('boxSizing')
+                        && support_css3('flexWrap')
+                    ) return true;//不是ie浏览器
+                    return false;
+                }
+            }
+
+
+            $('body').append('<div id="useCalc" style="width: calc(100% - 50px);-moz-calc(100% - 50px);-webkit-calc(100% - 50px);"></div>');
+            if ($('#useCalc').width() === $('body').width()) {
+                disabledLogin();
+            }
+            if (IEVersion() !== true) {
+                disabledLogin()
+            }
+
+            function disabledLogin() {
+                $('#loginFormBlock').hide();
+                $('body').append(
+                    '<div style="font-size:16px;background-color: rgba(0,0,0,.5);color:#fff;position:fixed;left:0;right:0;top:0;bottom:0;text-align:center;padding-top:250px;">' +
+                    '<div style="background: #fff url(./theme/images/login/noLogin.jpg) no-repeat;width:680px;height:350px;margin:0 auto;padding-top:50px;">' +
+                    '<span>您的浏览器版本太低，部分功能无法使用。</span>' +
+                    '<br/><br/>' +
+                    '<span>建议升级浏览器。</span><br/>' +
+                    '<br/><br/>' +
+                    '<a style="background: #29799e;border-radius:20px;display:inline-block;width:140px;color:#fff;line-height:40px;margin-right:2em;" target="_blank" href="http://down.tech.sina.com.cn/download/d_load.php?d_id=40975&down_id=5&ip=111.205.32.67"><u>谷歌Chrome</u></a>' +
+                    '<a style="background: #29799e;border-radius:20px;display:inline-block;width:140px;color:#fff;line-height:40px;" target="_blank" href="http://www.firefox.com.cn/"><u>火狐浏览器</u></a><br/>' +
+                    '</div>' +
+                    '</div>'
+                );
+            }
+        
+        });
+
     </script>
 </body>
+
 </html>
