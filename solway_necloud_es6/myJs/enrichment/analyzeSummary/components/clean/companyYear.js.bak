@@ -33,6 +33,20 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 设备 列表
+    analysis_station_dust_month_devicelist: {
+        name: 'GETanalysis_station_dust_month_devicelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 设备 曲线
+    analysis_station_dust_month_deviceline: {
+        name: 'GETanalysis_station_dust_month_deviceline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     actionCompanyCleanSuggest: {
         name: 'GETactionCompanyCleanSuggest',
         data: {},
@@ -148,7 +162,20 @@ ajaxData({
                 queryType: 1,
                 date: dateTime.showDate
             });
-        } else if (tabIndex === 2) {
+        } else if (tabIndex === 2 && showShape === 'list') {
+            $scope.analysis_station_dust_month_devicelist.getData({
+                queryCode: 'analysis_station_dust_month_devicelist',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 2 && showShape === 'chart') {
+            $scope.analysis_station_dust_month_deviceline.getData({
+                queryCode: 'analysis_station_dust_month_deviceline',
+                queryType: 1,
+                sort: 'clean_mark,asc',
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 3) {
             $scope.actionCompanyCleanSuggest.getData({
                 dateType: 3,
                 queryType: 1,
@@ -241,6 +268,56 @@ ajaxData({
         $scope.ydatas = [[res.body.data.dust_we_r]];
     };
 
+    // 设备 列表
+    $scope.analysis_station_dust_month_devicelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站',
+                dataIndex: 'st_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '设备',
+                dataIndex: 'eq_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+            },
+            {
+                title: '清洁指数' + '(' + res.body.units.clean_mark + ')',
+                dataIndex: 'clean_mark',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '灰尘损失电量' + '(' + res.body.units.dust_we + ')',
+                dataIndex: 'dust_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '灰尘损失比例' + '(' + res.body.units.dust_we_r + ')',
+                dataIndex: 'dust_we_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 设备 曲线
+    $scope.analysis_station_dust_month_deviceline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.st_name.map((v, i) => v + '\n' + res.body.data.eq_name[i]);
+        $scope.ydatas = [[res.body.data.clean_mark]];
+    };
+
 
     $scope.actionCompanyCleanSuggest.subscribe(res => {
         $scope.datasource = res.body;
@@ -318,6 +395,8 @@ ajaxData({
         $scope.analysis_company_dust_year_timeline.res = null;
         $scope.analysis_company_dust_year_stationlist.res = null;
         $scope.analysis_company_dust_year_stationline.res = null;
+        $scope.analysis_station_dust_month_devicelist.res = null;
+        $scope.analysis_station_dust_month_deviceline.res = null;
         $scope.actionCompanyCleanSuggest.res = null;
         if (getInfo) $scope.analysis_company_dust_year_info.res = null;
     }

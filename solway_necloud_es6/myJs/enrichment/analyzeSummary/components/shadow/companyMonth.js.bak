@@ -33,6 +33,20 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 设备 列表
+    analysis_station_shade_month_devicelist: {
+        name: 'GETanalysis_station_shade_month_devicelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 设备 曲线
+    analysis_station_shade_month_deviceline: {
+        name: 'GETanalysis_station_shade_month_deviceline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
     __serviceName__: 'shadowCompanyMonthService',
 })('shadowCompanyMonthCtrl', ['$scope', 'shadowCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -61,6 +75,10 @@ ajaxData({
 
     // 点击电站名  跳转到电站页面
     $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable') && $scope.tabIndex === 2) {
+            const { eqid, eq_name, stid } = item;
+            return $scope.equipmentDetail({ eqid, eq_name, stid });
+        }
         if (!event.target.className.includes('clickable')) return;
         $scope.reloadParentPage({
             stationData: {
@@ -72,6 +90,24 @@ ajaxData({
         });
     };
 
+    // 设备详情 弹出 处理 函数
+    $scope.equipmentDetail = (obj) => {
+        $scope.equipmentDetailShow = true;
+        $scope.$broadcast('equipmentDetails', obj);
+    };
+
+    // 图表 点击 事件 处理 函数
+    $scope.chartClick = (params) => {
+        if ($scope.tabIndex !== 2) return;
+        const { eq_name, eqid, stid } = $scope.analysis_station_shade_month_deviceline.res.body.data;
+        const itemIndex = eq_name.indexOf(params.name.split('\n')[1]);
+        $scope.equipmentDetail({
+            eq_name: params.name,
+            eqid: eqid[itemIndex],
+            stid: stid[itemIndex]
+        });
+        $scope.$apply();
+    };
 
     // 日期改变
     $scope.dateUpdated = async () => {
@@ -141,6 +177,21 @@ ajaxData({
                 queryCode: 'analysis_company_shade_month_stationline',
                 queryType: 1,
                 date: dateTime.showDate
+            });
+        } else if (tabIndex === 2 && showShape === 'list') {
+            $scope.analysis_station_shade_month_devicelist.getData({
+                queryCode: 'analysis_station_shade_month_devicelist',
+                queryType: 1,
+                date: dateTime.showDate,
+                shade_status: 1
+            });
+        } else if (tabIndex === 2 && showShape === 'chart') {
+            $scope.analysis_station_shade_month_deviceline.getData({
+                queryCode: 'analysis_station_shade_month_deviceline',
+                queryType: 1,
+                sort: 'shade_we_r,desc',
+                date: dateTime.showDate,
+                shade_status: 1
             });
         }
     };
@@ -233,6 +284,62 @@ ajaxData({
         $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
     };
 
+    // 设备 列表
+    $scope.analysis_station_shade_month_devicelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站',
+                dataIndex: 'st_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '设备',
+                dataIndex: 'eq_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+            },
+            {
+                title: '装机容量' + '(' + res.body.units.inst_kw + ')',
+                dataIndex: 'inst_kw',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                dataIndex: 'shade_we_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 设备 曲线
+    $scope.analysis_station_shade_month_deviceline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.st_name.map((v, i) => v + '\n' + res.body.data.eq_name[i]);
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+    };
+
     // 数据置空
     function setDataNull(getInfo) {
         $scope.column = [];
@@ -242,6 +349,8 @@ ajaxData({
         $scope.analysis_company_shade_month_timeline.res = null;
         $scope.analysis_company_shade_month_stationlist.res = null;
         $scope.analysis_company_shade_month_stationline.res = null;
+        $scope.analysis_station_shade_month_devicelist.res = null;
+        $scope.analysis_station_shade_month_deviceline.res = null;
         if (getInfo) $scope.analysis_company_shade_month_info.res = null;
     }
 

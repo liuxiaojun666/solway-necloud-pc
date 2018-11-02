@@ -33,6 +33,20 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 设备 列表
+    analysis_station_shade_year_devicelist: {
+        name: 'GETanalysis_station_shade_year_devicelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 设备 曲线
+    analysis_station_shade_year_deviceline: {
+        name: 'GETanalysis_station_shade_year_deviceline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
     __serviceName__: 'shadowCompanyYearService',
 })('shadowCompanyYearCtrl', ['$scope', 'shadowCompanyYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -143,6 +157,21 @@ ajaxData({
                 queryType: 1,
                 date: dateTime.showDate
             });
+        } else if (tabIndex === 2 && showShape === 'list') {
+            $scope.analysis_station_shade_year_devicelist.getData({
+                queryCode: 'analysis_station_shade_year_devicelist',
+                queryType: 1,
+                date: dateTime.showDate,
+                shade_status: 1
+            });
+        } else if (tabIndex === 2 && showShape === 'chart') {
+            $scope.analysis_station_shade_year_deviceline.getData({
+                queryCode: 'analysis_station_shade_year_deviceline',
+                queryType: 1,
+                sort: 'shade_we_r,desc',
+                date: dateTime.showDate,
+                shade_status: 1
+            });
         }
     };
 
@@ -234,6 +263,62 @@ ajaxData({
         $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
     };
 
+    // 设备 列表
+    $scope.analysis_station_shade_year_devicelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站',
+                dataIndex: 'st_name',
+                align: 'left',
+                width: '20%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '设备',
+                dataIndex: 'eq_name',
+                align: 'left',
+                width: '20%',
+                sort: true,
+            },
+            {
+                title: '装机容量' + '(' + res.body.units.inst_kw + ')',
+                dataIndex: 'inst_kw',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                dataIndex: 'shade_we_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 设备 曲线
+    $scope.analysis_station_shade_year_deviceline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.st_name.map((v, i) => v + '\n' + res.body.data.eq_name[i]);
+        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.shade_we], [res.body.data.shade_we_r]];
+    };
+
     // 数据置空
     function setDataNull(getInfo) {
         $scope.column = [];
@@ -243,6 +328,8 @@ ajaxData({
         $scope.analysis_company_shade_year_timeline.res = null;
         $scope.analysis_company_shade_year_stationlist.res = null;
         $scope.analysis_company_shade_year_stationline.res = null;
+        $scope.analysis_station_shade_year_devicelist.res = null;
+        $scope.analysis_station_shade_year_deviceline.res = null;
         if (getInfo) $scope.analysis_company_shade_year_info.res = null;
     }
 

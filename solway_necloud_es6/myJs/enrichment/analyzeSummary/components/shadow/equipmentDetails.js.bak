@@ -20,8 +20,9 @@ ajaxData({
 }, {
         __serviceName__: 'shadeEquipmentDetailsService',
     })('shadowEquipmentDetailsCtrl', ['$scope', 'shadeEquipmentDetailsService'], ($scope, myAjaxData) => {
-        $scope.$on('equipmentDetails', (e, { eqid, eq_name }) => {
+        $scope.$on('equipmentDetails', (e, { eqid, eq_name, stid = null }) => {
             $scope.eqid = eqid;
+            $scope.stid = stid;
             $scope.eq_name = eq_name;
             $scope.diffGetdata();
         });
@@ -33,13 +34,14 @@ ajaxData({
             $scope.cColumn = [];
             $scope.cxdata = void 0;
             $scope.cydata = void 0;
-            const { cShowShape = 'list', eqid, dateTime } = $scope;
+            const { cShowShape = 'list', eqid, dateTime, stid } = $scope;
             if (cShowShape === 'list') {
                 $scope.analysis_station_clean_invlist.getData({
                     queryType: 3,
                     date: dateTime.showDate,
                     dateType: 2,
                     eqid,
+                    stid
                 });
             } else if (cShowShape === 'chart') {
                 $scope.analysis_station_clean_invline.getData({
@@ -47,6 +49,7 @@ ajaxData({
                     date: dateTime.showDate,
                     dateType: 2,
                     eqid,
+                    stid
                 });
             } else if (cShowShape === 'shadow') {
                 // $scope.selectEqPaintingData.getData({
@@ -55,7 +58,8 @@ ajaxData({
                 // });
                 $scope.$broadcast('equipmentShadowDetails', {
                     eqid: $scope.eqid,
-                    eq_name: $scope.eq_name
+                    eq_name: $scope.eq_name,
+                    stid
                 });
             }
         };

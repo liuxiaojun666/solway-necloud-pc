@@ -33,6 +33,20 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 设备 列表
+    analysis_station_pgc_accum_devicelist: {
+        name: 'GETanalysis_station_pgc_accum_devicelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 设备 曲线
+    analysis_station_pgc_accum_deviceline: {
+        name: 'GETanalysis_station_pgc_accum_deviceline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
     __serviceName__: 'powerCapacityCompanyAccumulativeService',
 })('powerCapacityCompanyAccumulativeCtrl', ['$scope', 'powerCapacityCompanyAccumulativeService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -142,6 +156,18 @@ ajaxData({
                 queryType: 1,
                 date: dateTime.showDate
             });
+        } else if (tabIndex === 2 && showShape === 'list') {
+            $scope.analysis_station_pgc_accum_devicelist.getData({
+                queryCode: 'analysis_station_pgc_accum_devicelist',
+                queryType: 1,
+                date: dateTime.showDate,
+            });
+        } else if (tabIndex === 2 && showShape === 'chart') {
+            $scope.analysis_station_pgc_accum_deviceline.getData({
+                queryCode: 'analysis_station_pgc_accum_deviceline',
+                queryType: 1,
+                date: dateTime.showDate,
+            });
         }
     };
 
@@ -226,6 +252,57 @@ ajaxData({
         $scope.xdata = res.body.data.st_name;
         $scope.ydatas = [[res.body.data.pgc, res.body.data.decay_r_all, res.body.data.dust_r, res.body.data.pgc]];
     };
+
+    // 设备 列表
+    $scope.analysis_station_pgc_accum_devicelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站',
+                dataIndex: 'st_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '设备',
+                dataIndex: 'eq_name',
+                align: 'left',
+                width: '25%',
+                sort: true,
+            },
+            {
+                title: '发电能力' + '(' + res.body.units.pgc + ')',
+                dataIndex: 'pgc',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '衰减程度' + '(' + res.body.units.decay_r_all + ')',
+                dataIndex: 'decay_r_all',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '积灰程度' + '(' + res.body.units.dust_r + ')',
+                dataIndex: 'dust_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 设备 曲线
+    $scope.analysis_station_pgc_accum_deviceline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.st_name.map((v, i) => v + '\n' + res.body.data.eq_name[i]);
+        $scope.ydatas = [[res.body.data.pgc, res.body.data.decay_r_all, res.body.data.dust_r, res.body.data.pgc]];
+    };
+
     // 数据置空
     function setDataNull(getInfo) {
         $scope.column = [];
@@ -235,6 +312,8 @@ ajaxData({
         $scope.analysis_company_pgc_accum_timeline.res = null;
         $scope.analysis_company_pgc_accum_stationlist.res = null;
         $scope.analysis_company_pgc_accum_stationline.res = null;
+        $scope.analysis_station_pgc_accum_devicelist.res = null;
+        $scope.analysis_station_pgc_accum_deviceline.res = null;
         if (getInfo) $scope.analysis_company_pgc_accum_info.res = null;
     }
 

@@ -239,6 +239,17 @@ ajaxData(
         });
     };
 
+    $scope.closeGuidePage = () => {
+        $scope.guidePage = false;
+        Array.from(document.querySelectorAll('equipmentFailure .item')).forEach(v => v.style.opacity = 1);
+        historicalRecord.set({
+            themeEquipmentFailure: {
+                ...historicalRecord.get().themeEquipmentFailure || {},
+                guidePage: false
+            }
+        });
+    };
+
     $scope.changeTab = index => {
         $scope.tabIndex = index;
         drawingChart();

@@ -117,9 +117,12 @@ ajaxData({
         reportType: '1', 
         weight: 10, 
         week: 1, 
+        week2: 1,
         single: 1, 
         enable: 0, 
-        dateArr: getDateArr(1, void 0) 
+        mailAble: 0,
+        dateArr: getDateArr(1, void 0),
+        dateArr2: getDateArr(1, void 0),
     };
 
     //编辑当前记录
@@ -127,11 +130,13 @@ ajaxData({
         $scope.secondaryConfig = true;
         $scope.formData = {};
         $scope.detail.getData({ id }).then(res => {
-            const {reportType, startDate} = res.body;
+            const { reportType, startDate, sendDate} = res.body;
             $scope.formData = {
                 ...res.body,
                 week: reportType === 3 ? startDate.substr(-1) : '1',
+                week2: reportType === 3 ? sendDate.substr(-1) : '1',
                 dateArr: getDateArr(reportType, startDate),
+                dateArr2: getDateArr(reportType, sendDate),
                 isEdit: true
             };
         });
@@ -151,6 +156,8 @@ ajaxData({
             mailAble: 0, 
             dateArr: null, 
             week: null,
+            dateArr2: null, 
+            week2: null,
             name: $scope.formData.layName
         }).then(res => {
             if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
