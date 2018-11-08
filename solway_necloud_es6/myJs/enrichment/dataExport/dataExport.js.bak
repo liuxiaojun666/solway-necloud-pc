@@ -1,0 +1,195 @@
+ajaxData({
+    // 该角色 电站列表
+    allSTListForPCBySession: {
+        name: 'GETAllSTListForPCBySession',
+        data: {}
+    },
+    // 级别
+    bigDataExportLevel: {
+        name: 'GETbigDataExportLevel',
+        data: {
+            dictType: 'BIGDATA_EXPORT_LEVEL'
+        }
+    },
+    // 类型
+    bigDataExportType: {
+        name: 'GETbigDataExportType',
+        data: {
+            dictType: 'BIGDATA_EXPORT_TYPE'
+        }
+    },
+    // 列名
+    bigDataExportSelectByCondition: {
+        name: 'GETbigDataExportSelectByCondition',
+        data: {},
+        later: true
+    },
+    // 设备名
+    selectDevicesByStation: {
+        name: 'GETselectDevicesByStation',
+        data: {},
+        later: true
+    },
+
+}, {})('dataExportCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    historicalRecord.init();// 历史记录 初始化
+    $scope.beforeLoading = true; // 页面loading
+    $scope.moduleName = '数据导出';//当前页面名称；
+    $scope.endDate = new Date((+new Date) - 1000 * 60 * 60 * 24); // 日历可选 的截止日期
+    historyInitCallback();
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const {
+            startDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
+            endDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
+            createDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
+            formData = {},
+        } = historiData;
+        $scope.startDate = startDate;
+        $scope.endDate = endDate;
+        $scope.createDate = createDate;
+        $scope.createDate.showDate = '';
+        $scope.formData = formData;
+        $scope.beforeLoading = false;
+        // getTabData();
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+    };
+
+    // 级别 接口 处理
+    $scope.bigDataExportLevel.subscribe(res => {
+        $scope.formData.qcLevel = res[1] && res[1].dictValue;
+        $scope.bigDataExportSelectByCondition.beforeGetdata();
+        $scope.selectDevicesByStation.beforeGetdata();
+    });
+
+    // 类型 接口 处理
+    $scope.bigDataExportType.subscribe(res => {
+        $scope.formData.qcType = res[2] && res[2].dictValue;
+        $scope.bigDataExportSelectByCondition.beforeGetdata();
+        $scope.selectDevicesByStation.beforeGetdata();
+    });
+
+    // 电站 接口 处理
+    $scope.allSTListForPCBySession.subscribe(res => {
+        $scope.formData.qcStid = res[0] && res[0].id;
+        $scope.bigDataExportSelectByCondition.beforeGetdata();
+        $scope.selectDevicesByStation.beforeGetdata();
+    });
+
+    // 取列名
+    $scope.bigDataExportSelectByCondition.beforeGetdata = () => {
+        if (!$scope.bigDataExportLevel.res) return;
+        if (!$scope.bigDataExportType.res) return;
+        if (!$scope.allSTListForPCBySession.res) return;
+        $scope.bigDataExportSelectByCondition.getData({
+            level: $scope.formData.qcLevel,
+            type: $scope.formData.qcType,
+        });
+    };
+
+    // 列名 接口 处理
+    $scope.bigDataExportSelectByCondition.subscribe(res => {
+        $scope.formData.qcColumnidAll = false;
+        $scope.formData.qcColumnid = [].concat(res.body).map(v => ({
+            ...v,
+            show: true,
+            checked: false
+        }));
+    });
+
+    // 取设备
+    $scope.selectDevicesByStation.beforeGetdata = () => {
+        if (!$scope.bigDataExportLevel.res) return;
+        if (!$scope.bigDataExportType.res) return;
+        if (!$scope.allSTListForPCBySession.res) return;
+        if ($scope.formData.qcType == 0) return;
+        $scope.selectDevicesByStation.getData({
+            stid: $scope.formData.qcStid,
+            deviceType: $scope.formData.qcType,
+        });
+    };
+
+    // 设备 列表 接口 处理
+    $scope.selectDevicesByStation.subscribe(res => {
+        $scope.formData.qcEqidAll = false;
+        $scope.formData.qcEqid = [].concat(res).map(v => ({
+            ...v,
+            show: true,
+            checked: false
+        }));
+    });
+
+    // 改变选中状态
+    $scope.checkboxChange = (name, index, value) => {
+        if (index === 'All') {
+            return $scope.formData[name] = $scope.formData[name].map(v => ({...v, checked: value}));
+        }
+        if (!value) {
+            return $scope.formData[name + 'All'] = value;
+        }
+        $scope.formData[name + 'All'] = !$scope.formData[name].some(v => v.checked === false);
+    };
+
+    $scope.column = [
+        {
+            title: '级别',
+            dataIndex: 'a',
+            sort: 'true',
+            render(text) {
+                return '日级'
+            }
+        },
+        {
+            title: '电站',
+            dataIndex: 'b',
+            sort: 'true',
+            render(text) {
+                return 'hello world'
+            }
+        },
+        {
+            title: '类型',
+            dataIndex: 'c',
+            sort: 'true',
+            render(text) {
+                return '逆变器'
+            }
+        },
+        {
+            title: '时间段',
+            dataIndex: 'd',
+            align: 'center',
+            render(text) {
+                return '2018-10-15 至 2018-11-05'
+            }
+        },
+        {
+            title: '创建时间',
+            dataIndex: 'e',
+            align: 'center',
+            sort: 'true',
+            render(text) {
+                return '2018-10-15'
+            }
+        },
+        {
+            title: '过期时间',
+            dataIndex: 'f',
+            sort: 'true',
+            align: 'center',
+            render(text) {
+                return '2018-10-15'
+            }
+        },
+        {
+            title: '操作',
+            dataIndex: 'h',
+            render(text) {
+                return '下载'
+            }
+        },
+    ]
+
+});
