@@ -1,23 +1,26 @@
-app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state, $stateParams, $location,myAjaxData) {
+app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state, $stateParams, $location) {
 
+    const clearData = ()=>{
+        $scope.currentGroupId = '';
+        $scope.currentCompanyId = '';
+        $scope.currentStationId = '';
+    }
     $(".switch-power-enrich").on('click','.switchPowerIcon',function(){
-        myAjaxData
-        debugger
+        clearData();
+        $http({
+            method: "POST",
+            url: "UserAuthHandle/getCurrentInfoNew.htm",
+        }).success(function (res) {
+            $scope.currentSelectedId = res.currentSTID?res.currentSTID.toString():'';
+            $scope.currentLevel = res.currentType; //2:集团；1：公司；0：电站
+            
+            $scope.getSTClass();
+
+        });
         //初始化
         $scope.showCompanyStids = [];
         $scope.departmentTab = 'department';
-        //获取当前电站信息
-        const routeUrl = window.location.hash.substr(2);
-        if(routeUrl == 'power-index171024'){
-            $solway.setStore('currentStationsInfo', {'currentGroupId':'','currentCompanyId':'','currentStationId':''}); 
-        }
         
-        // let storeData = $solway.getStore().currentStationsInfo;
-        let storeData = myAjaxData.currentStationData.currentStationsInfo;
-        $scope.currentGroupId = storeData.currentGroupId;
-        $scope.currentCompanyId = storeData.currentCompanyId;
-        $scope.currentStationId = storeData.currentStationId;
-        $scope.getSTClass();
         
     })
 
@@ -55,6 +58,55 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
         }).success(function (res) {
             if(res.code == 0){
                 const data = res.body;
+
+                if($scope.currentLevel == 2){
+                    $scope.currentGroupId = $scope.currentSelectedId;
+                    //集团
+                }else if($scope.currentLevel == 1){
+                    //公司
+                    let thisStids = [];
+                    for(let i=0;i<data.length;i++){
+                        if(data[i].id == $scope.currentSelectedId ){
+                            thisStids = data[i].stids.split(',');
+                        }
+                    }
+                    for(let i=0;i<thisStids.length;i++){
+                        for(let j=0;j<data.length;j++){
+                            let groupStidsArr = data[j].stids.split(',');
+                            if(data[j].level == 0 && (groupStidsArr.indexOf(thisStids[i]) !== -1)){
+                                $scope.currentGroupId = data[j].id;
+                                break;
+                            }
+                        }
+                    }
+                    $scope.currentCompanyId = $scope.currentSelectedId;
+                }else if($scope.currentLevel == 0){
+                    //电站
+                    for(let i=0;i<data.length;i++){
+                        let groupStidsArr = data[i].stids.split(',');
+                        if(data[i].level == 0 && (groupStidsArr.indexOf($scope.currentSelectedId) !== -1)){
+                            $scope.currentGroupId = data[i].id;
+                            break;
+                        }
+                    }
+                    for(let i=0;i<data.length;i++){
+                        let thisStids = data[i].stids.split(',');
+                        if(data[i].level == 1 && (thisStids.indexOf($scope.currentSelectedId) !== -1)){
+                            $scope.currentCompanyId = data[i].id;
+                        }
+                    }
+                    $scope.currentStationId = $scope.currentSelectedId;
+                }
+
+
+
+
+
+
+
+                if(!$scope.currentGroupId){
+                    $scope.currentGroupId = data[0].id;
+                }
 
                 if($scope.currentCompanyId){
                     let stidArr = [];
@@ -241,41 +293,38 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                         $rootScope.posJcvFlag = true;
                     }
                    
-                    let currentStationsInfo = {'currentGroupId':'','currentCompanyId':'','currentStationId':''};
-                    //持久化所选的电站信息
-                    if(selectedType == 'group'){
-                        currentStationsInfo =  {'currentGroupId':powerStationId,'currentCompanyId':'','currentStationId':''};
-                        $solway.setStore('currentStationsInfo', {'currentGroupId':powerStationId,'currentCompanyId':'','currentStationId':''}); 
-                    }else{
-                        const data = $scope.groupAndCompanyList;
-                        const currentCompanyIdArr = itemData.stids.split(',');
-                        let gId = '';
-                        for(let i=0;i<data.length;i++){
-                            if(data[i].level == 0){
-                                let thisStids = data[i].stids.split(',');
-                                for(let j=0;j<currentCompanyIdArr.length;j++){
-                                    if(thisStids.indexOf(currentCompanyIdArr[j]) !== -1){
-                                        gId = data[i].id;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        if(selectedType == 'company'){
-                            currentStationsInfo = {'currentGroupId':gId,'currentCompanyId':powerStationId,'currentStationId':''};
-                            $solway.setStore('currentStationsInfo', {'currentGroupId':gId,'currentCompanyId':powerStationId,'currentStationId':''}); 
-                        }else if(selectedType == 'station'){
-                            currentStationsInfo = {'currentGroupId':gId,'currentCompanyId':itemData.parentId,'currentStationId':powerStationId};
-                            $solway.setStore('currentStationsInfo', {'currentGroupId':gId,'currentCompanyId':itemData.parentId,'currentStationId':powerStationId}); 
-                        }
-                    } 
+                    // let currentStationsInfo = {'currentGroupId':'','currentCompanyId':'','currentStationId':''};
+                    // //持久化所选的电站信息
+                    // if(selectedType == 'group'){
+                    //     currentStationsInfo =  {'currentGroupId':powerStationId,'currentCompanyId':'','currentStationId':''};
+                    //     $solway.setStore('currentStationsInfo', {'currentGroupId':powerStationId,'currentCompanyId':'','currentStationId':''}); 
+                    // }else{
+                    //     const data = $scope.groupAndCompanyList;
+                    //     const currentCompanyIdArr = itemData.stids.split(',');
+                    //     let gId = '';
+                    //     for(let i=0;i<data.length;i++){
+                    //         if(data[i].level == 0){
+                    //             let thisStids = data[i].stids.split(',');
+                    //             for(let j=0;j<currentCompanyIdArr.length;j++){
+                    //                 if(thisStids.indexOf(currentCompanyIdArr[j]) !== -1){
+                    //                     gId = data[i].id;
+                    //                     break;
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    //     if(selectedType == 'company'){
+                    //         $solway.setStore('currentStationsInfo', {'currentGroupId':gId,'currentCompanyId':powerStationId,'currentStationId':''}); 
+                    //     }else if(selectedType == 'station'){
+                    //         $solway.setStore('currentStationsInfo', {'currentGroupId':gId,'currentCompanyId':itemData.parentId,'currentStationId':powerStationId}); 
+                    //     }
+                    // } 
 
                     msg.switchArguments = {
                         id: powerStationId,
                         dataType: stFlag - 1,
                         isGroup: isGroup,
-                        stClass: $scope.currentSTClass,
-                        currentStationsInfo:currentStationsInfo
+                        stClass: $scope.currentSTClass
                     };
                     msg.currentSTNum = res.currentSTNum;
                     $scope.$emit("emitSwitchStation", msg);
