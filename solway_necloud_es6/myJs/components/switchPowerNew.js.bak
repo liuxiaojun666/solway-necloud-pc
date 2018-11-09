@@ -1,0 +1,283 @@
+app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state, $stateParams, $location,myAjaxData) {
+
+    $(".switch-power-enrich").on('click','.switchPowerIcon',function(){
+        // myAjaxData
+        // debugger
+        //初始化
+        $scope.showCompanyStids = [];
+        $scope.departmentTab = 'department';
+        //获取当前电站信息
+        const routeUrl = window.location.hash.substr(2);
+        if(routeUrl == 'power-index171024'){
+            $solway.setStore('currentStationsInfo', {'currentGroupId':'','currentCompanyId':'','currentStationId':''}); 
+        }
+        
+        let storeData = $solway.getStore().currentStationsInfo;
+        $scope.currentGroupId = storeData.currentGroupId;
+        $scope.currentCompanyId = storeData.currentCompanyId;
+        $scope.currentStationId = storeData.currentStationId;
+        $scope.getSTClass();
+        
+    })
+
+    //用户自定义接口
+    function getUserDefined(){
+        $http({
+            method: 'POST',
+            url: "UserAuthHandle/getSTListByLevel.htm",
+            params: {
+                isGroup: $rootScope.isGroup,
+                currentView: $rootScope.currentView,
+                isPart:1,
+                type:0,
+            }
+        }).success(function (res) {
+            $scope.userDefinedList = res.body;
+        })
+    }
+
+    //所有集团、公司接口
+    function getAllGroup (){
+        $scope.stationList = [];
+        $scope.belongToCompany = '';
+        $scope.showCompanyStids = [];
+        const isPart = $scope.departmentTab=='department'?'0':'1'
+        $http({
+            method: 'POST',
+            url: "UserAuthHandle/getSTListByLevel.htm",
+            params: {
+                isGroup: $rootScope.isGroup,
+                currentView: $rootScope.currentView,
+                isPart:isPart,
+                type:0,
+            }
+        }).success(function (res) {
+            if(res.code == 0){
+                const data = res.body;
+
+                if($scope.currentCompanyId){
+                    let stidArr = [];
+                    for(let i=0;i<data.length;i++){
+                        if(data[i].id == $scope.currentCompanyId){
+                            stidArr = data[i].stids.split(','); 
+                            break;
+                        }
+                    }
+                    for(let i=0;i<stidArr.length;i++){
+                        for(let j=0;j<data.length;j++){
+                            let groupStidsArr = data[j].stids.split(',');
+                            if(data[j].level == 0 && (groupStidsArr.indexOf(stidArr[i]) !== -1)){
+                                $scope.showCompanyStids = groupStidsArr;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if($scope.currentStationId ){
+                    $scope.belongToCompany = $scope.currentCompanyId;
+                    const isPart = $scope.departmentTab=='department'?'0':'1'
+                    $http({
+                        method: 'POST',
+                        url: "UserAuthHandle/getSTListByLevel.htm",
+                        params: {
+                            isGroup: $rootScope.isGroup,
+                            currentView: $rootScope.currentView,
+                            isPart:isPart,
+                            type:1,
+                            levelId:$scope.currentCompanyId
+                        }
+                    }).success(function (res) {
+                        if(res.code == 0){
+                            $scope.stationList = res.body;
+                        }
+                    });
+                }
+
+                $scope.groupAndCompanyList = data;
+            }
+        });
+    }
+
+    //风电、光伏tab列表
+    $scope.getSTClass = ()=> {
+        $http({
+            method: "POST",
+            url: "UserAuthHandle/getSTClassLIst.htm",
+        }).success(function (res) {
+            $scope.stationClasses = res.data;
+            getAllGroup();
+            getUserDefined();
+            if (!$scope.currentSTClass && $scope.stationClasses.length > 0) {
+                $scope.currentSTClass = $scope.stationClasses[0].id;
+            }
+        });
+    }
+    
+    //折叠集团
+    $scope.groupFold = (id,stids) =>{
+        $scope.belongToCompany = ''; //电站折叠
+
+        if($scope.currentGroupId == id){ //公司折叠
+            $scope.currentGroupId = '';
+            $scope.foldedGroup = true;
+            return false;
+        }
+        $scope.currentGroupId = id;
+        $scope.showCompanyStids = stids.split(',');
+        $scope.foldedGroup = false;
+    }
+
+    //判断该公司是否属于一个集团
+    $scope.judgeBelongGroup = stids =>{
+        let result = false;
+        let stidArr = stids.split(',');
+        if($scope.showCompanyStids.length){
+            for(let i=0;i<stidArr.length;i++){
+                result = ($scope.showCompanyStids.indexOf(stidArr[i]) !== -1);
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    //公司所属电站列表
+    $scope.getStationData = belongId =>{
+        if($scope.belongToCompany == belongId){
+            $scope.belongToCompany = '';
+            return;
+        }else{
+            $scope.belongToCompany = belongId;
+        }
+        const isPart = $scope.departmentTab=='department'?'0':'1'
+        $http({
+            method: 'POST',
+            url: "UserAuthHandle/getSTListByLevel.htm",
+            params: {
+                isGroup: $rootScope.isGroup,
+                currentView: $rootScope.currentView,
+                isPart:isPart,
+                type:1,
+                levelId:belongId
+            }
+        }).success(function (res) {
+            if(res.code == 0){
+                $scope.stationList = res.body;
+            }
+        });
+    }
+
+    //切换光伏、风电tab
+    $scope.changeSTClass = id =>{
+        $scope.currentSTClass = id;
+    }
+
+    //切换部门、自定义
+    $scope.changeDepartment = tab =>{
+        $scope.departmentTab = tab;
+    }
+
+    //切换电站
+    $scope.switchStation = ($event, powerStationId, stFlag, dataName, isGroup,selectedType,itemData) =>{
+        if ($($event.target).hasClass('disabled')) {
+            return;
+        }
+
+        //当再次选择已选择的电站时，直接返回
+        if ($($event.target).hasClass('activeItem')) {
+            return;
+        }
+
+		$("#switchPowerNewModal").modal('hide');
+
+        $http({
+            method: "POST",
+            url: "UserAuthHandle/changeDataType.htm",
+            params: {
+                id: powerStationId,
+                dataType: stFlag - 1,
+                isGroup: isGroup?isGroup:'0',
+                stClass:  $scope.currentSTClass
+            }
+        }).success(function (res) {
+            if (res.result) {
+                if (res.isChangeSTClass == 'yes') {
+                    var newSystemPageArr = [
+                        'monitoringSummary',
+                        'knowledgeBaseSummary',
+                        'dataShareSummary',
+                        'dataReportSummary',
+                        'maintenancePersonSummary',
+                        'productionManageSummary',
+                        'efficientOperationSummary',
+                        'analyzeSummary',
+                        'actionPlanSummary',
+                    ];
+                    if (newSystemPageArr.indexOf(window.location.hash.substr(2)) > -1) {
+                        return window.location.reload();
+                    }
+                    //当从首页或者消息中心跳到监控视图等页面时
+                    if (res.isNullSTClass == 'yes') {
+                        $state.go($rootScope.firstMenuUrl[$scope.currentSTClass]["uisref"]);
+                    } else {
+                        //当在不同电站类型间跳转时
+                        window.location.href = "index.jsp#/app" + $rootScope.firstMenuUrl[$scope.currentSTClass]["uiurl"];
+                        location.reload();
+                    }
+
+                } else {
+                    //此处告诉session
+                    var msg = {};
+                    msg.dataId = powerStationId;
+                    msg.dataName = dataName;
+                    msg.stFlag = stFlag;
+                    $scope.currentSTID = powerStationId;
+                    $scope.currentType = stFlag - 1;
+                    if (res.currentSTNum > 1) {
+                        $rootScope.posJcvFlag = false;
+                    } else {
+                        $rootScope.posJcvFlag = true;
+                    }
+                    msg.switchArguments = {
+                        id: powerStationId,
+                        dataType: stFlag - 1,
+                        isGroup: isGroup,
+                        stClass: $scope.currentSTClass
+                    };
+                    msg.currentSTNum = res.currentSTNum;
+                    $scope.$emit("emitSwitchStation", msg);
+
+                    //持久化所选的电站信息
+                    if(selectedType == 'group'){
+                        $solway.setStore('currentStationsInfo', {'currentGroupId':powerStationId,'currentCompanyId':'','currentStationId':''}); 
+                    }else{
+                        const data = $scope.groupAndCompanyList;
+                        const currentCompanyIdArr = itemData.stids.split(',');
+                        let gId = '';
+                        for(let i=0;i<data.length;i++){
+                            if(data[i].level == 0){
+                                let thisStids = data[i].stids.split(',');
+                                for(let j=0;j<currentCompanyIdArr.length;j++){
+                                    if(thisStids.indexOf(currentCompanyIdArr[j]) !== -1){
+                                        gId = data[i].id;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if(selectedType == 'company'){
+                            $solway.setStore('currentStationsInfo', {'currentGroupId':gId,'currentCompanyId':powerStationId,'currentStationId':''}); 
+                        }else if(selectedType == 'station'){
+                            $solway.setStore('currentStationsInfo', {'currentGroupId':gId,'currentCompanyId':itemData.parentId,'currentStationId':powerStationId}); 
+                        }
+                    } 
+                    
+                }
+            }
+
+        });
+    }
+
+
+});
