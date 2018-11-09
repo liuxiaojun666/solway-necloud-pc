@@ -124,7 +124,8 @@ ajaxData({
                 const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
                 return $scope.reloadParentPage({ stationData: { id, isGroup, dataType, stClass } });
             }
-            const { currentDataName, hasShareUser} = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            const { currentDataName, hasShareUser } = stationInfo;
             $scope.ifShowShareTab = hasShareUser;
             
             $scope.switchPowerScope.currentDataName = currentDataName;

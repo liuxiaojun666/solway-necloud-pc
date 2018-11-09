@@ -30,6 +30,18 @@ ajaxData({
         data: {},
         later: true
     },
+    // 添加任务
+    bigdataExportUpdate: {
+        name: 'bigdataExportUpdate',
+        data: {},
+        later: true
+    },
+    // 任务 列表
+    bigdataExportPage: {
+        name: 'GETbigdataExportPage',
+        data: {},
+        later: true
+    },
 
 }, {})('dataExportCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     historicalRecord.init();// 历史记录 初始化
@@ -37,22 +49,23 @@ ajaxData({
     $scope.moduleName = '数据导出';//当前页面名称；
     $scope.endDate = new Date((+new Date) - 1000 * 60 * 60 * 24); // 日历可选 的截止日期
     historyInitCallback();
+
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
         const historiData = historicalRecord.get();
         const {
             startDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
             endDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
-            createDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
-            formData = {},
         } = historiData;
         $scope.startDate = startDate;
         $scope.endDate = endDate;
-        $scope.createDate = createDate;
-        $scope.createDate.showDate = '';
-        $scope.formData = formData;
+        $scope.formData = {};
+        $scope.queryData = {
+            qcLevel: '',
+            qcStid: '',
+            qcType: ''
+        };
         $scope.beforeLoading = false;
-        // getTabData();
         await myAjaxData.timeout(0);
         $scope.$apply();
     };
@@ -60,23 +73,29 @@ ajaxData({
     // 级别 接口 处理
     $scope.bigDataExportLevel.subscribe(res => {
         $scope.formData.qcLevel = res[1] && res[1].dictValue;
-        $scope.bigDataExportSelectByCondition.beforeGetdata();
-        $scope.selectDevicesByStation.beforeGetdata();
+        $scope.bigdataExportUpdate.beforeGetdata();
     });
 
     // 类型 接口 处理
     $scope.bigDataExportType.subscribe(res => {
         $scope.formData.qcType = res[2] && res[2].dictValue;
-        $scope.bigDataExportSelectByCondition.beforeGetdata();
-        $scope.selectDevicesByStation.beforeGetdata();
+        $scope.bigdataExportUpdate.beforeGetdata();
     });
 
     // 电站 接口 处理
     $scope.allSTListForPCBySession.subscribe(res => {
         $scope.formData.qcStid = res[0] && res[0].id;
-        $scope.bigDataExportSelectByCondition.beforeGetdata();
-        $scope.selectDevicesByStation.beforeGetdata();
+        $scope.bigdataExportUpdate.beforeGetdata();
     });
+
+    // 新增
+    $scope.createTask = async () => {
+        $scope.newForm = true;
+        if ($scope.bigDataExportSelectByCondition.res) return;
+        await myAjaxData.timeout(200);
+        $scope.bigDataExportSelectByCondition.beforeGetdata(); 
+        $scope.selectDevicesByStation.beforeGetdata();
+    };
 
     // 取列名
     $scope.bigDataExportSelectByCondition.beforeGetdata = () => {
@@ -115,20 +134,23 @@ ajaxData({
 
     // 设备 列表 接口 处理
     $scope.selectDevicesByStation.subscribe(res => {
-        $scope.formData.qcEqidAll = false;
+        $scope.formData.qcEqidAll = true;
         $scope.formData.qcEqidOnlyShowChecked = false;
         $scope.formData.qcEqidKeyWords = '';
         $scope.formData.qcEqid = [].concat(res).map(v => ({
             ...v,
             show: true,
-            checked: false
+            checked: true
         }));
     });
 
     // 改变选中状态
     $scope.checkboxChange = (name, index, value) => {
         if (index === 'All') {
-            $scope.formData[name] = $scope.formData[name].map(v => ({ ...v, checked: value }));
+            $scope.formData[name] = $scope.formData[name].map(v => ({
+                ...v,
+                checked: value
+            }));
             return $scope.checkboxFilter(name);
         }
         if (!value) return $scope.formData[name + 'All'] = value;
@@ -140,73 +162,139 @@ ajaxData({
         const OnlyShowChecked = $scope.formData[name + 'OnlyShowChecked'];
         const keyWords = $scope.formData[name + 'KeyWords'].trim();
         if (OnlyShowChecked) {
-            const arr = $scope.formData[name] = $scope.formData[name].map(v => ({ ...v, show: v.checked }));
-            if (keyWords) return $scope.formData[name] = arr.map(v => ({ ...v, show: (v.display || v.name).includes(keyWords) && v.show }));
+            const arr = $scope.formData[name] = $scope.formData[name].map(v => ({
+                ...v,
+                show: v.checked
+            }));
+            if (keyWords) {
+                return $scope.formData[name] = arr.map(v => ({
+                    ...v,
+                    show: (v.display || v.name).includes(keyWords) && v.show
+                }));
+            }
             return $scope.formData[name] = arr;
         } else {
-            if (keyWords) return $scope.formData[name] = $scope.formData[name].map(v => ({ ...v, show: (v.display || v.name).includes(keyWords) }));
-            return $scope.formData[name] = $scope.formData[name].map(v => ({ ...v, show: true }));
+            if (keyWords) {
+                return $scope.formData[name] = $scope.formData[name].map(v => ({
+                    ...v,
+                    show: (v.display || v.name).includes(keyWords)
+                }));
+            }
+            return $scope.formData[name] = $scope.formData[name].map(v => ({
+                ...v,
+                show: true
+            }));
         }
     };
 
-    $scope.column = [
-        {
-            title: '级别',
-            dataIndex: 'a',
-            sort: 'true',
-            render(text) {
-                return '日级'
-            }
-        },
-        {
-            title: '电站',
-            dataIndex: 'b',
-            sort: 'true',
-            render(text) {
-                return 'hello world'
-            }
-        },
-        {
-            title: '类型',
-            dataIndex: 'c',
-            sort: 'true',
-            render(text) {
-                return '逆变器'
-            }
-        },
-        {
-            title: '时间段',
-            dataIndex: 'd',
-            align: 'center',
-            render(text) {
-                return '2018-10-15 至 2018-11-05'
-            }
-        },
-        {
-            title: '创建时间',
-            dataIndex: 'e',
-            align: 'center',
-            sort: 'true',
-            render(text) {
-                return '2018-10-15'
-            }
-        },
-        {
-            title: '过期时间',
-            dataIndex: 'f',
-            sort: 'true',
-            align: 'center',
-            render(text) {
-                return '2018-10-15'
-            }
-        },
-        {
-            title: '操作',
-            dataIndex: 'h',
-            render(text) {
-                return '下载'
-            }
-        },
-    ]
+    // 创建 提交
+    $scope.formDataSubmit = () => {
+        const { qcColumnid, qcEqid, qcType, qcColumnidAll, qcEqidAll } = $scope.formData;
+        if (qcColumnid.length === 0) return;
+        if (qcType != 0 && qcEqid.length === 0) return;
+        $scope.bigdataExportUpdate.getData({
+            ...$scope.formData,
+            qcColumnid: qcColumnidAll ? '' : qcColumnid.filter(v => v.checked).map(v => v.field).join(','),
+            qcEqid: qcEqidAll ? '' : qcEqid.filter(v => v.checked).map(v => v.serialNumber).join(','),
+            qcEqidAll: null,
+            qcEqidOnlyShowChecked: null,
+            qcEqidKeyWords: null,
+            qcColumnidAll: null,
+            qcColumnidOnlyShowChecked: null,
+            qcColumnidKeyWords: null,
+            qcStartTime: $scope.startDate.showDate,
+            qcEndTime: $scope.endDate.showDate
+        });
+        $scope.newForm = false;
+    };
+
+    // 创建 完成后 刷新列表
+    $scope.bigdataExportUpdate.subscribe(res => {
+        $scope.queryData = {
+            qcLevel: '',
+            qcStid: '',
+            qcType: ''
+        };
+        $scope.bigdataExportUpdate.beforeGetdata();
+    });
+
+    // 任务列表 接口请求 request
+    $scope.bigdataExportUpdate.beforeGetdata = () => {
+        if (!$scope.bigDataExportLevel.res) return;
+        if (!$scope.bigDataExportType.res) return;
+        if (!$scope.allSTListForPCBySession.res) return;
+        $scope.column = [];
+        $scope.bigdataExportPage.getData({
+            ...$scope.queryData,
+        });
+    };
+
+    // 任务列表 接口 处理 response
+    $scope.bigdataExportPage.subscribe(res => {
+        $scope.column = [
+            {
+                title: '级别',
+                dataIndex: 'qcLevel',
+                sort: 'true',
+                render(text) {
+                    return $scope.bigDataExportLevel.res.filter(v => text === v.dictValue)[0].dictName;
+                }
+            },
+            {
+                title: '电站',
+                dataIndex: 'qcStid',
+                sort: 'true',
+                render(text) {
+                    return $scope.allSTListForPCBySession.res.filter(v => text === v.id)[0].stationname;
+                }
+            },
+            {
+                title: '类型',
+                dataIndex: 'qcType',
+                sort: 'true',
+                render(text) {
+                    return $scope.bigDataExportType.res.filter(v => text == v.dictValue)[0].dictName;
+                }
+            },
+            {
+                title: '时间段',
+                dataIndex: 'qcStartTime',
+                align: 'center',
+                render(text, item) {
+                    return new Date(text).Format('yyyy-MM-dd') + '至' + new Date(item.qcEndTime).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '创建时间',
+                dataIndex: 'createTime',
+                align: 'center',
+                sort: 'true',
+                render(text) {
+                    return text ? new Date(text).Format('yyyy-MM-dd') : '';
+                }
+            },
+            {
+                title: '过期时间',
+                dataIndex: 'expiryTime',
+                sort: 'true',
+                align: 'center',
+                render(text) {
+                    return text ? new Date(text).Format('yyyy-MM-dd') : '';
+                }
+            },
+            {
+                title: '操作',
+                dataIndex: 'busiStatus',
+                render(text, item) {
+                    if (text === '00') return '正在生成任务...';
+                    if (text === '01') return `<a style="color: #1cb09a;" target="_blank" href="${item.url}">下载</a>`;
+                    if (text === '03') return '导出失败';
+                    if (text === '04') return '导出结果为空';
+                    return '';
+                }
+            },
+        ]
+    });
+
 
 });
