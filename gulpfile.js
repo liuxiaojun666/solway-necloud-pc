@@ -16,6 +16,10 @@ let gulp = require('gulp'),
 	fs = require('fs'),
 	path = require('path'),
 	autoprefixer = require('gulp-autoprefixer'),
+	uglify = require('gulp-uglify'),
+	pump = require('pump'),
+	pngquant = require('imagemin-pngquant'),
+	htmlmin = require('gulp-htmlmin'),
 	imageMin = require('gulp-imagemin');
 
 let lastTime = Date.now();
@@ -131,10 +135,10 @@ gulp.task('watch', [], () => {
 })
 
 
-gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:8080'))
+gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:88'))
 
 gulp.task('updateCode', () => {
-	// svnUpdate()
+	svnUpdate()
 
 	cmd.get(`git pull`, (err, data, stderr) => {
 		if (err) return console.log(`git pull error\n`, err, data, stderr)
@@ -164,6 +168,7 @@ function svnUpdate() {
 
 /****************************************非代理启动************************************** */
 gulp.task('start', gulpSequence('updateCode', 'watch', 'openChrome'))
+
 
 gulp.task('es6Rename', () => {
 	gulp.src('solway_necloud_es6/myJs/**/*.js')
@@ -206,3 +211,87 @@ gulp.task('commit', [], async () => {
 
 })
 
+
+/**
+ * 构建 压缩
+ */
+gulp.task('minify', gulpSequence('copy', 'minifyHtml', 'minifyJs', 'minifyCss', 'minifyImg'))
+
+// 复制 目录
+gulp.task('copy', function () {
+	gulp.src('theme/**/*')
+		.pipe(gulp.dest('theme_compress'))
+
+	gulp.src('vendor/**/*')
+		.pipe(gulp.dest('vendor_compress'))
+
+	return gulp.src('tpl/**/*')
+		.pipe(gulp.dest('tpl_compress'))
+});
+
+//压缩css
+gulp.task('minifyCss', function () {
+	gulp.src('theme/**/*.css')
+		.pipe(autoprefixer({ browsers: ['last 100 versions'], cascade: false }))
+		.pipe(cssmin())
+		.pipe(gulp.dest('theme_compress'));
+
+	gulp.src('vendor/**/*.css')
+		.pipe(autoprefixer({ browsers: ['last 100 versions'], cascade: false }))
+		.pipe(cssmin())
+		.pipe(gulp.dest('vendor_compress'));
+
+	return gulp.src('tpl/**/*.css')
+		.pipe(autoprefixer({ browsers: ['last 100 versions'], cascade: false }))
+		.pipe(cssmin())
+		.pipe(gulp.dest('tpl_compress'));
+});
+
+//压缩js
+gulp.task('minifyJs', function (cb) {
+	pump([
+		gulp.src('theme/**/*.js'),
+		uglify({ mangle: false, compress: false }),
+		gulp.dest('theme_compress')
+	], function () {
+		pump([
+			gulp.src('tpl/**/*.js'),
+			uglify({ mangle: false, compress: false }),
+			gulp.dest('tpl_compress')
+		], function () {
+			pump([
+				gulp.src('vendor/**/*.js'),
+				uglify({ mangle: false, compress: false }),
+				gulp.dest('vendor_compress')
+			], cb)
+		});
+	})
+});
+
+//压缩图片
+gulp.task('minifyImg', function () {
+	return gulp.src('theme/images/**/*')
+		.pipe(imageMin({
+			use: [pngquant()]
+		}))
+		.pipe(gulp.dest('theme_compress/images'));
+});
+
+gulp.task('minifyHtml', function () {
+	var options = {
+		removeComments: true,//清除HTML注释
+		collapseWhitespace: true,//压缩HTML
+		collapseBooleanAttributes: false,//省略布尔属性的值 <input checked="true"/> ==> <input />
+		removeEmptyAttributes: false,//删除所有空格作属性值 <input id="" /> ==> <input />
+		removeScriptTypeAttributes: true,//删除<script>的type="text/javascript"
+		removeStyleLinkTypeAttributes: true,//删除<style>和<link>的type="text/css"
+		minifyJS: { mangle: false, compress: false },//压缩页面JS
+		minifyCSS: true, //压缩页面CSS
+		ignoreCustomFragments: [
+			/{{(.*?)}}/g,
+		]
+	};
+	return gulp.src(['tpl/**/*.html'])
+		.pipe(htmlmin(options))
+		.pipe(gulp.dest('tpl_compress'));
+});
