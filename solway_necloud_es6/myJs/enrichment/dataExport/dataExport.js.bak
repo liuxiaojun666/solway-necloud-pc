@@ -92,6 +92,8 @@ ajaxData({
     // 列名 接口 处理
     $scope.bigDataExportSelectByCondition.subscribe(res => {
         $scope.formData.qcColumnidAll = false;
+        $scope.formData.qcColumnidOnlyShowChecked = false;
+        $scope.formData.qcColumnidKeyWords = '';
         $scope.formData.qcColumnid = [].concat(res.body).map(v => ({
             ...v,
             show: true,
@@ -114,6 +116,8 @@ ajaxData({
     // 设备 列表 接口 处理
     $scope.selectDevicesByStation.subscribe(res => {
         $scope.formData.qcEqidAll = false;
+        $scope.formData.qcEqidOnlyShowChecked = false;
+        $scope.formData.qcEqidKeyWords = '';
         $scope.formData.qcEqid = [].concat(res).map(v => ({
             ...v,
             show: true,
@@ -124,12 +128,25 @@ ajaxData({
     // 改变选中状态
     $scope.checkboxChange = (name, index, value) => {
         if (index === 'All') {
-            return $scope.formData[name] = $scope.formData[name].map(v => ({...v, checked: value}));
+            $scope.formData[name] = $scope.formData[name].map(v => ({ ...v, checked: value }));
+            return $scope.checkboxFilter(name);
         }
-        if (!value) {
-            return $scope.formData[name + 'All'] = value;
+        if (!value) return $scope.formData[name + 'All'] = value;
+        return $scope.formData[name + 'All'] = !$scope.formData[name].some(v => v.checked === false);
+    };
+
+    // 选择框 条件过滤
+    $scope.checkboxFilter = (name) => {
+        const OnlyShowChecked = $scope.formData[name + 'OnlyShowChecked'];
+        const keyWords = $scope.formData[name + 'KeyWords'].trim();
+        if (OnlyShowChecked) {
+            const arr = $scope.formData[name] = $scope.formData[name].map(v => ({ ...v, show: v.checked }));
+            if (keyWords) return $scope.formData[name] = arr.map(v => ({ ...v, show: (v.display || v.name).includes(keyWords) && v.show }));
+            return $scope.formData[name] = arr;
+        } else {
+            if (keyWords) return $scope.formData[name] = $scope.formData[name].map(v => ({ ...v, show: (v.display || v.name).includes(keyWords) }));
+            return $scope.formData[name] = $scope.formData[name].map(v => ({ ...v, show: true }));
         }
-        $scope.formData[name + 'All'] = !$scope.formData[name].some(v => v.checked === false);
     };
 
     $scope.column = [
