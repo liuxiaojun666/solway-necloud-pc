@@ -1,8 +1,8 @@
 app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state, $stateParams, $location,myAjaxData) {
 
     $(".switch-power-enrich").on('click','.switchPowerIcon',function(){
-        // myAjaxData
-        // debugger
+        myAjaxData
+        debugger
         //初始化
         $scope.showCompanyStids = [];
         $scope.departmentTab = 'department';
@@ -12,7 +12,8 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
             $solway.setStore('currentStationsInfo', {'currentGroupId':'','currentCompanyId':'','currentStationId':''}); 
         }
         
-        let storeData = $solway.getStore().currentStationsInfo;
+        // let storeData = $solway.getStore().currentStationsInfo;
+        let storeData = myAjaxData.currentStationData.currentStationsInfo;
         $scope.currentGroupId = storeData.currentGroupId;
         $scope.currentCompanyId = storeData.currentCompanyId;
         $scope.currentStationId = storeData.currentStationId;
@@ -239,17 +240,11 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                     } else {
                         $rootScope.posJcvFlag = true;
                     }
-                    msg.switchArguments = {
-                        id: powerStationId,
-                        dataType: stFlag - 1,
-                        isGroup: isGroup,
-                        stClass: $scope.currentSTClass
-                    };
-                    msg.currentSTNum = res.currentSTNum;
-                    $scope.$emit("emitSwitchStation", msg);
-
+                   
+                    let currentStationsInfo = {'currentGroupId':'','currentCompanyId':'','currentStationId':''};
                     //持久化所选的电站信息
                     if(selectedType == 'group'){
+                        currentStationsInfo =  {'currentGroupId':powerStationId,'currentCompanyId':'','currentStationId':''};
                         $solway.setStore('currentStationsInfo', {'currentGroupId':powerStationId,'currentCompanyId':'','currentStationId':''}); 
                     }else{
                         const data = $scope.groupAndCompanyList;
@@ -267,11 +262,24 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                             }
                         }
                         if(selectedType == 'company'){
+                            currentStationsInfo = {'currentGroupId':gId,'currentCompanyId':powerStationId,'currentStationId':''};
                             $solway.setStore('currentStationsInfo', {'currentGroupId':gId,'currentCompanyId':powerStationId,'currentStationId':''}); 
                         }else if(selectedType == 'station'){
+                            currentStationsInfo = {'currentGroupId':gId,'currentCompanyId':itemData.parentId,'currentStationId':powerStationId};
                             $solway.setStore('currentStationsInfo', {'currentGroupId':gId,'currentCompanyId':itemData.parentId,'currentStationId':powerStationId}); 
                         }
                     } 
+
+                    msg.switchArguments = {
+                        id: powerStationId,
+                        dataType: stFlag - 1,
+                        isGroup: isGroup,
+                        stClass: $scope.currentSTClass,
+                        currentStationsInfo:currentStationsInfo
+                    };
+                    msg.currentSTNum = res.currentSTNum;
+                    $scope.$emit("emitSwitchStation", msg);
+
                     
                 }
             }
