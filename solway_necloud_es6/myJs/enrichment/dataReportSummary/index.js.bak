@@ -74,7 +74,7 @@ ajaxData({
         getTabData();
         $scope.$apply();
     };
-    
+
     // 父页面重载  可修改记录
     $scope.reloadParentPage = async (data = {}) => {
         historicalRecord.set(data);
@@ -138,6 +138,8 @@ ajaxData({
             }
             const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
             myAjaxData.setCurrentStationData(stationInfo);
+            const { currentDataName } = stationInfo
+
             $scope.switchPowerScope.currentDataName = currentDataName;
             $scope.switchPowerCallback(stationData);
         }
@@ -146,7 +148,7 @@ ajaxData({
     // 获取tab
     function getTabData() {
         if ($scope.beforeLoading) return;
-        const {dataType, _dateType} = $scope;
+        const { dataType, _dateType } = $scope;
         return $scope.tab.getData({
             useSt: dataType === 0 ? 1 : 0,
             reportType: [4, 2, 1, null, 3][_dateType]
