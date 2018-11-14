@@ -1,0 +1,190 @@
+ajaxData({
+    // 电站 月 时间 列表
+    query_station_year_res_timelist_his: {
+        name: 'GETquery_station_year_res_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 月 时间 曲线
+    query_station_year_res_timeline_his: {
+        name: 'GETquery_station_year_res_timeline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
+
+        __serviceName__: 'themeResourceStationYearService'
+    })('themeResourceStationYearCtrl', ['$scope', 'themeResourceStationYearService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            let { showShape, select1, select2 } = historicalRecord.get().themeResourceStationYear || {};
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            await $scope.dateUpdated();
+            $scope.changeShowShape(showShape || 'list');
+            $scope.select1 = select1;
+            $scope.select2 = select2;
+            if (select1) await $scope.selectChange('select1');
+            if (select2) await $scope.selectChange('select2');
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            diffGetData();
+            $scope.$apply();
+        };
+
+
+        // 日期改变
+        $scope.dateUpdated = async () => {
+            await myAjaxData.timeout(0);
+            if ($scope.currentClass !== 'StationYear') return;
+            diffSelectOptions();
+            diffGetData();
+        };
+
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            if (!$scope.initComplete) return;
+            if ($scope.currentClass !== 'StationYear') return;
+            diffSelectOptions();
+            diffGetData();
+        };
+
+        // 切换显示形式  图表 or 列表
+        $scope.changeShowShape = showShape => {
+            if (showShape === $scope.showShape) return;
+            $scope.showShape = showShape;
+            historicalRecord.set({
+                themeResourceStationYear: {
+                    ...historicalRecord.get().themeResourceStationYear || {},
+                    showShape
+                }
+            });
+            diffGetData();
+        };
+
+        // 图标轴线切换
+        $scope.selectChange = async (arg) => {
+            await myAjaxData.timeout(0);
+            historicalRecord.set({
+                themeResourceStationYear: {
+                    ...historicalRecord.get().themeResourceStationYear || {},
+                    [arg]: $scope[arg]
+                }
+            });
+            diffChartLineData();
+            $scope.$apply();
+        };
+
+        // 电站年 列表 数据处理
+        $scope.query_station_year_res_timelist_his.subscribe(res => {
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    sort: 'true',
+                    align: 'center',
+                },
+                {
+                    title: '辐射总量(' + res.body.units.rad_chk + ')',
+                    dataIndex: 'rad_chk',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '发电小时数(' + res.body.units.real_hours + ')',
+                    dataIndex: 'real_hours',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '日照小时数(' + res.body.units.sun_hours + ')',
+                    dataIndex: 'sun_hours',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '降雨量(' + res.body.units.pcpn + ')',
+                    dataIndex: 'pcpn',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '平均温度',
+                    dataIndex: 'ta_avg',
+                    sort: 'true',
+                    align: 'right',
+                },
+            ];
+        });
+
+        $scope.query_station_year_res_timeline_his.subscribe(async res => {
+            if (!res.body.data.dtime[0]) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'rad_chk';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'sun_hours';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
+            diffChartLineData();
+            $scope.$apply();
+        });
+
+        // 计算 图表 显示对应 轴
+        function diffChartLineData() {
+            if (!$scope.initComplete) return;
+            const { select1, select2 } = $scope;
+            $scope.xdata = $scope.query_station_year_res_timeline_his.res.body.data.dtime
+            $scope.ydatas = [[$scope.query_station_year_res_timeline_his.res.body.data[select1]], [$scope.query_station_year_res_timeline_his.res.body.data[select2]]]
+        }
+
+        // 轴线切换  可选项  判断
+        function diffSelectOptions(units = {}) {
+            $scope.selectOptions = {
+                max_sun: '最大辐射强度' + (units.max_sun ? '(' + units.max_sun + ')' : ''),
+                rad_chk: '辐射总量' + (units.rad_chk ? '(' + units.rad_chk + ')' : ''),
+                sun_hours: '日照小时数' + (units.sun_hours ? '(' + units.sun_hours + ')' : ''),
+                ta_avg: '平均温度' + (units.ta_avg ? '(' + units.ta_avg + ')' : ''),
+                real_hours: '发电小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
+                pcpn: '降雨量' + (units.pcpn ? '(' + units.pcpn + ')' : ''),
+            };
+        }
+
+        // 判断 调用  对应 接口
+        async function diffGetData() {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            const { showShape, dateTime } = $scope;
+            setDataNull();
+            if (showShape === 'list') {
+                $scope.query_station_year_res_timelist_his.getData({
+                    queryCode: 'query_station_year_res_timelist_his',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+            } else {
+                $scope.query_station_year_res_timeline_his.getData({
+                    queryCode: 'query_station_year_res_timeline_his',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+            }
+        }
+
+        function setDataNull() {
+            $scope.query_station_year_res_timelist_his.res = null;
+            $scope.query_station_year_res_timeline_his.res = null;
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
+            $scope.column = [];
+        }
+
+        $scope.$on('$destroy', () => setDataNull());
+
+    });

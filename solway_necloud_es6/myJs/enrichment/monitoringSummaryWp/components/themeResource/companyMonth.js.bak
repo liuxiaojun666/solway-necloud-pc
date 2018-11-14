@@ -1,0 +1,227 @@
+ajaxData({
+    // 集团月资源详情时间列表
+    query_company_month_res_timelist_his: {
+        name: 'GETquery_company_month_res_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团月资源详情时间曲线
+    query_company_month_res_timeline_his: {
+        name: 'GETquery_company_month_res_timeline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团月资源详情电站列表
+    query_company_month_res_stationlist_his: {
+        name: 'GETquery_company_month_res_stationlist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 集团月资源详情电站曲线
+    query_company_month_res_stationline_his: {
+        name: 'GETquery_company_month_res_stationline_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
+
+        __serviceName__: 'themeResourceCompanyMonthService'
+    })('themeResourceCompanyMonthCtrl', ['$scope', 'themeResourceCompanyMonthService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            let { showShape, tabIndex = 0  } = historicalRecord.get().themeResourceCompanyMonth || {};
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            await $scope.dateUpdated();
+            $scope.changeShowShape(showShape || 'list');
+            $scope.changeTab(tabIndex);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            diffGetData();
+            $scope.$apply();
+        };
+
+
+        // 日期改变
+        $scope.dateUpdated = async () => {
+            await myAjaxData.timeout(0);
+            if ($scope.currentClass !== 'CompanyMonth') return;
+            diffGetData();
+        };
+
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            if (!$scope.initComplete) return;
+            if ($scope.currentClass !== 'CompanyMonth') return;
+            diffGetData();
+        };
+
+        // 点击电站名  跳转到电站页面
+        $scope.trClick = (item, index, event) => {
+            if (!event.target.className.includes('clickable')) return;
+            $scope.reloadParentPage({
+                stationData: {
+                    dataType: 0,
+                    id: item.stid,
+                    isGroup: "0",
+                    stClass: '01'
+                }
+            });
+        };
+
+        // tab 切换
+        $scope.changeTab = tabIndex => {
+            if (tabIndex === $scope.tabIndex) return;
+            $scope.tabIndex = tabIndex;
+            historicalRecord.set({
+                themeResourceCompanyMonth: {
+                    ...historicalRecord.get().themeResourceCompanyMonth || {},
+                    tabIndex
+                }
+            });
+            diffGetData();
+        };
+
+        // 切换显示形式  图表 or 列表
+        $scope.changeShowShape = showShape => {
+            if (showShape === $scope.showShape) return;
+            $scope.showShape = showShape;
+            historicalRecord.set({
+                themeResourceCompanyMonth: {
+                    ...historicalRecord.get().themeResourceCompanyMonth || {},
+                    showShape
+                }
+            });
+            diffGetData();
+        };
+
+        // 公司 月 时间 列表
+        $scope.query_company_month_res_timelist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.data;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    sort: 'true',
+                    align: 'center'
+                }, {
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
+                    dataIndex: 'rad_chk',
+                    sort: 'true',
+                    align: 'right',
+                }, {
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
+                    dataIndex: 'real_hours',
+                    sort: 'true',
+                    align: 'right',
+                }
+            ];
+        };
+        // 公司 月 时间 柱状图
+        $scope.query_company_month_res_timeline_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.xdata = res.body.data.dtime;
+            $scope.ydatas = [[res.body.data.rad_chk, res.body.data.real_hours]];
+        };
+        // 公司 月 电站 列表
+        $scope.query_company_month_res_stationlist_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.data;
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'st_name',
+                    sort: 'true',
+                    width: '40%',
+                    align: 'left',
+                    render(text) {
+                        return `<span class="clickable">${text}</span>`
+                    }
+                }, {
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
+                    dataIndex: 'inst_kw',
+                    sort: 'true',
+                    align: 'right',
+                }, {
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
+                    dataIndex: 'rad_chk',
+                    sort: 'true',
+                    align: 'right',
+                }, {
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
+                    dataIndex: 'real_hours',
+                    sort: 'true',
+                    align: 'right',
+                }, {
+                    title: '降雨量' + (res.body.units.pcpn ? '(' + res.body.units.pcpn + ')' : ''),
+                    dataIndex: 'pcpn',
+                    sort: 'true',
+                    align: 'right'
+                },
+            ];
+        };
+        // 公司 月 电站 柱状图
+        $scope.query_company_month_res_stationline_his.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.xdata = res.body.data.st_name;
+            $scope.ydatas = [[res.body.data.rad_chk, res.body.data.real_hours]];
+        };
+
+        // 判断 调用  对应 接口
+        async function diffGetData() {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            const { showShape, dateTime, tabIndex } = $scope;
+            setDataNull();
+            if (tabIndex === 0 && showShape === 'list') {
+                $scope.query_company_month_res_timelist_his.getData({
+                    queryCode: 'query_company_month_res_timelist_his',
+                    queryType: 1,
+                    date: dateTime.showDate
+                });
+            } else if (tabIndex === 0 && showShape === 'chart') {
+                $scope.query_company_month_res_timeline_his.getData({
+                    queryCode: 'query_company_month_res_timeline_his',
+                    queryType: 1,
+                    date: dateTime.showDate
+                });
+            } else if (tabIndex === 1 && showShape === 'list') {
+                $scope.query_company_month_res_stationlist_his.getData({
+                    queryCode: 'query_company_month_res_stationlist_his',
+                    queryType: 1,
+                    date: dateTime.showDate
+                });
+            } else if (tabIndex === 1 && showShape === 'chart') {
+                $scope.query_company_month_res_stationline_his.getData({
+                    queryCode: 'query_company_month_res_stationline_his',
+                    queryType: 1,
+                    date: dateTime.showDate
+                });
+            }
+        }
+
+        function setDataNull() {
+            $scope.query_company_month_res_timelist_his.res = null;
+            $scope.query_company_month_res_timeline_his.res = null;
+            $scope.query_company_month_res_stationlist_his.res = null;
+            $scope.query_company_month_res_stationline_his.res = null;
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
+            $scope.datasource = void 0;
+            $scope.column = [];
+        }
+
+        $scope.$on('$destroy', () => setDataNull());
+
+    });

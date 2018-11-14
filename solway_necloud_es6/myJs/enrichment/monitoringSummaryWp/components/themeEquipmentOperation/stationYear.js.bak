@@ -1,0 +1,339 @@
+ajaxData(
+    {
+        //电站-月-时间列表
+        query_station_year_dev_detail_timelist_his: {
+            name: 'GETquery_station_year_dev_detail_timelist_his',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //电站-月-时间曲线
+        query_station_year_dev_detail_timeline_his: {
+            name: 'GETquery_station_year_dev_detail_timeline_his',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //电站-月-设备列表
+        query_station_year_dev_detail_devlist_his: {
+            name: 'GETquery_station_year_dev_detail_devlist_his',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //电站-月-设备曲线
+        query_station_year_dev_detail_devline_his: {
+            name: 'GETquery_station_year_dev_detail_devline_his',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+    },
+    {
+        __serviceName__: 'themeEquipmentOperationStationYearService'
+    }
+)('themeEquipmentOperationStationYearCtrl', ['$scope', 'themeEquipmentOperationStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeEquipmentOperationStationYear || {};
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.select1 = select1 || 2;
+        $scope.select2 = select2 || 2;
+        if (select1) await $scope.selectChange('select1');
+        if (select2) await $scope.selectChange('select2');
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData();
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'StationYear') return;
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        if ($scope.currentClass !== 'StationYear') return;
+        await myAjaxData.timeout(0);
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeEquipmentOperationStationYear: {
+                ...historicalRecord.get().themeEquipmentOperationStationYear || {},
+                tabIndex
+            }
+        });
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeEquipmentOperationStationYear: {
+                ...historicalRecord.get().themeEquipmentOperationStationYear || {},
+                showShape
+            }
+        });
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+    // 图标轴线切换
+    $scope.selectChange = async (arg) => {
+        await myAjaxData.timeout(0);
+        historicalRecord.set({
+            themeEquipmentOperationStationYear: {
+                ...historicalRecord.get().themeEquipmentOperationStationYear || {},
+                [arg]: $scope[arg]
+            }
+        });
+        diffChartLineData();
+        $scope.$apply();
+    };
+
+    $scope.diffGetData = async () => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+        if (showShape === 'list' && tabIndex === 0) {//时间
+            $scope.query_station_year_dev_detail_timelist_his.getData({
+                queryCode: 'query_station_year_dev_detail_timelist_his',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (showShape === 'chart' && tabIndex === 0) {
+            $scope.query_station_year_dev_detail_timeline_his.getData({
+                queryCode: 'query_station_year_dev_detail_timeline_his',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (showShape === 'list' && tabIndex === 1) {//设备
+            $scope.query_station_year_dev_detail_devlist_his.getData({
+                queryCode: 'query_station_year_dev_detail_devlist_his',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (showShape === 'chart' && tabIndex === 1) {
+            $scope.query_station_year_dev_detail_devline_his.getData({
+                queryCode: 'query_station_year_dev_detail_devline_his',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        }
+    }
+
+
+    //电站月-时间-列表
+    $scope.query_station_year_dev_detail_timelist_his.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.dataSource = res.body.data;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'dtime',
+                align: 'center',
+                sort: 'true',
+            },
+            {
+                title: '故障台次',
+                dataIndex: 'fail_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '告警台次',
+                dataIndex: 'alarm_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '离线台次',
+                dataIndex: 'inter_count',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '故障损失电量(' + res.body.units.fail_we + ')',
+                dataIndex: 'fail_we',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: 'mttr',
+                width: '60px',
+                dataIndex: 'mttr',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: 'mtbf',
+                width: '60px',
+                dataIndex: 'mtbf',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: 'pba',
+                width: '60px',
+                dataIndex: 'pba',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: 'pr',
+                width: '60px',
+                dataIndex: 'pr',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+    };
+
+    //电站月-时间-曲线
+    $scope.query_station_year_dev_detail_timeline_his.getDataCallback = async (success, res) => {
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'dust_we';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
+        await $scope.selectChange('select1');
+        await $scope.selectChange('select2');
+        diffSelectOptions(res.body.units);
+        diffChartLineData();
+        $scope.$apply();
+    }
+
+    //电站月-设备-列表
+    $scope.query_station_year_dev_detail_devlist_his.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.dataSource = res.body.data;
+        $scope.column = [
+            {
+                title: '设备名称',
+                width: '25%',
+                dataIndex: 'eq_name',
+                align: 'left',
+            },
+            {
+                title: '故障台次',
+                dataIndex: 'fail_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '告警台次',
+                dataIndex: 'alarm_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '离线台次',
+                dataIndex: 'inter_count',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '故障损失电量(' + res.body.units.fail_we + ')',
+                dataIndex: 'fail_we',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '组串电流离散率',
+                dataIndex: 'c_dr_avg',
+                sort: 'true',
+                align: 'right',
+            }
+        ];
+    };
+
+    //电站月-设备-曲线
+    $scope.query_station_year_dev_detail_devline_his.getDataCallback = async (success, res) => {
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'dust_we';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
+        await $scope.selectChange('select1');
+        await $scope.selectChange('select2');
+        diffSelectOptions(res.body.units);
+        diffChartLineData();
+        $scope.$apply();
+    }
+
+
+    // 计算 图表 显示对应 轴
+    function diffChartLineData() {
+        if (!$scope.initComplete) return;
+        const { select1, select2, tabIndex } = $scope;
+        if (tabIndex === 0) {
+            $scope.xdata = $scope.query_station_year_dev_detail_timeline_his.res.body.data.dtime;
+            $scope.ydatas = [[$scope.query_station_year_dev_detail_timeline_his.res.body.data[select1]], [$scope.query_station_year_dev_detail_timeline_his.res.body.data[select2]]];
+        } else if (tabIndex === 1) {
+            $scope.xdata = $scope.query_station_year_dev_detail_devline_his.res.body.data.eq_name;
+            $scope.ydatas = [[$scope.query_station_year_dev_detail_devline_his.res.body.data[select1]], [$scope.query_station_year_dev_detail_devline_his.res.body.data[select2]]];
+        }
+    }
+
+    // 轴线切换  可选项  判断
+    function diffSelectOptions(units = {}) {
+        if ($scope.tabIndex === 0) {
+            $scope.selectOptions = {
+                fail_count: '故障台次',
+                alarm_count: '告警台次',
+                inter_count: '离线台次',
+                dust_we: '故障损失电量' + units.dust_we,
+                mttr: 'mttr',
+                mtbf: 'mtbf',
+                pba: 'pba',
+                pr: 'pr',
+            }
+        } else if ($scope.tabIndex === 1) {
+            $scope.selectOptions = {
+                eqcount: '总台数',
+                fail_count: '故障台次',
+                alarm_count: '告警台次',
+                inter_count: '离线台次',
+                dust_we: '故障损失电量' + units.dust_we,
+                title: '功率离散率'
+            }
+        }
+
+    }
+
+    // 数据置空
+    function setDataNull() {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.query_station_year_dev_detail_timelist_his.res = null;
+        $scope.query_station_year_dev_detail_timeline_his.res = null;
+        $scope.query_station_year_dev_detail_devlist_his.res = null;
+        $scope.query_station_year_dev_detail_devline_his.res = null;
+
+    }
+
+
+
+});

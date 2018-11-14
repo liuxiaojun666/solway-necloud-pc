@@ -1,0 +1,146 @@
+ajaxData(
+    {
+        //电站日功率时间列表（历史日
+        stationDayAgoTimeList: {
+            name: 'GETPowerStationDayAgoTimeList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
+        //电站日功率时间曲线（历史日
+        stationDayAgoTimeLine: {
+            name: 'GETPowerStationDayAgoTimeLine',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
+    },
+    {
+        __serviceName__: 'themeEquipmentOperationStationDayAgoService'
+    }
+)('themeEquipmentOperationStationDayAgoCtrl', ['$scope', 'themeEquipmentOperationStationDayAgoService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape = 'chart', tabIndex = 0 } = historicalRecord.get().themeEquipmentOperationStationDayAgo || {};
+        $scope.changeShowShape(showShape);
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await diffGetData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'StationDayAgo') return;
+        $scope.column = [];
+        diffGetData();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        if ($scope.currentClass !== 'StationDayAgo') return;
+        await myAjaxData.timeout(0);
+        if ($scope.dateType !== 0) return;
+        diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        if (showShape === $scope.showShape) return;
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeEquipmentOperationStationDayAgo: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayAgo || {},
+                showShape
+            }
+        });
+        diffGetData();
+    };
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeEquipmentOperationStationDayAgo: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayAgo || {},
+                tabIndex
+            }
+        });
+        diffGetData();
+    };
+
+    // 判断 调用  对应 接口
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.column = [];
+        $scope.stationDayAgoTimeList.res = null;
+        $scope.stationDayAgoTimeLine.res = null;
+        const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+        if (showShape === 'list' && tabIndex === 0) {
+            $scope.stationDayAgoTimeList.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate
+            });
+        } else if (showShape === 'chart' && tabIndex === 0) {
+            $scope.stationDayAgoTimeLine.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate
+            });
+        }
+    };
+    // 电站  历史日   时间   列表
+    $scope.stationDayAgoTimeList.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'time',
+                sort: true,
+                width: '',
+                align: 'center'
+            },
+            {
+                title: '实发功率(kW)',
+                dataIndex: 'real_curve',
+                sort: true,
+                width: '',
+                align: 'right',
+            },
+            {
+                title: '应发功率(kW)',
+                dataIndex: 'shd_curve',
+                sort: true,
+                width: '',
+                align: 'right',
+            },
+            {
+                title: '光照强度(kW/㎡)',
+                dataIndex: 'sun_curve',
+                sort: true,
+                width: '',
+                align: 'right',
+            }
+        ];
+    };
+    // 电站  历史日   时间   曲线
+    $scope.stationDayAgoTimeLine.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.x;
+        $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.sun_curve]]
+    };
+
+});

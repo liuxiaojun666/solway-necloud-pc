@@ -1,0 +1,263 @@
+ajaxData({
+    // 给默认选中电站
+    getuserAuthHandleSetSTClass: {
+        name: 'GETUserAuthHandleSetSTClass',
+        data: {},
+        later: true
+    },
+    // 切换电站
+    changeStation: {
+        name: 'GETUserAuthHandleChangeDataType',
+        data: {},
+        later: true
+    },
+    // 基本电站信息
+    getUserAuthHandleGetCurrentInfo: {
+        name: 'GETUserAuthHandleGetCurrentInfo',
+        data: {},
+        later: true
+    },
+    // 电站基本信息 新
+    getCurrentInfoNew: {
+        name: 'GETgetCurrentInfoNew',
+        data: {},
+        later: true
+    }
+}, {})('monitoringSummaryWpCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
+    historicalRecord.init();
+    $scope.beforeLoading = true; // 页面loading
+    $scope.moduleName = '电站监视';//当前页面名称；
+    historyInitCallback();
+    
+    // 父页面重载  可修改记录
+    $scope.reloadParentPage = async (data = {}) => {
+        historicalRecord.set(data);
+        $scope.beforeLoading = true;
+        if (data.stationData) {
+            await $scope.changeStation.getData(data.stationData);
+            const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            $scope.switchPowerScope.currentDataName = currentDataName;
+            $scope.switchPowerCallback(data.stationData);
+        }
+        return historyInitCallback();
+    };
+
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback  () {
+        const historiData = historicalRecord.get();
+        const { detailFullPage,
+            dateType = 0,
+            dateTime = new Date(),
+            theme = 'EquipmentOperation',
+            stationData 
+        } = historiData;
+        if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
+        $scope.dateTime = dateTime;
+        $scope.dateType = dateType;
+        $scope._dateTime = dateTime;
+        $scope._dateType = dateType;
+        $scope.theme = theme;
+        $scope.detailFullPage = detailFullPage;
+        if (!stationData) historicalRecord.set({ dateType, dateTime, theme });
+        await diffStationInfo(stationData);
+        $scope.beforeLoading = false;
+        computeClass();
+        $scope.changeTheme(theme);
+        $scope.mainPageInitComplete && $scope.mainPageInitComplete($scope.currentClass);
+        $scope.$apply();
+    };
+
+    // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
+    $scope.dateUpdated = (dateType, dateTime) => {
+        historicalRecord.set({ dateType, dateTime });
+        if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
+        $scope._dateType = dateType;
+        $scope._dateTime = dateTime;
+        computeClass();
+        if (dateType === 3 && $scope.theme !== 'Accumulative') {
+            historicalRecord.set({ preTheme: $scope.theme });
+            $scope.changeTheme('Accumulative');
+        }
+        else if (dateType !== 3 && $scope.theme === 'Accumulative') $scope.changeTheme(historicalRecord.get().preTheme); 
+        else $scope.changeTheme($scope.theme);
+        $scope.getTopXhr = true;
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = (switchArguments, switchPowerScope) => {
+        if (switchPowerScope) $scope.switchPowerScope = switchPowerScope;
+        if (!switchArguments) return;
+        $scope.dataType = switchArguments.dataType;
+        historicalRecord.set({ stationData: switchArguments });
+        computeClass();
+        $scope.changeTheme($scope.theme);
+        $scope.getTopXhr = true;
+    };
+    // 双击 详情
+    $scope.switchDetailFullPagePre = (e, type) => {
+        if (type === 'dblclick') {
+            if (!e.ctrlKey) return;
+        }
+        $scope.switchDetailFullPage();
+    };
+    // 放大显示详情操作
+    $scope.switchDetailFullPage = (e, type) => {
+        historicalRecord.set({ 
+            detailFullPage: $scope.detailFullPage = !$scope.detailFullPage 
+        });
+        if ($scope.detailFullPage) $scope.getTopXhr = false;
+    };
+
+    // 切换主题模块
+    $scope.changeTheme = theme => {
+        if ($scope.beforeLoading) return;
+        $scope.theme = theme;
+        historicalRecord.set({ theme });
+        const folder = 'theme' + theme;
+        let file = (theme === 'BasicSituation' || theme === 'Accumulative') ? 'index' : $scope.currentClass;
+            file = file.substring(0, 1).toLowerCase() + file.substring(1);
+        if ($scope.themeDetail === `tpl/enrichment/monitoringSummaryWp/components/${folder}/${file}.html${$scope.stamp}`) return;
+        $scope.themeLoading = true;
+        $scope.themeDetail = `tpl/enrichment/monitoringSummaryWp/components/${folder}/${file}.html${$scope.stamp}`;
+    };
+
+    // 计算当前 所属 哪一类
+    const computeClass = () => {
+        if ($scope.beforeLoading) return;
+        const { dateTime, dateType, stationData: { dataType } } = historicalRecord.get();
+        const str1 = ['Station', 'Company', 'Company'][dataType];
+        const str2 = ['Day', 'Month', 'Year', 'Accumulative'][dateType];
+        if (str2 !== 'Day') $scope.currentClass = str1 + str2;
+        else if (dateTime.Format('yyyy-MM-dd') === (new Date).Format('yyyy-MM-dd')) $scope.currentClass = str1 + str2 + 'Today';
+        else $scope.currentClass = str1 + str2 + 'Ago';
+        historicalRecord.set({ currentClass: $scope.currentClass });
+    };
+
+
+    // 键盘 左右 键   切换主题  组合键 放大缩小（ctrl + M）
+    $(document).on('keydown', keyChangeTheme);
+    $scope.$on('$destroy', () => $(document).off('keydown', keyChangeTheme));
+    function keyChangeTheme(event) {
+        const themeArr = ['BasicSituation', 'Resource', 'EquipmentOperation', 'Electricity'];
+        const { theme } = $scope;
+        switch (event.keyCode) {
+            case 37:
+                if (theme === themeArr[0]) return;
+                $scope.changeTheme(themeArr[themeArr.indexOf(theme) - 1]);
+                $scope.$apply();
+                break;
+
+            case 39:
+                if (theme === themeArr[themeArr.length - 1]) return;
+                $scope.changeTheme(themeArr[themeArr.indexOf(theme) + 1]);
+                $scope.$apply();
+                break;
+
+            case 77:
+                if (event.ctrlKey) $scope.switchDetailFullPage();
+                $scope.$apply();
+
+            default:
+                break;
+        }
+
+    }
+
+    // 电站 信息  对比
+    async function diffStationInfo(stationData) {
+        while (!$scope._getStationInfo) await myAjaxData.timeout(100);
+        const currentStationData = await $scope._getStationInfo;
+        if (currentStationData.isMan === 1) return;
+        if (!currentStationData.currentSTID && currentStationData.currentSTID !== 0) { // 没有选择过电站
+            const res = await $scope.getuserAuthHandleSetSTClass.getData({});
+            if (res.result === false) {
+                alert('没有选择任何 公司 或 电站，请联系管理员');
+                return window.location.href = '/index.jsp';
+            }
+            return window.location.reload();
+        }
+        if (!stationData) { // 没有记录电站信息  
+            const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
+            $scope.switchPowerCallback({ id, isGroup, dataType, stClass });
+        } else if (Object.is(currentStationData.currentSTID, stationData.id)) { // 电站信息 没有变化
+            await myAjaxData.timeout(500);
+            $scope.switchPowerCallback(stationData);
+        } else { // 电站信息  发生变化   切换到记录中的电站
+            const { result } = await $scope.changeStation.getData(stationData);
+            if (!result) {
+                const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
+                return $scope.reloadParentPage({ stationData: { id, isGroup, dataType, stClass }});
+            }
+            const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            myAjaxData.setCurrentStationData(stationInfo);
+            const { currentDataName } = stationInfo
+            $scope.switchPowerScope.currentDataName = currentDataName;
+            $scope.switchPowerCallback(stationData);
+        }
+    };
+
+    // 初始化子页面scope
+    $scope.initChildScope = async (__childScope, __myAjaxData) => {
+        $scope.themeLoading = false;
+        // 主页面初始化完成
+        const mainPageInitComplete = __childScope.$parent.$parent.mainPageInitComplete;
+        __childScope.$parent.$parent.mainPageInitComplete = (...arg) => {
+            mainPageInitComplete && mainPageInitComplete(...arg);
+            if (__childScope.hasOwnProperty('mainPageInitComplete')) {
+                __childScope.mainPageInitComplete();
+                // __childScope.$apply();
+            }
+        };
+
+        // 日期切换
+        const dateUpdated = __childScope.$parent.$parent.dateUpdated;
+        __childScope.$parent.$parent.dateUpdated = (...arg) => {
+            dateUpdated && dateUpdated(...arg);
+            if ($scope.beforeLoading) return;
+            if (__childScope.hasOwnProperty('dateUpdated')) {
+                __childScope.dateUpdated();
+                const { dateTime, dateType } = historicalRecord.get();
+                __childScope.dateTime = dateTime;
+                __childScope.dateType = dateType;
+                // __childScope.$apply();
+            }
+        };
+
+        // 电站切换
+        const switchPowerCallback = __childScope.$parent.$parent.switchPowerCallback;
+        __childScope.$parent.$parent.switchPowerCallback = (...arg) => {
+            switchPowerCallback && switchPowerCallback(...arg);
+            if ($scope.beforeLoading) return;
+            if (__childScope.hasOwnProperty('switchPowerCallback')) {
+                __childScope.switchPowerCallback();
+                // __childScope.$apply();
+            }
+        };
+
+        // 详情放大缩小 切换
+        const switchDetailFullPage = __childScope.$parent.$parent.switchDetailFullPage;
+        __childScope.$parent.$parent.switchDetailFullPage = (...arg) => {
+            switchDetailFullPage && switchDetailFullPage(...arg);
+            if ($scope.beforeLoading) return;
+            if (__childScope.hasOwnProperty('switchDetailFullPage')) {
+                __childScope.switchDetailFullPage();
+                // __childScope.$apply();
+            }
+        };
+
+        // 如果已初始化  尝试调用初始化完成函数
+        if (!$scope.beforeLoading) {
+            await myAjaxData.timeout(0);
+            __childScope.hasOwnProperty('mainPageInitComplete') && __childScope.mainPageInitComplete($scope.currentClass);
+        }
+
+        // 子页面销毁 删除监听
+        __childScope.$on('$destroy', () => {
+            delete __childScope.mainPageInitComplete;
+            delete __childScope.dateUpdated;
+            delete __childScope.switchPowerCallback;
+            delete __childScope.switchDetailFullPage;
+        });
+    };
+
+});
