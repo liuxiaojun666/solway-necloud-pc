@@ -245,7 +245,7 @@ ajaxData({
                 dataIndex: 'qcStid',
                 sort: 'true',
                 render(text) {
-                    return $scope.allSTListForPCBySession.res.filter(v => text === v.id)[0].stationname;
+                    return text ? ($scope.allSTListForPCBySession.res.filter(v => text === v.id)[0] || {stationname: ''}).stationname : '';
                 }
             },
             {
@@ -270,7 +270,7 @@ ajaxData({
                 align: 'center',
                 sort: 'true',
                 render(text) {
-                    return text ? new Date(text).Format('yyyy-MM-dd') : '';
+                    return text ? new Date(text).Format('yyyy-MM-dd hh:mm:ss') : '';
                 }
             },
             {
@@ -279,7 +279,7 @@ ajaxData({
                 sort: 'true',
                 align: 'center',
                 render(text) {
-                    return text ? new Date(text).Format('yyyy-MM-dd') : '';
+                    return text ? new Date(text).Format('yyyy-MM-dd hh:mm:ss') : '';
                 }
             },
             {
