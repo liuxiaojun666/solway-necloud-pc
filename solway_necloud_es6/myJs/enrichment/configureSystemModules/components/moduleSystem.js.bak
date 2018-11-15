@@ -1,0 +1,106 @@
+ajaxData({
+    systemModulelist: {
+        name: 'GETsystemModulelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
+        __serviceName__: 'systemModuleService',
+    })('moduleSystemCtrl', ['$scope', 'systemModuleService', 'actionRecord', '$timeout'], ($scope, myAjaxData, historicalRecord, $timeout) => {
+        /// 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+
+            await $scope.diffGetData();
+
+
+        };
+
+        $scope.diffGetData = async () => {
+            if (!$scope.initComplete) return;
+            $scope.loading = true;
+            await myAjaxData.timeout(0);
+
+            $scope.systemModulelist.getData({
+                serviceMode: $scope.serviceType,
+                keywords: $scope.keywords,
+            });
+        }
+
+        $scope.systemModulelist.getDataCallback = (success, res) => {
+            $scope.loading = false;
+           
+            $scope.column = [
+                {
+                    title: '名称',
+                    dataIndex: 'name',
+                    width: '20%',
+                    align: 'left',
+                    sort: true,
+                    render (text, record) {
+                        if(record.pid != 0){
+                            return '<span style="padding-left:4em">' + text + '</span>';
+                        }else{
+                            return text;
+                        }
+                    }
+                }, {
+                    title: '唯一编码',
+                    dataIndex: 'code',
+                    align: 'center',
+                    sort: true,
+                },
+                //  {
+                //     title: '上级模块',
+                //     dataIndex: 'eqreduce',
+                //     width: '30%',   
+                //     align: 'right',
+                //     sort: true,
+                //     // render (text, record) {
+                //     //     return text + '%'
+                //     // }
+                // },
+                 {
+                    title: '分类',
+                    dataIndex: 'category',
+                    align: 'center',
+                    sort: true,
+                }, {
+                    title: '服务模式',
+                    dataIndex: 'serviceMode',
+                    align: 'center',
+                    sort: true,
+                }, {
+                    title: '顺序号',
+                    dataIndex: 'weight',
+                    align: 'center',
+                    sort: true,
+                }
+            ]
+        }
+
+        //新增
+        $scope.addModule = () =>{
+            $scope.showAddModule = true;
+            $scope.$broadcast('broadAddModule');
+        }
+
+        $scope.$on('addModuleCallback',function(){
+            $scope.showAddModule = false;
+            $scope.diffGetData();
+        });
+
+
+        // 销毁 事件
+        $scope.$on('$destroy', () => {
+            document.removeEventListener('click', closeSearchAlert);
+        });
+    });

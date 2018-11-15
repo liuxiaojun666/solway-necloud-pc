@@ -1,0 +1,31 @@
+ajaxData({
+ 
+
+
+}, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','$location'], ($scope, myAjaxData, historicalRecord,$location) => {
+    historicalRecord.init();// 历史记录 初始化
+    $scope.beforeLoading = true; // 页面loading
+    $scope.moduleName = '运行配置';//当前页面名称；
+    historyInitCallback();
+
+    //当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const {
+            startDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
+            endDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
+        } = historiData;
+        
+        $scope.beforeLoading = false;
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+    };
+
+
+    $scope.hashTo = val =>{
+        $location.hash(val);
+    }
+
+
+
+});

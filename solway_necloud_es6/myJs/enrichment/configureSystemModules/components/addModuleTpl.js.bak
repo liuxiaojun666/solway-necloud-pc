@@ -1,0 +1,76 @@
+ajaxData({
+    systemModulelist: {
+        name: 'GETsystemModulelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    checkCodeExist:{
+        name: 'GETcheckCodeExist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    update:{
+        name:'POSTupdate',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'addModuleTplService',
+})('addModuleTplCtrl', ['$scope', 'addModuleTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
+    
+    const initParentModuleData = ()=>{
+        $scope.systemModulelist.getData({
+            pid:0
+        }).then(res=>{
+            if(res.code == 0){
+                $scope.parrentModuleList = res.body;
+                // $scope.parentModule = res.body[0].id;
+            }
+        });
+    }
+
+    const save = () =>{
+        let formData = {
+            "id":$scope.id,
+            "pid": $scope.pid,
+            "name": $scope.name,
+            "code": $scope.code,
+            "category": $scope.category,
+            "serviceMode": $scope.serviceType,
+            "weight":$scope.weight
+        }
+        
+        $scope.update.getData(formData).then(res=>{
+            if(res.code == 0 && res.body.id){
+                $scope.$emit('addModuleCallback');
+            }
+        });
+    }
+    $scope.$on('broadAddModule',function(){
+        $scope.id = '';
+        initParentModuleData()
+    });
+
+    //保存
+    $scope.save = () =>{
+        //校验编码是否存在编码
+        $scope.checkCodeExist.getData({
+            code:$scope.code
+        }).then(res=>{
+            if(res.code == 0){
+                save();
+            }else{
+                toaster.pop('error', '',res.msg)
+            }
+        });
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('addModuleCallback');
+    }
+
+});

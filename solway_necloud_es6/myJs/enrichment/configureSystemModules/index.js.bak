@@ -1,0 +1,80 @@
+ajaxData({
+ 
+
+}, {})('configureSystemModulesCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    historicalRecord.init();// 历史记录 初始化
+    $scope.beforeLoading = true; // 页面loading
+    $scope.themeLoading = true;
+    $scope.moduleName = '待定';//当前页面名称；
+    historyInitCallback();
+
+    //当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const {
+            themeTab = 0
+        } = historiData;
+
+        $scope.themeTab = themeTab;
+
+        $scope.beforeLoading = false;
+        computeThemeDetail();
+        $scope.mainPageInitComplete && $scope.mainPageInitComplete();
+
+    };
+
+    // theme 切换 计算
+    async function computeThemeDetail() {
+        if ($scope.beforeLoading) return;
+        const themeDetail = `
+                tpl/enrichment/configureSystemModules/components/${
+                    ["ModuleSystem", "ModuleDefaultRole"][$scope.themeTab] 
+            }.html${$scope.stamp}`;
+        if (themeDetail === $scope.themeDetail) return;
+        
+        await myAjaxData.timeout(0);
+        $scope.themeDetail = themeDetail;
+        $scope.themeLoading = true;
+        $scope.$apply();
+    }
+
+    //切换主题tab
+    $scope.changeThemeTab = tab =>{
+        $scope.themeTab = tab;
+        historicalRecord.set({ themeTab: $scope.themeTab });
+        computeThemeDetail();
+    }
+
+    // 初始化子页面scope
+    $scope.initChildScope = async (__childScope, __myAjaxData) => {
+        $scope.themeLoading = false;
+        // 主页面初始化完成
+        const mainPageInitComplete = __childScope.$parent.$parent.mainPageInitComplete;
+        __childScope.$parent.$parent.mainPageInitComplete = (...arg) => {
+            mainPageInitComplete && mainPageInitComplete(...arg);
+            if (__childScope.hasOwnProperty('mainPageInitComplete')) {
+                __childScope.mainPageInitComplete();
+                // __childScope.$apply();
+            }
+        };
+
+        // 如果已初始化  尝试调用初始化完成函数
+        if (!$scope.beforeLoading) {
+            await myAjaxData.timeout(0);
+            __childScope.hasOwnProperty('mainPageInitComplete') && __childScope.mainPageInitComplete();
+        }
+
+        // 子页面销毁 删除监听
+        __childScope.$on('$destroy', () => {
+            delete __childScope.mainPageInitComplete;
+            delete __childScope.dateUpdated;
+            delete __childScope.switchPowerCallback;
+        });
+    };
+
+
+
+
+
+
+});
