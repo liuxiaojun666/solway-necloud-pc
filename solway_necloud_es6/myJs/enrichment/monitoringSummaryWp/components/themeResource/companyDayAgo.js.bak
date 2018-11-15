@@ -1,0 +1,119 @@
+ajaxData({
+    // 电站日
+    companyDayAgo: {
+        name: 'GETquery_company_day_res_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+}, {
+
+        __serviceName__: 'themeResourceCompanyDayAgoService'
+    })('themeResourceCompanyDayAgoCtrl', ['$scope', 'themeResourceCompanyDayAgoService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            await $scope.dateUpdated();
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        };
+
+        // 日期改变
+        $scope.dateUpdated = async () => {
+            if ($scope.currentClass !== 'CompanyDayAgo') return;
+            await myAjaxData.timeout(0);
+            $scope.column = [];
+            if ($scope.currentClass === 'CompanyDayAgo') $scope.companyDayAgo.getData({
+                queryCode: 'query_company_day_res_timelist_his',
+                queryType: 1,
+                date: $scope.dateTime.showDate
+            });
+        };
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            if ($scope.currentClass !== 'CompanyDayAgo') return;
+            if (!$scope.initComplete) return;
+            $scope.query_station_day_res_timeone_his.res = null;
+            if ($scope.dateType === 0) return $scope.companyDayAgo.getData({});
+        };
+
+        // 点击电站名  跳转到电站页面
+        $scope.trClick = (item, index, event) => {
+            if (!event.target.className.includes('clickable')) return;
+            $scope.reloadParentPage({
+                stationData: {
+                    dataType: 0,
+                    id: item.stid,
+                    isGroup: "0",
+                    stClass: '01'
+                }
+            });
+        };
+
+        $scope.companyDayAgo.subscribe(res => {
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'st_name',
+                    sort: 'true',
+                    width: '30%',
+                    align: 'left',
+                    render(text) {
+                        return `<span class="clickable">${text}</span>`
+                    }
+                },
+                {
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
+                    dataIndex: 'inst_kw',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
+                    dataIndex: 'rad_chk',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '最大光照强度' + (res.body.units.max_sun ? '(' + res.body.units.max_sun + ')' : ''),
+                    dataIndex: 'max_sun',
+                    sort: 'true',
+                    align: 'right',
+                    width: '15%',
+                },
+                {
+                    title: '天气',
+                    dataIndex: 'weather',
+                    sort: 'true',
+                    align: 'center',
+                },
+                {
+                    title: '温度' + (res.body.units.ta_avg ? '(' + res.body.units.ta_avg + ')' : ''),
+                    dataIndex: 'ta_avg',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '降雨量' + (res.body.units.pcpn ? '(' + res.body.units.pcpn + ')' : ''),
+                    dataIndex: 'pcpn',
+                    sort: 'true',
+                    align: 'center',
+                },
+            ];
+        });
+
+        // 定时器  定时刷新接口
+        $scope.$on('$destroy', () => {
+            $scope.column = [];
+            $scope.companyDayAgo.res = null;
+        });
+
+    });

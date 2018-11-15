@@ -1,0 +1,299 @@
+ajaxData({
+    //累计详情---集团---列表
+    query_company_accum_detail_timelist_his: {
+        name: 'GETquery_company_accum_detail_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //累计详情---集团---柱状图
+    query_company_accum_detail_timebar_his: {
+        name: 'GETquery_company_accum_detail_timebar_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //累计详情---电站---列表
+    query_station_accum_detail_timelist_his: {
+        name: 'GETquery_station_accum_detail_timelist_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //累计详情---电站---柱状图
+    query_station_accum_detail_timebar_his: {
+        name: 'GETquery_station_accum_detail_timebar_his',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'themeAccumulativeDetailService'
+    })('themeAccumulativeDetailCtrl', ['$scope', 'themeAccumulativeDetailService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    $scope.initChildScope($scope, myAjaxData);
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeAccumulative || {};
+        $scope.changeShowShape(showShape || 'list');
+        $scope.select1 = select1;
+        $scope.select2 = select2;
+        if (select1) await $scope.selectChange('select1');
+        if (select2) await $scope.selectChange('select2');
+        $('.ng-clock').removeClass('ng-clock');
+
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        diffGetData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        if (showShape === $scope.showShape) return;
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeAccumulative: {
+                ...historicalRecord.get().themeAccumulative || {},
+                showShape
+            }
+        });
+        diffGetData();
+    };
+
+    // 图标轴线切换
+    $scope.selectChange = async (arg) => {
+        await myAjaxData.timeout(0);
+        historicalRecord.set({
+            themeAccumulative: {
+                ...historicalRecord.get().themeAccumulative || {},
+                [arg]: $scope[arg]
+            }
+        });
+        
+        diffChartLineData();
+        $scope.$apply();
+    };
+
+    // 判断 调用  对应 接口
+    async function diffGetData() {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        $scope.accumulativeDetailLoading = true;
+        if ($scope.dataType && $scope.showShape == 'list'){ //集团列表
+            $scope.query_company_accum_detail_timelist_his.getData({
+                'queryCode': 'query_company_accum_detail_timelist_his',
+                'queryType': 1
+            });
+        } else if ($scope.dataType && $scope.showShape == 'chart') { //集团柱状图
+            $scope.query_company_accum_detail_timebar_his.getData({
+                'queryCode': 'query_company_accum_detail_timebar_his',
+                'queryType': 1
+            });
+        } else if (!$scope.dataType && $scope.showShape == 'list') { //电站列表
+            $scope.query_station_accum_detail_timelist_his.getData({
+                'queryCode': 'query_station_accum_detail_timelist_his',
+                'queryType': 3
+            });
+        } else if (!$scope.dataType && $scope.showShape == 'chart') { //电站柱状图
+            $scope.query_station_accum_detail_timebar_his.getData({
+                'queryCode': 'query_station_accum_detail_timebar_his',
+                'queryType': 3
+            });
+        }
+    };
+
+    // 集团列表--接口处理
+    $scope.query_company_accum_detail_timelist_his.getDataCallback = (success, res) => {
+        $scope.accumulativeDetailLoading = false;
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '年份',
+                dataIndex: 'dtime',
+                sort: 'true',
+                align: 'center',
+            },
+            {
+                title: '应发电量(' + res.body.units.shd_kwh_chk + ')',
+                dataIndex: 'shd_kwh_chk',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '实发电量(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '上网电量(' + res.body.units.send_kwh_chk + ')',
+                dataIndex: 'send_kwh_chk',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '损失电量(' + res.body.units.fail_we + ')',
+                dataIndex: 'fail_we',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '发电小时数(' + res.body.units.real_hours + ')',
+                dataIndex: 'real_hours',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '平均风速(' + res.body.units.aa + ')',
+                dataIndex: 'aa',
+                sort: 'true',
+                align: 'right'
+            },
+            // {
+            //     title: '辐射总量(' + res.body.units.rad_chk + ')',
+            //     dataIndex: 'rad_chk',
+            //     sort: 'true',
+            //     align: 'right'
+            // },
+            {
+                title: 'pba',
+                dataIndex: 'pba',
+                sort: 'true',
+                align: 'right'
+            },
+            // {
+            //     title: 'pr',
+            //     dataIndex: 'pr',
+            //     sort: 'true',
+            //     align: 'right'
+            // }
+        ];
+    };
+
+    // 集团柱状图--接口处理
+    $scope.query_company_accum_detail_timebar_his.getDataCallback = (success, res) => {
+        $scope.accumulativeDetailLoading = false;    
+        diffSelectOptions(res.body.units);//图表设置selectOptions  
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
+
+       
+
+    }
+
+    // 电站列表--接口处理
+    $scope.query_station_accum_detail_timelist_his.getDataCallback = (success, res) => {
+        $scope.accumulativeDetailLoading = false;
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '年份',
+                dataIndex: 'dtime',
+                sort: 'true',
+                align: 'center',
+            },
+            {
+                title: '应发电量(' + res.body.units.shd_kwh_chk + ')',
+                dataIndex: 'shd_kwh_chk',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '实发电量(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '上网电量(' + res.body.units.send_kwh_chk + ')',
+                dataIndex: 'send_kwh_chk',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '损失电量(' + res.body.units.fail_we + ')',
+                dataIndex: 'fail_we',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '发电小时数(' + res.body.units.real_hours + ')',
+                dataIndex: 'real_hours',
+                sort: 'true',
+                align: 'right'
+            },
+            // {
+            //     title: '辐射总量(' + res.body.units.rad_chk + ')',
+            //     dataIndex: 'rad_chk',
+            //     sort: 'true',
+            //     align: 'right'
+            // },
+
+            {
+                title: '平均风速(' + res.body.units.aa + ')',
+                dataIndex: 'aa',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: 'pba',
+                dataIndex: 'pba',
+                sort: 'true',
+                align: 'right'
+            },
+            // {
+            //     title: 'pr',
+            //     dataIndex: 'pr',
+            //     sort: 'true',
+            //     align: 'right'
+            // }
+        ];
+    }
+
+    // 电站柱状图--接口处理
+    $scope.query_station_accum_detail_timebar_his.getDataCallback = (success, res) => {
+        $scope.accumulativeDetailLoading = false;
+        diffSelectOptions(res.body.units);
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
+    }
+
+    // 计算 图表 显示对应 轴
+    function diffChartLineData() {
+        if (!$scope.initComplete) return;
+        const { select1, select2 } = $scope;
+        
+        if ($scope.dataType){//集团
+            $scope.xdata = $scope.query_company_accum_detail_timebar_his.res.body.data.dtime;
+            $scope.ydatas = [[$scope.query_company_accum_detail_timebar_his.res.body.data[select1]], [$scope.query_company_accum_detail_timebar_his.res.body.data[select2]]];
+        } else if (!$scope.dataType){//电站
+            $scope.xdata = $scope.query_station_accum_detail_timebar_his.res.body.data.dtime;
+            $scope.ydatas = [[$scope.query_station_accum_detail_timebar_his.res.body.data[select1]], [$scope.query_station_accum_detail_timebar_his.res.body.data[select2]]]
+        }
+    }
+
+    // selectOption赋值
+    function diffSelectOptions(units) {
+        $scope.selectOptions = {
+            shd_kwh_chk: '应发电量' + units.shd_kwh_chk,
+            real_kwh_chk: '实发电量' + units.real_kwh_chk,
+            send_kwh_chk: '上网电量' + units.send_kwh_chk,
+            fail_we: '损失电量' + units.fail_we,
+            real_hours: '发电小时数' + units.real_hours,
+            // rad_chk: '辐射总量' + units.rad_chk,
+            pba: 'pba',
+            pr: 'pr'
+        };
+    }
+});
