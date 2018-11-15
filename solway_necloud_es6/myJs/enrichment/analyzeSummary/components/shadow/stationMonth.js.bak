@@ -145,18 +145,19 @@ ajaxData({
     // 图表 点击 事件 处理 函数
     $scope.chartClick = (params) => {
         if ($scope.tabIndex !== 1) return;
-        const { eq_name, eqid } = $scope.analysis_station_shade_month_deviceline.res.body.data;
+        const { eq_name, eqid, is_sn } = $scope.analysis_station_shade_month_deviceline.res.body.data;
         $scope.equipmentDetail({
             eq_name: params.name,
-            eqid: eqid[eq_name.indexOf(params.name)]
+            eqid: eqid[eq_name.indexOf(params.name)],
+            is_sn: is_sn[eq_name.indexOf(params.name)]
         });
         $scope.$apply();
     };
 
     // 设备 列表 点击行
     $scope.equipmentListTrClick = (item, index) => {
-        const { eqid, eq_name } = item;
-        $scope.equipmentDetail({ eqid, eq_name });
+        const { eqid, eq_name, is_sn } = item;
+        $scope.equipmentDetail({ eqid, eq_name, is_sn });
     };
 
     // 时间 列表

@@ -20,10 +20,11 @@ ajaxData({
 }, {
         __serviceName__: 'shadeEquipmentDetailsService',
     })('shadowEquipmentDetailsCtrl', ['$scope', 'shadeEquipmentDetailsService'], ($scope, myAjaxData) => {
-        $scope.$on('equipmentDetails', (e, { eqid, eq_name, stid = null }) => {
+        $scope.$on('equipmentDetails', (e, { eqid, eq_name, is_sn, stid = null }) => {
             $scope.eqid = eqid;
             $scope.stid = stid;
             $scope.eq_name = eq_name;
+            $scope.is_sn = is_sn;
             $scope.diffGetdata();
         });
 
@@ -34,6 +35,7 @@ ajaxData({
             $scope.cColumn = [];
             $scope.cxdata = void 0;
             $scope.cydata = void 0;
+            if ($scope.is_sn !== 1 && $scope.cShowShape === 'shadow') $scope.cShowShape = 'list';
             const { cShowShape = 'list', eqid, dateTime, stid } = $scope;
             if (cShowShape === 'list') {
                 $scope.analysis_station_clean_invlist.getData({
