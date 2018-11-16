@@ -5,6 +5,12 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    deleteModule: {
+        name: 'POSTdeleteModule',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
 }, {
         __serviceName__: 'systemModuleService',
     })('moduleSystemCtrl', ['$scope', 'systemModuleService', 'actionRecord', '$timeout'], ($scope, myAjaxData, historicalRecord, $timeout) => {
@@ -83,14 +89,43 @@ ajaxData({
                     dataIndex: 'weight',
                     align: 'center',
                     sort: true,
+                }, {
+                    title: '操作',
+                    align: 'center',
+                    sort: true,
+                    render(text,item,index) {
+                        return `
+                        <div class="clearfix">
+                            <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                            <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#1ddabe;"></i>
+                        </div>
+                        `
+                    },
                 }
             ]
         }
+        
+        const deleteModule = id =>{
+
+        }
+
+        $scope.trClick = (item, index, event) => {
+            const moduleId = item.id;
+            if (event.target.className.includes('icon-bianji-copy')){
+                $scope.showAddModule = true;
+                $scope.$broadcast('broadAddModule',{'moduleId':moduleId});
+            }else if(event.target.className.includes('icon-shanchu1')){
+                // $solway.confirm({ message: '确定删除此模块？' }, async () => {
+                //     deleteModule()
+                // });
+            };
+            
+        };
 
         //新增
         $scope.addModule = () =>{
             $scope.showAddModule = true;
-            $scope.$broadcast('broadAddModule');
+            $scope.$broadcast('broadAddModule',{'moduleId':''});
         }
 
         $scope.$on('addModuleCallback',function(){

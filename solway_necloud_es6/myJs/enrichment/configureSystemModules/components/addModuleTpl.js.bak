@@ -11,8 +11,14 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    selectModule:{
+        name: 'GETselectModule',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     update:{
-        name:'POSTupdate',
+        name:'POSTupdateModule',
         data: {},
         later: true,
         onlyLatest: true
@@ -49,8 +55,19 @@ ajaxData({
             }
         });
     }
-    $scope.$on('broadAddModule',function(){
-        $scope.id = '';
+
+    const selectModuleDetail = id =>{
+        $scope.selectModule.getData({
+            id:id
+        }).then(res=>{
+            // debugger
+        });
+    }
+    $scope.$on('broadAddModule',function(e,data){
+        $scope.id = data.moduleId;
+        if($scope.id){
+            selectModuleDetail($scope.id)
+        }
         initParentModuleData()
     });
 
