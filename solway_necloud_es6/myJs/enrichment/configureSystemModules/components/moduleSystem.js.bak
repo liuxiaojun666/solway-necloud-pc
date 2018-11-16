@@ -13,11 +13,9 @@ ajaxData({
     },
 }, {
         __serviceName__: 'systemModuleService',
-    })('moduleSystemCtrl', ['$scope', 'systemModuleService', 'actionRecord', '$timeout'], ($scope, myAjaxData, historicalRecord, $timeout) => {
+    })('moduleSystemCtrl', ['$scope', 'systemModuleService', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
         /// 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
-
-
 
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
@@ -26,8 +24,6 @@ ajaxData({
             await myAjaxData.timeout(0);
 
             await $scope.diffGetData();
-
-
         };
 
         $scope.diffGetData = async () => {
@@ -106,7 +102,17 @@ ajaxData({
         }
         
         const deleteModule = id =>{
-
+            $scope.deleteModule.getData({
+                id:id
+            }).then(res=>{
+                if(res.code == 0){
+                    $scope.diffGetData()
+                    toaster.pop('success', '',res.msg)
+                }else{
+                    toaster.pop('error', '',res.msg)
+                }
+                
+            });
         }
 
         $scope.trClick = (item, index, event) => {
@@ -115,9 +121,9 @@ ajaxData({
                 $scope.showAddModule = true;
                 $scope.$broadcast('broadAddModule',{'moduleId':moduleId});
             }else if(event.target.className.includes('icon-shanchu1')){
-                // $solway.confirm({ message: '确定删除此模块？' }, async () => {
-                //     deleteModule()
-                // });
+                $solway.confirm({ message: '确定删除此模块？' }, () => {
+                    deleteModule(moduleId)
+                });
             };
             
         };

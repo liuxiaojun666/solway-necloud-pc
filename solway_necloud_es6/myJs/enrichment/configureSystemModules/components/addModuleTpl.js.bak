@@ -26,31 +26,24 @@ ajaxData({
 }, {
     __serviceName__: 'addModuleTplService',
 })('addModuleTplCtrl', ['$scope', 'addModuleTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
-    
+
     const initParentModuleData = ()=>{
         $scope.systemModulelist.getData({
             pid:0
         }).then(res=>{
             if(res.code == 0){
                 $scope.parrentModuleList = res.body;
-                // $scope.parentModule = res.body[0].id;
             }
         });
     }
 
+    initParentModuleData()
+
     const save = () =>{
-        let formData = {
-            "id":$scope.id,
-            "pid": $scope.pid,
-            "name": $scope.name,
-            "code": $scope.code,
-            "category": $scope.category,
-            "serviceMode": $scope.serviceType,
-            "weight":$scope.weight
-        }
-        
-        $scope.update.getData(formData).then(res=>{
+        $scope.formData['id'] = $scope.id;
+        $scope.update.getData($scope.formData).then(res=>{
             if(res.code == 0 && res.body.id){
+                toaster.pop('success', '','添加成功')
                 $scope.$emit('addModuleCallback');
             }
         });
@@ -60,15 +53,16 @@ ajaxData({
         $scope.selectModule.getData({
             id:id
         }).then(res=>{
-            // debugger
+            $scope.formData = res.body;
         });
     }
     $scope.$on('broadAddModule',function(e,data){
         $scope.id = data.moduleId;
+        $scope.formData = {};
         if($scope.id){
             selectModuleDetail($scope.id)
         }
-        initParentModuleData()
+        
     });
 
     //保存
