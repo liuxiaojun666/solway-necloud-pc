@@ -40,7 +40,10 @@ ajaxData({
         $scope.beforeLoading = true;
         if (data.stationData) {
             await $scope.changeStation.getData(data.stationData);
-            const { currentDataName } = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            historicalRecord.set({ stationData: data.stationData });
+            const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            myAjaxData.setCurrentStationData(stationInfo);
+            const { currentDataName } = stationInfo;             
             $scope.switchPowerScope.currentDataName = currentDataName;
             $scope.switchPowerCallback(data.stationData);
         }
@@ -97,8 +100,8 @@ ajaxData({
     async function diffStationInfo(stationData) {
         while (!$scope._getStationInfo) await myAjaxData.timeout(100);
         const currentStationData = await $scope._getStationInfo;
-        if (currentStationData.isMan === 1) return;
-        if (!currentStationData.currentSTID && currentStationData.currentSTID !== 0) { // 没有选择过电站
+        if (myAjaxData.currentStationData.isMan === 1) return;
+        if (!myAjaxData.currentStationData.currentSTID && myAjaxData.currentStationData.currentSTID !== 0) { // 没有选择过电站
             const res = await $scope.getuserAuthHandleSetSTClass.getData({});
             if (res.result === false) {
                 alert('没有选择任何 公司 或 电站，请联系管理员');
@@ -112,25 +115,29 @@ ajaxData({
             $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 }).then(res => {
                 $scope.ifShowShareTab = res.hasShareUser;
             });
-        } else if (Object.is(currentStationData.currentSTID, stationData.id)) { // 电站信息 没有变化
+        } else if (Object.is(myAjaxData.currentStationData.currentSTID, stationData.id)) { // 电站信息 没有变化
             await myAjaxData.timeout(500);
             $scope.switchPowerCallback(stationData);
             $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 }).then(res => {
                 $scope.ifShowShareTab = res.hasShareUser;
             });
         } else { // 电站信息  发生变化   切换到记录中的电站
-            const { result } = await $scope.changeStation.getData(stationData);
-            if (!result) {
-                const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
-                return $scope.reloadParentPage({ stationData: { id, isGroup, dataType, stClass } });
-            }
+            const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
             const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
             myAjaxData.setCurrentStationData(stationInfo);
-            const { currentDataName, hasShareUser } = stationInfo;
-            $scope.ifShowShareTab = hasShareUser;
+            return $scope.reloadParentPage({ stationData: { id, isGroup, dataType, stClass } });
+            // const { result } = await $scope.changeStation.getData(stationData);
+            // if (!result) {
+            //     const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
+            //     return $scope.reloadParentPage({ stationData: { id, isGroup, dataType, stClass } });
+            // }
+            // const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            // myAjaxData.setCurrentStationData(stationInfo);
+            // const { currentDataName, hasShareUser } = stationInfo;
+            // $scope.ifShowShareTab = hasShareUser;
 
-            $scope.switchPowerScope.currentDataName = currentDataName;
-            $scope.switchPowerCallback(stationData);
+            // $scope.switchPowerScope.currentDataName = currentDataName;
+            // $scope.switchPowerCallback(stationData);
         }
     }
 
