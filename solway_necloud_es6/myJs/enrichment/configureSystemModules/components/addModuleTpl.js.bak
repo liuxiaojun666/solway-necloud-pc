@@ -43,7 +43,7 @@ ajaxData({
         $scope.formData['id'] = $scope.id;
         $scope.update.getData($scope.formData).then(res=>{
             if(res.code == 0 && res.body.id){
-                toaster.pop('success', '','添加成功')
+                toaster.pop('success', '',res.msg)
                 $scope.$emit('addModuleCallback');
             }
         });
@@ -67,16 +67,22 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
-        //校验编码是否存在编码
-        $scope.checkCodeExist.getData({
-            code:$scope.code
-        }).then(res=>{
-            if(res.code == 0){
-                save();
-            }else{
-                toaster.pop('error', '',res.msg)
-            }
-        });
+        if($scope.id){
+            //编辑无需校验编码
+            save();
+        }else{
+            //校验编码是否存在编码
+            $scope.checkCodeExist.getData({
+                code:$scope.code
+            }).then(res=>{
+                if(res.code == 0){
+                    save();
+                }else{
+                    toaster.pop('error', '',res.msg)
+                }
+            });
+        }
+        
     }
 
     //取消
