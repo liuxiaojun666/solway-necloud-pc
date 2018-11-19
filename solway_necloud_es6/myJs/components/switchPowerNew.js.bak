@@ -150,7 +150,6 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
         if ($($event.target).hasClass('activeItem')) {
             return;
         }
-
 		$("#switchPowerNewModal").modal('hide');
 
         $http({
@@ -165,8 +164,13 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
         }).success(function (res) {
             if (res.result) {
                 if (res.isChangeSTClass == 'yes') {
-                    var newSystemPageArr = [
+                    const pvPageArr = [
                         'monitoringSummary',
+                    ];
+                    const wpPageArr = [
+                        'monitoringSummaryWp',
+                    ];
+                    const commonPageArr = [
                         'knowledgeBaseSummary',
                         'dataShareSummary',
                         'dataReportSummary',
@@ -176,7 +180,12 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                         'analyzeSummary',
                         'actionPlanSummary',
                     ];
-                    if (newSystemPageArr.indexOf(window.location.hash.substr(2)) > -1) {
+                    const currentPageStateName = window.location.hash.substr(2);
+                    if (pvPageArr.includes(currentPageStateName)) {
+                        return $state.go(wpPageArr[pvPageArr.indexOf(currentPageStateName)]);
+                    } else if (wpPageArr.includes(currentPageStateName)) {
+                        return $state.go(pvPageArr[wpPageArr.indexOf(currentPageStateName)]);
+                    } else if (commonPageArr.includes(currentPageStateName)) {
                         return window.location.reload();
                     }
                     //当从首页或者消息中心跳到监控视图等页面时
