@@ -14,6 +14,9 @@ ajaxData({
 }, {
         __serviceName__: 'systemModuleService',
     })('moduleSystemCtrl', ['$scope', 'systemModuleService', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+        
+        const categoryMap = {'1':'普通模块', '2':'通用集团管理员配置', '-9':'集团管理员'};
+        const serviceModeMap = {'00':'免费服务','01':'收费服务','02':'子模块收费','09':'推广试用'};
         /// 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
 
@@ -57,6 +60,7 @@ ajaxData({
                 }, {
                     title: '唯一编码',
                     dataIndex: 'code',
+                    width: '26%',
                     align: 'center',
                     sort: true,
                 },
@@ -75,11 +79,17 @@ ajaxData({
                     dataIndex: 'category',
                     align: 'center',
                     sort: true,
+                    render(text){
+                        return categoryMap[text]
+                    }
                 }, {
                     title: '服务模式',
                     dataIndex: 'serviceMode',
                     align: 'center',
                     sort: true,
+                    render(text){
+                        return serviceModeMap[text]
+                    }
                 }, {
                     title: '顺序号',
                     dataIndex: 'weight',
@@ -93,7 +103,7 @@ ajaxData({
                         return `
                         <div class="clearfix">
                             <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
-                            <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#1ddabe;"></i>
+                            <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
                         </div>
                         `
                     },
