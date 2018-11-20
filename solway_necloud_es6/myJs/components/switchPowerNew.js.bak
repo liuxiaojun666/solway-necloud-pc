@@ -11,9 +11,10 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
             method: "POST",
             url: "UserAuthHandle/getCurrentInfoNew.htm",
         }).success(function (res) {
+            $scope.currentInfoData = res;
             $scope.currentSTClass = res.currentSTClass;//光伏、风电
             $scope.currentSTID = res.currentSTID; //当前所选ID
-            $scope.currentParentId = res.currentParentId;
+            // $scope.currentParentId = res.currentParentId;
             $scope.currentType = res.currentType; //2:集团；1：公司；0：电站
             
             $scope.getSTClass();
@@ -92,7 +93,10 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                         $scope.hasChildStation.push(data[i].comId);
                     }
                 }
+                
+                //若当前是在电站级别，去展开电站
                 if($scope.currentSTID && $scope.currentType == 0){
+                    $scope.currentParentId = $scope.currentInfoData.currentParentId; //箭头active控制
                     getStationList($scope.currentParentId);
                 }
                 
@@ -147,9 +151,9 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
         }
 
         //当再次选择已选择的电站时，直接返回
-        if ($($event.target).hasClass('activeItem')) {
-            return;
-        }
+        // if ($($event.target).hasClass('activeItem')) {
+        //     return;
+        // }
 		$("#switchPowerNewModal").modal('hide');
 
         $http({
