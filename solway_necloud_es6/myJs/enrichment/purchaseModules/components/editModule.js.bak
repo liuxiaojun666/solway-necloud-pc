@@ -1,0 +1,60 @@
+
+ajaxData({
+    update:{
+        name:'POSTupdateBuyModule',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'editPurchaseModuleService',
+})('editPurchaseModuleCtrl', ['$scope', 'editPurchaseModuleService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    $scope.mcssWarnDate = new Date();
+    $scope.mcssStartDate = new Date();
+    $scope.mcssEndDate = new Date();
+    $scope.endDate = new Date('2099');
+
+    $scope.$on('broadEditPurchaseModule',function(e,data){
+        $scope.detailInfo = data;
+        $scope.mcComId = data.mcComId;
+        $scope.mcssServiceStatus = data.mcssServiceStatus?data.mcssServiceStatus:'01'
+    });
+
+
+    //保存
+    $scope.save = () =>{
+        let formData = {
+            'mcComId':$scope.mcComId,
+            'mcssWarnDate':$scope.mcssWarnDate.Format('yyyy-MM-dd'),
+            'mcssStartDate':$scope.mcssStartDate.Format('yyyy-MM-dd'),
+            'mcssEndDate':$scope.mcssEndDate.Format('yyyy-MM-dd'),
+            'mcssServiceStatus':$scope.mcssServiceStatus
+        };
+        
+        // $scope.update.getData(formData).then(res=>{
+        //     console.log(res)
+        //     debugger
+        // });
+
+        $http({
+            method : "POST",
+            url : window.baseUrl +'/moduleInfo/updateCompanyBuyModule.htm',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data:formData,
+            transformRequest: function (g) {
+                return JSON.stringify(g)
+            }
+        }).success(function(result) {
+        })
+        
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('editPurchaseModuleCallback');
+    }
+
+});
