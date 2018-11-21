@@ -14,6 +14,7 @@ ajaxData({
 }, {})('purchaseModulesCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout'], ($scope, myAjaxData, historicalRecord, $timeout) => {
 
     $scope.moduleName = '购买配置';//当前页面名称；
+    const serviceTypeMap = {'00':'已购买','01':'未购买'};
 
     const initCompanyList = () => {
         $scope.getCompanyList.getData({
@@ -70,12 +71,11 @@ ajaxData({
                         }
                     }
                 }, {
-                    title: '提醒时间',
-                    dataIndex: 'mcssWarnDate',
+                    title: '购买状态',
+                    dataIndex: 'mcssServiceStatus',
                     align: 'center',
-                    sort: true,
                     render(text,item,index){
-                        if(text) return new Date(text).Format("yyyy-MM-dd")
+                        if(text) return serviceTypeMap[text]
                     }
                 }, {
                     title: '开始时间',
@@ -95,19 +95,25 @@ ajaxData({
                         
                     }
                 }, {
-                    title: '服务协议状态',
-                    dataIndex: 'mcssServiceStatus',
+                    title: '提醒时间',
+                    dataIndex: 'mcssWarnDate',
                     align: 'center',
+                    sort: true,
+                    render(text,item,index){
+                        if(text) return new Date(text).Format("yyyy-MM-dd")
+                    }
                 }, {
                     title: '操作',
                     align: 'center',
                     dataIndex:'id',
                     render(text,item,index) {
-                        return `
-                        <div class="clearfix">
-                            <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
-                        </div>
-                        `
+                        if(!item.hasChildren){
+                            return `
+                                <div class="clearfix">
+                                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                                </div>
+                                `
+                        }
                     },
                 }
             ]
