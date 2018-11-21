@@ -67,6 +67,8 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
+        if (!$solway.formValidation($scope.formData, '.addModuleTpl', toaster)) return;//校验非空
+
         if($scope.id){
             //编辑无需校验编码
             save();
@@ -82,12 +84,11 @@ ajaxData({
                 }
             });
         }
-        
     }
 
     //取消
     $scope.cancel = () =>{
-        $scope.$emit('addModuleCallback');
+        $scope.$emit('cancelCallback');
     }
 
 });
