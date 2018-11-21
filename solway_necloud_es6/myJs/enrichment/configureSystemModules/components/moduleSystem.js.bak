@@ -13,10 +13,10 @@ ajaxData({
     },
 }, {
         __serviceName__: 'systemModuleService',
-    })('moduleSystemCtrl', ['$scope', 'systemModuleService', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
-        
-        const categoryMap = {'1':'普通模块', '2':'通用集团管理员配置', '-9':'集团管理员'};
-        const serviceModeMap = {'00':'免费服务','01':'收费服务','02':'子模块收费','09':'推广试用'};
+    })('moduleSystemCtrl', ['$scope', 'systemModuleService', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+
+        const categoryMap = { '1': '普通模块', '2': '通用集团管理员配置', '-9': '集团管理员' };
+        const serviceModeMap = { '00': '免费服务', '01': '收费服务', '02': '子模块收费', '09': '推广试用' };
         /// 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
 
@@ -42,7 +42,19 @@ ajaxData({
 
         $scope.systemModulelist.getDataCallback = (success, res) => {
             $scope.loading = false;
-           
+
+            const data = res.body,childData = res.body;
+            $scope.systemList = [];
+            for(let i=0;i<data.length;i++){
+                if(data[i].pid == 0){
+                    $scope.systemList.push(data[i]);
+                }
+                for(let j=0;j<childData.length;j++){
+                    if(childData[j].pid == data[i].id){
+                        $scope.systemList.push(childData[j]);
+                    }
+                }
+            }
             $scope.column = [
                 {
                     title: '名称',
@@ -50,10 +62,10 @@ ajaxData({
                     width: '20%',
                     align: 'left',
                     sort: true,
-                    render (text, record) {
-                        if(record.pid != 0){
+                    render(text, record) {
+                        if (record.pid != 0) {
                             return '<span style="padding-left:4em">' + text + '</span>';
-                        }else{
+                        } else {
                             return text;
                         }
                     }
@@ -63,23 +75,12 @@ ajaxData({
                     width: '26%',
                     align: 'center',
                     sort: true,
-                },
-                //  {
-                //     title: '上级模块',
-                //     dataIndex: 'eqreduce',
-                //     width: '30%',   
-                //     align: 'right',
-                //     sort: true,
-                //     // render (text, record) {
-                //     //     return text + '%'
-                //     // }
-                // },
-                 {
+                }, {
                     title: '分类',
                     dataIndex: 'category',
                     align: 'center',
                     sort: true,
-                    render(text){
+                    render(text) {
                         return categoryMap[text]
                     }
                 }, {
@@ -87,7 +88,7 @@ ajaxData({
                     dataIndex: 'serviceMode',
                     align: 'center',
                     sort: true,
-                    render(text){
+                    render(text) {
                         return serviceModeMap[text]
                     }
                 }, {
@@ -99,7 +100,7 @@ ajaxData({
                     title: '操作',
                     align: 'center',
                     sort: true,
-                    render(text,item,index) {
+                    render(text, item, index) {
                         return `
                         <div class="clearfix">
                             <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
@@ -110,43 +111,49 @@ ajaxData({
                 }
             ]
         }
-        
-        const deleteModule = id =>{
+
+        const deleteModule = id => {
             $scope.deleteModule.getData({
-                id:id
-            }).then(res=>{
-                if(res.code == 0){
+                id: id
+            }).then(res => {
+                if (res.code == 0) {
                     $scope.diffGetData()
-                    toaster.pop('success', '',res.msg)
-                }else{
-                    toaster.pop('error', '',res.msg)
+                    toaster.pop('success', '', res.msg)
+                } else {
+                    toaster.pop('error', '', res.msg)
                 }
-                
+
             });
         }
 
         $scope.trClick = (item, index, event) => {
             const moduleId = item.id;
-            if (event.target.className.includes('icon-bianji-copy')){
+            if (event.target.className.includes('icon-bianji-copy')) {
                 $scope.showAddModule = true;
-                $scope.$broadcast('broadAddModule',{'moduleId':moduleId});
-            }else if(event.target.className.includes('icon-shanchu1')){
+                $scope.$broadcast('broadAddModule', { 'moduleId': moduleId });
+            } else if (event.target.className.includes('icon-shanchu1')) {
                 $solway.confirm({ message: '确定删除此模块？' }, () => {
                     deleteModule(moduleId)
                 });
             };
-            
+
         };
 
         //新增
-        $scope.addModule = () =>{
+        $scope.addModule = () => {
             $scope.showAddModule = true;
-            $scope.$broadcast('broadAddModule',{'moduleId':''});
+            $scope.$broadcast('broadAddModule', { 'moduleId': '' });
         }
 
-        $scope.$on('addModuleCallback',function(){
+        //新增成功
+        $scope.$on('addModuleCallback', function () {
             $scope.showAddModule = false;
             $scope.diffGetData();
+        });
+
+        //取消
+        $scope.$on('cancelCallback',function(){
+            $scope.showAddModule = false;
         });
 
 

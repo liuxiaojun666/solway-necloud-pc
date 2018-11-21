@@ -31,7 +31,6 @@ ajaxData({
         $scope.selectCompanyModules.getData({
             comId: $scope.selectedCompanyId
         }).then(res => {
-
             let data = res.body;
             let parrentArr = [], childrenArr = [];
             for (let i = 0; i < data.length; i++) {
@@ -75,16 +74,26 @@ ajaxData({
                     dataIndex: 'mcssWarnDate',
                     align: 'center',
                     sort: true,
+                    render(text,item,index){
+                        if(text) return new Date(text).Format("yyyy-MM-dd")
+                    }
                 }, {
                     title: '开始时间',
                     dataIndex: 'mcssStartDate',
                     align: 'center',
                     sort: true,
+                    render(text,item,index){
+                        if(text) return new Date(text).Format("yyyy-MM-dd")
+                    }
                 }, {
                     title: '结束时间',
                     dataIndex: 'mcssEndDate',
                     align: 'center',
                     sort: true,
+                    render(text,item,index){
+                        if(text) return new Date(text).Format("yyyy-MM-dd")
+                        
+                    }
                 }, {
                     title: '服务协议状态',
                     dataIndex: 'mcssServiceStatus',
@@ -117,6 +126,17 @@ ajaxData({
         $('.ng-clock').removeClass('ng-clock');
     }, 100);
 
+    //点其他区域消失模块
+    $scope.hideEditAlert = () =>{
+        $scope.showEditModule = false;
+        $scope.$broadcast('hideEditBroad');
+    }
+
+    //编辑成功后回调
+    $scope.$on('addPurchaseModuleCallback',()=>{
+        $scope.showEditModule = false;
+        initCompanyList();
+    });
 
     //取消
     $scope.$on('editPurchaseModuleCallback',()=>{
