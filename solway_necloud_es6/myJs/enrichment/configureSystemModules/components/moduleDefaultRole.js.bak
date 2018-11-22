@@ -28,14 +28,13 @@ ajaxData({
             $scope.loading = true;
             await myAjaxData.timeout(0);
 
-            $scope.getRoleList.getData({
-                
-            });
+            $scope.getRoleList.getData({});
         }
 
         $scope.getRoleList.getDataCallback = (success, res) => {
             $scope.loading = false;
 
+            return;
             console.log(res)
             $scope.column = [
                 {
@@ -94,49 +93,49 @@ ajaxData({
             ]
         }
 
-        const deleteModule = id => {
-            $scope.deleteModule.getData({
-                id: id
-            }).then(res => {
-                if (res.code == 0) {
-                    $scope.diffGetData()
-                    toaster.pop('success', '', res.msg)
-                } else {
-                    toaster.pop('error', '', res.msg)
-                }
+        // const deleteModule = id => {
+        //     $scope.deleteModule.getData({
+        //         id: id
+        //     }).then(res => {
+        //         if (res.code == 0) {
+        //             $scope.diffGetData()
+        //             toaster.pop('success', '', res.msg)
+        //         } else {
+        //             toaster.pop('error', '', res.msg)
+        //         }
 
-            });
-        }
+        //     });
+        // }
 
-        $scope.trClick = (item, index, event) => {
-            const moduleId = item.id;
-            if (event.target.className.includes('icon-bianji-copy')) {
-                $scope.showAddModule = true;
-                $scope.$broadcast('broadAddModule', { 'moduleId': moduleId });
-            } else if (event.target.className.includes('icon-shanchu1')) {
-                $solway.confirm({ message: '确定删除此模块？' }, () => {
-                    deleteModule(moduleId)
-                });
-            };
+        // $scope.trClick = (item, index, event) => {
+        //     const moduleId = item.id;
+        //     if (event.target.className.includes('icon-bianji-copy')) {
+        //         $scope.showAddModule = true;
+        //         $scope.$broadcast('broadAddModule', { 'moduleId': moduleId });
+        //     } else if (event.target.className.includes('icon-shanchu1')) {
+        //         $solway.confirm({ message: '确定删除此模块？' }, () => {
+        //             deleteModule(moduleId)
+        //         });
+        //     };
 
-        };
+        // };
 
-        //新增
-        $scope.addModule = () => {
-            $scope.showAddModule = true;
-            $scope.$broadcast('broadAddModule', { 'moduleId': '' });
-        }
+        // //新增
+        // $scope.addModule = () => {
+        //     $scope.showAddModule = true;
+        //     $scope.$broadcast('broadAddModule', { 'moduleId': '' });
+        // }
 
-        //新增成功
-        $scope.$on('addModuleCallback', function () {
-            $scope.showAddModule = false;
-            $scope.diffGetData();
-        });
+        // //新增成功
+        // $scope.$on('addModuleCallback', function () {
+        //     $scope.showAddModule = false;
+        //     $scope.diffGetData();
+        // });
 
-        //取消
-        $scope.$on('cancelCallback',function(){
-            $scope.showAddModule = false;
-        });
+        // //取消
+        // $scope.$on('cancelCallback',function(){
+        //     $scope.showAddModule = false;
+        // });
 
 
         // 销毁 事件
