@@ -7,9 +7,11 @@ let gulp = require('gulp'),
     pngquant = require('imagemin-pngquant'),
     htmlmin = require('gulp-htmlmin'),
     imageMin = require('gulp-imagemin');
+
 /**
  * 构建 压缩
  */
+// gulp.task('minify', gulpSequence('copy', 'minifyJs', 'minifyCss', 'minifyImg'))
 gulp.task('minify', gulpSequence('copy', 'minifyHtml', 'minifyJs', 'minifyCss', 'minifyImg'))
 
 // 复制 目录
@@ -80,10 +82,16 @@ gulp.task('minifyHtml', function () {
         removeEmptyAttributes: false,//删除所有空格作属性值 <input id="" /> ==> <input />
         removeScriptTypeAttributes: true,//删除<script>的type="text/javascript"
         removeStyleLinkTypeAttributes: true,//删除<style>和<link>的type="text/css"
-        minifyJS: { mangle: false, compress: false },//压缩页面JS
+        minifyJS: {
+            mangle: false,
+            compress: true,
+            comments: false
+        },//压缩页面JS
         minifyCSS: true, //压缩页面CSS
         ignoreCustomFragments: [
-            /{{(.*?)}}/g,
+            /\{\{((.|\s)*?)\}\}/g,
+            /\sstyle\=\"((.|\s)*?)\"/g,
+            /;/g,
         ]
     };
     return gulp.src(['tpl/**/*.html'])
