@@ -35,15 +35,18 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
+        if($scope.mcssServiceStatus == '01'){
+            clearDateTime();
+        }
         let formData = {
             'appId':$scope.detailInfo.appId,
             'appPid':$scope.detailInfo.appPid,
             'mcComId':$scope.detailInfo.mcComId,
             'mcId':$scope.detailInfo.mcId,
             'mcssId':$scope.detailInfo.mcssId,
-            'mcssWarnDate':$scope.mcssWarnDate.Format('yyyy-MM-dd'),
-            'mcssStartDate':$scope.mcssStartDate.Format('yyyy-MM-dd'),
-            'mcssEndDate':$scope.mcssEndDate.Format('yyyy-MM-dd'),
+            'mcssWarnDate':$scope.mcssWarnDate?$scope.mcssWarnDate.Format('yyyy-MM-dd'):'',
+            'mcssStartDate':$scope.mcssStartDate?$scope.mcssStartDate.Format('yyyy-MM-dd'):'',
+            'mcssEndDate':$scope.mcssEndDate?$scope.mcssEndDate.Format('yyyy-MM-dd'):'',
             'mcssServiceStatus':$scope.mcssServiceStatus
         };
 
