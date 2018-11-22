@@ -5,11 +5,17 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    //删除
+    deleteConfigureRoleModule:{
+        name: 'POSTdeleteConfigureRoleModule',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
 }, {
         __serviceName__: 'moduleDefaultRoleService',
     })('moduleDefaultRoleCtrl', ['$scope', 'moduleDefaultRoleService', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
 
-        const categoryMap = { '1': '普通模块', '2': '通用集团管理员配置', '-9': '集团管理员' };
         const serviceModeMap = { '00': '免费服务', '01': '收费服务', '02': '子模块收费', '09': '推广试用' };
         /// 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
@@ -20,6 +26,7 @@ ajaxData({
             $scope.initComplete = true;
             await myAjaxData.timeout(0);
 
+            $scope.roleType = '00';
             await $scope.diffGetData();
         };
 
@@ -36,18 +43,28 @@ ajaxData({
         $scope.getRoleList.getDataCallback = (success, res) => {
             $scope.loading = false;
 
-            console.log(res);
-            return;
-            console.log(res)
+            const data = res.body,childData = res.body;
+            $scope.defaultRoleList = [];
+            for(let i=0;i<data.length;i++){
+                if(data[i].appPid == 0){
+                    $scope.defaultRoleList.push(data[i]);
+                }
+                for(let j=0;j<childData.length;j++){
+                    if(childData[j].appPid == data[i].appId){
+                        $scope.defaultRoleList.push(childData[j]);
+                    }
+                }
+            }
+
             $scope.column = [
                 {
                     title: '名称',
-                    dataIndex: 'name',
+                    dataIndex: 'originalName',
                     width: '20%',
                     align: 'left',
                     sort: true,
                     render(text, record) {
-                        if (record.pid != 0) {
+                        if (record.appPid != 0) {
                             return '<span style="padding-left:4em">' + text + '</span>';
                         } else {
                             return text;
@@ -60,14 +77,6 @@ ajaxData({
                     align: 'center',
                     sort: true,
                 }, {
-                    title: '分类',
-                    dataIndex: 'category',
-                    align: 'center',
-                    sort: true,
-                    render(text) {
-                        return categoryMap[text]
-                    }
-                }, {
                     title: '服务模式',
                     dataIndex: 'serviceMode',
                     align: 'center',
@@ -76,73 +85,64 @@ ajaxData({
                         return serviceModeMap[text]
                     }
                 }, {
-                    title: '顺序号',
-                    dataIndex: 'weight',
-                    align: 'center',
-                    sort: true,
-                }, {
                     title: '操作',
                     align: 'center',
                     sort: true,
                     render(text, item, index) {
-                        return `
-                        <div class="clearfix">
-                            <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
-                            <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
-                        </div>
-                        `
+                        if(!item.hasChildren){
+                            return `
+                            <div class="clearfix">
+                                <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                            </div>
+                            `
+                        }
                     },
                 }
             ]
         }
 
-        // const deleteModule = id => {
-        //     $scope.deleteModule.getData({
-        //         id: id
-        //     }).then(res => {
-        //         if (res.code == 0) {
-        //             $scope.diffGetData()
-        //             toaster.pop('success', '', res.msg)
-        //         } else {
-        //             toaster.pop('error', '', res.msg)
-        //         }
+        const deleteDefaultRoleModule = id => {
+            $scope.deleteConfigureRoleModule.getData({
+                id: id
+            }).then(res => {
+                if (res.code == 0) {
+                    $scope.diffGetData()
+                    toaster.pop('success', '', res.msg)
+                } else {
+                    toaster.pop('error', '', res.msg)
+                }
 
-        //     });
-        // }
+            });
+        }
 
-        // $scope.trClick = (item, index, event) => {
-        //     const moduleId = item.id;
-        //     if (event.target.className.includes('icon-bianji-copy')) {
-        //         $scope.showAddModule = true;
-        //         $scope.$broadcast('broadAddModule', { 'moduleId': moduleId });
-        //     } else if (event.target.className.includes('icon-shanchu1')) {
-        //         $solway.confirm({ message: '确定删除此模块？' }, () => {
-        //             deleteModule(moduleId)
-        //         });
-        //     };
+        $scope.trClick = (item, index, event) => {
+            if (event.target.className.includes('icon-shanchu1')) {
+                $solway.confirm({ message: '确定删除此模块？' }, () => {
+                    deleteDefaultRoleModule(item.roleId)
+                });
+            };
+        };
 
-        // };
+        //新增
+        $scope.addModule = () => {
+            $scope.showAddDefaultRoleModule = true;
+            $scope.$broadcast('broadAddDefaultRoleModule', { 'type':'add' });
+        }
 
-        // //新增
-        // $scope.addModule = () => {
-        //     $scope.showAddModule = true;
-        //     $scope.$broadcast('broadAddModule', { 'moduleId': '' });
-        // }
+        //新增成功
+        $scope.$on('addDefaultRoleModuleCallback', function () {
+            $scope.showAddDefaultRoleModule = false;
+            $scope.diffGetData();
+        });
 
-        // //新增成功
-        // $scope.$on('addModuleCallback', function () {
-        //     $scope.showAddModule = false;
-        //     $scope.diffGetData();
-        // });
-
-        // //取消
-        // $scope.$on('cancelCallback',function(){
-        //     $scope.showAddModule = false;
-        // });
+        //取消
+        $scope.$on('cancelCallback',function(){
+            $scope.showAddDefaultRoleModule = false;
+        });
 
 
         // 销毁 事件
         $scope.$on('$destroy', () => {
-            document.removeEventListener('click', closeSearchAlert);
+           
         });
     });
