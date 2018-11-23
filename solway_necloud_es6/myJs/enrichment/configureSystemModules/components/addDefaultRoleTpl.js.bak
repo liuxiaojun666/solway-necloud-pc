@@ -16,12 +16,12 @@ ajaxData({
 })('addDefaultRoleModuleTplCtrl', ['$scope', 'addDefaultRoleModuleTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
 
     const initNotConfiguredModuleData = ()=>{
+        $scope.notConfiguredModuleList = [];
         $scope.unConfiguredModulelist.getData({
             roleType:$scope.roleType
         }).then(res=>{
             if(res.code == 0){
                 const data = res.body,childData = res.body;
-                $scope.notConfiguredModuleList = [];
                 for(let i=0;i<data.length;i++){
                     if(data[i].appPid == 0){
                         $scope.notConfiguredModuleList.push(data[i]);
@@ -32,14 +32,13 @@ ajaxData({
                         }
                     }
                 }
-                // $scope.notConfiguredModuleList = res.body;
             }
+            $timeout(function(){
+                $("input[name='roleModuleIds']").each(function(){
+                    this.checked=false;
+                });
+            },0);
         });
-    }
-
-    const save = () =>{
-        $scope.formData['id'] = $scope.id;
-        
     }
 
     $scope.$on('broadAddDefaultRoleModule',function(e,data){

@@ -37,8 +37,6 @@ ajaxData({
         });
     }
 
-    initParentModuleData()
-
     const save = () =>{
         $scope.formData['id'] = $scope.id;
         $scope.update.getData($scope.formData).then(res=>{
@@ -57,6 +55,8 @@ ajaxData({
         });
     }
     $scope.$on('broadAddModule',function(e,data){
+        initParentModuleData();
+        
         $scope.id = data.moduleId;
         $scope.formData = {};
         if($scope.id){
