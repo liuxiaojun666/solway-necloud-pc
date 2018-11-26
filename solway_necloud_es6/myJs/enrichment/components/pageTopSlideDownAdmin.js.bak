@@ -1,0 +1,124 @@
+app.directive('pageSlideDownAdmin', ['$ocLazyLoad', '$http', '$state', '$stateParams', '$timeout', '$rootScope', 'actionRecord', ($ocLazyLoad, $http, $state, $stateParams, $timeout, $rootScope, historicalRecord) => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: {
+
+    },
+    templateUrl: 'tpl/enrichment/components/pageSlideDownAdmin.html' + window.stamp,
+    link($scope, $element) {
+
+        //鼠标悬浮0.5s页面头部，出现下拉页面
+        let timer = null;
+        const setMainHeight = () => {
+            let wHeight = $(window).height();
+            let muduleHeight = 500;
+            $(".module-list").css('marginTop', (wHeight - muduleHeight) / 2)
+            $(".function-list").css('marginTop', (wHeight - 660) / 2)
+        }
+
+        setMainHeight()
+
+        window.addEventListener('resize', setMainHeight);
+        $scope.$on('$destroy', () => {
+            window.removeEventListener('resize', setMainHeight);
+        });
+
+        $timeout(() => {
+            $('body').on('mouseover', '.hover-header-con', () => {
+                // $scope.setActiveClass();
+                timer = setTimeout(() => {
+                    $(".systems-page").slideDown();
+                }, 500);
+            })
+            $('body').on('mouseout', '.hover-header-con', () => {
+                if (timer) clearTimeout(timer);
+            })
+        }, 0)
+
+        $('body').on('click', '.hover-header-con-click', () => {
+            $(".systems-page").slideDown();
+            // $scope.setActiveClass();
+        })
+
+        $(".close_btn_slide").click(() => {
+            $(".systems-page").slideUp();
+        });
+
+        $(".square-common").hover(function () {
+            $(this).addClass('active');
+        }, function () {
+            if ($(this).hasClass($scope.currentState)) return;
+            $(this).removeClass('active');
+        })
+
+
+    },
+    controller($scope, $element) {
+        $scope.currentState = $state.current.name;
+        $scope.adminPages = [
+            {
+                state: 'app.powerStation',
+                name: '电站管理'
+            },
+            {
+                state: 'app.userInformation',
+                name: '用户管理'
+            },
+            {
+                state: 'app.roleInformationList',
+                name: '角色管理'
+            },
+            {
+                state: 'app.rightInformation',
+                name: '权限管理'
+            },
+            {
+                state: 'app.knowledge',
+                name: '知识库'
+            },
+            {
+                state: 'app.modelConfig',
+                name: '应发模型配置'
+            },
+            {
+                state: 'app.baseDictionary',
+                name: '字典管理'
+            },
+            {
+                state: 'app.systemDataInit',
+                name: '数据初始化'
+            },
+            {
+                state: 'app.ureportConfig2',
+                name: '报表配置'
+            },
+            {
+                state: 'purchaseModules',
+                name: '模块购买'
+            },
+            {
+                state: 'systemModules',
+                name: '系统模块'
+            },
+        ];
+        $scope.productLibrary = [
+            {
+                state: 'app.manufacturer',
+                name: '厂商管理'
+            },
+            {
+                state: 'app.product',
+                name: '产品管理'
+            },
+            {
+                state: 'app.protocol',
+                name: '协议管理'
+            },
+            {
+                state: 'app.commProtocol',
+                name: '通讯违规管理'
+            },
+        ];
+    }
+})])
