@@ -8,18 +8,22 @@ ajaxData({
         name: 'GETroleAllList',
         data: {},
         later: true
+    },
+    deleteRole:{
+        name: 'POSTdeleteRole',
+        data: {},
+        later: true
     }
-
-}, {})('authorityManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout'], ($scope, myAjaxData, historicalRecord, $timeout) => {
+}, {})('authorityManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
 
     $scope.moduleName = '权限管理';//当前页面名称；
 
-    const getRoleAllList = depid => {
+    const getRoleAllList = () => {
         $scope.tableLoading = true;
         $scope.roleAllList.getData({
             pageIndex: 0,
             pageSize: 10,
-            depid: depid,
+            depid: $scope.depid,
             roleType: '02'
         }).then(res => {
             $scope.tableLoading = false;
@@ -56,9 +60,26 @@ ajaxData({
         })
     }
 
+    //删除此角色
+    const deleteRole = roleId =>{
+        $scope.deleteRole.getData({
+            roleId:roleId
+        }).then(res => {
+            if (res.key==1) {
+                toaster.pop('error', '','有下级部门');
+			} else if (res.key==2){
+                toaster.pop('error', '','删除失败');
+			} else if(res.key==3){
+                toaster.pop('success', '','删除成功');
+                getRoleAllList();
+			}
+        })
+    }
+
     function onClick(event, treeId, treeNode, clickFlag) {
-        let depid = treeNode.id;
-        getRoleAllList(depid);
+        $scope.depid = treeNode.id;
+        $scope.depName = treeNode.name;
+        getRoleAllList();
     };
 
     let zTreeObj;
@@ -85,8 +106,6 @@ ajaxData({
         $scope.departmentList.getData({
         }).then(res => {
             if (res.key == 1) {
-                const depList = res.data;
-
                 let zNodes = res.data;
                 $.fn.zTree.init($("#departmentTree"), setting, zNodes);
                 zTreeObj = $.fn.zTree.getZTreeObj("departmentTree")
@@ -97,6 +116,34 @@ ajaxData({
     }
 
     initDepartmentList();
+
+    $scope.trClick = (item, index, event) => {
+        const roleId = item.roleId;
+        if (event.target.className.includes('icon-bianji-copy')) {
+            $scope.showAddRoleTpl = true;
+            $scope.$broadcast('broadAddRole', { 'roleId': roleId });
+        } else if (event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此模块？' }, () => {
+                deleteRole(roleId)
+            });
+        };
+    };
+
+    $scope.addRole = () =>{
+        $scope.showAddRoleTpl = true;
+        $scope.$broadcast('broadAddRole', { 'roleId': '' });
+    }
+
+    //添加成功回调
+    $scope.$on('addRoleCallback',()=>{
+        $scope.showAddRoleTpl = false;
+        getRoleAllList();
+    });
+
+    //取消后回调
+    $scope.$on('addRoleCancelCallback',()=>{
+        $scope.showAddRoleTpl = false;
+    });
 
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');
