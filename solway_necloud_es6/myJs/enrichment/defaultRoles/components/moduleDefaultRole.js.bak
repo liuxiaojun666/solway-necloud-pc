@@ -1,4 +1,10 @@
 ajaxData({
+    newsTypeList:{
+        name:'GETnewsTypeList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     getRoleList: {
         name: 'GETgetRoleList',
         data: {},
@@ -8,6 +14,18 @@ ajaxData({
     //删除
     deleteConfigureRoleModule:{
         name: 'POSTdeleteConfigureRoleModule',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    getByRoleType:{
+        name: 'GETgetByRoleType',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    roleMsgUpdate:{
+        name: 'POSTroleMsgUpdate',
         data: {},
         later: true,
         onlyLatest: true
@@ -27,8 +45,35 @@ ajaxData({
             await myAjaxData.timeout(0);
 
             $scope.roleType = '00';
+
+            recieveNewsTypes();
             await $scope.diffGetData();
         };
+
+        //接收消息类型列表
+        const recieveNewsTypes = () =>{
+            $scope.newsTypeList.getData({
+                dictType: "ROLE_REC_MSG_TYPE_CODE"
+            }).then(res => {
+                $scope.recMsgTypes = res;
+            });
+        }
+
+        //保存消息类型
+        $scope.setMsgTypes = ()=>{
+            const newsTypeArr = [];
+            $("input[name='recmsgtypes']:checked").map((index,v)=>{
+                newsTypeArr.push(v.value)
+            })
+
+            $scope.roleMsgUpdate.getData({
+                roleType: $scope.roleType,
+                recMsgTypes:newsTypeArr.join(',')
+            }).then(res => {
+                console.log(res)
+            });
+            
+        }
 
         $scope.diffGetData = async () => {
             if (!$scope.initComplete) return;
@@ -38,6 +83,14 @@ ajaxData({
             $scope.getRoleList.getData({
                 roleType:$scope.roleType
             });
+
+            if($scope.roleType == '01' || $scope.roleType == '02'){
+                $("input[name='recmsgtypes']").prop("checked", false);
+                $scope.getByRoleType.getData({
+                    roleType:$scope.roleType
+                })
+            }
+            
         }
 
         $scope.getRoleList.getDataCallback = (success, res) => {
@@ -99,6 +152,16 @@ ajaxData({
                     },
                 }
             ]
+        }
+
+        $scope.getByRoleType.getDataCallback = (success,res) =>{
+            const recMsgTypes = res.body.recMsgTypes;
+            console.log(res.body);
+            if(recMsgTypes){
+                $.each(drecMsgTypes.split(','), function (i, v) {
+                    $("input[name='recmsgtypes'][value='" + v + "']").prop("checked", true);
+                })
+            }
         }
 
         const deleteDefaultRoleModule = id => {
