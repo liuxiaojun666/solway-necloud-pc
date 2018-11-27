@@ -23,7 +23,7 @@ ajaxData({
 
         // $scope.mcssWarnDate = data.mcssWarnDate? new Date(data.mcssWarnDate):new Date();
         $scope.mcssStartDate = data.mcssStartDate? new Date(data.mcssStartDate):new Date();
-        $scope.mcssEndDate = data.mcssEndDate? new Date(data.mcssEndDate):new Date();
+        $scope.mcssEndDate = data.mcssEndDate? new Date(data.mcssEndDate):new Date((new Date).setDate((new Date).getDate() + 7));
 
         $scope.mcssServiceStatus = data.mcssServiceStatus?data.mcssServiceStatus:'01'
     });
@@ -38,6 +38,13 @@ ajaxData({
         if($scope.mcssServiceStatus == '01'){
             clearDateTime();
         }
+        if($scope.mcssEndDate && $scope.mcssStartDate){
+            if($scope.mcssEndDate<=$scope.mcssStartDate){
+                toaster.pop('error', '','结束时间必须大于开始时间')
+                return false;
+            }
+        }
+
         let formData = {
             'appId':$scope.detailInfo.appId,
             'appPid':$scope.detailInfo.appPid,

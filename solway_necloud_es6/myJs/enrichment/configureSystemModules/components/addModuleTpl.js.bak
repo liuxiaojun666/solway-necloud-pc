@@ -37,12 +37,15 @@ ajaxData({
         });
     }
 
+    initParentModuleData();
+
     const save = () =>{
         $scope.formData['id'] = $scope.id;
         $scope.update.getData($scope.formData).then(res=>{
             if(res.code == 0 && res.body.id){
                 toaster.pop('success', '',res.msg)
                 $scope.$emit('addModuleCallback');
+                initParentModuleData();
             }
         });
     }
@@ -55,10 +58,9 @@ ajaxData({
         });
     }
     $scope.$on('broadAddModule',function(e,data){
-        initParentModuleData();
-        
         $scope.id = data.moduleId;
         $scope.formData = {};
+        
         if($scope.id){
             selectModuleDetail($scope.id)
         }
@@ -85,6 +87,11 @@ ajaxData({
             });
         }
     }
+
+    //删除成功
+    $scope.$on('broadDeleteModule',()=>{
+        initParentModuleData();
+    });
 
     //取消
     $scope.cancel = () =>{

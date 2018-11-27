@@ -15,7 +15,7 @@ ajaxData({
         __serviceName__: 'systemModuleService',
     })('moduleSystemCtrl', ['$scope', 'systemModuleService', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
 
-        const categoryMap = { '1': '普通模块', '2': '通用集团管理员配置', '-9': '集团管理员' };
+        const categoryMap = { '1': '普通用户（领导|监视|其他普通角色用户）', '2': 'admin超级管理员', '-9': '集团管理员' };
         const serviceModeMap = { '00': '免费服务', '01': '收费服务', '02': '子模块收费', '09': '推广试用' };
         /// 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
@@ -35,7 +35,7 @@ ajaxData({
             await myAjaxData.timeout(0);
 
             $scope.systemModulelist.getData({
-                serviceMode: $scope.serviceType,
+                category: $scope.serviceType,
                 keywords: $scope.keywords,
             });
         }
@@ -59,7 +59,7 @@ ajaxData({
                 {
                     title: '名称',
                     dataIndex: 'name',
-                    width: '20%',
+                    width: '18%',
                     align: 'left',
                     sort: true,
                     render(text, record) {
@@ -78,6 +78,7 @@ ajaxData({
                 }, {
                     title: '分类',
                     dataIndex: 'category',
+                    width:'22%',
                     align: 'center',
                     sort: true,
                     render(text) {
@@ -117,8 +118,9 @@ ajaxData({
                 id: id
             }).then(res => {
                 if (res.code == 0) {
-                    $scope.diffGetData()
-                    toaster.pop('success', '', res.msg)
+                    $scope.diffGetData();
+                    $scope.$broadcast('broadDeleteModule');
+                    toaster.pop('success', '', res.msg);
                 } else {
                     toaster.pop('error', '', res.msg)
                 }
