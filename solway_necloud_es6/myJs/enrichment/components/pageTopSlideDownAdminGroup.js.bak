@@ -1,11 +1,11 @@
-app.directive('pageSlideDownAdmin', ['$ocLazyLoad', '$http', '$state', '$stateParams', '$timeout', '$rootScope', 'actionRecord', ($ocLazyLoad, $http, $state, $stateParams, $timeout, $rootScope, historicalRecord) => ({
+app.directive('pageSlideDownAdminGroup', ['$ocLazyLoad', '$http', '$state', '$stateParams', '$timeout', '$rootScope', 'actionRecord', ($ocLazyLoad, $http, $state, $stateParams, $timeout, $rootScope, historicalRecord) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
     scope: {
 
     },
-    templateUrl: 'tpl/enrichment/components/pageSlideDownAdmin.html' + window.stamp,
+    templateUrl: 'tpl/enrichment/components/pageSlideDownAdminGroup.html' + window.stamp,
     link($scope, $element) {
 
         //鼠标悬浮0.5s页面头部，出现下拉页面
@@ -58,6 +58,14 @@ app.directive('pageSlideDownAdmin', ['$ocLazyLoad', '$http', '$state', '$statePa
         $scope.currentState = $state.current.name;
         $scope.adminPages = [
             {
+                state: 'app.companyDepartmentInfo',
+                name: '企业信息管理'
+            },
+            {
+                state: 'app.manageDepartment',
+                name: '部门管理'
+            },
+            {
                 state: 'app.powerStation',
                 name: '电站管理'
             },
@@ -66,63 +74,31 @@ app.directive('pageSlideDownAdmin', ['$ocLazyLoad', '$http', '$state', '$statePa
                 name: '用户管理'
             },
             {
-                state: 'app.roleInformationList',
+                state: 'app.roleInformation',
                 name: '角色管理'
             },
             {
-                state: 'app.rightInformation',
-                name: '权限管理'
+                state: 'app.powerStationGroup',
+                name: '电站分组管理'
             },
             {
                 state: 'app.knowledge',
                 name: '知识库'
             },
-            // {
-            //     state: 'app.modelConfig',
-            //     name: '应发模型配置'
-            // },
             {
-                state: 'app.baseDictionary',
-                name: '字典管理'
+                state: 'app.svgManager',
+                name: '布局视图管理'
             },
             {
-                state: 'app.systemDataInit',
-                name: '数据初始化'
+                state: 'app.settleDataList',
+                name: '结算电量'
             },
             {
-                state: 'app.ureportConfig2',
-                name: '报表配置'
-            },
-            {
-                state: 'purchaseModules',
-                name: '模块购买'
-            },
-            {
-                state: 'systemModules',
-                name: '系统模块'
-            },
-            {
-                state: 'defaultRoles',
-                name: '默认角色'
+                state: 'authorityManagement',
+                name: '权限管理'
             },
         ];
-        $scope.productLibrary = [
-            {
-                state: 'app.manufacturer',
-                name: '厂商管理'
-            },
-            {
-                state: 'app.product',
-                name: '产品管理'
-            },
-            {
-                state: 'app.protocol',
-                name: '协议管理'
-            },
-            {
-                state: 'app.commProtocol',
-                name: '通讯规约管理'
-            },
-        ];
+
+        $scope.productLibrary = [];
     }
 })])
