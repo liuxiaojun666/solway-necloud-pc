@@ -1,18 +1,18 @@
 ajaxData({
  
 
-}, {})('configureSystemModulesCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+}, {})('defaultRolesModulesCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     historicalRecord.init();// 历史记录 初始化
     $scope.beforeLoading = true; // 页面loading
     $scope.themeLoading = true;
-    $scope.moduleName = '系统模块';//当前页面名称；
+    $scope.moduleName = '默认角色';//当前页面名称；
     historyInitCallback();
 
     //当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
         const historiData = historicalRecord.get();
         const {
-            themeTab = 0
+            themeTab = 1
         } = historiData;
 
         $scope.themeTab = themeTab;
@@ -27,7 +27,7 @@ ajaxData({
     async function computeThemeDetail() {
         if ($scope.beforeLoading) return;
         const themeDetail = `
-                tpl/enrichment/configureSystemModules/components/${
+                tpl/enrichment/defaultRoles/components/${
                     ["ModuleSystem", "ModuleDefaultRole"][$scope.themeTab] 
             }.html${$scope.stamp}`;
         if (themeDetail === $scope.themeDetail) return;
