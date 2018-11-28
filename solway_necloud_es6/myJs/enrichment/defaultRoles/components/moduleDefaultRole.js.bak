@@ -63,14 +63,19 @@ ajaxData({
         $scope.setMsgTypes = ()=>{
             const newsTypeArr = [];
             $("input[name='recmsgtypes']:checked").map((index,v)=>{
-                newsTypeArr.push(v.value)
+                newsTypeArr.push(v.value);
             })
 
             $scope.roleMsgUpdate.getData({
+                id:$scope.curRoleId,
                 roleType: $scope.roleType,
                 recMsgTypes:newsTypeArr.join(',')
             }).then(res => {
-                console.log(res)
+                if(res.code == 0){
+                    toaster.pop('success', '', res.msg)
+                }else{
+                    toaster.pop('error', '', '修改失败')
+                }
             });
             
         }
@@ -155,10 +160,11 @@ ajaxData({
         }
 
         $scope.getByRoleType.getDataCallback = (success,res) =>{
-            const recMsgTypes = res.body.recMsgTypes;
-            console.log(res.body);
+            const recMsgTypes = res.body?res.body.recMsgTypes:'';
+            $scope.curRoleId = res.body?res.body.id:'';
+
             if(recMsgTypes){
-                $.each(drecMsgTypes.split(','), function (i, v) {
+                $.each(recMsgTypes.split(','), function (i, v) {
                     $("input[name='recmsgtypes'][value='" + v + "']").prop("checked", true);
                 })
             }
