@@ -51,6 +51,7 @@ ajaxData({
                         return `
                         <div class="clearfix">
                             <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                            <i class="iconfont edit icon-peizhi" style="font-size: 23px;color:#1ddabe;margin-right:15px;"></i>
                             <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
                         </div>
                         `
@@ -119,10 +120,14 @@ ajaxData({
 
     $scope.trClick = (item, index, event) => {
         const roleId = item.roleId;
+        const fixedType = item.fixedType;
         if (event.target.className.includes('icon-bianji-copy')) {
             $scope.showAddRoleTpl = true;
             $scope.$broadcast('broadAddRole', { 'roleId': roleId });
-        } else if (event.target.className.includes('icon-shanchu1')) {
+        }else if (event.target.className.includes('icon-peizhi')) {
+            $scope.showRoleConfigureModulesTpl = true;
+            $scope.$broadcast('broadRoleConfigureModules', { 'roleId': roleId ,'fixedType':fixedType});
+        }else if (event.target.className.includes('icon-shanchu1')) {
             $solway.confirm({ message: '确定删除此模块？' }, () => {
                 deleteRole(roleId)
             });
@@ -143,6 +148,10 @@ ajaxData({
     //取消后回调
     $scope.$on('addRoleCancelCallback',()=>{
         $scope.showAddRoleTpl = false;
+    });
+
+    $scope.$on('roleConfigureModulesCancelCallback',()=>{
+        $scope.showRoleConfigureModulesTpl = false;
     });
 
     $timeout(() => {
