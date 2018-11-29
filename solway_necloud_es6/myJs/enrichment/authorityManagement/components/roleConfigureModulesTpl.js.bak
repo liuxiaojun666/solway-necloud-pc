@@ -21,7 +21,6 @@ ajaxData({
         $scope.selectCustomModules.getData({
             roleId:$scope.roleId
         }).then(res => {
-            console.log(res)
             const data = res.body,childData = res.body;
             for(let i=0;i<data.length;i++){
                 if(data[i].appPid == 0){
@@ -66,10 +65,9 @@ ajaxData({
                 return JSON.stringify(g)
             }
         }).success(function(res) {
-            // debugger
             if(res.code == 0){
                 toaster.pop('success','',res.msg);
-                $scope.$emit('addPurchaseModuleCallback');
+                $scope.$emit('roleConfigureModuleCallback');
             }else{
                 toaster.pop('error', '','配置失败')
             }
