@@ -18,6 +18,7 @@ ajaxData({
 
     const getCustomModules = ()=>{
         $scope.customModules = [];
+        $scope.parentPid = [];
         $scope.selectCustomModules.getData({
             roleId:$scope.roleId
         }).then(res => {
@@ -25,6 +26,7 @@ ajaxData({
             for(let i=0;i<data.length;i++){
                 if(data[i].appPid == 0){
                     $scope.customModules.push(data[i]);
+                    $scope.parentPid.push(data[i]);
                 }
                 for(let j=0;j<childData.length;j++){
                     if(childData[j].appPid == data[i].appId){
@@ -46,12 +48,18 @@ ajaxData({
         let appIdArr = [];
         
         $("input[name='roleModuleIds']:checked").map((index,v)=>{
-            appIdArr.push({'appId':v.value})
+            appIdArr.push(v.value)
+            const curPid = v.dataset.pid;
+            if(curPid != '0' && !appIdArr.includes(curPid)){
+                appIdArr.push(curPid);
+            }
         })
+
+        const parentAndChildArr = appIdArr.map((index,v)=>({'appId':index}))
 
         let formData = {
             'roleId':$scope.roleId,
-            'ls':appIdArr
+            'ls':parentAndChildArr
         };
 
         $http({
