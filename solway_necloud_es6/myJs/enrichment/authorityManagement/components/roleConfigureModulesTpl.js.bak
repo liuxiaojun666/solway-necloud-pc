@@ -18,14 +18,15 @@ ajaxData({
 
     const getCustomModules = ()=>{
         $scope.customModules = [];
+        $scope.parentPid = [];
         $scope.selectCustomModules.getData({
             roleId:$scope.roleId
         }).then(res => {
-            console.log(res)
             const data = res.body,childData = res.body;
             for(let i=0;i<data.length;i++){
                 if(data[i].appPid == 0){
                     $scope.customModules.push(data[i]);
+                    $scope.parentPid.push(data[i]);
                 }
                 for(let j=0;j<childData.length;j++){
                     if(childData[j].appPid == data[i].appId){
@@ -44,35 +45,41 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
-        // let formData = {
-        //     'roleId':$scope.roleId
-        // };
-
-        $scope.updateCustomModules.getData({
-            roleId:$scope.roleId
-        }).then(res=>{
-            //debugger
+        let appIdArr = [];
+        
+        $("input[name='roleModuleIds']:checked").map((index,v)=>{
+            appIdArr.push(v.value)
+            const curPid = v.dataset.pid;
+            if(curPid != '0' && !appIdArr.includes(curPid)){
+                appIdArr.push(curPid);
+            }
         })
 
-        // $http({
-        //     method : "POST",
-        //     url : window.baseUrl +'/moduleCompanyRole/updateCustomModules.htm',
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     },
-        //     data:formData,
-        //     transformRequest: function (g) {
-        //         return JSON.stringify(g)
-        //     }
-        // }).success(function(res) {
-        //     debugger
-        //     if(res.code == 0){
-        //         toaster.pop('success','',res.msg);
-        //         $scope.$emit('addPurchaseModuleCallback');
-        //     }else{
-        //         toaster.pop('error', '','配置失败')
-        //     }
-        // })
+        const parentAndChildArr = appIdArr.map((index,v)=>({'appId':index}))
+
+        let formData = {
+            'roleId':$scope.roleId,
+            'ls':parentAndChildArr
+        };
+
+        $http({
+            method : "POST",
+            url : window.baseUrl +'/moduleCompanyRole/updateCustomModules.htm',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data:JSON.stringify(formData),
+            transformRequest: function (g) {
+                return JSON.stringify(g)
+            }
+        }).success(function(res) {
+            if(res.code == 0){
+                toaster.pop('success','',res.msg);
+                $scope.$emit('roleConfigureModuleCallback');
+            }else{
+                toaster.pop('error', '','配置失败')
+            }
+        })
         
     }
 
