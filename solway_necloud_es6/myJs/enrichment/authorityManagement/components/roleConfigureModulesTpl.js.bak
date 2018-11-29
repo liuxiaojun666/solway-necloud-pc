@@ -44,35 +44,36 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
-        // let formData = {
-        //     'roleId':$scope.roleId
-        // };
-
-        $scope.updateCustomModules.getData({
-            roleId:$scope.roleId
-        }).then(res=>{
-            //debugger
+        let appIdArr = [];
+        
+        $("input[name='roleModuleIds']:checked").map((index,v)=>{
+            appIdArr.push({'appId':v.value})
         })
 
-        // $http({
-        //     method : "POST",
-        //     url : window.baseUrl +'/moduleCompanyRole/updateCustomModules.htm',
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     },
-        //     data:formData,
-        //     transformRequest: function (g) {
-        //         return JSON.stringify(g)
-        //     }
-        // }).success(function(res) {
-        //     debugger
-        //     if(res.code == 0){
-        //         toaster.pop('success','',res.msg);
-        //         $scope.$emit('addPurchaseModuleCallback');
-        //     }else{
-        //         toaster.pop('error', '','配置失败')
-        //     }
-        // })
+        let formData = {
+            'roleId':$scope.roleId,
+            'ls':appIdArr
+        };
+
+        $http({
+            method : "POST",
+            url : window.baseUrl +'/moduleCompanyRole/updateCustomModules.htm',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data:JSON.stringify(formData),
+            transformRequest: function (g) {
+                return JSON.stringify(g)
+            }
+        }).success(function(res) {
+            // debugger
+            if(res.code == 0){
+                toaster.pop('success','',res.msg);
+                $scope.$emit('addPurchaseModuleCallback');
+            }else{
+                toaster.pop('error', '','配置失败')
+            }
+        })
         
     }
 
