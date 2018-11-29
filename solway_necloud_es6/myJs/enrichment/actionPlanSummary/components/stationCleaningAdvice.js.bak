@@ -51,8 +51,8 @@ ajaxData(
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
         let { tabIndex = 0 } = historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {};
-        $scope.price = 0.5;
-        $scope.cost = 5000;
+        $scope.price = 1;
+        $scope.cost = 3000;
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -180,6 +180,11 @@ ajaxData(
         }]];
     });
 
+    $scope.stationPreBestCleanDataLine.subscribe(res => {
+        $scope.xdata = res.body.x;
+        $scope.ydatas = [[res.body.fut_bcl_kwh_curve]]
+    });
+
     $scope.action_station_clean_suggest_dust_top5_line.subscribe(res => {
         if (!$scope.action_station_clean_suggest_dust_bottom5_line.res) return;
         topBottomMerge();
@@ -208,6 +213,8 @@ ajaxData(
         $scope.action_station_clean_suggest_subject.res = null;
         $scope.action_station_clean_suggest_dust_top5_line.res = null;
         $scope.action_station_clean_suggest_dust_bottom5_line.res = null;
+        $scope.stationLastDayCleanData.res = null;
+        $scope.stationPreBestCleanDataLine.res = null;
     }
 
 
