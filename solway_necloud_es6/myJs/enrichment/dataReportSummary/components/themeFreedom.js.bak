@@ -1,0 +1,84 @@
+ajaxData(
+    {
+        
+    }, {
+        __serviceName__: 'themeFreedomService',
+    }
+)('themeFreedomCtrl', ['$scope', 'themeFreedomService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { timeRange } = historicalRecord.get().themeFreedom || {};
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.timeRange = timeRange;
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        // getTabData();
+        // await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+    };
+
+    // 切换电站
+    $scope.switchPowerCallback = () => getTabData();
+
+
+    $scope.column = [
+        {
+            title: '序号',
+            dataIndex: '1',
+            sort: true,
+            align: 'center',
+            render(text) {
+                return '1'
+            }
+        },
+        {
+            title: '报表名称',
+            dataIndex: '2',
+            sort: true,
+            align: 'center',
+            render(text) {
+                return '1'
+            }
+        },
+        {
+            title: '报表日期',
+            dataIndex: '3',
+            sort: true,
+            align: 'center',
+            render(text) {
+                return '1'
+            }
+        },
+        {
+            title: '生产时间',
+            dataIndex: '4',
+            sort: true,
+            align: 'center',
+            render(text) {
+                return '1'
+            }
+        },
+        {
+            title: '操作',
+            dataIndex: '5',
+            sort: true,
+            align: 'center',
+            render(text) {
+                return `<a href="#"></a>`;
+            }
+        },
+    ];
+
+});
