@@ -35,6 +35,11 @@ ajaxData(
             data: {},
             later: true
         },
+        stationCleanCost: {
+            name: 'GETstationCleanCost',
+            data: {},
+            later: true
+        },
         stationPreBestCleanDataLine: {
             name: 'GETstationPreBestCleanDataLine',
             data: {},
@@ -50,9 +55,13 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { tabIndex = 0 } = historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {};
-        $scope.price = 1;
-        $scope.cost = 3000;
+        let { tabIndex = 0, price = 1, cost } = historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {};
+        if (!cost) {
+            await $scope.stationCleanCost.getData({});
+            cost = $scope.stationCleanCost.res.body.totalCost
+        }
+        $scope.price = price;
+        $scope.cost = cost;
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
