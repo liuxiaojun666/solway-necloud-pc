@@ -1,0 +1,84 @@
+ajaxData({
+    businessManagementData: {
+        name: 'GETbusinessManagementData',
+        data: {},
+        later: true
+    },
+    // update:{
+    //     name:'POSTupdateModule',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // }
+}, {
+    __serviceName__: 'editBusManageTplService',
+})('editBusManageTplCtrl', ['$scope', 'editBusManageTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
+
+    const getData = () =>{
+        $scope.businessManagementData.getData({}).then(res=>{
+            if (res.key==2) {
+				$scope.customConfig = res.customConfig;
+                $scope.formData = res.data;
+            
+                console.log(res.data)
+            }
+        });
+    }
+
+    getData();
+    // const save = () =>{
+    //     $scope.formData['id'] = $scope.id;
+    //     $scope.update.getData($scope.formData).then(res=>{
+    //         if(res.code == 0 && res.body.id){
+    //             toaster.pop('success', '',res.msg)
+    //             $scope.$emit('addModuleCallback');
+    //             initParentModuleData();
+    //         }
+    //     });
+    // }
+
+    // const selectModuleDetail = id =>{
+    //     $scope.selectModule.getData({
+    //         id:id
+    //     }).then(res=>{
+    //         $scope.formData = res.body;
+    //     });
+    // }
+    // $scope.$on('broadAddModule',function(e,data){
+    //     initParentModuleData();
+    //     $scope.id = data.moduleId;
+    //     $scope.formData = {};
+        
+    //     if($scope.id){
+    //         selectModuleDetail($scope.id)
+    //     }
+        
+    // });
+
+    //保存
+    // $scope.save = () =>{
+    //     if (!$solway.formValidation($scope.formData, '.addModuleTpl', toaster)) return;//校验非空
+
+    //     if($scope.id){
+    //         //编辑无需校验编码
+    //         save();
+    //     }else{
+    //         //校验编码是否存在编码
+    //         $scope.checkCodeExist.getData({
+    //             code:$scope.formData.code
+    //         }).then(res=>{
+    //             if(res.code == 0){
+    //                 save();
+    //             }else{
+    //                 toaster.pop('error', '',res.msg)
+    //             }
+    //         });
+    //     }
+    // }
+
+    // //取消
+    // $scope.cancel = () =>{
+    //     $scope.$emit('cancelCallback');
+    // }
+
+});

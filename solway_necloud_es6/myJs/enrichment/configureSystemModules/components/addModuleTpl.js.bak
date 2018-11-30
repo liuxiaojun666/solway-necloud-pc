@@ -29,7 +29,8 @@ ajaxData({
 
     const initParentModuleData = ()=>{
         $scope.systemModulelist.getData({
-            pid:0
+            pid:0,
+            category:$scope.serviceType
         }).then(res=>{
             if(res.code == 0){
                 $scope.parrentModuleList = res.body;
@@ -58,6 +59,7 @@ ajaxData({
         });
     }
     $scope.$on('broadAddModule',function(e,data){
+        initParentModuleData();
         $scope.id = data.moduleId;
         $scope.formData = {};
         
