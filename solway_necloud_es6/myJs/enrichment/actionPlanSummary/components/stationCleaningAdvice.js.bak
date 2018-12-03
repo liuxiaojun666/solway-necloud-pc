@@ -55,10 +55,11 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { tabIndex = 0, price = 1, cost } = historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {};
+        let { tabIndex = 0, price, cost } = historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {};
         if (!cost) {
             await $scope.stationCleanCost.getData({});
             cost = $scope.stationCleanCost.res.body.totalCost
+            price = $scope.stationCleanCost.res.body.price || 1
         }
         $scope.price = price;
         $scope.cost = cost;
