@@ -4,6 +4,11 @@ ajaxData({
         data: {},
         later: true
     },
+    selectProvince:{
+        name: 'POSTSelectProvince',
+        data: {},
+        later: true
+    }
     // update:{
     //     name:'POSTupdateModule',
     //     data: {},
@@ -14,18 +19,36 @@ ajaxData({
     __serviceName__: 'editBusManageTplService',
 })('editBusManageTplCtrl', ['$scope', 'editBusManageTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
 
+    $scope.enterpriseTypeList = [
+        {id:32,dictName:'国有企业'},
+        {id:33,dictName:'股份制企业'},
+        {id:34,dictName:'私营企业'},
+        {id:35,dictName:'联营企业'},
+        {id:36,dictName:'外商投资企业'},
+        {id:37,dictName:'港、澳、台'},
+        {id:38,dictName:'股份合作企业'},
+        {id:39,dictName:'集体所有制'}
+    ];
+
+    $scope.endDate = new Date('2099');
+
     const getData = () =>{
         $scope.businessManagementData.getData({}).then(res=>{
             if (res.key==2) {
 				$scope.customConfig = res.customConfig;
                 $scope.formData = res.data;
-            
+                $scope.admintime = new Date(res.data.admintime);
                 console.log(res.data)
+
+                
             }
         });
     }
 
-    getData();
+    $scope.$on('broadEdit',()=>{
+        getData();
+    });
+
     // const save = () =>{
     //     $scope.formData['id'] = $scope.id;
     //     $scope.update.getData($scope.formData).then(res=>{
