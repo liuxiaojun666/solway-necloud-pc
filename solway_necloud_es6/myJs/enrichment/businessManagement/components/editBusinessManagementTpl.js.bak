@@ -32,16 +32,70 @@ ajaxData({
 
     $scope.endDate = new Date('2099');
 
+    const clearData = () =>{
+        $scope.formData = {};
+        $scope.customConfig = {};
+        $scope.admintime = null;
+
+        $scope.provinceid = '';
+        $scope.cityid = '';
+        $scope.countyid = '';
+    }
+
     const getData = () =>{
+        clearData();
         $scope.businessManagementData.getData({}).then(res=>{
             if (res.key==2) {
-				$scope.customConfig = res.customConfig;
-                $scope.formData = res.data;
-                $scope.admintime = new Date(res.data.admintime);
-                console.log(res.data)
+                const data = res.data;
 
-                
+				$scope.customConfig = res.customConfig;
+                $scope.formData = data;
+                $scope.admintime = new Date(data.admintime);
+
+                $scope.provinceid = data.provinceid;
+                $scope.cityid = data.cityid;
+                $scope.countyid = data.countyid;
+                console.log(res.data)
+     
+                getProvence();
             }
+        });
+    }
+
+    const getProvence = ()=>{
+        $scope.selectProvince.getData({
+            treeLevel:1,
+            parentId:1
+        }).then(res=>{
+            console.log(res)
+            $scope.provinceList = res;
+            if($scope.provinceid){
+                getCity();
+            }
+        });
+        
+    }
+
+    const getCity = () =>{
+        $scope.selectProvince.getData({
+            treeLevel:2,
+            parentId:$scope.provinceid
+        }).then(res=>{
+            console.log(res)
+            $scope.cityList = res;
+            if($scope.cityid){
+                getCountry();
+            }
+        });
+    }
+
+    const getCountry = () =>{
+        $scope.selectProvince.getData({
+            treeLevel:3,
+            parentId:$scope.cityid
+        }).then(res=>{
+            console.log(res)
+            $scope.countryList = res;
         });
     }
 
