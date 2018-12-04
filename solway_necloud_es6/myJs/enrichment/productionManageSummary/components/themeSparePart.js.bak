@@ -1,0 +1,47 @@
+ajaxData({
+    
+}, {
+    __serviceName__: 'themeSparePartService'
+    })('themeSparePartCtrl', ['$scope', 'themeSparePartService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
+        /// 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            const {
+                startDate: __sdate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365),
+                endDate: __edate = new Date,
+                isHis = '',
+                pStationId,
+                handStatus = {
+                    '00': true,
+                    '01': true,
+                    '02': true,
+                    '03': true,
+                    '04': true,
+                    '05': true,
+                    '06': true,
+                    '07': true,
+                },
+                searchKey = '',
+                isDefaultList = true
+            } = historicalRecord.get().themeSparePart || {};
+            $scope.startDate = new Date(__sdate);
+            $scope.startDate.showDate = '';
+            $scope.endDate = new Date(__edate);
+            $scope.endDate.showDate = '';
+            $scope.isHis = isHis;
+            $scope.handStatus = handStatus;
+            $scope.searchKey = searchKey;
+            $scope.pStationId = pStationId;
+            $scope.isDefaultList = isDefaultList;
+            await myAjaxData.timeout(0);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            // getBaseMessageList();
+            $scope.$apply();
+        };
+
+        
+
+});

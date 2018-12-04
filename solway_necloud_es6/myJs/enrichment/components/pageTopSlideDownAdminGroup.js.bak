@@ -1,4 +1,4 @@
-app.directive('pageSlideDownAdminGroup', ['$ocLazyLoad', '$http', '$state', '$stateParams', '$timeout', '$rootScope', 'actionRecord', ($ocLazyLoad, $http, $state, $stateParams, $timeout, $rootScope, historicalRecord) => ({
+app.directive('pageSlideDownAdminGroup', ['$ocLazyLoad', '$http', '$state', '$stateParams', '$timeout', '$rootScope', 'actionRecord', 'myAjaxData', ($ocLazyLoad, $http, $state, $stateParams, $timeout, $rootScope, historicalRecord, myAjaxData) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
@@ -56,6 +56,15 @@ app.directive('pageSlideDownAdminGroup', ['$ocLazyLoad', '$http', '$state', '$st
     },
     controller($scope, $element) {
         $scope.currentState = $state.current.name;
+        myAjaxData.getData({
+            name: 'GETuiStates',
+            data: {}
+        }).then(res => {
+            $scope.adminPages = res.body[0].children.map(v => ({ state: v.uiState, name: v.name }));
+            if (!res.body[1]) return;
+            $scope.productLibrary = res.body[1].children.map(v => ({ state: v.uiState, name: v.name }));
+        });
+
         $scope.adminPages = [
             {
                 state: 'app.companyDepartmentInfo',

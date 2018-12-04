@@ -1,4 +1,66 @@
-ajaxData({}, {})('productionManageSummaryCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
-    $(".align-middle").css('paddingTop', ($(window).height() - 200) / 2)
+ajaxData({
+}, {})('productionManageSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    historicalRecord.init();
+    $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '生产管理';//当前页面名称；
+    // $scope.themeShareUsable = window.localStorage.wxuser;
+    historyInitCallback();
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const {
+            theme = 'TwoVotes',
+        } = historiData;
+        $scope.theme = theme;
+        await myAjaxData.timeout(0);
+        $scope.changeTheme(theme);
+        $scope.beforeLoading = false;
+        $scope.mainPageInitComplete && $scope.mainPageInitComplete();
+        $scope.$apply();
+    };
+
+    // 父页面重载  可修改记录
+    $scope.reloadParentPage = async (data = {}) => {
+        historicalRecord.set(data);
+        $scope.beforeLoading = true;
+        
+        return historyInitCallback();
+    };
+
+
+    // 切换主题模块
+    $scope.changeTheme = theme => {
+        // if (!$scope.themeShareUsable && theme === 'Share') return;
+        if (theme !== $scope.theme) $scope.themeLoading = true;
+        $scope.theme = theme;
+        historicalRecord.set({ theme });
+        $scope.themeDetail = `tpl/enrichment/productionManageSummary/components/theme${theme}.html${$scope.stamp}`;
+    };
+
+
+
+    // 初始化子页面scope
+    $scope.initChildScope = async (__childScope, __myAjaxData) => {
+        $scope.themeLoading = false;
+        // 主页面初始化完成
+        const mainPageInitComplete = __childScope.$parent.$parent.mainPageInitComplete;
+        __childScope.$parent.$parent.mainPageInitComplete = (...arg) => {
+            mainPageInitComplete && mainPageInitComplete(...arg);
+            if (__childScope.hasOwnProperty('mainPageInitComplete')) {
+                __childScope.mainPageInitComplete();
+                // __childScope.$apply();
+            }
+        };
+
+        // 如果已初始化  尝试调用初始化完成函数
+        if (!$scope.beforeLoading) {
+            await myAjaxData.timeout(0);
+            __childScope.hasOwnProperty('mainPageInitComplete') && __childScope.mainPageInitComplete($scope.currentClass);
+        }
+
+        // 子页面销毁 删除监听
+        __childScope.$on('$destroy', () => {
+            delete __childScope.mainPageInitComplete;
+        });
+    };
 });
