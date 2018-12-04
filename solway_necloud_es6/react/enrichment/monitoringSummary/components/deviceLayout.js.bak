@@ -58,6 +58,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
         <div ng-include="'tpl/systemPage/basemessage/modal/taskList_historyData1.jsp'"></div>
         <div ng-include="'tpl/systemPage/basemessage/modal/taskList_historyData2.jsp'"></div>
         <div ng-include="'tpl/systemPage/basemessage/modal/taskList_historyData3.jsp'"></div>
+        <div ng-include="'tpl/enrichment/components/equipmentPopUp/entrance.html'"></div>
     </div>`,
     scope: !1,
     link($scope, $element, $attrs) {
@@ -207,9 +208,11 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
 
         //双击事件
         $scope.dblclick = function (pstationid, deviceId, deviceSerialNnumber, deviceTypeNow, hasJB) {
-            const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow };
+            const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, hasJB };
             $scope.deviceTypeNow = deviceTypeNow;
             $scope.inverterType = hasJB;//点击逆变器，不同类型跳转不同样式页面（1->inverterDetailNew.jsp,2->inverterDetailNewType1.jsp）
+
+            // $scope.$broadcast("equipmentPopUp", res);
 
             if (deviceTypeNow == '3') {
                 $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
@@ -221,6 +224,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
                 $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
                 $scope.$broadcast("showDeviceDetail1broad", res);
             }
+            $scope.$apply();
             return false;
         };
 

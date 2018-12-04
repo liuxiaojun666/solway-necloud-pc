@@ -1,0 +1,32 @@
+ajaxData(
+    {
+
+    },
+    {
+        __serviceName__: 'equipmentPopUpService',
+        depend: [
+            'theme/js/dist/enrichment/components/equipmentPopUp/bigInverter.js', 
+            'theme/js/dist/enrichment/components/equipmentPopUp/junctionBox.js', 
+            'theme/js/dist/enrichment/components/equipmentPopUp/smallInverter.js', 
+            'theme/js/dist/enrichment/components/equipmentPopUp/boxChange.js'
+        ],
+        templateUrl: [
+            'tpl/enrichment/components/equipmentPopUp/bigInverter.html',
+            'tpl/enrichment/components/equipmentPopUp/junctionBox.html',
+            'tpl/enrichment/components/equipmentPopUp/smallInverter.html',
+            'tpl/enrichment/components/equipmentPopUp/boxChange.html'
+        ]
+    }
+)('equipmentPopUpCtrl', ['$scope', 'equipmentPopUpService', '$ocLazyLoad'], function ($scope, currentService, $ocLazyLoad) {
+    $scope.display = false;
+    $scope.$on('equipmentPopUp', (e, eqObj) => {
+        currentService.config.eqObj = eqObj;
+        $scope.templateLoading = true;
+        $scope.display = true;
+        $scope.templateUrl = '';
+        const dataIndex = eqObj.hasJB === '0' ? 0 : eqObj.deviceTypeNow;
+        $ocLazyLoad.load(currentService.config.depend[dataIndex]).then(() => {
+            $scope.templateUrl = currentService.config.templateUrl[dataIndex];
+        });
+    });
+});
