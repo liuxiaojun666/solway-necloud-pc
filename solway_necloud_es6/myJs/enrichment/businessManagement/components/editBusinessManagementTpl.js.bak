@@ -8,13 +8,13 @@ ajaxData({
         name: 'POSTSelectProvince',
         data: {},
         later: true
+    },
+    update:{
+        name:'POSTbusinessManagementSave',
+        data: {},
+        later: true,
+        onlyLatest: true
     }
-    // update:{
-    //     name:'POSTupdateModule',
-    //     data: {},
-    //     later: true,
-    //     onlyLatest: true
-    // }
 }, {
     __serviceName__: 'editBusManageTplService',
 })('editBusManageTplCtrl', ['$scope', 'editBusManageTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
@@ -37,9 +37,6 @@ ajaxData({
         $scope.customConfig = {};
         $scope.admintime = null;
 
-        $scope.provinceid = '';
-        $scope.cityid = '';
-        $scope.countyid = '';
     }
 
     const getData = () =>{
@@ -52,9 +49,6 @@ ajaxData({
                 $scope.formData = data;
                 $scope.admintime = new Date(data.admintime);
 
-                $scope.provinceid = data.provinceid;
-                $scope.cityid = data.cityid;
-                $scope.countyid = data.countyid;
                 console.log(res.data)
      
                 getProvence();
@@ -67,34 +61,29 @@ ajaxData({
             treeLevel:1,
             parentId:1
         }).then(res=>{
-            console.log(res)
             $scope.provinceList = res;
-            if($scope.provinceid){
-                getCity();
-            }
+            getCity();
         });
         
     }
 
     const getCity = () =>{
+        if(!$scope.formData.provinceid) return;
         $scope.selectProvince.getData({
             treeLevel:2,
-            parentId:$scope.provinceid
+            parentId:$scope.formData.provinceid
         }).then(res=>{
-            console.log(res)
             $scope.cityList = res;
-            if($scope.cityid){
-                getCountry();
-            }
+            getCountry();
         });
     }
 
     const getCountry = () =>{
+        if(!$scope.formData.cityid) return;
         $scope.selectProvince.getData({
             treeLevel:3,
-            parentId:$scope.cityid
+            parentId:$scope.formData.cityid
         }).then(res=>{
-            console.log(res)
             $scope.countryList = res;
         });
     }
@@ -103,55 +92,100 @@ ajaxData({
         getData();
     });
 
-    // const save = () =>{
-    //     $scope.formData['id'] = $scope.id;
-    //     $scope.update.getData($scope.formData).then(res=>{
-    //         if(res.code == 0 && res.body.id){
-    //             toaster.pop('success', '',res.msg)
-    //             $scope.$emit('addModuleCallback');
-    //             initParentModuleData();
-    //         }
-    //     });
-    // }
+    //省change
+    $scope.provinceChange = () =>{
+        $scope.cityList = [];
+        $scope.countryList = [];
+        $scope.formData.cityid = '';
+        $scope.formData.countyid = '';
+        getCity();
+    }
 
-    // const selectModuleDetail = id =>{
-    //     $scope.selectModule.getData({
-    //         id:id
-    //     }).then(res=>{
-    //         $scope.formData = res.body;
-    //     });
-    // }
-    // $scope.$on('broadAddModule',function(e,data){
-    //     initParentModuleData();
-    //     $scope.id = data.moduleId;
-    //     $scope.formData = {};
-        
-    //     if($scope.id){
-    //         selectModuleDetail($scope.id)
-    //     }
-        
-    // });
+    //市change
+    $scope.cityChange = ()=>{
+        $scope.countryList = [];
+        $scope.formData.countyid = '';
+        getCountry();
+    }
+
+    function commonUploadImg(inputId,showPlaceId,dataObj,dataParams){
+        $(document).on('change', '#'+inputId, function() {
+            $.ajaxFileUpload({
+                url: 'uploadImage/uploadImageFrom.htm', //用于文件上传的服务器端请求地址
+                secureuri: false, //是否需要安全协议，一般设置为false
+                fileElementId: inputId,
+                formName: "file",
+                dataType: 'json', //返回值类型 一般设置为json
+                data: {"nodeId":inputId},
+                success: function (data){
+                    if (data.key==0) {
+                        $("#"+showPlaceId).attr("src", data.path);
+                        if(dataObj){
+                            $scope[dataObj][dataParams] = data.path;
+                            $scope.$apply();
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    $timeout(()=>{
+        //登录页logo上传
+        commonUploadImg('updateLogolg','showLogolg','customConfig','logo_lg');
+        commonUploadImg('updateLogosm','showLogosm','customConfig','logo_sm');
+        commonUploadImg('updateLogo','showLogo','formData','logo');
+        commonUploadImg('updateIdMsg','showIdMsg','','');
+    },0);
+
+    //删除上传图片
+    $scope.deleteImg = (dataObj,dataParams,showPlaceId) =>{
+        $('#'+showPlaceId).attr('src', '');
+		delete $scope[dataObj][dataParams];
+    }
+
+    $scope.radioCheck = num =>{
+        $scope.customConfig.logo_sm_flag = num;
+    }
 
     //保存
-    // $scope.save = () =>{
-    //     if (!$solway.formValidation($scope.formData, '.addModuleTpl', toaster)) return;//校验非空
+    $scope.save = () =>{
 
-    //     if($scope.id){
-    //         //编辑无需校验编码
-    //         save();
-    //     }else{
-    //         //校验编码是否存在编码
-    //         $scope.checkCodeExist.getData({
-    //             code:$scope.formData.code
-    //         }).then(res=>{
-    //             if(res.code == 0){
-    //                 save();
-    //             }else{
-    //                 toaster.pop('error', '',res.msg)
-    //             }
-    //         });
-    //     }
-    // }
+        if(!$scope.customConfig.logo_sm) delete $scope.customConfig.logo_sm_flag;
+     
+        // $scope.update.getData({
+        //     data: $scope.formData,
+        //     customConfig : JSON.stringify($scope.customConfig)
+        // }).then(res=>{
+        //     console.log(res)
+        //     if (res.key==3) {//企业名称不合法
+        //         toaster.pop('error', '','企业名称不合法')
+        //     };
+        //     if (res.key==4) {//企业类型至少选一个
+        //         toaster.pop('error', '','校验企业类型必选其一')
+        //     };
+        //     if (res.key==1) {
+        //         // $('#clickRoute').trigger('click');
+        //     };
+        // })
+
+        // $.post('Company/updateInfo.htm', {
+        //     data: $scope.formData,
+        //     customConfig : JSON.stringify($scope.customConfig)
+        // }, function(res) {
+		// 	console.log(res)
+        //     if (res.key==3) {//企业名称不合法
+        //         toaster.pop('error', '','企业名称不合法')
+        //     };
+        //     if (res.key==4) {//企业类型至少选一个
+        //         toaster.pop('error', '','校验企业类型必选其一')
+        //     };
+        //     if (res.key==1) {
+        //         // $('#clickRoute').trigger('click');
+        //     };
+        // });
+        
+    }
 
     // //取消
     // $scope.cancel = () =>{
