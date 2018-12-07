@@ -9,14 +9,11 @@ ajaxData({
 
     $scope.moduleName = '企业管理';//当前页面名称；
 
-    
     const getData = () =>{
         $scope.businessManagementData.getData({}).then(res=>{
             if (res.key==2) {
 				$scope.customConfig = res.customConfig;
                 $scope.ComInfo = res.data;
-            
-                console.log(res.data)
             }
         });
     }
@@ -33,5 +30,16 @@ ajaxData({
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');
     },2000);
+
+    //取消回调
+    $scope.$on('cancelCallback',()=>{
+        $scope.showEditBusinessManagement = false;
+    });
+
+    //保存成功回调
+    $scope.$on('saveSuccessCallback',()=>{
+        $scope.showEditBusinessManagement = false;
+        getData();
+    });
 
 });
