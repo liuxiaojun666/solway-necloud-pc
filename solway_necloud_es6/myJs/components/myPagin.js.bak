@@ -13,9 +13,11 @@ app.directive('myPaging', ['myAjaxData', (myAjaxData) => ({
         getData: '=',
         paging: '=',
         pageSize: '@',
-        defaultPageSize: '='
+        defaultPageSize: '=',
+        firstPageIndex: '='
     },
     controller($scope, $element) {
+        $scope.lcalFirstPageIndex = $scope.firstPageIndex || 0;
         $scope.mygetData = (obj, arg2) => {
             if (arg2) return
             $scope.getData(obj)

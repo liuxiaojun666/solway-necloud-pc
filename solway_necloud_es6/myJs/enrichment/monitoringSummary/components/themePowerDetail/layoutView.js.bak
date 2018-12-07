@@ -130,19 +130,20 @@ ajaxData({
 
         // 事件处理函数   弹出窗
         function showHistoryData_byRTMDeviceLogId(pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
-            var res = { deviceSerialNnumber: deviceSerialNnumber, deviceId: deviceid, pstationid: pstationid, deviceTypeNow: deviceType, };
-            $scope.deviceTypeNow = deviceType;
-            $scope.inverterType = hasJB;
-            if (deviceType == '3') {
-                $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
-                $scope.$broadcast("showDeviceDetail3broad", res);
-            } else if (deviceType == '2') {
-                $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
-                $scope.$broadcast("showDeviceDetail2broad", res);
-            } else if (deviceType == '1') {
-                $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
-                $scope.$broadcast("showDeviceDetail1broad", res);
-            }
+            var res = { deviceSerialNnumber: deviceSerialNnumber, deviceId: deviceid, pstationid: pstationid, deviceTypeNow: deviceType, hasJB};
+            $scope.$broadcast("equipmentPopUp", res);
+            // $scope.deviceTypeNow = deviceType;
+            // $scope.inverterType = hasJB;
+            // if (deviceType == '3') {
+            //     $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
+            //     $scope.$broadcast("showDeviceDetail3broad", res);
+            // } else if (deviceType == '2') {
+            //     $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
+            //     $scope.$broadcast("showDeviceDetail2broad", res);
+            // } else if (deviceType == '1') {
+            //     $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
+            //     $scope.$broadcast("showDeviceDetail1broad", res);
+            // }
         };
 
         // 视频 处理  获取视频列表

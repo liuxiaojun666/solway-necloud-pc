@@ -5,16 +5,16 @@ ajaxData(
     {
         __serviceName__: 'equipmentPopUpService',
         depend: [
-            'theme/js/dist/enrichment/components/equipmentPopUp/bigInverter.js', 
-            'theme/js/dist/enrichment/components/equipmentPopUp/junctionBox.js', 
-            'theme/js/dist/enrichment/components/equipmentPopUp/smallInverter.js', 
-            'theme/js/dist/enrichment/components/equipmentPopUp/boxChange.js'
+            'theme/js/dist/enrichment/components/equipmentPopUp/bigInverter.js' + stamp, 
+            'theme/js/dist/enrichment/components/equipmentPopUp/junctionBox.js' + stamp, 
+            'theme/js/dist/enrichment/components/equipmentPopUp/smallInverter.js' + stamp, 
+            'theme/js/dist/enrichment/components/equipmentPopUp/boxChange.js' + stamp
         ],
         templateUrl: [
-            'tpl/enrichment/components/equipmentPopUp/bigInverter.html',
-            'tpl/enrichment/components/equipmentPopUp/junctionBox.html',
-            'tpl/enrichment/components/equipmentPopUp/smallInverter.html',
-            'tpl/enrichment/components/equipmentPopUp/boxChange.html'
+            'tpl/enrichment/components/equipmentPopUp/bigInverter.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/junctionBox.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/smallInverter.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/boxChange.html' + stamp
         ]
     }
 )('equipmentPopUpCtrl', ['$scope', 'equipmentPopUpService', '$ocLazyLoad'], function ($scope, currentService, $ocLazyLoad) {
@@ -25,8 +25,18 @@ ajaxData(
         $scope.display = true;
         $scope.templateUrl = '';
         const dataIndex = eqObj.hasJB === '0' ? 0 : eqObj.deviceTypeNow;
-        $ocLazyLoad.load(currentService.config.depend[dataIndex]).then(() => {
+        $ocLazyLoad.load([
+            'theme/js/dist/components/calendar.js' + stamp,
+            'theme/js/dist/components/myTable.js' + stamp,
+            'theme/js/dist/components/myPagin.js' + stamp,
+        ].concat(currentService.config.depend[dataIndex])).then(() => {
             $scope.templateUrl = currentService.config.templateUrl[dataIndex];
         });
     });
+
+    $scope.includePageDesdroy = () => {
+        $scope.display = false; 
+        $scope.templateUrl = '';
+        $scope.$broadcast('includePageDesdroy');
+    }
 });
