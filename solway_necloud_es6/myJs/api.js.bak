@@ -97,7 +97,7 @@ window.ajaxData = (b, a) => {
                     N[key].getData(b[key].data);
                 }
             };
-            N.getData = (g, i) => {
+            N.getData = (g, i = {}) => {
                 return Z.getData({
                     name: g,
                     data: i
@@ -105,8 +105,30 @@ window.ajaxData = (b, a) => {
             };
             for (let g in b) {
                 N[g] = {};
-                N[g].getData = k => {
+                N[g].getData = (k = {}) => {
                     if (N[g].sameTimeOnce && N[g].isLoding) return;
+                    if (N[g]._cache && N[g].reqData && N[g].res) {
+                        const preData = N[g].reqData;
+                        let isEqual = false;
+                        if (Object.prototype.toString.apply({})) {
+                            // 这里有个坑   有需要再补
+                        }
+                        if (k === preData) isEqual = true;
+                        else {
+                            const has1 = Object.keys(k).every(v => k[v] === preData[v]);
+                            const has2 = Object.keys(preData).every(v => k[v] === preData[v]);
+                            if (has1 && has2) isEqual = true;
+                        }
+                        if (isEqual) {
+                            N[g].getDataCallback && N[g].getDataCallback(true, l);
+                            return N[g].subscribeArr.forEach((v) => {
+                                const { s, c } = v;
+                                s && s(N[g].res);
+                                c && c(N[g].res);
+                            });
+                        }
+                    }
+                    N[g].reqData = k;
                     const _number = ++N[g].getData.reqNumber;
                     let i = Z.getData({ name: b[g].name, data: k });
                     N[g].promise = i;
@@ -143,6 +165,7 @@ window.ajaxData = (b, a) => {
                 N[g].getData.reqNumber = 0;
                 N[g].getData.resNumber = 0;
                 N[g].onlyLatest = b[g].onlyLatest;
+                N[g]._cache = b[g].cache;
                 N[g].sameTimeOnce = b[g].sameTimeOnce;
                 N[g].isLoding = !1;
                 if (b[g].later) continue;
