@@ -4,9 +4,45 @@ ajaxData(
             name: 'GETfreeRptPage',
             data: {},
             later: true,
-        }
+        },
+        freeRptSubGetRptSubList: {
+            name: 'GETfreeRptSubGetRptSubList',
+            data: {},
+            later: true,
+        },
+        freeRptSubscribe: {
+            name: 'freeRptSubscribe',
+            data: {},
+            later: true,
+        },
+        freeRptUnSubscribe: {
+            name: 'freeRptUnSubscribe',
+            data: {},
+            later: true,
+        },
+        rptTplList: {
+            name: 'GETrptTplList',
+            data: {},
+            later: true,
+        },
     }, {
         __serviceName__: 'themeFreedomService',
+        getDateArr(reportType, startDate) {
+            const func = str => str.split('-').join().split(' ').join().split(':').join().split(',');
+            if (reportType == '1') {
+                if (startDate) return [null, ...func(startDate), null];
+                else return [null, '01', '01', '00', '00', null];
+            } else if (reportType == '2') {
+                if (startDate) return [null, null, ...func(startDate), null];
+                else return [null, null, '01', '00', '00', null];
+            } else if (reportType == '4') {
+                if (startDate) return [null, null, null, ...func(startDate), null];
+                else return [null, null, null, '00', '00', null];
+            } else if (reportType == '3') {
+                if (startDate) return [null, null, null, ...func(startDate.substr(0, startDate.length - 2)), null];
+                else return [null, null, null, '00', '00', null];
+            }
+        }
     }
 )('themeFreedomCtrl', ['$scope', 'themeFreedomService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
     /// 初始化 scope
@@ -44,11 +80,11 @@ ajaxData(
     $scope.freeRptPage.beforGetData = () => {
         if (!$scope.initComplete) return;
         $scope.column = [];
-        const {_dateType, _dateTime, keywords} = $scope;
+        const { _dateType, _dateTime, keywords } = $scope;
         $scope.freeRptPage.getData({
             pageIndex: 0,
             pageSize: 10,
-            dateType: _dateType,
+            dateType: [3, 2, 1][_dateType],
             queryDate: _dateTime.showDate,
             keywords
         });
@@ -56,7 +92,7 @@ ajaxData(
 
     // 列表 接口 返回
     $scope.freeRptPage.subscribe(res => {
-        
+
         $scope.column = [
             {
                 title: '报表名称',
@@ -93,6 +129,56 @@ ajaxData(
             },
         ];
     });
+
+    // 订阅报表列表 接口返回
+    $scope.freeRptSubGetRptSubList.subscribe(res => {
+        $scope.subscribeReportColumn = [
+            {
+                title: '报表名称',
+                dataIndex: 'name',
+                width: '80%',
+                align: 'left'
+            },
+            {
+                title: '操作',
+                dataIndex: 'sub_id',
+                width: '20%',
+                align: 'center',
+                render(text) {
+                    return `<span class="clickable subscribe ${text && 'enable'}">
+                        <i class="clickable iconfont icon-xuanzhong"></i>
+                    </span><span class="clickable text">订阅</span>`
+                }
+            }
+        ];
+    });
+
+    // 订阅 取消订阅 操作
+    $scope.subscribeReportTrClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        if ($scope.freeRptSubscribe.isLoding || $scope.freeRptSubGetRptSubList.isLoding) return;
+        $scope[item.sub_id ? 'freeRptUnSubscribe' : 'freeRptSubscribe'].getData(
+            item.sub_id ? { id: item.sub_id } : { tplId: item.id }
+        ).then(res => {
+            if (res.code !== 0) return;
+            $scope.freeRptSubGetRptSubList.getData();
+        });
+    };
+
+    // 模板管理 列表 处理
+    $scope.rptTplList.subscribe(res => {
+        $scope.rptTplList.res.body = res.body.map(v => ({
+            ...res,
+            dateArr: myAjaxData.config.getDateArr(v.reportType, v.startDate),
+        }));
+    });
+
+    // 日期规则更新 函数
+    $scope.datePickerUpdated = async (dateStr, dateArr, attrs) => {
+        await myAjaxData.timeout(0);
+        $scope.rptTplList.res.body[attrs.index] = dateStr;
+    };
+
 
 
 });
