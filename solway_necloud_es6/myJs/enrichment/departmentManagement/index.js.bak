@@ -8,12 +8,12 @@ ajaxData({
         name: 'GETdepartmentDetail',
         data: {},
         later: true
-    }
-    // roleAllList: {
-    //     name: 'GETroleAllList',
-    //     data: {},
-    //     later: true
-    // },
+    },
+    update: {
+        name: 'POSTupdateDepartment',
+        data: {},
+        later: true
+    },
     // deleteRole:{
     //     name: 'POSTdeleteRole',
     //     data: {},
@@ -22,75 +22,77 @@ ajaxData({
 }, {})('departmentManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
 
     $scope.moduleName = '部门管理';//当前页面名称；
-    $scope.formData = {};
+    $scope.formData = {
+        'departcode':'-',
+        'name':'-',
+        'fullName':'-',
+        'sequence':'-',
+    };
+    let newCount = 1;
+    let CountId = 0;
 
     $scope.disabled = true;
 
-    // const getRoleAllList = () => {
-    //     $scope.tableLoading = true;
-    //     $scope.roleAllList.getData({
-    //         pageIndex: 0,
-    //         pageSize: 10,
-    //         depid: $scope.depid,
-    //         roleType: '02'
-    //     }).then(res => {
-    //         $scope.tableLoading = false;
-    //         $scope.column = [
-    //             {
-    //                 title: '角色编码',
-    //                 dataIndex: 'roleCode',
-    //                 align: 'left',
-    //                 sort: true
-    //             }, {
-    //                 title: '角色名称',
-    //                 dataIndex: 'roleName',
-    //                 align: 'center'
-    //             }, {
-    //                 title: '角色描述',
-    //                 dataIndex: 'remark',
-    //                 align: 'center',
-    //                 sort: true
-    //             },
-    //              {
-    //                 title: '操作',
-    //                 align: 'center',
-    //                 dataIndex:'id',
-    //                 render(text,item,index) {
-    //                     return `
-    //                     <div class="clearfix">
-    //                         <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
-    //                         <i class="iconfont edit icon-peizhi" style="font-size: 23px;color:#1ddabe;margin-right:15px;"></i>
-    //                         <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
-    //                     </div>
-    //                     `
-    //                 },
-    //             }
-    //         ]
-    //     })
-    // }
+    //编辑
+    $scope.edit = () =>{
+        $scope.disabled = false;
+        const nodes = zTreeObj.getSelectedNodes();//当前选中部门
+		let treeNode = nodes[0];
+        $scope.formData['id'] = treeNode.id;
+        getDepDetail();
+    }
 
-    // //删除此角色
-    // const deleteRole = roleId =>{
-    //     $scope.deleteRole.getData({
-    //         roleId:roleId
-    //     }).then(res => {
-    //         if (res.key==1) {
-    //             toaster.pop('error', '','有下级部门');
-	// 		} else if (res.key==2){
-    //             toaster.pop('error', '','删除失败');
-	// 		} else if(res.key==3){
-    //             toaster.pop('success', '','删除成功');
-    //             getRoleAllList();
-	// 		}
-    //     })
-    // }
+    //取消
+    $scope.cancel = () =>{
+        $scope.disabled = true;
+        zTreeObj.removeNode($scope.newTreeNode[0]);
+        getDepDetail();
+    }
+
+    //添加部门
+    $scope.add = level =>{
+        $scope.disabled = false;
+
+        const nodes = zTreeObj.getSelectedNodes();//当前选中部门
+        const newName = "新部门"+(newCount++);
+        $scope.formData = {'name':newName};
+        if(level == 'siblings'){ //同级部门
+            const treeParentNode = nodes[0].getParentNode();//父部门
+            $scope.newTreeNode = zTreeObj.addNodes(treeParentNode, {id:(CountId++), pId:treeParentNode.id, isParent:true, name: newName} );
+            $scope.formData['parentid'] = treeParentNode.id;
+        }else if(level == 'child'){ //下级部门
+            const treeNode = nodes[0];
+            $scope.newTreeNode = zTreeObj.addNodes(treeNode, {id:(CountId++), pId:treeNode.id, isParent:false, name: newName} );
+            $scope.formData['parentid'] = treeNode.id;
+        }
+    }
+
+    //保存
+    $scope.save = () =>{
+        $scope.update.getData({
+            data:JSON.stringify($scope.formData),
+        }).then(res=>{
+            // console.log(res)
+        })
+    }
+
+    //编辑状态下，左侧树不可点
+    $scope.alertInfo = () =>{
+        alert("请先保存要添加的部门！");
+    }
 
     const getDepDetail = () =>{
         $scope.departmentDetail.getData({
             id:$scope.depid
         }).then(res=>{
-            console.log(res)
-            $scope.formData = res.data;
+            // console.log(res)
+            if(res.data){
+                let data = res.data;
+                $scope.formData = data;
+                for(let key in data){
+                    if(!data[key]) $scope.formData[key] = '-';
+                }
+            }
         });
     }
 
@@ -129,56 +131,15 @@ ajaxData({
                 zTreeObj = $.fn.zTree.getZTreeObj("departmentTree")
                 $('#departmentTree li:first > a').trigger('click');
                 $('#departmentTree li:first > a').trigger('dblclick');
+		        // newCount = getTreeLastId(data);
+                // debugger
             }
         })
     }
 
     initDepartmentList();
 
-    // $scope.trClick = (item, index, event) => {
-    //     const roleId = item.roleId;
-    //     const fixedType = item.fixedType;
-    //     if (event.target.className.includes('icon-bianji-copy')) {
-    //         $scope.showAddRoleTpl = true;
-    //         $scope.$broadcast('broadAddRole', { 'roleId': roleId });
-    //     }else if (event.target.className.includes('icon-peizhi')) {
-    //         $scope.showRoleConfigureModulesTpl = true;
-    //         $scope.$broadcast('broadRoleConfigureModules', { 'roleId': roleId ,'fixedType':fixedType});
-    //     }else if (event.target.className.includes('icon-shanchu1')) {
-    //         $solway.confirm({ message: '确定删除此模块？' }, () => {
-    //             deleteRole(roleId)
-    //         });
-    //     };
-    // };
-
-    // $scope.addRole = () =>{
-    //     $scope.showAddRoleTpl = true;
-    //     $scope.$broadcast('broadAddRole', { 'roleId': '' });
-    // }
-
-    //添加成功回调
-    // $scope.$on('addRoleCallback',()=>{
-    //     $scope.showAddRoleTpl = false;
-    //     getRoleAllList();
-    // });
-
-    // //取消后回调
-    // $scope.$on('addRoleCancelCallback',()=>{
-    //     $scope.showAddRoleTpl = false;
-    // });
-
-    // //编辑模块成功后回调
-    // $scope.$on('roleConfigureModuleCallback',()=>{
-    //     $scope.showRoleConfigureModulesTpl = false;
-    //     getRoleAllList();
-    // });
-
-    // //取消后回调
-    // $scope.$on('roleConfigureModulesCancelCallback',()=>{
-    //     $scope.showRoleConfigureModulesTpl = false;
-    // });
-    
-
+ 
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');
     },2000);
