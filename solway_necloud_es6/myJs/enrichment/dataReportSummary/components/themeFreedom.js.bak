@@ -1,6 +1,10 @@
 ajaxData(
     {
-        
+        freeRptPage: {
+            name: 'GETfreeRptPage',
+            data: {},
+            later: true,
+        }
     }, {
         __serviceName__: 'themeFreedomService',
     }
@@ -19,66 +23,76 @@ ajaxData(
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
-        // getTabData();
-        // await $scope.diffGetData(true);
+        $scope.freeRptPage.beforGetData();
         $scope.$apply();
     };
 
     // 日期改变
     $scope.dateUpdated = async () => {
         await myAjaxData.timeout(0);
+        $scope.$apply();
+        $scope.freeRptPage.beforGetData();
     };
 
     // 切换电站
-    $scope.switchPowerCallback = () => getTabData();
+    $scope.switchPowerCallback = () => {
+        getTabData();
+        $scope.freeRptPage.beforGetData();
+    }
 
+    // 列表 接口请求
+    $scope.freeRptPage.beforGetData = () => {
+        if (!$scope.initComplete) return;
+        $scope.column = [];
+        const {_dateType, _dateTime, keywords} = $scope;
+        $scope.freeRptPage.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            dateType: _dateType,
+            queryDate: _dateTime.showDate,
+            keywords
+        });
+    };
 
-    $scope.column = [
-        {
-            title: '序号',
-            dataIndex: '1',
-            sort: true,
-            align: 'center',
-            render(text) {
-                return '1'
-            }
-        },
-        {
-            title: '报表名称',
-            dataIndex: '2',
-            sort: true,
-            align: 'center',
-            render(text) {
-                return '1'
-            }
-        },
-        {
-            title: '报表日期',
-            dataIndex: '3',
-            sort: true,
-            align: 'center',
-            render(text) {
-                return '1'
-            }
-        },
-        {
-            title: '生产时间',
-            dataIndex: '4',
-            sort: true,
-            align: 'center',
-            render(text) {
-                return '1'
-            }
-        },
-        {
-            title: '操作',
-            dataIndex: '5',
-            sort: true,
-            align: 'center',
-            render(text) {
-                return `<a href="#"></a>`;
-            }
-        },
-    ];
+    // 列表 接口 返回
+    $scope.freeRptPage.subscribe(res => {
+        
+        $scope.column = [
+            {
+                title: '报表名称',
+                dataIndex: 'name',
+                sort: true,
+                align: 'center',
+            },
+            {
+                title: '报表日期',
+                dataIndex: 'rdate',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '生成时间',
+                dataIndex: 'ctime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '操作',
+                dataIndex: 'fid',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return `<a target="_blank" style="color: #428bca;" href="minio/download.htm?id=${text}">下载</a>`;
+                }
+            },
+        ];
+    });
+
 
 });
