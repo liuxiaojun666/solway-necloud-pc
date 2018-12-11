@@ -60,7 +60,14 @@ app.directive('datePicker', ['myAjaxData', '$timeout', (myAjaxData, $timeout) =>
                 $scope.days = new Array(num).fill('').map((v, i) => (i < 9) ? ('0' + (i + 1)) : (i + 1 + ''));
                 $scope.day = $scope.days.includes($scope.day) ? $scope.day : $scope.days[$scope.days.length - 1];
             }
+            const _type = $scope.type;
             let { year, month, day, hour, minute, second } = $scope;
+            if (_type[0] && !year) year = $scope.year = thisYear;
+            if (_type[1] && !month) month = $scope.month = '01';
+            if (_type[2] && !day) day = $scope.day = '01';
+            if (_type[3] && !hour) hour = $scope.hour = '00';
+            if (_type[4] && !minute) minute = $scope.minute = '00';
+            if (_type[5] && !second) second = $scope.second = '00';
             $scope.dateArr = [year, month, day, hour, minute, second];
             let dateStr = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
             if (!year) dateStr = dateStr.substr(1);

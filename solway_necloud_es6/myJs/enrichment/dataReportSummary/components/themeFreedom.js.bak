@@ -25,10 +25,30 @@ ajaxData(
             data: {},
             later: true,
         },
+        freeRptTplSetEnable: {
+            name: 'freeRptTplSetEnable',
+            data: {},
+            later: true,
+        },
+        freeRptTplDeleteBatch: {
+            name: 'freeRptTplDeleteBatch',
+            data: {},
+            later: true,
+        },
+        updateRptTpl: {
+            name: 'updateRptTpl',
+            data: {},
+            later: true,
+        },
+        insertRptTpl: {
+            name: 'insertRptTpl',
+            data: {},
+            later: true,
+        },
     }, {
         __serviceName__: 'themeFreedomService',
         getDateArr(reportType, startDate) {
-            const func = str => str.split('-').join().split(' ').join().split(':').join().split(',');
+            const func = str => str.split('-').join().split(' ').join().split(':').join().split(',').map(v => v.length === 1 ? '0' + v : v);
             if (reportType == '1') {
                 if (startDate) return [null, ...func(startDate), null];
                 else return [null, '01', '01', '00', '00', null];
@@ -166,19 +186,52 @@ ajaxData(
     };
 
     // 模板管理 列表 处理
-    $scope.rptTplList.subscribe(res => {
+    $scope.rptTplList.subscribe(async res => {
+        $scope.rptTplList.rendered = false;
+        await myAjaxData.timeout(0);
         $scope.rptTplList.res.body = res.body.map(v => ({
-            ...res,
+            ...v,
             dateArr: myAjaxData.config.getDateArr(v.reportType, v.startDate),
         }));
+        $scope.$apply();
+        await myAjaxData.timeout(100);
+        $scope.rptTplList.rendered = true;
     });
 
     // 日期规则更新 函数
     $scope.datePickerUpdated = async (dateStr, dateArr, attrs) => {
+        if (!$scope.rptTplList.rendered) return;
         await myAjaxData.timeout(0);
-        $scope.rptTplList.res.body[attrs.index] = dateStr;
+        $scope.rptTplList.res.body[attrs.index].startDate = dateStr;
+        $scope.rptTplList.res.body[attrs.index].changed = true;
+        $scope.$apply();
     };
 
+    // 模板启用 和 作废 接口处理
+    $scope.freeRptTplSetEnable.subscribe(res => {
+        if (res.code !== 0 )return;
+        $scope.rptTplList.getData();
+    });
 
+    // 模板删除 接口处理
+    $scope.freeRptTplDeleteBatch.subscribe(res => {
+        if (res.code !== 0 ) return;
+        $scope.rptTplList.getData();
+    });
+
+    // 模板更新  完成
+    $scope.updateRptTpl.subscribe(res => {
+        if (res.code !== 0) return;
+        $scope.rptTplList.getData();
+    });
+
+    // 文件上传
+    $scope.uploadFile = e => {
+        $scope.insertRptTpl.getData({
+            name: e.files[0].name,
+            excelFile: e.files[0],
+            reportType: 4
+        });
+    };
 
 });

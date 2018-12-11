@@ -1,19 +1,38 @@
 app.factory("apiService", ["$http", "$q", (d, b) => {
     const win = window;
-    const c = win.interface, k = win.noFormSubmit, a = {};
+    const c = win.interface, 
+        k = win.noFormSubmit, 
+        n = win.uploadFileApi,
+        a = {};
     a.getData = (e) => {
-        const m = k.includes(e.name), f = b.defer(), j = e.name.startsWith('GET') ? 'GET' : 'POST', l = Object.is(j, 'POST') && !m ? { "Content-Type": "application/x-www-form-urlencoded" } : {};
+        const m = k.includes(e.name), 
+            o = n.includes(e.name),
+            f = b.defer(), 
+            j = e.name.startsWith('GET') ? 'GET' : 'POST', 
+            l = Object.is(j, 'POST') && !m && !o ? { "Content-Type": "application/x-www-form-urlencoded" } : 
+                Object.is(j, 'POST') && o ? { "Content-Type": undefined } : {},
+            p = o ? new FormData() : void 0;
+        if (o) {
+            for (const key in e.data) {
+                if (e.data.hasOwnProperty(key)) {
+                    const element = e.data[key];
+                    p.append(key, element);
+                }
+            }
+        }
         d({
             method: j,
             url: c[e.name],
+            encType: o && 'multipart/form-data',
             headers: {
                 ...l,
                 "X-Requested-With": "XMLHttpRequest"
             },
             params: j === 'GET' ? e.data : {},
-            data: j === 'POST' ? e.data : {},
+            data: o ? p : j === 'POST' ? e.data : {},
             transformRequest(g) {
-                return m ? JSON.stringify(g) : $.param(g);
+                return m ? JSON.stringify(g) : 
+                o ? g : $.param(g);
             },
         }).success(h => {
             if (h.status >= 500) {
