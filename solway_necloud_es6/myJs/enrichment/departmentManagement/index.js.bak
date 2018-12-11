@@ -72,7 +72,14 @@ ajaxData({
         $scope.update.getData({
             data:JSON.stringify($scope.formData),
         }).then(res=>{
-            // console.log(res)
+            console.log(res)
+            if(res.key==2){
+                toaster.pop('success','','保存成功');
+                $scope.disabled = true;
+                initDepartmentList();
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
         })
     }
 
