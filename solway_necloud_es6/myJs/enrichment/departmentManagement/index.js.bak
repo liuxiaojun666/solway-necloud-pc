@@ -14,24 +14,27 @@ ajaxData({
         data: {},
         later: true
     },
-    // deleteRole:{
-    //     name: 'POSTdeleteRole',
-    //     data: {},
-    //     later: true
-    // }
+    depDelete:{
+        name: 'POSTdeleteDepartment',
+        data: {},
+        later: true
+    }
 }, {})('departmentManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
-
     $scope.moduleName = '部门管理';//当前页面名称；
-    $scope.formData = {
-        'departcode':'-',
-        'name':'-',
-        'fullName':'-',
-        'sequence':'-',
-    };
+    const initData = () =>{
+        $scope.formData = {
+            'departcode':'-',
+            'name':'-',
+            'fullName':'-',
+            'sequence':'-',
+        };
+        $scope.disabled = true;
+    }
+
+    initData();
+    
     let newCount = 1;
     let CountId = 0;
-
-    $scope.disabled = true;
 
     //编辑
     $scope.edit = () =>{
@@ -45,6 +48,7 @@ ajaxData({
     //取消
     $scope.cancel = () =>{
         $scope.disabled = true;
+        $scope.newTreeNode;
         zTreeObj.removeNode($scope.newTreeNode[0]);
         getDepDetail();
     }
@@ -72,8 +76,32 @@ ajaxData({
         $scope.update.getData({
             data:JSON.stringify($scope.formData),
         }).then(res=>{
-            // console.log(res)
+            if(res.key==2){
+                toaster.pop('success','','保存成功');
+                $scope.disabled = true;
+                initDepartmentList();
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
         })
+    }
+
+    //删除
+    $scope.delete = () =>{
+        $solway.confirm({ message: '确定删除此部门？' }, () => {
+            $scope.depDelete.getData({
+                id: $scope.depid
+            }).then(res=>{
+                if(res.key == 3){
+                    toaster.pop('error', '','请先删除下级部门')
+                }else if (res.key==2) {
+                    toaster.pop('success','','保存成功');
+                    initDepartmentList();
+                } else if (res.key==1) {
+                    toaster.pop('error', '','保存失败')
+                }
+            })
+        });
     }
 
     //编辑状态下，左侧树不可点
@@ -85,13 +113,14 @@ ajaxData({
         $scope.departmentDetail.getData({
             id:$scope.depid
         }).then(res=>{
-            // console.log(res)
             if(res.data){
                 let data = res.data;
                 $scope.formData = data;
                 for(let key in data){
                     if(!data[key]) $scope.formData[key] = '-';
                 }
+            }else{
+                initData();
             }
         });
     }
@@ -131,17 +160,13 @@ ajaxData({
                 zTreeObj = $.fn.zTree.getZTreeObj("departmentTree")
                 $('#departmentTree li:first > a').trigger('click');
                 $('#departmentTree li:first > a').trigger('dblclick');
-		        // newCount = getTreeLastId(data);
-                // debugger
             }
         })
     }
 
     initDepartmentList();
-
  
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');
     },2000);
-
 });
