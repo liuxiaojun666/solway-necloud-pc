@@ -1,0 +1,121 @@
+ajaxData({
+    departmentList: {
+        name: 'GETdepartmentList',
+        data: {},
+        later: true
+    },
+    // departmentDetail:{
+    //     name: 'GETdepartmentDetail',
+    //     data: {},
+    //     later: true
+    // },
+    // update: {
+    //     name: 'POSTupdateDepartment',
+    //     data: {},
+    //     later: true
+    // },
+    // depDelete:{
+    //     name: 'POSTdeleteDepartment',
+    //     data: {},
+    //     later: true
+    // }
+}, {})('userManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '用户管理';//当前页面名称；
+    
+
+  
+
+    //保存
+    // $scope.save = () =>{
+    //     $scope.update.getData({
+    //         data:JSON.stringify($scope.formData),
+    //     }).then(res=>{
+    //         if(res.key==2){
+    //             toaster.pop('success','','保存成功');
+    //             $scope.disabled = true;
+    //             initDepartmentList();
+    //         }else{
+    //             toaster.pop('error', '','保存失败')
+    //         }
+    //     })
+    // }
+
+    //删除
+    // $scope.delete = () =>{
+    //     $solway.confirm({ message: '确定删除此部门？' }, () => {
+    //         $scope.depDelete.getData({
+    //             id: $scope.depid
+    //         }).then(res=>{
+    //             if(res.key == 3){
+    //                 toaster.pop('error', '','请先删除下级部门')
+    //             }else if (res.key==2) {
+    //                 toaster.pop('success','','保存成功');
+    //                 initDepartmentList();
+    //             } else if (res.key==1) {
+    //                 toaster.pop('error', '','保存失败')
+    //             }
+    //         })
+    //     });
+    // }
+
+    // const getDepDetail = () =>{
+    //     $scope.departmentDetail.getData({
+    //         id:$scope.depid
+    //     }).then(res=>{
+    //         if(res.data){
+    //             let data = res.data;
+    //             $scope.formData = data;
+    //             for(let key in data){
+    //                 if(!data[key]) $scope.formData[key] = '-';
+    //             }
+    //         }else{
+    //             initData();
+    //         }
+    //     });
+    // }
+
+    function onClick(event, treeId, treeNode, clickFlag) {
+        $scope.depid = treeNode.id;
+        $scope.depName = treeNode.name;
+        // getDepDetail();
+    };
+
+    let zTreeObj;
+    const setting = {
+        check: {
+            enable: true,
+            chkStyle: "radio",
+            radioType: "all"
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                idKey: "id",
+                pIdKey: "pId",
+                rootPId: 0
+            }
+        },
+        callback: {
+            onClick: onClick
+        }
+    };
+
+    const initDepartmentList = () => {
+        $scope.departmentList.getData({
+        }).then(res => {
+            if (res.key == 1) {
+                let zNodes = res.data;
+                $.fn.zTree.init($("#departmentTree"), setting, zNodes);
+                zTreeObj = $.fn.zTree.getZTreeObj("departmentTree")
+                $('#departmentTree li:first > a').trigger('click');
+                $('#departmentTree li:first > a').trigger('dblclick');
+            }
+        })
+    }
+
+    initDepartmentList();
+ 
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});
