@@ -135,10 +135,10 @@ gulp.task('watch', [], () => {
 })
 
 
-gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:8080'))
+gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:88'))
 
 gulp.task('updateCode', () => {
-	// svnUpdate()
+	svnUpdate()
 
 	cmd.get(`git pull`, (err, data, stderr) => {
 		if (err) return console.log(`git pull error\n`, err, data, stderr)
@@ -285,10 +285,16 @@ gulp.task('minifyHtml', function () {
 		removeEmptyAttributes: false,//删除所有空格作属性值 <input id="" /> ==> <input />
 		removeScriptTypeAttributes: true,//删除<script>的type="text/javascript"
 		removeStyleLinkTypeAttributes: true,//删除<style>和<link>的type="text/css"
-		minifyJS: { mangle: false, compress: false },//压缩页面JS
+		minifyJS: { 
+			mangle: false, 
+			compress: true,
+			comments: false
+		},//压缩页面JS
 		minifyCSS: true, //压缩页面CSS
 		ignoreCustomFragments: [
-			/{{(.*?)}}/g,
+			/\{\{((.|\s)*?)\}\}/g,
+			/\sstyle\=\"((.|\s)*?)\"/g,
+			/;/g,
 		]
 	};
 	return gulp.src(['tpl/**/*.html'])
