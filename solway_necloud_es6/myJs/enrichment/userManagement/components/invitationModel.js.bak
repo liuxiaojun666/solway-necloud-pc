@@ -29,7 +29,7 @@ ajaxData({
         }).then(res => {
             console.log(res)
             if (res.key == "1") {
-                
+                $scope.roles = res.data;
             }
         });
     }
@@ -40,12 +40,14 @@ ajaxData({
         }).then(res => {
             console.log(res)
             if (res.key == "1") {
-                
+                // $scope.
             }
         });
     }
 
     const initSelectData = () =>{
+        $scope.count = 1;
+        $scope.inviteList = [{'serNum':$scope.count}]
         getRoleData();
         getStationData();
     }
@@ -55,9 +57,24 @@ ajaxData({
         initSelectData();
     });
 
+    //增加一行
+    $scope.addLine = () =>{
+        $scope.count++;
+        $scope.inviteList.push({'serNum':$scope.count})
+    }
+
+    //删除一行
+    $scope.deleteLine = serNum =>{
+        for(let i=0,list=$scope.inviteList;i<list.length;i++){
+            if(list[i].serNum == serNum){
+                $scope.inviteList.splice(i,1)
+            }
+        }
+    }
+
     //保存
     $scope.save = () =>{
-        
+        console.log($scope.inviteList)
         
         // $scope.update.getData({data: JSON.stringify($scope.formData)}).then(res=>{
             
