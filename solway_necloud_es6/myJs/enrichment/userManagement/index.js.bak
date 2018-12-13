@@ -4,11 +4,11 @@ ajaxData({
         data: {},
         later: true
     },
-    // departmentDetail:{
-    //     name: 'GETdepartmentDetail',
-    //     data: {},
-    //     later: true
-    // },
+    userList:{
+        name: 'GETuserList',
+        data: {},
+        later: true
+    },
     // update: {
     //     name: 'POSTupdateDepartment',
     //     data: {},
@@ -22,7 +22,41 @@ ajaxData({
 }, {})('userManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
     $scope.moduleName = '用户管理';//当前页面名称；
     
-
+    $scope.column = [
+        {
+            title: '姓名',
+            dataIndex: 'realname',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '账号',
+            dataIndex: 'phone',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '邀请时间',
+            dataIndex: 'invitetime',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '邀请状态',
+            dataIndex: 'invitestatus',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
   
 
     //保存
@@ -73,11 +107,19 @@ ajaxData({
     //         }
     //     });
     // }
+    
+    const getUserList = () =>{
+        $scope.userList.getData({
+            pageIndex :0,
+            pageSize : 10,
+            depid: $scope.depid
+        })
+    }
 
     function onClick(event, treeId, treeNode, clickFlag) {
         $scope.depid = treeNode.id;
         $scope.depName = treeNode.name;
-        // getDepDetail();
+        getUserList();
     };
 
     let zTreeObj;
@@ -114,6 +156,16 @@ ajaxData({
     }
 
     initDepartmentList();
+
+    //邀请人员
+    $scope.invitation = () =>{
+        $scope.showInvitationModel = true;
+        $scope.$broadcast('broadInvitation', { 'depId': $scope.depid });
+    }
+
+    $scope.$on('cancelCallback',()=>{
+        $scope.showInvitationModel = false;
+    });
  
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');

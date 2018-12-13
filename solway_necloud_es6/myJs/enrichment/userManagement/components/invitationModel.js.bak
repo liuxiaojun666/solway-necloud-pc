@@ -1,0 +1,73 @@
+
+ajaxData({
+    roleList:{
+        name:'GETroleList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    stationData:{
+        name:'GETstationData',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // update:{
+    //     name:'POSTaddRole',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // }
+}, {
+    __serviceName__: 'invitationModelService',
+})('invitationModelCtrl', ['$scope', 'invitationModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    //角色信息
+    const getRoleData = () =>{
+        $scope.roleList.getData({
+            depId: 0
+        }).then(res => {
+            console.log(res)
+            if (res.key == "1") {
+                
+            }
+        });
+    }
+
+    //电站分组，电站信息
+    const getStationData = () =>{
+        $scope.stationData.getData({
+        }).then(res => {
+            console.log(res)
+            if (res.key == "1") {
+                
+            }
+        });
+    }
+
+    const initSelectData = () =>{
+        getRoleData();
+        getStationData();
+    }
+
+    $scope.$on('broadInvitation',function(e,data){
+        $scope.depId = data.depId;
+        initSelectData();
+    });
+
+    //保存
+    $scope.save = () =>{
+        
+        
+        // $scope.update.getData({data: JSON.stringify($scope.formData)}).then(res=>{
+            
+        // });
+        
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+    }
+
+});
