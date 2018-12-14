@@ -40,8 +40,18 @@ ajaxData(
             data: {},
             later: true,
         },
+        updateRptTplFile: {
+            name: 'updateRptTplFile',
+            data: {},
+            later: true,
+        },
         insertRptTpl: {
             name: 'insertRptTpl',
+            data: {},
+            later: true,
+        },
+        powerStations: {
+            name: 'POSTPowerStationId',
             data: {},
             later: true,
         },
@@ -64,7 +74,7 @@ ajaxData(
             }
         }
     }
-)('themeFreedomCtrl', ['$scope', 'themeFreedomService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
+)('themeFreedomCtrl', ['$scope', 'themeFreedomService', 'actionRecord', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, toaster, $ocLazyLoad) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -92,9 +102,9 @@ ajaxData(
 
     // 切换电站
     $scope.switchPowerCallback = () => {
-        getTabData();
+        // getTabData();
         $scope.freeRptPage.beforGetData();
-    }
+    };
 
     // 列表 接口请求
     $scope.freeRptPage.beforGetData = () => {
@@ -185,6 +195,21 @@ ajaxData(
         });
     };
 
+    // 模板管理列表
+    $scope.templeteManageFun = () => {
+        $scope.templeteManage = true;
+        $scope.rptTplList.getData();
+        document.querySelectorAll('.publicSummary>div .switch-power-enrich .station-name')[0].style.opacity = 0;
+        document.querySelectorAll('.publicSummary>div .switch-power-enrich i.switch-station.switchPowerIcon')[0].style.display = 'none';
+    };
+
+    // 模板管理 关闭
+    $scope.templeteManageClose = () => {
+        $scope.templeteManage = false;
+        document.querySelectorAll('.publicSummary>div .switch-power-enrich .station-name')[0].style.opacity = 1;
+        document.querySelectorAll('.publicSummary>div .switch-power-enrich i.switch-station.switchPowerIcon')[0].style.display = 'inline';
+    };
+
     // 模板管理 列表 处理
     $scope.rptTplList.subscribe(async res => {
         $scope.rptTplList.rendered = false;
@@ -209,13 +234,25 @@ ajaxData(
 
     // 模板启用 和 作废 接口处理
     $scope.freeRptTplSetEnable.subscribe(res => {
-        if (res.code !== 0 )return;
+        if (res.code !== 0) return;
         $scope.rptTplList.getData();
     });
 
+    // 模板删除 请求
+    $scope.freeRptTplDeleteBatch.beforGetData = (id, name) => {
+        $ocLazyLoad.load([
+            'theme/js/dist/components/confirm.js' + stamp,
+        ]).then(res => {
+            $solway.confirm(
+                { title: '模板：' + name, message: ' 确定删除该模板吗？' },
+                () => $scope.freeRptTplDeleteBatch.getData({ ids: id })
+            );
+        });
+    };
+
     // 模板删除 接口处理
     $scope.freeRptTplDeleteBatch.subscribe(res => {
-        if (res.code !== 0 ) return;
+        if (res.code !== 0) return;
         $scope.rptTplList.getData();
     });
 
@@ -225,12 +262,75 @@ ajaxData(
         $scope.rptTplList.getData();
     });
 
-    // 文件上传
-    $scope.uploadFile = e => {
+    // 替换文件
+    $scope.updateRptTplFile.beforGetData = e => {
+        $scope.updateRptTplFile.getData({
+            id: e.attributes.attrid.value,
+            excelFile: e.files[0]
+        });
+    };
+
+    // 模板更新  完成
+    $scope.updateRptTplFile.subscribe(res => {
+        if (res.code !== 0) return;
+        $scope.rptTplList.getData();
+    });
+
+    // 添加模板 按钮点击
+    let spread;
+    $scope.addTemplatePopUpFunc = () => {
+        $scope.addTemplatePopUp = true;
+        if ($scope.powerStations.res) return;
+        $scope.powerStations.getData({ currentView: '00', isGroup: 1 });
+        $ocLazyLoad.load([
+            'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
+            'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
+        ]).then(() => $ocLazyLoad.load([
+            'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
+        ])).then(res => {
+            const spreadNS = GC.Spread.Sheets;
+            spread = spread || new spreadNS.Workbook(document.getElementById('ss'), { tabStripRatio: 0.88 });
+        });
+    };
+
+    // 添加模板 执行策略更新
+    $scope.addTemplatedatePickerUpdated = async (dateStr, dateArr, attrs) => {
+        await myAjaxData.timeout(0);
+        $scope.newTempleteObj.startDate = dateStr;
+        $scope.$apply();
+    };
+
+    // 新增模板 文件导入
+    $scope.importFile = e => {
+        const excelIO = new GC.Spread.Excel.IO();
+        $scope.newTempleteObj.excelFile = e.files[0];
+        $scope.newTempleteObj.name = e.files[0].name;
+        excelIO.open(e.files[0], function (spreadJson) {
+            if (spreadJson.version && spreadJson.sheets) {
+                spread.unbindAll();
+                spread.fromJSON(spreadJson);
+                spread.focus();
+            } else {
+                alert('无效的文件');
+            }
+        });
+    };
+
+    // 电站列表处理
+    $scope.powerStations.subscribe(res => {
+        $scope.newTempleteObj.sid = res.comList[0].id;
+    });
+
+    // 新增模板
+    $scope.uploadFile = () => {
         $scope.insertRptTpl.getData({
-            name: e.files[0].name,
-            excelFile: e.files[0],
-            reportType: 4
+            ...$scope.newTempleteObj,
+            dateArr: null,
+            comid: $scope.powerStations.res.comList.filter(obj => obj.id == $scope.newTempleteObj.sid)[0].comId
+        }).then(res => {
+            if (res.code !== 0) return;
+            $scope.addTemplatePopUp = false;
+            $scope.rptTplList.getData();
         });
     };
 

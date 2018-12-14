@@ -188,7 +188,7 @@
                     font-size: 18px;
                 }
                 float: left;
-                margin-left: 28%;
+                margin-left: calc(50% - 170px - 44px - 87px - 100px);
             }
             .btn2 {
                 cursor: pointer;
@@ -206,7 +206,25 @@
                     font-size: 16px;
                 }
                 float: left;
-                margin-left: 80px;
+                margin-left: 60px;
+            }
+            .btn3 {
+                cursor: pointer;
+                i {
+                    display: inline-block;
+                    width: 28px;
+                    height: 28px;
+                    line-height: 28px;
+                    text-align: center;
+                    border-radius: 50%;
+                    background-color: #4471F0;
+                    color: #fff;
+                    vertical-align: middle;
+                    margin-right: 5px;
+                    font-size: 16px;
+                }
+                float: left;
+                margin-left: 60px;
             }
             .my-paging {
                 float: right;
@@ -351,21 +369,42 @@
                     background-color: #153861;
                     font-size: 16px;
                     color: rgba(255, 255, 255, 0.7);
-                    i {
+                    >i {
                         font-size: 20px;
                         display: inline-block;
                         &:first-of-type {
+                            font-size: 16px;
                             transform: rotate(90deg);
-                            margin-right: 30px;
+                            margin-right: 1.2em;
                             margin-left: 10px;
                             cursor: pointer;
                             border: 1px solid rgba(255, 255, 255, 0.7);
                             border-radius: 50%;
-                            width: 30px;
-                            height: 30px;
+                            width: 1.3em;
+                            height: 1.3em;
                             vertical-align: inherit;
                             text-align: center;
-                            line-height: 30px;
+                            line-height: 1.3em;
+                            margin-top: 15px;
+                        }
+                    }
+                    >div {
+                        cursor: pointer;
+                        width: max-content;
+                        margin-right: calc(50%);
+                        transform: translateX(50%);
+                        float: right;
+                        i {
+                            display: inline-block;
+                            font-size: 20px; // border: 1px solid rgba(255, 255, 255, 0.7);
+                            border-radius: 50%;
+                            width: 1.2em;
+                            height: 1.2em;
+                            vertical-align: inherit;
+                            text-align: center;
+                            line-height: 1.2em;
+                            font-style: normal;
+                            background-color: #26B19F;
                         }
                     }
                 }
@@ -393,12 +432,14 @@
                                 &:first-child {
                                     width: 300px;
                                 }
-                                &:nth-of-type(2),
-                                &:nth-of-type(3) {
+                                &:nth-of-type(2) {
                                     width: 150px;
                                 }
+                                &:nth-of-type(3) {
+                                    width: 500px;
+                                }
                                 &:last-child {
-                                    width: 180px;
+                                    width: 220px;
                                 }
                             }
                         }
@@ -428,17 +469,23 @@
                                     width: 300px;
                                     border-left: none;
                                 }
-                                &:nth-of-type(2),
-                                &:nth-of-type(3) {
+                                &:nth-of-type(2) {
                                     width: 150px;
                                     text-align: center;
                                 }
-                                &:nth-of-type(4) {
+                                &:nth-of-type(3) {
                                     position: relative;
+                                    width: 500px;
                                     input,
                                     select {
                                         background-color: #0d3463;
-                                        color: rgba(255, 255, 255, 0.7);
+                                        color: rgba(255, 255, 255, 0.7); // &:disabled {
+                                        //     border: none;
+                                        //     width: 40px!important;
+                                        //     option {
+                                        //         color: #fff;
+                                        //     }
+                                        // }
                                     }
                                     select {
                                         &:first-of-type {
@@ -448,7 +495,7 @@
                                     >i {
                                         position: absolute;
                                         right: 0;
-                                        top: 3px;
+                                        top: 8px;
                                         font-size: 25px;
                                         padding: 0 10px;
                                         cursor: pointer;
@@ -456,7 +503,8 @@
                                     }
                                 }
                                 &:last-child {
-                                    width: 180px;
+                                    width: 220px;
+                                    text-align: center;
                                     .subscribe {
                                         display: inline-block;
                                         border: 1px solid #092139;
@@ -485,12 +533,28 @@
                                         margin: 0 2em;
                                         color: #28b1a7;
                                         cursor: pointer;
+                                        position: relative;
+                                        display: inline-block;
+                                        input {
+                                            display: inline-block;
+                                            position: absolute;
+                                            left: 0;
+                                            top: 0;
+                                            width: 30px;
+                                            opacity: 0;
+                                            cursor: pointer;
+                                        }
+                                    }
+                                    a {
+                                        color: #28b1a7;
+                                        margin-right: 2em;
                                     }
                                     >i {
                                         color: red;
                                         font-size: 20px;
                                         vertical-align: initial;
                                         cursor: pointer;
+                                        opacity: 0.8;
                                     }
                                 }
                             }
@@ -523,6 +587,87 @@
                         vertical-align: top;
                         opacity: 0;
                         cursor: pointer;
+                    }
+                }
+            }
+        }
+        .slide-down.add-template {
+            height: 0;
+            overflow: hidden;
+            &.pop-up {
+                height: 100vh;
+                padding-top: 10vh;
+            }
+            article.box {
+                width: 1200px;
+                height: 80vh;
+                margin: 0 auto;
+                background-color: #fff;
+                header {
+                    height: 50px;
+                    line-height: 50px;
+                    background-color: #F1F1F1;
+                    text-align: center;
+                    color: #333;
+                    font-size: 20px;
+                }
+                section {
+                    padding: 20px;
+                    height: calc(100% - 100px);
+                    color: #333;
+                    .handel {
+                        label,
+                        div {
+                            margin-right: 3em;
+                        }
+                        .station-list {
+                            select {
+                                width: 170px;
+                            }
+                        }
+                        .export {
+                            margin-right: 0;
+                            color: #1CB09A;
+                            input {
+                                position: relative;
+                                display: inline-block;
+                                width: 100px;
+                                height: 30px;
+                                left: -50px;
+                                opacity: 0;
+                            }
+                        }
+                    }
+                    .excel-preview {
+                        height: calc(100% - 70px);
+                        margin-top: 20px;
+                        p {
+                            color: red;
+                        }
+                        >div {
+                            height: 100%;
+                            &.hide {
+                                opacity: 0;
+                            }
+                        }
+                    }
+                }
+                footer {
+                    text-align: center;
+                    button {
+                        width: 100px;
+                        height: 40px;
+                        background-color: #f1f1f1;
+                        color: #333;
+                        border: 1px solid #ccc;
+                        border-radius: 3px;
+                        font-size: 20px;
+                        margin: 0 10px;
+                        &:last-child {
+                            background-color: #1CB09A;
+                            border: none;
+                            color: #fff;
+                        }
                     }
                 }
             }
