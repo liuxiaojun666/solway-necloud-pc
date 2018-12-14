@@ -12,12 +12,12 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
-    // update:{
-    //     name:'POSTaddRole',
-    //     data: {},
-    //     later: true,
-    //     onlyLatest: true
-    // }
+    update:{
+        name:'POSTupdateInvitation',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
 }, {
     __serviceName__: 'invitationModelService',
 })('invitationModelCtrl', ['$scope', 'invitationModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
@@ -41,20 +41,21 @@ ajaxData({
             console.log(res)
             if (res.key == "1") {
                 $scope.groupList = res.data.groupStations;
-                
+                $scope.stations = res.data.stations;
             }
         });
     }
 
     const initSelectData = () =>{
         $scope.count = 1;
-        $scope.inviteList = [{'serNum':$scope.count,'deptid':$scope.depId }]
+        $scope.inviteList = [{'serNum':$scope.count,'deptid':$scope.depId,'authUserRoleGroupStationRels':[],'aursrs':[] }]
 
         $scope.showRoles = false;
         getRoleData();
         getStationData();
     }
 
+    //初始
     $scope.$on('broadInvitation',function(e,data){
         $scope.depId = data.depId;
         initSelectData();
@@ -63,7 +64,7 @@ ajaxData({
     //增加一行
     $scope.addLine = () =>{
         $scope.count++;
-        $scope.inviteList.push({'serNum':$scope.count,'deptid':$scope.depId})
+        $scope.inviteList.push({'serNum':$scope.count,'deptid':$scope.depId,'authUserRoleGroupStationRels':[],'aursrs':[]})
     }
 
     //删除一行
@@ -75,18 +76,47 @@ ajaxData({
         }
     }
 
-    //选择角色
-    $scope.ifShowRole = () =>{
-        $scope.showRoles = !$scope.showRoles;
+    //选择电站组
+    $scope.checkGroup = serNum =>{
+        const currentGroup = []
+        $("input[name=group"+serNum+"]:checked").map((index,v)=>{
+            currentGroup.push({'groupId':v.value})
+        })
+        for(let i=0,list=$scope.inviteList;i<list.length;i++){
+            if(list[i].serNum == serNum){
+                list[i].authUserRoleGroupStationRels = currentGroup;
+            }
+        }
+
+    }
+
+    //选择电站
+    $scope.checkStation = serNum =>{
+        const stationGroup = []
+        $("input[name=station"+serNum+"]:checked").map((index,v)=>{
+            stationGroup.push({'pstationId':v.value,'flag':0})
+        })
+        for(let i=0,list=$scope.inviteList;i<list.length;i++){
+            if(list[i].serNum == serNum){
+                list[i].aursrs = stationGroup;
+            }
+        }
     }
 
     //保存
     $scope.save = () =>{
         console.log($scope.inviteList)
         
-        // $scope.update.getData({data: JSON.stringify($scope.formData)}).then(res=>{
-            
-        // });
+        $scope.update.getData({data: JSON.stringify($scope.inviteList)}).then(res=>{
+            console.log(res)
+            if (res.key==1){
+                toaster.pop('error', '', '新增失败');
+            } else if(res.key==2){
+                toaster.pop('success', '', '新增成功');
+            } else if(res.key==3){
+                toaster.pop('error', '', '已经被邀请');
+            }
+        });
         
     }
 
@@ -95,4 +125,9 @@ ajaxData({
         $scope.$emit('cancelCallback');
     }
 
+    $timeout(()=>{
+        $('.invitationModelTpl').on('click', '.toggle-one', function(event) {
+            $(this).next('.dropdown-one').toggle();
+        });
+    },0);
 });
