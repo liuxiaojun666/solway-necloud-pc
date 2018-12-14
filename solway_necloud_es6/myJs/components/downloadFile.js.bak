@@ -1,0 +1,38 @@
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+        typeof define === 'function' && define.amd ? define(['exports'], factory) :
+            (factory((global.$solway = global.$solway || {})));
+}(window, ((exports) => {
+    const download = ({
+        url,
+        filename = '未命名.你想要的后缀',
+        callback = () => {},
+        blob = false,
+        download = true
+    }) => {
+        const oReq = new XMLHttpRequest();
+        oReq.open("GET", url, true);
+        oReq.responseType = "blob";
+        oReq.onload = function (oEvent) {
+            const content = oReq.response;
+            const _blob = new Blob([content]);
+            if (download) {
+                const elink = document.createElement('a');
+                if (filename) elink.download = filename;
+                elink.style.display = 'none';
+                elink.href = URL.createObjectURL(_blob);
+                elink.target = '_blank';
+                document.body.appendChild(elink);
+                elink.click();
+                document.body.removeChild(elink);
+                if (!blob) callback();
+            }
+            if (blob) {
+                callback(_blob);
+            }
+        };
+        oReq.send();
+    };
+
+    exports.download = download;
+})));

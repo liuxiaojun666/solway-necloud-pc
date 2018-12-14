@@ -8,6 +8,10 @@ app.directive('datePicker', ['myAjaxData', '$timeout', (myAjaxData, $timeout) =>
         created: '=',
         mounted: '=',
         disabled: '=',
+        hourRange: '=',
+        hourdisabled: '=',
+        hourdisabled: '=',
+        minutedisabled: '=',
     },
     link($scope) {
         $timeout(() => {
@@ -66,7 +70,7 @@ app.directive('datePicker', ['myAjaxData', '$timeout', (myAjaxData, $timeout) =>
             if (_type[0] && !year) year = $scope.year = thisYear;
             if (_type[1] && !month) month = $scope.month = '01';
             if (_type[2] && !day) day = $scope.day = '01';
-            if (_type[3] && !hour) hour = $scope.hour = '00';
+            if (_type[3] && !hour) hour = $scope.hour;
             if (_type[4] && !minute) minute = $scope.minute = '00';
             if (_type[5] && !second) second = $scope.second = '00';
             $scope.dateArr = [year, month, day, hour, minute, second];

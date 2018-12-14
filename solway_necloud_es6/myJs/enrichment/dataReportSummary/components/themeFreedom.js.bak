@@ -61,16 +61,16 @@ ajaxData(
             const func = str => str.split('-').join().split(' ').join().split(':').join().split(',').map(v => v.length === 1 ? '0' + v : v);
             if (reportType == '1') {
                 if (startDate) return [null, ...func(startDate), null];
-                else return [null, '01', '01', '00', '00', null];
+                else return [null, '01', '01', '08', '00', null];
             } else if (reportType == '2') {
                 if (startDate) return [null, null, ...func(startDate), null];
-                else return [null, null, '01', '00', '00', null];
+                else return [null, null, '01', '08', '00', null];
             } else if (reportType == '4') {
                 if (startDate) return [null, null, null, ...func(startDate), null];
-                else return [null, null, null, '00', '00', null];
+                else return [null, null, null, '08', '00', null];
             } else if (reportType == '3') {
                 if (startDate) return [null, null, null, ...func(startDate.substr(0, startDate.length - 2)), null];
-                else return [null, null, null, '00', '00', null];
+                else return [null, null, null, '08', '00', null];
             }
         }
     }
@@ -199,15 +199,15 @@ ajaxData(
     $scope.templeteManageFun = () => {
         $scope.templeteManage = true;
         $scope.rptTplList.getData();
-        document.querySelectorAll('.publicSummary>div .switch-power-enrich .station-name')[0].style.opacity = 0;
-        document.querySelectorAll('.publicSummary>div .switch-power-enrich i.switch-station.switchPowerIcon')[0].style.display = 'none';
+        // document.querySelectorAll('.publicSummary>div .switch-power-enrich .station-name')[0].style.opacity = 0;
+        // document.querySelectorAll('.publicSummary>div .switch-power-enrich i.switch-station.switchPowerIcon')[0].style.display = 'none';
     };
 
     // 模板管理 关闭
     $scope.templeteManageClose = () => {
         $scope.templeteManage = false;
-        document.querySelectorAll('.publicSummary>div .switch-power-enrich .station-name')[0].style.opacity = 1;
-        document.querySelectorAll('.publicSummary>div .switch-power-enrich i.switch-station.switchPowerIcon')[0].style.display = 'inline';
+        // document.querySelectorAll('.publicSummary>div .switch-power-enrich .station-name')[0].style.opacity = 1;
+        // document.querySelectorAll('.publicSummary>div .switch-power-enrich i.switch-station.switchPowerIcon')[0].style.display = 'inline';
     };
 
     // 模板管理 列表 处理
@@ -277,43 +277,45 @@ ajaxData(
     });
 
     // 添加模板 按钮点击
-    let spread;
-    $scope.addTemplatePopUpFunc = () => {
+    $scope.addTemplatePopUpFunc = (load) => {
         $scope.addTemplatePopUp = true;
-        if ($scope.powerStations.res) return;
+        if ($scope.powerStations.res) return load && load(true);
         $scope.powerStations.getData({ currentView: '00', isGroup: 1 });
         $ocLazyLoad.load([
             'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
             'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
         ]).then(() => $ocLazyLoad.load([
             'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
-        ])).then(res => {
-            const spreadNS = GC.Spread.Sheets;
-            spread = spread || new spreadNS.Workbook(document.getElementById('ss'), { tabStripRatio: 0.88 });
-        });
+        ])).then((res) => load && load());
     };
 
     // 添加模板 执行策略更新
     $scope.addTemplatedatePickerUpdated = async (dateStr, dateArr, attrs) => {
         await myAjaxData.timeout(0);
+        if (dateStr === $scope.newTempleteObj.startDate) return;
         $scope.newTempleteObj.startDate = dateStr;
         $scope.$apply();
     };
 
     // 新增模板 文件导入
+    let spread;
     $scope.importFile = e => {
+        const spreadNS = GC.Spread.Sheets;
+        spread = spread || new spreadNS.Workbook(document.getElementById('ss'), { tabStripRatio: 1 });
         const excelIO = new GC.Spread.Excel.IO();
         $scope.newTempleteObj.excelFile = e.files[0];
-        $scope.newTempleteObj.name = e.files[0].name;
+        $scope.newTempleteObj.name = (e.files[0].name || '').split('.')[0];
         excelIO.open(e.files[0], function (spreadJson) {
             if (spreadJson.version && spreadJson.sheets) {
                 spread.unbindAll();
                 spread.fromJSON(spreadJson);
-                spread.focus();
+                spread.sheets.forEach(v => v.options.isProtected = true);
             } else {
                 alert('无效的文件');
             }
         });
+        if (e.preview) return;
+        $scope.$apply();
     };
 
     // 电站列表处理
@@ -331,6 +333,32 @@ ajaxData(
             if (res.code !== 0) return;
             $scope.addTemplatePopUp = false;
             $scope.rptTplList.getData();
+        });
+    };
+
+    // 文件下载
+    $scope.downloadFile = (url, filename, preview) => {
+        $scope.fileLoading = true;
+        $ocLazyLoad.load([
+            'theme/js/dist/components/downloadFile.js',
+        ]).then(() => {
+            $solway.download({
+                url, 
+                filename, 
+                blob: preview,
+                download: !preview,
+                callback(blob) {
+                    $scope.fileLoading = false;
+                    if (!blob) return;
+                    $scope.templatePreview = true;
+                    $scope.templatePreviewName = filename;
+                    $scope.$apply();
+                    $scope.addTemplatePopUpFunc((apply) => {
+                        $scope.importFile({files: [blob], preview});
+                        apply && $scope.$apply();
+                    });
+                }
+            });
         });
     };
 
