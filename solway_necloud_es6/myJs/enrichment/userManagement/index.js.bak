@@ -1,0 +1,173 @@
+ajaxData({
+    departmentList: {
+        name: 'GETdepartmentList',
+        data: {},
+        later: true
+    },
+    userList:{
+        name: 'GETuserList',
+        data: {},
+        later: true
+    },
+    // update: {
+    //     name: 'POSTupdateDepartment',
+    //     data: {},
+    //     later: true
+    // },
+    // depDelete:{
+    //     name: 'POSTdeleteDepartment',
+    //     data: {},
+    //     later: true
+    // }
+}, {})('userManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '用户管理';//当前页面名称；
+    
+    $scope.column = [
+        {
+            title: '姓名',
+            dataIndex: 'realname',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '账号',
+            dataIndex: 'phone',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '邀请时间',
+            dataIndex: 'invitetime',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '邀请状态',
+            dataIndex: 'invitestatus',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
+  
+
+    //保存
+    // $scope.save = () =>{
+    //     $scope.update.getData({
+    //         data:JSON.stringify($scope.formData),
+    //     }).then(res=>{
+    //         if(res.key==2){
+    //             toaster.pop('success','','保存成功');
+    //             $scope.disabled = true;
+    //             initDepartmentList();
+    //         }else{
+    //             toaster.pop('error', '','保存失败')
+    //         }
+    //     })
+    // }
+
+    //删除
+    // $scope.delete = () =>{
+    //     $solway.confirm({ message: '确定删除此部门？' }, () => {
+    //         $scope.depDelete.getData({
+    //             id: $scope.depid
+    //         }).then(res=>{
+    //             if(res.key == 3){
+    //                 toaster.pop('error', '','请先删除下级部门')
+    //             }else if (res.key==2) {
+    //                 toaster.pop('success','','保存成功');
+    //                 initDepartmentList();
+    //             } else if (res.key==1) {
+    //                 toaster.pop('error', '','保存失败')
+    //             }
+    //         })
+    //     });
+    // }
+
+    // const getDepDetail = () =>{
+    //     $scope.departmentDetail.getData({
+    //         id:$scope.depid
+    //     }).then(res=>{
+    //         if(res.data){
+    //             let data = res.data;
+    //             $scope.formData = data;
+    //             for(let key in data){
+    //                 if(!data[key]) $scope.formData[key] = '-';
+    //             }
+    //         }else{
+    //             initData();
+    //         }
+    //     });
+    // }
+    
+    const getUserList = () =>{
+        $scope.userList.getData({
+            pageIndex :0,
+            pageSize : 10,
+            depid: $scope.depid
+        })
+    }
+
+    function onClick(event, treeId, treeNode, clickFlag) {
+        $scope.depid = treeNode.id;
+        $scope.depName = treeNode.name;
+        getUserList();
+    };
+
+    let zTreeObj;
+    const setting = {
+        check: {
+            enable: true,
+            chkStyle: "radio",
+            radioType: "all"
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                idKey: "id",
+                pIdKey: "pId",
+                rootPId: 0
+            }
+        },
+        callback: {
+            onClick: onClick
+        }
+    };
+
+    const initDepartmentList = () => {
+        $scope.departmentList.getData({
+        }).then(res => {
+            if (res.key == 1) {
+                let zNodes = res.data;
+                $.fn.zTree.init($("#departmentTree"), setting, zNodes);
+                zTreeObj = $.fn.zTree.getZTreeObj("departmentTree")
+                $('#departmentTree li:first > a').trigger('click');
+                $('#departmentTree li:first > a').trigger('dblclick');
+            }
+        })
+    }
+
+    initDepartmentList();
+
+    //邀请人员
+    $scope.invitation = () =>{
+        $scope.showInvitationModel = true;
+        $scope.$broadcast('broadInvitation', { 'depId': $scope.depid });
+    }
+
+    $scope.$on('cancelCallback',()=>{
+        $scope.showInvitationModel = false;
+    });
+ 
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});

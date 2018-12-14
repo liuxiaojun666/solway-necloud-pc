@@ -1,0 +1,90 @@
+
+ajaxData({
+    roleList:{
+        name:'GETroleList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    stationData:{
+        name:'GETstationData',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // update:{
+    //     name:'POSTaddRole',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // }
+}, {
+    __serviceName__: 'invitationModelService',
+})('invitationModelCtrl', ['$scope', 'invitationModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    //角色信息
+    const getRoleData = () =>{
+        $scope.roleList.getData({
+            depId: 0
+        }).then(res => {
+            console.log(res)
+            if (res.key == "1") {
+                $scope.roles = res.data;
+            }
+        });
+    }
+
+    //电站分组，电站信息
+    const getStationData = () =>{
+        $scope.stationData.getData({
+        }).then(res => {
+            console.log(res)
+            if (res.key == "1") {
+                // $scope.
+            }
+        });
+    }
+
+    const initSelectData = () =>{
+        $scope.count = 1;
+        $scope.inviteList = [{'serNum':$scope.count}]
+        getRoleData();
+        getStationData();
+    }
+
+    $scope.$on('broadInvitation',function(e,data){
+        $scope.depId = data.depId;
+        initSelectData();
+    });
+
+    //增加一行
+    $scope.addLine = () =>{
+        $scope.count++;
+        $scope.inviteList.push({'serNum':$scope.count})
+    }
+
+    //删除一行
+    $scope.deleteLine = serNum =>{
+        for(let i=0,list=$scope.inviteList;i<list.length;i++){
+            if(list[i].serNum == serNum){
+                $scope.inviteList.splice(i,1)
+            }
+        }
+    }
+
+    //保存
+    $scope.save = () =>{
+        console.log($scope.inviteList)
+        
+        // $scope.update.getData({data: JSON.stringify($scope.formData)}).then(res=>{
+            
+        // });
+        
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+    }
+
+});
