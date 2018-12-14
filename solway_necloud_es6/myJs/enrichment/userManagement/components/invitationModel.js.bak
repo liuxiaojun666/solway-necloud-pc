@@ -40,14 +40,17 @@ ajaxData({
         }).then(res => {
             console.log(res)
             if (res.key == "1") {
-                // $scope.
+                $scope.groupList = res.data.groupStations;
+                
             }
         });
     }
 
     const initSelectData = () =>{
         $scope.count = 1;
-        $scope.inviteList = [{'serNum':$scope.count}]
+        $scope.inviteList = [{'serNum':$scope.count,'deptid':$scope.depId }]
+
+        $scope.showRoles = false;
         getRoleData();
         getStationData();
     }
@@ -60,7 +63,7 @@ ajaxData({
     //增加一行
     $scope.addLine = () =>{
         $scope.count++;
-        $scope.inviteList.push({'serNum':$scope.count})
+        $scope.inviteList.push({'serNum':$scope.count,'deptid':$scope.depId})
     }
 
     //删除一行
@@ -70,6 +73,11 @@ ajaxData({
                 $scope.inviteList.splice(i,1)
             }
         }
+    }
+
+    //选择角色
+    $scope.ifShowRole = () =>{
+        $scope.showRoles = !$scope.showRoles;
     }
 
     //保存
