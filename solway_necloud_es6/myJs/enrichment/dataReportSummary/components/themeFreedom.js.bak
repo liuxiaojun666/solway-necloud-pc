@@ -120,6 +120,11 @@ ajaxData(
         });
     };
 
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name + item.fileName);
+    };
+
     // 列表 接口 返回
     $scope.freeRptPage.subscribe(res => {
 
@@ -154,7 +159,7 @@ ajaxData(
                 sort: true,
                 align: 'center',
                 render(text) {
-                    return `<a target="_blank" style="color: #428bca;" href="minio/download.htm?id=${text}">下载</a>`;
+                    return `<span class="clickable" style="color: #428bca;" >下载</span>`;
                 }
             },
         ];
@@ -279,14 +284,19 @@ ajaxData(
     // 添加模板 按钮点击
     $scope.addTemplatePopUpFunc = (load) => {
         $scope.addTemplatePopUp = true;
-        if ($scope.powerStations.res) return load && load(true);
+        if ($scope.newTempleteObj.excelFile && !load) return $scope.importFile({
+            files: [$scope.newTempleteObj.nullExcelFile],
+            preview: true,
+            addFile: true
+        });
+        if ($scope.powerStations.res && load) return load(true);
         $scope.powerStations.getData({ currentView: '00', isGroup: 1 });
         $ocLazyLoad.load([
             'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
             'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
         ]).then(() => $ocLazyLoad.load([
             'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
-        ])).then((res) => load && load());
+        ])).then(res => load ? load() : $scope.importFile({ files: [], preview: true, addFile: true }));
     };
 
     // 添加模板 执行策略更新
@@ -300,12 +310,18 @@ ajaxData(
     // 新增模板 文件导入
     let spread;
     $scope.importFile = e => {
+        if (e.addFile) $scope.newTempleteObj.showMark = true;
         const spreadNS = GC.Spread.Sheets;
         spread = spread || new spreadNS.Workbook(document.getElementById('ss'), { tabStripRatio: 1 });
         const excelIO = new GC.Spread.Excel.IO();
-        $scope.newTempleteObj.excelFile = e.files[0];
-        $scope.newTempleteObj.name = (e.files[0].name || '').split('.')[0];
-        excelIO.open(e.files[0], function (spreadJson) {
+        if (!$scope.newTempleteObj.nullExcelFile) {
+            excelIO.save(JSON.stringify(spread.toJSON()), function (blob) {
+                $scope.newTempleteObj.nullExcelFile = blob;
+            });
+        }
+        $scope.newTempleteObj.excelFile = e.files[0] || $scope.newTempleteObj.nullExcelFile;
+        $scope.newTempleteObj.name = ((e.files[0] || {}).name || '').split('.')[0];
+        excelIO.open($scope.newTempleteObj.excelFile, function (spreadJson) {
             if (spreadJson.version && spreadJson.sheets) {
                 spread.unbindAll();
                 spread.fromJSON(spreadJson);
@@ -328,6 +344,7 @@ ajaxData(
         $scope.insertRptTpl.getData({
             ...$scope.newTempleteObj,
             dateArr: null,
+            nullExcelFile: null,
             comid: $scope.powerStations.res.comList.filter(obj => obj.id == $scope.newTempleteObj.sid)[0].comId
         }).then(res => {
             if (res.code !== 0) return;
@@ -343,18 +360,18 @@ ajaxData(
             'theme/js/dist/components/downloadFile.js',
         ]).then(() => {
             $solway.download({
-                url, 
-                filename, 
+                url,
+                filename,
                 blob: preview,
                 download: !preview,
                 callback(blob) {
                     $scope.fileLoading = false;
-                    if (!blob) return;
+                    if (!blob && !preview) return $scope.$apply();
                     $scope.templatePreview = true;
                     $scope.templatePreviewName = filename;
                     $scope.$apply();
                     $scope.addTemplatePopUpFunc((apply) => {
-                        $scope.importFile({files: [blob], preview});
+                        $scope.importFile({ files: [blob], preview });
                         apply && $scope.$apply();
                     });
                 }

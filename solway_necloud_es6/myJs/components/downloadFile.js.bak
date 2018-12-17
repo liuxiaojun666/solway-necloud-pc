@@ -15,20 +15,28 @@
         oReq.responseType = "blob";
         oReq.onload = function (oEvent) {
             const content = oReq.response;
-            const _blob = new Blob([content]);
-            if (download) {
-                const elink = document.createElement('a');
-                if (filename) elink.download = filename;
-                elink.style.display = 'none';
-                elink.href = URL.createObjectURL(_blob);
-                elink.target = '_blank';
-                document.body.appendChild(elink);
-                elink.click();
-                document.body.removeChild(elink);
-                if (!blob) callback();
-            }
-            if (blob) {
-                callback(_blob);
+            if (content.size === 0) {
+                if (confirm(' 文件为空或不存在，确定继续执行吗？')) __fun();
+                return callback();
+            } else __fun();
+
+            
+            function __fun() {
+                const _blob = new Blob([content]);
+                if (download) {
+                    const elink = document.createElement('a');
+                    if (filename) elink.download = filename;
+                    elink.style.display = 'none';
+                    elink.href = URL.createObjectURL(_blob);
+                    elink.target = '_blank';
+                    document.body.appendChild(elink);
+                    elink.click();
+                    document.body.removeChild(elink);
+                    if (!blob) callback();
+                }
+                if (blob) {
+                    callback(_blob);
+                }
             }
         };
         oReq.send();
