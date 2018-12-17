@@ -366,12 +366,12 @@ ajaxData(
                 download: !preview,
                 callback(blob) {
                     $scope.fileLoading = false;
-                    if (!blob && !preview) return $scope.$apply();
+                    if (!blob) return $scope.$apply();
                     $scope.templatePreview = true;
                     $scope.templatePreviewName = filename;
                     $scope.$apply();
                     $scope.addTemplatePopUpFunc((apply) => {
-                        $scope.importFile({ files: [blob], preview });
+                        $scope.importFile({ files: [blob.size ? blob : null], preview });
                         apply && $scope.$apply();
                     });
                 }
