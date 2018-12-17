@@ -50,7 +50,7 @@ ajaxData({
             render(text, item, index) {
                 return `
                 <div class="clearfix">
-                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                    <i class="iconfont edit icon-shouquan" style="visibility:${item.istautsNum=='01'?'visible':'hidden'};font-size: 18px;color:#1ddabe;margin-right:15px;" title="授权"></i>
                     <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
                 </div>
                 `
@@ -107,6 +107,18 @@ ajaxData({
     //         }
     //     });
     // }
+
+    $scope.trClick = (item, index, event) => {
+        // console.log(item)
+        // if(event.target.className.includes('icon-shouquan')) {
+        //     $scope.showAuthorizeModel = true;
+        //     $scope.$broadcast('broadAuthorizeModel', { 'id': item.id});
+        // }else if(event.target.className.includes('icon-shanchu1')) {
+        //     $solway.confirm({ message: '确定删除此人？' }, () => {
+        //         // deleteRole(roleId)
+        //     });
+        // };
+    };
     
     const getUserList = () =>{
         $scope.userList.getData({
@@ -165,6 +177,11 @@ ajaxData({
 
     $scope.$on('cancelCallback',()=>{
         $scope.showInvitationModel = false;
+    });
+
+    $scope.$on('addCallback',()=>{
+        $scope.showInvitationModel = false;
+        getUserList();
     });
  
     $timeout(() => {

@@ -27,7 +27,6 @@ ajaxData({
         $scope.roleList.getData({
             depId: 0
         }).then(res => {
-            console.log(res)
             if (res.key == "1") {
                 $scope.roles = res.data;
             }
@@ -38,7 +37,6 @@ ajaxData({
     const getStationData = () =>{
         $scope.stationData.getData({
         }).then(res => {
-            console.log(res)
             if (res.key == "1") {
                 $scope.groupList = res.data.groupStations;
                 $scope.stations = res.data.stations;
@@ -49,7 +47,6 @@ ajaxData({
     const initSelectData = () =>{
         $scope.count = 1;
         $scope.inviteList = [{'serNum':$scope.count,'deptid':$scope.depId,'authUserRoleGroupStationRels':[],'aursrs':[] }]
-
         $scope.showRoles = false;
         getRoleData();
         getStationData();
@@ -87,7 +84,6 @@ ajaxData({
                 list[i].authUserRoleGroupStationRels = currentGroup;
             }
         }
-
     }
 
     //选择电站
@@ -105,19 +101,36 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
-        console.log($scope.inviteList)
-        
+        let params = $scope.inviteList;
+        for(let i=0;i<params.length;i++){
+            if(!params[i].realname){
+                toaster.pop('error', '', '姓名必填');
+                return;
+            }
+            if(!params[i].phone){
+                toaster.pop('error', '', '手机号必填');
+                return;
+            }
+            if(!params[i].roleid){
+                toaster.pop('error', '', '角色必选');
+                return;
+            }
+            if(params[i].aursrs.length<=0 && params[i].authUserRoleGroupStationRels.length<=0){
+                toaster.pop('error', '', '分组和电站至少选一种');
+                return;
+            }
+        }
+
         $scope.update.getData({data: JSON.stringify($scope.inviteList)}).then(res=>{
-            console.log(res)
             if (res.key==1){
                 toaster.pop('error', '', '新增失败');
             } else if(res.key==2){
                 toaster.pop('success', '', '新增成功');
+                $scope.$emit('addCallback');
             } else if(res.key==3){
                 toaster.pop('error', '', '已经被邀请');
             }
         });
-        
     }
 
     //取消
@@ -127,7 +140,13 @@ ajaxData({
 
     $timeout(()=>{
         $('.invitationModelTpl').on('click', '.toggle-one', function(event) {
-            $(this).next('.dropdown-one').toggle();
+            let displayFlag = $(this).next('.dropdown-one').css('display')
+            if(displayFlag === 'none'){
+                $('.dropdown-one').hide();
+                $(this).next('.dropdown-one').show();
+            }else{
+                $(this).next('.dropdown-one').hide();
+            }
         });
     },0);
 });
