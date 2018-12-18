@@ -109,15 +109,14 @@ ajaxData({
     // }
 
     $scope.trClick = (item, index, event) => {
-        // console.log(item)
-        // if(event.target.className.includes('icon-shouquan')) {
-        //     $scope.showAuthorizeModel = true;
-        //     $scope.$broadcast('broadAuthorizeModel', { 'id': item.id});
-        // }else if(event.target.className.includes('icon-shanchu1')) {
-        //     $solway.confirm({ message: '确定删除此人？' }, () => {
-        //         // deleteRole(roleId)
-        //     });
-        // };
+        if(event.target.className.includes('icon-shouquan')) {
+            $scope.showAuthorizeModel = true;
+            $scope.$broadcast('broadAuthorizeModel', { 'id': item.id,'depId': $scope.depid });
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此人？' }, () => {
+                // deleteRole(roleId)
+            });
+        };
     };
     
     const getUserList = () =>{
