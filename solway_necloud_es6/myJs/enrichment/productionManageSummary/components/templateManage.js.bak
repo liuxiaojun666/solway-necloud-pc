@@ -9,13 +9,19 @@ ajaxData(
             name: 'opWorkTplTicketUpdate',
             data: {},
             later: true
-        }
+        },
+        opWorkTplTicketDelete: {
+            name: 'opWorkTplTicketDelete',
+            data: {},
+            later: true
+        },
     }, {
         __serviceName__: 'towVotesTemplateService'
     }
 )('towVotesTemplateCtrl', ['$scope', 'towVotesTemplateService', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, toaster, $ocLazyLoad) => {
     let spread;
     $scope.$on('templateManagement', () => {
+        $scope.newTempleteObj ={};
         if ($scope.opWorkTplTicketPage.res) return;
         $scope.opWorkTplTicketPage.getData();
         $ocLazyLoad.load([
@@ -26,6 +32,7 @@ ajaxData(
         ])).then(res => {
             const spreadNS = GC.Spread.Sheets;
             spread = spread || new spreadNS.Workbook(document.getElementById('ss'), { tabStripRatio: 1 });
+            spread.emptyExcel = spread.toJSON();
         });
     });
 
@@ -39,13 +46,23 @@ ajaxData(
             },
             {
                 title: '更新时间',
-                dataIndex: '',
+                dataIndex: '1',
                 sort: true,
             },
             {
                 title: '提交人',
-                dataIndex: '',
+                dataIndex: '2',
                 sort: true,
+            },
+            {
+                title: '操作',
+                dataIndex: 'id',
+                align: 'center',
+                render(rext) {
+                    return `
+                        <i title="编辑" style="color: #1cb09a;margin-right: 2em;" class="iconfont icon-bianji-copy clickable"></i>
+                        <i title="删除" style="color: red;" class="iconfont icon-shanchu1 clickable"></i>`;
+                }
             },
         ];
     });
@@ -64,9 +81,49 @@ ajaxData(
         $scope.$apply();
     };
 
+    // 点击行  编辑 or 删除
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        if (event.target.title === '编辑') return editItem(item);
+        else if (event.target.title === '删除') return deleteItem(item);
+    };
+
+    // 编辑
+    function editItem(item) {
+        $scope.addTemplatePopUp = true;
+        $scope.newTempleteObj.id = item.id;
+        $scope.newTempleteObj.name = item.name;
+        const spreadJson = JSON.parse(item.content);
+        if (spreadJson.version && spreadJson.sheets) {
+            spread.unbindAll();
+            spread.fromJSON(spreadJson);
+        }
+    }
+
+    // 删除
+    function deleteItem(item) {
+        $ocLazyLoad.load([
+            'theme/js/dist/components/confirm.js' + stamp,
+        ]).then(res => {
+            $solway.confirm(
+                { title: '模板：' + item.name, message: ' 确定删除该模板吗？' },
+                () => $scope.opWorkTplTicketDelete.getData({ id: item.id }).then(res => {
+                    $scope.opWorkTplTicketPage.getData();
+                })
+            );
+        });
+    }
+
+    // 新增模板
+    $scope.addTemplateFunc = () => {
+        $scope.addTemplatePopUp = true; 
+        $scope.newTempleteObj = { id: null, name: '' };
+        spread.fromJSON(spread.emptyExcel);
+    };
+
     // 提交
     $scope.uploadFile = () => {
-        if (!$scope.newTempleteObj.name) return;
+        if (!$scope.newTempleteObj.name.trim()) return;
         $scope.opWorkTplTicketUpdate.getData({
             ...$scope.newTempleteObj,
             content: JSON.stringify(spread.toJSON())
