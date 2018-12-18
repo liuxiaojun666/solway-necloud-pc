@@ -3,7 +3,7 @@ ajaxData(
         pvAlarmGetRunFaultList: {
             name: 'GETpvAlarmGetRunFaultList',
             data: {},
-            later:true,
+            later: true,
         },
         action_station_clean_suggest_dev_shade_list: {
             name: 'GETaction_station_clean_suggest_dev_shade_list',
@@ -57,6 +57,18 @@ ajaxData(
                 }
             });
             $scope.diffGetData();
+        };
+
+        // 设备故障， 查看设备详情
+        $scope.equipmentDetail = (item, index, event) => {
+            const { deviceSerialNnumber, deviceId, pstationid, deviceType: deviceTypeNow, hasJB } = item;
+            $scope.$broadcast("equipmentPopUp", {
+                deviceSerialNnumber,
+                deviceId,
+                pstationid,
+                deviceTypeNow,
+                hasJB
+            });
         };
 
         // 接口请求

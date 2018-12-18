@@ -55,14 +55,14 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { tabIndex = 0, price, cost } = historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {};
-        if (!cost) {
-            await $scope.stationCleanCost.getData({});
-            cost = $scope.stationCleanCost.res.body.totalCost
-            price = $scope.stationCleanCost.res.body.price || 1
-        }
-        $scope.price = price;
-        $scope.cost = cost;
+        let { tabIndex = 0 } = historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {};
+        // if (!cost) {
+        //     await $scope.stationCleanCost.getData({});
+        //     cost = $scope.stationCleanCost.res.body.totalCost
+        //     price = $scope.stationCleanCost.res.body.price || 1
+        // }
+        // $scope.price = price;
+        // $scope.cost = cost;
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -124,19 +124,23 @@ ajaxData(
                 });
             });
         } else if (tabIndex === 1) {
-            const {price, cost} = $scope;
             const date = (new Date(Date.now() - 24 * 60 * 60 * 1000)).Format('yyyy-MM-dd');
-            $scope.stationLastDayCleanData.getData({
-                date,
-                dateType: 3,
-                queryType: 3,
-                price,
-                cost
-            });
             $scope.stationPreBestCleanDataLine.getData({
                 date,
                 dateType: 3,
                 queryType: 3
+            });
+            $scope.stationCleanCost.getData().then(res => {
+                $scope.cost = res.body.totalCost;
+                $scope.price = res.body.price || 1;
+                const { price, cost } = $scope;
+                $scope.stationLastDayCleanData.getData({
+                    date,
+                    dateType: 3,
+                    queryType: 3,
+                    price,
+                    cost
+                });
             });
         } else if (tabIndex === 2) {
             $scope.action_station_clean_suggest_subject.getData({
