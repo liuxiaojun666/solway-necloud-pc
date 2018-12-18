@@ -216,7 +216,7 @@ ajaxData(
     };
 
     // 历史数据 列表 接口 返回 处理
-    $scope.newHistoryData.subscribe(res => {
+    $scope.newHistoryData.subscribe(async res => {
         $scope.column = [
             {
                 dataIndex: 'dtime',
@@ -347,6 +347,8 @@ ajaxData(
                 return `<span>${text.toFixed(2)}</span>`
             }
         })));
+        await currentService.timeout(0);
+        $scope.$apply();
     });
 
     // 故障 列表 接口请求
