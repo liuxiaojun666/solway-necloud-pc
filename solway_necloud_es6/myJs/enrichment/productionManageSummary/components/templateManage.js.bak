@@ -1,11 +1,85 @@
 ajaxData(
     {
-
+        opWorkTplTicketPage: {
+            name: 'GETopWorkTplTicketPage',
+            data: {},
+            later: true
+        },
+        opWorkTplTicketUpdate: {
+            name: 'opWorkTplTicketUpdate',
+            data: {},
+            later: true
+        }
     }, {
         __serviceName__: 'towVotesTemplateService'
     }
-)('towVotesTemplateCtrl', ['$scope', 'towVotesTemplateService', 'toaster'], ($scope, myAjaxData, toaster) => {
+)('towVotesTemplateCtrl', ['$scope', 'towVotesTemplateService', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, toaster, $ocLazyLoad) => {
+    let spread;
+    $scope.$on('templateManagement', () => {
+        if ($scope.opWorkTplTicketPage.res) return;
+        $scope.opWorkTplTicketPage.getData();
+        $ocLazyLoad.load([
+            'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
+            'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
+        ]).then(() => $ocLazyLoad.load([
+            'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
+        ])).then(res => {
+            const spreadNS = GC.Spread.Sheets;
+            spread = spread || new spreadNS.Workbook(document.getElementById('ss'), { tabStripRatio: 1 });
+        });
+    });
 
+    // 模板列表
+    $scope.opWorkTplTicketPage.subscribe(res => {
+        $scope.column = [
+            {
+                title: '模板名称',
+                dataIndex: 'name',
+                sort: true
+            },
+            {
+                title: '更新时间',
+                dataIndex: '',
+                sort: true,
+            },
+            {
+                title: '提交人',
+                dataIndex: '',
+                sort: true,
+            },
+        ];
+    });
 
+    // 模板导入
+    $scope.importFile = e => {
+        const excelIO = new GC.Spread.Excel.IO();
+        excelIO.open(e.files[0], function (spreadJson) {
+            if (spreadJson.version && spreadJson.sheets) {
+                spread.unbindAll();
+                spread.fromJSON(spreadJson);
+            } else {
+                alert('无效的文件');
+            }
+        });
+        $scope.$apply();
+    };
+
+    // 提交
+    $scope.uploadFile = () => {
+        if (!$scope.newTempleteObj.name) return;
+        $scope.opWorkTplTicketUpdate.getData({
+            ...$scope.newTempleteObj,
+            content: JSON.stringify(spread.toJSON())
+        });
+    };
+
+    // 提交后
+    $scope.opWorkTplTicketUpdate.subscribe(res => {
+        $scope.addTemplatePopUp = false;
+        $scope.opWorkTplTicketPage.getData({
+            pageIndex: 0,
+            pageSize: 10
+        });
+    });
 
 });
