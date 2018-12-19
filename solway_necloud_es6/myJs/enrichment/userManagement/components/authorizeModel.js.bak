@@ -61,6 +61,7 @@ ajaxData({
                 $scope.aursrRoles = res.data.aursrRoles;
                 for(let i=0;i<$scope.aursrRoles.length;i++){
                     let curItem = $scope.aursrRoles[i].roleIdList;
+                    $scope.aursrRoles[i].serNum = i;
                     for(let j=0;j<curItem.length;j++){
                         if(curItem[j].checked == '1'){
                             $scope.aursrRoles[i].roleId = curItem[j].roleId;
@@ -69,7 +70,7 @@ ajaxData({
                 }
                 $scope.count = $scope.aursrRoles.length;
 
-                $scope.newList = angular.copy($scope.aursrRoles[0]) 
+                $scope.newList = angular.copy($scope.aursrRoles[0]) ;
                 $scope.newList.aursrs.map(v=>(v.checked = 0));
                 $scope.newList.authUserRoleGroupStationRels.map(v=>(v.checked = 0))
                 $scope.newList.roleIdList.map(v=>(v.checked = 0))
@@ -94,8 +95,8 @@ ajaxData({
 
     //增加一行
     $scope.addLine = () =>{
+        $scope.aursrRoles.push({'roleId':106,'roleIdList':$scope.newList.roleIdList,'aursrs':$scope.newList.aursrs,'authUserRoleGroupStationRels':$scope.newList.authUserRoleGroupStationRels,'serNum':$scope.count});
         $scope.count++;
-        $scope.aursrRoles.push($scope.newList)
     }
 
     //删除一行
@@ -135,8 +136,23 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
-        console.log($scope.aursrRoles);
-        let newArr = []
+        // console.log($scope.aursrRoles);
+        // let roleIds = [];
+        // $(".role option:selected").map((index,v)=>{
+        //     roleIds.push({'roleId':v.value})
+        // }); 
+        // const currentGroup = []
+        // let $groupList = $("input[name=group]");
+        // for(let i=0;i<$groupList.length;i++){
+        //     $("input[name=group]:checked").map((index,v)=>{
+        //         currentGroup.push({'groupId':v.value})
+        //     })
+        // }
+        // $("input[name=group]:checked").map((index,v)=>{
+        //     currentGroup.push({'groupId':v.value})
+        // })
+        // debugger
+        // let newArr = []
         // for(let i=0;i<$scope.aursrRoles.length;i++){
         //     let cur = $scope.aursrRoles[i];
         //     if(cur.roleId){

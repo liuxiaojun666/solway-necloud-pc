@@ -13,6 +13,7 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
         }).success(function (res) {
             $scope.currentInfoData = res;
             $scope.currentSTClass = res.currentSTClass;//光伏、风电
+            $scope.stType = res.stType; //部门0，自定义1
             $scope.currentSTID = res.currentSTID; //当前所选ID
             // $scope.currentParentId = res.currentParentId;
             $scope.currentType = res.currentType; //2:集团；1：公司；0：电站
@@ -20,13 +21,12 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
             $scope.getSTClass();
 
         });
-        //初始化
-        $scope.departmentTab = 'department';
     })
 
     //用户自定义接口
     function getUserDefined(){
         $scope.userDefinedList = [];
+        $scope.stationList = [];
         $http({
             method: 'POST',
             url: "UserAuthHandle/getSTListByLevel.htm",
@@ -38,6 +38,17 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                 stClass: $scope.currentSTClass
             }
         }).success(function (res) {
+            const data = res.body;
+            $scope.parentIdArr = [],$scope.hasChildStation = [];
+            for(let i = 0;i<data.length;i++){
+                if(data[i].stFlag == 2 && data[i].parentId){
+                    $scope.parentIdArr.push(data[i].parentId)
+                }
+                if(data[i].stFlag == 2 && !$scope.hasChildStation.includes(data[i].comId)){
+                    $scope.hasChildStation.push(data[i].comId);
+                }
+            }
+            
             $scope.userDefinedList = res.body;
         })
     }
@@ -48,14 +59,13 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     }
 
     const getStationList = belongId =>{
-        const isPart = $scope.departmentTab=='department'?'0':'1'
         $http({
             method: 'POST',
             url: "UserAuthHandle/getSTListByLevel.htm",
             params: {
                 isGroup: $rootScope.isGroup,
                 currentView: $rootScope.currentView,
-                isPart:isPart,
+                isPart:$scope.stType,
                 type:1,
                 levelId:belongId,
                 stClass: $scope.currentSTClass
@@ -137,12 +147,12 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
 
     //切换部门、自定义
     $scope.changeDepartment = tab =>{
-        $scope.departmentTab = tab;
+        $scope.stType = tab;
         $scope.judgeWhichList();
     }
 
     $scope.judgeWhichList = () =>{
-        if($scope.departmentTab=='department'){
+        if($scope.stType=='0'){
             getAllGroup();
         }else{
             getUserDefined();
