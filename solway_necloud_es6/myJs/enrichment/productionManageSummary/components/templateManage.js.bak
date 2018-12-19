@@ -15,13 +15,18 @@ ajaxData(
             data: {},
             later: true
         },
+        opWorkTplTicketSelectById: {
+            name: 'GETopWorkTplTicketSelectById',
+            data: {},
+            later: true
+        },
     }, {
         __serviceName__: 'towVotesTemplateService'
     }
 )('towVotesTemplateCtrl', ['$scope', 'towVotesTemplateService', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, toaster, $ocLazyLoad) => {
-    let spread;
+    let spread, excelIO;
     $scope.$on('templateManagement', () => {
-        $scope.newTempleteObj ={};
+        $scope.newTempleteObj = {};
         if ($scope.opWorkTplTicketPage.res) return;
         $scope.opWorkTplTicketPage.getData();
         $ocLazyLoad.load([
@@ -31,6 +36,7 @@ ajaxData(
             'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
         ])).then(res => {
             const spreadNS = GC.Spread.Sheets;
+            excelIO = new GC.Spread.Excel.IO();
             spread = spread || new spreadNS.Workbook(document.getElementById('ss'), { tabStripRatio: 1 });
             spread.emptyExcel = spread.toJSON();
         });
@@ -42,16 +48,21 @@ ajaxData(
             {
                 title: '模板名称',
                 dataIndex: 'name',
+                align: 'left',
                 sort: true
             },
             {
                 title: '更新时间',
-                dataIndex: '1',
+                dataIndex: 'modifyTime',
                 sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd hh:mm:ss');
+                }
             },
             {
                 title: '提交人',
-                dataIndex: '2',
+                dataIndex: 'createUserName',
                 sort: true,
             },
             {
@@ -69,7 +80,7 @@ ajaxData(
 
     // 模板导入
     $scope.importFile = e => {
-        const excelIO = new GC.Spread.Excel.IO();
+        if (!$scope.newTempleteObj.name) $scope.newTempleteObj.name = e.files[0].name.split('.')[0];
         excelIO.open(e.files[0], function (spreadJson) {
             if (spreadJson.version && spreadJson.sheets) {
                 spread.unbindAll();
@@ -90,14 +101,22 @@ ajaxData(
 
     // 编辑
     function editItem(item) {
-        $scope.addTemplatePopUp = true;
-        $scope.newTempleteObj.id = item.id;
-        $scope.newTempleteObj.name = item.name;
-        const spreadJson = JSON.parse(item.content);
-        if (spreadJson.version && spreadJson.sheets) {
-            spread.unbindAll();
-            spread.fromJSON(spreadJson);
-        }
+        $scope.fileLoading = true;
+        $ocLazyLoad.load(['theme/js/dist/components/downloadFile.js' + stamp]).then(res => {
+            $solway.download({
+                url: item.cfp,
+                download: false,
+                blob: true,
+                callback: blob => {
+                    $scope.fileLoading = false;
+                    if (!blob) return $scope.$apply();
+                    $scope.addTemplatePopUp = true;
+                    $scope.newTempleteObj.id = item.id;
+                    $scope.newTempleteObj.name = item.name;
+                    return $scope.importFile({ files: [blob] });
+                }
+            });
+        });
     }
 
     // 删除
@@ -116,7 +135,7 @@ ajaxData(
 
     // 新增模板
     $scope.addTemplateFunc = () => {
-        $scope.addTemplatePopUp = true; 
+        $scope.addTemplatePopUp = true;
         $scope.newTempleteObj = { id: null, name: '' };
         spread.fromJSON(spread.emptyExcel);
     };
@@ -124,9 +143,11 @@ ajaxData(
     // 提交
     $scope.uploadFile = () => {
         if (!$scope.newTempleteObj.name.trim()) return;
-        $scope.opWorkTplTicketUpdate.getData({
-            ...$scope.newTempleteObj,
-            content: JSON.stringify(spread.toJSON())
+        excelIO.save(spread.toJSON(), blob => {
+            $scope.opWorkTplTicketUpdate.getData({
+                ...$scope.newTempleteObj,
+                cf: blob
+            });
         });
     };
 

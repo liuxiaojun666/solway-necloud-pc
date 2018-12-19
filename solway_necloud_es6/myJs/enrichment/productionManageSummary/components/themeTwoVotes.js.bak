@@ -11,24 +11,6 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
-    // 标记选中为已读
-    readBaseMessages: {
-        name: 'readBaseMessages',
-        data: {},
-        later: true,
-    },
-    // 全部消息标记为已读
-    readBaseAllMessages: {
-        name: 'readBaseAllMessages',
-        data: {},
-        later: true
-    },
-    // 批量关闭 消息
-    eventNoHandles: {
-        name: 'eventNoHandles',
-        data: {},
-        later: true
-    },
     // 电站id  查询  电站人员
     selectAllUserBySTID: {
         name: 'GETselectAllUserBySTID',
@@ -36,34 +18,15 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
-    // 开票
-    opTimeTaskUpdate: {
-        name: 'opTimeTaskUpdate',
+    // 模板列表
+    opWorkTplTicketList: {
+        name: 'GETopWorkTplTicketList',
         data: {},
-        later: true
     },
-    // 定时任务管理 列表
-    timeTaskList: {
-        name: 'GETopTimeTaskList',
-        data: {},
-        later: true,
-        onlyLatest: true,
-    },
-    // 定时任务 删除
-    automaticTaskDelete: {
-        name: 'opTimeTaskDelete',
-        data: {},
-        later: true,
-    },
-    // 定时任务 打开关闭
-    opShareTimeTaskAutoPub: {
-        name: 'opTimeTaskAutoPub',
-        data: {},
-        later: true,
-    }
 }, {
         __serviceName__: 'themeTwoVotesService'
-    })('themeTwoVotesCtrl', ['$scope', 'themeTwoVotesService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
+    })('themeTwoVotesCtrl', ['$scope', 'themeTwoVotesService', 'actionRecord', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad) => {
+        let spread, excelIO;
         // 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
 
@@ -110,38 +73,37 @@ ajaxData({
         };
 
         // 开票 弹出 事件
-        $scope.makeInvoicePopUp = () => {
-            // if ($scope.messagePopUp) return;
+        $scope.makeInvoicePopUp = (name, tplUrl) => {
             $scope.makeInvoice = true;
-        };
-
-
-        // 对比是否 默认 查询 条件
-        function diffIsDefaultList() {
-            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
-            if (startDate.showDate !== '') return $scope.isDefaultList = false;
-            if (endDate.showDate !== '') return $scope.isDefaultList = false;
-            if (pStationId) return $scope.isDefaultList = false;
-            if (searchKey !== '') return $scope.isDefaultList = false;
-            if (isHis !== '0') return $scope.isDefaultList = false;
-            if (Object.keys(handStatus).filter(v => handStatus[v] === false)[0]) return $scope.isDefaultList = false;
-            return $scope.isDefaultList = true;
-        }
-
-
-        // 查询
-        $scope.search = () => {
-            $scope.searchActive = false;
-            $scope.closeMessagePopUp();
-            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
-            diffIsDefaultList();
-            historicalRecord.set({
-                themeTwoVotes: {
-                    ...historicalRecord.get().themeTwoVotes || {},
-                    startDate, endDate, pStationId, isHis, handStatus, searchKey, isDefaultList: $scope.isDefaultList
-                }
+            $scope.makeInvoiceName = name;
+            $ocLazyLoad.load([
+                'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
+                'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
+            ]).then(() => $ocLazyLoad.load([
+                'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
+            ])).then(res => {
+                const spreadNS = GC.Spread.Sheets;
+                excelIO = new GC.Spread.Excel.IO();
+                spread = spread || new spreadNS.Workbook(document.getElementById('ss2'), { tabStripRatio: 1 });
+                $ocLazyLoad.load(['theme/js/dist/components/downloadFile.js' + stamp]).then(res => {
+                    $solway.download({
+                        url: tplUrl,
+                        download: false,
+                        blob: true,
+                        callback: blob => {
+                            if (!blob) return $scope.$apply();
+                            excelIO.open(blob, function (spreadJson) {
+                                if (spreadJson.version && spreadJson.sheets) {
+                                    spread.unbindAll();
+                                    spread.fromJSON(spreadJson);
+                                } else {
+                                    alert('无效的文件');
+                                }
+                            });
+                        }
+                    });
+                });
             });
-            return getBaseMessageList();
         };
 
         // 消息列表 接口 请求
@@ -159,34 +121,6 @@ ajaxData({
                 pageSize: 20
             });
         }
-
-        // 消息列表 缺省 参数
-        $scope.resetList = () => {
-            $scope.startDate.showDate = '';
-            $scope.endDate.showDate = '';
-            $scope.pStationId = '';
-            $scope.searchKey = '';
-            $scope.isHis = '0';
-            $scope.handStatus = {
-                '00': true,
-                '01': true,
-                '02': true,
-                '03': true,
-                '04': true,
-                '05': true,
-            };
-            Array.from(document.querySelectorAll('#searchParams input'), v => v.value = '');
-            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
-            historicalRecord.set({
-                themeTwoVotes: {
-                    ...historicalRecord.get().themeTwoVotes || {},
-                    startDate, endDate, pStationId, isHis, handStatus, searchKey,
-                    isDefaultList: $scope.isDefaultList = true
-                }
-            });
-            getBaseMessageList();
-        };
-
         // 列表 接口 数据 回调
         $scope.getBaseMessageListNew.getDataCallback = (success, res) => {
             if (!success) return;
@@ -268,57 +202,6 @@ ajaxData({
             $scope.closeMessagePopUp();
         };
 
-        // 消息 批量 标记为 已读
-        const batchReadMsg = async all => {
-            $scope.batchReadHandle = '0';
-            let res = null;
-            if (all) {
-                $solway.confirm({ message: '确定标记所有消息为已读？' }, async () => {
-                    res = await $scope.readBaseAllMessages.getData({});
-                    resultCallback();
-                });
-            } else {
-                $solway.confirm({ message: '确定标记选中消息为已读？'}, async () => {
-                    const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies.split('_')[1]);
-                    if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
-                    res = await $scope.readBaseMessages.getData({ ids: ids.join(',') });
-                    resultCallback();
-                });
-            }
-            function resultCallback () {
-                if (res && res.code === 0) toaster.pop('success', '', '批量处理成功');
-                else toaster.pop('error', '', '批量处理失败');
-                $scope.getBaseMessageListNew.getData({});
-            }
-        };
-
-        // 批量 标记已读 事件触发
-        $scope.batchReadHandleFunc = () => {
-            const { batchReadHandle } = $scope;
-            if (batchReadHandle == '1') batchReadMsg();
-            else if (batchReadHandle == '2') batchReadMsg(true);
-        };
-
-        // 批量关闭 未确认消息
-        $scope.batchClose = async () => {
-            const { otherreason, notprocereason } = $scope;
-            const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
-            if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
-            if (notprocereason == '0' && !otherreason) return toaster.pop('error', '', '请填写其他原因具体内容');
-            // if (!confirm('确定关闭选中消息为 关闭？')) return;
-            $solway.confirm({ message: '确定标记选中消息为关闭？' }, async () => {
-                const res = await $scope.eventNoHandles.getData({
-                    notprocereason,
-                    otherreason,
-                    e_m_ids: ids.join(',')
-                });
-                eventListen();
-                if (res.code === 0) toaster.pop('success', '', '批量处理成功');
-                else toaster.pop('error', '', '批量处理失败');
-                $scope.getBaseMessageListNew.getData({});
-            });
-        };
-
         // 点击行
         $scope.trClick = async (item, index, e) => {
             e.stopPropagation();
@@ -350,6 +233,7 @@ ajaxData({
         function eventListen() {
             $scope.searchActive = false;
             $scope.batchCloseActive = false;
+            $scope.showOpenVotes = false;
             // $scope.messagePopUp = false;
             $scope.$apply();
         }
