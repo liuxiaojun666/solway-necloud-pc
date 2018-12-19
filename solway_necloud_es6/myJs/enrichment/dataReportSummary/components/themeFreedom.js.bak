@@ -171,8 +171,21 @@ ajaxData(
             {
                 title: '报表名称',
                 dataIndex: 'name',
-                width: '80%',
+                width: '40%',
                 align: 'left'
+            },
+            {
+                title: '邮件发送时间',
+                dataIndex: 'startDate',
+                width: '40%',
+                align: 'left',
+                render(text, item) {
+                    return `
+                        <span>每</span>
+                        <span ng-show="!item.editing">${['', '年', '月', '', '日'][item.reportType]}</span>
+                        <span>${item.startDate || '未指定时间'}</span>
+                        `
+                }
             },
             {
                 title: '操作',
