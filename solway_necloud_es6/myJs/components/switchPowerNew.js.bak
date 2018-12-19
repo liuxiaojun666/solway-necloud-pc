@@ -22,12 +22,11 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
         });
         //初始化
         $scope.departmentTab = 'department';
-        
-        
     })
 
     //用户自定义接口
     function getUserDefined(){
+        $scope.userDefinedList = [];
         $http({
             method: 'POST',
             url: "UserAuthHandle/getSTListByLevel.htm",
@@ -36,6 +35,7 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                 currentView: $rootScope.currentView,
                 isPart:1,
                 type:0,
+                stClass: $scope.currentSTClass
             }
         }).success(function (res) {
             $scope.userDefinedList = res.body;
@@ -70,14 +70,13 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     //所有集团、公司接口
     function getAllGroup (){
         $scope.stationList = [];
-        const isPart = $scope.departmentTab=='department'?'0':'1'
         $http({
             method: 'POST',
             url: "UserAuthHandle/getSTListByLevel.htm",
             params: {
                 isGroup: $rootScope.isGroup,
                 currentView: $rootScope.currentView,
-                isPart:isPart,
+                isPart:0,
                 type:0,
                 stClass: $scope.currentSTClass
             }
@@ -99,7 +98,6 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                     $scope.currentParentId = $scope.currentInfoData.currentParentId; //箭头active控制
                     getStationList($scope.currentParentId);
                 }
-                
                 $scope.groupAndCompanyList = data;
             }
         });
@@ -112,8 +110,7 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
             url: "UserAuthHandle/getSTClassLIst.htm",
         }).success(function (res) {
             $scope.stationClasses = res.data;
-            getAllGroup();
-            getUserDefined();
+            $scope.judgeWhichList();
             if (!$scope.currentSTClass && $scope.stationClasses.length > 0) {
                 $scope.currentSTClass = $scope.stationClasses[0].id;
             }
@@ -135,13 +132,21 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     //切换光伏、风电tab
     $scope.changeSTClass = id =>{
         $scope.currentSTClass = id;
-        getAllGroup();
-        // getUserDefined();
+        $scope.judgeWhichList();
     }
 
     //切换部门、自定义
     $scope.changeDepartment = tab =>{
         $scope.departmentTab = tab;
+        $scope.judgeWhichList();
+    }
+
+    $scope.judgeWhichList = () =>{
+        if($scope.departmentTab=='department'){
+            getAllGroup();
+        }else{
+            getUserDefined();
+        }
     }
 
     //切换电站
