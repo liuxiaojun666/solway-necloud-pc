@@ -9,16 +9,11 @@ ajaxData({
         data: {},
         later: true
     },
-    // update: {
-    //     name: 'POSTupdateDepartment',
-    //     data: {},
-    //     later: true
-    // },
-    // depDelete:{
-    //     name: 'POSTdeleteDepartment',
-    //     data: {},
-    //     later: true
-    // }
+    deleteAuthority: {
+        name: 'POSTdeleteAuthority',
+        data: {},
+        later: true
+    }
 }, {})('userManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
     $scope.moduleName = '用户管理';//当前页面名称；
     
@@ -57,56 +52,20 @@ ajaxData({
             },
         }
     ]
-  
-
-    //保存
-    // $scope.save = () =>{
-    //     $scope.update.getData({
-    //         data:JSON.stringify($scope.formData),
-    //     }).then(res=>{
-    //         if(res.key==2){
-    //             toaster.pop('success','','保存成功');
-    //             $scope.disabled = true;
-    //             initDepartmentList();
-    //         }else{
-    //             toaster.pop('error', '','保存失败')
-    //         }
-    //     })
-    // }
 
     //删除
-    // $scope.delete = () =>{
-    //     $solway.confirm({ message: '确定删除此部门？' }, () => {
-    //         $scope.depDelete.getData({
-    //             id: $scope.depid
-    //         }).then(res=>{
-    //             if(res.key == 3){
-    //                 toaster.pop('error', '','请先删除下级部门')
-    //             }else if (res.key==2) {
-    //                 toaster.pop('success','','保存成功');
-    //                 initDepartmentList();
-    //             } else if (res.key==1) {
-    //                 toaster.pop('error', '','保存失败')
-    //             }
-    //         })
-    //     });
-    // }
-
-    // const getDepDetail = () =>{
-    //     $scope.departmentDetail.getData({
-    //         id:$scope.depid
-    //     }).then(res=>{
-    //         if(res.data){
-    //             let data = res.data;
-    //             $scope.formData = data;
-    //             for(let key in data){
-    //                 if(!data[key]) $scope.formData[key] = '-';
-    //             }
-    //         }else{
-    //             initData();
-    //         }
-    //     });
-    // }
+    const deletePerson = id =>{
+        $scope.deleteAuthority.getData({
+            id: id
+        }).then(res=>{
+            if (res.key==2) {
+                toaster.pop('success','','删除成功');
+                getUserList();
+            } else if (res.key==1) {
+                toaster.pop('error', '','删除失败')
+            }
+        })
+    }
 
     $scope.trClick = (item, index, event) => {
         if(event.target.className.includes('icon-shouquan')) {
@@ -114,7 +73,7 @@ ajaxData({
             $scope.$broadcast('broadAuthorizeModel', { 'id': item.id,'depId': $scope.depid });
         }else if(event.target.className.includes('icon-shanchu1')) {
             $solway.confirm({ message: '确定删除此人？' }, () => {
-                // deleteRole(roleId)
+                deletePerson(item.id)
             });
         };
     };
@@ -174,15 +133,25 @@ ajaxData({
         $scope.$broadcast('broadInvitation', { 'depId': $scope.depid });
     }
 
+    //移交管理员
+    $scope.changeAdministrator = () =>{
+        $scope.changeAdministratorModel = true;
+        $scope.$broadcast('broadAdministrator', { 'depId': $scope.depid });
+    }
+
     $scope.$on('cancelCallback',()=>{
         $scope.showInvitationModel = false;
+        $scope.showAuthorizeModel = false;
+        $scope.changeAdministratorModel = false;
     });
 
     $scope.$on('addCallback',()=>{
         $scope.showInvitationModel = false;
+        $scope.showAuthorizeModel = false;
+        $scope.changeAdministratorModel = false;
         getUserList();
     });
- 
+
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');
     },2000);

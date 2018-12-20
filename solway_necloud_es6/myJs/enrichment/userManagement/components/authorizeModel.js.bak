@@ -36,6 +36,7 @@ ajaxData({
             if (res.key == "1") {
                 $scope.roles = res.data;
             }
+            getStationData();
         });
     }
 
@@ -47,157 +48,140 @@ ajaxData({
                 $scope.groupList = res.data.groupStations;
                 $scope.stations = res.data.stations;
             }
+            getDetailInfo();
         });
     }
-
     //获取详情信息
     const getDetailInfo = () =>{
+        $scope.newList = {};
         $scope.authorityDetail.getData({
             id:$scope.id
         }).then(res=>{
-            console.log(res)
             if(res.key == 1){
                 $scope.data = res.data;
-                $scope.aursrRoles = res.data.aursrRoles;
-                for(let i=0;i<$scope.aursrRoles.length;i++){
-                    let curItem = $scope.aursrRoles[i].roleIdList;
-                    $scope.aursrRoles[i].serNum = i;
-                    for(let j=0;j<curItem.length;j++){
-                        if(curItem[j].checked == '1'){
-                            $scope.aursrRoles[i].roleId = curItem[j].roleId;
+                if(res.data.aursrRoles){
+                    $scope.aursrRoles = res.data.aursrRoles;
+                    for(let i=0;i<$scope.aursrRoles.length;i++){
+                        let curItem = $scope.aursrRoles[i].roleIdList;
+                        $scope.aursrRoles[i].serNum = i;
+                        for(let j=0;j<curItem.length;j++){
+                            if(curItem[j].checked == '1'){
+                                $scope.aursrRoles[i].roleId = Number(curItem[j].roleId);
+                            }
                         }
                     }
+                    $scope.count = $scope.aursrRoles.length;
+    
+                    $scope.newList = angular.copy($scope.aursrRoles[0]) ;
+                    $scope.newList.aursrs.map(v=>(v.checked = 0));
+                    $scope.newList.authUserRoleGroupStationRels.map(v=>(v.checked = 0))
+                    $scope.newList.roleIdList.map(v=>(v.checked = 0))
+                    
+                }else{
+                    $scope.aursrRoles = [];
+                    $scope.count = 0;
+                    $scope.newList.aursrs = angular.copy($scope.stations);
+                    $scope.newList.authUserRoleGroupStationRels = angular.copy($scope.groupList)
+                    $scope.newList.authUserRoleGroupStationRels.map(v=>(v.checked = 0))
+                    $scope.newList.roleIdList = angular.copy($scope.roles);
                 }
-                $scope.count = $scope.aursrRoles.length;
-
-                $scope.newList = angular.copy($scope.aursrRoles[0]) ;
-                $scope.newList.aursrs.map(v=>(v.checked = 0));
-                $scope.newList.authUserRoleGroupStationRels.map(v=>(v.checked = 0))
-                $scope.newList.roleIdList.map(v=>(v.checked = 0))
             }
         })
-    }
-
-    const initSelectData = () =>{
-        
-        // $scope.showRoles = false;
-        // getRoleData();
-        // getStationData();
-        getDetailInfo();
     }
 
     //初始
     $scope.$on('broadAuthorizeModel',function(e,data){
         $scope.depId = data.depId;
         $scope.id = data.id;
-        initSelectData();
+        getRoleData();
     });
 
     //增加一行
     $scope.addLine = () =>{
-        $scope.aursrRoles.push({'roleId':106,'roleIdList':$scope.newList.roleIdList,'aursrs':$scope.newList.aursrs,'authUserRoleGroupStationRels':$scope.newList.authUserRoleGroupStationRels,'serNum':$scope.count});
+        $scope.aursrRoles.push({'roleId':106,'roleIdList':angular.copy($scope.newList.roleIdList),'aursrs':angular.copy($scope.newList.aursrs),'authUserRoleGroupStationRels':angular.copy($scope.newList.authUserRoleGroupStationRels),'serNum':$scope.count});
         $scope.count++;
     }
 
     //删除一行
     $scope.deleteLine = serNum =>{
-        for(let i=0,list=$scope.inviteList;i<list.length;i++){
+        for(let i=0,list=$scope.aursrRoles;i<list.length;i++){
             if(list[i].serNum == serNum){
-                $scope.inviteList.splice(i,1)
+                $scope.aursrRoles.splice(i,1)
             }
         }
     }
 
     // //选择电站组
-    // $scope.checkGroup = serNum =>{
-    //     const currentGroup = []
-    //     $("input[name=group"+serNum+"]:checked").map((index,v)=>{
-    //         currentGroup.push({'groupId':v.value})
-    //     })
-    //     for(let i=0,list=$scope.inviteList;i<list.length;i++){
-    //         if(list[i].serNum == serNum){
-    //             list[i].authUserRoleGroupStationRels = currentGroup;
-    //         }
-    //     }
-    // }
+    $scope.checkGroup = serNum =>{
+        const currentChecked = [];
+        $("input[name=group"+serNum+"]:checked").map((index,v)=>{
+            currentChecked.push(Number(v.value))
+        })
+        for(let i=0;i<$scope.aursrRoles.length;i++){
+            if($scope.aursrRoles[i].serNum == serNum){
+                let currentGroup = $scope.aursrRoles[i].authUserRoleGroupStationRels;
+                for(let j=0;j<currentGroup.length;j++){
+                    if(currentChecked.includes(currentGroup[j].id)){
+                        $scope.aursrRoles[i].authUserRoleGroupStationRels[j].checked = 1;
+                    }else{
+                        $scope.aursrRoles[i].authUserRoleGroupStationRels[j].checked = 0;
+                    }
+                }
+            }
+        }
+    }
 
     // //选择电站
-    // $scope.checkStation = serNum =>{
-    //     const stationGroup = []
-    //     $("input[name=station"+serNum+"]:checked").map((index,v)=>{
-    //         stationGroup.push({'pstationId':v.value,'flag':0})
-    //     })
-    //     for(let i=0,list=$scope.inviteList;i<list.length;i++){
-    //         if(list[i].serNum == serNum){
-    //             list[i].aursrs = stationGroup;
-    //         }
-    //     }
-    // }
+    $scope.checkStation = serNum =>{
+        const currentChecked = [];
+        $("input[name=station"+serNum+"]:checked").map((index,v)=>{
+            currentChecked.push(Number(v.value))
+        })
+        for(let i=0;i<$scope.aursrRoles.length;i++){
+            if($scope.aursrRoles[i].serNum == serNum){
+                let currentGroup = $scope.aursrRoles[i].aursrs;
+                for(let j=0;j<currentGroup.length;j++){
+                    if(currentChecked.includes(currentGroup[j].id)){
+                        $scope.aursrRoles[i].aursrs[j].checked = 1;
+                    }else{
+                        $scope.aursrRoles[i].aursrs[j].checked = 0;
+                    }
+                }
+            }
+        }
+    }
 
     //保存
     $scope.save = () =>{
-        // console.log($scope.aursrRoles);
-        // let roleIds = [];
-        // $(".role option:selected").map((index,v)=>{
-        //     roleIds.push({'roleId':v.value})
-        // }); 
-        // const currentGroup = []
-        // let $groupList = $("input[name=group]");
-        // for(let i=0;i<$groupList.length;i++){
-        //     $("input[name=group]:checked").map((index,v)=>{
-        //         currentGroup.push({'groupId':v.value})
-        //     })
-        // }
-        // $("input[name=group]:checked").map((index,v)=>{
-        //     currentGroup.push({'groupId':v.value})
-        // })
-        // debugger
-        // let newArr = []
-        // for(let i=0;i<$scope.aursrRoles.length;i++){
-        //     let cur = $scope.aursrRoles[i];
-        //     if(cur.roleId){
-        //         newArr.push({'roleid':cur.roleId})
-        //     }else{
-
-        //     }
-        // }
-        return;
-        let params = $scope.inviteList;
-        for(let i=0;i<params.length;i++){
-            if(!params[i].realname){
-                toaster.pop('error', '', '姓名必填');
-                return;
-            }
-            if(!params[i].phone){
-                toaster.pop('error', '', '手机号必填');
-                return;
-            }
-            if(!params[i].roleid){
-                toaster.pop('error', '', '角色必选');
-                return;
-            }
-            if(params[i].aursrs.length<=0 && params[i].authUserRoleGroupStationRels.length<=0){
-                toaster.pop('error', '', '分组和电站至少选一种');
-                return;
-            }
+        let aursrRoles = [];
+        for(let i=0;i<$scope.aursrRoles.length;i++){
+            let roleid = $scope.aursrRoles[i].roleId+'';
+            let groupArr = [],stationArr = [];
+            $scope.aursrRoles[i].authUserRoleGroupStationRels.map((v,i)=>{
+                if(v.checked == 1) groupArr.push({'groupId':v.id+''})
+            })
+            $scope.aursrRoles[i].aursrs.map((v,i)=>{
+                if(v.checked == 1) stationArr.push({'pstationId':v.id+'','flag':'0'})
+            })
+            aursrRoles.push({'roleid':roleid+'','aursrs':stationArr,'authUserRoleGroupStationRels':groupArr})
         }
+        const data = $scope.data;
+        let formData = {'id':data.id+'','phone':data.phone,'realname':data.realname,'aursrRoles':aursrRoles};
 
-        $scope.update.getData({data: JSON.stringify($scope.inviteList)}).then(res=>{
-            if (res.key==1){
-                toaster.pop('error', '', '新增失败');
-            } else if(res.key==2){
-                toaster.pop('success', '', '新增成功');
+        $scope.authoritySave.getData({data: JSON.stringify(formData)}).then(res=>{
+            if(res.key==2){
+                toaster.pop('success', '', '保存成功');
                 $scope.$emit('addCallback');
-            } else if(res.key==3){
-                toaster.pop('error', '', '已经被邀请');
+            } else{
+                toaster.pop('error', '', '保存失败');
             }
         });
     }
 
-    // //取消
-    // $scope.cancel = () =>{
-    //     $scope.$emit('cancelCallback');
-    // }
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+    }
 
     $timeout(()=>{
         $('.authorizeModelTpl').on('click', '.toggle-one', function(event) {

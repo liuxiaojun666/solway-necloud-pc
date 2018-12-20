@@ -1,0 +1,49 @@
+
+ajaxData({
+    administratorList:{
+        name:'GETadministratorList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    administratorSave:{
+        name:'POSTadministratorSave',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'administratorListModelService',
+})('administratorListModelCtrl', ['$scope', 'administratorListModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    const getAdministrator = () =>{
+        $scope.administratorList.getData({
+        }).then(res => {
+            $scope.administratorList = res;
+        })
+    }
+
+    $scope.$on("broadAdministrator",(e,v)=>{
+        getAdministrator();
+    })
+
+    $scope.save = () =>{
+        const userId = $("input[name='person']:checked").val();
+        if(!userId){
+			toaster.pop('error','','请选择人员');
+			return;
+        }
+        $scope.administratorSave.getData({
+            userid:userId
+        }).then(res => {
+            alert('移交成功,请重新登录!')
+			window.location.href = 'login.html';
+        })
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+    }
+
+});
