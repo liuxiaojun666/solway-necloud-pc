@@ -53,7 +53,7 @@ ajaxData({
                             }
                         }
                     }
-                }).onStart(function () {
+                }).onBegin(function () {
                     if (!this.again) {
                         setTimeout(() => {
                             this.again = true;
@@ -71,6 +71,9 @@ ajaxData({
                             ]
                         });
                     }
+                }).onStart(function () {
+                    // debugger
+                    
                 }).onBeforeStop(function (obj) {
                     $scope.params = $scope.params.filter(item => item.stream[0].dest !== obj.url)
                 });

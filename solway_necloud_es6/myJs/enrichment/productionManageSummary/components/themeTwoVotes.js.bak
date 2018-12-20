@@ -25,7 +25,7 @@ ajaxData({
     },
 }, {
         __serviceName__: 'themeTwoVotesService'
-    })('themeTwoVotesCtrl', ['$scope', 'themeTwoVotesService', 'actionRecord', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad) => {
+    })('themeTwoVotesCtrl', ['$scope', 'themeTwoVotesService', 'actionRecord', '$ocLazyLoad', 'toaster'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad, toaster) => {
         let spread, excelIO;
         // 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
@@ -103,6 +103,17 @@ ajaxData({
                         }
                     });
                 });
+            });
+        };
+
+        // 开票 提交
+        $scope.openVotesSubmit = () => {
+            $ocLazyLoad.load([
+                'theme/js/dist/components/formValidation.js',
+            ]).then(res => {
+                if ($solway.formValidation($scope.openVotesObj, '.makeInvoice .handel', toaster)) {
+                    $scope.makeInvoice = false;
+                }
             });
         };
 
