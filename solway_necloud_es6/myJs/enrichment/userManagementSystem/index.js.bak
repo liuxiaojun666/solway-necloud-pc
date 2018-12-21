@@ -12,18 +12,18 @@ ajaxData({
 }, {})('userManagementSystemCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
     $scope.moduleName = '用户管理';//当前页面名称；
 
-    // const getUserList = () =>{
-    //     $scope.userList.getData({
-    //         pageIndex : 0,
-    //         pageSize : 10,
-    //         userType : $scope.userTypeS,
-    //         userName : $scope.userNameS,
-    //         pstationid : $scope.pstationidS,
-    //         keyWords : $scope.keyWords
-    //     }).then(res=>{
-    //         console.log(res)
-    //     });
-    // }
+    const getUserList = () =>{
+        $scope.userList.getData({
+            pageIndex : 0,
+            pageSize : 10,
+            userName : $scope.userNameS,
+            keyWords : $scope.keyWords
+        }).then(res=>{
+            console.log(res)
+        });
+    }
+
+    getUserList();
     
     $scope.column = [
         {
@@ -94,14 +94,7 @@ ajaxData({
     //         });
     //     };
     // };
-    
-    const getUserList = () =>{
-        $scope.userList.getData({
-            pageIndex :0,
-            pageSize : 10,
-            depid: $scope.depid
-        })
-    }
+
 
 
     // //邀请人员
