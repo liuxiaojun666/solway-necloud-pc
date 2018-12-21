@@ -292,7 +292,8 @@ ajaxData(
             width: '80px',
             align: 'right',
             render(text) {
-                return `<span>${text.toFixed(2)}</span>`
+                if (typeof text !== 'number') return '-';
+                return `<span>${text.toFixed(2)}</span>`;
             }
         })));
         await currentService.timeout(0);
