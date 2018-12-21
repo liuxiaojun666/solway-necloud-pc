@@ -1,0 +1,135 @@
+ajaxData({
+    userList:{
+        name: 'GETuserListSystem',
+        data: {},
+        later: true
+    },
+    // deleteAuthority: {
+    //     name: 'POSTdeleteAuthority',
+    //     data: {},
+    //     later: true
+    // }
+}, {})('userManagementSystemCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '用户管理';//当前页面名称；
+
+    // const getUserList = () =>{
+    //     $scope.userList.getData({
+    //         pageIndex : 0,
+    //         pageSize : 10,
+    //         userType : $scope.userTypeS,
+    //         userName : $scope.userNameS,
+    //         pstationid : $scope.pstationidS,
+    //         keyWords : $scope.keyWords
+    //     }).then(res=>{
+    //         console.log(res)
+    //     });
+    // }
+    
+    $scope.column = [
+        {
+            title: '账号',
+            dataIndex: 'phone',
+            align: 'center',
+            sort: !0
+        },{
+            title: '姓名',
+            dataIndex: 'realname',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '所属公司',
+            dataIndex: 'phone',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '上次登录时间',
+            dataIndex: 'invitetime',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '邀请状态',
+            dataIndex: 'invitestatus',
+            align: 'center'
+        }, {
+            title: '状态',
+            dataIndex: 'invitestatus',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-shouquan" style="visibility:${item.istautsNum=='01'?'visible':'hidden'};font-size: 18px;color:#1ddabe;margin-right:15px;" title="授权"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
+
+    // //删除
+    // const deletePerson = id =>{
+    //     $scope.deleteAuthority.getData({
+    //         id: id
+    //     }).then(res=>{
+    //         if (res.key==2) {
+    //             toaster.pop('success','','删除成功');
+    //             getUserList();
+    //         } else if (res.key==1) {
+    //             toaster.pop('error', '','删除失败')
+    //         }
+    //     })
+    // }
+
+    // $scope.trClick = (item, index, event) => {
+    //     if(event.target.className.includes('icon-shouquan')) {
+    //         $scope.showAuthorizeModel = true;
+    //         $scope.$broadcast('broadAuthorizeModel', { 'id': item.id,'depId': $scope.depid });
+    //     }else if(event.target.className.includes('icon-shanchu1')) {
+    //         $solway.confirm({ message: '确定删除此人？' }, () => {
+    //             deletePerson(item.id)
+    //         });
+    //     };
+    // };
+    
+    const getUserList = () =>{
+        $scope.userList.getData({
+            pageIndex :0,
+            pageSize : 10,
+            depid: $scope.depid
+        })
+    }
+
+
+    // //邀请人员
+    // $scope.invitation = () =>{
+    //     $scope.showInvitationModel = true;
+    //     $scope.$broadcast('broadInvitation', { 'depId': $scope.depid });
+    // }
+
+    // //移交管理员
+    // $scope.changeAdministrator = () =>{
+    //     $scope.changeAdministratorModel = true;
+    //     $scope.$broadcast('broadAdministrator', { 'depId': $scope.depid });
+    // }
+
+    // $scope.$on('cancelCallback',()=>{
+    //     $scope.showInvitationModel = false;
+    //     $scope.showAuthorizeModel = false;
+    //     $scope.changeAdministratorModel = false;
+    // });
+
+    // $scope.$on('addCallback',()=>{
+    //     $scope.showInvitationModel = false;
+    //     $scope.showAuthorizeModel = false;
+    //     $scope.changeAdministratorModel = false;
+    //     getUserList();
+    // });
+
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});
