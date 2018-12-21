@@ -17,7 +17,6 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
             $scope.currentSTID = res.currentSTID; //当前所选ID
             // $scope.currentParentId = res.currentParentId;
             $scope.currentType = res.currentType; //2:集团；1：公司；0：电站
-            
             $scope.getSTClass();
 
         });
@@ -152,10 +151,11 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     }
 
     $scope.judgeWhichList = () =>{
-        if($scope.stType=='0'){
-            getAllGroup();
-        }else{
+        if($scope.stType=='1'){
             getUserDefined();
+        }else{
+            $scope.stType = '0';
+            getAllGroup();
         }
     }
 
