@@ -296,6 +296,7 @@ ajaxData(
 
     // 添加模板 按钮点击
     $scope.addTemplatePopUpFunc = (load) => {
+        $scope.templatePreviewName = '';
         $scope.addTemplatePopUp = true;
         if ($scope.newTempleteObj.excelFile && !load) return $scope.importFile({
             files: [$scope.newTempleteObj.nullExcelFile],
@@ -323,7 +324,7 @@ ajaxData(
     // 新增模板 文件导入
     let spread;
     $scope.importFile = e => {
-        if (e.addFile) $scope.newTempleteObj.showMark = true;
+        $scope.newTempleteObj.showMark = e.addFile;
         const spreadNS = GC.Spread.Sheets;
         spread = spread || new spreadNS.Workbook(document.getElementById('ss'), { tabStripRatio: 1 });
         const excelIO = new GC.Spread.Excel.IO();
