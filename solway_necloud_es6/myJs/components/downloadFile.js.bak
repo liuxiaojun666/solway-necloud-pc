@@ -14,15 +14,14 @@
         oReq.open("GET", url, true);
         oReq.responseType = "blob";
         oReq.onload = function (oEvent) {
-            const content = oReq.response;
-            if (content.size === 0) {
+            if (oReq.response.size === 0 || oReq.status === 404) {
                 if (confirm(' 文件为空或不存在，确定继续执行吗？')) __fun();
                 return callback();
             } else __fun();
 
             
             function __fun() {
-                const _blob = new Blob([content]);
+                const _blob = new Blob([oReq.response]);
                 if (download) {
                     const elink = document.createElement('a');
                     if (filename) elink.download = filename;
