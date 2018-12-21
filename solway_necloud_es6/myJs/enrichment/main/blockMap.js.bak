@@ -189,14 +189,14 @@ ajaxData(
         myChart.setOption(option, true);
 
         myChart.on('click', function (param) {
-            // if (stationMap.get(param.name) != null) {
-            //     clickMapArea(param, stationMap.get(param.name));
-            // }
+            param.data && param.data.id && clickMapArea(param, param.data.id);
         });
 
-        //双击跳转到电站界面
-        myChart.on('dblclick', function (param) {
-            return;
+        myChart._dom.addEventListener('dblclick', async function (e) {
+            $scope.isMagnified = e.currentTarget.isMagnified = !e.currentTarget.isMagnified;
+            $scope.$apply();
+            await myAjaxData.timeout(100);
+            myChart.resize();
         });
     }());
 
