@@ -96,7 +96,7 @@ ajaxData({
     window.addEventListener('resize', resizeHeight);
 
     const judgeIfDeviceModal = data =>{
-        if(data.busitype =='00' && data.deviceType && data.deviceType !== -9 && data.deviceId){
+        if(data.busitype =='00' && data.deviceType && data.deviceId && data.deviceId != -9){
             $scope.ifDeviceDataModal = true;
         }else{
             $scope.ifDeviceDataModal = false;
@@ -297,6 +297,7 @@ ajaxData({
 
     //查看故障小助手
     $scope.showFaultGuideModal = ()=>{
+        if(!$scope.ifDeviceDataModal) return;
         $scope.faultGuideData = true;
         $scope.$broadcast('faultAssistant',$scope.chatList[0].busino);
         $('#aaa').modal({ backdrop: 'static', keyboard: false });
