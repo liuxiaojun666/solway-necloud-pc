@@ -1,10 +1,29 @@
 ajaxData(
     {
-        
+        runTimeMonitor: {
+            name: 'GETrunTimeMonitor',
+            data: {},
+            onlyLatest: true,
+            sameTimeOnce: true
+        }
     }, {
         __serviceName__: 'mainMonitoringService',
         
     }
 )('mainMonitoringCtrl', ['$scope', 'mainMonitoringService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
-    
+    const od = new Odometer({ el: document.getElementById('odometer'), value: 10000000 });
+    $scope.runTimeMonitor.subscribe(res => {
+        od.update(100000000 + res.dayGeneratingPowerKWh + '');
+    });
+
+
+
+
+
+
+
+
+
+    const timer = $interval(() => $scope.runTimeMonitor.getData(), 5000);
+    $scope.$on('$destroy', () => $interval.cancel(timer));
 });

@@ -1,3 +1,9 @@
+@font-face {
+    font-family: kuhei;
+    src: url('../../fonts/kuhei.ttf'), url('../../fonts/kuhei.ttf'), url('../../fonts/kuhei.ttf');
+    /* IE9 */
+}
+
 .mainPage {
     background: url("../../images/enrichment/public/bg-starsky.jpg") no-repeat;
     background-size: cover;
@@ -82,17 +88,266 @@
                     &:nth-of-type(2) {
                         width: 2.47rem;
                         right: 0.3rem;
+                        bottom: 0.1rem;
                     }
                 }
-                // background-color: blue;
+                >span {
+                    position: absolute;
+                    font-size: 0.16rem;
+                    &.tree {
+                        color: #6DD459;
+                        bottom: 0.4rem;
+                        left: 2rem;
+                    }
+                    &.co2 {
+                        color: #65C8FF;
+                        bottom: 0.5rem;
+                        right: 0.4rem;
+                    }
+                }
+                .odometer-block {
+                    height: 100%;
+                    width: max-content;
+                    margin: 0 auto;
+                    p {
+                        margin-bottom: 0;
+                        color: #8BEAEA;
+                        font-size: 0.14rem;
+                        padding-top: 0.1rem;
+                    }
+                    .zdy-theme {
+                        color: #61FF4F;
+                        font-family: 'kuhei';
+                        font-size: 0.41rem;
+                        line-height: 1;
+                        height: 1em;
+                        text-align: center;
+                        position: relative;
+                        &::after {
+                            content: 'kWh';
+                            display: inline-block;
+                            position: absolute;
+                            right: -0.2rem;
+                            bottom: 0;
+                            font-family: serif;
+                            color: #5CC2BC;
+                            font-size: 0.14rem;
+                        }
+                        .odometer-digit {
+                            background: linear-gradient(0deg, rgba(109, 205, 236, 1), rgba(78, 168, 198, 1), rgba(78, 168, 198, 0.27), rgba(78, 168, 198, 0.54), rgba(78, 168, 198, 1), rgba(109, 205, 236, 1));
+                            margin-right: 0.05rem;
+                            &:first-child {
+                                border-radius: 0;
+                            }
+                            >span {
+                                transform: scale(0.8, 1.5) translateY(-0.02rem);
+                            }
+                            .odometer-digit-spacer {
+                                visibility: visible;
+                                color: #021528;
+                                opacity: 0.6;
+                                margin-top: -0.08rem;
+                                font-weight: bold; // transform: scale(0.9, 1.6) translateY(-0.01rem);
+                            }
+                        }
+                    }
+                }
             }
             .section-south {
-                opacity: 0.3;
                 height: calc(100% - 0.9rem);
                 padding: 0.3rem;
                 >div {
-                    background-color: pink;
                     height: 100%;
+                    position: relative;
+                    .top-block,
+                    .bottom-block {
+                        background-color: rgba(51, 87, 129, 0.5);
+                        width: 100%;
+                        height: 45%;
+                        left: 0;
+                        position: absolute;
+                    }
+                    .top-block {
+                        top: 0;
+                        section {
+                            height: 100%;
+                            width: 50%;
+                            header {
+                                position: absolute;
+                                height: 0.3rem;
+                                top: -0.3rem;
+                                line-height: 0.3rem;
+                                z-index: 0;
+                                font-size: 0.16rem;
+                                color: #E0EEFF;
+                                padding: 0 1em;
+                                &::before {
+                                    content: '';
+                                    display: block;
+                                    position: absolute;
+                                    left: 0;
+                                    right: 0;
+                                    top: 0;
+                                    bottom: 0;
+                                    background-color: rgba(55, 98, 149, 1);
+                                    z-index: -1;
+                                    transform: perspective(.5em) rotateX(5deg) scaleY(1) translateY(-0.1em);
+                                }
+                            }
+                            &:nth-child(1) {
+                                float: left;
+                                padding: 0.18rem;
+                                header {
+                                    left: 0.5em;
+                                }
+                                .month-power,
+                                .year-power {
+                                    overflow: hidden;
+                                    height: calc((100% - 0.4rem) / 2);
+                                    min-height: 0.4rem; // background-color: pink;
+                                    margin-bottom: 0.1rem;
+                                    .m-progress {
+                                        width: 1.8rem; // background-color: blue;
+                                        height: 100%;
+                                        float: left;
+                                        margin-right: 0.3rem;
+                                        p {
+                                            font-size: 0.12rem;
+                                            margin-bottom: 0;
+                                            span {
+                                                margin-right: 0.2rem;
+                                                &:nth-child(2) {
+                                                    font-size: 0.16rem;
+                                                    color: #10FFFF;
+                                                }
+                                                &:nth-child(3) {
+                                                    color: #7ED7DF;
+                                                }
+                                            }
+                                        }
+                                        .bg {
+                                            background-color: #35679B;
+                                            height: 0.15rem;
+                                            padding: 0.03rem;
+                                            position: relative;
+                                            >div {
+                                                height: calc(100% - 0.06rem);
+                                                top: 0.03rem;
+                                                position: absolute;
+                                            }
+                                            .plan-area {
+                                                left: 0.06rem;
+                                                width: 70%;
+                                                background: repeating-linear-gradient(to right, #24CBD0, #24CBD0 0.04rem, transparent 0.04rem, transparent 0.07rem);
+                                                opacity: 0.3;
+                                            }
+                                            .current-area{
+                                                width: 70%;
+                                                max-width: 70%;
+                                                left: 0.06rem;
+                                                background: repeating-linear-gradient(to right, #FFD267, #FFD267 0.04rem, transparent 0.04rem, transparent 0.07rem);
+
+                                            } 
+                                            .excess-bg {
+                                                right: 0.06rem;
+                                                width: calc(30% - 0.12rem);
+                                                background: repeating-linear-gradient(to right, #FF5069, #FF5069 0.04rem, transparent 0.04rem, transparent 0.07rem);
+                                                opacity: 0.3;
+                                            }
+                                        }
+                                    }
+                                    >p {
+                                        float: left;
+                                        width: 3em;
+                                        margin-right: 1.5em;
+                                        font-size: 0.12rem;
+                                        line-height: 1.33;
+                                        color: rgba(255, 255, 255, .6);
+                                        span {
+                                            color: #10FFFF;
+                                        }
+                                    }
+                                }
+                                .legend {
+                                    height: 0.2rem;
+                                    line-height: 0.2rem;
+                                    span {
+                                        margin-left: 2em;
+                                        margin-right: 2em;
+                                        font-size: 0.12rem;
+                                        position: relative;
+                                        &::before {
+                                            content: '';
+                                            display: inline-block;
+                                            width: 1.5em;
+                                            height: 0.5em;
+                                            position: absolute;
+                                            top: 0.3em;
+                                            left: -2em;
+                                            background-color: currentcolor;
+                                            vertical-align: middle;
+                                        }
+                                        &:nth-child(1) {
+                                            color: #FFD267;
+                                        }
+                                        &:nth-child(2) {
+                                            color: #21C7CD;
+                                        }
+                                        &:nth-child(3) {
+                                            color: #FF5069;
+                                        }
+                                    }
+                                }
+                            }
+                            &:nth-child(2) {
+                                float: right;
+                                header {
+                                    right: 0.5em;
+                                }
+                            }
+                        }
+                    }
+                    .bottom-block {
+                        bottom: 0;
+                        section {
+                            height: 100%;
+                            width: 50%;
+                            header {
+                                position: absolute;
+                                height: 0.3rem;
+                                top: -0.3rem;
+                                line-height: 0.3rem;
+                                z-index: 0;
+                                font-size: 0.16rem;
+                                color: #E0EEFF;
+                                padding: 0 1em;
+                                &::before {
+                                    content: '';
+                                    display: block;
+                                    position: absolute;
+                                    left: 0;
+                                    right: 0;
+                                    top: 0;
+                                    bottom: 0;
+                                    background-color: rgba(55, 98, 149, 1);
+                                    z-index: -1;
+                                    transform: perspective(.5em) rotateX(5deg) scaleY(1) translateY(-0.1em);
+                                }
+                            }
+                            &:nth-child(1) {
+                                float: left;
+                                header {
+                                    left: 0.5em;
+                                }
+                            }
+                            &:nth-child(2) {
+                                float: right;
+                                header {
+                                    right: 0.7em;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
