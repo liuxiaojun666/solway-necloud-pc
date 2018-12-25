@@ -1,0 +1,311 @@
+ajaxData({
+    // 该角色 电站列表
+    allSTListForPCBySession: {
+        name: 'GETAllSTListForPCBySession',
+        data: {}
+    },
+    // 模板列表
+    opWorkTplTicketList: {
+        name: 'GETopWorkTplTicketList',
+        data: {},
+    },
+    // 票据创建
+    opWorkTicketCreate: {
+        name: 'opWorkTicketCreate',
+        data: {},
+        later: true
+    },
+    // 票据列表 分页
+    opWorkTicketPage: {
+        name: 'GETopWorkTicketPage',
+        data: {},
+        later: true
+    },
+    // 票据列表 标记已读
+    opWorkTicketRead: {
+        name: 'opWorkTicketRead',
+        data: {},
+        later: true
+    },
+    // 票据列表 标记已读 批量
+    opWorkTicketReadBatch: {
+        name: 'opWorkTicketReadBatch',
+        data: {},
+        later: true
+    },
+}, {
+        __serviceName__: 'themeTwoVotesService'
+    })('themeTwoVotesCtrl', ['$scope', 'themeTwoVotesService', 'actionRecord', '$ocLazyLoad', 'toaster'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad, toaster) => {
+        let spread, excelIO;
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            const { } = historicalRecord.get().themeTwoVotes || {};
+            $scope.startDate = new Date(Date.now() - 30 * 1000 * 24 * 60 * 60);
+            $scope.endDate = new Date();
+            $scope.startDate.showDate = '';
+            $scope.endDate.showDate = '';
+            await myAjaxData.timeout(0);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            $scope.getBaseMessageList();
+            $scope.$apply();
+        };
+
+        // 查询 弹出 事件
+        $scope.searchPopUp = (e) => {
+            e.stopPropagation();
+            $scope.searchActive = true;
+            $scope.batchCloseActive = false;
+            // $scope.messagePopUp = false;
+        };
+
+        // 开票 弹出 事件
+        $scope.makeInvoicePopUp = (obj) => {
+            $scope.loadingFile = true;
+            $ocLazyLoad.load([
+                'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
+                'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
+            ]).then(() => $ocLazyLoad.load([
+                'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
+            ])).then(res => {
+                const spreadNS = GC.Spread.Sheets;
+                excelIO = new GC.Spread.Excel.IO();
+                spread = spread || new spreadNS.Workbook(document.getElementById('ss2'), { tabStripRatio: 1 });
+                $ocLazyLoad.load(['theme/js/dist/components/downloadFile.js' + stamp]).then(res => {
+                    $solway.download({
+                        url: obj.cfp,
+                        download: false,
+                        blob: true,
+                        callback: blob => {
+                            $scope.loadingFile = false;
+                            if (!blob) return $scope.$apply();
+                            $scope.makeInvoice = true;
+                            $scope.openVotesObj.name = obj.name;
+                            $scope.openVotesObj.tplId = obj.id;
+                            excelIO.open(blob, function (spreadJson) {
+                                if (spreadJson.version && spreadJson.sheets) {
+                                    spread.unbindAll();
+                                    spread.fromJSON(spreadJson);
+                                } else {
+                                    alert('无效的文件');
+                                }
+                            });
+                            return $scope.$apply();
+                        }
+                    });
+                });
+            });
+        };
+
+        // 开票 提交
+        $scope.openVotesSubmit = () => {
+            $ocLazyLoad.load([
+                'theme/js/dist/components/formValidation.js',
+            ]).then(res => {
+                if (!$solway.formValidation($scope.openVotesObj, '.makeInvoice .handel', toaster)) return;
+                excelIO.save(spread.toJSON(), blob => {
+                    $scope.opWorkTicketCreate.getData({
+                        ...$scope.openVotesObj,
+                        cf: blob,
+                        name: null
+                    }).then(res => {
+                        $scope.makeInvoice = false;
+                        $scope.getBaseMessageList();
+                    });
+                });
+            });
+        };
+
+        // 消息列表 接口 请求
+        $scope.getBaseMessageList = () => {
+            $scope.isDefaultList = true;
+            $scope.keywords = '';
+            $scope.stationId = '';
+            $scope.states = $scope.states = {
+                '00': true,
+                '01': true,
+                '02': true,
+                '03': true,
+                '04': true,
+                '05': true,
+            };
+            $scope.opWorkTicketPage.getData({
+                pageIndex: 0,
+                pageSize: 20,
+                keywords: '',
+                stationId: null,
+                states: null,
+                startDate: null,
+                endDate: null
+            });
+        };
+
+        // 搜索
+        $scope.search = () => {
+            $scope.isDefaultList = false;
+            const { keywords, stationId, startDate, endDate, states } = $scope;
+            $scope.opWorkTicketPage.getData({
+                pageIndex: 0,
+                pageSize: 20,
+                keywords,
+                stationId,
+                states: Object.keys(states).filter(v => states[v]).join(','),
+                startDate: startDate.showDate,
+                endDate: endDate.showDate
+            });
+        };
+
+        // 批量标记已读
+        $scope.batchReadHandleFunc = (value) => {
+            if (value == '0') return;
+            $scope.opWorkTicketReadBatch.getData({
+                ids: document.getElementsByName('batchprocessing'):: [].filter(v => v.checked).map(v => v.dataset.identifies).join()
+            }).then(res => {
+                if (res.code === 0 && res.msg === 'success') {
+                    toaster.pop('success', '', '批量标记已读成功')
+                } else {
+                    toaster.pop('error', '', '批量标记已读失败')
+                }
+            });
+            $scope.batchReadHandle = '0';
+        };
+
+
+        // 列表 接口 数据 回调
+        $scope.opWorkTicketPage.subscribe((res) => {
+            // 列表
+            $scope.column = [
+                {
+                    title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+                    dataIndex: '',
+                    width: '60px',
+                    align: 'center',
+                    checkboxName: 'batchprocessing',
+                    render(text, record, index) {
+                        return '<label class="i-checks m-b-none"><input data-identifies="' + record.currNoticeId + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    }
+                },
+                {
+                    title: '票据类型',
+                    dataIndex: 'tplName',
+                    width: '10%',
+                    render(text, item) {
+                        return `
+                            <span>${text || ''}</span>
+                            ${(item.readStatus === '0') ? '<span class="unread" style="margin-left:0.5em;display:inline-block;width:10px;height:10px;text-align:center;line-height:15px;background:#ed5454;border-radius:50%;"></span>' : ''}`;
+                    }
+                },
+                {
+                    title: '电站名称',
+                    dataIndex: 'stationName',
+                    width: '20%',
+                },
+                {
+                    title: '开票人',
+                    dataIndex: 'createUname',
+                    // sort: true,
+                },
+                {
+                    title: '发布时间',
+                    dataIndex: 'createTime',
+                    align: 'center',
+                    // sort: true,
+                    width: '15%',
+                    render(text) {
+                        return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm:ss')}</span>`
+                    }
+                },
+                {
+                    title: '主要内容',
+                    dataIndex: 'summary',
+                    // sort: true,
+                    width: '30%',
+                },
+                {
+                    title: '状态',
+                    dataIndex: 'state',
+                    sort: true,
+                    align: 'center',
+                    render(text) {
+                        switch (text) {
+                            case '00':
+                                return '完成'
+                            case '01':
+                                return '已创建'
+                            case '02':
+                                return '处理中'
+                            case '03':
+                                return '作废'
+                            case '04':
+                                return '不合格'
+                            case '05':
+                                return '退回'
+
+                            default:
+                                break;
+                        }
+                    }
+                },
+            ];
+            $scope.closeMessagePopUp();
+        });
+
+        // 点击行
+        $scope.trClick = async (item, index, e) => {
+            $scope.chartPanelLoading = true;
+            e.stopPropagation();
+            $scope.searchActive = false;
+            $scope.batchCloseActive = false;
+            $scope.closeMessagePopUp();
+            await myAjaxData.timeout(100);
+            $scope.messagePopUp = true;
+            $ocLazyLoad.load([
+                'theme/js/dist/enrichment/productionManageSummary/components/chatPanel.js' + stamp
+            ]).then(res => {
+                $scope.chatPanelLoad = () => {
+                    $scope.chartPanelLoaded = true;
+                    $scope.chartPanelLoading = false;
+                    $scope.$broadcast("chatPanelObj", item);
+                    $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
+                    if (item.readStatus === '0') $scope.opWorkTicketRead.getData({ id: item.currNoticeId });
+                };
+                if ($scope.chartPanelLoaded) return $scope.chatPanelLoad();
+                return $scope.chatPanelView = 'tpl/enrichment/productionManageSummary/components/chatPanel.html' + stamp;
+            });
+            $scope.$apply();
+        };
+
+        // 关闭 聊天 消息 面板
+        $scope.closeMessagePopUp = () => {
+            $scope.messagePopUp = false;
+            $('.my-table tbody tr').removeClass('active');
+        };
+
+        // 管理模板
+        $scope.templateManagement = () => {
+            $scope.templateManage = true;
+            $ocLazyLoad.load([
+                'theme/js/dist/enrichment/productionManageSummary/components/chatPanel.js' + stamp
+            ]).then(async () => {
+                if (!$scope.templateManageLoaded) return $scope.templateManageView = 'tpl/enrichment/productionManageSummary/components/templateManage.html' + stamp;
+                $scope.$broadcast('templateManagement');
+            });
+        };
+
+        // 页面 点击  影藏 弹出
+        document.addEventListener('click', eventListen);
+        function eventListen() {
+            $scope.searchActive = false;
+            $scope.batchCloseActive = false;
+            $scope.showOpenVotes = false;
+            // $scope.messagePopUp = false;
+            $scope.$apply();
+        }
+        $scope.$on('$destroy', () => {
+            document.removeEventListener('click', eventListen);
+        });
+
+    });
