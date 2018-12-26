@@ -1,5 +1,5 @@
 ajaxData({
-}, {})('mainPageCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+}, {})('mainPageCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $interval, $ocLazyLoad) => {
     historicalRecord.init();
     $scope.beforeLoading = true; // 页面loading
     historyInitCallback();
@@ -28,12 +28,18 @@ ajaxData({
 
 
     // 切换主题模块
-    $scope.changeTheme = theme => {
+    $scope.changeTheme = async theme => {
         // if (!$scope.themeShareUsable && theme === 'Share') return;
         if (theme !== $scope.theme) $scope.themeLoading = true;
         $scope.theme = theme;
         historicalRecord.set({ theme });
+        if (theme === 'Monitoring') {
+            await $ocLazyLoad.load(['theme/js/dist/enrichment/components/lineOrBarChart.js' + stamp]);
+        } else {
+            await myAjaxData.timeout(0);
+        }
         $scope.themeDetail = `tpl/enrichment/main/theme${theme}.html${$scope.stamp}`;
+        $scope.$apply();
     };
 
     // 时间刷新
