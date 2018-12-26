@@ -33,6 +33,12 @@ ajaxData({
         data: {},
         later: true
     },
+    // 票据 编辑
+    opWorkTicketModify: {
+        name: 'opWorkTicketModify',
+        data: {},
+        later: true
+    },
 }, {
         __serviceName__: 'themeTwoVotesService'
     })('themeTwoVotesCtrl', ['$scope', 'themeTwoVotesService', 'actionRecord', '$ocLazyLoad', 'toaster'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad, toaster) => {
@@ -64,13 +70,12 @@ ajaxData({
 
         // 开票 弹出 事件
         $scope.makeInvoicePopUp = (obj) => {
-            $scope.loadingFile = true;
             $ocLazyLoad.load([
                 'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
                 'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
             ]).then(() => $ocLazyLoad.load([
                 'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
-            ])).then(res => {
+            ])).then(() => {
                 const spreadNS = GC.Spread.Sheets;
                 excelIO = new GC.Spread.Excel.IO();
                 spread = spread || new spreadNS.Workbook(document.getElementById('ss2'), { tabStripRatio: 1 });
@@ -85,10 +90,26 @@ ajaxData({
                             $scope.makeInvoice = true;
                             $scope.openVotesObj.name = obj.name;
                             $scope.openVotesObj.tplId = obj.id;
+                            if (obj.edit || obj.lookOver) {
+                                $scope.openVotesObj.stationId = obj.stationId;
+                                $scope.openVotesObj.sn = obj.sn;
+                                $scope.openVotesObj.summary = obj.summary;
+                                $scope.openVotesObj.id = obj.id;
+                                $scope.openVotesObj.lookOver = obj.lookOver;
+                                $scope.openVotesObj.inputDisabled = true;
+                            } else {
+                                $scope.openVotesObj.stationId = null;
+                                $scope.openVotesObj.sn = null;
+                                $scope.openVotesObj.summary = null;
+                                $scope.openVotesObj.id = null;
+                                $scope.openVotesObj.lookOver = null;
+                                $scope.openVotesObj.inputDisabled = false;
+                            }
                             excelIO.open(blob, function (spreadJson) {
                                 if (spreadJson.version && spreadJson.sheets) {
                                     spread.unbindAll();
                                     spread.fromJSON(spreadJson);
+                                    if (obj.lookOver) spread.sheets.forEach(v => v.options.isProtected = true);
                                 } else {
                                     alert('无效的文件');
                                 }
@@ -110,11 +131,27 @@ ajaxData({
                     $scope.opWorkTicketCreate.getData({
                         ...$scope.openVotesObj,
                         cf: blob,
-                        name: null
+                        name: null,
+                        inputDisabled: null,
+                        edit: null,
+                        lookOver: null
                     }).then(res => {
                         $scope.makeInvoice = false;
                         $scope.getBaseMessageList();
                     });
+                });
+            });
+        };
+
+        // 票据编辑
+        $scope.opWorkTicketModify.beforGetData = () => {
+            excelIO.save(spread.toJSON(), blob => {
+                $scope.opWorkTicketModify.getData({
+                    cf: blob,
+                    id: $scope.openVotesObj.id
+                }).then(() => {
+                    $scope.makeInvoice = false;
+                    $scope.getBaseMessageList();
                 });
             });
         };
