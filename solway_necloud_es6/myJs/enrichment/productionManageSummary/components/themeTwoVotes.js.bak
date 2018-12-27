@@ -78,6 +78,7 @@ ajaxData({
                 const spreadNS = GC.Spread.Sheets;
                 excelIO = new GC.Spread.Excel.IO();
                 spread = spread || new spreadNS.Workbook(document.getElementById('ss2'), { tabStripRatio: 1 });
+                if (!spread.nullExel) spread.nullExel = spread.toJSON();
                 $ocLazyLoad.load(['theme/js/dist/components/downloadFile.js' + stamp]).then(res => {
                     $solway.download({
                         url: obj.cfp,
@@ -104,7 +105,7 @@ ajaxData({
                                 $scope.openVotesObj.lookOver = null;
                                 $scope.openVotesObj.inputDisabled = false;
                             }
-                            excelIO.open(blob, function (spreadJson) {
+                            excelIO.open(blob, spreadJson => {
                                 if (spreadJson.version && spreadJson.sheets) {
                                     spread.unbindAll();
                                     spread.fromJSON(spreadJson);
@@ -112,6 +113,11 @@ ajaxData({
                                 } else {
                                     alert('无效的文件');
                                 }
+                            }, e => {
+                                if (e.errorCode !== 1) return;
+                                spread.unbindAll();
+                                spread.fromJSON(spread.nullExel);
+                                if (obj.lookOver) spread.sheets.forEach(v => v.options.isProtected = true);
                             });
                             return $scope.$apply();
                         }
