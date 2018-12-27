@@ -129,7 +129,7 @@ gulp.task('watch', [], () => {
 						.pipe(gulp.dest(''));
 				}
 				livereload.changed(event.path)
-			}, 1000);
+			}, 500);
 		})
 	}, 5000)
 })

@@ -1,10 +1,107 @@
 ajaxData(
     {
-        
+        runTimeMonitor: {
+            name: 'GETrunTimeMonitor',
+            data: {},
+            onlyLatest: true,
+            sameTimeOnce: true
+        },
+        companyDayTodayTime2: {
+            name: 'GETPowerCompanyDayTodayTime2',
+            data: {
+                queryType: 1,
+                dateType: 3,
+                date: new Date().Format('yyyy-MM-dd'),
+                dataType: 2,
+                stime: 0
+            },
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
     }, {
         __serviceName__: 'mainMonitoringService',
-        
+        companyDayTodayTimeLineData: { xdata: [], line1: [], line2: [], line3: [] }
     }
 )('mainMonitoringCtrl', ['$scope', 'mainMonitoringService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
-    
+
+    // 滚动数字
+    const od = new Odometer({ el: document.getElementById('odometer'), value: 10000000 });
+    $scope.runTimeMonitor.subscribe(res => od.update(100000000 + res.dayGeneratingPowerKWh + ''));
+
+    // 基本信息 装机容量
+    const myPieChart = echarts.init(document.getElementById('pieChart1'));
+    $scope.runTimeMonitor.subscribe(res => {
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b}: {c} ({d}%)"
+            },
+            color: ['#FFCC51', 'rgba(115,199,223,0.9)'],
+            series: [
+                {
+                    type: 'pie',
+                    radius: ['49.5%', '50%'],
+                    data: [
+                        { value: 0, name: '总装机容量' }
+                    ],
+                    tooltip: {
+                        show: false
+                    },
+                    hoverAnimation: false,
+                    label: {
+                        normal: {
+                            position: 'center',
+                        },
+                    },
+                },
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    radius: ['60%', '75%'],
+                    data: [
+                        { value: 335, name: '直达' },
+                        { value: 310, name: '邮件营销' }
+                    ]
+                },
+                {
+                    type: 'pie',
+                    radius: ['86.5%', '87%'],
+                    label: {
+                        normal: {
+                            show: false,
+                        }
+                    },
+                    data: [
+                        { value: 0, name: '' }
+                    ],
+                    tooltip: {
+                        show: false
+                    },
+                    hoverAnimation: false
+                },
+            ]
+        };
+        myPieChart.setOption(option, true);
+    });
+
+    // 功率曲线
+    $scope.companyDayTodayTime2.subscribe(res => {
+        const { companyDayTodayTimeLineData } = myAjaxData.config;
+        const { xdata, line1, line2, line3 } = companyDayTodayTimeLineData;
+        const length = xdata.length;
+        $scope.xdata = companyDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaTime);
+        $scope.ydatas = [[
+            companyDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_p),
+            companyDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_shd_p)
+        ]];
+        myAjaxData.config.companyDayTodayTimeLineData = companyDayTodayTimeLineData;
+    });
+
+    // 定时刷新数据
+    const timer = $interval(() => {
+        $scope.runTimeMonitor.getData();
+        const variable = $scope.companyDayTodayTime2.res.body.echarts_xaTime;
+        $scope.companyDayTodayTime2.getData({ stime: variable[variable.length - 1].split(':').join('') });
+    }, 5000);
+    $scope.$on('$destroy', () => $interval.cancel(timer));
 });

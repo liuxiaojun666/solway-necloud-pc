@@ -29,6 +29,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         areaFill: '=', // 填充， 线性渐变
         markLine: '=', // 标记线
         legend: '=',
+        grid: '=',
     },
     link($scope, $element) {
         let myChart;
@@ -40,6 +41,9 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 if (!newValue) return;
                 drawing();
             });
+            if ($scope.width === '100%' || $scope.height === '100%') {
+                window.addEventListener('resize', resizeFunc);
+            }
             $scope.$watchGroup(['height', 'width'], async (newValue, oldValue) => {
                 if (!newValue) return;
                 await resizeFunc();
@@ -78,6 +82,13 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 areaFill, 
                 markLine,
                 legend = {},
+                grid = {
+                    top: '60',
+                    left: '20',
+                    right: '20',
+                    bottom: '0',
+                    containLabel: true
+                }
             } = $scope;
             const option = {
                 backgroundColor,
@@ -105,13 +116,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     },
                     ...legend,
                 },
-                grid: {
-                    top: '60',
-                    left: '20',
-                    right: '20',
-                    bottom: '0',
-                    containLabel: true //grid 区域是否包含坐标轴的刻度标签[ default: false ] 
-                },
+                grid,
                 xAxis: [{
                     type: 'category',
                     // boundaryGap: false, //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样
@@ -252,6 +257,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         $scope.$on('$destroy', () => {
             myChart && echarts.dispose(myChart);
             myChart = null;
+            window.removeEventListener('resize', resizeFunc);
         });
     }
 })]);

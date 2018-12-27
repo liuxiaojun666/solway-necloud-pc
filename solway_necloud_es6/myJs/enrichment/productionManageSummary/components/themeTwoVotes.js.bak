@@ -4,63 +4,58 @@ ajaxData({
         name: 'GETAllSTListForPCBySession',
         data: {}
     },
-    // 消息列表
-    getBaseMessageListNew: {
-        name: 'GETBaseMessageListNew',
-        data: {},
-        later: true,
-        onlyLatest: true
-    },
-    // 电站id  查询  电站人员
-    selectAllUserBySTID: {
-        name: 'GETselectAllUserBySTID',
-        data: {},
-        later: true,
-        onlyLatest: true
-    },
     // 模板列表
     opWorkTplTicketList: {
         name: 'GETopWorkTplTicketList',
         data: {},
     },
+    // 票据创建
+    opWorkTicketCreate: {
+        name: 'opWorkTicketCreate',
+        data: {},
+        later: true
+    },
+    // 票据列表 分页
+    opWorkTicketPage: {
+        name: 'GETopWorkTicketPage',
+        data: {},
+        later: true
+    },
+    // 票据列表 标记已读
+    opWorkTicketRead: {
+        name: 'opWorkTicketRead',
+        data: {},
+        later: true
+    },
+    // 票据列表 标记已读 批量
+    opWorkTicketReadBatch: {
+        name: 'opWorkTicketReadBatch',
+        data: {},
+        later: true
+    },
+    // 票据 编辑
+    opWorkTicketModify: {
+        name: 'opWorkTicketModify',
+        data: {},
+        later: true
+    },
 }, {
         __serviceName__: 'themeTwoVotesService'
     })('themeTwoVotesCtrl', ['$scope', 'themeTwoVotesService', 'actionRecord', '$ocLazyLoad', 'toaster'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad, toaster) => {
         let spread, excelIO;
-        // 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
 
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
-            const {
-                startDate: __sdate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365),
-                endDate: __edate = new Date,
-                pStationId,
-                isHis = '0',
-                handStatus = {
-                    '00': true,
-                    '01': true,
-                    '02': true,
-                    '03': true,
-                    '04': true,
-                    '05': true,
-                },
-                searchKey = '',
-                isDefaultList = true,
-            } = historicalRecord.get().themeTwoVotes || {};
-            $scope.startDate = new Date(__sdate);
+            const { } = historicalRecord.get().themeTwoVotes || {};
+            $scope.startDate = new Date(Date.now() - 30 * 1000 * 24 * 60 * 60);
+            $scope.endDate = new Date();
             $scope.startDate.showDate = '';
-            $scope.endDate = new Date(__edate);
             $scope.endDate.showDate = '';
-            $scope.pStationId = pStationId;
-            $scope.isHis = isHis;
-            $scope.handStatus = handStatus;
-            $scope.searchKey = searchKey;
-            $scope.isDefaultList = isDefaultList;
             await myAjaxData.timeout(0);
             $('.ng-clock').removeClass('ng-clock');
             $scope.initComplete = true;
-            getBaseMessageList();
+            $scope.getBaseMessageList();
             $scope.$apply();
         };
 
@@ -73,33 +68,52 @@ ajaxData({
         };
 
         // 开票 弹出 事件
-        $scope.makeInvoicePopUp = (name, tplUrl) => {
-            $scope.makeInvoice = true;
-            $scope.makeInvoiceName = name;
+        $scope.makeInvoicePopUp = (obj) => {
             $ocLazyLoad.load([
                 'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
                 'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
             ]).then(() => $ocLazyLoad.load([
                 'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
-            ])).then(res => {
+            ])).then(() => {
                 const spreadNS = GC.Spread.Sheets;
                 excelIO = new GC.Spread.Excel.IO();
                 spread = spread || new spreadNS.Workbook(document.getElementById('ss2'), { tabStripRatio: 1 });
                 $ocLazyLoad.load(['theme/js/dist/components/downloadFile.js' + stamp]).then(res => {
                     $solway.download({
-                        url: tplUrl,
+                        url: obj.cfp,
                         download: false,
                         blob: true,
                         callback: blob => {
+                            $scope.loadingFile = false;
                             if (!blob) return $scope.$apply();
+                            $scope.makeInvoice = true;
+                            $scope.openVotesObj.name = obj.name;
+                            $scope.openVotesObj.tplId = obj.id;
+                            if (obj.edit || obj.lookOver) {
+                                $scope.openVotesObj.stationId = obj.stationId;
+                                $scope.openVotesObj.sn = obj.sn;
+                                $scope.openVotesObj.summary = obj.summary;
+                                $scope.openVotesObj.id = obj.id;
+                                $scope.openVotesObj.lookOver = obj.lookOver;
+                                $scope.openVotesObj.inputDisabled = true;
+                            } else {
+                                $scope.openVotesObj.stationId = null;
+                                $scope.openVotesObj.sn = null;
+                                $scope.openVotesObj.summary = null;
+                                $scope.openVotesObj.id = null;
+                                $scope.openVotesObj.lookOver = null;
+                                $scope.openVotesObj.inputDisabled = false;
+                            }
                             excelIO.open(blob, function (spreadJson) {
                                 if (spreadJson.version && spreadJson.sheets) {
                                     spread.unbindAll();
                                     spread.fromJSON(spreadJson);
+                                    if (obj.lookOver) spread.sheets.forEach(v => v.options.isProtected = true);
                                 } else {
                                     alert('无效的文件');
                                 }
                             });
+                            return $scope.$apply();
                         }
                     });
                 });
@@ -111,31 +125,119 @@ ajaxData({
             $ocLazyLoad.load([
                 'theme/js/dist/components/formValidation.js',
             ]).then(res => {
-                if ($solway.formValidation($scope.openVotesObj, '.makeInvoice .handel', toaster)) {
+                if (!$solway.formValidation($scope.openVotesObj, '.makeInvoice .handel', toaster)) return;
+                excelIO.save(spread.toJSON(), blob => {
+                    $scope.opWorkTicketCreate.getData({
+                        ...$scope.openVotesObj,
+                        cf: blob,
+                        name: null,
+                        inputDisabled: null,
+                        edit: null,
+                        lookOver: null
+                    }).then(res => {
+                        $scope.makeInvoice = false;
+                        $scope.getBaseMessageList();
+                    });
+                });
+            });
+        };
+
+        // 票据编辑
+        $scope.opWorkTicketModify.beforGetData = () => {
+            excelIO.save(spread.toJSON(), blob => {
+                $scope.opWorkTicketModify.getData({
+                    cf: blob,
+                    id: $scope.openVotesObj.id
+                }).then(() => {
                     $scope.makeInvoice = false;
-                }
+                    $scope.getBaseMessageList();
+                });
+            });
+        };
+
+        // 导出excel
+        $scope.exportExcel = () => {
+            $scope.fileLoading = true;
+            excelIO.save(spread.toJSON(), blob => {
+                const elink = document.createElement('a');
+                elink.download = $scope.openVotesObj.name + '.xlsx';
+                elink.style.display = 'none';
+                elink.href = URL.createObjectURL(blob);
+                elink.target = '_blank';
+                document.body.appendChild(elink);
+                elink.click();
+                document.body.removeChild(elink);
+                $scope.fileLoading = false;
+                $scope.$apply();
+            });
+        };
+
+        // 打印 Excel
+        $scope.excelPrint = () => {
+            $scope.fileLoading = true;
+            $ocLazyLoad.load('vendor/spreadjs/scripts/gc.spread.sheets.print.11.0.0.min.js').then(() => {
+                spread.print();
+                $scope.fileLoading = false;
             });
         };
 
         // 消息列表 接口 请求
-        function getBaseMessageList() {
-            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
-            $scope.column = [];
-            $scope.getBaseMessageListNew.getData({
-                startDate: startDate.showDate,
-                endDate: endDate.showDate,
-                pStationId: pStationId || '',
-                searchKey: searchKey || '',
-                isHis,
-                handStatus: isHis == '0' ? Object.keys(handStatus).filter(v => handStatus[v]).join() : '03',
+        $scope.getBaseMessageList = () => {
+            $scope.isDefaultList = true;
+            $scope.keywords = '';
+            $scope.stationId = '';
+            $scope.states = $scope.states = {
+                '00': true,
+                '01': true,
+                '02': true,
+                '03': true,
+                '04': true,
+                '05': true,
+            };
+            $scope.opWorkTicketPage.getData({
                 pageIndex: 0,
-                pageSize: 20
+                pageSize: 20,
+                keywords: '',
+                stationId: null,
+                states: null,
+                startDate: null,
+                endDate: null
             });
-        }
-        // 列表 接口 数据 回调
-        $scope.getBaseMessageListNew.getDataCallback = (success, res) => {
-            if (!success) return;
+        };
 
+        // 搜索
+        $scope.search = () => {
+            $scope.isDefaultList = false;
+            const { keywords, stationId, startDate, endDate, states } = $scope;
+            $scope.opWorkTicketPage.getData({
+                pageIndex: 0,
+                pageSize: 20,
+                keywords,
+                stationId,
+                states: Object.keys(states).filter(v => states[v]).join(','),
+                startDate: startDate.showDate,
+                endDate: endDate.showDate
+            });
+        };
+
+        // 批量标记已读
+        $scope.batchReadHandleFunc = (value) => {
+            if (value == '0') return;
+            $scope.opWorkTicketReadBatch.getData({
+                ids: document.getElementsByName('batchprocessing'):: [].filter(v => v.checked).map(v => v.dataset.identifies).join()
+            }).then(res => {
+                if (res.code === 0 && res.msg === 'success') {
+                    toaster.pop('success', '', '批量标记已读成功')
+                } else {
+                    toaster.pop('error', '', '批量标记已读失败')
+                }
+            });
+            $scope.batchReadHandle = '0';
+        };
+
+
+        // 列表 接口 数据 回调
+        $scope.opWorkTicketPage.subscribe((res) => {
             // 列表
             $scope.column = [
                 {
@@ -145,23 +247,32 @@ ajaxData({
                     align: 'center',
                     checkboxName: 'batchprocessing',
                     render(text, record, index) {
-                        return '<label class="i-checks m-b-none"><input data-identifies="' + record.busino + '_' + record.mid + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                        return '<label class="i-checks m-b-none"><input data-identifies="' + record.currNoticeId + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    }
+                },
+                {
+                    title: '票据类型',
+                    dataIndex: 'tplName',
+                    width: '10%',
+                    render(text, item) {
+                        return `
+                            <span>${text || ''}</span>
+                            ${(item.readStatus === '0') ? '<span class="unread" style="margin-left:0.5em;display:inline-block;width:10px;height:10px;text-align:center;line-height:15px;background:#ed5454;border-radius:50%;"></span>' : ''}`;
                     }
                 },
                 {
                     title: '电站名称',
-                    dataIndex: 'stname',
-                    width: '25%',
+                    dataIndex: 'stationName',
+                    width: '20%',
+                },
+                {
+                    title: '开票人',
+                    dataIndex: 'createUname',
                     // sort: true,
-                    render(text, item) {
-                        return `
-                    <span style="color: #3ae2ca;">${text || ''}</span>
-                    ${(item.unread_num > 0) ? '<span class="unread" style="margin-left:0.5em;display:inline-block;width:15px;height:15px;text-align:center;line-height:15px;background:#ed5454;border-radius:50%;">' + item.unread_num + '</span>' : ''}`
-                    }
                 },
                 {
                     title: '发布时间',
-                    dataIndex: 'ct',
+                    dataIndex: 'createTime',
                     align: 'center',
                     // sort: true,
                     width: '15%',
@@ -170,39 +281,30 @@ ajaxData({
                     }
                 },
                 {
-                    title: '发布人',
-                    dataIndex: 'musname_real',
-                    // sort: true,
-                },
-                {
-                    title: '处理人',
-                    dataIndex: 'murname_real',
-                    // sort: true,
-                },
-                {
-                    title: '内容',
-                    dataIndex: 'mc',
+                    title: '主要内容',
+                    dataIndex: 'summary',
                     // sort: true,
                     width: '30%',
                 },
                 {
                     title: '状态',
-                    dataIndex: 'mhs',
-                    // sort: true,
+                    dataIndex: 'state',
+                    sort: true,
+                    align: 'center',
                     render(text) {
                         switch (text) {
                             case '00':
-                                return '待确认'
+                                return '完成'
                             case '01':
-                                return '待受理'
+                                return '已开票'
                             case '02':
-                                return '待处理'
+                                return '处理中'
                             case '03':
-                                return '已关闭'
+                                return '作废'
                             case '04':
-                                return '被确认'
+                                return '不合格'
                             case '05':
-                                return '验收中'
+                                return '退回'
 
                             default:
                                 break;
@@ -211,19 +313,31 @@ ajaxData({
                 },
             ];
             $scope.closeMessagePopUp();
-        };
+        });
 
         // 点击行
         $scope.trClick = async (item, index, e) => {
+            $scope.chartPanelLoading = true;
             e.stopPropagation();
             $scope.searchActive = false;
             $scope.batchCloseActive = false;
+            $scope.currentTplName = item.tplName + '-' + item.stationName;
             $scope.closeMessagePopUp();
             await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
-            $scope.$broadcast("chatPanelObj", { ...item, isHis: [0, 1][$scope.isHis] });
-            $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
-            if (item.unread_num > 0) $scope.readBaseMessages.getData({ ids: item.mid });
+            $ocLazyLoad.load([
+                'theme/js/dist/enrichment/productionManageSummary/components/chatPanel.js' + stamp
+            ]).then(res => {
+                $scope.chatPanelLoad = () => {
+                    $scope.chartPanelLoaded = true;
+                    $scope.chartPanelLoading = false;
+                    $scope.$broadcast("chatPanelObj", item);
+                    $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
+                    if (item.readStatus === '0') $scope.opWorkTicketRead.getData({ id: item.currNoticeId });
+                };
+                if ($scope.chartPanelLoaded) return $scope.chatPanelLoad();
+                return $scope.chatPanelView = 'tpl/enrichment/productionManageSummary/components/chatPanel.html' + stamp;
+            });
             $scope.$apply();
         };
 
@@ -236,7 +350,12 @@ ajaxData({
         // 管理模板
         $scope.templateManagement = () => {
             $scope.templateManage = true;
-            $scope.$broadcast('templateManagement');
+            $ocLazyLoad.load([
+                'theme/js/dist/enrichment/productionManageSummary/components/chatPanel.js' + stamp
+            ]).then(async () => {
+                if (!$scope.templateManageLoaded) return $scope.templateManageView = 'tpl/enrichment/productionManageSummary/components/templateManage.html' + stamp;
+                $scope.$broadcast('templateManagement');
+            });
         };
 
         // 页面 点击  影藏 弹出

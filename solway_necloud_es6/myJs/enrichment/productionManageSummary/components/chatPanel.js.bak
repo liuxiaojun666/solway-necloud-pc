@@ -1,11 +1,76 @@
 ajaxData(
     {
+        opWorkTicketList: {
+            name: 'GETopWorkTicketList',
+            data: {},
+            later: true
+        },
+        selectAllUserBySTID: {
+            name: 'GETselectAllUserBySTID',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            cache: true
+        },
+        loginUserInfo: {
+            name: 'GETloginUserInfo',
+            data: {},
+            later: true
+        },
+        opWorkTicketHandle: {
+            name: 'opWorkTicketHandle',
+            data: {},
+            later: true
+        },
+        opWorkTicketTo: {
+            name: 'opWorkTicketTo',
+            data: {},
+            later: true
+        },
 
     }, {
         __serviceName__: 'chatPanelService'
     }
-)('chatPanelCtrl', ['$scope', 'chatPanelService', 'toaster'], ($scope, myAjaxData, toaster) => {
+)('chatPanelCtrl', ['$scope', 'chatPanelService', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, toaster, $ocLazyLoad) => {
 
+    $scope.$on('chatPanelObj', async (event, obj) => {
+        const {stationId, id, sn, tplId, tplName: name, summary} = obj;
+        $scope.obj = {
+            stationId, id, sn, tplId, name, summary
+        };
+        if (!$scope.loginUserInfo.res) await $scope.loginUserInfo.getData();
+        $scope.opWorkTicketList.getData({ workId: obj.id });
+    });
 
+    $scope.opWorkTicketList.subscribe(res => {
+        $scope.obj.cfp = res.body[res.body.length - 1].cfp;
+    });
+
+    $scope.opWorkTicketHandle.subscribe(res => {
+        $scope.handle00 = false;
+        $scope.handle04 = false;
+        $scope.$parent.$parent.getBaseMessageList();
+        $scope.$parent.$parent.messagePopUp = false;
+    });
+
+    $scope.opWorkTicketTo.subscribe(res => {
+        $scope.handleTransfer = false;
+        $scope.$parent.$parent.getBaseMessageList();
+        $scope.$parent.$parent.messagePopUp = false;
+    });
+
+    $scope.invalid = () => {
+        $ocLazyLoad.load(['theme/js/dist/components/confirm.js' + stamp])
+            .then(() => $solway.confirm(
+                { title: '票据作废', message: ' 确定作废该票据吗？' },
+                () => $scope.opWorkTicketHandle.getData({
+                    id: $scope.obj.id,
+                    state: '03',
+                }).then(() => {
+                    $scope.$parent.$parent.getBaseMessageList();
+                    $scope.$parent.$parent.messagePopUp = false;
+                })
+            ));
+    };
 
 });
