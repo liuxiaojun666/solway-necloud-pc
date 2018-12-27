@@ -1,12 +1,33 @@
 app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state, $stateParams, $location) {
-
     const clearData = ()=>{
         $scope.currentSTID = '';
         $scope.currentParentId = '';
         $scope.currentType = '';
+        $scope.stationClasses = []
     }
+
+    //存储 公共方法
+    function setStorageFun(parentObj,childObj,obj){
+        let storage = JSON.parse(localStorage.getItem(parentObj));
+        if(storage){
+            localStorage.setItem(parentObj,JSON.stringify(Object.assign(JSON.parse(localStorage.getItem(parentObj)),obj)));
+        }else{
+            localStorage.setItem(parentObj,JSON.stringify(obj));
+        }
+    }
+
     $(".switch-power-enrich").on('click','.switchPowerIcon',function(){
         clearData();
+        let storage = JSON.parse(localStorage.getItem("switchStationData"));
+        if(storage && storage.stationClassData){
+            $scope.stationClasses = storage.stationClassData;
+            getCurrentStationData()
+        }else{
+            $scope.getSTClass();
+        }
+    })
+
+    function getCurrentStationData(){
         $http({
             method: "POST",
             url: "UserAuthHandle/getCurrentInfoNew.htm",
@@ -15,17 +36,41 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
             $scope.currentSTClass = res.currentSTClass;//光伏、风电
             $scope.stType = res.stType; //部门0，自定义1
             $scope.currentSTID = res.currentSTID; //当前所选ID
-            // $scope.currentParentId = res.currentParentId;
             $scope.currentType = res.currentType; //2:集团；1：公司；0：电站
-            $scope.getSTClass();
+            //测试，当前选中公司ID
+            $scope.currentComId = res.currentComId;
 
+            if (!$scope.currentSTClass && $scope.stationClasses) {
+                $scope.currentSTClass = $scope.stationClasses[0].id;
+            } 
+            
+            $scope.judgeWhichList();
         });
-    })
-
-    //用户自定义接口
+    }
+    
     function getUserDefined(){
         $scope.userDefinedList = [];
         $scope.stationList = [];
+        let storage = JSON.parse(localStorage.getItem("switchStationData"));
+        if($scope.currentSTClass == '01'){//光伏
+            if(storage && storage.solarDefineGroup){
+                let data = storage.solarDefineGroup;
+                dealWithDefineData(data);
+            }else{
+                defineData();
+            }
+        }else if($scope.currentSTClass == '02'){//风电 
+            if(storage && storage.windDefineGroup){
+                let data = storage.windDefineGroup;
+                dealWithDefineData(data);
+            }else{
+                defineData();
+            }
+        }
+    }
+
+    //用户自定义接口
+    function defineData(){
         $http({
             method: 'POST',
             url: "UserAuthHandle/getSTListByLevel.htm",
@@ -38,47 +83,53 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
             }
         }).success(function (res) {
             const data = res.body;
-            $scope.parentIdArr = [],$scope.hasChildStation = [];
-            for(let i = 0;i<data.length;i++){
-                if(data[i].stFlag == 2 && data[i].parentId){
-                    $scope.parentIdArr.push(data[i].parentId)
+            if(data){
+                if($scope.currentSTClass == '01'){//光伏
+                    setStorageFun("switchStationData",'solarDefineGroup',{'solarDefineGroup':data});
+                }else if($scope.currentSTClass == '02'){//风电
+                    setStorageFun("switchStationData",'windDefineGroup',{'windDefineGroup':data});
                 }
-                if(data[i].stFlag == 2 && !$scope.hasChildStation.includes(data[i].comId)){
-                    $scope.hasChildStation.push(data[i].comId);
-                }
+                dealWithDefineData(data)
             }
-            
-            $scope.userDefinedList = res.body;
         })
     }
 
-    //判断该公司有没有折叠箭头
-    $scope.ifHasChildCompany = id =>{
-        return (!$scope.parentIdArr.includes(id) && !$scope.hasChildStation.includes(id));
+    function dealWithDefineData(data){
+        $scope.parentIdArr = [],$scope.hasChildStation = [];
+        for(let i = 0;i<data.length;i++){
+            if(data[i].stFlag == 2 && data[i].parentId){
+                $scope.parentIdArr.push(data[i].parentId)
+            }
+            if(data[i].stFlag == 2 && !$scope.hasChildStation.includes(data[i].comId)){
+                $scope.hasChildStation.push(data[i].comId);
+            }
+        }
+        
+        $scope.userDefinedList = data;
     }
 
-    const getStationList = belongId =>{
-        $http({
-            method: 'POST',
-            url: "UserAuthHandle/getSTListByLevel.htm",
-            params: {
-                isGroup: $rootScope.isGroup,
-                currentView: $rootScope.currentView,
-                isPart:$scope.stType,
-                type:1,
-                levelId:belongId,
-                stClass: $scope.currentSTClass
+    function getAllGroup (){
+        $scope.stationList = [];
+        let storage = JSON.parse(localStorage.getItem("switchStationData"));
+        if($scope.currentSTClass == '01'){//光伏
+            if(storage && storage.solarDepGroup){
+                let data = storage.solarDepGroup;
+                dealwithGroupData(data);
+            }else{
+                groupData();
             }
-        }).success(function (res) {
-            if(res.code == 0){
-                $scope.stationList = res.body;
+        }else if($scope.currentSTClass == '02'){//风电 
+            if(storage && storage.windDepGroup){
+                let data = storage.windDepGroup;
+                dealwithGroupData(data);
+            }else{
+                groupData();
             }
-        });
+        }    
     }
 
     //所有集团、公司接口
-    function getAllGroup (){
-        $scope.stationList = [];
+    function groupData(){
         $http({
             method: 'POST',
             url: "UserAuthHandle/getSTListByLevel.htm",
@@ -90,26 +141,39 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                 stClass: $scope.currentSTClass
             }
         }).success(function (res) {
-            if(res.code == 0){
+            if(res.code == 0 && res.body){
                 const data = res.body;
-                $scope.parentIdArr = [],$scope.hasChildStation = [];
-                for(let i = 0;i<data.length;i++){
-                    if(data[i].stFlag == 2 && data[i].parentId){
-                        $scope.parentIdArr.push(data[i].parentId)
-                    }
-                    if(data[i].stFlag == 2 && !$scope.hasChildStation.includes(data[i].comId)){
-                        $scope.hasChildStation.push(data[i].comId);
-                    }
+                if($scope.currentSTClass == '01'){//光伏
+                    setStorageFun("switchStationData",'solarDepGroup',{'solarDepGroup':data});
+                }else if($scope.currentSTClass == '02'){//风电
+                    setStorageFun("switchStationData",'windDepGroup',{'windDepGroup':data});
                 }
-                
-                //若当前是在电站级别，去展开电站
-                if($scope.currentSTID && $scope.currentType == 0){
-                    $scope.currentParentId = $scope.currentInfoData.currentParentId; //箭头active控制
-                    getStationList($scope.currentParentId);
-                }
-                $scope.groupAndCompanyList = data;
+                dealwithGroupData(data)
             }
         });
+    }
+
+    //处理，组合集团公司数据
+    function dealwithGroupData(data){
+        $scope.parentIdArr = [],$scope.hasChildStation = [];
+        for(let i = 0;i<data.length;i++){
+            if(data[i].stFlag == 2 && data[i].parentId){
+                $scope.parentIdArr.push(data[i].parentId)
+            }
+            if(data[i].stFlag == 2 && !$scope.hasChildStation.includes(data[i].comId)){
+                $scope.hasChildStation.push(data[i].comId);
+            }
+            if($scope.currentSTID == data[i].id){
+                $scope.currentComId = data[i].comId;
+            }
+        }
+
+        //若当前是在电站级别，去展开电站
+        if($scope.currentSTID && $scope.currentType == 0){
+            $scope.currentParentId = $scope.currentInfoData.currentParentId; //箭头active控制
+            getStationList($scope.currentParentId);
+        }
+        $scope.groupAndCompanyList = data;
     }
 
     //风电、光伏tab列表
@@ -119,23 +183,45 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
             url: "UserAuthHandle/getSTClassLIst.htm",
         }).success(function (res) {
             $scope.stationClasses = res.data;
-            $scope.judgeWhichList();
+            setStorageFun("switchStationData",'stationClassData',{'stationClassData':res.data});
             if (!$scope.currentSTClass && $scope.stationClasses.length > 0) {
                 $scope.currentSTClass = $scope.stationClasses[0].id;
-            }
+            } 
+            getCurrentStationData()
         });
+    }
+
+    //判断该公司有没有折叠箭头
+    $scope.ifHasChildCompany = id =>{
+        return (!$scope.parentIdArr.includes(id))
+    }
+
+    $scope.ifHasChildStations = id=>{
+        return (!$scope.parentIdArr.includes(id) && !$scope.hasChildStation.includes(id));
     }
     
     //公司所属电站列表
-    $scope.getStationData = belongId =>{
-        $scope.stationList = []
+    $scope.getStationData = (belongId,level,comId) =>{
+        $scope.stationList = [];
+        if(belongId == $scope.currentComId){
+            $scope.currentComId = '';
+            $scope.currentParentId = '';
+            return;
+        }
         if($scope.currentParentId == belongId){
             $scope.currentParentId = '';
+            if(level == 0){
+                $scope.currentComId = '';
+            }
             return;
         }else{
             $scope.currentParentId = belongId;
+            $scope.currentComId = comId;
         }
-        getStationList(belongId)
+        
+        if($scope.ifHasChildStations(belongId) && level != -1){  
+            getStationList(belongId)
+        }
     }
 
     //切换光伏、风电tab
@@ -151,12 +237,82 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     }
 
     $scope.judgeWhichList = () =>{
-        if($scope.stType=='1'){
+        if($scope.stType=='1'){//自定义
             getUserDefined();
-        }else{
+        }else{//部门
             $scope.stType = '0';
             getAllGroup();
         }
+    }
+
+    function ifStationExist(belongId,arr){
+        for(let i=0;i<arr.length;i++){
+            if(belongId == arr[i].pid) return arr[i].stationList;
+        }
+        return [];
+    }
+    const getStationList = belongId =>{
+        let storage = JSON.parse(localStorage.getItem("switchStationData"));
+        $scope.stationList = [];
+        if($scope.currentSTClass == '01' && $scope.stType == '0'){//光伏、部门
+            if(storage && storage.solarDepStation){
+                $scope.stationList = ifStationExist(belongId,storage.solarDepStation)
+            }
+        }else if($scope.currentSTClass == '01' &&  $scope.stType == '1'){//光伏、自定义
+            if(storage && storage.solarDefineStation){
+                $scope.stationList = ifStationExist(belongId,storage.solarDefineStation)
+            }
+        }else if($scope.currentSTClass == '02' && $scope.stType == '0'){//风电 、部门
+            if(storage && storage.windDepStation){
+                $scope.stationList = ifStationExist(belongId,storage.windDepStation)
+            }
+        }else{//风电、自定义
+            if(storage && storage.windDefineStation){
+                $scope.stationList = ifStationExist(belongId,storage.windDefineStation)
+            }
+        }
+        if(!$scope.stationList.length){
+            stationDataInterface(belongId)
+        }
+    }
+
+    //获取点击公司的电站接口
+    function stationDataInterface (belongId){
+        $http({
+            method: 'POST',
+            url: "UserAuthHandle/getSTListByLevel.htm",
+            params: {
+                isGroup: $rootScope.isGroup,
+                currentView: $rootScope.currentView,
+                isPart:$scope.stType,
+                type:1,
+                levelId:belongId,
+                stClass: $scope.currentSTClass
+            }
+        }).success(function (res) {
+            if(res.code == 0){
+                let storage = JSON.parse(localStorage.getItem('switchStationData'));
+                if($scope.currentSTClass == '01' && $scope.stType == '0'){//光伏、部门
+                    let concatArr = storage.solarDepStation?storage.solarDepStation:[];
+                    concatArr.push({'pid':belongId,'stationList':res.body})
+                    localStorage.setItem('switchStationData',JSON.stringify(Object.assign(storage,{'solarDepStation':concatArr})));
+                }else if($scope.currentSTClass == '01' &&  $scope.stType == '1'){//光伏、自定义
+                    let concatArr = storage.solarDefineStation?storage.solarDefineStation:[];
+                    concatArr.push({'pid':belongId,'stationList':res.body})
+                    localStorage.setItem('switchStationData',JSON.stringify(Object.assign(storage,{'solarDefineStation':concatArr})));
+                }else if($scope.currentSTClass == '02' && $scope.stType == '0'){//风电 、部门
+                    let concatArr = storage.windDepStation?storage.windDepStation:[];
+                    concatArr.push({'pid':belongId,'stationList':res.body})
+                    localStorage.setItem('switchStationData',JSON.stringify(Object.assign(storage,{'windDepStation':concatArr})));
+                }else{//风电、自定义
+                    let concatArr = storage.windDefineStation?storage.windDefineStation:[];
+                    concatArr.push({'pid':belongId,'stationList':res.body})
+                    localStorage.setItem('switchStationData',JSON.stringify(Object.assign(storage,{'windDefineStation':concatArr})));
+                }
+        
+                $scope.stationList = res.body;
+            }
+        });
     }
 
     //切换电站

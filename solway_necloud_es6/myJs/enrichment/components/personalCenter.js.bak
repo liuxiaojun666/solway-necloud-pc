@@ -31,6 +31,9 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval',
                     roleId: Id	//用户要切换的ID
                 }
             }).success(function(response) {
+                if(localStorage.getItem('switchStationData')){
+                    localStorage.removeItem('switchStationData');
+                }
                 $scope.roleType = response.roleType;
                 
                 $scope.currentRoleID = Id;//当前角色Id
