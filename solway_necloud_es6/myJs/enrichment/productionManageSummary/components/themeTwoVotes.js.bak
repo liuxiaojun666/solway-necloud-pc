@@ -43,7 +43,6 @@ ajaxData({
         __serviceName__: 'themeTwoVotesService'
     })('themeTwoVotesCtrl', ['$scope', 'themeTwoVotesService', 'actionRecord', '$ocLazyLoad', 'toaster'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad, toaster) => {
         let spread, excelIO;
-        // 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
 
         // 主页面初始化完成 回调
@@ -153,6 +152,23 @@ ajaxData({
                     $scope.makeInvoice = false;
                     $scope.getBaseMessageList();
                 });
+            });
+        };
+
+        // 导出excel
+        $scope.exportExcel = () => {
+            $scope.fileLoading = true;
+            excelIO.save(spread.toJSON(), blob => {
+                const elink = document.createElement('a');
+                elink.download = $scope.openVotesObj.name + '.xlsx';
+                elink.style.display = 'none';
+                elink.href = URL.createObjectURL(blob);
+                elink.target = '_blank';
+                document.body.appendChild(elink);
+                elink.click();
+                document.body.removeChild(elink);
+                $scope.fileLoading = false;
+                $scope.$apply();
             });
         };
 
@@ -271,7 +287,7 @@ ajaxData({
                             case '00':
                                 return '完成'
                             case '01':
-                                return '已创建'
+                                return '已开票'
                             case '02':
                                 return '处理中'
                             case '03':
