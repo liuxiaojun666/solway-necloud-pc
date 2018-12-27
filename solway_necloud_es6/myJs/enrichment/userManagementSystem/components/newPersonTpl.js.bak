@@ -1,0 +1,45 @@
+
+ajaxData({
+    update:{
+        name:'POSTupdatePerson',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'addPersonModelService',
+})('addPersonModelCtrl', ['$scope', 'addPersonModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    const initSelectData = ()=>{
+
+    }
+    //初始
+    $scope.$on('broadAddPerson',function(e,data){
+        $scope.id = data.id;
+        if($scope.id){
+            initSelectData();
+        }else{
+            $scope.formData = {};
+        }
+        // initSelectData();
+    });
+
+    //保存
+    $scope.save = () =>{
+        $scope.update.getData($scope.formData).then(res=>{
+            if(res.id){
+                toaster.pop('success','','添加成功');
+                $scope.$emit('addCallback');
+            }else{
+                toaster.pop('error', '','添加失败')
+            }
+        });
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+    }
+
+   
+});
