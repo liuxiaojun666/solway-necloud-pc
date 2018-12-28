@@ -41,7 +41,7 @@ ajaxData({
             historicalRecord.set({ stationData: data.stationData });
             const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
             myAjaxData.setCurrentStationData(stationInfo);
-            const { currentDataName } = stationInfo;            
+            const { currentDataName } = stationInfo;
             $scope.switchPowerScope.currentDataName = currentDataName;
             $scope.switchPowerCallback(data.stationData);
         }
@@ -103,8 +103,16 @@ ajaxData({
                 alert('没有选择任何 公司 或 电站，请联系管理员');
                 return window.location.href = '/index.jsp'
             }
+
+            historicalRecord.set({ reloadNumber: (historicalRecord.get().reloadNumber || 0) + 1 });
+            if (historicalRecord.get().reloadNumber > 1) {
+                alert('获取电站信息失败，请联系管理员');
+                historicalRecord.set({ reloadNumber: 0 });
+                return window.location.href = '/index.jsp';
+            }
             return window.location.reload();
         }
+        historicalRecord.set({ reloadNumber: 0 });
         if (!stationData) { // 没有记录电站信息  
             const { currentSTID: id, currentSTType: isGroup, currentType: dataType, currentSTClass: stClass } = await $scope.getUserAuthHandleGetCurrentInfo.getData({});
             $scope.switchPowerCallback({ id, isGroup, dataType, stClass });
