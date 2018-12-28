@@ -127,7 +127,7 @@
                             content: 'kWh';
                             display: inline-block;
                             position: absolute;
-                            right: -0.2rem;
+                            right: -0.3rem;
                             bottom: 0;
                             font-family: serif;
                             color: #5CC2BC;
@@ -447,7 +447,7 @@
                     }
                     .text-block {
                         width: 100%;
-                        height: 100%;
+                        height: 0;
                         left: 0;
                         top: 0;
                         z-index: 3;
@@ -457,7 +457,14 @@
                             position: absolute;
                             line-height: 1.3;
                             white-space: nowrap;
-                            cursor: pointer;
+                            cursor: pointer; // &::before, &::after {
+                            //     content: '';
+                            //     display: block;
+                            //     position: absolute;
+                            //     width: 5em;
+                            //     height: 1.5em;
+                            //     background-color: #fff;
+                            // }
                             &.active {
                                 font-size: 0.23rem;
                                 opacity: 1;
@@ -465,37 +472,49 @@
                             &:nth-child(1) {
                                 left: 50%;
                                 transform: translateX(-50%);
-                                top: -0.25rem;
-                                padding: 0.3rem calc(((100vmin - 1.81rem - 1px) / 2 - 0.1rem) / 2);
+                                top: -0.05rem;
+                                padding: 0.1rem 0; // &::before {
+                                //     left: -5em;
+                                //     top: 1.5em;
+                                //     transform: rotate(-25deg);
+                                // }
+                                // &::after {
+                                //     right: -5em;
+                                //     top: 1.5em;
+                                //     transform: rotate(25deg);
+                                // }
                                 &.active {
-                                    top: -0.33rem;
+                                    top: -0.13rem;
                                 }
                             }
                             &:nth-child(2) {
-                                right: -0.23rem;
-                                top: 50%;
+                                right: -0.03rem;
+                                top: 0;
+                                margin-top: 50%;
                                 transform: translateY(-50%);
-                                padding: calc(((100vmin - 1.81rem - 1px) / 2 - 0.1rem) / 2) 0.3rem;
+                                padding: 0 0.1rem;
                                 &.active {
-                                    right: -0.3rem;
+                                    right: -0.1rem;
                                 }
                             }
                             &:nth-child(3) {
                                 left: 50%;
+                                top: 0;
+                                margin-top: calc(100% - 1.3em - 0.14rem);
                                 transform: translateX(-50%);
-                                bottom: -0.25rem;
-                                padding: 0.3rem calc(((100vmin - 1.81rem - 1px) / 2 - 0.1rem) / 2);
+                                padding: 0.1rem 0;
                                 &.active {
-                                    bottom: -0.33rem;
+                                    margin-top: calc(100% - 1.3em - 0.06rem);
                                 }
                             }
                             &:nth-child(4) {
-                                left: -0.23rem;
-                                top: 50%;
+                                left: -0.03rem;
+                                top: 0;
+                                margin-top: 50%;
                                 transform: translateY(-50%);
-                                padding: calc(((100vmin - 1.81rem - 1px) / 2 - 0.1rem) / 2) 0.3rem;
+                                padding: 0 0.1rem;
                                 &.active {
-                                    left: -0.3rem;
+                                    left: -0.1rem;
                                 }
                             }
                         }
@@ -518,6 +537,9 @@
                             left: 0;
                             top: 0;
                             transform: translateX(calc(((100vmin - 1.51rem - 0.3rem) - (100vmin + 2rem)) / 2)) translateY(-2.51rem);
+                            & +div.text-block {
+                                display: none;
+                            }
                         }
                     }
                 }
