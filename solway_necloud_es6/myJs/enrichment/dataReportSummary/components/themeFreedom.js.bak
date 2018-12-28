@@ -122,7 +122,11 @@ ajaxData(
 
     $scope.trClick = (item, index, event) => {
         if (!event.target.className.includes('clickable')) return;
-        $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name + item.fileName);
+        if (event.target.className.includes('download')) {
+            $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name + item.fileName);
+        } else if (event.target.className.includes('preview')) {
+            $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name + item.fileName, true);
+        }
     };
 
     // 列表 接口 返回
@@ -159,7 +163,9 @@ ajaxData(
                 sort: true,
                 align: 'center',
                 render(text) {
-                    return `<span class="clickable" style="color: #428bca;" >下载</span>`;
+                    return `
+                        <span class="clickable download" style="color: #428bca;margin-right:3em;" >下载</span>
+                        <span class="clickable preview" style="color: #428bca;" >预览</span>`;
                 }
             },
         ];
@@ -296,7 +302,7 @@ ajaxData(
 
     // 添加模板 按钮点击
     $scope.addTemplatePopUpFunc = (load) => {
-        $scope.templatePreviewName = '';
+        if (!load) $scope.templatePreviewName = '';
         $scope.addTemplatePopUp = true;
         if ($scope.newTempleteObj.excelFile && !load) return $scope.importFile({
             files: [$scope.newTempleteObj.nullExcelFile],
