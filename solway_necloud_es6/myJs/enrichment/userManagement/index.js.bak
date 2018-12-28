@@ -60,7 +60,7 @@ ajaxData({
         }).then(res=>{
             if (res.key==2) {
                 toaster.pop('success','','删除成功');
-                getUserList();
+                $scope.getUserList();
             } else if (res.key==1) {
                 toaster.pop('error', '','删除失败')
             }
@@ -78,18 +78,19 @@ ajaxData({
         };
     };
     
-    const getUserList = () =>{
+    $scope.getUserList = () =>{
         $scope.userList.getData({
             pageIndex :0,
             pageSize : 10,
-            depid: $scope.depid
+            depid: $scope.depid,
+            keyWords:$scope.keyWords
         })
     }
 
     function onClick(event, treeId, treeNode, clickFlag) {
         $scope.depid = treeNode.id;
         $scope.depName = treeNode.name;
-        getUserList();
+        $scope.getUserList();
     };
 
     let zTreeObj;
@@ -149,7 +150,7 @@ ajaxData({
         $scope.showInvitationModel = false;
         $scope.showAuthorizeModel = false;
         $scope.changeAdministratorModel = false;
-        getUserList();
+        $scope.getUserList();
     });
 
     $timeout(() => {
