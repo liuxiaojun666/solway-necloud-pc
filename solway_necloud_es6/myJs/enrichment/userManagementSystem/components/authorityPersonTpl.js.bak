@@ -1,0 +1,93 @@
+
+ajaxData({
+    roleListSystem:{
+        name:'GETroleListSystem',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    getCompanyList:{
+        name:'POSTCompanyListData',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    authorityStations:{
+        name:'GETauthorityStations',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    authWaitStations:{
+        name:'GETauthWaitStations',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'authorityPersonTplService',
+})('authorityPersonTplCtrl', ['$scope', 'authorityPersonTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    const initRole = () =>{
+        $scope.roleListSystem.getData({userId:$scope.userId}).then(res=>{
+            if (res.key == 0){
+                $scope.roleList = res.data;
+            }
+        });
+    }
+
+    const initCompanyList = () => {
+        $scope.getCompanyList.getData({
+        }).then(res => {
+            $scope.companyList = res;
+        })
+    }
+
+    const authWaitStations = () =>{
+        // $scope.authWaitStations.getData({
+        //     userId:id,
+		// 	comIds:$("#comId").val(),
+		// 	keyword:$("#keyword").val()
+        // }).then(res=>{
+
+        // })
+    }
+
+    const authorityStations = () =>{
+        $scope.authorityStations.getData({userId:$scope.userId}).then(res=>{
+            if (res.key == 0){
+                $scope.hasAuthorityStations = res.data;
+            }
+        });;
+    }
+    //初始
+    $scope.$on('broadAuthorityPerson',function(e,data){
+        $scope.userId = data.id;
+        initRole();
+        initCompanyList();
+        authorityStations();
+
+        authWaitStations();
+        // if($scope.id){
+        //     $scope.formData = data;
+        // }else{
+        //     $scope.formData = {};
+        // }
+    });
+
+    //保存
+    $scope.save = () =>{
+        $scope.update.getData($scope.formData).then(res=>{
+            if(res.id){
+                toaster.pop('success','','添加成功');
+                $scope.$emit('addCallback');
+            }else{
+                toaster.pop('error', '','添加失败')
+            }
+        });
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+    }
+});

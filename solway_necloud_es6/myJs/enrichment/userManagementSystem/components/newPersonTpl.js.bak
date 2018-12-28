@@ -1,5 +1,11 @@
 
 ajaxData({
+    personDetail:{
+        name:'GETpersonDetail',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     update:{
         name:'POSTupdatePerson',
         data: {},
@@ -9,19 +15,15 @@ ajaxData({
 }, {
     __serviceName__: 'addPersonModelService',
 })('addPersonModelCtrl', ['$scope', 'addPersonModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
-
-    const initSelectData = ()=>{
-
-    }
+    
     //初始
     $scope.$on('broadAddPerson',function(e,data){
         $scope.id = data.id;
         if($scope.id){
-            initSelectData();
+            $scope.formData = data;
         }else{
             $scope.formData = {};
         }
-        // initSelectData();
     });
 
     //保存
@@ -40,6 +42,4 @@ ajaxData({
     $scope.cancel = () =>{
         $scope.$emit('cancelCallback');
     }
-
-   
 });
