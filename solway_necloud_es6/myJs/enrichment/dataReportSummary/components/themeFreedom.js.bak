@@ -304,7 +304,7 @@ ajaxData(
             addFile: true
         });
         if ($scope.powerStations.res && load) return load(true);
-        $scope.powerStations.getData({ currentView: '00', isGroup: 1 });
+        if (!$scope.powerStations.res) $scope.powerStations.getData({ currentView: '00', isGroup: 1 });
         $ocLazyLoad.load([
             'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
             'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
@@ -340,6 +340,7 @@ ajaxData(
                 spread.unbindAll();
                 spread.fromJSON(spreadJson);
                 spread.sheets.forEach(v => v.options.isProtected = true);
+                e.value = '';
             } else {
                 alert('无效的文件');
             }
@@ -350,7 +351,8 @@ ajaxData(
 
     // 电站列表处理
     $scope.powerStations.subscribe(res => {
-        $scope.newTempleteObj.sid = res.comList[0].id;
+        $scope.powerStations.res.comList = res.comList.filter(v => v.stFlag && v.id !== 0);
+        $scope.newTempleteObj.sid = res.comList[0].id || res.comList[1].id;
     });
 
     // 新增模板
