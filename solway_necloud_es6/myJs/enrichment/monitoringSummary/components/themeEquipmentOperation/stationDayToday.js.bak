@@ -539,6 +539,22 @@ ajaxData(
         $scope.ydatas = [[res.body.data.map(v => v.pgc)], [res.body.data.map(v => v.pcpn)]];
     };
 
+
+    // 设备弹出
+    $scope.equipmentDetail = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const { deviceSerialNnumber, deviceId, pstationid, deviceTypeCode: deviceTypeNow, hasJB, stid, eqid } = item;
+        $scope.$broadcast("equipmentPopUp", {
+            deviceSerialNnumber,
+            deviceId,
+            pstationid,
+            deviceTypeNow,
+            hasJB,
+            stid,
+            eqid
+        });
+    };
+
     //电站-故障列表
     $scope.getStationFaultAlarmRtData.getDataCallback = (success, res) => {
         if (!success) return;
@@ -549,6 +565,9 @@ ajaxData(
                 dataIndex: 'name',
                 sort: 'true',
                 align: 'left',
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '故障类型',

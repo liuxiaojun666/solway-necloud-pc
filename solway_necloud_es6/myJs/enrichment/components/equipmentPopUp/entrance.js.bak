@@ -32,10 +32,12 @@ ajaxData(
     }
 )('equipmentPopUpCtrl', ['$scope', 'equipmentPopUpService', '$ocLazyLoad', '$interval'], function ($scope, currentService, $ocLazyLoad, $interval) {
     $scope.display = false;
+    let timer;
     $scope.$on('equipmentPopUp', async(e, eqObj) => {
         if (!eqObj.deviceSerialNnumber && eqObj.stid && eqObj.eqid) {
             const {stid, eqid} = eqObj;
-            const { hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow} = await deviceInfo.getData({stid, eqid}).body;
+            const res = await $scope.deviceInfo.getData({stid, eqid});
+            const { hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow } = res.body;
             eqObj.deviceSerialNnumber = deviceSerialNnumber;
             eqObj.hasJB = hasJB;
             eqObj.pstationid = pstationid;
@@ -58,9 +60,14 @@ ajaxData(
             dateString: new Date().Format("yyyy-MM-dd"),
             stids: eqObj.pstationid
         });
+        timer = $interval(() => {
+            if (!$scope.rtmSingleStationComm.res || !$scope.templateUrl) return;
+            $scope.rtmSingleStationComm.getData({})
+        }, 5 * 1000);
+        await currentService.timeout(0);
+        $scope.$apply();
     });
 
-    const timer = $interval(() => $scope.rtmSingleStationComm.getData({}), 5 * 1000);
 
     $scope.includePageDesdroy = () => {
         $scope.display = false; 

@@ -15,7 +15,7 @@ ajaxData({
     },
 }, {
     __serviceName__: 'themeElectricityStationDayAgoService'
-})('themeElectricityStationDayAgoCtrl', ['$scope', 'themeElectricityStationDayAgoService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    })('themeElectricityStationDayAgoCtrl', ['$scope', 'themeElectricityStationDayAgoService', 'actionRecord', 'myAjaxData'], ($scope, myAjaxData, historicalRecord, myAjaxDataParent) => {
     // 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -102,6 +102,21 @@ ajaxData({
         }
     };
 
+    // 设备故障， 查看设备详情
+    $scope.equipmentDetail = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const { deviceSerialNnumber, deviceId, pstationid, deviceType: deviceTypeNow, hasJB, stid, eqid } = item;
+        $scope.$broadcast("equipmentPopUp", {
+            deviceSerialNnumber,
+            deviceId,
+            pstationid,
+            deviceTypeNow,
+            hasJB,
+            stid: stid || myAjaxDataParent.currentStationData.currentSTID,
+            eqid
+        });
+    };
+
     $scope.query_station_day_elec_his_list.subscribe(res => {
         $scope.column = [
             {
@@ -109,6 +124,9 @@ ajaxData({
                 dataIndex: 'eq_name',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),

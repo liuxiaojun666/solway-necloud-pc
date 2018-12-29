@@ -62,13 +62,15 @@ ajaxData(
         // 设备故障， 查看设备详情
         $scope.equipmentDetail = (item, index, event) => {
             if (!event.target.className.includes('clickable')) return;
-            const { deviceSerialNnumber, deviceId, pstationid, deviceType: deviceTypeNow, hasJB } = item;
+            const { deviceSerialNnumber, deviceId, pstationid, deviceType: deviceTypeNow, hasJB, stid, eqid } = item;
             $scope.$broadcast("equipmentPopUp", {
                 deviceSerialNnumber,
                 deviceId,
                 pstationid,
                 deviceTypeNow,
-                hasJB
+                hasJB,
+                stid,
+                eqid
             });
         };
 
@@ -162,6 +164,9 @@ ajaxData(
                     title: '设备名称',
                     dataIndex: 'eq_name',
                     sort: true,
+                    render(text) {
+                        return `<span class="clickable">${text}</span>`
+                    }
                 },
                 {
                     title: '阴影异常组串数',
@@ -178,6 +183,9 @@ ajaxData(
                     title: '设备名称',
                     dataIndex: 'eq_name',
                     sort: true,
+                    render(text) {
+                        return `<span class="clickable">${text}</span>`
+                    }
                 },
                 {
                     title: 'PR(%)',
@@ -194,6 +202,9 @@ ajaxData(
                     title: '设备名称',
                     dataIndex: 'eq_name',
                     sort: true,
+                    render(text) {
+                        return `<span class="clickable">${text}</span>`
+                    }
                 },
                 {
                     title: '累计衰减率' + '(' + res.body.units.decay_r_all + ')',
