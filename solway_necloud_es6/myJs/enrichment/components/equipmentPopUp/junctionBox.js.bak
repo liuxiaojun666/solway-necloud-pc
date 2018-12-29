@@ -167,7 +167,10 @@ ajaxData(
     // 状态刷新
     const timer = $interval(() => {
         if ($scope.tabIndex !== 0) return;
-        $scope.rtmSingleStationComm.getData({ dateString: new Date().Format("yyyy-MM-dd") });
+        $scope.rtmSingleStationComm.getData({ 
+            dateString: new Date().Format("yyyy-MM-dd"),
+            stids: $scope.pstationid
+        });
         if ($scope.rtmSingleStationComm.res.comm === 1) return;
         $scope.singleRealDataBJunction.getData();
     }, 5 * 1000);

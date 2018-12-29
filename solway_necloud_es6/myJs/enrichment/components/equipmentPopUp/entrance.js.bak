@@ -1,6 +1,10 @@
 ajaxData(
     {
-
+        deviceInfo: {
+            name: 'GETdeviceInfo',
+            data: {},
+            later: true
+        }
     },
     {
         __serviceName__: 'equipmentPopUpService',
@@ -19,7 +23,16 @@ ajaxData(
     }
 )('equipmentPopUpCtrl', ['$scope', 'equipmentPopUpService', '$ocLazyLoad'], function ($scope, currentService, $ocLazyLoad) {
     $scope.display = false;
-    $scope.$on('equipmentPopUp', (e, eqObj) => {
+    $scope.$on('equipmentPopUp', async(e, eqObj) => {
+        if (!eqObj.deviceSerialNnumber && eqObj.stid && eqObj.eqid) {
+            const {stid, eqid} = eqObj;
+            const { hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow} = await deviceInfo.getData({stid, eqid}).body;
+            eqObj.deviceSerialNnumber = deviceSerialNnumber;
+            eqObj.hasJB = hasJB;
+            eqObj.pstationid = pstationid;
+            eqObj.deviceId = deviceId;
+            eqObj.deviceTypeNow = deviceTypeNow;
+        }
         currentService.config.eqObj = eqObj;
         $scope.templateLoading = true;
         $scope.display = true;
