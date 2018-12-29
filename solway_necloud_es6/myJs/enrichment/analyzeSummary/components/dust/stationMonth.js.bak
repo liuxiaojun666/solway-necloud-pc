@@ -171,7 +171,14 @@ ajaxData({
     };
 
     // 设备 列表 点击行
-    $scope.equipmentListTrClick = (item, index) => {
+    $scope.equipmentListTrClick = (item, index, event) => {
+        if (event.target.className.includes('clickable')) {
+            const { stid, eqid } = item;
+            return $scope.$broadcast("equipmentPopUp", {
+                stid,
+                eqid
+            });
+        };
         const {eqid, eq_name} = item;
         $scope.equipmentDetail({eqid, eq_name});
     };
@@ -252,6 +259,9 @@ ajaxData({
                 align: 'left',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '装机容量' + '(' + res.body.units.inst_kw + ')',
