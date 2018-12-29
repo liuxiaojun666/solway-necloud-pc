@@ -72,15 +72,16 @@ ajaxData({
         $scope.$broadcast('broadAddStation', { 'id': '' });
     }
 
-    // $scope.trClick = (item, index, event) => {
-    //     if(event.target.className.includes('icon-bianji-copy')) {
-    //         $scope.newPersonModel = true;
-    //         $scope.$broadcast('broadAddPerson', { 'id': item.userId,'userName':item.userName ,'realName':item.realName});
-    //     }else if(event.target.className.includes('icon-shouquan')) {
-    //         $scope.authorityModel = true;
-    //         $scope.$broadcast('broadAuthorityPerson', { 'id': item.userId});
-    //     }
-    // };
+    $scope.trClick = (item, index, event) => {
+        if(event.target.className.includes('icon-bianji-copy')) {
+            $scope.newStationModel = true;
+            // $scope.$broadcast('hideEditBroad');
+            $scope.$broadcast('broadAddStation', { 'id': item.id});
+        }else if(event.target.className.includes('icon-shouquan')) {
+            // $scope.authorityModel = true;
+            // $scope.$broadcast('broadAuthorityPerson', { 'id': item.userId});
+        }
+    };
 
 
 

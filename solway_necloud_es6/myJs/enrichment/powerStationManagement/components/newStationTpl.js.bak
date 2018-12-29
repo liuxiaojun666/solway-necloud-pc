@@ -1,72 +1,84 @@
 ajaxData({
-    // businessManagementData: {
-    //     name: 'GETbusinessManagementData',
-    //     data: {},
-    //     later: true
-    // },
-    // selectProvince:{
-    //     name: 'POSTSelectProvince',
-    //     data: {},
-    //     later: true
-    // },
-    // update:{
-    //     name:'POSTbusinessManagementSave',
-    //     data: {},
-    //     later: true,
-    //     onlyLatest: true
-    // }
+    powerStationDetail: {
+        name: 'GETpowerStationDetail',
+        data: {},
+        later: true
+    },
+    depListCompany:{
+        name: 'GETdepListCompany',
+        data: {},
+        later: true
+    },
+    personInCharge:{
+        name:'GETpersonInCharge',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
 }, {
     __serviceName__: 'newStationTplService',
 })('newStationTplCtrl', ['$scope', 'newStationTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
 
-    // $scope.enterpriseTypeList = [
-    //     {id:32,dictName:'国有企业'},
-    //     {id:33,dictName:'股份制企业'},
-    //     {id:34,dictName:'私营企业'},
-    //     {id:35,dictName:'联营企业'},
-    //     {id:36,dictName:'外商投资企业'},
-    //     {id:37,dictName:'港、澳、台'},
-    //     {id:38,dictName:'股份合作企业'},
-    //     {id:39,dictName:'集体所有制'}
-    // ];
+    $scope.endDate = new Date('2099');
 
-    // $scope.endDate = new Date('2099');
+    //电站分类
+    $scope.stationClass = [
+        {"typeId":"01", "typeName":"光伏电站"},
+        {"typeId":"02", "typeName":"风电电站"},
+        {"typeId":"03", "typeName":"电能站"},
+        {"typeId":"04", "typeName":"火电"}];
 
-    // const clearData = () =>{
-    //     $scope.formData = {};
-    //     $scope.customConfig = {};
-    //     $scope.admintime = null;
+    //电站类型
+    $scope.stationType = [
+        {"typeId":"01", "typeName":"地面电站"},
+        {"typeId":"02", "typeName":"分布式电站"},
+        {"typeId":"03", "typeName":"用户电站"}];
+    
+    const clearDateTime = () =>{
+        $scope.startProductTime = null;
+        $scope.endProductTime = null;
+    }
 
-    // }
+    //负责人列表
+    const getChargePersonList = () =>{
+        $scope.personInCharge.getData({}).then(res=>{
+            $scope.manager = res;
+        });
+    }
 
-    // const initShowImages = (data,customConfig) =>{
-    //     if(data.logo){
-    //         $("#showLogo").attr("src", data.logo);
-    //     }
-    //     if(customConfig.logo_lg){
-    //         $("#showLogolg").attr("src", customConfig.logo_lg);
-    //     }
-    //     if(customConfig.logo_sm){
-    //         $("#showLogosm").attr("src", customConfig.logo_sm);
-    //     }
-    // }
+    getChargePersonList();
 
-    // const getData = () =>{
-    //     clearData();
-    //     $scope.businessManagementData.getData({}).then(res=>{
-    //         if (res.key==2) {
-    //             const data = res.data;
-    //             const customConfig = res.customConfig;
-    //             initShowImages(data,customConfig);
+    const getStationDetailData = () =>{
+        $scope.powerStationDetail.getData({
+            id:$scope.id
+        }).then(res=>{
+            $scope.formData = res;
+            console.log(res)
+            $scope.getDepListByCompany(res.companyid);//获取当前公司的部门列表
+            $scope.startProductTime = res.productiondate? new Date(res.productiondate):new Date();
+            $scope.endProductTime = res.closedate? new Date(res.closedate):new Date((new Date).setDate((new Date).getDate() + 7));
+        });
+    }
+    $scope.$on('broadAddStation',(index,v)=>{
+        clearDateTime();
+        $scope.id = v.id;
+        if($scope.id){
+            getStationDetailData()
+        }else{
+            $scope.formData = {};
+            $scope.startProductTime = new Date();
+            $scope.endProductTime = new Date((new Date).setDate((new Date).getDate() + 7));
+        }
+    });
 
-    //             $scope.formData = data;
-    //             $scope.customConfig = customConfig;
-                
-    //             $scope.admintime = new Date(data.admintime);
-    //             getProvence();
-    //         }
-    //     });
-    // }
+    $scope.getDepListByCompany = companyid =>{
+        $scope.depListCompany.getData({
+            comid : companyid
+        }).then(res=>{
+            console.log(res)
+            $scope.depList = res;
+        });
+    }
 
     // const getProvence = ()=>{
     //     $scope.selectProvince.getData({
@@ -99,10 +111,6 @@ ajaxData({
     //         $scope.countryList = res;
     //     });
     // }
-
-    $scope.$on('broadAddStation',()=>{
-        // getData();
-    });
 
     // //省change
     // $scope.provinceChange = () =>{
