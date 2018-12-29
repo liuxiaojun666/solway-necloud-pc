@@ -81,6 +81,13 @@ ajaxData({
             $scope.equipmentDetail({ eqid, eq_name, stid });
         }
         if (!event.target.className.includes('clickable')) return;
+        if (event.target.className.includes('eq')) {
+            const { stid, eqid } = item;
+            return $scope.$broadcast("equipmentPopUp", {
+                stid,
+                eqid
+            });
+        };
         $scope.reloadParentPage({
             stationData: {
                 dataType: 0,
@@ -305,6 +312,9 @@ ajaxData({
                 align: 'left',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable eq">${text}</span>`
+                }
             },
             {
                 title: '装机容量' + '(' + res.body.units.inst_kw + ')',

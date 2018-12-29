@@ -68,6 +68,16 @@ ajaxData(
         });
     });
 
+    // 设备故障， 查看设备详情
+    $scope.equipmentDetail = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const { did: eqid, sid: stid } = item;
+        $scope.$broadcast("equipmentPopUp", {
+            stid: stid || myAjaxDataParent.currentStationData.currentSTID,
+            eqid
+        });
+    };
+
     $scope.stationDayTodayData.subscribe(res => {
         $scope.column = [
             {
@@ -81,6 +91,9 @@ ajaxData(
                 dataIndex: 'name',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '装机容量(kW)',

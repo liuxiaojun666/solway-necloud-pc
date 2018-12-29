@@ -32,7 +32,7 @@ ajaxData(
     {
         __serviceName__: 'themeEquipmentOperationStationYearService'
     }
-)('themeEquipmentOperationStationYearCtrl', ['$scope', 'themeEquipmentOperationStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+)('themeEquipmentOperationStationYearCtrl', ['$scope', 'themeEquipmentOperationStationYearService', 'actionRecord', 'myAjaxData'], ($scope, myAjaxData, historicalRecord, myAjaxDataParent) => {
     // 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -226,6 +226,21 @@ ajaxData(
         $scope.$apply();
     }
 
+    // 设备故障， 查看设备详情
+    $scope.equipmentDetail = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const { deviceSerialNnumber, deviceId, pstationid, deviceType: deviceTypeNow, hasJB, stid, eqid } = item;
+        $scope.$broadcast("equipmentPopUp", {
+            deviceSerialNnumber,
+            deviceId,
+            pstationid,
+            deviceTypeNow,
+            hasJB,
+            stid: stid || myAjaxDataParent.currentStationData.currentSTID,
+            eqid
+        });
+    };
+    
     //电站月-设备-列表
     $scope.query_station_year_dev_detail_devlist_his.getDataCallback = (success, res) => {
         if (!success) return;
@@ -236,6 +251,9 @@ ajaxData(
                 width: '25%',
                 dataIndex: 'eq_name',
                 align: 'left',
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '故障台次',

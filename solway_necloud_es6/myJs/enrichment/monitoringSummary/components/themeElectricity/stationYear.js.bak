@@ -50,7 +50,7 @@ ajaxData({
     },
 }, {
         __serviceName__: 'themeElectricityStationYearService'
-    })('themeElectricityStationYearCtrl', ['$scope', 'themeElectricityStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    })('themeElectricityStationYearCtrl', ['$scope', 'themeElectricityStationYearService', 'actionRecord', 'myAjaxData'], ($scope, myAjaxData, historicalRecord, myAjaxDataParent) => {
         // 初始化 scope
         $scope.initChildScope($scope, myAjaxData);
 
@@ -250,6 +250,22 @@ ajaxData({
             diffChartLineData();
             $scope.$apply();
         };
+
+        // 设备故障， 查看设备详情
+        $scope.equipmentDetail = (item, index, event) => {
+            if (!event.target.className.includes('clickable')) return;
+            const { deviceSerialNnumber, deviceId, pstationid, deviceType: deviceTypeNow, hasJB, stid, eqid } = item;
+            $scope.$broadcast("equipmentPopUp", {
+                deviceSerialNnumber,
+                deviceId,
+                pstationid,
+                deviceTypeNow,
+                hasJB,
+                stid: stid || myAjaxDataParent.currentStationData.currentSTID,
+                eqid
+            });
+        };
+
         // 电站 年 设备 列表
         $scope.query_station_year_elec_devlist_his.getDataCallback = (success, res) => {
             if (!success) return;
@@ -259,6 +275,9 @@ ajaxData({
                     dataIndex: 'eq_name',
                     width: '25%',
                     sort: true,
+                    render(text) {
+                        return `<span class="clickable">${text}</span>`
+                    }
                 },
                 {
                     title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
