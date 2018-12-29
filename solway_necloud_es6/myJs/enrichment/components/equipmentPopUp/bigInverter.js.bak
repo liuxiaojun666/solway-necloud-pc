@@ -10,14 +10,6 @@ ajaxData(
             data: {},
             later: true
         },
-        rtmSingleStationComm: {
-            name: 'GETRtmSingleStationComm',
-            data: {
-                dateString: new Date().Format("yyyy-MM-dd"),
-            },
-            onlyLatest: true,
-            sameTimeOnce: true
-        },
         singleRealDataBInverter: {
             name: 'GETsingleRealDataBInverter',
             data: {},
@@ -214,10 +206,6 @@ ajaxData(
     // 状态刷新
     const timer = $interval(() => {
         if ($scope.tabIndex !== 0) return;
-        $scope.rtmSingleStationComm.getData({ 
-            dateString: new Date().Format("yyyy-MM-dd"),
-            stids: $scope.pstationid
-        });
         if ($scope.rtmSingleStationComm.res.comm === 1) return;
         $scope.singleRealDataBInverter.getData({});
     }, 10 * 1000);
@@ -439,7 +427,6 @@ ajaxData(
     $scope.$on('includePageDesdroy', () => {
         $scope.inverterCount.res = null;
         $scope.inverterHours.res = null;
-        $scope.rtmSingleStationComm.res = null;
         $scope.singleRealDataBInverter.res = null;
         $scope.newHistoryData.res = null;
         $scope.faultAlarmList.res = null;
