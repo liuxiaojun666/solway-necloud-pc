@@ -93,7 +93,7 @@ ajaxData(
     {
         __serviceName__: 'themeEquipmentOperationStationDayTodayService'
     }
-)('themeEquipmentOperationStationDayTodayCtrl', ['$scope', 'themeEquipmentOperationStationDayTodayService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+)('themeEquipmentOperationStationDayTodayCtrl', ['$scope', 'themeEquipmentOperationStationDayTodayService', 'actionRecord', '$interval', 'myAjaxData'], ($scope, myAjaxData, historicalRecord, $interval, myAjaxDataParent) => {
     // 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -157,8 +157,11 @@ ajaxData(
             }
         });
         if ($scope.tabIndex === 1 && $scope.showShape === 'chart') {
-            $scope.getDeviceLayout.getData({});
-            $scope.rtmSingleStationComm.getData({ dateString: new Date().Format("yyyy-MM-dd") });
+            $scope.getDeviceLayout.getData({ id: myAjaxDataParent.currentStationData.currentSTID});
+            $scope.rtmSingleStationComm.getData({ 
+                dateString: new Date().Format("yyyy-MM-dd"),
+                stids: myAjaxDataParent.currentStationData.currentSTID
+            });
         }
         setDataNull();
         diffGetData();
