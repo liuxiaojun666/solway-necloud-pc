@@ -9,6 +9,16 @@ ajaxData({
         data: {},
         later: true
     },
+    selectProvince:{
+        name: 'POSTSelectProvince',
+        data: {},
+        later: true
+    },
+    stationCode:{
+        name: 'GETstationCode',
+        data: {},
+        later: true
+    },
     personInCharge:{
         name:'GETpersonInCharge',
         data: {},
@@ -39,6 +49,10 @@ ajaxData({
         $scope.endProductTime = null;
     }
 
+    //电站编号自动生成
+    // const createStationCode = () =>{
+    // }
+
     //负责人列表
     const getChargePersonList = () =>{
         $scope.personInCharge.getData({}).then(res=>{
@@ -53,10 +67,11 @@ ajaxData({
             id:$scope.id
         }).then(res=>{
             $scope.formData = res;
-            console.log(res)
             $scope.getDepListByCompany(res.companyid);//获取当前公司的部门列表
             $scope.startProductTime = res.productiondate? new Date(res.productiondate):new Date();
             $scope.endProductTime = res.closedate? new Date(res.closedate):new Date((new Date).setDate((new Date).getDate() + 7));
+
+            getProvence();
         });
     }
     $scope.$on('broadAddStation',(index,v)=>{
@@ -68,6 +83,9 @@ ajaxData({
             $scope.formData = {};
             $scope.startProductTime = new Date();
             $scope.endProductTime = new Date((new Date).setDate((new Date).getDate() + 7));
+
+            $scope.getDepListByCompany('');
+            getProvence();
         }
     });
 
@@ -75,58 +93,57 @@ ajaxData({
         $scope.depListCompany.getData({
             comid : companyid
         }).then(res=>{
-            console.log(res)
             $scope.depList = res;
         });
     }
 
-    // const getProvence = ()=>{
-    //     $scope.selectProvince.getData({
-    //         treeLevel:1,
-    //         parentId:1
-    //     }).then(res=>{
-    //         $scope.provinceList = res;
-    //         getCity();
-    //     });
+    const getProvence = ()=>{
+        $scope.selectProvince.getData({
+            treeLevel:1,
+            parentId:1
+        }).then(res=>{
+            $scope.provinceList = res;
+            getCity();
+        });
         
-    // }
+    }
 
-    // const getCity = () =>{
-    //     if(!$scope.formData.provinceid) return;
-    //     $scope.selectProvince.getData({
-    //         treeLevel:2,
-    //         parentId:$scope.formData.provinceid
-    //     }).then(res=>{
-    //         $scope.cityList = res;
-    //         getCountry();
-    //     });
-    // }
+    const getCity = () =>{
+        if(!$scope.formData.provinceid) return;
+        $scope.selectProvince.getData({
+            treeLevel:2,
+            parentId:$scope.formData.provinceid
+        }).then(res=>{
+            $scope.cityList = res;
+            getCountry();
+        });
+    }
 
-    // const getCountry = () =>{
-    //     if(!$scope.formData.cityid) return;
-    //     $scope.selectProvince.getData({
-    //         treeLevel:3,
-    //         parentId:$scope.formData.cityid
-    //     }).then(res=>{
-    //         $scope.countryList = res;
-    //     });
-    // }
+    const getCountry = () =>{
+        if(!$scope.formData.cityid) return;
+        $scope.selectProvince.getData({
+            treeLevel:3,
+            parentId:$scope.formData.cityid
+        }).then(res=>{
+            $scope.countryList = res;
+        });
+    }
 
     // //省change
-    // $scope.provinceChange = () =>{
-    //     $scope.cityList = [];
-    //     $scope.countryList = [];
-    //     $scope.formData.cityid = '';
-    //     $scope.formData.countyid = '';
-    //     getCity();
-    // }
+    $scope.provinceChange = () =>{
+        $scope.cityList = [];
+        $scope.countryList = [];
+        $scope.formData.cityid = '';
+        $scope.formData.countyid = '';
+        getCity();
+    }
 
     // //市change
-    // $scope.cityChange = ()=>{
-    //     $scope.countryList = [];
-    //     $scope.formData.countyid = '';
-    //     getCountry();
-    // }
+    $scope.cityChange = ()=>{
+        $scope.countryList = [];
+        $scope.formData.countyid = '';
+        getCountry();
+    }
 
 
     //保存
