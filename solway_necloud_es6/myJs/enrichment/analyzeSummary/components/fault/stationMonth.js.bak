@@ -119,6 +119,16 @@ ajaxData({
         $scope.equipmentDetail({ eqid, eq_name });
     };
 
+    // 设备故障， 查看设备详情
+    $scope.equipmentDetailruning = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const { stid, eqid } = item;
+        $scope.$broadcast("equipmentPopUp", {
+            stid,
+            eqid
+        });
+    };
+
     // 设备 列表
     $scope.analysis_station_fail_month_devicelist.getDataCallback = (success, res) => {
         if (!success) return;
@@ -130,6 +140,9 @@ ajaxData({
                 align: 'left',
                 width: '20%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '装机容量' + '(' + res.body.units.inst_kw + ')',

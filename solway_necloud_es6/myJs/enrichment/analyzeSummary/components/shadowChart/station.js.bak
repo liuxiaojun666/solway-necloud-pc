@@ -76,6 +76,13 @@ ajaxData(
     };
 
     $scope.equipmentListTrClick = (item, index, event) => {
+        if (event.target.className.includes('clickable')) {
+            const { stid, eqid } = item;
+            return $scope.$broadcast("equipmentPopUp", {
+                stid: stid || myAjaxDataParent.currentStationData.currentSTID,
+                eqid
+            });
+        }
         $scope.equipmentDetailShow = true;
         $scope.$broadcast('equipmentShadowDetails', item);
     };
@@ -181,6 +188,9 @@ ajaxData(
                 align: 'left',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '异常阴影组串数',

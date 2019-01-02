@@ -57,7 +57,7 @@ ajaxData({
     },
 }, {
     __serviceName__: 'powerCapacityStationAccumulativeService',
-})('powerCapacityStationAccumulativeCtrl', ['$scope', 'powerCapacityStationAccumulativeService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+})('powerCapacityStationAccumulativeCtrl', ['$scope', 'powerCapacityStationAccumulativeService', 'actionRecord', 'myAjaxData'], ($scope, myAjaxData, historicalRecord, myAjaxDataParent) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -217,6 +217,16 @@ ajaxData({
         $scope.ydatas = [[res.body.data.pgc, res.body.data.decay_r_all, res.body.data.dust_r, res.body.data.pgc]];
     };
 
+    // 设备故障， 查看设备详情
+    $scope.equipmentDetailruning = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const { stid, eqid } = item;
+        $scope.$broadcast("equipmentPopUp", {
+            stid: stid || myAjaxDataParent.currentStationData.currentSTID,
+            eqid
+        });
+    };
+
     // 设备 列表
     $scope.analysis_station_pgc_accum_devicelist.getDataCallback = (success, res) => {
         if (!success) return;
@@ -228,6 +238,9 @@ ajaxData({
                 align: 'left',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '发电能力' + '(' + res.body.units.pgc + ')',
@@ -267,6 +280,9 @@ ajaxData({
                 align: 'left',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '初始性能指数' + '(' + res.body.units.init_pgc + ')',

@@ -233,6 +233,16 @@ ajaxData({
         $scope.ydatas = [[res.body.data.clean_mark]];
     };
 
+    // 设备故障， 查看设备详情
+    $scope.equipmentDetailruning = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const { stid, eqid } = item;
+        $scope.$broadcast("equipmentPopUp", {
+            stid: stid || myAjaxDataParent.currentStationData.currentSTID,
+            eqid
+        });
+    };
+
     // 设备 列表
     $scope.analysis_station_dust_year_devicelist.getDataCallback = (success, res) => {
         if (!success) return;
@@ -244,6 +254,9 @@ ajaxData({
                 align: 'left',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '清洁指数' + '(' + res.body.units.clean_mark + ')',

@@ -82,6 +82,13 @@ ajaxData({
     // 点击电站名  跳转到电站页面
     $scope.trClick = (item, index, event) => {
         if (!event.target.className.includes('clickable')) return;
+        if (event.target.className.includes('eq')) {
+            const { stid, eqid } = item;
+            return $scope.$broadcast("equipmentPopUp", {
+                stid,
+                eqid
+            });
+        };
         $scope.reloadParentPage({
             stationData: {
                 dataType: 0,
@@ -289,6 +296,9 @@ ajaxData({
                 align: 'left',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable eq">${text}</span>`
+                }
             },
             {
                 title: '清洁指数' + '(' + res.body.units.clean_mark + ')',

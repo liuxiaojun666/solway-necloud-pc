@@ -58,6 +58,13 @@ ajaxData(
             return $scope.$broadcast('equipmentShadowDetails', item);
         }
         if (!event.target.className.includes('clickable')) return;
+        if (event.target.className.includes('eq')) {
+            const { stid, eqid } = item;
+            return $scope.$broadcast("equipmentPopUp", {
+                stid,
+                eqid
+            });
+        };
         $scope.reloadParentPage({
             stationData: {
                 dataType: 0,
@@ -199,6 +206,9 @@ ajaxData(
                 align: 'left',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<span class="clickable eq">${text}</span>`
+                }
             },
             {
                 title: '异常阴影组串数',
