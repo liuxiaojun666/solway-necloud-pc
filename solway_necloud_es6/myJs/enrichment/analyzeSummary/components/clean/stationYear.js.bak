@@ -59,7 +59,22 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
-    }
+    },
+    stationPreBestCleanDataLine: {
+        name: 'GETstationPreBestCleanDataLine',
+        data: {},
+        later: true
+    },
+    stationCleanCost: {
+        name: 'GETstationCleanCost',
+        data: {},
+        later: true
+    },
+    stationLastDayCleanData: {
+        name: 'GETstationLastDayCleanData',
+        data: {},
+        later: true
+    },
 }, {
     __serviceName__: 'cleanStationYearService',
 })('cleanStationYearCtrl', ['$scope', 'cleanStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -133,32 +148,20 @@ ajaxData({
                 date: dateTime.showDate
             });
         }
-        if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_station_dust_year_timelist.getData({
-                queryCode: 'analysis_station_dust_year_timelist',
-                queryType: 3,
-                date: dateTime.showDate
-            });
-        } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_station_dust_year_timeline.getData({
-                queryCode: 'analysis_station_dust_year_timeline',
-                queryType: 3,
-                date: dateTime.showDate
-            });
-        } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_station_dust_year_devicelist.getData({
-                queryCode: 'analysis_station_dust_year_devicelist',
-                queryType: 3,
-                date: dateTime.showDate
-            });
-        } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_station_dust_year_deviceline.getData({
-                queryCode: 'analysis_station_dust_year_deviceline',
-                queryType: 3,
-                sort: 'clean_mark,asc',
-                date: dateTime.showDate
-            });
-        } else if (tabIndex === 2) {
+        // if (tabIndex === 0 && showShape === 'list') {
+        //     $scope.analysis_station_dust_month_timelist.getData({
+        //         queryCode: 'analysis_station_dust_month_timelist',
+        //         queryType: 3,
+        //         date: dateTime.showDate
+        //     });
+        // } else if (tabIndex === 0 && showShape === 'chart') {
+        //     $scope.analysis_station_dust_month_timeline.getData({
+        //         queryCode: 'analysis_station_dust_month_timeline',
+        //         queryType: 3,
+        //         date: dateTime.showDate
+        //     });
+        // } 
+        if (tabIndex === 0) {
             $scope.resourceDetailStationDay.getData({
                 date: (new Date).Format('yyyy-MM-dd'),
                 dateType: 3,
@@ -184,6 +187,63 @@ ajaxData({
                     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
                 });
             });
+        } else if (tabIndex === 1 && showShape === 'list') {
+            $scope.analysis_station_dust_year_devicelist.getData({
+                queryCode: 'analysis_station_dust_year_devicelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 1 && showShape === 'chart') {
+            $scope.analysis_station_dust_year_deviceline.getData({
+                queryCode: 'analysis_station_dust_year_deviceline',
+                queryType: 3,
+                sort: 'clean_mark,asc',
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 2) {
+            // $scope.resourceDetailStationDay.getData({
+            //     date: (new Date).Format('yyyy-MM-dd'),
+            //     dateType: 3,
+            //     queryType: 3
+            // });
+            // $scope.action_station_clean_suggest_mark_30day_line.getData({
+            //     queryCode: 'action_station_clean_suggest_mark_30day_line',
+            //     queryType: 3,
+            //     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 365).Format('yyyy-MM-dd'),
+            //     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            // });
+            // $scope.action_station_clean_suggest_subject.getData({
+            //     queryCode: 'action_station_clean_suggest_subject',
+            //     queryType: 3,
+            //     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+            //     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            // }).then((res) => {
+            //     if (res.body.data.pre_clean_status !== 1) return;
+            //     $scope.action_station_clean_suggest_dust_30day_dust_we.getData({
+            //         queryCode: 'action_station_clean_suggest_dust_30day_dust_we',
+            //         queryType: 3,
+            //         start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+            //         date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            //     });
+            // });
+            const date = (new Date(Date.now() - 24 * 60 * 60 * 1000)).Format('yyyy-MM-dd');
+            $scope.stationPreBestCleanDataLine.getData({
+                date,
+                dateType: 3,
+                queryType: 3
+            });
+            $scope.stationCleanCost.getData().then(res => {
+                $scope.cost = res.body.totalCost;
+                $scope.price = res.body.price || 1;
+                const { price, cost } = $scope;
+                $scope.stationLastDayCleanData.getData({
+                    date,
+                    dateType: 3,
+                    queryType: 3,
+                    price,
+                    cost
+                });
+            });
         } else if (tabIndex === 3) {
             $scope.analysis_station_clean_page.getData({
                 queryCode: 'analysis_station_clean_page',
@@ -193,6 +253,11 @@ ajaxData({
         }
         $scope.$apply();
     };
+
+    $scope.stationPreBestCleanDataLine.subscribe(res => {
+        $scope.xdata = res.body.x;
+        $scope.ydatas = [[res.body.fut_bcl_kwh_curve]]
+    });
 
     // 时间 列表
     $scope.analysis_station_dust_year_timelist.getDataCallback = (success, res) => {
@@ -354,6 +419,8 @@ ajaxData({
         $scope.analysis_station_dust_year_deviceline.res = null;
         $scope.action_station_clean_suggest_mark_30day_line.res = null;
         $scope.analysis_station_clean_page.res = null;
+        $scope.stationPreBestCleanDataLine.res = null;
+        $scope.stationLastDayCleanData.res = null;
         if (getInfo) $scope.analysis_station_dust_year_info.res = null;
     }
 

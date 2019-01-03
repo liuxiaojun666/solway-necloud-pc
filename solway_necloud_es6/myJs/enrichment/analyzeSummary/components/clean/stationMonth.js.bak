@@ -59,7 +59,22 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
-    }
+    },
+    stationPreBestCleanDataLine: {
+        name: 'GETstationPreBestCleanDataLine',
+        data: {},
+        later: true
+    },
+    stationCleanCost: {
+        name: 'GETstationCleanCost',
+        data: {},
+        later: true
+    },
+    stationLastDayCleanData: {
+        name: 'GETstationLastDayCleanData',
+        data: {},
+        later: true
+    },
 }, {
     __serviceName__: 'cleanStationMonthService',
         base64str2: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAgCAMAAACrZuH4AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAABCUExURUxpcVah/1ah/1ei/1Wj/1ai/1Sk/1ai/1ai/1ai/1ei/1eo/1ai/2Kh/1ei/1ah/1ai/1ai/1Kk/1ah/1eh/1ei/2BAiUsAAAAVdFJOUwBYR9Uj9hLwMMA/B3oCpeVihRywkxGe08QAAAC2SURBVDjL1ZJJEoMgEEUZRCYFHP79rxpBYxJtqMoueQuqF6+apvmM/Rr9pBEtH6uC0ShYX+twCEBgbHbO3IwVJ2LJp7w4XuGK7j6MDnfs+9AmEQbEq8ECkuEpOEULsMckY0SVvYtAA56NoWXIbPCWAV9ZxYkqg4SGEfZPs1Uhzsd7k6SvCPOXGXPl7cmc5S1CSpb1rVsUtKSMqaxYwuRyogyt+y0FsFsZVU8ZKafBD/k7uWB/yQNS9R/qm8zvWAAAAABJRU5ErkJggg=='
@@ -134,32 +149,20 @@ ajaxData({
                 date: dateTime.showDate
             });
         }
-        if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_station_dust_month_timelist.getData({
-                queryCode: 'analysis_station_dust_month_timelist',
-                queryType: 3,
-                date: dateTime.showDate
-            });
-        } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_station_dust_month_timeline.getData({
-                queryCode: 'analysis_station_dust_month_timeline',
-                queryType: 3,
-                date: dateTime.showDate
-            });
-        } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_station_dust_month_devicelist.getData({
-                queryCode: 'analysis_station_dust_month_devicelist',
-                queryType: 3,
-                date: dateTime.showDate
-            });
-        } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_station_dust_month_deviceline.getData({
-                queryCode: 'analysis_station_dust_month_deviceline',
-                queryType: 3,
-                sort: 'clean_mark,asc',
-                date: dateTime.showDate
-            });
-        } else if (tabIndex === 2) {
+        // if (tabIndex === 0 && showShape === 'list') {
+        //     $scope.analysis_station_dust_month_timelist.getData({
+        //         queryCode: 'analysis_station_dust_month_timelist',
+        //         queryType: 3,
+        //         date: dateTime.showDate
+        //     });
+        // } else if (tabIndex === 0 && showShape === 'chart') {
+        //     $scope.analysis_station_dust_month_timeline.getData({
+        //         queryCode: 'analysis_station_dust_month_timeline',
+        //         queryType: 3,
+        //         date: dateTime.showDate
+        //     });
+        // } 
+        if (tabIndex === 0) {
             $scope.resourceDetailStationDay.getData({
                 date: (new Date).Format('yyyy-MM-dd'),
                 dateType: 3,
@@ -183,6 +186,64 @@ ajaxData({
                     queryType: 3,
                     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
                     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                });
+            });
+        }
+        else if (tabIndex === 1 && showShape === 'list') {
+            $scope.analysis_station_dust_month_devicelist.getData({
+                queryCode: 'analysis_station_dust_month_devicelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 1 && showShape === 'chart') {
+            $scope.analysis_station_dust_month_deviceline.getData({
+                queryCode: 'analysis_station_dust_month_deviceline',
+                queryType: 3,
+                sort: 'clean_mark,asc',
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 2) {
+            // $scope.resourceDetailStationDay.getData({
+            //     date: (new Date).Format('yyyy-MM-dd'),
+            //     dateType: 3,
+            //     queryType: 3
+            // });
+            // $scope.action_station_clean_suggest_mark_30day_line.getData({
+            //     queryCode: 'action_station_clean_suggest_mark_30day_line',
+            //     queryType: 3,
+            //     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 365).Format('yyyy-MM-dd'),
+            //     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            // });
+            // $scope.action_station_clean_suggest_subject.getData({
+            //     queryCode: 'action_station_clean_suggest_subject',
+            //     queryType: 3,
+            //     start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+            //     date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            // }).then((res) => {
+            //     if (res.body.data.pre_clean_status !== 1) return;
+            //     $scope.action_station_clean_suggest_dust_30day_dust_we.getData({
+            //         queryCode: 'action_station_clean_suggest_dust_30day_dust_we',
+            //         queryType: 3,
+            //         start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+            //         date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            //     });
+            // });
+            const date = (new Date(Date.now() - 24 * 60 * 60 * 1000)).Format('yyyy-MM-dd');
+            $scope.stationPreBestCleanDataLine.getData({
+                date,
+                dateType: 3,
+                queryType: 3
+            });
+            $scope.stationCleanCost.getData().then(res => {
+                $scope.cost = res.body.totalCost;
+                $scope.price = res.body.price || 1;
+                const { price, cost } = $scope;
+                $scope.stationLastDayCleanData.getData({
+                    date,
+                    dateType: 3,
+                    queryType: 3,
+                    price,
+                    cost
                 });
             });
         } else if (tabIndex === 3) {
@@ -309,6 +370,11 @@ ajaxData({
         $scope.ydatas = [[res.body.data.clean_mark]];
     };
 
+    $scope.stationPreBestCleanDataLine.subscribe(res => {
+        $scope.xdata = res.body.x;
+        $scope.ydatas = [[res.body.fut_bcl_kwh_curve]]
+    });
+
 
     $scope.action_station_clean_suggest_mark_30day_line.subscribe(res => {
         $scope.xdata = res.body.data.dtime;
@@ -377,6 +443,8 @@ ajaxData({
         $scope.analysis_station_dust_month_deviceline.res = null;
         $scope.action_station_clean_suggest_mark_30day_line.res = null;
         $scope.analysis_station_clean_page.res = null;
+        $scope.stationPreBestCleanDataLine.res = null;
+        $scope.stationLastDayCleanData.res = null;
         if (getInfo) $scope.analysis_station_dust_month_info.res = null;
     }
 
