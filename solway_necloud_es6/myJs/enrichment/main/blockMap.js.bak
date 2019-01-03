@@ -4,6 +4,20 @@ ajaxData(
             name: 'GETpowerStationStatusDataNew2',
             data: {},
             onlyLatest: true
+        },
+        powerStationModalShowData: {
+            name: 'GETpowerStationModalShowData',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            cache: true
+        },
+        userAuthHandleChangeDataType: {
+            name: 'GETUserAuthHandleChangeDataType',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            cache: true
         }
     }, {
         __serviceName__: 'mapViewService',
@@ -64,7 +78,7 @@ ajaxData(
             return arrData;
         }
     }
-)('mapViewCtrl', ['$scope', 'mapViewService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+)('mapViewCtrl', ['$scope', 'mapViewService', 'actionRecord', '$interval', '$state'], ($scope, myAjaxData, historicalRecord, $interval, $state) => {
     const myChart = echarts.init(document.getElementById('chinaChart'));
 
     $scope.powerStationStatusDataNew2.subscribe(res => {
@@ -78,7 +92,7 @@ ajaxData(
                 op.series[2].data = myAjaxData.config.formatMapData(v, "3");
             } else if (v.name == "风电") {
                 op.series[3].data = myAjaxData.config.formatMapData(v, "4");
-            } 
+            }
         });
         myChart.setOption(op, true);
     });
@@ -115,8 +129,8 @@ ajaxData(
             geo: {
                 map: 'china',
                 roam: true,
-                zoom: 1,
-                center: [105, 35],
+                zoom: 1.2,
+                center: [105, 38],
                 label: {
                     normal: {
                         show: false,
@@ -199,6 +213,45 @@ ajaxData(
             myChart.resize();
         });
     }());
+
+    async function clickMapArea(param, id) {
+        const e = param.event || window.event;
+        $scope.xPos = e.offsetX + document.body.scrollLeft + document.documentElement.scrollLeft - 225;
+        $scope.yPos = e.offsetY + document.body.scrollTop + document.documentElement.scrollTop - 353;
+        if ($scope.isMagnified) {
+            $scope.xPos += 15;
+            $scope.yPos += 20;
+        }
+        $scope.stationBlockDisplay = true;
+        const res = await $scope.powerStationModalShowData.getData({ id });
+        if (!res) return;
+        $scope.powerStationModalShowData.res.name = param.name;
+        $scope.powerStationModalShowData.res.id = id;
+        $scope.powerStationModalShowData.res.stClass = param.seriesName === '风电' ? '02' : '01';
+        if (res.powerData.comm == 1) {
+            $scope.powerStationModalShowData.res.statusText = `<span class="black-5">通讯中断</span>`;
+        } else if (res.powerData.comm == 2) {
+            $scope.powerStationModalShowData.res.statusText = `<span class="black-5">初始化</span>`;
+        } else {
+            if (res.powerData.status == 1) {//故障
+                $scope.powerStationModalShowData.res.statusText = `<span class="map-red">故障</span>`;
+            } else if (res.powerData.status == 2) {//报警
+                $scope.powerStationModalShowData.res.statusText = `<span class="map-yellow">报警</span>`;
+            } else {//正常
+                $scope.powerStationModalShowData.res.statusText = `<span class="map-green">正常运行</span>`;
+            }
+        }
+        $scope.$apply();
+    }
+
+
+    $scope.goStationPage = async (data) => {
+        if (data.stClass === '02') return;
+        await $scope.userAuthHandleChangeDataType.getData(data);
+        $scope.$apply();
+        if (data.stClass === '01') $state.go('monitoringSummary');
+        else if (data.stClass === '02') return;
+    };
 
 
 });

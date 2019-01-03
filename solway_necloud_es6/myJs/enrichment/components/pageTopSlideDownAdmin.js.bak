@@ -61,75 +61,7 @@ app.directive('pageSlideDownAdmin', ['$ocLazyLoad', '$http', '$state', '$statePa
             data: {}
         }).then(res => {
             $scope.adminPages = res.body[0].children.map(v => ({state: v.uiState, name: v.name}));
-            $scope.productLibrary = res.body[1].children.map(v => ({state: v.uiState, name: v.name}));
+            $scope.productLibrary = res.body[1] && res.body[1].children.map(v => ({state: v.uiState, name: v.name}));
         });
-        $scope.adminPages = [
-            {
-                state: 'app.powerStation',
-                name: '电站管理'
-            },
-            {
-                state: 'app.userInformation',
-                name: '用户管理'
-            },
-            {
-                state: 'app.roleInformationList',
-                name: '角色管理'
-            },
-            {
-                state: 'app.rightInformation',
-                name: '权限管理'
-            },
-            {
-                state: 'app.knowledge',
-                name: '知识库'
-            },
-            // {
-            //     state: 'app.modelConfig',
-            //     name: '应发模型配置'
-            // },
-            {
-                state: 'app.baseDictionary',
-                name: '字典管理'
-            },
-            {
-                state: 'app.systemDataInit',
-                name: '数据初始化'
-            },
-            {
-                state: 'app.ureportConfig2',
-                name: '报表配置'
-            },
-            {
-                state: 'purchaseModules',
-                name: '模块购买'
-            },
-            {
-                state: 'systemModules',
-                name: '系统模块'
-            },
-            {
-                state: 'defaultRoles',
-                name: '默认角色'
-            },
-        ];
-        $scope.productLibrary = [
-            {
-                state: 'app.manufacturer',
-                name: '厂商管理'
-            },
-            {
-                state: 'app.product',
-                name: '产品管理'
-            },
-            {
-                state: 'app.protocol',
-                name: '协议管理'
-            },
-            {
-                state: 'app.commProtocol',
-                name: '通讯规约管理'
-            },
-        ];
     }
 })])

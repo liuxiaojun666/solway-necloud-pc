@@ -130,8 +130,20 @@ ajaxData(
     const myPieChart4 = echarts.init(document.getElementById('pieChart4'));
     const myPieChart5 = echarts.init(document.getElementById('pieChart5'));
     $scope.deviceStatusFromRedis.subscribe(res => {
-        const class01 = res['01'];
-        const class02 = res['02'];
+        const class01 = res['01'] || {
+            comm: 0,
+            fault: 0,
+            maintain: 0,
+            run: 0,
+            wait: 0
+        };
+        const class02 = res['02'] || {
+            comm: 0,
+            fault: 0,
+            maintain: 0,
+            run: 0,
+            wait: 0
+        };
         const class01Total = Object.values(class01).reduce((a, b) => a + b, 0);
         const class02Total = Object.values(class02).reduce((a, b) => a + b, 0);
         function getOption(index, name, color) {
