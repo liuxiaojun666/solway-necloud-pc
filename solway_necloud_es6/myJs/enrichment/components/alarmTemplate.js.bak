@@ -30,9 +30,10 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             $scope.initData();
         })
 
-        //报警状态
+        //报警状态,初始化参数
         $scope.currentStatus = 'normal'; //abnormal,normal
         $scope.ifVoiced = true;
+        $scope.notShowFinish = 1;
 
         var newUtterance = new SpeechSynthesisUtterance();
         newUtterance.lang = 'zh-cn';
@@ -77,6 +78,13 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         //控制是否可以语音播放
         $scope.changeInput = (e) =>{
             $scope.ifVoiced = e.target.checked;
+        }
+
+        //控制是否显示已消缺
+        $scope.changeInputAbsent = e =>{
+            $scope.notShowFinish = e.target.checked?1:0;
+            $scope.maxUpdateTime = 0;
+            $scope.initData();
         }
 
         //批量标记为已确认
@@ -136,7 +144,8 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 params: {
                     maxUpdateTime:$scope.maxUpdateTime,
                     voiceTime:voiceTime,
-                    eventTypes:checkedCondition.join(',')
+                    eventTypes:checkedCondition.join(','),
+                    notShowFinish:$scope.notShowFinish
                 }
             }).success(function (res) {
                 $scope.pendding = false;
