@@ -246,11 +246,10 @@ ajaxData(
 
 
     $scope.goStationPage = async (data) => {
-        if (data.stClass === '02') return;
         await $scope.userAuthHandleChangeDataType.getData(data);
         $scope.$apply();
-        if (data.stClass === '01') $state.go('monitoringSummary');
-        else if (data.stClass === '02') return;
+        if (data.stClass === '01') return $state.go('monitoringSummary');
+        else if (data.stClass === '02') return $state.go('monitoringSummaryWp');
     };
 
 
