@@ -51,7 +51,7 @@ ajaxData(
         },
         // 列表视图  获取 设备 类型 箱变 列表
         getRunRealDataBBoxChange: {
-            name: 'GETDeviceStationGetRunRealDataBBoxChange',
+            name: 'GETDeviceStationGetRealDataBBoxChange',
             data: {},
             later: true,
             onlyLatest: true,
@@ -168,13 +168,14 @@ ajaxData(
     };
 
     // 列表视图  切换 设备类型
-    $scope.switchDeviceType = () => {
+    $scope.switchDeviceType = (type) => {
         historicalRecord.set({
             themeEquipmentOperationStationDayToday: {
                 ...historicalRecord.get().themeEquipmentOperationStationDayToday || {},
-                currentDeviceType: $scope.currentDeviceType
+                currentDeviceType: $scope.currentDeviceType = type || $scope.currentDeviceType
             }
         });
+        if (type) $scope.column = [];
         $scope.diffDeviceTypeGetData();
     };
 
@@ -194,50 +195,18 @@ ajaxData(
 
     // 逆变器 列表视图 点击 行
     $scope.showInformation = function (item, index) {
-        const { did: serialnumber, sid: pstationid } = item;
-        $scope.selectByConditionMap.getData({
-            stid: pstationid,
-            sn: serialnumber
-        }).then(function (result) {
-            if (result) showHistoryData_byRTMDeviceLogId(pstationid, result.id, serialnumber, '2', result.hasJB);
+        $scope.$broadcast("equipmentPopUp", {
+            stid: item.sid,
+            eqid: item.did
         });
-    };
-
-    // 箱变 列表视图 点击 行
-    $scope.showBoxChangeData = (item, index) => {
-        $scope.showHistoryData_byRTMDeviceLogId(pstationid, result.id, serialnumber, '3');
-    };
-
-    // 汇流箱 列表视图 点击 行
-    $scope.toJunctionBoxMonitor = (item, index) => {
-        $scope.showHistoryData_byRTMDeviceLogId(pstationid, result.id, serialnumber, '1');
-    };
-
-    //设备  弹窗
-    function showHistoryData_byRTMDeviceLogId(pstationid, deviceId, deviceSerialNnumber, deviceTypeNow, hasJB) {
-        const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, defaultShowPage: '2' , hasJB};
-        $scope.$broadcast("equipmentPopUp", res);
-
-        // $scope.deviceTypeNow = deviceTypeNow;
-        // $scope.inverterType = hasJB;//点击逆变器，不同类型跳转不同样式页面（1->inverterDetailNew.jsp,2->inverterDetailNewType1.jsp）
-
-        // if (deviceTypeNow == '3') {
-        //     $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
-        //     $scope.$broadcast("showDeviceDetail3broad", res);
-        // } else if (deviceTypeNow == '2') {
-        //     $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
-        //     $scope.$broadcast("showDeviceDetail2broad", res);
-        // } else if (deviceTypeNow == '1') {
-        //     $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
-        //     $scope.$broadcast("showDeviceDetail1broad", res);
-        // }
     };
 
     // 列表视图 接口请求
     $scope.diffDeviceTypeGetData = () => {
         switch ($scope.currentDeviceType) {
             case '1':
-                $scope.getRunRealDataBBoxChange.getData({
+                if ($scope.getRunRealDataBJunction.isLoding) return
+                $scope.getRunRealDataBJunction.getData({
                     search: $scope.searchKey,
                     status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
                 });
@@ -252,7 +221,8 @@ ajaxData(
                 break;
 
             case '3':
-                $scope.getRunRealDataBJunction.getData({
+                if ($scope.getRunRealDataBBoxChange.isLoding) return
+                $scope.getRunRealDataBBoxChange.getData({
                     search: $scope.searchKey,
                     status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
                 });
@@ -470,6 +440,491 @@ ajaxData(
                 }
             },
 
+        ].concat(new Array(20).fill('c').map((v, i) => ({
+            dataIndex: v + (i + 1),
+            title: `<span>${i + 1}</span>`,
+            width: '80px',
+            align: 'right',
+            render(text, item, index) {
+                return item.hasJB === '0' ? '' : `
+                        <div style="background: ${item.shadowFlags && item.shadowFlags[i] ? 'rgba(0, 0, 0,0.3)' : ''}">
+                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags && item.statuFlags[i]) ? text.toFixed(2) : '-')}</span>
+                        </div>
+                        `
+            }
+        })));
+    };
+    // 电站 今日 设备 列表视图 箱变 列表
+    $scope.getRunRealDataBBoxChange.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                dataIndex: 'statusDesc',
+                title: '状态',
+                width: '80px',
+                sort: true,
+                fixed: 'left',
+                render(text, item, index) {
+                    if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                    else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else return `<span>${text}</span>`;
+                }
+            },
+            {
+                dataIndex: 'did',
+                title: '编号',
+                width: '60px',
+                fixed: 'left',
+                sort: true,
+            },
+            {
+                dataIndex: 'name',
+                title: '名称',
+                width: '120px',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `<text style="color: #428bca;">${text}</text>`
+                }
+            },
+            {
+                dataIndex: 'dtime',
+                title: '时间',
+                width: '140px',
+                align: 'center',
+                sort: true,
+                render(text) {
+                    return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
+                }
+            }, {
+                dataIndex: 'pa1',
+                title: '绕组1A相有功功率(kW)',
+                width: '150px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'pb1',
+                title: '绕组1B相有功功率(kW)',
+                width: '150px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'pc1',
+                title: '绕组1C相有功功率(kW)',
+                width: '150px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'qa1',
+                title: '绕组1A相无功功率(kVar)',
+                width: '160px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'qb1',
+                title: '绕组1B相无功功率(kVar)',
+                width: '160px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'qc1',
+                title: '绕组1C相无功功率(kVar)',
+                width: '160px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'ca1',
+                title: '绕组1A相电流(A)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'cb1',
+                title: '绕组1B相电流(A)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'cc1',
+                title: '绕组1C相电流(A)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'ua1',
+                title: '绕组1A相电压(V)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'ub1',
+                title: '绕组1B相电压(V)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'uc1',
+                title: '绕组1C相电压(V)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'f1',
+                title: '绕组1频率(Hz)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'pf1',
+                title: '绕组1功率因数',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'w1',
+                title: '绕组1电量(kWh)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'pa2',
+                title: '绕组2A相有功功率(kW)',
+                width: '150px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'pb2',
+                title: '绕组2B相有功功率(kW)',
+                width: '150px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'pc2',
+                title: '绕组2C相有功功率(kW)',
+                width: '150px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'qa2',
+                title: '绕组2A相无功功率(kVar)',
+                width: '160px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'qb2',
+                title: '绕组2B相无功功率(kVar)',
+                width: '160px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'qc2',
+                title: '绕组2C相无功功率(kVar)',
+                width: '160px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'ca2',
+                title: '绕组2A相电流(A)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'cb2',
+                title: '绕组2B相电流(A)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'cc2',
+                title: '绕组2C相电流(A)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'ua2',
+                title: '绕组2A相电压(V)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'ub2',
+                title: '绕组2B相电压(V)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'uc2',
+                title: '绕组2C相电压(V)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'f2',
+                title: '绕组2频率(Hz)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'pf2',
+                title: '绕组2功率因数',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'w2',
+                title: '绕组2电量(kWh)',
+                width: '120px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'ta',
+                title: 'A相温度(℃)',
+                width: '80px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'tb',
+                title: 'B相温度(℃)',
+                width: '80px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 'tc',
+                title: 'C相温度(℃)',
+                width: '80px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }, {
+                dataIndex: 't',
+                title: '温度(℃)',
+                width: '80px',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                },
+                align: 'right'
+            }
+        ];
+    };
+    // 电站 今日 设备 列表视图 汇流箱 列表
+    $scope.getRunRealDataBJunction.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                dataIndex: 'statusDesc',
+                title: '状态',
+                width: '80px',
+                sort: true,
+                fixed: 'left',
+                render(text, item, index) {
+                    if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                    else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else return `<span>${text}</span>`;
+                }
+            },
+            {
+                dataIndex: 'did',
+                title: '编号',
+                width: '50px',
+                fixed: 'left',
+                sort: true,
+            },
+            {
+                dataIndex: 'name',
+                title: '名称',
+                width: '120px',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `<text style="color: #428bca;">${text}</text>`
+                }
+            },
+            {
+                dataIndex: 'dtime',
+                title: '时间',
+                width: '100px',
+                align: 'center',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
+                }
+            }, 
+            {
+                dataIndex: 'k',
+                title: '开关',
+                width: '60px',
+                align: 'center',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `
+                        <span>${['无效', '无效', '闭合', '开启'][text]}</span>
+                    `
+                }
+            }, 
+            {
+                dataIndex: 'arrester',
+                title: '防雷器',
+                width: '60px',
+                align: 'center',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `
+                        <span>${['无效', '无效', '正常', '异常'][text]}</span>
+                    `
+                }
+            }, 
+            {
+                dataIndex: 'u',
+                title: '电压(V)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, {
+                dataIndex: 'c',
+                title: '电流(A)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, {
+                dataIndex: 'p',
+                title: '功率(kW)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, {
+                dataIndex: 't',
+                title: '温度(℃)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, {
+                dataIndex: 'ef',
+                title: '效率(%)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${(text * 100).toFixed(2)}</span>`
+                }
+            }
         ].concat(new Array(20).fill('c').map((v, i) => ({
             dataIndex: v + (i + 1),
             title: `<span>${i + 1}</span>`,
