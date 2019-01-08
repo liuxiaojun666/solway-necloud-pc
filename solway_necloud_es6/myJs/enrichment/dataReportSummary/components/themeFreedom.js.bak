@@ -401,4 +401,13 @@ ajaxData(
         });
     };
 
+    // 打印 Excel
+    $scope.excelPrint = () => {
+        $scope.fileLoading = true;
+        $ocLazyLoad.load('vendor/spreadjs/scripts/gc.spread.sheets.print.11.0.0.min.js').then(() => {
+            spread.print();
+            $scope.fileLoading = false;
+        });
+    };
+
 });
