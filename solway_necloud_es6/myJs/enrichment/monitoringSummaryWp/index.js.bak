@@ -49,21 +49,25 @@ ajaxData({
     async function historyInitCallback  () {
         const historiData = historicalRecord.get();
         const { detailFullPage,
-            dateType = 0,
-            dateTime = new Date(),
+            // dateType = 0,
+            // dateTime = new Date(),
             theme = 'EquipmentOperation',
-            stationData 
+            stationData
         } = historiData;
-        if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
+        // if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope.dateTime = new Date();
+        $scope.dateTime.showDate = $scope.dateTime.Format('yyyy-MM-dd');
         $scope.dateType = 0;
+        $scope._dateTime = $scope.dateTime;
+        $scope._dateType = $scope.dateType;
         // $scope.dateTime = dateTime;
         // $scope.dateType = dateType;
-        $scope._dateTime = dateTime;
-        $scope._dateType = dateType;
+        // $scope._dateTime = dateTime;
+        // $scope._dateType = dateType;
+        historicalRecord.set({ dateType: $scope.dateType, dateTime: $scope.dateTime });
         $scope.theme = theme;
         $scope.detailFullPage = detailFullPage;
-        if (!stationData) historicalRecord.set({ dateType, dateTime, theme });
+        if (!stationData) historicalRecord.set({ theme });
         await diffStationInfo(stationData);
         $scope.beforeLoading = false;
         computeClass();

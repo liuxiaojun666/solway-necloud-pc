@@ -1,9 +1,15 @@
 ajaxData({
-    query_station_day_res_timeone_his: {
-        name: 'GETquery_station_day_res_timeone_his',
-        data: {},
+    // 电站日
+    stationDay: {
+        name: 'GETwpMonitorGetRunResDetail',
+        data: {
+            queryType: 3,
+            dateType: 3,
+            date: (new Date).Format('yyyy-MM-dd')
+        },
         later: true,
         onlyLatest: true,
+        sameTimeOnce: true,
     },
 }, {
 
@@ -29,9 +35,9 @@ ajaxData({
         $scope.dateUpdated = async () => {
             if ($scope.currentClass !== 'StationDayAgo') return;
             await myAjaxData.timeout(0);
-            if ($scope.currentClass === 'StationDayAgo') $scope.query_station_day_res_timeone_his.getData({
+            if ($scope.currentClass === 'StationDayAgo') $scope.stationDay.getData({
                 queryType: 3,
-                queryCode: 'query_station_day_res_timeone_his',
+                dateType: 3,
                 date: $scope.dateTime.showDate
             });
         };
@@ -41,12 +47,12 @@ ajaxData({
         $scope.switchPowerCallback = () => {
             if ($scope.currentClass !== 'StationDayAgo') return;
             if (!$scope.initComplete) return;
-            $scope.query_station_day_res_timeone_his.res = null;
-            if ($scope.dateType === 0) return $scope.query_station_day_res_timeone_his.getData({});
+            $scope.stationDay.res = null;
+            if ($scope.dateType === 0) return $scope.stationDay.getData({});
         };
 
         $scope.$on('$destroy', () => {
-            $scope.query_station_day_res_timeone_his.res = null;
+            $scope.stationDay.res = null;
         });
 
     });

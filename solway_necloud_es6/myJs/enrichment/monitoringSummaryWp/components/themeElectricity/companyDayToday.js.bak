@@ -1,6 +1,6 @@
 ajaxData({
     companyDayToday: {
-        name: 'GETpvMonitorGetRunKWPowerList',
+        name: 'GETrunKWPowerList',
         data: {
             queryType: 1,
             dateType: 3,
@@ -38,7 +38,7 @@ ajaxData({
                     dataType: 0,
                     id: item.stid,
                     isGroup: "0",
-                    stClass: '01'
+                    stClass: '02'
                 }
             });
         };
@@ -74,21 +74,27 @@ ajaxData({
                     dataIndex: 'real_kwh',
                     width: '10%',
                     sort: true,
-                    align: 'right'
+                    align: 'right',
+                    render(text) {
+                        return text && text[0];
+                    }
                 },
                 {
                     title: '上网电量(kWh)',
-                    dataIndex: 'send_kwh_chk',
+                    dataIndex: 'send_kwh',
                     width: '10%',
                     sort: true,
                     align: 'right'
                 },
                 {
-                    title: '辐射总量(kWh/㎡)',
-                    dataIndex: 'real_ld_kw',
+                    title: '平均风速(m/s)',
+                    dataIndex: 'ws',
                     width: '10%',
                     sort: true,
-                    align: 'right'
+                    align: 'right',
+                    render(text) {
+                        return text && text[0];
+                    }
                 },
                 {
                     title: '发电小时数(h)',

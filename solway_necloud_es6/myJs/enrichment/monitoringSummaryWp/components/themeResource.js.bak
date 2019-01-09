@@ -1,9 +1,29 @@
 ajaxData({
     pageData:{
-        name:'GETResourceInfo',
+        name:'GETwpMonitorGetRunRes',
         later: true,
         onlyLatest: true
-    }
+    },
+    query_wp_station_month_res_subject_his:{
+        name:'GETquery_wp_station_month_res_subject_his',
+        later: true,
+        onlyLatest: true
+    },
+    query_wp_station_year_res_subject_his:{
+        name:'GETquery_wp_station_year_res_subject_his',
+        later: true,
+        onlyLatest: true
+    },
+    query_wp_company_month_res_subject_his:{
+        name:'GETquery_wp_company_month_res_subject_his',
+        later: true,
+        onlyLatest: true
+    },
+    query_wp_company_year_res_subject_his:{
+        name:'GETquery_wp_company_year_res_subject_his',
+        later: true,
+        onlyLatest: true
+    },
 }, {
     __serviceName__: 'themeResourceAjaxData'
     })('themeResourceCtrl', ['$scope', 'themeResourceAjaxData', '$interval'], ($scope, myAjaxData, $interval) => {
@@ -54,17 +74,43 @@ ajaxData({
     }
 
     //接口
-    $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        // $scope.themeResourceIsLoding = !$scope.pageData.res;//第一次请求接口，loading
-        $scope.pageData.getData({
-            'queryType': queryType,
-            'date': dateTime,
-            'dateType': dateType
-        }).then(res => {
-            $scope.themeResourceIsLoding = false;
-            if (res.code == 0) $scope.data = res.body;
-        })
-    }
+    $scope.getAjaxData = async (queryType, dateTime, dateType) => {
+        const { currentClass} = $scope;
+        if (dateType === 3) {
+            await $scope.pageData.getData({
+                'queryType': queryType,
+                'date': dateTime,
+                'dateType': dateType
+            });
+        } else if (currentClass === 'StationMonth') {
+            await $scope.query_wp_station_month_res_subject_his.getData({
+                queryCode: 'query_wp_station_month_res_subject_his',
+                queryType: 3,
+                date: dateTime
+            });
+        } else if (currentClass === 'StationYear') {
+            await $scope.query_wp_station_year_res_subject_his.getData({
+                queryCode: 'query_wp_station_year_res_subject_his',
+                queryType: 3,
+                date: dateTime
+            });
+        } else if (currentClass === 'CompanyMonth') {
+            await $scope.query_wp_company_month_res_subject_his.getData({
+                queryCode: 'query_wp_company_month_res_subject_his',
+                queryType: 1,
+                date: dateTime
+            });
+        } else if (currentClass === 'CompanyYear') {
+            await $scope.query_wp_company_year_res_subject_his.getData({
+                queryCode: 'query_wp_company_year_res_subject_his',
+                queryType: 1,
+                date: dateTime
+            });
+        }
+        await myAjaxData.timeout(0);
+        $scope.themeResourceIsLoding = false;
+        $scope.$apply();
+    };
 
     const interval = $interval(() => {
         if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();

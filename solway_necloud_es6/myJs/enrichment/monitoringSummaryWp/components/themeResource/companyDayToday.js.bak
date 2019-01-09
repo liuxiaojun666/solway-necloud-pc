@@ -1,7 +1,7 @@
 ajaxData({
     // 电站日
     companyDayToday: {
-        name: 'GETresourceDetailCompanyDayToday',
+        name: 'GETwpMonitorGetRunResDetail',
         data: {
             queryType: 1,
             dateType: 3,
@@ -33,7 +33,7 @@ ajaxData({
                     dataType: 0,
                     id: item.stid,
                     isGroup: "0",
-                    stClass: '01'
+                    stClass: '02'
                 }
             });
         };
@@ -65,25 +65,21 @@ ajaxData({
                     align: 'right'
                 },
                 {
-                    title: '辐射总量(kWh/m²)',
-                    dataIndex: 'rad_chk',
+                    title: '风速(m/s)',
+                    dataIndex: 'ws',
                     sort: 'true',
                     width: '15%',
                     align: 'right'
                 },
                 {
-                    title: '光照强度(W/m²)',
-                    dataIndex: 'sun',
-                    sort: 'true',
-                    width: '10%',
-                    align: 'right'
-                },
-                {
                     title: '天气',
-                    dataIndex: 'weater',
+                    dataIndex: 'weather',
                     sort: 'true',
                     width: '10%',
-                    align: 'center'
+                    align: 'center',
+                    render(text) {
+                        return {A: '晴', B: '阴', C: '雨', D: '雪', E: '霾', X: '其他'}[text]
+                    }
                 },
                 {
                     title: '温度(℃)',
@@ -94,17 +90,17 @@ ajaxData({
                 },
                 {
                     title: '今日预报',
-                    dataIndex: 'pre_weater',
+                    dataIndex: 'pre_weather',
                     sort: 'true',
                     width: '10%',
                     align: 'center',
                     render(text, item) {
-                        return text ? '<span>' + text + ' ' + item.pre_tmp + '℃' + '</span>' : '<span></span>';
+                        return text ? '<span>' + text + ' ' + item.tmp + '℃' + '</span>' : '<span></span>';
                     }
                 },
                 {
                     title: '明日预报',
-                    dataIndex: 'pre_weater2',
+                    dataIndex: 'pre_weather2',
                     sort: 'true',
                     width: '10%',
                     align: 'center',
@@ -114,7 +110,7 @@ ajaxData({
                 },
                 {
                     title: '后日预报',
-                    dataIndex: 'pre_weater3',
+                    dataIndex: 'pre_weather3',
                     sort: 'true',
                     width: '10%',
                     align: 'center',

@@ -1,28 +1,28 @@
 ajaxData({
     // 集团月资源详情时间列表
-    query_company_month_res_timelist_his: {
-        name: 'GETquery_company_month_res_timelist_his',
+    query_wp_company_month_res_timelist: {
+        name: 'GETquery_wp_company_month_res_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 集团月资源详情时间曲线
-    query_company_month_res_timeline_his: {
-        name: 'GETquery_company_month_res_timeline_his',
+    query_wp_company_month_res_timeline: {
+        name: 'GETquery_wp_company_month_res_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 集团月资源详情电站列表
-    query_company_month_res_stationlist_his: {
-        name: 'GETquery_company_month_res_stationlist_his',
+    query_wp_company_month_res_stationlist: {
+        name: 'GETquery_wp_company_month_res_stationlist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 集团月资源详情电站曲线
-    query_company_month_res_stationline_his: {
-        name: 'GETquery_company_month_res_stationline_his',
+    query_wp_company_month_res_stationline: {
+        name: 'GETquery_wp_company_month_res_stationline',
         data: {},
         later: true,
         onlyLatest: true
@@ -74,7 +74,7 @@ ajaxData({
                     dataType: 0,
                     id: item.stid,
                     isGroup: "0",
-                    stClass: '01'
+                    stClass: '02'
                 }
             });
         };
@@ -106,7 +106,7 @@ ajaxData({
         };
 
         // 公司 月 时间 列表
-        $scope.query_company_month_res_timelist_his.getDataCallback = (success, res) => {
+        $scope.query_wp_company_month_res_timelist.getDataCallback = (success, res) => {
             if (!success) return;
             $scope.datasource = res.body.data;
             $scope.column = [
@@ -116,8 +116,8 @@ ajaxData({
                     sort: 'true',
                     align: 'center'
                 }, {
-                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
-                    dataIndex: 'rad_chk',
+                    title: '平均风速' + (res.body.units.ws_avg ? '(' + res.body.units.ws_avg + ')' : ''),
+                    dataIndex: 'ws_avg',
                     sort: 'true',
                     align: 'right',
                 }, {
@@ -129,13 +129,13 @@ ajaxData({
             ];
         };
         // 公司 月 时间 柱状图
-        $scope.query_company_month_res_timeline_his.getDataCallback = (success, res) => {
+        $scope.query_wp_company_month_res_timeline.getDataCallback = (success, res) => {
             if (!success) return;
             $scope.xdata = res.body.data.dtime;
-            $scope.ydatas = [[res.body.data.rad_chk, res.body.data.real_hours]];
+            $scope.ydatas = [[res.body.data.ws_avg, res.body.data.real_hours]];
         };
         // 公司 月 电站 列表
-        $scope.query_company_month_res_stationlist_his.getDataCallback = (success, res) => {
+        $scope.query_wp_company_month_res_stationlist.getDataCallback = (success, res) => {
             if (!success) return;
             $scope.datasource = res.body.data;
             $scope.column = [
@@ -154,8 +154,8 @@ ajaxData({
                     sort: 'true',
                     align: 'right',
                 }, {
-                    title: '辐射总量' + (res.body.units.rad_chk ? '(' + res.body.units.rad_chk + ')' : ''),
-                    dataIndex: 'rad_chk',
+                    title: '平均风速' + (res.body.units.ws_avg ? '(' + res.body.units.ws_avg + ')' : ''),
+                    dataIndex: 'ws_avg',
                     sort: 'true',
                     align: 'right',
                 }, {
@@ -163,19 +163,14 @@ ajaxData({
                     dataIndex: 'real_hours',
                     sort: 'true',
                     align: 'right',
-                }, {
-                    title: '降雨量' + (res.body.units.pcpn ? '(' + res.body.units.pcpn + ')' : ''),
-                    dataIndex: 'pcpn',
-                    sort: 'true',
-                    align: 'right'
-                },
+                }
             ];
         };
         // 公司 月 电站 柱状图
-        $scope.query_company_month_res_stationline_his.getDataCallback = (success, res) => {
+        $scope.query_wp_company_month_res_stationline.getDataCallback = (success, res) => {
             if (!success) return;
             $scope.xdata = res.body.data.st_name;
-            $scope.ydatas = [[res.body.data.rad_chk, res.body.data.real_hours]];
+            $scope.ydatas = [[res.body.data.ws_avg, res.body.data.real_hours]];
         };
 
         // 判断 调用  对应 接口
@@ -185,26 +180,26 @@ ajaxData({
             const { showShape, dateTime, tabIndex } = $scope;
             setDataNull();
             if (tabIndex === 0 && showShape === 'list') {
-                $scope.query_company_month_res_timelist_his.getData({
-                    queryCode: 'query_company_month_res_timelist_his',
+                $scope.query_wp_company_month_res_timelist.getData({
+                    queryCode: 'query_wp_company_month_res_timelist',
                     queryType: 1,
                     date: dateTime.showDate
                 });
             } else if (tabIndex === 0 && showShape === 'chart') {
-                $scope.query_company_month_res_timeline_his.getData({
-                    queryCode: 'query_company_month_res_timeline_his',
+                $scope.query_wp_company_month_res_timeline.getData({
+                    queryCode: 'query_wp_company_month_res_timeline',
                     queryType: 1,
                     date: dateTime.showDate
                 });
             } else if (tabIndex === 1 && showShape === 'list') {
-                $scope.query_company_month_res_stationlist_his.getData({
-                    queryCode: 'query_company_month_res_stationlist_his',
+                $scope.query_wp_company_month_res_stationlist.getData({
+                    queryCode: 'query_wp_company_month_res_stationlist',
                     queryType: 1,
                     date: dateTime.showDate
                 });
             } else if (tabIndex === 1 && showShape === 'chart') {
-                $scope.query_company_month_res_stationline_his.getData({
-                    queryCode: 'query_company_month_res_stationline_his',
+                $scope.query_wp_company_month_res_stationline.getData({
+                    queryCode: 'query_wp_company_month_res_stationline',
                     queryType: 1,
                     date: dateTime.showDate
                 });
@@ -212,10 +207,10 @@ ajaxData({
         }
 
         function setDataNull() {
-            $scope.query_company_month_res_timelist_his.res = null;
-            $scope.query_company_month_res_timeline_his.res = null;
-            $scope.query_company_month_res_stationlist_his.res = null;
-            $scope.query_company_month_res_stationline_his.res = null;
+            $scope.query_wp_company_month_res_timelist.res = null;
+            $scope.query_wp_company_month_res_timeline.res = null;
+            $scope.query_wp_company_month_res_stationlist.res = null;
+            $scope.query_wp_company_month_res_stationline.res = null;
             $scope.xdata = void 0;
             $scope.ydatas = void 0;
             $scope.datasource = void 0;

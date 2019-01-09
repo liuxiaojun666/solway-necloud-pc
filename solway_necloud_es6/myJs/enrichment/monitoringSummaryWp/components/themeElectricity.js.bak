@@ -1,181 +1,183 @@
 ajaxData({
     //集团、电站---------当日
     electricityCurrent:{
-        name: 'GETElectricityCurrent',
+        name: 'GETwpMonitorGetRunKWPower',
         later: true
     },
-    //电站---------历史日
-    query_station_day_elec_subject_his: {
-        name: 'GETquery_station_day_elec_subject_his',
+    //电站---------日
+    query_wp_station_day_elec_subject_his: {
+        name: 'GETquery_wp_station_day_elec_subject_his',
         later: true
     },
     //电站---------月
-    query_station_month_elec_subject_his: {
-        name: 'GETquery_station_month_elec_subject_his',
+    query_wp_station_month_elec_subject_his: {
+        name: 'GETquery_wp_station_month_elec_subject_his',
         later: true
     },
     //电站---------年
-    query_station_year_elec_subject_his: {
-        name: 'GETquery_station_year_elec_subject_his',
+    query_wp_station_year_elec_subject_his: {
+        name: 'GETquery_wp_station_year_elec_subject_his',
         later: true
     },
     //集团---------历史日
-    query_company_day_elec_subject_his: {
-        name: 'GETquery_company_day_elec_subject_his',
+    query_wp_company_day_elec_subject_his: {
+        name: 'GETquery_wp_company_day_elec_subject_his',
         later: true
     },
     //集团---------月
-    query_company_month_elec_subject_his: {
-        name: 'GETquery_company_month_elec_subject_his',
+    query_wp_company_month_elec_subject_his: {
+        name: 'GETquery_wp_company_month_elec_subject_his',
         later: true
     },
     //集团---------年
-    query_company_year_elec_subject_his: {
-        name: 'GETquery_company_year_elec_subject_his',
+    query_wp_company_year_elec_subject_his: {
+        name: 'GETquery_wp_company_year_elec_subject_his',
         later: true
     }
 }, {
-    __serviceName__: 'themeElectricityAjaxData'
+        __serviceName__: 'themeElectricityAjaxData'
     })('themeElectricityCtrl', ['$scope', 'themeElectricityAjaxData', '$timeout', '$interval'], ($scope, myAjaxData, $timeout, $interval) => {
 
-    $scope.initChildScope($scope, myAjaxData);
+        $scope.initChildScope($scope, myAjaxData);
 
-    const initEchartHeightWidth = () =>{
-        //左侧柱状图占的比例
-        $scope.barWidth = $("#themeElectricity").width();
-        if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo' || $scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
-            $scope.xAxis = ['应发电量','实发电量', '上网电量'];
-        } else {
-            $scope.xAxis = ['应发电量','实发电量', '上网电量','预测发电量'];
+        const initEchartHeightWidth = () => {
+            //左侧柱状图占的比例
+            $scope.barWidth = $("#themeElectricity").width();
+            if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo' || $scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
+                $scope.xAxis = ['应发电量', '实发电量', '上网电量'];
+            } else {
+                $scope.xAxis = ['应发电量', '实发电量', '上网电量', '预测发电量'];
+            }
+            $scope.$apply();
         }
-        $scope.$apply();
-    }
 
-    const initParams = async () => {
-        if($scope.detailFullPage){
-            return false; //放大状态，不做处理
-        }else{
-            if ($scope.getTopXhr === false){
+        const initParams = async () => {
+            if ($scope.detailFullPage) {
+                return false; //放大状态，不做处理
+            } else {
+                if ($scope.getTopXhr === false) {
+                    await myAjaxData.timeout(0)
+                    initEchartHeightWidth();
+                    return false; //条件未改变，不做处理
+                }
+
+                const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
+                const dateType = ($scope._dateType == 0) ? 3 : ($scope._dateType == 1 ? 2 : 1);
+                const dateTime = $scope._dateTime.showDate;
+
                 await myAjaxData.timeout(0)
+
                 initEchartHeightWidth();
-                return false; //条件未改变，不做处理
-            } 
-            
-            const queryType = $scope.dataType ? 1 : 3 //集团1，电站3
-            const dateType = ($scope._dateType == 0) ? 3 : ($scope._dateType == 1 ? 2 : 1);
-            const dateTime = $scope._dateTime.showDate;
+                $scope.getAjaxData(queryType, dateTime, dateType)
+            };
 
-            await myAjaxData.timeout(0)
+        }
 
-            initEchartHeightWidth();
-            $scope.getAjaxData(queryType, dateTime, dateType)
+        //父页面初始化完成
+        $scope.mainPageInitComplete = () => {
+            if ($scope._dateType != 3) {
+                $scope.themeElectricityIsLoding = true;
+                initParams();
+            }
+
         };
-        
-    }
 
-    //父页面初始化完成
-    $scope.mainPageInitComplete = () => {
-        if ($scope._dateType != 3) {
-            $scope.themeElectricityIsLoding = true;
+        //切换日期类型
+        $scope.dateUpdated = () => {
+            if ($scope._dateType != 3) {
+                $scope.themeElectricityIsLoding = true;
+                initParams();
+            }
+        }
+
+        //切换电站
+        $scope.switchPowerCallback = () => {
+            if ($scope._dateType != 3) {
+                $scope.themeElectricityIsLoding = true;
+                initParams();
+            }
+        }
+
+        //点击放大后
+        $scope.switchDetailFullPage = () => {
             initParams();
         }
-        
-    };
 
-    //切换日期类型
-    $scope.dateUpdated = () => {
-        if ($scope._dateType != 3) {
-            $scope.themeElectricityIsLoding = true;
-            initParams();
-        }
-    }
-
-    //切换电站
-    $scope.switchPowerCallback = () => {
-        if ($scope._dateType != 3) {
-            $scope.themeElectricityIsLoding = true;
-            initParams();
-        }
-    }
-
-    //点击放大后
-    $scope.switchDetailFullPage = () => {
-        initParams();
-    }
-
-    //接口
-    $scope.getAjaxData = (queryType, dateTime, dateType) => {
-        // $scope.themeElectricityIsLoding = !$scope.electricityCurrent.res;
-        if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
-            $scope.electricityCurrent.getData({
-                'queryType': queryType,
-                'date': dateTime,
-                'dateType': dateType
-            }).then(res => {
-                $scope.themeElectricityIsLoding = false;
-                if (res.code == 0) {
+        //接口
+        $scope.getAjaxData = (queryType, dateTime, dateType) => {
+            if ($scope.currentClass == 'StationDayToday' || $scope.currentClass == 'CompanyDayToday') {
+                $scope.electricityCurrent.getData({
+                    'queryType': queryType,
+                    'date': dateTime,
+                    'dateType': dateType
+                }).then(res => {
+                    $scope.themeElectricityIsLoding = false;
+                    if (res.code !== 0) return;
                     $scope.data = res.body;
                     const data = res.body;
-                    $scope.yAxis = [[[data.real_ekwh,data.real_kwh, data.send_kwh_chk]]];
-                }
-            })
-        } else {
-            let params='';
+                    $scope.yAxis = [[[data.real_ekwh, data.real_kwh_o, data.send_kwh]]];
+                });
+                return;
+            }
+            let params = '';
             switch ($scope.currentClass) {
+                case 'StationDayToday':
+                    params = 'query_wp_station_day_elec_subject_his'
+                    break;
                 case 'StationDayAgo':
-                    params = 'query_station_day_elec_subject_his'
+                    params = 'query_wp_station_day_elec_subject_his'
                     break;
                 case 'StationMonth':
-                    params = 'query_station_month_elec_subject_his'
+                    params = 'query_wp_station_month_elec_subject_his'
                     break;
                 case 'StationYear':
-                    params = 'query_station_year_elec_subject_his'
+                    params = 'query_wp_station_year_elec_subject_his'
                     break;
                 case 'CompanyDayAgo':
-                    params = 'query_company_day_elec_subject_his'
+                    params = 'query_wp_company_day_elec_subject_his'
+                    break;
+                case 'CompanyDayToday':
+                    params = 'query_wp_company_day_elec_subject_his'
                     break;
                 case 'CompanyMonth':
-                    params = 'query_company_month_elec_subject_his'
+                    params = 'query_wp_company_month_elec_subject_his'
                     break;
                 case 'CompanyYear':
-                    params = 'query_company_year_elec_subject_his'
+                    params = 'query_wp_company_year_elec_subject_his'
                     break;
                 default:
                     break;
             }
             $scope.getHistoryData(params, queryType, dateTime)
-        }
-    }
+        };
 
-    //历史接口
-    $scope.getHistoryData = (params, queryType, dateTime) =>{
-        $scope[params].getData({
-            'queryCode': params,
-            'queryType': queryType,
-            'date': dateTime
-        }).then(res => {
-            $scope.themeElectricityIsLoding = false;
-            if (res.code == 0) {
+        //历史接口
+        $scope.getHistoryData = (params, queryType, dateTime) => {
+            $scope[params].getData({
+                'queryCode': params,
+                'queryType': queryType,
+                'date': dateTime
+            }).then(res => {
+                $scope.themeElectricityIsLoding = false;
                 $scope.data = res.body;
-                const data = res.body;
-                if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo'){
-                    $scope.yAxis = [[[data.shd_kwh_chk,data.real_kwh, data.send_kwh_chk]]];
-                }else{
-                    $scope.yAxis = [[[data.shd_kwh_chk,data.real_kwh, data.send_kwh_chk, data.plan_kwh]]];
+                if (res.code !== 0) return;
+                if ($scope.currentClass == 'StationDayAgo' || $scope.currentClass == 'CompanyDayAgo') {
+                    $scope.yAxis = [[[res.body.shd_kwh, res.body.real_kwh_o, res.body.send_kwh]]];
+                } else {
+                    $scope.yAxis = [[[res.body.shd_kwh, res.body.real_kwh_o, res.body.send_kwh, res.body.plan_kwh]]];
                 }
-            }
-        })
-    }
+            })
+        }
 
-    const interval = $interval(() => {
-        if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();
-    }, 10000);
+        const interval = $interval(() => {
+            if ($scope.currentClass === 'StationDayToday' || $scope.currentClass === 'CompanyDayToday') initParams();
+        }, 10000);
 
-    window.addEventListener('resize', initEchartHeightWidth);
-    
-    $scope.$on('$destroy', () => {
-        $interval.cancel(interval)
-        window.removeEventListener('resize', initEchartHeightWidth);
+        window.addEventListener('resize', initEchartHeightWidth);
+
+        $scope.$on('$destroy', () => {
+            $interval.cancel(interval)
+            window.removeEventListener('resize', initEchartHeightWidth);
+        });
+
     });
-    
-});
