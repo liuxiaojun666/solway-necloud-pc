@@ -395,7 +395,7 @@
                                 }
                             }
                             &:nth-child(2) {
-                                >div {
+                                >div#pieChart {
                                     float: right;
                                     width: 60%;
                                     height: 100%;
@@ -410,7 +410,7 @@
                                 header {
                                     right: 0.79em;
                                 }
-                                >div {
+                                >div.quan {
                                     float: right;
                                     width: 10%;
                                     height: 100%;
@@ -475,27 +475,33 @@
                 }
                 .odometer-block {
                     p {
-                        color: #FF6D6D;
-                        font-size: 0.12rem;
+                        margin-top: -0.4em;
+                        color: #FF6D6D; // font-size: 0.12rem;
                     }
                     .zdy-theme {
                         color: #FF4B4B;
                         &::after {
                             content: '天';
                             right: -0.15rem;
+                            bottom: -10px;
                             color: #FF6D6D;
                         }
                         .odometer-digit {
-                            background: #C0CFDE;
+                            background: url("../../images/enrichment/main/peopleManageNumbg.png") no-repeat;
+                            background-size: cover; // background: #C0CFDE;  peopleManageNumbg
                             margin-right: 0.1rem;
-                            padding: 0 0.05rem;
-                            box-shadow: 0px 0px 0px 0px rgba(211, 147, 147, 0.98) inset, 0px 0px 24px 0px rgba(255, 108, 108, 0.96) inset, 0px 0px 13px 0px rgba(255, 108, 108, 1) inset;
+                            padding: 0 0.1rem; // box-shadow: 0px 0px 0px 0px rgba(211, 147, 147, 0.98) inset, 0px 0px 24px 0px rgba(255, 108, 108, 0.96) inset, 0px 0px 13px 0px rgba(255, 108, 108, 1) inset;
+                            height: 0.61rem;
                             .odometer-digit-spacer {
                                 color: #BCAFAF;
                                 opacity: 0.6;
                             }
                             .odometer-digit-inner {
-                                transform: translateX(0.05rem)
+                                transform: translateX(0.1rem);
+                            }
+                            .odometer-digit-spacer,
+                            .odometer-value {
+                                margin-top: 0.07rem;
                             }
                         }
                     }
@@ -517,11 +523,102 @@
                                 header {
                                     left: 0.59em;
                                 }
+                                .blok-list {
+                                    left: 0;
+                                    ul {
+                                        li {
+                                            >div {
+                                                float: left;
+                                                div {
+                                                    float: left;
+                                                    &:first-child {
+                                                        background-color: rgba(91, 168, 255, 1);
+                                                    }
+                                                    &:last-child {
+                                                        background-color: rgba(172, 133, 223, 1);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    aside {
+                                        text-align: center;
+                                        margin-top: 3em;
+                                        span {
+                                            margin-right: 5em;
+                                            position: relative;
+                                            color: rgba(255, 255, 255, .7);
+                                            font-size: 0.12rem;
+                                            &::before {
+                                                content: '';
+                                                display: inline-block;
+                                                width: 2em;
+                                                height: 0.8em;
+                                                background-color: #fff;
+                                                position: absolute;
+                                                left: -2.5em;
+                                                top: 0.2em;
+                                                vertical-align: middle;
+                                            }
+                                            &:first-child {
+                                                &::before {
+                                                    background-color: rgba(44, 128, 170, 1);
+                                                }
+                                            }
+                                            &:last-child {
+                                                margin-right: 15em;
+                                                &::before {
+                                                    background-color: rgba(172, 133, 223, 1);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             &:nth-child(2) {
                                 float: right;
+                                overflow: hidden;
                                 header {
                                     right: 0.73em;
+                                    span.summry {
+                                        // content: '两票合格率汇总：'attr(data-summry)'%';
+                                        position: absolute;
+                                        left: -8em;
+                                        top: 0;
+                                        color: #10FFFF;
+                                        font-size: 0.14rem;
+                                        &::before {
+                                            content: '两票合格率汇总';
+                                            position: absolute;
+                                            top: 0;
+                                            left: -10em;
+                                            color: #fff;
+                                            opacity: 0.6;
+                                            font-size: 0.12rem;
+                                        }
+                                    }
+                                }
+                                .blok-list {
+                                    right: 0;
+                                    overflow: hidden;
+                                    ul {
+                                        max-height: 100%;
+                                        overflow-y: scroll;
+                                        margin-right: -18px;
+                                        li {
+                                            >div {
+                                                float: right;
+                                                div {
+                                                    float: right;
+                                                    background-color: rgba(255, 202, 100, 0.5);
+                                                    border: 1px solid rgba(255, 184, 12, 1);
+                                                }
+                                                &:last-child {
+                                                    text-align: right;
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             header {
@@ -546,21 +643,42 @@
                                     transform: perspective(.5em) rotateX(5deg) scaleY(1) translateY(-0.1em);
                                 }
                             }
-                            aside {
+                            .blok-list {
                                 position: absolute;
-                                left: 2rem;
-                                top: -0.3rem;
-                                line-height: 0.3rem;
-                                span {
-                                    font-size: 0.14rem;
-                                    margin-right: 2em;
-                                    color: #10FFFF;
-                                    &:nth-child(1) {
-                                        color: #fff;
-                                        opacity: 0.6;
-                                    }
-                                    &:last-child {
-                                        font-size: 0.12rem;
+                                width: 45%;
+                                min-height: 250px;
+                                max-height: 90%;
+                                overflow-y: scroll;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                ul {
+                                    margin: 0;
+                                    padding: 0;
+                                    list-style-type: none;
+                                    li {
+                                        margin-bottom: 1em;
+                                        font-size: 0.13rem;
+                                        height: 1.5em;
+                                        line-height: 1.5em;
+                                        &:last-child {
+                                            margin-bottom: 0;
+                                        }
+                                        >div:first-child {
+                                            width: 40%;
+                                            height: 100%;
+                                            background-color: rgba(83, 183, 94, .05);
+                                            >div {
+                                                height: 100%;
+                                            }
+                                        }
+                                        >div:last-child {
+                                            height: 100%;
+                                            width: 50%;
+                                            overflow: hidden;
+                                            span {
+                                                margin: 0 0.5em;
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -589,6 +707,10 @@
             bottom: 0;
             transform: translateX(-50%);
             padding: 0.05rem; // overflow: hidden;
+            .d-loding {
+                transform: translateY(1rem);
+                z-index: 99;
+            }
             .circle2 {
                 width: 100%;
                 height: 100%;
@@ -650,7 +772,7 @@
                             //     background-color: #fff;
                             // }
                             &.active {
-                                font-size: 0.23rem;
+                                font-size: 0.20rem;
                                 opacity: 1;
                             }
                             &:nth-child(1) {
