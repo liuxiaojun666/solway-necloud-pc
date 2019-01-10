@@ -78,7 +78,6 @@ ajaxData({
                     $scope.newList.roleIdList.map(v=>(v.checked = 0))
                     
                 }else{
-                    $scope.aursrRoles = [];
                     $scope.count = 0;
                     $scope.newList.aursrs = angular.copy($scope.stations);
                     $scope.newList.authUserRoleGroupStationRels = angular.copy($scope.groupList)
@@ -93,6 +92,7 @@ ajaxData({
     $scope.$on('broadAuthorizeModel',function(e,data){
         $scope.depId = data.depId;
         $scope.id = data.id;
+        $scope.aursrRoles = [];
         getRoleData();
     });
 
@@ -181,6 +181,7 @@ ajaxData({
     //取消
     $scope.cancel = () =>{
         $scope.$emit('cancelCallback');
+        $('.dropdown-one').hide();
     }
 
     $timeout(()=>{
