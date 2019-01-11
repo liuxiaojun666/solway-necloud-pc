@@ -14,7 +14,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
                 $(".systems-page").slideUp();
                 return false;
             }
-            if ($scope.currentState == 'power-index171024') {
+            if ($scope.currentState == $rootScope.mainPageUrl) {
                 $http({
                     method: "POST",
                     url: window.baseUrl + "/UserAuthHandle/setSTClass.htm",
@@ -47,9 +47,10 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
 
 
         //到不同首页
-        $scope.goMainPage = () =>{
-            $state.go($rootScope.mainPageUrl);
-        }
+        $scope.goMainPage = (theme) =>{
+            historicalRecord.falsify($rootScope.mainPageUrl, {theme}, true);
+            // $state.go($rootScope.mainPageUrl);
+        };
 
         //切换不同体系
         $scope.changeSystemTab = type =>{

@@ -1,0 +1,66 @@
+ajaxData(
+    {
+        stClassLIst: {
+            name: 'GETstClassLIst',
+            data: {}
+        },
+        home_pv_company_pgc_year_stationlist: {
+            name: 'GEThome_pv_company_pgc_year_stationlist',
+            data: {},
+            later: true
+        },
+        home_pv_company_pr_year_stationlist: {
+            name: 'GEThome_pv_company_pr_year_stationlist',
+            data: {},
+            later: true
+        },
+        home_wp_company_pgc_year_stationlist: {
+            name: 'GEThome_wp_company_pgc_year_stationlist',
+            data: {},
+            later: true
+        },
+        home_wp_company_pba_year_stationlist: {
+            name: 'GEThome_wp_company_pba_year_stationlist',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'mainResourcesService',
+    }
+)('mainResourcesCtrl', ['$scope', 'mainResourcesService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+    $('.themeResources.ng-clock').removeClass('ng-clock');
+    let od;
+    // 电站类型列表
+    $scope.stClassLIst.subscribe(res => {
+        $scope.stClassLIst.res.stClass01 = res.data.some(v => v.id === '01');
+        $scope.stClassLIst.res.stClass02 = res.data.some(v => v.id === '02');
+    });
+    $scope.stClassLIst.subscribe(res => {
+        const date = new Date().getFullYear();
+        [
+            'home_pv_company_pgc_year_stationlist',
+            'home_pv_company_pr_year_stationlist',
+            'home_wp_company_pgc_year_stationlist',
+            'home_wp_company_pba_year_stationlist',
+        ].forEach(element => $scope[element].getData({
+            queryCode: [element],
+            queryType: 1,
+            date
+        }));
+    });
+
+    $scope.stClassLIst.subscribe(async res => {
+        await myAjaxData.timeout(0);
+        od = new Odometer({ el: document.getElementById('odometer'), value: 100 });
+        od && od.update('1000' + 95);
+    });
+
+    // 运维效率响应处理
+    // $scope.analysis_company_operation_station_accum_list.subscribe(res => {
+    //     $scope.analysis_company_operation_station_accum_list.res.body.data.maxNum = res.body.data.reduce((a, b) => {
+    //         const newNum = b.res_hours_avg + b.repair_hours_avg;
+    //         return a > newNum ? a : newNum;
+    //     }, 0);
+    // });
+
+});
