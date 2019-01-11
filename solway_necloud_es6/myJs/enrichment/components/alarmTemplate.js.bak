@@ -84,6 +84,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         $scope.changeInputAbsent = e =>{
             $scope.notShowFinish = e.target.checked?1:0;
             $scope.maxUpdateTime = 0;
+            $scope.datalist = [];
             $scope.initData();
         }
 
@@ -124,7 +125,10 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             if($scope.pendding) return;
             $scope.pendding = true;
 
-            if(flag) $scope.maxUpdateTime = 0;
+            if(flag) {
+                $scope.maxUpdateTime = 0;
+                $scope.datalist = [];
+            }
 
             const checkedCondition = [];
             $("input[name='conditionType']:checked").map((index,v)=>{
@@ -258,7 +262,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
         const interval = $interval(()=>{
             $scope.initData();
-        },60000);
+        },6000);
 
         $scope.$on('$destroy', () => {
             window.removeEventListener('resize', calculateListHeight);

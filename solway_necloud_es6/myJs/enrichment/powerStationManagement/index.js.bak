@@ -3,6 +3,11 @@ ajaxData({
         name: 'GETpowerStationList',
         data: {},
         later: true
+    },
+    deleteStation:{
+        name: 'POSTdeleteStation',
+        data: {},
+        later: true
     }
 }, {})('powerStationManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
     $scope.moduleName = '电站管理';//当前页面名称；
@@ -12,8 +17,6 @@ ajaxData({
             pageIndex : 0,
             pageSize : 10,
             parentIsNull:1,
-            // stationname : $scope.psName,
-            // stationcode : $scope.psCode,
             keyWords : $scope.keyWords,
         })
     }
@@ -72,30 +75,37 @@ ajaxData({
         $scope.$broadcast('broadAddStation', { 'id': '' });
     }
 
+    //删除电站
+    const deleteStationFun = id =>{
+        $scope.deleteStation.getData({id:id}).then(res=>{
+            if(res.type == "success"){
+                toaster.pop('success','','删除成功');
+                $scope.getStationList();
+            }else{
+                toaster.pop('error','','删除失败');
+            }
+        });
+    }
+
     $scope.trClick = (item, index, event) => {
         if(event.target.className.includes('icon-bianji-copy')) {
             $scope.newStationModel = true;
-            // $scope.$broadcast('hideEditBroad');
             $scope.$broadcast('broadAddStation', { 'id': item.id});
-        }else if(event.target.className.includes('icon-shouquan')) {
-            // $scope.authorityModel = true;
-            // $scope.$broadcast('broadAuthorityPerson', { 'id': item.userId});
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此电站？删除电站，相关配置信息将一起被删除,请谨慎操作 ! ! !' }, () => {
+                deleteStationFun(item.id)
+            });
         }
     };
 
+    $scope.$on('cancelCallback',()=>{
+        $scope.newStationModel = false;
+    });
 
-
-
-    // $scope.$on('cancelCallback',()=>{
-    //     $scope.newPersonModel = false;
-    //     $scope.authorityModel = false;
-    // });
-
-    // $scope.$on('addCallback',()=>{
-    //     $scope.newPersonModel = false;
-    //     $scope.authorityModel = false;
-    //     $scope.getUserList();
-    // });
+    $scope.$on('addCallback',()=>{
+        $scope.newStationModel = false;
+        $scope.getStationList();
+    });
 
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');
