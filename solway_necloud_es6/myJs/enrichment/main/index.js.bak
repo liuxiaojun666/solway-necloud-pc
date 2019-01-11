@@ -37,6 +37,7 @@ ajaxData({
         if (theme !== $scope.theme) $scope.themeLoading = true;
         $scope.theme = theme;
         historicalRecord.set({ theme });
+        await $ocLazyLoad.load([`theme/js/dist/enrichment/main/theme${theme}.js` + stamp]);
         if (theme === 'Monitoring') {
             await $ocLazyLoad.load(['theme/js/dist/enrichment/components/lineOrBarChart.js' + stamp]);
         } else {
