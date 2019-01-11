@@ -14,6 +14,7 @@ ajaxData({
         data: {},
         later: true
     },
+    //自动生成编号
     stationCode:{
         name: 'GETstationCode',
         data: {},
@@ -21,6 +22,17 @@ ajaxData({
     },
     personInCharge:{
         name:'GETpersonInCharge',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    getLatAndLong:{
+        name:'POSTLatandlng',
+        data: {},
+        later:true
+    },
+    saveStation:{
+        name:'POSTstationSave',
         data: {},
         later: true,
         onlyLatest: true
@@ -50,8 +62,13 @@ ajaxData({
     }
 
     //电站编号自动生成
-    // const createStationCode = () =>{
-    // }
+    const createStationCode = () =>{
+        $scope.stationCode.getData({
+            'parentid' : 1
+        }).then(res=>{
+            $scope.formData['stationcode'] = res;
+        });
+    }
 
     //负责人列表
     const getChargePersonList = () =>{
@@ -86,6 +103,7 @@ ajaxData({
 
             $scope.getDepListByCompany('');
             getProvence();
+            createStationCode();
         }
     });
 
@@ -145,23 +163,66 @@ ajaxData({
         getCountry();
     }
 
+    //计算经纬度
+    $scope.calculatePos = function (){
+        let formData = $scope.formData;
+        let add="";
+        let province = '',city='',country='';
+        if($scope.provinceList){
+            $scope.provinceList.map((v,k)=>{
+                if(v.id == formData.provinceid) province = v.regionName;
+            });
+        }
+
+        if($scope.cityList){
+            $scope.cityList.map((v,k)=>{
+                if(v.id == formData.cityid) city = v.regionName;
+            });
+        }
+      
+        if($scope.countryList){
+            $scope.countryList.map((v,k)=>{
+                if(v.id == formData.countyid) country = v.regionName;
+            });
+        }
+        
+        if(province && city && country){
+            add=add+province+city+country;
+        }
+
+        if(formData.address) add = add+formData.address;
+      
+        $scope.getLatAndLong.getData({
+            "add":add
+        }).then(res =>{
+            $scope.formData['longitude'] = res[0];
+            $scope.formData['latitude'] = res[1]
+        })
+    }
 
     //保存
     $scope.save = () =>{
-        if(!$scope.customConfig.logo_sm) delete $scope.customConfig.logo_sm_flag;
-        $scope.update.getData({
-            data:  JSON.stringify($scope.formData),
-            customConfig : JSON.stringify($scope.customConfig)
-        }).then(res=>{
-            if (res.key==3) {
-                toaster.pop('error', '','企业名称不合法')
-            };
-            if (res.key==4) {
-                toaster.pop('error', '','校验企业类型必选其一')
-            };
-            if (res.key==1) {
-                $scope.$emit('saveSuccessCallback');
-            };
+        if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
+
+        let  paramsArr = ['id','depid','companyid','stationcode','stationname','stationfullname','stationClass','stationType','managerid','buildcapacity',
+            'closedate','provinceid','cityid','countyid','address','longitude','latitude','stationtel','stationzip'];
+        let formData = {}
+        for(let key in $scope.formData){
+           if(paramsArr.includes(key)){
+                formData[key] = $scope.formData[key]
+           }
+        }
+
+        formData['startProductTime'] = $scope.formData['startProductTime']?new Date($scope.formData['startProductTime']).Format("yyyy-MM-dd"):'';
+        formData['productiondate'] =  $scope.formData['productiondate']?new Date($scope.formData['productiondate']).Format("yyyy-MM-dd"):'';
+        
+        $scope.saveStation.getData(formData).then(res=>{
+            if(res.type == 'success'){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('addCallback');
+            }else{
+                toaster.pop('error','','保存失败');
+            }
         })
     }
 
