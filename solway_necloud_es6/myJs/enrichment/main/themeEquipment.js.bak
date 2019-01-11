@@ -4,22 +4,24 @@ ajaxData(
             name: 'GETstClassLIst',
             data: {}
         },
-        safeRunDayCount: {
-            name: 'GETsafeRunDayCount',
+        home_pv_company_pgc_year_stationlist: {
+            name: 'GEThome_pv_company_pgc_year_stationlist',
             data: {},
             later: true
         },
-        completerate: {
-            name: 'GETcompleterate',
+        home_pv_company_pr_year_stationlist: {
+            name: 'GEThome_pv_company_pr_year_stationlist',
             data: {},
             later: true
         },
-        analysis_company_operation_station_accum_list: {
-            name: 'GETanalysis_company_operation_station_accum_list',
-            data: {
-                queryCode: 'analysis_company_operation_station_accum_list',
-                queryType: 1
-            },
+        home_wp_company_pgc_year_stationlist: {
+            name: 'GEThome_wp_company_pgc_year_stationlist',
+            data: {},
+            later: true
+        },
+        home_wp_company_pba_year_stationlist: {
+            name: 'GEThome_wp_company_pba_year_stationlist',
+            data: {},
             later: true
         },
     }, {
@@ -34,12 +36,17 @@ ajaxData(
         $scope.stClassLIst.res.stClass02 = res.data.some(v => v.id === '02');
     });
     $scope.stClassLIst.subscribe(res => {
-        $scope.safeRunDayCount.getData();
-        $scope.completerate.getData();
-        $scope.analysis_company_operation_station_accum_list.getData({
-            queryCode: 'analysis_company_operation_station_accum_list',
-            queryType: 1
-        });
+        const date = new Date().getFullYear();
+        [
+            'home_pv_company_pgc_year_stationlist',
+            'home_pv_company_pr_year_stationlist',
+            'home_wp_company_pgc_year_stationlist',
+            'home_wp_company_pba_year_stationlist',
+        ].forEach(element => $scope[element].getData({
+            queryCode: [element],
+            queryType: 1,
+            date
+        }));
     });
 
     $scope.stClassLIst.subscribe(async res => {
@@ -50,21 +57,17 @@ ajaxData(
         if ($scope.stClassLIst.res.stClass02) {
             od2 = new Odometer({ el: document.getElementById('odometer2'), value: 100 });
         }
-    });
-
-    $scope.safeRunDayCount.subscribe(res => {
-        od && od.update('1' + 25);
+        od && od.update('1' + 95);
         od2 && od2.update('1' + '00');
         od2 && $(od2.el).find('.odometer-digit').eq(0).find('.odometer-value').text(1);
     });
 
-
     // 运维效率响应处理
-    $scope.analysis_company_operation_station_accum_list.subscribe(res => {
-        $scope.analysis_company_operation_station_accum_list.res.body.data.maxNum = res.body.data.reduce((a, b) => {
-            const newNum = b.res_hours_avg + b.repair_hours_avg;
-            return a > newNum ? a : newNum;
-        }, 0);
-    });
+    // $scope.analysis_company_operation_station_accum_list.subscribe(res => {
+    //     $scope.analysis_company_operation_station_accum_list.res.body.data.maxNum = res.body.data.reduce((a, b) => {
+    //         const newNum = b.res_hours_avg + b.repair_hours_avg;
+    //         return a > newNum ? a : newNum;
+    //     }, 0);
+    // });
 
 });
