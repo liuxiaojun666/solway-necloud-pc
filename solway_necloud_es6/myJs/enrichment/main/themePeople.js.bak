@@ -1,6 +1,20 @@
 ajaxData(
     {
-        
+        safeRunDayCount: {
+            name: 'GETsafeRunDayCount',
+            data: {}
+        },
+        completerate: {
+            name: 'GETcompleterate',
+            data: {}
+        },
+        analysis_company_operation_station_accum_list: {
+            name: 'GETanalysis_company_operation_station_accum_list',
+            data: {
+                queryCode: 'analysis_company_operation_station_accum_list',
+                queryType: 1
+            }
+        },
     }, {
         __serviceName__: 'mainPeopleService',
         companyDayTodayTimeLineData: { xdata: [], line1: [], line2: [], line3: [] }
@@ -9,7 +23,15 @@ ajaxData(
     $('.themePeople.ng-clock').removeClass('ng-clock');
     // 滚动数字
     const od = new Odometer({ el: document.getElementById('odometer'), value: 10000 });
-    od.update(10000 + 589 + '');
+    $scope.safeRunDayCount.promise.then(res => od.update(10000 + res.body + ''));
+
+    // 运维效率响应处理
+    $scope.analysis_company_operation_station_accum_list.promise.then(res => {
+        $scope.analysis_company_operation_station_accum_list.res.body.data.maxNum = res.body.data.reduce((a, b) => {
+            const newNum = b.res_hours_avg + b.repair_hours_avg;
+            return a > newNum ? a : newNum;
+        }, 0);
+    });
 
     // 实例销毁 清除定时器 清除事件绑定
     $scope.$on('$destroy', () => {
