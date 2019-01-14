@@ -1,29 +1,29 @@
 ajaxData(
     {
         //电站-月-时间列表
-        query_station_month_dev_detail_timelist_his: {
-            name: 'GETquery_station_month_dev_detail_timelist_his',
+        query_wp_station_month_dev_timelist: {
+            name: 'GETquery_wp_station_month_dev_timelist',
             data: {},
             later: true,
             onlyLatest: true
         },
         //电站-月-时间曲线
-        query_station_month_dev_detail_timeline_his: {
-            name: 'GETquery_station_month_dev_detail_timeline_his',
+        query_wp_station_month_dev_timeline: {
+            name: 'GETquery_wp_station_month_dev_timeline',
             data: {},
             later: true,
             onlyLatest: true
         },
         //电站-月-设备列表
-        query_station_month_dev_detail_devlist_his: {
-            name: 'GETquery_station_month_dev_detail_devlist_his',
+        query_wp_station_month_dev_devlist: {
+            name: 'GETquery_wp_station_month_dev_devlist',
             data: {},
             later: true,
             onlyLatest: true
         },
         //电站-月-设备曲线
-        query_station_month_dev_detail_devline_his: {
-            name: 'GETquery_station_month_dev_detail_devline_his',
+        query_wp_station_month_dev_devline: {
+            name: 'GETquery_wp_station_month_dev_devline',
             data: {},
             later: true,
             onlyLatest: true
@@ -121,26 +121,26 @@ ajaxData(
         await myAjaxData.timeout(0);
         const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
         if (showShape === 'list' && tabIndex === 0) {//时间
-            $scope.query_station_month_dev_detail_timelist_his.getData({
-                queryCode: 'query_station_month_dev_detail_timelist_his',
+            $scope.query_wp_station_month_dev_timelist.getData({
+                queryCode: 'query_wp_station_month_dev_timelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (showShape === 'chart' && tabIndex === 0) {
-            $scope.query_station_month_dev_detail_timeline_his.getData({
-                queryCode: 'query_station_month_dev_detail_timeline_his',
+            $scope.query_wp_station_month_dev_timeline.getData({
+                queryCode: 'query_wp_station_month_dev_timeline',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (showShape === 'list' && tabIndex === 1) {//设备
-            $scope.query_station_month_dev_detail_devlist_his.getData({
-                queryCode: 'query_station_month_dev_detail_devlist_his',
+            $scope.query_wp_station_month_dev_devlist.getData({
+                queryCode: 'query_wp_station_month_dev_devlist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (showShape === 'chart' && tabIndex === 1) {
-            $scope.query_station_month_dev_detail_devline_his.getData({
-                queryCode: 'query_station_month_dev_detail_devline_his',
+            $scope.query_wp_station_month_dev_devline.getData({
+                queryCode: 'query_wp_station_month_dev_devline',
                 queryType: 3,
                 date: dateTime.showDate
             });
@@ -149,7 +149,7 @@ ajaxData(
 
 
     //电站月-时间-列表
-    $scope.query_station_month_dev_detail_timelist_his.getDataCallback = (success, res) => {
+    $scope.query_wp_station_month_dev_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.dataSource = res.body.data;
         $scope.column = [
@@ -166,8 +166,14 @@ ajaxData(
                 align: 'right',
             },
             {
-                title: '告警台次',
-                dataIndex: 'alarm_count',
+                title: '限电台次',
+                dataIndex: 'restrict_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '检修台次',
+                dataIndex: 'repair_count',
                 sort: 'true',
                 align: 'right',
             },
@@ -184,40 +190,33 @@ ajaxData(
                 align: 'right'
             },
             {
-                title: 'mttr',
-                width: '60px',
+                title: 'mttr(' + res.body.units.mttr + ')',
+                width: '120px',
                 dataIndex: 'mttr',
                 sort: 'true',
                 align: 'right',
             },
             {
-                title: 'mtbf',
-                width: '60px',
+                title: 'mtbf(' + res.body.units.mtbf + ')',
+                width: '120px',
                 dataIndex: 'mtbf',
                 sort: 'true',
                 align: 'right',
             },
             {
-                title: 'pba',
-                width: '60px',
+                title: 'pba(' + res.body.units.pba + ')',
+                width: '120px',
                 dataIndex: 'pba',
                 sort: 'true',
                 align: 'right'
             },
-            {
-                title: 'pr',
-                width: '60px',
-                dataIndex: 'pr',
-                sort: 'true',
-                align: 'right'
-            }
         ];
     };
 
     //电站月-时间-曲线
-    $scope.query_station_month_dev_detail_timeline_his.getDataCallback = async (success, res) => {
+    $scope.query_wp_station_month_dev_timeline.getDataCallback = async (success, res) => {
         if (!success) return;
-        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'dust_we';
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'repair_count';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
         await $scope.selectChange('select1');
         await $scope.selectChange('select2');
@@ -227,7 +226,7 @@ ajaxData(
     }
 
     //电站月-设备-列表
-    $scope.query_station_month_dev_detail_devlist_his.getDataCallback = (success, res) => {
+    $scope.query_wp_station_month_dev_devlist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.dataSource = res.body.data;
         $scope.column = [
@@ -244,8 +243,14 @@ ajaxData(
                 align: 'right',
             },
             {
-                title: '告警台次',
-                dataIndex: 'alarm_count',
+                title: '限电台次',
+                dataIndex: 'restrict_count',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '检修台次',
+                dataIndex: 'repair_count',
                 sort: 'true',
                 align: 'right',
             },
@@ -262,18 +267,19 @@ ajaxData(
                 align: 'right'
             },
             {
-                title: '组串电流离散率',
-                dataIndex: 'c_dr_avg',
+                title: 'pba',
+                width: '120px',
+                dataIndex: 'pba',
                 sort: 'true',
-                align: 'right',
-            }
+                align: 'right'
+            },
         ];
     };
 
     //电站月-设备-曲线
-    $scope.query_station_month_dev_detail_devline_his.getDataCallback = async (success, res) => {
+    $scope.query_wp_station_month_dev_devline.getDataCallback = async (success, res) => {
         if (!success) return;
-        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'dust_we';
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'repair_count';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'fail_count';
         await $scope.selectChange('select1');
         await $scope.selectChange('select2');
@@ -288,11 +294,11 @@ ajaxData(
         if (!$scope.initComplete) return;
         const { select1, select2, tabIndex } = $scope;
         if (tabIndex === 0) {
-            $scope.xdata = $scope.query_station_month_dev_detail_timeline_his.res.body.data.dtime;
-            $scope.ydatas = [[$scope.query_station_month_dev_detail_timeline_his.res.body.data[select1]], [$scope.query_station_month_dev_detail_timeline_his.res.body.data[select2]]];
+            $scope.xdata = $scope.query_wp_station_month_dev_timeline.res.body.data.dtime;
+            $scope.ydatas = [[$scope.query_wp_station_month_dev_timeline.res.body.data[select1]], [$scope.query_wp_station_month_dev_timeline.res.body.data[select2]]];
         } else if (tabIndex === 1) {
-            $scope.xdata = $scope.query_station_month_dev_detail_devline_his.res.body.data.eq_name;
-            $scope.ydatas = [[$scope.query_station_month_dev_detail_devline_his.res.body.data[select1]], [$scope.query_station_month_dev_detail_devline_his.res.body.data[select2]]];
+            $scope.xdata = $scope.query_wp_station_month_dev_devline.res.body.data.eq_name;
+            $scope.ydatas = [[$scope.query_wp_station_month_dev_devline.res.body.data[select1]], [$scope.query_wp_station_month_dev_devline.res.body.data[select2]]];
         }
     }
 
@@ -301,22 +307,22 @@ ajaxData(
         if ($scope.tabIndex === 0) {
             $scope.selectOptions = {
                 fail_count: '故障台次',
-                alarm_count: '告警台次',
+                restrict_count: '限电台次',
+                repair_count: '检修台次',
                 inter_count: '离线台次',
-                dust_we: '故障损失电量' + units.dust_we,
+                fail_we: '故障损失电量' + units.fail_we,
                 mttr: 'mttr',
                 mtbf: 'mtbf',
                 pba: 'pba',
-                pr: 'pr',
             }
         } else if ($scope.tabIndex === 1) {
             $scope.selectOptions = {
                 eqcount: '总台数',
                 fail_count: '故障台次',
-                alarm_count: '告警台次',
+                restrict_count: '限电台次',
+                repair_count: '检修台次',
                 inter_count: '离线台次',
-                dust_we: '故障损失电量' + units.dust_we,
-                title: '功率离散率'
+                fail_we: '故障损失电量' + units.fail_we,
             }
         }
 
@@ -327,10 +333,10 @@ ajaxData(
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.query_station_month_dev_detail_timelist_his.res = null;
-        $scope.query_station_month_dev_detail_timeline_his.res = null;
-        $scope.query_station_month_dev_detail_devlist_his.res = null;
-        $scope.query_station_month_dev_detail_devline_his.res = null;
+        $scope.query_wp_station_month_dev_timelist.res = null;
+        $scope.query_wp_station_month_dev_timeline.res = null;
+        $scope.query_wp_station_month_dev_devlist.res = null;
+        $scope.query_wp_station_month_dev_devline.res = null;
 
     }
 
