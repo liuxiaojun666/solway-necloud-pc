@@ -9,6 +9,10 @@ ajaxData({
         name: 'POSTAuditPerson',
         data: {},
         later: true
+    },
+    stationList2: {
+        name: 'GETStationList2',
+        data: {},
     }
 }, {
     __serviceName__: 'peopleDetailTplCtrlService'
@@ -38,6 +42,7 @@ ajaxData({
         $scope.auditPerson.getData({
             id: $scope.userId,
             isPass: yesOrNot,
+            stationIds: document.getElementsByName('stationIds2'):: [].filter(v => v.checked).map(v => v.value).join()
         }).then(res =>{
             if (res.code == 0) {
                 toaster.pop('success', '',res.msg);
@@ -47,7 +52,7 @@ ajaxData({
                 toaster.pop('error', "", res.msg)
             }
             $scope.bonusBtnAbled = true
-        })
+        });
     }
 
     //图片放大
