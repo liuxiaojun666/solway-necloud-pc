@@ -1,25 +1,28 @@
-app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams', '$timeout','$rootScope','actionRecord',($ocLazyLoad, $http, $state, $stateParams,$timeout,$rootScope,historicalRecord) => ({
+app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams', '$timeout', '$rootScope', 'actionRecord', ($ocLazyLoad, $http, $state, $stateParams, $timeout, $rootScope, historicalRecord) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
     scope: {
 
     },
-    templateUrl: 'tpl/enrichment/components/pageSlideDown.html'+window.stamp,
+    templateUrl: 'tpl/enrichment/components/pageSlideDown.html' + window.stamp,
     link($scope, $element) {
 
-        $scope.goChildrenPage = (routerUrl,theme) => {
-            $solway.setStore('systemInfo', {'systemTab':$scope.systemTab,'module':[routerUrl,theme]}); 
-            if($scope.currentState == routerUrl){
+        $scope.goChildrenPage = (routerUrl, theme) => {
+            const {stClass} = $scope;
+            if (stClass === '02' && routerUrl === 'monitoringSummary') {
+                routerUrl += 'Wp';
+            }
+            $solway.setStore('systemInfo', { 'systemTab': $scope.systemTab, 'module': [routerUrl, theme] });
+            if ($scope.currentState == routerUrl) {
                 $(".systems-page").slideUp();
                 return false;
             }
-            if ($scope.currentState == $rootScope.mainPageUrl) {
+            if ($scope.currentSTinfo.currentSTClass !== stClass) {
                 $http({
-                    method: "POST",
+                    method: "GET",
                     url: window.baseUrl + "/UserAuthHandle/setSTClass.htm",
-                    params: {
-                    }
+                    params: {stClass}
                 }).success(function (res) {
                     $state.go(routerUrl);
                 });
@@ -28,17 +31,17 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
             }
         }
 
-        $scope.goBoughtModulePage = (routerUrl,theme) =>{
-            $solway.setStore('systemInfo', {'systemTab':$scope.systemTab,'module':[routerUrl,theme]}); 
-            if(routerUrl == theme){
-                const falsify = historicalRecord.falsify(routerUrl,{},true);
-                if(falsify.redirect == 'failure'){
+        $scope.goBoughtModulePage = (routerUrl, theme) => {
+            $solway.setStore('systemInfo', { 'systemTab': $scope.systemTab, 'module': [routerUrl, theme] });
+            if (routerUrl == theme) {
+                const falsify = historicalRecord.falsify(routerUrl, {}, true);
+                if (falsify.redirect == 'failure') {
                     $(".systems-page").slideUp();
                 }
-            }else{
-                const falsify = historicalRecord.falsify(routerUrl,{'theme':theme},true);
+            } else {
+                const falsify = historicalRecord.falsify(routerUrl, { 'theme': theme }, true);
                 $scope.currentFun = theme;
-                if(falsify.redirect == 'failure'){
+                if (falsify.redirect == 'failure') {
                     $scope.$parent.reloadParentPage({});
                     $(".systems-page").slideUp();
                 }
@@ -47,15 +50,15 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
 
 
         //到不同首页
-        $scope.goMainPage = (theme) =>{
-            historicalRecord.falsify($rootScope.mainPageUrl, {theme}, true);
+        $scope.goMainPage = (theme) => {
+            historicalRecord.falsify($rootScope.mainPageUrl, { theme }, true);
             // $state.go($rootScope.mainPageUrl);
         };
 
         //切换不同体系
-        $scope.changeSystemTab = type =>{
-            $scope.systemTab = type;  
-            $scope.setActiveClass();       
+        $scope.changeSystemTab = type => {
+            $scope.systemTab = type;
+            $scope.setActiveClass();
         }
 
         //鼠标悬浮0.5s页面头部，出现下拉页面
@@ -63,8 +66,8 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
         const setMainHeight = () => {
             let wHeight = $(window).height();
             let muduleHeight = 500;
-            $(".module-list").css('marginTop', (wHeight - muduleHeight)/2)
-            $(".function-list").css('marginTop', (wHeight - 660)/2)
+            $(".module-list").css('marginTop', (wHeight - muduleHeight) / 2)
+            $(".function-list").css('marginTop', (wHeight - 660) / 2)
         }
 
         setMainHeight()
@@ -76,7 +79,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
 
         $timeout(() => {
             $element.removeClass('ng-clock');
-            $('body').on('mouseover','.hover-header-con',()=>{
+            $('body').on('mouseover', '.hover-header-con', () => {
                 $scope.setActiveClass();
                 timer = setTimeout(() => {
                     $(".systems-page").slideDown();
@@ -99,30 +102,43 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
         $(".square-common").hover(function () {
             $(this).addClass('active');
         }, function () {
-            if($(this).hasClass($scope.currentState)) return;
+            if ($(this).hasClass($scope.currentState)) return;
             $(this).removeClass('active');
         })
 
 
     },
-    controller($scope, $element){
+    controller($scope, $element) {
         historicalRecord.init();
-        
+
         $scope.stamp = window.stamp;
 
-        $scope.setActiveClass = ()=>{
+        $scope.setActiveClass = () => {
             $scope.currentState = $state.current.name;
 
-            if($scope.currentState == 'analyzeSummary'){
-                $scope.currentFun = historicalRecord.get().theme?historicalRecord.get().theme:'default';
+            getCurrentSTInfo();
+
+            if ($scope.currentState == 'analyzeSummary') {
+                $scope.currentFun = historicalRecord.get().theme ? historicalRecord.get().theme : 'default';
                 // $scope.$apply();
-            }else if($scope.currentState == 'efficientOperationSummary'){
-                $scope.currentFun = historicalRecord.get().theme?historicalRecord.get().theme:'Profession';
+            } else if ($scope.currentState == 'efficientOperationSummary') {
+                $scope.currentFun = historicalRecord.get().theme ? historicalRecord.get().theme : 'Profession';
                 // $scope.$apply();
-            }else{
+            } else {
                 $scope.currentFun = $scope.currentState;
             }
 
+        }
+
+        function getCurrentSTInfo() {
+            $http({
+                method: "GET",
+                url: window.baseUrl + "/UserAuthHandle/getCurrentInfoNew.htm",
+                params: { }
+            }).success(function (res) {
+                $scope.stClass = res.currentSTClass || '01';
+                $scope.currentSTinfo = res;
+            });
         }
 
         historyInitCallback();
@@ -130,7 +146,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state','$stateParams',
         // 获取记录
         function historyInitCallback() {
             const record = $solway.getStore().systemInfo;
-            const {systemTab = 'concept'} = record;
+            const { systemTab = 'concept' } = record;
             $scope.systemTab = systemTab;
 
             $scope.setActiveClass();
