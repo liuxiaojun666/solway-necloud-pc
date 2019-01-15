@@ -52,6 +52,8 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
         //到不同首页
         $scope.goMainPage = (theme) => {
             historicalRecord.falsify($rootScope.mainPageUrl, { theme }, true);
+            $(".systems-page").slideUp();
+            if ($rootScope.mainPageUrl === 'main') $scope.$parent.reloadParentPage();
             // $state.go($rootScope.mainPageUrl);
         };
 
