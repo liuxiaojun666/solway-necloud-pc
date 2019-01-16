@@ -8,11 +8,13 @@
         filename = '未命名.你想要的后缀',
         callback = () => {},
         blob = false,
-        download = true
+        download = true,
+        progress = () => {}
     }) => {
         const oReq = new XMLHttpRequest();
         oReq.open("GET", url, true);
         oReq.responseType = "blob";
+        oReq.addEventListener("progress", ({ total, loaded }) => progress(total, loaded), false);
         oReq.onload = function (oEvent) {
             if (oReq.response.size === 0 || oReq.status === 404) {
                 if (confirm(' 文件为空或不存在，确定继续执行吗？')) __fun();
