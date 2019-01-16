@@ -8,11 +8,20 @@ ajaxData(
         __serviceName__: 'predPacketTplService'
     }
 )('predPacketTplCtrl', ['$scope', 'predPacketTplService', '$timeout', 'toaster'], ($scope, myAjaxData, $timeout, toaster) => {
-    $scope.selectStationTaskStatistics.getData({
-        pageSize: 20,
-        pageIndex: 0,
-        dateType: ['', 2, 1, 0][$scope.dateType],
-        date: $scope.dateTime.showDate,
+
+    $scope.selectStationTaskStatistics.beforGetData = () => {
+        $scope.selectStationTaskStatistics.getData({
+            pageSize: 20,
+            pageIndex: 0,
+            dateType: ['', 2, 1, 0][$scope._dateType],
+            date: ($scope.dateTime || {}).showDate,
+        });
+    };
+    $scope.selectStationTaskStatistics.beforGetData();
+    $scope.$on('predPacket', () => {
+        if (!$scope.predPacketShow) return;
+        $scope.selectStationTaskStatistics.beforGetData();
+        $scope.$apply();
     });
     $scope.selectStationTaskStatistics.subscribe(res => {
         $scope.selectStationTaskStatistics.res.body.total_bouns = res.body.data.reduce((a, b) => a + b.sum_bouns, 0);
