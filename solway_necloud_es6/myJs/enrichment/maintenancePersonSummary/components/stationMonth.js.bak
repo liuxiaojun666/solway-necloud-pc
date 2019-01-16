@@ -37,8 +37,8 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        // let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceStationMonth || {};
-        let tabIndex = 0 ;
+        let { tabIndex = 0 } = historicalRecord.get() || {};
+        // let tabIndex = 0 ;
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
@@ -65,12 +65,13 @@ ajaxData({
     // tab 切换
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
-        // historicalRecord.set({
-        //     themeMaintenanceStationMonth: {
-        //         ...historicalRecord.get().themeMaintenanceStationMonth || {},
-        //         tabIndex
-        //     }
-        // });
+        historicalRecord.set({
+            tabIndex,
+            themeMaintenanceStationMonth: {
+                ...historicalRecord.get().themeMaintenanceStationMonth || {},
+                tabIndex
+            }
+        });
         $scope.diffGetData();
     };
 
@@ -247,6 +248,13 @@ ajaxData({
         // 
     };
 
+    $scope.eqPopUp = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.$broadcast("equipmentPopUp", {
+            stid: item.stid,
+            eqid: item.eqid
+        });
+    };
     // 设备列表
     $scope.analysis_station_operation_dev_month_list.getDataCallback = (success, res) => {
         $scope.stationMonthLoading = false;
@@ -260,9 +268,9 @@ ajaxData({
                 width: '25%',
                 dataIndex: 'eq_name',
                 align: 'left',
-                // render(text, record, index) {
-                //     return `<span class="alert-name" id="${record.id}">${text}</span>`
-                // }
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
             },
             {
                 title: '检修台次',

@@ -1,13 +1,58 @@
 ajaxData(
     {
-        //人员列表
         selectStationTaskStatistics: {
             name: 'GETselectStationTaskStatistics',
-            data: {},
+            later: true
         },
     }, {
         __serviceName__: 'predPacketTplService'
     }
 )('predPacketTplCtrl', ['$scope', 'predPacketTplService', '$timeout', 'toaster'], ($scope, myAjaxData, $timeout, toaster) => {
-
+    $scope.selectStationTaskStatistics.getData({
+        pageSize: 20,
+        pageIndex: 0,
+        dateType: ['', 2, 1, 0][$scope.dateType],
+        date: $scope.dateTime.showDate,
+    });
+    $scope.selectStationTaskStatistics.subscribe(res => {
+        $scope.selectStationTaskStatistics.res.body.total_bouns = res.body.data.reduce((a, b) => a + b.sum_bouns, 0);
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'stationName',
+                sort: true,
+                align: 'left',
+            },
+            {
+                title: '任务次数(次)',
+                dataIndex: 't_num',
+                sort: true,
+                align: 'right',
+            },
+            {
+                title: '红包金额(元)',
+                dataIndex: 'sum_bouns',
+                sort: true,
+                align: 'right',
+            },
+            {
+                title: '平均红包(元)',
+                dataIndex: 'avg_bouns',
+                sort: true,
+                align: 'right',
+            },
+            {
+                title: '最大红包(元)',
+                dataIndex: 'max_bouns',
+                sort: true,
+                align: 'right',
+            },
+            {
+                title: '最小红包(元)',
+                dataIndex: 'min_bouns',
+                sort: true,
+                align: 'right',
+            },
+        ];
+    });
 });

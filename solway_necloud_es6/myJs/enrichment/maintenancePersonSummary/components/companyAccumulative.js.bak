@@ -38,8 +38,8 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        // let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceCompanyAccum || {};
-        let tabIndex = 0 ;
+        let { tabIndex = 0 } = historicalRecord.get() || {};
+        // let tabIndex = 0 ;
         const { dateType } = historicalRecord.get();
         $scope.dateType = dateType;
         // await $scope.dateUpdated();
@@ -80,12 +80,13 @@ ajaxData({
     // tab 切换
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
-        // historicalRecord.set({
-        //     themeMaintenanceCompanyAccum: {
-        //         ...historicalRecord.get().themeMaintenanceCompanyAccum || {},
-        //         tabIndex
-        //     }
-        // });
+        historicalRecord.set({
+            tabIndex,
+            themeMaintenanceCompanyAccum: {
+                ...historicalRecord.get().themeMaintenanceCompanyAccum || {},
+                tabIndex
+            }
+        });
         $scope.diffGetData();
     };
 
