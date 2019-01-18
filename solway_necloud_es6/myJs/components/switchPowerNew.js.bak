@@ -30,7 +30,7 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     function getCurrentStationData(){
         $http({
             method: "POST",
-            url: "UserAuthHandle/getCurrentInfoNew.htm",
+            url: window.interface['GETgetCurrentInfoNew'],
         }).success(function (res) {
             $scope.currentInfoData = res;
             $scope.currentSTClass = res.currentSTClass;//光伏、风电
@@ -73,7 +73,7 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     function defineData(){
         $http({
             method: 'POST',
-            url: "UserAuthHandle/getSTListByLevel.htm",
+            url: window.interface['GETsTListByLevel'],
             params: {
                 isGroup: $rootScope.isGroup,
                 currentView: $rootScope.currentView,
@@ -131,8 +131,8 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     //所有集团、公司接口
     function groupData(){
         $http({
-            method: 'POST',
-            url: "UserAuthHandle/getSTListByLevel.htm",
+            method: 'GET',
+            url: window.interface['GETsTListByLevel'],
             params: {
                 isGroup: $rootScope.isGroup,
                 currentView: $rootScope.currentView,
@@ -180,7 +180,7 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     $scope.getSTClass = ()=> {
         $http({
             method: "POST",
-            url: "UserAuthHandle/getSTClassLIst.htm",
+            url: window.interface['GETstClassLIst'],
         }).success(function (res) {
             $scope.stationClasses = res.data;
             setStorageFun("switchStationData",'stationClassData',{'stationClassData':res.data});
@@ -279,8 +279,8 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     //获取点击公司的电站接口
     function stationDataInterface (belongId){
         $http({
-            method: 'POST',
-            url: "UserAuthHandle/getSTListByLevel.htm",
+            method: 'GET',
+            url: window.interface['GETsTListByLevel'],
             params: {
                 isGroup: $rootScope.isGroup,
                 currentView: $rootScope.currentView,
@@ -328,8 +328,8 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
 		$("#switchPowerNewModal").modal('hide');
 
         $http({
-            method: "POST",
-            url: "UserAuthHandle/changeDataType.htm",
+            method: "GET",
+            url: window.interface['GETUserAuthHandleChangeDataType'],
             params: {
                 id: powerStationId,
                 dataType: stFlag - 1,
@@ -368,7 +368,7 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                         $state.go($rootScope.firstMenuUrl[$scope.currentSTClass]["uisref"]);
                     } else {
                         //当在不同电站类型间跳转时
-                        window.location.href = "index.jsp#/app" + $rootScope.firstMenuUrl[$scope.currentSTClass]["uiurl"];
+                        window.location.href = "index.html#/app" + $rootScope.firstMenuUrl[$scope.currentSTClass]["uiurl"];
                         location.reload();
                     }
 

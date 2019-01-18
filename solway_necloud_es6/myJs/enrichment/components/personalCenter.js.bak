@@ -13,7 +13,7 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval',
         //获取角色
         $http({
             method: "POST",
-            url: window.baseUrl +"/UserAuthHandle/getRoleListForPC.htm"
+            url: window.interface['GETroleListForPC']
         }).success(function (res) {
             $scope.rolelist = res.rolelist;	//用户列表
             $scope.currentRoleID = res.currentRole;//当前用户的ID‘
@@ -26,7 +26,7 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval',
         $scope.changeRole = function (Id) {
             $http({
                 method : "POST",
-                url : window.baseUrl +"/UserAuthHandle/changeRoleNew.htm",
+                url: window.interface['changeRoleNew'],
                 params: {
                     roleId: Id	//用户要切换的ID
                 }
@@ -44,8 +44,28 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval',
                 res.currCompanyName = response.comName;
                 res.currCompanyLogo = response.comLogo;
                 $scope.$emit("chCompanyInfo", res);
-                
-                window.location.href=window.baseUrl +"/index.jsp";
+                $http({
+                    method: "GET",
+                    url: window.interface['GETrightListForPCNew'],
+                    params: {}
+                }).success(function (result) {
+                    var welComeUrl = '/power-index';
+                    if (result.roleType == 3) {
+                        welComeUrl = '/businessManagement';
+                    } else if (result.roleType == 99) {
+                        welComeUrl = "/app" + (function (arr, atr) {
+                            for (var i = 0; i < arr.length; i++) {
+                                if (arr[i][atr]) {
+                                    return arr[i][atr];
+                                }
+                            }
+                        })(result.rightlist, "uiurl");
+                    } else {
+                        welComeUrl = "/" + result.mainPage;
+                    }
+                    window.localStorage.welComeUrl = welComeUrl;
+                    window.location.href = window.baseUrl + "/index.html";
+                })
 
                 // if (response.roleType ==3 || response.roleType==99) {//集团管理员,系统管理员
                 //     /*var uisref = getArrRealVal(response.rightlist, 'uisref');//获取第一个uisref不为空的值
@@ -53,15 +73,15 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval',
                 //     $state.go(uisref, {
                 //         RoleId: $scope.currentRoleID
                 //     },{reload: true});*/
-                //     window.location.href=window.baseUrl +"/index.jsp";
+                //     window.location.href=window.baseUrl +"/index.html";
                 // } else {//非集团系统角色
-                //     window.location.href=window.baseUrl +"/index.jsp";
+                //     window.location.href=window.baseUrl +"/index.html";
                 // };
             });
         };
 
         //获取当前用户
-        $http.get(window.baseUrl +"/Login/getLoginUser.htm", {
+        $http.get(window.interface['GETloginUserInfo'], {
             timeout: 5000
         }).success(function (result) {
             $scope.loginName = result.userName;
@@ -79,8 +99,8 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval',
         //获取邀请消息条数
         function getInvitesNum() {
             $http({
-                method: "POST",
-                url: window.baseUrl + "/BaseMessage/queryCompanyInviteCount.htm"
+                method: "GET",
+                url: window.interface['GETqueryCompanyInviteCount']
             }).success(function (res) {
                 if(res.code == 1 && res.data>0){
                     $scope.ifInviteNote = true;
@@ -120,14 +140,14 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval',
         $scope.logOut = () =>{
             $.ajax({
                 type: "post",
-                url: window.baseUrl +"/Login/logout.htm",
+                url: window.interface['logout'],
                 timeout: 5000,
                 data: {},
                 success: function (msg) {
-                    window.location.href = window.baseUrl+"/login.jsp";
+                    window.location.href = window.baseUrl+"/login.html";
                 },
                 error: function (msg) {
-                    window.location.href = window.baseUrl +"/login.jsp";
+                    window.location.href = window.baseUrl +"/login.html";
                 }
             });
         }

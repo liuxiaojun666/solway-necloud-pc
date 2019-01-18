@@ -21,7 +21,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
             if ($scope.currentSTinfo.currentSTClass !== stClass) {
                 $http({
                     method: "GET",
-                    url: window.baseUrl + "/UserAuthHandle/setSTClass.htm",
+                    url: window.interface['GETUserAuthHandleSetSTClass'],
                     params: {stClass}
                 }).success(function (res) {
                     $state.go(routerUrl);
@@ -135,7 +135,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
         function getCurrentSTInfo() {
             $http({
                 method: "GET",
-                url: window.baseUrl + "/UserAuthHandle/getCurrentInfoNew.htm",
+                url: window.interface['GETgetCurrentInfoNew'],
                 params: { }
             }).success(function (res) {
                 $scope.stClass = res.currentSTClass || '01';

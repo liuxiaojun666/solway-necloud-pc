@@ -57,15 +57,6 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
         <div ng-include="'tpl/enrichment/components/equipmentPopUp/entrance.html'"></div>
     </div>`,
     scope: !1,
-    /* 
-    
-        <script src="theme/js/angular.pagination.js"></script>
-        <div ng-include="'tpl/systemPage/basemessage/modal/taskList_historyData1.jsp'"></div>
-        <div ng-include="'tpl/systemPage/basemessage/modal/taskList_historyData2.jsp'"></div>
-        <div ng-include="'tpl/systemPage/basemessage/modal/taskList_historyData3.jsp'"></div>
-
-    
-    */
     link($scope, $element, $attrs) {
         class Root extends React.Component {
             constructor(props) {
@@ -214,21 +205,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
         //双击事件
         $scope.dblclick = function (pstationid, deviceId, deviceSerialNnumber, deviceTypeNow, hasJB) {
             const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, hasJB };
-            // $scope.deviceTypeNow = deviceTypeNow;
-            // $scope.inverterType = hasJB;//点击逆变器，不同类型跳转不同样式页面（1->inverterDetailNew.jsp,2->inverterDetailNewType1.jsp）
-
             $scope.$broadcast("equipmentPopUp", res);
-
-            // if (deviceTypeNow == '3') {
-            //     $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
-            //     $scope.$broadcast("showDeviceDetail3broad", res);
-            // } else if (deviceTypeNow == '2') {
-            //     $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
-            //     $scope.$broadcast("showDeviceDetail2broad", res);
-            // } else if (deviceTypeNow == '1') {
-            //     $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
-            //     $scope.$broadcast("showDeviceDetail1broad", res);
-            // }
             $scope.$apply();
             return false;
         };

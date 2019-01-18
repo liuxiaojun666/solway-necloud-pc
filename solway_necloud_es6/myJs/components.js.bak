@@ -12,7 +12,7 @@ app.directive('endDateWarning', ['$ocLazyLoad', '$http', ($ocLazyLoad, $http) =>
         const getNewRoleEndDate = () =>{
             $http({
                 method: "GET",
-                url: window.baseUrl + "/PowerStation/getServiceAgreement.htm",
+                url: window.interface['GETserviceAgreement'],
                 params: {}
             }).success(function (result) {
 
@@ -38,8 +38,8 @@ app.directive('endDateWarning', ['$ocLazyLoad', '$http', ($ocLazyLoad, $http) =>
        
         const getRoleData = () =>{
             $http({
-                method: "POST",
-                url: window.baseUrl +"/UserAuthHandle/getRoleListForPC.htm"
+                method: "GET",
+                url: window.interface['GETroleListForPC']
             }).success(function (res) {
                 $scope.rolelist = res.rolelist;	
                 $scope.currentRoleID = res.currentRole;
