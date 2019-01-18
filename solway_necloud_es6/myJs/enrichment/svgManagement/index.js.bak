@@ -1,0 +1,134 @@
+ajaxData({
+    svgManagementList:{
+        name: 'GETsvgManagementList',
+        data: {},
+        later: true
+    },
+    svgDeleteBatch:{
+        name: 'GETsvgDeleteBatch',
+        data: {},
+        later: true
+    }
+}, {})('svgManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord, $timeout,toaster,$http) => {
+    $scope.moduleName = 'svg管理';
+    
+    $scope.initSvgList = () =>{
+        $scope.svgManagementList.getData({
+            pageIndex : 0,
+            pageSize: 10
+        })
+    }
+
+    $scope.initSvgList();
+
+
+    $scope.column = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '100px',
+            align: 'center',
+            checkboxName: 'svgCheckbox',
+            render(text, item, index) {
+                return '<label class="i-checks m-b-none"><input data-id="' + item.id + '" name="svgCheckbox" type="checkbox" /><i style="background:transparent;"></i></label>';
+            }
+        },{
+            title: '编号',
+            dataIndex: 'id',
+            align: 'left',
+            sort: true
+        }, {
+            title: '名称',
+            dataIndex: 'name',
+            align: 'center'
+        }, {
+            title: '所属电站',
+            dataIndex: 'stationname',
+            width:'30%',
+            align: 'center',
+            sort: true
+        }, {
+            title: '底图',
+            dataIndex: 'baseMap',
+            align: 'center',
+            sort: true
+        }, {
+            title: '是否默认显示',
+            dataIndex: 'isDisplay',
+            align: 'center',
+            sort: true
+        },
+         {
+            title: '操作',
+            align: 'center',
+            dataIndex:'id',
+            render(text,item,index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
+    
+     //打开电站
+     $scope.newSvg = () =>{
+        $scope.newSvgModel = true;
+        $scope.$broadcast('newSvgBroad',{id:''});
+    }
+
+    const deleteSvg = ids =>{
+        $scope.svgDeleteBatch.getData({
+            ids:ids
+        }).then(res=>{
+            if (res.key == 0){
+                toaster.pop('success','','删除成功');
+                $scope.initSvgList();
+            }else{
+                toaster.pop('error','','删除失败');
+            }
+        });
+    }
+
+    //批量删除
+    $scope.deleteBatch = () =>{
+        let ids = [];
+        $("input[name='svgCheckbox']:checked").each(function () {
+            ids.push(this.dataset.id);
+        });
+        if (ids.length == 0){
+            alert("请选择删除的数据");
+            return;
+        }
+        $solway.confirm({ message: '确定删除所选的所有svg' }, () => {
+            deleteSvg(ids);
+        });
+    }
+
+    $scope.trClick = (item, index, event) => {
+        if(event.target.className.includes('icon-bianji-copy')) {
+            $scope.newSvgModel = true;
+            $scope.$broadcast('newSvgBroad',{id:item.id});
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此svg' }, () => {
+                deleteSvg([item.id])
+            });
+        }
+    };
+
+    $scope.$on('cancelCallback',()=>{
+        $scope.newSvgModel = false;
+    });
+
+    $scope.$on('saveSuccess',()=>{
+        $scope.newSvgModel = false;
+        $scope.initSvgList();
+    })
+
+ 
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});
