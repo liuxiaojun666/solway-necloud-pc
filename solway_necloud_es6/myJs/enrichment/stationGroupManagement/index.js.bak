@@ -1,5 +1,5 @@
 ajaxData({
-    groupList: {
+    groupListData: {
         name: 'GETgroupList',
         data: {},
         later: true
@@ -9,23 +9,43 @@ ajaxData({
         data: {},
         later: true
     },
-    // update: {
-    //     name: 'POSTupdateDepartment',
-    //     data: {},
-    //     later: true
-    // },
-    // depDelete:{
-    //     name: 'POSTdeleteDepartment',
-    //     data: {},
-    //     later: true
-    // }
-}, {})('stationGroupManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    addGroup: {
+        name: 'POSTaddGroup',
+        data: {},
+        later: true
+    },
+    deleteGroup:{
+        name: 'POSTdeleteGroup',
+        data: {},
+        later: true
+    },
+    authGroupStations:{
+        name: 'GETauthGroupStations',
+        data: {},
+        later: true
+    },
+    saveStationsForGroup:{
+        name: 'POSTsaveStationsForGroup',
+        data: {},
+        later: true
+    },
+    deleteStationFromGroup:{
+        name: 'POSTdeleteStationFromGroup',
+        data: {},
+        later: true
+    }
+}, {})('stationGroupManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord, $timeout,toaster,$http) => {
     $scope.moduleName = '电站分组管理';//当前页面名称；
     
     
     $scope.initGroupList = () =>{
-        $scope.groupList.getData().then(res=>{
+        $scope.groupListData.getData().then(res=>{
             $scope.groupList = res.data;
+            if(res.data){
+                $scope.currentGroupId = res.data[0].id;
+                getStationListData(res.data[0].id);
+                $scope.selected = 0;
+            }
         });
     }
 
@@ -36,41 +56,44 @@ ajaxData({
             pageIndex:0,
             pageSize: 10,
             groupid: groupId
-        }).then(res=>{
-            $scope.column = [
-                {
-                    title: '电站名称',
-                    dataIndex: 'name',
-                    align: 'left',
-                    sort: true
-                }, {
-                    title: '装机容量',
-                    dataIndex: 'build',
-                    align: 'center'
-                }, {
-                    title: '地址',
-                    dataIndex: 'address',
-                    align: 'center',
-                    sort: true
-                },
-                 {
-                    title: '操作',
-                    align: 'center',
-                    dataIndex:'id',
-                    render(text,item,index) {
-                        return `
-                        <div class="clearfix">
-                            <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
-                        </div>
-                        `
-                    },
-                }
-            ]
-        });
+        })
     }
+
+    $scope.column = [
+        {
+            title: '电站名称',
+            width:'30%',
+            dataIndex: 'name',
+            align: 'left',
+            sort: true
+        }, {
+            title: '装机容量',
+            dataIndex: 'build',
+            align: 'right'
+        }, {
+            title: '地址',
+            dataIndex: 'address',
+            width:'40%',
+            align: 'left',
+            sort: true
+        },
+         {
+            title: '操作',
+            align: 'center',
+            dataIndex:'id',
+            render(text,item,index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
     //选中组
     $scope.chooseGroup = (item,index) =>{
         $scope.selected = index;
+        $scope.currentGroupId = item.id;
         getStationListData(item.id);
     }
 
@@ -78,28 +101,123 @@ ajaxData({
     $scope.hoverGroup = (item,index)=>{
         $scope.currentIndex = index;
     }
+    //hoverout
+    $scope.hoveroutGroup = () =>{
+        $scope.currentIndex = null;
+    }
 
-    // //删除
-    // $scope.delete = () =>{
-    //     $solway.confirm({ message: '确定删除此部门？' }, () => {
-    //         $scope.depDelete.getData({
-    //             id: $scope.depid
-    //         }).then(res=>{
-    //             if(res.key == 3){
-    //                 toaster.pop('error', '','请先删除下级部门')
-    //             }else if (res.key==2) {
-    //                 toaster.pop('success','','保存成功');
-    //                 initDepartmentList();
-    //             } else if (res.key==1) {
-    //                 toaster.pop('error', '','保存失败')
-    //             }
-    //         })
-    //     });
-    // }
+    //打开分组
+    $scope.newGroup = () =>{
+        $scope.newGroupTpl = true;
+    }
 
-  
+    //添加分组，保存
+    $scope.save = () =>{
+        $scope.addGroup.getData({
+            groupname:$scope.groupname
+        }).then(res=>{
+            if(res.type == "success"){
+                toaster.pop('success','','保存成功');
+                $scope.newGroupTpl = false;
+                $scope.initGroupList();
+            }else{
+                toaster.pop('error','','保存失败');
+            }
+        });
+    }
 
-    
+    //删除分组
+    $scope.deleteGroupData = id =>{
+        $solway.confirm({ message: '确定删除此分组' }, () => {
+            $scope.deleteGroup.getData({
+                id:id
+            }).then(res=>{
+                if(res.type == "success"){
+                    toaster.pop('success','','删除成功');
+                    $scope.initGroupList();
+                }else{
+                    toaster.pop('error','','删除失败');
+                }
+            });
+        });
+    }
+
+     //打开电站
+     $scope.addStation = () =>{
+        $scope.newStationTpl = true;
+        $scope.stationBelongToGroup();
+    }
+
+    //分组所属的电站列表
+    $scope.stationBelongToGroup = () =>{
+        $scope.authGroupStations.getData({
+            groupId:$scope.currentGroupId
+        }).then(res=>{
+            $scope.authStationsList = res;
+
+            $('input[name="stationCheckAll"]').prop('checked',false);
+            $('input[name="ids"]').prop('checked',false);
+            $timeout(()=>{
+                let $checkAll =  $(".addStationTpl").find('input[name="stationCheckAll"]');
+                let $checkEvery =  $(".addStationTpl").find('input[name="ids"]');
+                $(".addStationTpl").on('click','input[name="stationCheckAll"]', (e)=>{
+                    Array.from($checkEvery).forEach(item=>item.checked = e.target.checked)
+                    
+                });
+                $(".addStationTpl").on('click','input[name="ids"]', (e)=>{
+                    $checkAll.prop('checked', Array.from($checkEvery).every(item => item.checked== true));
+                });
+            })
+            
+        });
+    }
+
+    //保存电站
+    $scope.saveStation = () =>{
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            url: "AuthPowerStationGroup/savedata.htm?"
+                + $("input[name=ids]:checked").serialize() + "&groupid=" + $scope.currentGroupId,
+            success: function (json) {
+                toaster.pop('success', '', '保存成功');
+                $scope.newStationTpl = false;
+                $scope.initGroupList();
+            },
+            error: function (json) {
+                toaster('error', '', "保存失败");
+            }
+        });
+      
+    }
+
+    //删除分组中的电站
+    const deleteStation = id =>{
+        $scope.deleteStationFromGroup.getData({
+            id:id
+        }).then(res=>{
+            if(res.type == "success"){
+                toaster.pop('success','','删除成功');
+                $scope.initGroupList();
+            }else{
+                toaster.pop('error','','删除失败');
+            }
+        });
+    }
+
+    $scope.trClick = (item, index, event) => {
+        if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此电站' }, () => {
+                deleteStation(item.id)
+            });
+        }
+    };
+
+    $scope.cancel = () =>{
+        $scope.newGroupTpl = false;
+        $scope.newStationTpl = false;
+    }
+
  
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');
