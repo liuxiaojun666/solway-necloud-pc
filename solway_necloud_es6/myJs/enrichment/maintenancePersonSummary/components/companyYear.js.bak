@@ -37,8 +37,8 @@ ajaxData({
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        // let { tabIndex = 0 } = historicalRecord.get().themeMaintenanceCompanyYear || {};
-        let tabIndex = 0 ;
+        let { tabIndex = 0 } = historicalRecord.get() || {};
+        // let tabIndex = 0 ;
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
@@ -55,6 +55,7 @@ ajaxData({
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         $scope.diffGetData();
+        $scope.$broadcast('predPacket');
     };
 
     // 点击电站名  跳转到电站页面
@@ -74,18 +75,20 @@ ajaxData({
     $scope.dateUpdated = async () => {
         await myAjaxData.timeout(0);
         $scope.diffGetData();
+        $scope.$broadcast('predPacket');
     };
 
 
     // tab 切换
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
-        // historicalRecord.set({
-        //     themeMaintenanceCompanyYear: {
-        //         ...historicalRecord.get().themeMaintenanceCompanyYear || {},
-        //         tabIndex
-        //     }
-        // });
+        historicalRecord.set({
+            tabIndex,
+            themeMaintenanceCompanyYear: {
+                ...historicalRecord.get().themeMaintenanceCompanyYear || {},
+                tabIndex
+            }
+        });
         $scope.diffGetData();
     };
 
@@ -185,6 +188,8 @@ ajaxData({
                 $scope.sharePeopleList.getData({
                     pageIndex: 0,
                     pageSize: 20,
+                    dateType: 1,
+                    date: dateTime.showDate,
                     keywords:$scope.keywords
                 });
                 $scope.tabName = "共享人员";                
