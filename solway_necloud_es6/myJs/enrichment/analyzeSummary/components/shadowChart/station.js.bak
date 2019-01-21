@@ -75,6 +75,16 @@ ajaxData(
         $scope.diffGetData();
     };
 
+    $scope.chartClick = (event) => {
+        if (event.seriesName !== "异常阴影组串数") return;
+        $scope.equipmentDetailShow = true;
+        $scope.$broadcast('equipmentShadowDetails', {
+            eqid: $scope.analysis_station_str_shade_deviceline.res.body.data.eqid[event.dataIndex],
+            eq_name: $scope.analysis_station_str_shade_deviceline.res.body.data.eq_name[event.dataIndex],
+            stid: $scope.analysis_station_str_shade_deviceline.res.body.data.stid[event.dataIndex]
+        });
+    };
+
     $scope.equipmentListTrClick = (item, index, event) => {
         if (event.target.className.includes('clickable')) {
             const { stid, eqid } = item;
