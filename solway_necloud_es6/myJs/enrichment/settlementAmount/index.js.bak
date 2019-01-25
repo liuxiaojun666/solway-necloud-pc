@@ -1,0 +1,138 @@
+ajaxData({
+    settlePowerList: {
+        name: 'GETSettlePowerList',
+        data: {}
+    },
+    // 该角色 电站列表
+    allSTListForPCBySession: {
+        name: 'GETAllSTListForPCBySession',
+        data: {}
+    },
+    // 图片上传
+    uploadImageSingle: {
+        name: 'uploadImageSingle',
+        later: true,
+    },
+    // 新增 更新
+    settlePowerSave: {
+        name: 'POSTSettlePowerUpdate',
+        data: {},
+        later: true
+    },
+    // 查看详情
+    settlePowerDetail: {
+        name: 'GETSettlePowerDetail',
+        data: {},
+        later: true
+    },
+}, {})('settlementAmountCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
+    historicalRecord.init();
+    $scope.beforeLoading = true; // 页面loading
+    $scope.moduleName = '结算电量';//当前页面名称；
+    historyInitCallback();
+
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const {
+            
+        } = historiData;
+        $scope.formData = {
+            stid: '',
+            stationName: '',
+            num: '',
+            beginTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
+            endTime: new Date(Date.now() - 1000 * 60 * 60 * 24),
+            year: '',
+            netPower: '',
+            selfPower: '',
+            imgs: []
+        };
+        $scope.beforeLoading = false;
+        // $scope.$apply();
+    };
+
+    // 列表
+    $scope.settlePowerList.subscribe(res => {
+        $scope.column = [
+            {
+                title: '期数',
+                dataIndex: 'num',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '电站名称',
+                dataIndex: 'stationName',
+                sort: true,
+            },
+            {
+                title: '开始时间',
+                dataIndex: 'beginTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '结束时间',
+                dataIndex: 'endTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '上网电量(kWh)',
+                dataIndex: 'netPower',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '自发自用电量(kWh)',
+                dataIndex: 'selfPower',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '操作',
+                dataIndex: 'id',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return `
+                        <span title="编辑" style="padding: 0 10px;color:#31d3c9;cursor:pointer;" class="clickable iconfont icon-bianji-copy"></span>
+                        <span title="删除" style="padding: 0 10px;cursor:pointer;color:red;" class="clickable iconfont icon-shanchu1"></span>
+                    `
+                }
+            },
+        ];
+    });
+
+    // 图片上传
+    $scope.uploadFile = (element) => {
+        $scope.uploadImageSingle.getData({
+            classify: 'settlementPower',
+            file: element.files[0]
+        }).then(res => {
+            if (res.code !== 0) return;
+            $scope.formData.imgs.push(res.body);
+        });
+    };
+
+    // 新增 更新
+    $scope.formDataSubmit = () => {
+        const { beginTime, endTime } = $scope.formData;
+        $scope.settlePowerSave.getData({
+            ...$scope.formData,
+            beginTime: beginTime.showDate,
+            endTime: endTime.showDate
+        }).then(res => {
+            $scope.newForm = false;
+            $scope.settlePowerList.getData();
+        });
+    };
+
+});

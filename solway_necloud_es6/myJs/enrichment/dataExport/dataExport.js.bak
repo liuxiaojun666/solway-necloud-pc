@@ -43,7 +43,7 @@ ajaxData({
         later: true
     },
 
-}, {})('dataExportCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+}, {})('dataExportCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
     historicalRecord.init();// 历史记录 初始化
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '数据导出';//当前页面名称；
@@ -294,6 +294,15 @@ ajaxData({
                 }
             },
         ]
+    });
+
+    // 自动刷新任务列表
+    const timer = $interval(() => {
+        $scope.bigdataExportPage.getData();
+    }, 60 * 1000);
+
+    $scope.$on('$destroy', () => {
+        $interval.cancel(timer);
     });
 
 
