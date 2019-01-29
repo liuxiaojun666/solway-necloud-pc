@@ -1,31 +1,39 @@
-ajaxData({
-    settlePowerList: {
-        name: 'GETSettlePowerList',
-        data: {}
-    },
-    // 该角色 电站列表
-    allSTListForPCBySession: {
-        name: 'GETAllSTListForPCBySession',
-        data: {}
-    },
-    // 图片上传
-    uploadImageSingle: {
-        name: 'uploadImageSingle',
-        later: true,
-    },
-    // 新增 更新
-    settlePowerSave: {
-        name: 'POSTSettlePowerUpdate',
-        data: {},
-        later: true
-    },
-    // 查看详情
-    settlePowerDetail: {
-        name: 'GETSettlePowerDetail',
-        data: {},
-        later: true
-    },
-}, {})('settlementAmountCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
+ajaxData(
+    {
+        settlePowerList: {
+            name: 'GETSettlePowerList',
+            data: {}
+        },
+        // 该角色 电站列表
+        allSTListForPCBySession: {
+            name: 'GETAllSTListForPCBySession',
+            data: {}
+        },
+        // 图片上传
+        uploadImageSingle: {
+            name: 'uploadImageSingle',
+            later: true,
+        },
+        // 新增 更新
+        settlePowerSave: {
+            name: 'POSTSettlePowerUpdate',
+            data: {},
+            later: true
+        },
+        // 查看详情
+        settlePowerDetail: {
+            name: 'GETSettlePowerDetail',
+            data: {},
+            later: true
+        },
+        // 删除
+        settlePowerDelete: {
+            name: 'POSTSettlePowerDelete',
+            data: {},
+            later: true
+        }
+    }, {}
+)('settlementAmountCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad) => {
     historicalRecord.init();
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '结算电量';//当前页面名称；
@@ -35,8 +43,12 @@ ajaxData({
     async function historyInitCallback() {
         const historiData = historicalRecord.get();
         const {
-            
+
         } = historiData;
+        $scope.beforeLoading = false;
+    };
+
+    $scope.formDataInit = () => {
         $scope.formData = {
             stid: '',
             stationName: '',
@@ -48,8 +60,37 @@ ajaxData({
             selfPower: '',
             imgs: []
         };
-        $scope.beforeLoading = false;
-        // $scope.$apply();
+    }
+
+    // 列表操作，删除 编辑
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        if (event.target.className.includes('edit')) {
+            $scope.newForm = true;
+            const { id, stid, num, beginTime, endTime, year, netPower, selfPower, imgs } = item;
+            $scope.formData = {
+                id,
+                stid,
+                num,
+                beginTime: new Date(beginTime),
+                endTime: new Date(endTime),
+                year,
+                netPower,
+                selfPower,
+                imgs: (imgs || '').split(',')
+            };
+        } else if (event.target.className.includes('delete')) {
+            $ocLazyLoad.load([
+                'theme/js/dist/components/confirm.js' + stamp,
+            ]).then(res => {
+                $solway.confirm(
+                    { title: '电站：' + item.stationName + ', 期数:' + item.num, message: ' 确定删除该记录吗？' },
+                    () => $scope.settlePowerDelete.getData({ id: item.id }).then(res => {
+                        $scope.settlePowerList.getData();
+                    })
+                );
+            });
+        }
     };
 
     // 列表
@@ -103,8 +144,8 @@ ajaxData({
                 align: 'center',
                 render(text) {
                     return `
-                        <span title="编辑" style="padding: 0 10px;color:#31d3c9;cursor:pointer;" class="clickable iconfont icon-bianji-copy"></span>
-                        <span title="删除" style="padding: 0 10px;cursor:pointer;color:red;" class="clickable iconfont icon-shanchu1"></span>
+                        <span title="编辑" style="padding: 0 10px;color:#31d3c9;cursor:pointer;" class="clickable edit iconfont icon-bianji-copy"></span>
+                        <span title="删除" style="padding: 0 10px;cursor:pointer;color:red;" class="clickable delete iconfont icon-shanchu1"></span>
                     `
                 }
             },
@@ -124,11 +165,12 @@ ajaxData({
 
     // 新增 更新
     $scope.formDataSubmit = () => {
-        const { beginTime, endTime } = $scope.formData;
+        const { beginTime, endTime, imgs } = $scope.formData;
         $scope.settlePowerSave.getData({
             ...$scope.formData,
             beginTime: beginTime.showDate,
-            endTime: endTime.showDate
+            endTime: endTime.showDate,
+            imgs: imgs.join()
         }).then(res => {
             $scope.newForm = false;
             $scope.settlePowerList.getData();
