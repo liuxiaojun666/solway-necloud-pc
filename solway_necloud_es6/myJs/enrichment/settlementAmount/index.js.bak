@@ -33,7 +33,7 @@ ajaxData(
             later: true
         }
     }, {}
-)('settlementAmountCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad) => {
+)('settlementAmountCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$ocLazyLoad', 'toaster'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad, toaster) => {
     historicalRecord.init();
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '结算电量';//当前页面名称；
@@ -51,16 +51,15 @@ ajaxData(
     $scope.formDataInit = () => {
         $scope.formData = {
             stid: '',
-            stationName: '',
             num: '',
             beginTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
             endTime: new Date(Date.now() - 1000 * 60 * 60 * 24),
             year: '',
-            netPower: '',
-            selfPower: '',
+            netPower: 0,
+            selfPower: 0,
             imgs: []
         };
-    }
+    };
 
     // 列表操作，删除 编辑
     $scope.trClick = (item, index, event) => {
@@ -159,21 +158,33 @@ ajaxData(
             file: element.files[0]
         }).then(res => {
             if (res.code !== 0) return;
-            $scope.formData.imgs.push(res.body);
+            if (!$scope.formData.imgs[0]) $scope.formData.imgs[0] = res.body;
+            else $scope.formData.imgs.push(res.body);
         });
+    };
+
+    // 删除图片
+    $scope.deleteImage = (index) => {
+        $scope.formData.imgs.splice(index, 1);
     };
 
     // 新增 更新
     $scope.formDataSubmit = () => {
         const { beginTime, endTime, imgs } = $scope.formData;
-        $scope.settlePowerSave.getData({
-            ...$scope.formData,
-            beginTime: beginTime.showDate,
-            endTime: endTime.showDate,
-            imgs: imgs.join()
-        }).then(res => {
-            $scope.newForm = false;
-            $scope.settlePowerList.getData();
+        $ocLazyLoad.load([
+            'theme/js/dist/components/formValidation.js' + stamp,
+        ]).then(res => {
+            if ($solway.formValidation($scope.formData, '.settlementAmount .slide-down', toaster)) {
+                $scope.settlePowerSave.getData({
+                    ...$scope.formData,
+                    beginTime: beginTime.showDate,
+                    endTime: endTime.showDate,
+                    imgs: imgs.join()
+                }).then(res => {
+                    $scope.newForm = false;
+                    $scope.settlePowerList.getData();
+                });
+            }
         });
     };
 
