@@ -1,31 +1,152 @@
 ajaxData({
- 
-
-
-}, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','$location'], ($scope, myAjaxData, historicalRecord,$location) => {
-    historicalRecord.init();// 历史记录 初始化
-    $scope.beforeLoading = true; // 页面loading
-    $scope.moduleName = '运行配置';//当前页面名称；
-    historyInitCallback();
-
-    //当前页面行为记录初始化回调 获取行为记录
-    async function historyInitCallback() {
-        const historiData = historicalRecord.get();
-        const {
-            startDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
-            endDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
-        } = historiData;
-        
-        $scope.beforeLoading = false;
-        await myAjaxData.timeout(0);
-        $scope.$apply();
-    };
-
-
-    $scope.hashTo = val =>{
-        $location.hash(val);
+    getCurrentInfoNew: {
+        name: 'GETgetCurrentInfoNew',
+        data: {},
+        later: true
+    },
+    aerographDetail:{
+        name: 'GETaerographDetail',
+        data: {},
+        later: true
+    },
+    aerographList:{
+        name: 'GETaerographList',
+        data: {},
+        later: true
+    },
+    aerographListAround:{
+        name: 'GETaerographListAround',
+        data: {},
+        later: true
+    },
+    updateAerograph:{
+        name: 'POSTupdateAerograph',
+        data: {},
+        later: true
     }
 
 
+}, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','toaster'], ($scope, myAjaxData, historicalRecord,toaster) => {
+    
+    $scope.moduleName = '运行配置';
+
+    $scope.initPageParams = async()=>{
+        const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '03', isGroup: 0 });
+        $scope.pstationid = stationInfo.currentSTID;
+        $scope.currentStationName = stationInfo.currentDataName;
+        getAerographDetail();
+    }
+
+    $scope.initPageParams();
+
+    $('.workingConfigure').on('click','.menu-btn',function(){
+        $(this).siblings().removeClass('active-btn');
+        $(this).addClass('active-btn');
+    });
+
+    /****************************************  气象仪   *********************************************** */
+    
+    //气象仪 编辑
+    $scope.aerographEditShow = () =>{
+        $scope.aerographEdit = true;
+        getAerographDetail();
+    }
+
+    //气象仪详情
+    const getAerographDetail = () =>{
+        $scope.aerographDetail.getData({
+            pstationid:$scope.pstationid
+        }).then(res=>{
+            $scope.aerographData = res;
+            $scope.aerographEditId = res.id;
+            $scope.weatherdetail = res.weatherdetail;
+            $scope.isld = res.isld;
+
+            $scope.isborrow = res.isborrow;
+            if($scope.isborrow == 1){ //是否引用
+                $scope.borrowpstationid = res.borrowpstationid;
+                $scope.aerographId = res.borrowdeviceid;
+                getAeroGraphAroundData();
+            }else{
+                $scope.aerographSelfId = res.borrowdeviceid;
+                getCurrentAerographList();
+            }
+            
+        });
+    }
+
+    //当前电站的气象仪列表
+    const getCurrentAerographList = ()=>{
+        $scope.aerographList.getData({
+            pstationid:$scope.pstationid,
+			devicetype:5
+        }).then(res=>{
+            $scope.aerographListData = res;
+        });
+    }
+
+    //radio 是否引用
+    $scope.checkQuoteRadio = type =>{
+        $scope.isborrow = type;
+        if(type == 1){
+            getAeroGraphAroundData();
+        }else{
+            getCurrentAerographList();
+        }
+    }
+
+    //查看周边可引用的气象仪列表
+    const getAeroGraphAroundData = () =>{
+        $scope.aerographListAround.getData({
+            'powerStationId':$scope.pstationid
+        }).then(res=>{
+            if(res && res.list){
+                $scope.aroundData = res.list;
+            }
+        });
+    }
+
+    //radio 选择气象仪类型
+    $scope.aerographTypeRadio = type =>{
+        $scope.weatherdetail = type;
+    }
+
+    //radio 选择周边可引用气象仪
+    $scope.aerographQuoteWhich = item =>{
+        $scope.borrowpstationid = item.psId;
+        $scope.aerographId = item.aerographId;
+    }
+
+    //保存气象仪配置信息
+    $scope.saveAerograph = () =>{
+        let formData = {
+            isborrow: $scope.isborrow,
+            weatherdetail: $scope.weatherdetail,
+            pstationid: $scope.pstationid,
+            id: $scope.aerographEditId,
+            isld: $scope.isld
+        }
+        if($scope.isborrow == 1){
+            formData['aroundid'] = 'on';
+            if(!$scope.aerographId){
+                toaster.pop('error','','请选择要引用的气象仪');
+                return;
+            }
+            formData['borrowpstationid'] = $scope.borrowpstationid;
+            formData['borrowdeviceid'] = $scope.aerographId;
+        }else{
+            formData['borrowpstationid'] = $scope.pstationid;
+            formData['borrowdeviceid'] = $scope.aerographSelfId;
+        }
+        $scope.updateAerograph.getData(formData).then(res=>{
+            if(res.type == 'success'){
+                toaster.pop('success','','保存成功');
+                $scope.aerographEdit = false;
+                getAerographDetail();
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
 
 });
