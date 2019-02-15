@@ -1,47 +1,212 @@
-ajaxData({
-    
-}, {
-    __serviceName__: 'themeSparePartService'
-    })('themeSparePartCtrl', ['$scope', 'themeSparePartService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
-        /// 初始化 scope
-        $scope.initChildScope($scope, myAjaxData);
+ajaxData(
+    {
+        // 备件清单分页
+        opFittingsDictFdnumPage: {
+            name: 'GETopFittingsDictFdnumPage',
+            data: {},
+            later: true
+        },
+        // 库房列表
+        opFittingsRoomSelectByCondition: {
+            name: 'GETopFittingsRoomSelectByCondition',
+            data: {},
+            later: true,
+        },
+        // 备件入库分页
+        fittingsInPage: {
+            name: 'GETfittingsInPage',
+            data: {},
+            later: true,
+        },
+        // 入库清单
+        fittingsInFoods: {
+            name: 'GETfittingsInFoods',
+            data: {},
+            later: true
+        }
+    }, {
+        __serviceName__: 'themeSparePartService'
+    }
+)('themeSparePartCtrl', ['$scope', 'themeSparePartService', 'actionRecord', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, toaster, $ocLazyLoad) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
 
-        // 主页面初始化完成 回调
-        $scope.mainPageInitComplete = async () => {
-            const {
-                startDate: __sdate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365),
-                endDate: __edate = new Date,
-                isHis = '',
-                pStationId,
-                handStatus = {
-                    '00': true,
-                    '01': true,
-                    '02': true,
-                    '03': true,
-                    '04': true,
-                    '05': true,
-                    '06': true,
-                    '07': true,
-                },
-                searchKey = '',
-                isDefaultList = true
-            } = historicalRecord.get().themeSparePart || {};
-            $scope.startDate = new Date(__sdate);
-            $scope.startDate.showDate = '';
-            $scope.endDate = new Date(__edate);
-            $scope.endDate.showDate = '';
-            $scope.isHis = isHis;
-            $scope.handStatus = handStatus;
-            $scope.searchKey = searchKey;
-            $scope.pStationId = pStationId;
-            $scope.isDefaultList = isDefaultList;
-            await myAjaxData.timeout(0);
-            $('.ng-clock').removeClass('ng-clock');
-            $scope.initComplete = true;
-            // getBaseMessageList();
-            $scope.$apply();
-        };
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        const {
+            tabIndex = 0,
+            isDefaultList = true,
+            startDate = new Date(Date.now() - 1000 * 24 * 60 * 60 * 365),
+            endDate = new Date,
+        } = historicalRecord.get().themeSparePart || {};
+        $scope.tabIndex = tabIndex;
+        $scope.isDefaultList = isDefaultList;
+        $scope.startDate = startDate;
+        $scope.endDate = endDate;
+        await myAjaxData.timeout(0);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        getData()
+        $scope.$apply();
+    };
 
-        
+    $scope.changeTab = index => {
+        $scope.tabIndex = index;
+        historicalRecord.set({
+            themeSparePart: {
+                ...historicalRecord.get().themeSparePart || {},
+                tabIndex: index
+            }
+        });
+        getData();
+    };
+
+    $scope.publicFunc = (obj) => {
+        const { tabIndex } = $scope;
+        let fileName = '';
+        if (tabIndex === 1) fileName = 'putInStorage';
+        else if (tabIndex === 2) fileName = 'picking';
+        else if (tabIndex === 3) fileName = 'outStock';
+        else if (tabIndex === 4) fileName = 'returningLibrary';
+
+        $ocLazyLoad.load('theme/js/dist/enrichment/productionManageSummary/components/' + fileName + '.js').then(() => {
+            $scope.tpl4 = 'tpl/enrichment/productionManageSummary/components/' + fileName + '.html'
+            if ($scope['tpl' + tabIndex + 'loaded']) return $scope.$broadcast('popUp', obj);
+
+            $scope.tplLoaded = () => {
+                $scope['tpl' + tabIndex + 'loaded'] = true;
+                $scope.$broadcast('popUp', obj);
+            };
+        });
+    };
+
+    $scope.trClick = (item, index, event) => {
+        const {tabIndex} = $scope;
+        if (tabIndex === 1) {
+            $scope.publicFunc(item);   
+        }
+    };
+
+    function getData() {
+        $scope.column = [];
+        $scope.datasource = null;
+        const {tabIndex} = $scope;
+        if (tabIndex === 0) {
+            $scope.opFittingsRoomSelectByCondition.getData();
+            $scope.opFittingsDictFdnumPage.getData();
+        } else if (tabIndex === 1) {
+            $scope.opFittingsRoomSelectByCondition.getData();
+            $scope.fittingsInPage.getData();
+        }
+    }
+
+    // 备件清单分页
+    $scope.opFittingsDictFdnumPage.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.opFittingsDictFdnumPage.getData;
+        $scope.column = [
+            {
+                title: '备件编号',
+                dataIndex: 'code',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '备件名称',
+                dataIndex: 'name',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '型号',
+                dataIndex: 'ft',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '数量',
+                dataIndex: 'num',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '单位(元)',
+                dataIndex: 'fu',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '单价',
+                dataIndex: 'fp',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '金额(元)',
+                dataIndex: '',
+                align: 'right',
+                render(text, item, index) {
+                    return item.fp * item.num + '';
+                }
+            },
+        ];
+    });
+
+    // 备件入库管理分页
+    $scope.fittingsInPage.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.fittingsInPage.getData;
+        $scope.column = [
+            {
+                title: '入库单号',
+                dataIndex: 'sn',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '仓库名称',
+                dataIndex: 'stationName',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '入库日期',
+                dataIndex: 'createTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '操作人员',
+                dataIndex: 'createUname',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '备注',
+                dataIndex: 'summary',
+                sort: true,
+                width: '30%',
+                align: 'left'
+            },
+        ];
+    });
+
+    // 页面 点击  影藏 弹出
+    document.addEventListener('click', eventListen);
+    function eventListen() {
+        $scope.searchActive = false;
+        // $scope.batchCloseActive = false;
+        // $scope.showOpenVotes = false;
+        // $scope.messagePopUp = false;
+        $scope.$apply();
+    }
+    $scope.$on('$destroy', () => {
+        document.removeEventListener('click', eventListen);
+    });
 
 });

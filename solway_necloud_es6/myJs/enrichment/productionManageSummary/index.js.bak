@@ -1,5 +1,7 @@
-ajaxData({
-}, {})('productionManageSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+ajaxData(
+    {
+    }, {}
+)('productionManageSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad) => {
     historicalRecord.init();
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '生产管理';//当前页面名称；
@@ -23,7 +25,7 @@ ajaxData({
     $scope.reloadParentPage = async (data = {}) => {
         historicalRecord.set(data);
         $scope.beforeLoading = true;
-        
+
         return historyInitCallback();
     };
 
@@ -34,6 +36,11 @@ ajaxData({
         if (theme !== $scope.theme) $scope.themeLoading = true;
         $scope.theme = theme;
         historicalRecord.set({ theme });
+        if (theme === 'SparePart') {
+            return $ocLazyLoad.load(['theme/js/dist/enrichment/components/detailTabs.js']).then(() => {
+                $scope.themeDetail = `tpl/enrichment/productionManageSummary/components/theme${theme}.html${$scope.stamp}`;
+            });
+        }
         $scope.themeDetail = `tpl/enrichment/productionManageSummary/components/theme${theme}.html${$scope.stamp}`;
     };
 
