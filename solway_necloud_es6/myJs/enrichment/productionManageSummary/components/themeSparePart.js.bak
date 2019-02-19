@@ -11,6 +11,7 @@ ajaxData(
             name: 'GETopFittingsRoomSelectByCondition',
             data: {},
             later: true,
+            cache: true
         },
         // 备件入库分页
         fittingsInPage: {
@@ -18,12 +19,12 @@ ajaxData(
             data: {},
             later: true,
         },
-        // 入库清单
-        fittingsInFoods: {
-            name: 'GETfittingsInFoods',
+        // 领料 分页
+        opWorkFittingsReqPage: {
+            name: 'GETopWorkFittingsReqPage',
             data: {},
             later: true
-        }
+        },
     }, {
         __serviceName__: 'themeSparePartService'
     }
@@ -46,7 +47,7 @@ ajaxData(
         await myAjaxData.timeout(0);
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
-        getData()
+        $scope.diffGetData()
         $scope.$apply();
     };
 
@@ -58,7 +59,8 @@ ajaxData(
                 tabIndex: index
             }
         });
-        getData();
+        $scope.closeMessagePopUp();
+        $scope.diffGetData();
     };
 
     $scope.publicFunc = (obj) => {
@@ -80,23 +82,62 @@ ajaxData(
         });
     };
 
-    $scope.trClick = (item, index, event) => {
+    $scope.trClick = async (item, index, event) => {
         const {tabIndex} = $scope;
         if (tabIndex === 1) {
+            $scope.publicFunc(item);   
+        } else if (tabIndex === 2) {
+            $scope.chartPanelLoading = true;
+            event.stopPropagation();
+            $scope.searchActive = false;
+            $scope.currentTplName = item.tplName + '-' + item.title;
+            $scope.closeMessagePopUp();
+            await myAjaxData.timeout(100);
+            $scope.messagePopUp = true;
+            $ocLazyLoad.load([
+                'theme/js/dist/enrichment/productionManageSummary/components/chatPanel2.js' + stamp
+            ]).then(res => {
+                $scope.chatPanelLoad = () => {
+                    $scope.chartPanelLoaded = true;
+                    $scope.chartPanelLoading = false;
+                    $scope.$broadcast("chatPanel2Obj", item);
+                    $('.my-table tbody tr').eq(index + 1).addClass('active');
+                };
+                if ($scope.chartPanelLoaded) return $scope.chatPanelLoad();
+                return $scope.chatPanelView = 'tpl/enrichment/productionManageSummary/components/chatPanel2.html' + stamp;
+            });
+            $scope.$apply();
+        }
+    };
+
+    $scope.trDblClick = (item, index, event) => {
+        const {tabIndex} = $scope;
+        if (tabIndex === 2) {
             $scope.publicFunc(item);   
         }
     };
 
-    function getData() {
+
+    // 关闭 聊天 消息 面板
+    $scope.closeMessagePopUp = () => {
+        $scope.messagePopUp = false;
+        $('.my-table tbody tr').removeClass('active');
+    };
+
+
+    $scope.diffGetData = () => {
         $scope.column = [];
         $scope.datasource = null;
         const {tabIndex} = $scope;
         if (tabIndex === 0) {
             $scope.opFittingsRoomSelectByCondition.getData();
-            $scope.opFittingsDictFdnumPage.getData();
+            $scope.opFittingsDictFdnumPage.getData({pageIndex: 0});
         } else if (tabIndex === 1) {
             $scope.opFittingsRoomSelectByCondition.getData();
-            $scope.fittingsInPage.getData();
+            $scope.fittingsInPage.getData({pageIndex: 0});
+        } else if (tabIndex === 2) {
+            $scope.opFittingsRoomSelectByCondition.getData();
+            $scope.opWorkFittingsReqPage.getData({pageIndex: 0});
         }
     }
 
@@ -147,7 +188,7 @@ ajaxData(
                 dataIndex: '',
                 align: 'right',
                 render(text, item, index) {
-                    return item.fp * item.num + '';
+                    return (item.fp * item.num).toFixed(2) + '';
                 }
             },
         ];
@@ -196,11 +237,66 @@ ajaxData(
         ];
     });
 
+    // 备件 领料 分页
+    $scope.opWorkFittingsReqPage.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.opWorkFittingsReqPage.getData;
+        $scope.closeMessagePopUp();
+        $scope.column = [
+            {
+                title: '申请日期',
+                dataIndex: 'createTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '申请人',
+                dataIndex: 'createUname',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '领料原因',
+                dataIndex: 'summary',
+                sort: true,
+                width: '30%',
+                align: 'left'
+            },
+            {
+                title: '状态',
+                dataIndex: 'state',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    switch (text) {
+                        case '00':
+                            return '完成';
+                        case '01':
+                            return '待处理';
+                        case '02':
+                            return '正在处理';
+                        case '03':
+                            return '作废';
+                        case '04':
+                            return '不合格';
+                        case '05':
+                            return '退回';
+                        case '06':
+                            return '';
+                    }
+                }
+            },
+        ];
+    });
+
     // 页面 点击  影藏 弹出
     document.addEventListener('click', eventListen);
     function eventListen() {
         $scope.searchActive = false;
-        // $scope.batchCloseActive = false;
         // $scope.showOpenVotes = false;
         // $scope.messagePopUp = false;
         $scope.$apply();

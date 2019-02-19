@@ -12,33 +12,41 @@ ajaxData(
             later: true
         },
         // 入库清单
-        fittingsInFoods: {
+        fittingsInGoods: {
             name: 'GETfittingsInFoods',
             data: {},
             later: true
-        }
+        },
     }, {
         __serviceName__: 'themePutInStorageService'
     }
 )('themePutInStorageCtrl', ['$scope', 'themePutInStorageService', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, toaster, $ocLazyLoad) => {
 
-    $scope.createDate = (new Date).Format('yyyy-MM-dd');
-
-
+    
+    
     $scope.$on('popUp', (event, obj) => {
         const {tabIndex} = $scope;
         if (tabIndex !== 1) return;
         $scope.down = true;
+
+        $scope.createDate = (new Date).Format('yyyy-MM-dd');
+        $scope.stationId = void 0;
+        $scope.summary = void 0;
+        $scope.sn = void 0;
+        
         $scope.putList = [];
+        $scope.fittingsInGoods.res = null;
+
         $scope.lookOver = obj ? true : false;
-        obj && $scope.fittingsInFoods.getData({id: obj.id});
+        obj && $scope.fittingsInGoods.getData({id: obj.id});
     });
 
 
-    $scope.fittingsInFoods.subscribe(res => {
+    $scope.fittingsInGoods.subscribe(res => {
         $scope.createDate = (new Date(res.body.topic.createTime)).Format('yyyy-MM-dd');
         $scope.stationId = res.body.topic.stationId;
         $scope.summary = res.body.topic.summary;
+        $scope.sn = res.body.topic.sn;
     });
 
 
@@ -81,7 +89,7 @@ ajaxData(
             if (res.code !== 0) return toaster.pop('error', '', '入库失败');
             toaster.pop('success', '', '入库成功');
             $scope.down = false;
-            $scope.fittingsInPage.getData({pageIndex: 0});
+            $scope.diffGetData();
         });
     };
 

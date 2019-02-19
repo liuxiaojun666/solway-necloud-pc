@@ -77,6 +77,7 @@ ajaxData({
             {
                 title: '电站',
                 width: '30%',
+                style: 'padding-top:10px;',
                 dataIndex: 'rels',
                 render(text,item,index) {
                     return `
@@ -85,8 +86,9 @@ ajaxData({
                             <i class="iconfont icon-icon-power-powerstation" style="font-size: 25px;color: #1ddabe;display:${item.authStatus === '03' ? '' : 'none'};"></i>
                         </div>
                         <div class="pull-left" style="width:80%;">
-                            <p style="margin:5px 0 0 0;">${text[0]?text[0].stationName:''}</p>
-                            <p style="margin:0;">${text[1]?text[1].stationName:''}</p>
+                            ${
+                                text.map(v => '<span style="margin-right: 2em;">' + v.stationName+'</span>').join('')
+                            }
                         </div>
                     </div>
                     `
@@ -134,6 +136,11 @@ ajaxData({
     $scope.$on('addStationSuccessful',(e,v)=>{
         $scope.getDataList();
     });
+
+    // $scope.$on('peopleManage', () => {
+    //     if (!$scope.peopleManageShow) return;
+    //     $scope.getDataList();
+    // });
     
 
     $scope.getDataList = () =>{

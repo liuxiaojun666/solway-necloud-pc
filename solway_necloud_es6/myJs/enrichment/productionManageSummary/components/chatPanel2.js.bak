@@ -1,7 +1,7 @@
 ajaxData(
     {
-        opWorkTicketList: {
-            name: 'GETopWorkTicketList',
+        opWorkFittingsReqTasks: {
+            name: 'GETopWorkFittingsReqTasks',
             data: {},
             later: true
         },
@@ -22,24 +22,24 @@ ajaxData(
             data: {},
             later: true
         },
-        opWorkTicketTo: {
-            name: 'opWorkTicketTo',
+        opWorkFittingsReqTo: {
+            name: 'opWorkFittingsReqTo',
             data: {},
             later: true
         },
 
     }, {
-        __serviceName__: 'chatPanelService'
+        __serviceName__: 'chatPanel2Service'
     }
-)('chatPanelCtrl', ['$scope', 'chatPanelService', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, toaster, $ocLazyLoad) => {
+)('chatPanel2Ctrl', ['$scope', 'chatPanel2Service', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, toaster, $ocLazyLoad) => {
 
-    $scope.$on('chatPanelObj', async (event, obj) => {
+    $scope.$on('chatPanel2Obj', async (event, obj) => {
         const {stationId, id, sn, tplId, tplName: name, summary} = obj;
         $scope.obj = {
             stationId, id, sn, tplId, name, summary
         };
         if (!$scope.loginUserInfo.res) await $scope.loginUserInfo.getData();
-        $scope.opWorkTicketList.getData({ workId: obj.id });
+        $scope.opWorkFittingsReqTasks.getData({ id: obj.id });
     });
 
     $scope.opWorkTicketHandle.subscribe(res => {
@@ -49,9 +49,9 @@ ajaxData(
         $scope.$parent.$parent.messagePopUp = false;
     });
 
-    $scope.opWorkTicketTo.subscribe(res => {
+    $scope.opWorkFittingsReqTo.subscribe(res => {
         $scope.handleTransfer = false;
-        $scope.$parent.$parent.getBaseMessageList();
+        $scope.$parent.$parent.diffGetData();
         $scope.$parent.$parent.messagePopUp = false;
     });
 
