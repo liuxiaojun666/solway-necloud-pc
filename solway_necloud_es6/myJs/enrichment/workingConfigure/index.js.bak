@@ -23,6 +23,31 @@ ajaxData({
         name: 'POSTupdateAerograph',
         data: {},
         later: true
+    },
+    interruptNoteDetail:{
+        name: 'GETinterruptNoteDetail',
+        data: {},
+        later: true
+    },
+    interruptNoteSave:{
+        name: 'POSTinterruptNoteSave',
+        data: {},
+        later: true
+    },
+    powerStationDetail:{
+        name: 'GETpowerStationDetail',
+        data: {},
+        later: true
+    },
+    updateNoteSave:{
+        name: 'POSTupdateNoteSave',
+        data: {},
+        later: true
+    },
+    initialPowerDetail:{
+        name: 'GETinitialPowerDetail',
+        data: {},
+        later: true
     }
 
 
@@ -35,6 +60,15 @@ ajaxData({
         $scope.pstationid = stationInfo.currentSTID;
         $scope.currentStationName = stationInfo.currentDataName;
         getAerographDetail();
+        getInterruptDetailData();
+        getNoteDetailData();
+        getInitialPowerDetailData();
+
+        //状态均未编辑
+        $scope.aerographEdit = false;
+        $scope.interruptEditDisabled = true;
+        $scope.noteDisabled = true;
+        
     }
 
     $scope.initPageParams();
@@ -147,6 +181,105 @@ ajaxData({
                 toaster.pop('error', '','保存失败')
             }
         });
+    }
+
+    /****************************************  消息及日志   *********************************************** */
+
+    //中断详情
+    const getInterruptDetailData = () =>{
+        let arr = $("input[name='interruptNoteCheckbox']");
+        $scope.interruptNoteDetail.getData({pstationid:$scope.pstationid}).then(res=>{
+            if (res.key == 0){
+                const data = res.data;
+                $scope.timeOffset = data.leadvalue;
+                $scope.isrectip = data.isrectip;
+                for(let i=0;i<arr.length;i++){
+                    if($scope.isrectip.includes(arr[i].value)){
+                        arr[i].checked = true;
+                    }else{
+                        arr[i].checked = false;
+                    }
+                }
+            }
+        });
+    }
+    //通讯中断消息  编辑
+    $scope.interruptEditShow = () =>{
+        $scope.interruptEditDisabled = false;
+    }
+
+    //取消
+    $scope.interruptEditCancel = () =>{
+        getInterruptDetailData();
+        $scope.interruptEditDisabled = true;
+    }
+
+    //通讯中断消息  保存
+    $scope.saveInterruptNote = () =>{
+        let isrectip = [];
+        $("input[type='checkbox']").each(function(i){
+            if($(this).prop('checked')){
+                isrectip.push($(this).val())
+            }
+        });
+        $scope.interruptNoteSave.getData({
+            pstationid: $scope.pstationid,
+			isrectip: isrectip.join(","),
+			leadvalue: $scope.timeOffset
+        }).then(res=>{
+            if(res.key == 0){
+                toaster.pop('success','','保存成功');
+                $scope.interruptEditCancel();
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
+
+
+    //消息详情
+    const getNoteDetailData = () =>{
+        $scope.powerStationDetail.getData({id:$scope.pstationid}).then(res=>{
+			$("input[name='noteConfigure'][value='"+res.ismessage+"']").prop("checked", true);
+        });
+    }
+    //消息配置
+    $scope.noteEditShow = () =>{
+        $scope.noteDisabled = false;
+    }
+
+    //消息配置 取消
+    $scope.noteEditCancel = () =>{
+        $scope.noteDisabled = true;
+        getNoteDetailData();
+    }
+
+    //消息配置  保存
+    $scope.saveNote = () =>{
+        let ismessage = $("input[name='noteConfigure']:checked").val();
+        $scope.updateNoteSave.getData({
+            id:$scope.pstationid,
+            ismessage:ismessage
+        }).then(res=>{
+            if(res == 1){
+                toaster.pop('success','','保存成功');
+                $scope.noteEditCancel();
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
+
+    /****************************************  初始电量   *********************************************** */
+    
+    //初始电量详情
+    const getInitialPowerDetailData = () =>{
+        $scope.initialPowerDetail.getData({pstationid:$scope.pstationid}).then(res=>{
+            $scope.initialPowerData = res;
+        });
+    }
+    $scope.initialPowerEditShow = () =>{
+
     }
 
 });
