@@ -48,6 +48,11 @@ ajaxData({
         name: 'GETinitialPowerDetail',
         data: {},
         later: true
+    },
+    initialPowerSave:{
+        name: 'POSTinitialPowerSave',
+        data: {},
+        later: true
     }
 
 
@@ -68,6 +73,7 @@ ajaxData({
         $scope.aerographEdit = false;
         $scope.interruptEditDisabled = true;
         $scope.noteDisabled = true;
+        $scope.initialPowerEditDisabled = true;
         
     }
 
@@ -217,7 +223,7 @@ ajaxData({
     //通讯中断消息  保存
     $scope.saveInterruptNote = () =>{
         let isrectip = [];
-        $("input[type='checkbox']").each(function(i){
+        $("input[name='interruptNoteCheckbox']").each(function(i){
             if($(this).prop('checked')){
                 isrectip.push($(this).val())
             }
@@ -271,15 +277,38 @@ ajaxData({
     }
 
     /****************************************  初始电量   *********************************************** */
-    
+    $scope.endDate = new Date('2099');
+    $scope.expiryDate = new Date();
+
     //初始电量详情
     const getInitialPowerDetailData = () =>{
         $scope.initialPowerDetail.getData({pstationid:$scope.pstationid}).then(res=>{
+            console.log(res)
             $scope.initialPowerData = res;
+            $scope.expiryDate = new Date(res.expirydate);
         });
     }
     $scope.initialPowerEditShow = () =>{
+        $scope.initialPowerEditDisabled = false;
+    }
 
+    //取消
+    $scope.cancelInitialPower = () =>{
+        $scope.initialPowerEditDisabled = true;
+        getInitialPowerDetailData();
+    }
+
+    //保存
+    $scope.saveInitialPower = () =>{
+        $scope.initialPowerData['expirydate'] = new Date($scope.expiryDate).Format("yyyy-MM-dd");
+        $scope.initialPowerSave.getData($scope.initialPowerData).then(res=>{
+            if(res.type == 'success'){
+                toaster.pop('success','','保存成功');
+                $scope.cancelInitialPower();
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
     }
 
 });
