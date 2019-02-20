@@ -30,6 +30,7 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
         column: '=',
         datasource: '=',
         trClick: '=',
+        trDblclick: '=',
         trStyle: '=',
         scrollY: '=',
         scrollHeight: '=',
@@ -132,6 +133,14 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
                 if (e.target.parentElement.localName === 'label') return;
                 if (e.target.attributes['lxj-click']) return;
                 $scope.trClick(item, index, e);
+            };
+        }
+
+        if ($scope.trDblclick) {
+            $scope.__trDblClick = (e, item, index) => {
+                if (e.target.parentElement.localName === 'label') return;
+                if (e.target.attributes['lxj-click']) return;
+                $scope.trDblclick(item, index, e);
             };
         }
 
