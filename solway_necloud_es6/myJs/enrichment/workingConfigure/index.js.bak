@@ -53,10 +53,20 @@ ajaxData({
         name: 'POSTinitialPowerSave',
         data: {},
         later: true
+    },
+    videoConfigureList:{
+        name: 'GETvideoConfigureList',
+        data: {},
+        later: true
+    },
+    videoConfigureDelete:{
+        name: 'POSTvideoConfigureDelete',
+        data: {},
+        later: true
     }
 
 
-}, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','toaster'], ($scope, myAjaxData, historicalRecord,toaster) => {
+}, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','toaster','$http'], ($scope, myAjaxData, historicalRecord,toaster,$http) => {
     
     $scope.moduleName = '运行配置';
 
@@ -68,12 +78,14 @@ ajaxData({
         getInterruptDetailData();
         getNoteDetailData();
         getInitialPowerDetailData();
+        $scope.searchVideo();
 
         //状态均未编辑
         $scope.aerographEdit = false;
         $scope.interruptEditDisabled = true;
         $scope.noteDisabled = true;
         $scope.initialPowerEditDisabled = true;
+        $scope.EditVideoModel = false;
         
     }
 
@@ -242,7 +254,6 @@ ajaxData({
         });
     }
 
-
     //消息详情
     const getNoteDetailData = () =>{
         $scope.powerStationDetail.getData({id:$scope.pstationid}).then(res=>{
@@ -277,13 +288,13 @@ ajaxData({
     }
 
     /****************************************  初始电量   *********************************************** */
+
     $scope.endDate = new Date('2099');
     $scope.expiryDate = new Date();
 
     //初始电量详情
     const getInitialPowerDetailData = () =>{
         $scope.initialPowerDetail.getData({pstationid:$scope.pstationid}).then(res=>{
-            console.log(res)
             $scope.initialPowerData = res;
             $scope.expiryDate = new Date(res.expirydate);
         });
@@ -300,6 +311,8 @@ ajaxData({
 
     //保存
     $scope.saveInitialPower = () =>{
+        if (!$solway.formValidation($scope.initialPowerData, '.initial-power', toaster)) return;//校验非空
+
         $scope.initialPowerData['expirydate'] = new Date($scope.expiryDate).Format("yyyy-MM-dd");
         $scope.initialPowerSave.getData($scope.initialPowerData).then(res=>{
             if(res.type == 'success'){
@@ -310,5 +323,148 @@ ajaxData({
             }
         });
     }
+
+    /****************************************  视频监控点   *********************************************** */
+
+    $scope.columnVideo = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'videoCheckboxName',
+            render(text, record, index) {
+                return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="videoCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+            }
+        },{
+            title: '电站名称',
+            // width:'25%',
+            dataIndex: 'stName',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '监控点名称',
+            dataIndex: 'monitorPointName',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '监控点编号',
+            dataIndex: 'monitorPointNum',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '监控点IP',
+            dataIndex: 'monitorPointIP',
+            align: 'center'
+        }, {
+            title: '监控点源地址',
+            dataIndex: 'monitorPointSource',
+            align: 'center'
+        }, {
+            title: '监控点目标地址',
+            dataIndex: 'monitorPointDest',
+            align: 'center'
+        }, {
+            title: '监控点排序',
+            dataIndex: 'monitorPointSeq',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="授权"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
+    $scope.searchVideo = () =>{
+        $scope.videoConfigureList.getData({
+            pageIndex:0,
+            pageSize:10,
+            stId:$scope.pstationid,
+            monitorPointName:$scope.monitorPointName,
+            monitorPointIP:$scope.monitorPointIP
+        })
+    }
+
+    //新增
+    $scope.newVideo = () =>{
+        $scope.EditVideoModel = true;
+        $scope.$broadcast('broadAddVideo',{'id':''});
+    }
+
+    const deleteVideo = ids =>{
+        // $scope.videoConfigureDelete.getData({
+        //     stId:$scope.pstationid,
+        //     ids:ids
+        // }).then(res=>{
+        //     if (res.key == 0){
+        //         toaster.pop('success','','删除成功');
+        //         $scope.searchVideo();
+        //     }else{
+        //         toaster.pop('error', '','删除失败')
+        //     }
+        // });
+        $http({
+            method : "POST",
+            url : "PVideoConfig/deleteVideoConfig.htm",
+            params : {
+                stId:$scope.pstationid,
+                ids:ids
+            }
+        }).success(function(res) {
+            if (res.key == 0){
+                toaster.pop('success','','删除成功');
+                $scope.searchVideo();
+            }else{
+                toaster.pop('error', '','删除失败')
+            }
+        });
+    }
+
+    $scope.trClickVideo = (item, index, event) => {
+        if(event.target.className.includes('icon-bianji-copy')) {
+            $scope.EditVideoModel = true;
+            $scope.$broadcast('broadAddVideo',{'id':item.id,'detail':item});
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此视频配置？' }, () => {
+                deleteVideo([item.id])
+            });
+        }
+    };
+
+
+    //批量删除
+    $scope.delBatch = () =>{
+        let ids = [];
+        $("input[name='videoCheckboxName']:checked").each(function () {
+            ids.push(this.dataset.id);
+        });
+        if (ids.length == 0){
+            alert("请选择删除的数据");
+            return;
+        }
+        $solway.confirm({ message: '确定删除所选的视频配置？' }, () => {
+            deleteVideo(ids)
+        });
+        
+    }
+
+    //配置编辑成功回调
+    $scope.$on('saveVideoCallback',() =>{
+        $scope.EditVideoModel = false;
+        $scope.searchVideo();
+    });
+
+    //取消
+    $scope.$on('cancelCallback',()=>{
+        $scope.EditVideoModel = false;
+    });
 
 });
