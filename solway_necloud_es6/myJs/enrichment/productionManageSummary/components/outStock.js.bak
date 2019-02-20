@@ -1,0 +1,107 @@
+ajaxData(
+    {
+        // 出库 清单
+        opWorkFittingsOutGoods: {
+            name: 'GETopWorkFittingsOutGoods',
+            data: {},
+            later: true
+        },
+        // 库房列表  单个设备 库房中的数量
+        opFittingsDictRoomSelectByFD: {
+            name: 'GETopFittingsDictRoomSelectByFD',
+            data: {},
+            later: true,
+            cache: true
+        },
+        // 出库 创建
+        opWorkFittingsOutCreate: {
+            name: 'opWorkFittingsOutCreate',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'themeOutStockService'
+    }
+)('themeOutStockCtrl', ['$scope', 'themeOutStockService', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, toaster, $ocLazyLoad) => {
+
+
+
+    $scope.$on('popUp', (event, obj) => {
+        const { tabIndex } = $scope;
+        if (tabIndex !== 3) return;
+
+        $scope.obj = obj;
+
+        $scope.down = true;
+
+        $scope.lookOver = obj.state === '00' ? true : false;
+
+        $scope.opWorkFittingsOutGoods.getData({id: obj.id});
+    });
+
+
+    $scope.opWorkFittingsOutGoods.subscribe(res => {
+
+        $scope.workedObj = res.body.goods.map(v => ({
+            num: v.num,
+            fdId: v.fd.id,
+            code: v.fd.code,
+            name: v.fd.name,
+            ft: v.fd.ft,
+            fgId: v.id,
+            grs: v.fgrs
+        }));
+    });
+
+
+    $scope.deleteRoom = (fdIndex, grsIndex) => {
+        $scope.workedObj[fdIndex].grs.splice(grsIndex, 1);
+    };
+
+
+    $scope.computeMaxNum = (fdIndex, grsIndex) => {
+
+        $scope.workedObj[fdIndex].grs[grsIndex].max = $scope.workedObj[fdIndex].roomList.find(v => {
+            return +v.id === +$scope.workedObj[fdIndex].grs[grsIndex].roomId;
+        }).num;
+    };
+
+
+    $scope.opFittingsDictRoomSelectByFD.beforGetData = (index, fdId) => {
+        $scope.workedObj[index].grs.push({num: 1});
+        if ($scope.workedObj[index].grs.length > 1) return;
+        $scope.opFittingsDictRoomSelectByFD.getData({fdId}).then(res => {
+            $scope.workedObj[index].roomList = res.body;
+        });
+    };
+
+
+    $scope.submit = () => {
+
+        const { summary, putList } = $scope;
+
+        // if (!(summary)) return toaster.pop('error', '', '请填写备注内容');
+
+        // if (!putList[0]) return toaster.pop('error', '', '至少入库一条数据');
+
+        // if (putList.some(v => v.edit)) return toaster.pop('error', '', '请结束编辑状态');
+
+        // if (putList.some(v => !(v.fdId && v.num))) return toaster.pop('error', '', '请删除或完成不完整记录');
+
+        const goods = putList.map(v => {
+            delete v.edit;
+            delete v.money;
+            return v;
+        });
+
+        $scope.opWorkFittingsOutCreate.getData({
+            summary, goods
+        }).then(res => {
+            if (res.code !== 0) return toaster.pop('error', '', '领料申请创建失败');
+            toaster.pop('success', '', '领料申请创建成功');
+            $scope.down = false;
+            $scope.diffGetData({ pageIndex: 0 });
+        });
+    };
+
+});
