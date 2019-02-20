@@ -242,7 +242,6 @@ ajaxData({
         });
     }
 
-
     //消息详情
     const getNoteDetailData = () =>{
         $scope.powerStationDetail.getData({id:$scope.pstationid}).then(res=>{
@@ -283,7 +282,6 @@ ajaxData({
     //初始电量详情
     const getInitialPowerDetailData = () =>{
         $scope.initialPowerDetail.getData({pstationid:$scope.pstationid}).then(res=>{
-            console.log(res)
             $scope.initialPowerData = res;
             $scope.expiryDate = new Date(res.expirydate);
         });
@@ -300,6 +298,8 @@ ajaxData({
 
     //保存
     $scope.saveInitialPower = () =>{
+        if (!$solway.formValidation($scope.initialPowerData, '.initial-power', toaster)) return;//校验非空
+
         $scope.initialPowerData['expirydate'] = new Date($scope.expiryDate).Format("yyyy-MM-dd");
         $scope.initialPowerSave.getData($scope.initialPowerData).then(res=>{
             if(res.type == 'success'){
