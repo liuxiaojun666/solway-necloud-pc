@@ -63,7 +63,17 @@ ajaxData({
         name: 'POSTvideoConfigureDelete',
         data: {},
         later: true
-    }
+    },
+    restrictPowerList:{
+        name: 'GETrestrictPowerList',
+        data: {},
+        later: true
+    },
+    selectDevicesByStation: {
+        name: 'GETselectDevicesByStation',
+        data: {},
+        later: true
+    },
 
 
 }, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','toaster','$http'], ($scope, myAjaxData, historicalRecord,toaster,$http) => {
@@ -79,6 +89,9 @@ ajaxData({
         getNoteDetailData();
         getInitialPowerDetailData();
         $scope.searchVideo();
+        $scope.getRestrictPowerData();
+
+        $scope.changeDeviceType(2);
 
         //状态均未编辑
         $scope.aerographEdit = false;
@@ -207,7 +220,7 @@ ajaxData({
     const getInterruptDetailData = () =>{
         let arr = $("input[name='interruptNoteCheckbox']");
         $scope.interruptNoteDetail.getData({pstationid:$scope.pstationid}).then(res=>{
-            if (res.key == 0){
+            if (res.key == 0 && res.data){
                 const data = res.data;
                 $scope.timeOffset = data.leadvalue;
                 $scope.isrectip = data.isrectip;
@@ -376,7 +389,7 @@ ajaxData({
             render(text, item, index) {
                 return `
                 <div class="clearfix">
-                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="授权"></i>
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
                     <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
                 </div>
                 `
@@ -467,4 +480,67 @@ ajaxData({
         $scope.EditVideoModel = false;
     });
 
+    
+    /****************************************  限电配置   *********************************************** */
+
+    $scope.getDeviceTypeName = {2:'逆变器'};
+
+    $scope.changeDeviceType = deviceType =>{
+        $scope.selectDevicesByStation.getData({
+            stid: $scope.pstationid,
+            deviceType: deviceType,
+        }).then(res=>{
+            $scope.currentDeviceList = res;
+        });
+    }
+
+    
+
+    $scope.restrictEndDate = new Date().setDate(new Date().getDate() + 7);
+    $scope.restrictStartDate = new Date();
+    $scope.getRestrictPowerData = () =>{
+        $scope.restrictPowerList.getData({
+            pageIndex:0,
+            pageSize:10
+        }).then(res=>{
+            $scope.restrictPowerListData = res.body.data;
+
+            //测试
+            $scope.restrictPowerListData = [{createTime: null,createUser: null, dtype: "2", endDate: 1533612686000,eqid: 27,id: 1,startDate: 1533007882000,stid: 3013},
+                        {createTime: null,createUser: null, dtype: "2", endDate: 1533662686000,eqid: 28,id: 2,startDate: 1533907882000,stid: 3002}]
+            for(let i=0;i<$scope.restrictPowerListData.length;i++){
+                $scope.restrictPowerListData[i]['disabled'] = true;
+                $scope.restrictPowerListData[i]['startDate'] = new Date( $scope.restrictPowerListData[i]['startDate']);
+            }
+        });
+    }
+
+    //编辑
+    $scope.editRestrict = item =>{
+        for(let i=0;i<$scope.restrictPowerListData.length;i++){
+            if($scope.restrictPowerListData[i].id == item.id){
+                $scope.restrictPowerListData[i]['disabled'] = false;
+            }
+        }
+    }
+
+    //取消
+    $scope.cancleRestrict = item =>{
+        for(let i=0;i<$scope.restrictPowerListData.length;i++){
+            if($scope.restrictPowerListData[i].id == item.id){
+                $scope.restrictPowerListData[i]['disabled'] = true;
+            }
+        }
+    }
+
+    //确定
+    $scope.saveRestrict = item =>{
+        console.log(item)
+        console.log($scope.restrictStartDate);
+    }
+
+    //
+    $scope.restrictDeviceChange = () =>{
+
+    }
 });
