@@ -25,6 +25,19 @@ ajaxData(
             data: {},
             later: true
         },
+        // 出库 分页
+        opWorkFittingsOutPage: {
+            name: 'GETopWorkFittingsOutPage',
+            data: {},
+            later: true
+        },
+        selectCurrComUsers: {
+            name: 'GETselectCurrComUsers',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            cache: true
+        },
     }, {
         __serviceName__: 'themeSparePartService'
     }
@@ -107,6 +120,8 @@ ajaxData(
                 return $scope.chatPanelView = 'tpl/enrichment/productionManageSummary/components/chatPanel2.html' + stamp;
             });
             $scope.$apply();
+        } else if (tabIndex === 3) {
+            $scope.publicFunc(item);
         }
     };
 
@@ -138,6 +153,9 @@ ajaxData(
         } else if (tabIndex === 2) {
             $scope.opFittingsRoomSelectByCondition.getData();
             $scope.opWorkFittingsReqPage.getData({pageIndex: 0});
+        } else if (tabIndex === 3) {
+            $scope.selectCurrComUsers.getData();
+            $scope.opWorkFittingsOutPage.getData({pageIndex: 0});
         }
     }
 
@@ -287,6 +305,60 @@ ajaxData(
                             return '退回';
                         case '06':
                             return '';
+                    }
+                }
+            },
+        ];
+    });
+
+    // 备件 出库 分页
+    $scope.opWorkFittingsOutPage.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.opWorkFittingsOutPage.getData;
+        $scope.closeMessagePopUp();
+        $scope.column = [
+
+            {
+                title: '出库编号',
+                dataIndex: 'sn',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '出库时间',
+                dataIndex: 'modifyTime',
+                sort: true,
+                align: 'center',
+                render(text, item) {
+                    if (item.state !== '00') return '';
+                    return new Date(text).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '操作人',
+                dataIndex: 'createUname',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '备注',
+                dataIndex: 'summary',
+                sort: true,
+                width: '30%',
+                align: 'left'
+            },
+            {
+                title: '状态',
+                dataIndex: 'state',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    switch (text) {
+                        case '00':
+                            return '已出库';
+                        case '01':
+                            return '待出库';
                     }
                 }
             },
