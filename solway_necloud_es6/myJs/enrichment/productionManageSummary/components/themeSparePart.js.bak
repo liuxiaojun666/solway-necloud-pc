@@ -38,6 +38,12 @@ ajaxData(
             onlyLatest: true,
             cache: true
         },
+        // 还库分页
+        opFittingsRebackPage: {
+            name: 'GETopFittingsRebackPage',
+            data: {},
+            later: true,
+        },
     }, {
         __serviceName__: 'themeSparePartService'
     }
@@ -122,6 +128,8 @@ ajaxData(
             $scope.$apply();
         } else if (tabIndex === 3) {
             $scope.publicFunc(item);
+        } else if (tabIndex === 4) {
+            $scope.publicFunc(item);
         }
     };
 
@@ -156,6 +164,9 @@ ajaxData(
         } else if (tabIndex === 3) {
             $scope.selectCurrComUsers.getData();
             $scope.opWorkFittingsOutPage.getData({pageIndex: 0});
+        } else if (tabIndex === 4) {
+            $scope.selectCurrComUsers.getData();
+            $scope.opFittingsRebackPage.getData({pageIndex: 0});
         }
     }
 
@@ -318,7 +329,6 @@ ajaxData(
         $scope.pagingGetData = $scope.opWorkFittingsOutPage.getData;
         $scope.closeMessagePopUp();
         $scope.column = [
-
             {
                 title: '出库编号',
                 dataIndex: 'sn',
@@ -364,6 +374,68 @@ ajaxData(
             },
         ];
     });
+
+    // 备件 还库 分页
+    $scope.opFittingsRebackPage.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.opFittingsRebackPage.getData;
+        $scope.closeMessagePopUp();
+        $scope.column = [
+
+            {
+                title: '出库编号',
+                dataIndex: 'sn',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '申请时间',
+                dataIndex: 'createTime',
+                sort: true,
+                align: 'center',
+                render(text, item) {
+                    return new Date(text).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '还库时间',
+                dataIndex: 'modifyTime',
+                sort: true,
+                align: 'center',
+                render(text, item) {
+                    if (item.state !== '00') return '';
+                    return new Date(text).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '申请人',
+                dataIndex: 'createUname',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '操作人',
+                dataIndex: 'modifyName',
+                sort: true,
+                align: 'center'
+            },
+        ];
+    });
+
+    // 批量入库模板下载
+    $scope.downloadTemplate = () => {
+        $scope.downloading = true;
+        $ocLazyLoad.load([
+            'theme/js/dist/components/downloadFile.js' + stamp
+        ]).then(() => $solway.download({
+            url: window.interface['GETfittingsDownloadTemplate'],
+            filename: '备件输入表.xlsm',
+            callback() {
+                $scope.downloading = false;
+            }
+        }));
+    };
 
     // 页面 点击  影藏 弹出
     document.addEventListener('click', eventListen);
