@@ -74,6 +74,11 @@ ajaxData({
         data: {},
         later: true
     },
+    restrictPowerSave:{
+        name: 'POSTrestrictPowerSave',
+        data: {},
+        later: true
+    }
 
 
 }, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','toaster','$http'], ($scope, myAjaxData, historicalRecord,toaster,$http) => {
@@ -490,6 +495,7 @@ ajaxData({
             stid: $scope.pstationid,
             deviceType: deviceType,
         }).then(res=>{
+            console.log(res)
             $scope.currentDeviceList = res;
         });
     }
@@ -504,13 +510,13 @@ ajaxData({
             pageSize:10
         }).then(res=>{
             $scope.restrictPowerListData = res.body.data;
-
             //测试
-            $scope.restrictPowerListData = [{createTime: null,createUser: null, dtype: "2", endDate: 1533612686000,eqid: 27,id: 1,startDate: 1533007882000,stid: 3013},
-                        {createTime: null,createUser: null, dtype: "2", endDate: 1533662686000,eqid: 28,id: 2,startDate: 1533907882000,stid: 3002}]
+            // $scope.restrictPowerListData = [{createTime: null,createUser: null, dtype: "2", endDate: 1533612686000,eqid:18,id: 1,startDate: 1533007882000,stid: 3013},
+            //             {createTime: null,createUser: null, dtype: "2", endDate: 1533662686000,eqid: 20,id: 2,startDate: 1533907882000,stid: 3002}]
             for(let i=0;i<$scope.restrictPowerListData.length;i++){
                 $scope.restrictPowerListData[i]['disabled'] = true;
                 $scope.restrictPowerListData[i]['startDate'] = new Date( $scope.restrictPowerListData[i]['startDate']);
+                $scope.restrictPowerListData[i]['endDate'] = new Date( $scope.restrictPowerListData[i]['endDate']);
             }
         });
     }
@@ -535,8 +541,21 @@ ajaxData({
 
     //确定
     $scope.saveRestrict = item =>{
-        console.log(item)
-        console.log($scope.restrictStartDate);
+        // console.log(item)
+        // console.log($scope.restrictStartDate);
+        delete item.createUser;
+        delete item.createTime;
+        delete item.disabled;
+        item.startDate = item.startDate.showDate;
+        item.endDate = item.endDate.showDate;
+        $scope.restrictPowerSave.getData(item).then(res=>{
+            if(res.code == 0){
+                toaster.pop('success','','保存成功');
+                $scope.getRestrictPowerData();
+            }else{
+                toaster.pop('error','','保存失败');
+            }
+        });
     }
 
     //
