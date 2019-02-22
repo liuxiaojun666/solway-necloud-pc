@@ -83,7 +83,37 @@ ajaxData({
         name: 'POSTrestrictPowerDelete',
         data: {},
         later: true
-    }
+    },
+    overhaulList:{
+        name: 'GEToverhaulList',
+        data: {},
+        later: true
+    },
+    overhaulSave:{
+        name: 'POSToverhaulSave',
+        data: {},
+        later: true
+    },
+    overhaulDelete:{
+        name: 'POSToverhaulDelete',
+        data: {},
+        later: true
+    },
+    cleanTimeList:{
+        name: 'GETcleanTimeList',
+        data: {},
+        later: true
+    },
+    cleanTimeSave:{
+        name: 'POSTcleanTimeSave',
+        data: {},
+        later: true
+    },
+    cleanTimeDelete:{
+        name: 'POSTcleanTimeDelete',
+        data: {},
+        later: true
+    },
 
 
 }, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','toaster','$http'], ($scope, myAjaxData, historicalRecord,toaster,$http) => {
@@ -103,6 +133,9 @@ ajaxData({
 
         $scope.changeDeviceType(2);
 
+        getOverhaulList();
+        getCleanTimeList();
+
         //状态均未编辑
         $scope.aerographEdit = false;
         $scope.interruptEditDisabled = true;
@@ -110,6 +143,7 @@ ajaxData({
         $scope.initialPowerEditDisabled = true;
         $scope.EditVideoModel = false;
         $scope.addLineRestrict = false;
+        $scope.addLineOverhaul = false;
         
     }
 
@@ -424,17 +458,6 @@ ajaxData({
     }
 
     const deleteVideo = ids =>{
-        // $scope.videoConfigureDelete.getData({
-        //     stId:$scope.pstationid,
-        //     ids:ids
-        // }).then(res=>{
-        //     if (res.key == 0){
-        //         toaster.pop('success','','删除成功');
-        //         $scope.searchVideo();
-        //     }else{
-        //         toaster.pop('error', '','删除失败')
-        //     }
-        // });
         $http({
             method : "POST",
             url : "PVideoConfig/deleteVideoConfig.htm",
@@ -517,8 +540,8 @@ ajaxData({
             
             for(let i=0;i<$scope.restrictPowerListData.length;i++){
                 $scope.restrictPowerListData[i]['disabled'] = true;
-                $scope.restrictPowerListData[i]['startDate'] = new Date( $scope.restrictPowerListData[i]['startDate']);
-                $scope.restrictPowerListData[i]['endDate'] = new Date( $scope.restrictPowerListData[i]['endDate']);
+                $scope.restrictPowerListData[i]['startDate'] = new Date($scope.restrictPowerListData[i]['startDate']);
+                $scope.restrictPowerListData[i]['endDate'] = new Date($scope.restrictPowerListData[i]['endDate']);
             }
         });
     }
@@ -545,6 +568,7 @@ ajaxData({
     $scope.saveRestrict = (item,type) =>{
         let formData = {}
         if(type == 'add'){
+            formData['id'] = null;
             formData['stid'] = $scope.pstationid;
             formData['eqid'] = $scope.restrictDeviceId;
             formData['dtype'] = $scope.restrictDeviceType;
@@ -586,6 +610,175 @@ ajaxData({
             });
         });
     }
+
+    /****************************************  检修配置   *********************************************** */
+
+    $scope.overhaulStartDate =  new Date();
+    $scope.overhaulEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
+    const getOverhaulList = () =>{
+        $scope.overhaulList.getData({
+            pageIndex:0,
+            pageSize:10
+        }).then(res=>{
+            $scope.overhaulListData = res.body.data;
+            
+            for(let i=0;i<$scope.overhaulListData.length;i++){
+                $scope.overhaulListData[i]['disabled'] = true;
+                $scope.overhaulListData[i]['startDate'] = new Date($scope.overhaulListData[i]['startDate']);
+                $scope.overhaulListData[i]['endDate'] = new Date($scope.overhaulListData[i]['endDate']);
+            }
+        });
+    }
+
+    //编辑
+    $scope.editOverhaul = item =>{
+        for(let i=0;i<$scope.overhaulListData.length;i++){
+            if($scope.overhaulListData[i].id == item.id){
+                $scope.overhaulListData[i]['disabled'] = false;
+            }
+        }
+    }
+
+    //取消
+    $scope.cancleOverhaul = item =>{
+        for(let i=0;i<$scope.overhaulListData.length;i++){
+            if($scope.overhaulListData[i].id == item.id){
+                $scope.overhaulListData[i]['disabled'] = true;
+            }
+        }
+    }
+
+    //编辑保存
+    $scope.saveOverhaul = (item,type) =>{
+        let formData = {}
+        if(type == 'add'){
+            formData['id'] = null;
+            formData['stid'] = $scope.pstationid;
+            formData['eqid'] = $scope.overhaulDeviceId;
+            formData['dtype'] = $scope.overhaulDeviceType;
+            formData['startDate'] = new Date($scope.overhaulStartDate).Format("yyyy-MM-dd");
+            formData['endDate'] = new Date($scope.overhaulEndDate).Format("yyyy-MM-dd");
+        }else{
+            delete item.createUser;
+            delete item.createTime;
+            delete item.disabled;
+            item.startDate = item.startDate.showDate;
+            item.endDate = item.endDate.showDate;
+            formData = item;
+        }
+        
+        if(!formData.startDate){
+            toaster.pop('error','','检修开始时间必填！');
+        }
+        $scope.overhaulSave.getData(formData).then(res=>{
+            if(res.code == 0){
+                toaster.pop('success','','保存成功');
+                $scope.addLineOverhaul = false;
+                getOverhaulList();
+            }else{
+                toaster.pop('error','','保存失败');
+            }
+        });
+    }
+
+    //删除
+    $scope.deleteOverhaul = id =>{
+        $solway.confirm({ message: '确定删除此检修配置？' }, () => {
+            $scope.overhaulDelete.getData({id:id}).then(res=>{
+                if(res.code == 0){
+                    toaster.pop('success','','删除成功');
+                    getOverhaulList();
+                }else{
+                    toaster.pop('error','','删除失败');
+                }
+            });
+        });
+    }
+
+
+    /****************************************  清洗时间配置   *********************************************** */
+
+    $scope.cleanStartDate =  new Date();
+    $scope.cleanEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
+    const getCleanTimeList = () =>{
+        $scope.cleanTimeList.getData({
+            pageIndex:0,
+            pageSize:10
+        }).then(res=>{
+            $scope.cleanListData = res.body.data;
+            
+            for(let i=0;i<$scope.cleanListData.length;i++){
+                $scope.cleanListData[i]['disabled'] = true;
+                $scope.cleanListData[i]['startDate'] = new Date($scope.cleanListData[i]['startDate']);
+                $scope.cleanListData[i]['endDate'] = new Date($scope.cleanListData[i]['endDate']);
+            }
+        });
+    }
+
+    //编辑
+    $scope.editClean = item =>{
+        for(let i=0;i<$scope.cleanListData.length;i++){
+            if($scope.cleanListData[i].id == item.id){
+                $scope.cleanListData[i]['disabled'] = false;
+            }
+        }
+    }
+
+    //取消
+    $scope.cancleClean = item =>{
+        for(let i=0;i<$scope.cleanListData.length;i++){
+            if($scope.cleanListData[i].id == item.id){
+                $scope.cleanListData[i]['disabled'] = true;
+            }
+        }
+    }
+
+    //编辑保存
+    $scope.saveClean = (item,type) =>{
+        let formData = {}
+        if(type == 'add'){
+            formData['id'] = null;
+            formData['stid'] = $scope.pstationid;
+            formData['startDate'] = new Date($scope.cleanStartDate).Format("yyyy-MM-dd");
+            formData['endDate'] = new Date($scope.cleanEndDate).Format("yyyy-MM-dd");
+        }else{
+            delete item.createUser;
+            delete item.createTime;
+            delete item.disabled;
+            delete item.reportSite;
+            item.startDate = item.startDate.showDate;
+            item.endDate = item.endDate.showDate;
+            formData = item;
+        }
+        
+        if(!formData.startDate){
+            toaster.pop('error','','清洗开始时间必填！');
+        }
+        $scope.cleanTimeSave.getData(formData).then(res=>{
+            if(res.code == 0){
+                toaster.pop('success','','保存成功');
+                $scope.addLineClean = false;
+                getCleanTimeList();
+            }else{
+                toaster.pop('error','','保存失败');
+            }
+        });
+    }
+
+    //删除
+    $scope.deleteClean = id =>{
+        $solway.confirm({ message: '确定删除此清洗配置？' }, () => {
+            $scope.cleanTimeDelete.getData({id:id}).then(res=>{
+                if(res.code == 0){
+                    toaster.pop('success','','删除成功');
+                    getCleanTimeList();
+                }else{
+                    toaster.pop('error','','删除失败');
+                }
+            });
+        });
+    }
+
 
    
 });
