@@ -73,6 +73,14 @@ ajaxData(
             onlyLatest: true,
             sameTimeOnce: true,
         },
+        // 列表视图  获取 设备 类型 电表 列表
+        getRunRealDataMeter: {
+            name: 'GETRunRealDataMeter',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
         // 逆变器获取设备信息 用  serialnumber  获取 deviceId
         selectByConditionMap: {
             name: 'GETselectByConditionMap',
@@ -229,6 +237,14 @@ ajaxData(
                 });
                 break;
 
+            case '4':
+                if ($scope.getRunRealDataMeter.isLoding) return
+                $scope.getRunRealDataMeter.getData({
+                    search: $scope.searchKey,
+                    status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
+                });
+                break;
+
             default:
                 break;
         }
@@ -286,7 +302,7 @@ ajaxData(
         if (!success) return;
         const { currentDeviceType } = $scope;
         const isChange = !res.data.some(v => v.devid === currentDeviceType);
-        $scope.getDeviceType.res.data = res.data.filter(v => (v.devid === '1' || v.devid === '2' || v.devid === '3'))
+        $scope.getDeviceType.res.data = res.data.filter(v => (v.devid === '1' || v.devid === '2' || v.devid === '3' || v.devid === '4'));
         if (isChange) $scope.currentDeviceType = res.data[0].devid;
         await myAjaxData.timeout(0);
         $scope.$apply();
@@ -945,6 +961,182 @@ ajaxData(
                         `
             }
         })));
+    };
+    // 电站 今日 设备 列表视图 电表 列表
+    $scope.getRunRealDataMeter.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                dataIndex: 'statusDesc',
+                title: '状态',
+                width: '80px',
+                sort: true,
+                fixed: 'left',
+                render(text, item, index) {
+                    if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                    else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else return `<span>${text}</span>`;
+                }
+            },
+            {
+                dataIndex: 'did',
+                title: '编号',
+                width: '50px',
+                fixed: 'left',
+                sort: true,
+            },
+            {
+                dataIndex: 'name',
+                title: '名称',
+                width: '120px',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `<text style="color: #428bca;">${text}</text>`
+                }
+            },
+            {
+                dataIndex: 'dtime',
+                title: '时间',
+                width: '100px',
+                align: 'center',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
+                }
+            }, 
+            {
+                dataIndex: 'w',
+                title: '总电能(度)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, {
+                dataIndex: 'wp',
+                title: '正向总电能(度)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, {
+                dataIndex: 'wn',
+                title: '反向总电能(度)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, 
+            {
+                dataIndex: 'ua',
+                title: 'A箱电压(V)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, 
+            {
+                dataIndex: 'ub',
+                title: 'B箱电压(V)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            },
+            {
+                dataIndex: 'uc',
+                title: 'C箱电压(V)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            },
+            {
+                dataIndex: 'ia',
+                title: 'A箱电流(V)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, 
+            {
+                dataIndex: 'ib',
+                title: 'B箱电流(V)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            },
+            {
+                dataIndex: 'ic',
+                title: 'C箱电流(V)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            },
+            {
+                dataIndex: 'pa',
+                title: 'A箱功率(kW)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            }, 
+            {
+                dataIndex: 'pb',
+                title: 'B箱功率(kW)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            },
+            {
+                dataIndex: 'pc',
+                title: 'C箱功率(kW)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            },
+            {
+                dataIndex: 'p',
+                title: '总有功功率(kW)',
+                width: '80px',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            },
+        ];
     };
     // 电站 今日 时间 列表 列表
     $scope.stationDayTodayTime.getDataCallback = (success, res) => {
