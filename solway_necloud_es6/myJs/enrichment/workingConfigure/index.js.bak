@@ -78,6 +78,11 @@ ajaxData({
         name: 'POSTrestrictPowerSave',
         data: {},
         later: true
+    },
+    restrictPowerDelete:{
+        name: 'POSTrestrictPowerDelete',
+        data: {},
+        later: true
     }
 
 
@@ -104,6 +109,7 @@ ajaxData({
         $scope.noteDisabled = true;
         $scope.initialPowerEditDisabled = true;
         $scope.EditVideoModel = false;
+        $scope.addLineRestrict = false;
         
     }
 
@@ -500,9 +506,7 @@ ajaxData({
         });
     }
 
-    
-
-    $scope.restrictEndDate = new Date().setDate(new Date().getDate() + 7);
+    $scope.restrictEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
     $scope.restrictStartDate = new Date();
     $scope.getRestrictPowerData = () =>{
         $scope.restrictPowerList.getData({
@@ -510,9 +514,7 @@ ajaxData({
             pageSize:10
         }).then(res=>{
             $scope.restrictPowerListData = res.body.data;
-            //测试
-            // $scope.restrictPowerListData = [{createTime: null,createUser: null, dtype: "2", endDate: 1533612686000,eqid:18,id: 1,startDate: 1533007882000,stid: 3013},
-            //             {createTime: null,createUser: null, dtype: "2", endDate: 1533662686000,eqid: 20,id: 2,startDate: 1533907882000,stid: 3002}]
+            
             for(let i=0;i<$scope.restrictPowerListData.length;i++){
                 $scope.restrictPowerListData[i]['disabled'] = true;
                 $scope.restrictPowerListData[i]['startDate'] = new Date( $scope.restrictPowerListData[i]['startDate']);
@@ -539,18 +541,31 @@ ajaxData({
         }
     }
 
-    //确定
-    $scope.saveRestrict = item =>{
-        // console.log(item)
-        // console.log($scope.restrictStartDate);
-        delete item.createUser;
-        delete item.createTime;
-        delete item.disabled;
-        item.startDate = item.startDate.showDate;
-        item.endDate = item.endDate.showDate;
-        $scope.restrictPowerSave.getData(item).then(res=>{
+    //编辑保存
+    $scope.saveRestrict = (item,type) =>{
+        let formData = {}
+        if(type == 'add'){
+            formData['stid'] = $scope.pstationid;
+            formData['eqid'] = $scope.restrictDeviceId;
+            formData['dtype'] = $scope.restrictDeviceType;
+            formData['startDate'] = new Date($scope.restrictStartDate).Format("yyyy-MM-dd");
+            formData['endDate'] = new Date($scope.restrictEndDate).Format("yyyy-MM-dd");
+        }else{
+            delete item.createUser;
+            delete item.createTime;
+            delete item.disabled;
+            item.startDate = item.startDate.showDate;
+            item.endDate = item.endDate.showDate;
+            formData = item;
+        }
+        
+        if(!formData.startDate){
+            toaster.pop('error','','限电开始时间必填！');
+        }
+        $scope.restrictPowerSave.getData(formData).then(res=>{
             if(res.code == 0){
                 toaster.pop('success','','保存成功');
+                $scope.addLineRestrict = false;
                 $scope.getRestrictPowerData();
             }else{
                 toaster.pop('error','','保存失败');
@@ -558,8 +573,19 @@ ajaxData({
         });
     }
 
-    //
-    $scope.restrictDeviceChange = () =>{
-
+    //删除
+    $scope.deleteRestrict = id =>{
+        $solway.confirm({ message: '确定删除此限电配置？' }, () => {
+            $scope.restrictPowerDelete.getData({id:id}).then(res=>{
+                if(res.code == 0){
+                    toaster.pop('success','','删除成功');
+                    $scope.getRestrictPowerData();
+                }else{
+                    toaster.pop('error','','删除失败');
+                }
+            });
+        });
     }
+
+   
 });
