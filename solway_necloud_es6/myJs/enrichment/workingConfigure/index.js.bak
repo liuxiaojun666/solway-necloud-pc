@@ -114,6 +114,21 @@ ajaxData({
         data: {},
         later: true
     },
+    assessmentList:{
+        name: 'GETassessmentList',
+        data: {},
+        later: true
+    },
+    assessmentUpdate:{
+        name: 'POSTassessmentUpdate',
+        data: {},
+        later: true
+    },
+    planPowerList:{
+        name: 'GETplanPowerList',
+        data: {},
+        later: true
+    }
 
 
 }, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','toaster','$http'], ($scope, myAjaxData, historicalRecord,toaster,$http) => {
@@ -135,6 +150,8 @@ ajaxData({
 
         getOverhaulList();
         getCleanTimeList();
+        getAssessmentList();
+        getPlanPowerList();
 
         //状态均未编辑
         $scope.aerographEdit = false;
@@ -144,6 +161,7 @@ ajaxData({
         $scope.EditVideoModel = false;
         $scope.addLineRestrict = false;
         $scope.addLineOverhaul = false;
+        $scope.assessmentDisabled = true;
         
     }
 
@@ -416,12 +434,18 @@ ajaxData({
             align: 'center'
         }, {
             title: '监控点源地址',
-            dataIndex: 'monitorPointSource',
-            align: 'center'
+            dataIndex: '',
+            align: 'center',
+            render(text, record, index) {
+                return '<span style="display: block;text-overflow: ellipsis;overflow: hidden;" title="'+record.monitorPointSource+'">'+record.monitorPointSource+'</span>';
+            }
         }, {
             title: '监控点目标地址',
-            dataIndex: 'monitorPointDest',
-            align: 'center'
+            dataIndex: '',
+            align: 'center',
+            render(text, record, index) {
+                return '<span style="display: block;text-overflow: ellipsis;overflow: hidden;" title="'+record.monitorPointDest+'">'+record.monitorPointDest+'</span>';
+            }
         }, {
             title: '监控点排序',
             dataIndex: 'monitorPointSeq',
@@ -524,7 +548,6 @@ ajaxData({
             stid: $scope.pstationid,
             deviceType: deviceType,
         }).then(res=>{
-            console.log(res)
             $scope.currentDeviceList = res;
         });
     }
@@ -779,6 +802,60 @@ ajaxData({
         });
     }
 
+    
+    /****************************************  评估电量配置   *********************************************** */
 
+    const getAssessmentList = () =>{
+        $scope.assessmentList.getData({stid:$scope.pstationid}).then(res=>{
+            if(res.code == 0){
+                $scope.assessmentListData = res.body;
+            }
+        });
+    }
+
+    //编辑
+    $scope.assessmentEditShow = () =>{
+        $scope.assessmentDisabled = false;
+    }
+
+    //取消
+    $scope.assessmentEditCancel = () =>{
+        $scope.assessmentDisabled = true;
+    }
+
+    //保存
+    $scope.saveAssessment = () =>{
+        for(let i=0;i<$scope.assessmentListData.length;i++){
+            if(!$scope.assessmentListData[i].hour || !$scope.assessmentListData[i].rad){
+                toaster.pop('error','','每个月的发电小时数和辐射量均不能为空');
+                return;
+            }
+        }
+        $scope.assessmentUpdate.getData($scope.assessmentListData).then(res=>{
+            if(res.code == 0){
+                $scope.assessmentDisabled = true;
+                toaster.pop('success','','保存成功');
+                getAssessmentList();
+            }else{
+                toaster.pop('error','','保存失败');
+            }
+        });
+    }
+
+
+    /****************************************  计划电量配置   *********************************************** */
+
+    const getPlanPowerList = () =>{
+        $scope.planPowerList.getData({stid:$scope.pstationid}).then(res=>{
+            if(res.code == 0){
+                $scope.planPowerListData = res.body;
+            }
+        });
+    }
+
+    //新增
+    $scope.addPlanPowerShow = () =>{
+        $scope.editPlanPowerModel = true;
+    }
    
 });
