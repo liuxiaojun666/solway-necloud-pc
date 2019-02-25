@@ -102,9 +102,9 @@ ajaxData(
     };
 
     $scope.trClick = async (item, index, event) => {
-        const {tabIndex} = $scope;
+        const { tabIndex } = $scope;
         if (tabIndex === 1) {
-            $scope.publicFunc(item);   
+            $scope.publicFunc(item);
         } else if (tabIndex === 2) {
             $scope.chartPanelLoading = true;
             event.stopPropagation();
@@ -134,9 +134,9 @@ ajaxData(
     };
 
     $scope.trDblClick = (item, index, event) => {
-        const {tabIndex} = $scope;
+        const { tabIndex } = $scope;
         if (tabIndex === 2) {
-            $scope.publicFunc(item);   
+            $scope.publicFunc(item);
         }
     };
 
@@ -149,24 +149,25 @@ ajaxData(
 
 
     $scope.diffGetData = () => {
+        $scope.isDefaultList = true;
         $scope.column = [];
         $scope.datasource = null;
-        const {tabIndex} = $scope;
+        const { tabIndex } = $scope;
         if (tabIndex === 0) {
             $scope.opFittingsRoomSelectByCondition.getData();
-            $scope.opFittingsDictFdnumPage.getData({pageIndex: 0});
+            $scope.opFittingsDictFdnumPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 1) {
             $scope.opFittingsRoomSelectByCondition.getData();
-            $scope.fittingsInPage.getData({pageIndex: 0});
+            $scope.fittingsInPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 2) {
             $scope.opFittingsRoomSelectByCondition.getData();
-            $scope.opWorkFittingsReqPage.getData({pageIndex: 0});
+            $scope.opWorkFittingsReqPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 3) {
             $scope.selectCurrComUsers.getData();
-            $scope.opWorkFittingsOutPage.getData({pageIndex: 0});
+            $scope.opWorkFittingsOutPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 4) {
             $scope.selectCurrComUsers.getData();
-            $scope.opFittingsRebackPage.getData({pageIndex: 0});
+            $scope.opFittingsRebackPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         }
     }
 
@@ -416,7 +417,7 @@ ajaxData(
             },
             {
                 title: '操作人',
-                dataIndex: 'modifyName',
+                dataIndex: 'modifyUname',
                 sort: true,
                 align: 'center'
             },
