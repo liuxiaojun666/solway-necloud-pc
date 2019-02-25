@@ -5,6 +5,13 @@ ajaxData(
             name: 'GETopFittingsDictSelectCurrData',
             data: {}
         },
+        // 批量入库模板上传
+        opFittingsDictImportTemplate: {
+            name: 'opFittingsDictImportTemplate',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
         // 入库 创建
         opWorkFittingsInCreate: {
             name: 'opWorkFittingsInCreate',
@@ -49,6 +56,20 @@ ajaxData(
         $scope.summary = res.body.topic.summary;
         $scope.sn = res.body.topic.sn;
     });
+
+
+    $scope.upload = async ele => {
+        const res = await $scope.opFittingsDictImportTemplate.getData({ file: ele.files[0] });
+        ele.value = '';
+        $scope.putList = $scope.putList.concat(res.body.map(v => ({
+            fdId: v.id,
+            num: v.num,
+            position: v.position,
+            money: v.fpa.toFixed(2),
+            edit: false
+        })));
+        $scope.$apply();
+    };
 
 
     $scope.insert = () => {
