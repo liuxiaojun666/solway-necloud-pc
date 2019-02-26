@@ -41,45 +41,21 @@ ajaxData(
             onlyLatest: true,
             sameTimeOnce: true,
         },
-        // 列表视图  获取 设备 类型
-        getDeviceType: {
-            name: 'GETgetDeviceType',
+        // 测风塔列表
+        realtimeWindTower: {
+            name: 'GETrealtimeWindTower',
             data: {},
-            later: true,
             onlyLatest: true,
             sameTimeOnce: true,
+            later: true
         },
-        // 列表视图  获取 设备 类型 箱变 列表
-        getRunRealDataBBoxChange: {
-            name: 'GETDeviceStationGetRunRealDataBBoxChange',
+        // 风机组列表
+        realtimeWindTurbine: {
+            name: 'GETrealtimeWindTurbine',
             data: {},
-            later: true,
             onlyLatest: true,
             sameTimeOnce: true,
-        },
-        // 列表视图  获取 设备 类型 逆变器 列表
-        getRunRealDataBInverter: {
-            name: 'GETDeviceStationGetRunRealDataBInverter',
-            data: {},
-            later: true,
-            onlyLatest: true,
-            sameTimeOnce: true,
-        },
-        // 列表视图  获取 设备 类型 汇流箱 列表
-        getRunRealDataBJunction: {
-            name: 'GETDeviceStationGetRunRealDataBJunction',
-            data: {},
-            later: true,
-            onlyLatest: true,
-            sameTimeOnce: true,
-        },
-        // 逆变器获取设备信息 用  serialnumber  获取 deviceId
-        selectByConditionMap: {
-            name: 'GETselectByConditionMap',
-            data: {},
-            later: true,
-            onlyLatest: true,
-            sameTimeOnce: true,
+            later: true
         },
         //电站-今日-故障列表
         getStationFaultAlarmRtData: {
@@ -100,7 +76,7 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, currentDeviceType = '2', tabIndex = 0, checkboxStatus = [true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
+        let { showShape, currentDeviceType = '1', tabIndex = 0, checkboxStatus = [true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
         $scope.changeShowShape((tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'chart'));
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -189,56 +165,22 @@ ajaxData(
         $scope.diffDeviceTypeGetData();
     };
 
-    // 逆变器 列表视图 点击 行
-    $scope.showInformation = function (item, index) {
-        const { did: serialnumber, sid: pstationid } = item;
-        $scope.selectByConditionMap.getData({
-            stid: pstationid,
-            sn: serialnumber
-        }).then(function (result) {
-            if (result) showHistoryData_byRTMDeviceLogId(pstationid, result.id, serialnumber, '2', result.hasJB);
-        });
-    };
-
-    // 箱变 列表视图 点击 行
-    $scope.showBoxChangeData = (item, index) => {
-        $scope.showHistoryData_byRTMDeviceLogId(pstationid, result.id, serialnumber, '3');
-    };
-
-    // 汇流箱 列表视图 点击 行
-    $scope.toJunctionBoxMonitor = (item, index) => {
-        $scope.showHistoryData_byRTMDeviceLogId(pstationid, result.id, serialnumber, '1');
-    };
-
-    //设备  弹窗
-    function showHistoryData_byRTMDeviceLogId(pstationid, deviceId, deviceSerialNnumber, deviceTypeNow, hasJB) {
-        
-    };
 
     // 列表视图 接口请求
     $scope.diffDeviceTypeGetData = () => {
         switch ($scope.currentDeviceType) {
             case '1':
-                $scope.getRunRealDataBBoxChange.getData({
+                $scope.realtimeWindTower.getData({
                     search: $scope.searchKey,
-                    status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
                 });
                 break;
 
             case '2':
-                if ($scope.getRunRealDataBInverter.isLoding) return
-                $scope.getRunRealDataBInverter.getData({
+                $scope.realtimeWindTurbine.getData({
                     search: $scope.searchKey,
-                    status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
                 });
                 break;
 
-            case '3':
-                $scope.getRunRealDataBJunction.getData({
-                    search: $scope.searchKey,
-                    status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
-                });
-                break;
 
             default:
                 break;
@@ -272,8 +214,14 @@ ajaxData(
                     ? $scope.stationDayTodayTime.res.body.chartList[$scope.stationDayTodayTime.res.body.chartList.length - 1].xaTime.split(':').join('')
                     : 0,
             });
+        } else if (tabIndex === 1 && showShape === 'chart') {
+            $scope.realtimeWindTurbine.getData({
+                search: $scope.searchKey,
+            });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.getDeviceType.getData({});
+            // $scope.getDeviceType.getData({});
+            // $scope.currentDeviceType = '1';
+            $scope.switchDeviceType();
         } else if (tabIndex === 3) {
             $scope.query_station_day_dev_power_timelist_his.getData({
                 queryCode: 'query_station_day_dev_power_timelist_his',
@@ -289,18 +237,8 @@ ajaxData(
         }
     };
 
-    // 电站 今日 设备 列表视图
-    $scope.getDeviceType.getDataCallback = (success, res) => {
-        if (!success) return;
-        const { currentDeviceType } = $scope;
-        const isChange = !res.data.some(v => v.devid === currentDeviceType);
-        if (isChange) $scope.currentDeviceType = res.data[0].devid;
-        $scope.switchDeviceType();
-    };
-
-    // 电站 今日 设备 列表视图 逆变器 列表
-    $scope.getRunRealDataBInverter.getDataCallback = (success, res) => {
-        if (!success) return;
+    // 电站 今日 设备 列表视图 测风塔 列表
+    $scope.realtimeWindTower.subscribe((res) => {
         $scope.column = [
             {
                 dataIndex: 'statusDesc',
@@ -319,14 +257,14 @@ ajaxData(
             {
                 dataIndex: 'did',
                 title: '编号',
-                width: '60px',
+                width: '90px',
                 fixed: 'left',
                 sort: true,
             },
             {
                 dataIndex: 'name',
                 title: '名称',
-                width: '120px',
+                width: '150px',
                 fixed: 'left',
                 sort: true,
                 render(text) {
@@ -336,136 +274,640 @@ ajaxData(
             {
                 dataIndex: 'dtime',
                 title: '时间',
-                width: '130px',
+                width: '170px',
                 align: 'center',
+                fixed: 'left',
                 sort: true,
                 render(text) {
                     return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
                 }
             }, {
-                dataIndex: 'dcu',
-                title: 'DC电压(V)',
-                width: '80px',
+                dataIndex: 'sh1',
+                title: '测点1高度',
+                width: '110px',
                 align: 'right',
-                sort: true,
                 render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'dcc',
-                title: 'DC电流(A)',
-                width: '80px',
+                dataIndex: 'ta1',
+                title: '测点1环境温度',
+                width: '110px',
                 align: 'right',
-                sort: true,
                 render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'dcp',
-                title: 'DC功率(kW)',
-                width: '80px',
+                dataIndex: 'h2o1',
+                title: '测点1湿度',
+                width: '110px',
                 align: 'right',
-                sort: true,
                 render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'acu',
-                title: 'AC电压(V)',
-                width: '80px',
+                dataIndex: 'p1',
+                title: '测点1压力',
+                width: '160px',
                 align: 'right',
-                sort: true,
                 render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'acc',
-                title: 'AC电流(A)',
-                width: '80px',
+                dataIndex: 'ws1',
+                title: '测点1风速',
+                width: '160px',
                 align: 'right',
-                sort: true,
                 render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'acp',
-                title: 'AC功率(kW)',
-                width: '80px',
+                dataIndex: 'wsa1',
+                title: '测点1风速均值',
+                width: '160px',
                 align: 'right',
-                sort: true,
                 render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 't',
-                title: '温度(℃)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            }, {
-                dataIndex: 'ef',
-                title: '效率(%)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${(text * 100).toFixed(2)}</span>`
-                }
-            }, {
-                dataIndex: 'f',
-                title: '频率(Hz)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            }, {
-                dataIndex: 'pf',
-                title: '功率因数',
-                width: '90px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            }, {
-                dataIndex: 'dw',
-                title: '日发电量(度)',
+                dataIndex: 'wd1',
+                title: '测点1风向',
                 width: '120px',
                 align: 'right',
-                sort: true,
                 render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'tw',
-                title: '总发电量(度)',
+                dataIndex: 'sh2',
+                title: '测点2高度',
                 width: '120px',
                 align: 'right',
-                sort: true,
                 render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ta2',
+                title: '测点2环境温度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'h2o2',
+                title: '测点2湿度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'p2',
+                title: '测点2压力',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ws2',
+                title: '测点2风速',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wsa2',
+                title: '测点2风速均值',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wd2',
+                title: '测点2风向',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'sh3',
+                title: '测点3测点高度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ta3',
+                title: '测点3环境温度',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'h2o3',
+                title: '测点3湿度',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'p3',
+                title: '测点3压力',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ws3',
+                title: '测点3风速',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wsa3',
+                title: '测点3风速均值',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wd3',
+                title: '测点3风向',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'sh4',
+                title: '测点4高度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ta4',
+                title: '测点4环境温度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'h2o4',
+                title: '测点4湿度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'p4',
+                title: '测点4压力',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ws4',
+                title: '测点4风速',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wsa4',
+                title: '测点4风速均值',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wd4',
+                title: '测点4风向',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'sh5',
+                title: '测点5测点高度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ta5',
+                title: '测点5环境温度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'h2o5',
+                title: '测点5湿度',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'p5',
+                title: '测点5压力',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ws5',
+                title: '测点5风速',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wsa5',
+                title: '测点5风速均值',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wd5',
+                title: '测点5风向',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'sh6',
+                title: '测点6测点高度',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ta6',
+                title: '测点6环境温度',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'h2o6',
+                title: '测点6湿度',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'p6',
+                title: '测点6压力',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ws6',
+                title: '测点6风速',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wsa6',
+                title: '测点6风速均值',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'wd6',
+                title: '测点6风向',
+                width: '110px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }
+
+        ];
+    });
+    // 电站 今日 设备 列表视图 风机组 列表
+    $scope.realtimeWindTurbine.subscribe((res) => {
+        $scope.column = [
+            {
+                dataIndex: 'statusDesc',
+                title: '状态',
+                width: '80px',
+                sort: true,
+                fixed: 'left',
+                render(text, item, index) {
+                    if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                    else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else return `<span>${text}</span>`;
                 }
             },
-
-        ].concat(new Array(20).fill('c').map((v, i) => ({
-            dataIndex: v + (i + 1),
-            title: `<span>${i + 1}</span>`,
-            width: '80px',
-            align: 'right',
-            render(text, item, index) {
-                return item.hasJB === '0' ? '' : `
-                        <div style="background: ${item.shadowFlags && item.shadowFlags[i] ? 'rgba(0, 0, 0,0.3)' : ''}">
-                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags && item.statuFlags[i] && text) ? text.toFixed(2) : '-')}</span>
-                        </div>
-                        `
+            {
+                dataIndex: 'did',
+                title: '编号',
+                width: '90px',
+                fixed: 'left',
+                sort: true,
+            },
+            {
+                dataIndex: 'name',
+                title: '名称',
+                width: '150px',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `<text style="color: #428bca;">${text}</text>`
+                }
+            },
+            {
+                dataIndex: 'dtime',
+                title: '时间',
+                width: '170px',
+                align: 'center',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
+                }
+            }, {
+                dataIndex: 'wdspd',
+                title: '机舱外风速',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'extmp',
+                title: '机舱外温度',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'intltmp',
+                title: '机舱内温度',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'nacdirang',
+                title: '风向夹角',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'rotspd',
+                title: '叶轮转速',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ptangvalbl1',
+                title: '叶片1桨距角',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ptangvalbl2',
+                title: '叶片2桨距角',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ptangvalbl3',
+                title: '叶片3桨距角',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'spd',
+                title: '发电机转速',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'w',
+                title: '有功功率',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'var',
+                title: '无功功率',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'gntoptmpsta',
+                title: '发电机最高绕组温度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'hz',
+                title: '频率值',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'gripf',
+                title: '功率因数',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'trmtmpentgbxdrv',
+                title: '齿轮箱高速轴驱动端轴承温度',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'trmtmpentgbxnondrv',
+                title: '齿轮箱高速轴非驱动端轴承温度',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'trmtmpgbxoil',
+                title: '齿轮箱油温',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'ywdir',
+                title: '偏航角度',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'daykwh',
+                title: '有功发电量日计',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'totwhcons',
+                title: '有功发电量总计',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'turst',
+                title: '风机状态',
+                width: '160px',
+                align: 'right',
+                // render(text) {
+                    // if (text === 0) return `0`;
+                //     return `<span>${text ? text.toFixed(2) : ''}</span>`
+                // }
+            }, {
+                dataIndex: 'limwst',
+                title: '风机限功率状态',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return ``;
+                }
             }
-        })));
-    };
+
+        ];
+    });
     // 电站 今日 时间 列表 列表
     $scope.stationDayTodayTime.getDataCallback = (success, res) => {
         if (!success) return;
