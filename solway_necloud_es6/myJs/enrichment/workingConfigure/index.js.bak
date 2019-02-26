@@ -128,12 +128,43 @@ ajaxData({
         name: 'GETplanPowerList',
         data: {},
         later: true
+    },
+    planPowerDelete:{
+        name: 'POSTplanPowerDelete',
+        data: {},
+        later: true
     }
 
 
 }, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord','toaster','$http'], ($scope, myAjaxData, historicalRecord,toaster,$http) => {
     
     $scope.moduleName = '运行配置';
+
+    $scope.$on('broadcastSwitchStation',(e,data)=>{
+        if(data.stFlag !== 1){
+            toaster.pop('error','','请选择电站');
+        }
+
+        $scope.initPageParams();
+    })
+
+    $scope.menuActive = id =>{
+        $scope.activeMenuBtn = id;
+        document.getElementById(id).scrollIntoView()
+        // let scrollH = $("#"+id).offset().top;
+        // console.log(top)
+        // $('.scroll-area').animate({scrollTop: scrollH}, 0)
+    }
+
+    $scope.menuActive('a')
+
+    // const scrollFunc = e =>{
+    //     e = e || window.event; 
+    // }
+    // if (document.addEventListener) {//firefox 
+    //     document.addEventListener('DOMMouseScroll', scrollFunc, false); 
+    // } 
+    // window.onmousewheel = document.onmousewheel = scrollFunc;
 
     $scope.initPageParams = async()=>{
         const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '03', isGroup: 0 });
@@ -167,10 +198,12 @@ ajaxData({
 
     $scope.initPageParams();
 
-    $('.workingConfigure').on('click','.menu-btn',function(){
-        $(this).siblings().removeClass('active-btn');
-        $(this).addClass('active-btn');
-    });
+    // $('.workingConfigure').on('click','.menu-btn',function(){
+    //     $(this).siblings().removeClass('active-btn');
+    //     $(this).addClass('active-btn');
+    //     let offsetTop = $(this).offset().top;
+    //     document.getElementById("e1").scrollIntoView()
+    // });
 
     /****************************************  气象仪   *********************************************** */
     
@@ -851,8 +884,35 @@ ajaxData({
     //新增
     $scope.addPlanPowerShow = () =>{
         $scope.editPlanPowerModel = true;
+        $scope.$broadcast('addPlanPowerBroad',{'year':''});
     }
 
+    //编辑
+    $scope.editPlanPower = item =>{
+        $scope.editPlanPowerModel = true;
+        $scope.$broadcast('addPlanPowerBroad',{'year':item.year});
+    }
+
+    //编辑成功回调
+    $scope.$on('savePlanPowerCallback',()=>{
+        $scope.editPlanPowerModel = false;
+        getPlanPowerList();
+    });
+
+    //删除
+    $scope.deletePlanPower = year =>{
+        $solway.confirm({ message: '确定删除此年计划电量？' }, () => {
+            $scope.planPowerDelete.getData({stid:$scope.pstationid,year:year}).then(res=>{
+                if(res.code == 0){
+                    toaster.pop('success','','删除成功');
+                    getPlanPowerList();
+                }else{
+                    toaster.pop('error', '','删除失败')
+                }
+            });
+        });
+    }
+    
 
     //公共取消
      $scope.$on('cancelCallback',()=>{

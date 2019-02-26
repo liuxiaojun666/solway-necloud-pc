@@ -1,45 +1,71 @@
 
 ajaxData({
-    // videoConfigureSave:{
-    //     name:'POSTvideoConfigureSave',
-    //     data: {},
-    //     later: true,
-    //     onlyLatest: true
-    // }
+    planPowerListMonth:{
+        name:'GETplanPowerListMonth',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    planPowerSave:{
+        name:'POSTplanPowerSave',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
 }, {
     __serviceName__: 'addPlanModelService',
 })('addPlanPowerModelCtrl', ['$scope', 'addPlanModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
     
     $scope.planYear = new Date();
     $scope.endDate = new Date('2099');
-     //初始
-    // $scope.$on('broadAddVideo',function(e,data){
-    //     $scope.id = data.id;
-    //     if($scope.id){
-    //         $scope.formData = data.detail;
-    //     }else{
-    //         $scope.formData = {};
-    //         $scope.formData['stId'] = $scope.pstationid;
-    //     }
-    // });
 
-    $scope.dateUpdated = (dateType, dateTime) => {
-        // $scope.planYear
-        // debugger
+     //初始
+    $scope.$on('addPlanPowerBroad',function(e,data){
+        $scope.year = data.year;
+        getPlanPowerListData();
+    });
+
+    //列表接口
+    const getPlanPowerListData = () =>{
+        let year = '';
+        if($scope.year){
+            year = $scope.year;
+        }else{
+            year = $scope.planYear.showDate;
+        }
+
+        $scope.planPowerListMonth.getData({
+            year:year,
+            stid:$scope.pstationid
+        }).then(res=>{
+            if(res.code == 0){
+                $scope.planPowerListData = res.body;
+            }
+        });
+    }
+
+    $scope.dateUpdated = async(dateType, dateTime) => {
+        await myAjaxData.timeout(0)
+        $scope.$apply();
+        getPlanPowerListData();
     }
 
     //保存
     $scope.savePlanPower = () =>{
-        // if (!$solway.formValidation($scope.formData, '.addVideoModelTpl', toaster)) return;//校验非空
-
-        // $scope.videoConfigureSave.getData($scope.formData).then(res=>{
-        //     if(res.key == 0){
-        //         toaster.pop('success','','保存成功');
-        //         $scope.$emit('saveVideoCallback');
-        //     }else{
-        //         toaster.pop('error', '','保存失败')
-        //     }
-        // });
+        for(let i=0;i<$scope.planPowerListData.length;i++){
+            if(!$scope.planPowerListData[i].plannedValue){
+                toaster.pop('error','','每个月的计划发电量不能为空');
+                return;
+            }
+        }
+        $scope.planPowerSave.getData($scope.planPowerListData).then(res=>{
+            if(res.code == 0){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('savePlanPowerCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
     }
 
     //取消
