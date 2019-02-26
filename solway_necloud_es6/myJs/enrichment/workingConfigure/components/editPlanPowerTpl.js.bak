@@ -1,14 +1,14 @@
 
 ajaxData({
-    videoConfigureSave:{
-        name:'POSTvideoConfigureSave',
-        data: {},
-        later: true,
-        onlyLatest: true
-    }
+    // videoConfigureSave:{
+    //     name:'POSTvideoConfigureSave',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // }
 }, {
-    __serviceName__: 'addVideoModelService',
-})('addPowerModelCtrl', ['$scope', 'addVideoModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    __serviceName__: 'addPlanModelService',
+})('addPlanPowerModelCtrl', ['$scope', 'addPlanModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
     
     $scope.planYear = new Date();
     $scope.endDate = new Date('2099');
@@ -23,22 +23,27 @@ ajaxData({
     //     }
     // });
 
-    //保存
-    $scope.saveVideo = () =>{
-        if (!$solway.formValidation($scope.formData, '.addVideoModelTpl', toaster)) return;//校验非空
+    $scope.dateUpdated = (dateType, dateTime) => {
+        // $scope.planYear
+        // debugger
+    }
 
-        $scope.videoConfigureSave.getData($scope.formData).then(res=>{
-            if(res.key == 0){
-                toaster.pop('success','','保存成功');
-                $scope.$emit('saveVideoCallback');
-            }else{
-                toaster.pop('error', '','保存失败')
-            }
-        });
+    //保存
+    $scope.savePlanPower = () =>{
+        // if (!$solway.formValidation($scope.formData, '.addVideoModelTpl', toaster)) return;//校验非空
+
+        // $scope.videoConfigureSave.getData($scope.formData).then(res=>{
+        //     if(res.key == 0){
+        //         toaster.pop('success','','保存成功');
+        //         $scope.$emit('saveVideoCallback');
+        //     }else{
+        //         toaster.pop('error', '','保存失败')
+        //     }
+        // });
     }
 
     //取消
-    $scope.cancelVideo = () =>{
+    $scope.cancelPlanPower = () =>{
         $scope.$emit('cancelCallback');
     }
 });
