@@ -140,6 +140,32 @@ ajaxData({
     
     $scope.moduleName = '运行配置';
 
+    $scope.$on('broadcastSwitchStation',(e,data)=>{
+        if(data.stFlag !== 1){
+            toaster.pop('error','','请选择电站');
+        }
+
+        $scope.initPageParams();
+    })
+
+    $scope.menuActive = id =>{
+        $scope.activeMenuBtn = id;
+        document.getElementById(id).scrollIntoView()
+        // let scrollH = $("#"+id).offset().top;
+        // console.log(top)
+        // $('.scroll-area').animate({scrollTop: scrollH}, 0)
+    }
+
+    $scope.menuActive('a')
+
+    // const scrollFunc = e =>{
+    //     e = e || window.event; 
+    // }
+    // if (document.addEventListener) {//firefox 
+    //     document.addEventListener('DOMMouseScroll', scrollFunc, false); 
+    // } 
+    // window.onmousewheel = document.onmousewheel = scrollFunc;
+
     $scope.initPageParams = async()=>{
         const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '03', isGroup: 0 });
         $scope.pstationid = stationInfo.currentSTID;
@@ -172,10 +198,12 @@ ajaxData({
 
     $scope.initPageParams();
 
-    $('.workingConfigure').on('click','.menu-btn',function(){
-        $(this).siblings().removeClass('active-btn');
-        $(this).addClass('active-btn');
-    });
+    // $('.workingConfigure').on('click','.menu-btn',function(){
+    //     $(this).siblings().removeClass('active-btn');
+    //     $(this).addClass('active-btn');
+    //     let offsetTop = $(this).offset().top;
+    //     document.getElementById("e1").scrollIntoView()
+    // });
 
     /****************************************  气象仪   *********************************************** */
     
