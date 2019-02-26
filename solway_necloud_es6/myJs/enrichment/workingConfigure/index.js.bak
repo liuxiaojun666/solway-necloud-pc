@@ -128,6 +128,11 @@ ajaxData({
         name: 'GETplanPowerList',
         data: {},
         later: true
+    },
+    planPowerDelete:{
+        name: 'POSTplanPowerDelete',
+        data: {},
+        later: true
     }
 
 
@@ -851,8 +856,35 @@ ajaxData({
     //新增
     $scope.addPlanPowerShow = () =>{
         $scope.editPlanPowerModel = true;
+        $scope.$broadcast('addPlanPowerBroad',{'year':''});
     }
 
+    //编辑
+    $scope.editPlanPower = item =>{
+        $scope.editPlanPowerModel = true;
+        $scope.$broadcast('addPlanPowerBroad',{'year':item.year});
+    }
+
+    //编辑成功回调
+    $scope.$on('savePlanPowerCallback',()=>{
+        $scope.editPlanPowerModel = false;
+        getPlanPowerList();
+    });
+
+    //删除
+    $scope.deletePlanPower = year =>{
+        $solway.confirm({ message: '确定删除此年计划电量？' }, () => {
+            $scope.planPowerDelete.getData({stid:$scope.pstationid,year:year}).then(res=>{
+                if(res.code == 0){
+                    toaster.pop('success','','删除成功');
+                    getPlanPowerList();
+                }else{
+                    toaster.pop('error', '','删除失败')
+                }
+            });
+        });
+    }
+    
 
     //公共取消
      $scope.$on('cancelCallback',()=>{
