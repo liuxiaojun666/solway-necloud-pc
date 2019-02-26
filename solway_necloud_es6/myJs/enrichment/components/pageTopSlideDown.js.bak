@@ -115,6 +115,16 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
 
         $scope.stamp = window.stamp;
 
+        $http({
+            method: "GET",
+            url: window.interface['GETstClassLIst'],
+            params: {}
+        }).success(res => {
+            if (res.data.length === 2) {
+                $scope.switchStClassDisplay = true;
+            }
+        });
+
         $scope.setActiveClass = () => {
             $scope.currentState = $state.current.name;
 
