@@ -7,9 +7,9 @@ app.directive('switchPowerEnrich', ['myAjaxData', '$rootScope', (myAjaxData, $ro
     replace: !0,
     scope: !0,
     templateUrl: baseUrl + '/tpl/enrichment/components/switchPower.html' + window.stamp,
-    controller($scope) {
-        $rootScope.isGroup = 1;
-        $rootScope.currentView = '00';
+    controller($scope, $element, $attrs) {
+        $rootScope.isGroup = $attrs.isgroup || 1;
+        $rootScope.currentView = $attrs.currentview || '00';
         $scope.$parent._getStationInfo = myAjaxData.getData({
             name: 'GETgetCurrentInfoNew',
             data: { currentView: '00', isGroup: 1 }
