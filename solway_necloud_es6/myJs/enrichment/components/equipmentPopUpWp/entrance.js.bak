@@ -18,16 +18,10 @@ ajaxData(
     {
         __serviceName__: 'equipmentPopUpWpService',
         depend: [
-            'theme/js/dist/enrichment/components/equipmentPopUpWp/bigInverter.js' + stamp, 
-            'theme/js/dist/enrichment/components/equipmentPopUpWp/junctionBox.js' + stamp, 
-            'theme/js/dist/enrichment/components/equipmentPopUpWp/smallInverter.js' + stamp, 
-            'theme/js/dist/enrichment/components/equipmentPopUpWp/boxChange.js' + stamp
+            'theme/js/dist/enrichment/components/equipmentPopUpWp/windGenerator.js' + stamp,
         ],
         templateUrl: [
-            'tpl/enrichment/components/equipmentPopUpWp/bigInverter.html' + stamp,
-            'tpl/enrichment/components/equipmentPopUpWp/junctionBox.html' + stamp,
-            'tpl/enrichment/components/equipmentPopUpWp/smallInverter.html' + stamp,
-            'tpl/enrichment/components/equipmentPopUpWp/boxChange.html' + stamp
+            'tpl/enrichment/components/equipmentPopUpWp/windGenerator.html' + stamp,
         ]
     }
 )('equipmentPopUpWpCtrl', ['$scope', 'equipmentPopUpWpService', '$ocLazyLoad', '$interval'], function ($scope, currentService, $ocLazyLoad, $interval) {
@@ -35,8 +29,8 @@ ajaxData(
     let timer;
     $scope.$on('equipmentPopUpWp', async(e, eqObj) => {
         if (!eqObj.deviceSerialNnumber && eqObj.stid && eqObj.eqid) {
-            const {stid, eqid} = eqObj;
-            const res = await $scope.deviceInfo.getData({stid, eqid});
+            const { stid, eqid } = eqObj;
+            const res = await $scope.deviceInfo.getData({ stid, eqid });
             const { hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow } = res.body;
             eqObj.deviceSerialNnumber = deviceSerialNnumber;
             eqObj.hasJB = hasJB;
@@ -48,7 +42,8 @@ ajaxData(
         $scope.templateLoading = true;
         $scope.display = true;
         $scope.templateUrl = '';
-        const dataIndex = eqObj.hasJB === '0' ? 0 : eqObj.deviceTypeNow;
+        
+        const dataIndex = {'18': '0'}[eqObj.deviceTypeNow];
         $ocLazyLoad.load([
             'theme/js/dist/components/calendar.js' + stamp,
             'theme/js/dist/components/myTable.js' + stamp,
@@ -56,10 +51,12 @@ ajaxData(
         ].concat(currentService.config.depend[dataIndex])).then(() => {
             $scope.templateUrl = currentService.config.templateUrl[dataIndex];
         });
+
         $scope.rtmSingleStationComm.getData({
             dateString: new Date().Format("yyyy-MM-dd"),
             stids: eqObj.pstationid
         });
+
         timer = $interval(() => {
             if (!$scope.rtmSingleStationComm.res || !$scope.templateUrl) return;
             $scope.rtmSingleStationComm.getData({})

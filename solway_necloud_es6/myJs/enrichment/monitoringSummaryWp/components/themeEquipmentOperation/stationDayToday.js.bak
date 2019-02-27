@@ -19,7 +19,7 @@ ajaxData(
         },
         // 电站 今日  时间  列表
         stationDayTodayTime: {
-            name: 'GETPowerStationDayTodayTime',
+            name: 'GETrunAcpTimeList',
             data: {},
             later: true,
             onlyLatest: true,
@@ -27,7 +27,7 @@ ajaxData(
         },
         // 电站 今日  时间  图表
         stationDayTodayTime2: {
-            name: 'GETPowerStationDayTodayTime2',
+            name: 'GETrunAcpTimeList',
             data: {},
             later: true,
             onlyLatest: true,
@@ -59,7 +59,7 @@ ajaxData(
         },
         //电站-今日-故障列表
         getStationFaultAlarmRtData: {
-            name: 'GETgetStationFaultAlarmRtData',
+            name: 'GETwpStationFaultAlarmRtData',
             data: {},
             later: true,
             onlyLatest: true,
@@ -165,6 +165,10 @@ ajaxData(
         $scope.diffDeviceTypeGetData();
     };
 
+    $scope.showInformation = (item, index, event) => {
+        $scope.$broadcast('equipmentPopUpWp', { stid: item.sid, eqid: item.did});
+    };
+
 
     // 列表视图 接口请求
     $scope.diffDeviceTypeGetData = () => {
@@ -200,7 +204,7 @@ ajaxData(
                 date: dateTime.showDate,
                 dataType: 2,
                 stime: $scope.stationDayTodayTime2.res
-                    ? $scope.stationDayTodayTime2.res.body.echarts_xaTime[$scope.stationDayTodayTime2.res.body.echarts_xaTime.length - 1].split(':').join('')
+                    ? $scope.stationDayTodayTime2.res.body.echarts_xaxisTime[$scope.stationDayTodayTime2.res.body.echarts_xaxisTime.length - 1].split(':').join('')
                     : 0,
             });
         } else if (tabIndex === 0 && showShape === 'list') {
@@ -924,21 +928,21 @@ ajaxData(
             },
             {
                 title: '实发功率(kW)',
-                dataIndex: 'p',
+                dataIndex: 'power',
                 sort: true,
                 width: '',
                 align: 'right',
             },
             {
-                title: '应发功率(kW)',
-                dataIndex: 'shd_p',
+                title: '预测功率(kW)',
+                dataIndex: 'predictPower',
                 sort: true,
                 width: '',
                 align: 'right',
             },
             {
-                title: '光照强度(W/㎡)',
-                dataIndex: 'sun',
+                title: '风速(m/s)',
+                dataIndex: 'windSpeed',
                 sort: true,
                 width: '',
                 align: 'right',
@@ -949,12 +953,13 @@ ajaxData(
     const stationDayTodayTimeLineData = { xdata: [], line1: [], line2: [], line3: [] };
     $scope.stationDayTodayTime2.getDataCallback = (success, res) => {
         if (!success) return;
+        
         const { xdata, line1, line2, line3 } = stationDayTodayTimeLineData;
         const length = xdata.length;
-        $scope.xdata = stationDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaTime);
-        $scope.ydatas = [[stationDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_p),
-        stationDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_shd_p)],
-        [stationDayTodayTimeLineData.line3 = line3.slice(0, length - 1).concat(res.body.echarts_sun)]];
+        $scope.xdata = stationDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaxisTime);
+        $scope.ydatas = [[stationDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_power),
+            stationDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_predictPower)],
+            [stationDayTodayTimeLineData.line3 = line3.slice(0, length - 1).concat(res.body.echarts_windSpeed)]];
     };
 
 
