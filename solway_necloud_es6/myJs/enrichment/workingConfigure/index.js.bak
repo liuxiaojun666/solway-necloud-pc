@@ -276,6 +276,11 @@ ajaxData({
         $scope.weatherdetail = type;
     }
 
+    //radio 是否有累积辐射量
+    $scope.ifTotalRadiationRadio = type =>{
+        $scope.isld = type;
+    }
+
     //radio 选择周边可引用气象仪
     $scope.aerographQuoteWhich = item =>{
         $scope.borrowpstationid = item.psId;
@@ -589,7 +594,8 @@ ajaxData({
     $scope.getRestrictPowerData = () =>{
         $scope.restrictPowerList.getData({
             pageIndex:0,
-            pageSize:10
+            pageSize:10,
+            stid:$scope.pstationid
         }).then(res=>{
             $scope.restrictPowerListData = res.body.data;
             
@@ -673,7 +679,8 @@ ajaxData({
     const getOverhaulList = () =>{
         $scope.overhaulList.getData({
             pageIndex:0,
-            pageSize:10
+            pageSize:10,
+            stid:$scope.pstationid
         }).then(res=>{
             $scope.overhaulListData = res.body.data;
             
@@ -758,7 +765,8 @@ ajaxData({
     const getCleanTimeList = () =>{
         $scope.cleanTimeList.getData({
             pageIndex:0,
-            pageSize:10
+            pageSize:10,
+            stid:$scope.pstationid
         }).then(res=>{
             $scope.cleanListData = res.body.data;
             
