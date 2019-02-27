@@ -99,6 +99,8 @@ ajaxData({
         $scope.brandCondition = [];
         $scope.brandArr = [];
         $scope.keywords = '';
+        $scope.ftid = '';
+        $scope.manufids = '';
         $scope.diffGetData();
     });
 
@@ -107,13 +109,15 @@ ajaxData({
         $scope.brandCondition = [];
         $scope.brandArr = [];
         $scope.keywords = '';
+        $scope.ftid = '';
+        $scope.manufids = '';
         $scope.diffGetData();
     });
 
     //监听查询-专业
     $scope.$on('search',(e,val)=>{
-        $scope.brandCondition = val.brandCondition;
-        $scope.brandArr = val.brandArr;
+        $scope.ftid = val.brandCondition.join();
+        $scope.manufids = val.faultCondition.join();
         $scope.diffGetData()
     });
 
@@ -181,6 +185,8 @@ ajaxData({
                     queryCode: 'analysis_company_operation_person_month_list',
                     queryType: 1,
                     date: dateTime.showDate,
+                    manufid:$scope.manufids,
+                    ftid:$scope.ftid,
                     pageIndex: 0,
                     pageSize: 20
                 });

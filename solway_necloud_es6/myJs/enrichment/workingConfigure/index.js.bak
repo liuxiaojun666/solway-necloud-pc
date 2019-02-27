@@ -168,6 +168,10 @@ ajaxData({
 
     $scope.initPageParams = async()=>{
         const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '03', isGroup: 0 });
+        if(stationInfo.currentType){
+            toaster.pop('error','','请选择一个电站！（集团和公司均没数据）');
+            return false;
+        }
         $scope.pstationid = stationInfo.currentSTID;
         $scope.currentStationName = stationInfo.currentDataName;
         getAerographDetail();
@@ -270,6 +274,11 @@ ajaxData({
     //radio 选择气象仪类型
     $scope.aerographTypeRadio = type =>{
         $scope.weatherdetail = type;
+    }
+
+    //radio 是否有累积辐射量
+    $scope.ifTotalRadiationRadio = type =>{
+        $scope.isld = type;
     }
 
     //radio 选择周边可引用气象仪
@@ -585,7 +594,8 @@ ajaxData({
     $scope.getRestrictPowerData = () =>{
         $scope.restrictPowerList.getData({
             pageIndex:0,
-            pageSize:10
+            pageSize:10,
+            stid:$scope.pstationid
         }).then(res=>{
             $scope.restrictPowerListData = res.body.data;
             
@@ -669,7 +679,8 @@ ajaxData({
     const getOverhaulList = () =>{
         $scope.overhaulList.getData({
             pageIndex:0,
-            pageSize:10
+            pageSize:10,
+            stid:$scope.pstationid
         }).then(res=>{
             $scope.overhaulListData = res.body.data;
             
@@ -754,7 +765,8 @@ ajaxData({
     const getCleanTimeList = () =>{
         $scope.cleanTimeList.getData({
             pageIndex:0,
-            pageSize:10
+            pageSize:10,
+            stid:$scope.pstationid
         }).then(res=>{
             $scope.cleanListData = res.body.data;
             
