@@ -168,6 +168,10 @@ ajaxData({
 
     $scope.initPageParams = async()=>{
         const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '03', isGroup: 0 });
+        if(stationInfo.currentType){
+            toaster.pop('error','','请选择一个电站！（集团和公司均没数据）');
+            return false;
+        }
         $scope.pstationid = stationInfo.currentSTID;
         $scope.currentStationName = stationInfo.currentDataName;
         getAerographDetail();

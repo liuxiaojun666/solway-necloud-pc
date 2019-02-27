@@ -1,4 +1,4 @@
-app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state, $stateParams, $location) {
+app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state, $stateParams, $location,toaster) {
     const clearData = ()=>{
         $scope.currentSTID = '';
         $scope.currentParentId = '';
@@ -319,6 +319,11 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     $scope.switchStation = ($event, powerStationId, stFlag, dataName, isGroup,selectedType,itemData) =>{
         if ($($event.target).hasClass('disabled')) {
             return;
+        }
+
+        if($scope.disabledCompany && stFlag != 1){
+            toaster.pop('error','','请选择一个电站！（集团，公司均没数据）');
+            return false;
         }
 
         //当再次选择已选择的电站时，直接返回
