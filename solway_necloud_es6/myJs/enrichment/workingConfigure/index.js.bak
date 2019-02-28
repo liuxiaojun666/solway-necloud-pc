@@ -141,9 +141,9 @@ ajaxData({
     $scope.moduleName = '运行配置';
 
     $scope.$on('broadcastSwitchStation',(e,data)=>{
-        if(data.stFlag !== 1){
-            toaster.pop('error','','请选择电站');
-        }
+        // if(data.stFlag !== 1){
+        //     toaster.pop('error','','请选择电站');
+        // }
 
         $scope.initPageParams();
     })
@@ -167,9 +167,12 @@ ajaxData({
     // window.onmousewheel = document.onmousewheel = scrollFunc;
 
     $scope.initPageParams = async()=>{
+        $scope.ifStationFlag = true;
+
         const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '03', isGroup: 0 });
         if(stationInfo.currentType){
-            toaster.pop('error','','请选择一个电站！（集团和公司均没数据）');
+            $scope.ifStationFlag = false;
+            // toaster.pop('error','','请选择一个电站！（集团和公司均没数据）');
             return false;
         }
         $scope.pstationid = stationInfo.currentSTID;
@@ -761,7 +764,9 @@ ajaxData({
     /****************************************  清洗时间配置   *********************************************** */
 
     $scope.cleanStartDate =  new Date();
-    $scope.cleanEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
+    // $scope.cleanEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
+    $scope.cleanEndDate = new Date();
+    $scope.cleanEndDate.showDate = ''
     const getCleanTimeList = () =>{
         $scope.cleanTimeList.getData({
             pageIndex:0,
@@ -773,7 +778,7 @@ ajaxData({
             for(let i=0;i<$scope.cleanListData.length;i++){
                 $scope.cleanListData[i]['disabled'] = true;
                 $scope.cleanListData[i]['startDate'] = new Date($scope.cleanListData[i]['startDate']);
-                $scope.cleanListData[i]['endDate'] = new Date($scope.cleanListData[i]['endDate']);
+                $scope.cleanListData[i]['endDate'] = $scope.cleanListData[i]['endDate'] ? new Date($scope.cleanListData[i]['endDate']):'';
             }
         });
     }
@@ -802,8 +807,8 @@ ajaxData({
         if(type == 'add'){
             formData['id'] = null;
             formData['stid'] = $scope.pstationid;
-            formData['startDate'] = new Date($scope.cleanStartDate).Format("yyyy-MM-dd");
-            formData['endDate'] = new Date($scope.cleanEndDate).Format("yyyy-MM-dd");
+            formData['startDate'] = $scope.cleanStartDate.showDate;
+            formData['endDate'] = $scope.cleanEndDate.showDate;
         }else{
             delete item.createUser;
             delete item.createTime;
