@@ -1,12 +1,12 @@
 ajaxData(
     {
-        boxChangeCount: {
-            name: 'GETboxChangeCount',
+        deviceInfoWidthDialog: {
+            name: 'GETdeviceInfoWidthDialog',
             data: {},
             later: true
         },
-        boxChangeHours: {
-            name: 'GETboxChangeHours',
+        deviceHours: {
+            name: 'GETdeviceHours',
             data: {},
             later: true
         },
@@ -18,14 +18,14 @@ ajaxData(
             onlyLatest: true
         },
         newHistoryData: {
-            name: 'GETnewHistoryData',
+            name: 'GETwpHistoryData',
             data: {},
             later: true,
             onlyLatest: true,
             cache: true
         },
         faultAlarmList: {
-            name: 'GETfaultAlarmList',
+            name: 'GETwpFaultAlarmList',
             data: {},
             later: true
         }
@@ -43,16 +43,17 @@ ajaxData(
     $scope.eqHistoryDataEndDate = new Date;
 
     // 逆变器小时数信息获取
-    $scope.boxChangeHours.beforGetData = () => {
-        if ($scope.boxChangeHours.res) return;
-        $scope.boxChangeHours.getData({ id: eqService.config.eqObj.deviceId });
+    $scope.deviceHours.beforGetData = () => {
+        if ($scope.deviceHours.res) return;
+        $scope.deviceHours.getData({ id: eqService.config.eqObj.deviceId, type: 18 });
     };
 
     // 逆变器基本信息获取
-    // $scope.boxChangeCount.getData({
-    //     pageIndex: 0,
-    //     param: eqService.config.eqObj.deviceId
-    // });
+    $scope.deviceInfoWidthDialog.getData({
+        pageIndex: 0,
+        param: eqService.config.eqObj.deviceId,
+        id: eqService.config.eqObj.deviceId, type: 18
+    });
 
     // 实时数据获取
     // $scope.singleRealDataBBoxChange.getData({
@@ -63,51 +64,7 @@ ajaxData(
 
     // 实时数据 处理
     $scope.singleRealDataBBoxChange.subscribe(res => {
-        $scope.realListData = [1, 2].map(v => ['a', 'b', 'c'].map(xv => ({
-            c1: v + xv.toLocaleUpperCase(),
-            c2: res.data['p' + xv + v],
-            c3: res.data['q' + xv + v],
-            c4: res.data['c' + xv + v],
-            c5: res.data['u' + xv + v],
-        }))).reduce((a, b) => a.concat(b), []);
-        $scope.realListColumn = [
-            {
-                title: '',
-                dataIndex: 'c1'
-            },
-            {
-                title: '用功功率（kW）',
-                dataIndex: 'c2',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            },
-            {
-                title: '无功功率（kVar）',
-                dataIndex: 'c3',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            },
-            {
-                title: '电流（A）',
-                dataIndex: 'c4',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            },
-            {
-                title: '电压（V）',
-                dataIndex: 'c5',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            },
-        ];
+        
     });
 
     // 状态刷新
@@ -126,7 +83,7 @@ ajaxData(
         $scope.newHistoryData.getData({
             pageIndex: 1,
             pageSize: 10,
-            devicetype: 3,
+            devicetype: 18,
             begindate: eqHistoryDataStartDate.showDate,
             enddate: eqHistoryDataEndDate.showDate,
             stationid: pstationid,
@@ -141,7 +98,7 @@ ajaxData(
             {
                 dataIndex: 'dtime',
                 title: '时间',
-                width: '180px',
+                width: '220px',
                 align: 'center',
                 sort: true,
                 fixed: 'left',
@@ -149,276 +106,201 @@ ajaxData(
                     return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
                 }
             }, {
-                dataIndex: 'pa1',
-                title: '绕组1A相有功功率(kW)',
+                dataIndex: 'wdspd',
+                title: '机舱外风速',
                 width: '150px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'pb1',
-                title: '绕组1B相有功功率(kW)',
+                dataIndex: 'extmp',
+                title: '机舱外温度',
                 width: '150px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'pc1',
-                title: '绕组1C相有功功率(kW)',
+                dataIndex: 'intltmp',
+                title: '机舱内温度',
                 width: '150px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'qa1',
-                title: '绕组1A相无功功率(kVar)',
+                dataIndex: 'nacdirang',
+                title: '风向夹角',
                 width: '160px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'qb1',
-                title: '绕组1B相无功功率(kVar)',
+                dataIndex: 'rotspd',
+                title: '叶轮转速',
                 width: '160px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'qc1',
-                title: '绕组1C相无功功率(kVar)',
+                dataIndex: 'ptangvalbl1',
+                title: '叶片1桨距角',
                 width: '160px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'ca1',
-                title: '绕组1A相电流(A)',
+                dataIndex: 'ptangvalbl2',
+                title: '叶片2桨距角',
                 width: '120px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'cb1',
-                title: '绕组1B相电流(A)',
+                dataIndex: 'ptangvalbl3',
+                title: '叶片3桨距角',
                 width: '120px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'cc1',
-                title: '绕组1C相电流(A)',
+                dataIndex: 'spd',
+                title: '发电机转速',
                 width: '120px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'ua1',
-                title: '绕组1A相电压(V)',
+                dataIndex: 'w',
+                title: '有功功率',
                 width: '120px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'ub1',
-                title: '绕组1B相电压(V)',
+                dataIndex: 'var',
+                title: '无功功率',
                 width: '120px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'uc1',
-                title: '绕组1C相电压(V)',
+                dataIndex: 'gntoptmpsta',
+                title: '发电机最高绕组温度',
+                width: '200px',
+                align: 'right',
+                render(text) {
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
+                }
+            }, {
+                dataIndex: 'hz',
+                title: '频率值',
                 width: '120px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'f1',
-                title: '绕组1频率(Hz)',
+                dataIndex: 'gripf',
+                title: '功率因数',
                 width: '120px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'pf1',
-                title: '绕组1功率因数',
-                width: '120px',
+                dataIndex: 'trmtmpentgbxdrv',
+                title: '齿轮箱高速轴驱动端轴承温度',
+                width: '220px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'w1',
-                title: '绕组1电量(kWh)',
-                width: '120px',
+                dataIndex: 'trmtmpentgbxnondrv',
+                title: '齿轮箱高速轴非驱动端轴承温度',
+                width: '250px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'pa2',
-                title: '绕组2A相有功功率(kW)',
+                dataIndex: 'trmtmpgbxoil',
+                title: '齿轮箱油温',
                 width: '150px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'pb2',
-                title: '绕组2B相有功功率(kW)',
+                dataIndex: 'ywdir',
+                title: '偏航角度',
                 width: '150px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'pc2',
-                title: '绕组2C相有功功率(kW)',
-                width: '150px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'qa2',
-                title: '绕组2A相无功功率(kVar)',
+                dataIndex: 'daykwh',
+                title: '有功发电量日计',
                 width: '160px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'qb2',
-                title: '绕组2B相无功功率(kVar)',
+                dataIndex: 'totwhcons',
+                title: '有功发电量总计',
                 width: '160px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
+                    if (text === 0) return `0`;
+                    return `<span>${text ? text.toFixed(2) : ''}</span>`
                 }
             }, {
-                dataIndex: 'qc2',
-                title: '绕组2C相无功功率(kVar)',
+                dataIndex: 'turst',
+                title: '风机状态',
                 width: '160px',
                 align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
+                // render(text) {
+                // if (text === 0) return `0`;
+                //     return `<span>${text ? text.toFixed(2) : ''}</span>`
+                // }
             }, {
-                dataIndex: 'ca2',
-                title: '绕组2A相电流(A)',
+                dataIndex: 'limwst',
+                title: '风机限功率状态',
                 width: '120px',
                 align: 'right',
                 render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'cb2',
-                title: '绕组2B相电流(A)',
-                width: '120px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'cc2',
-                title: '绕组2C相电流(A)',
-                width: '120px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'ua2',
-                title: '绕组2A相电压(V)',
-                width: '120px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'ub2',
-                title: '绕组2B相电压(V)',
-                width: '120px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'uc2',
-                title: '绕组2C相电压(V)',
-                width: '120px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'f2',
-                title: '绕组2频率(Hz)',
-                width: '120px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'pf2',
-                title: '绕组2功率因数',
-                width: '120px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'w2',
-                title: '绕组2电量(kWh)',
-                width: '120px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'ta',
-                title: 'A相温度(℃)',
-                width: '80px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'tb',
-                title: 'B相温度(℃)',
-                width: '80px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 'tc',
-                title: 'C相温度(℃)',
-                width: '80px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
-                }
-            }, {
-                dataIndex: 't',
-                title: '温度(℃)',
-                width: '80px',
-                align: 'right',
-                render(text) {
-                    return text.toFixed(2) + '';
+                    return ``;
                 }
             }
         ];
@@ -495,8 +377,8 @@ ajaxData(
 
     // 销毁事件
     $scope.$on('includePageDesdroy', () => {
-        $scope.boxChangeCount.res = null;
-        $scope.boxChangeHours.res = null;
+        $scope.deviceInfoWidthDialog.res = null;
+        $scope.deviceHours.res = null;
         $scope.singleRealDataBBoxChange.res = null;
         $scope.newHistoryData.res = null;
         $scope.faultAlarmList.res = null;

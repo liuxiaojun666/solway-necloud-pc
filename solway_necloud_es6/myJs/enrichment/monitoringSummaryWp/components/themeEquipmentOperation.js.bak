@@ -12,7 +12,7 @@ ajaxData({
 
     //集团、电站---------当日
     getRunAcpStatus:{
-        name: 'GETgetRunAcpStatus',
+        name: 'GETrunAcpStatus',
         later: true
     },
     //电站---------历史日
@@ -279,8 +279,8 @@ ajaxData({
                     let acpInfo = res.body.acpInfo;
                     $scope.data = acpInfo;
                     // $scope.$emit('lastUpdate', { comm:acpInfo.comm, dtime: acpInfo.dtime})
-                    if(acpInfo.kw_r){
-                        initEchart(acpInfo.kw_r[0]);
+                    if (acpInfo.p_rate){
+                        initEchart(acpInfo.p_rate[0]);
                     }else{
                         initEchart('');
                     }
@@ -345,8 +345,8 @@ ajaxData({
                 $scope.pieThirdItemName = '告警台数';
                 $scope.pieThirdItemColor = '#e4b86f';
                 initPieEchart(data.fail_count, data.inter_count, data.alarm_count);//故障、离线、告警
-                if(data.max_p_rate){
-                    initEchart(data.max_p_rate[0]);
+                if(data.p_rate){
+                    initEchart(data.p_rate[0]);
                 }else{
                     initEchart('');
                 }
