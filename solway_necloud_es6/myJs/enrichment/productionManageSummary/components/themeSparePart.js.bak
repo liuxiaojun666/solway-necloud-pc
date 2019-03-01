@@ -163,10 +163,10 @@ ajaxData(
             $scope.opFittingsRoomSelectByCondition.getData();
             $scope.opWorkFittingsReqPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 3) {
-            $scope.selectCurrComUsers.getData();
+            $scope.selectCurrComUsers.getData({ hasTel: 1 });
             $scope.opWorkFittingsOutPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 4) {
-            $scope.selectCurrComUsers.getData();
+            $scope.selectCurrComUsers.getData({ hasTel: 1 });
             $scope.opFittingsRebackPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         }
     }
@@ -202,13 +202,13 @@ ajaxData(
                 align: 'right'
             },
             {
-                title: '单位(元)',
+                title: '单位',
                 dataIndex: 'fu',
                 sort: true,
                 align: 'center'
             },
             {
-                title: '单价',
+                title: '单价(元)',
                 dataIndex: 'fp',
                 sort: true,
                 align: 'right'
@@ -269,7 +269,12 @@ ajaxData(
 
     // 备件 领料 分页
     $scope.opWorkFittingsReqPage.subscribe(res => {
-        $scope.datasource = res.body.data;
+        $scope.datasource = res.body.data
+        // .filter(v => {
+        //     if (v.state !== '01') return true;
+        //     if (v.createUid !== v.currUid) return false;
+        //     return true;
+        // });
         $scope.paging = res.body;
         $scope.pagingGetData = $scope.opWorkFittingsReqPage.getData;
         $scope.closeMessagePopUp();
