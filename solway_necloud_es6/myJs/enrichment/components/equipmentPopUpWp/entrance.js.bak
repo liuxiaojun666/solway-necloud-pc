@@ -28,7 +28,7 @@ ajaxData(
     $scope.display = false;
     let timer;
     $scope.$on('equipmentPopUpWp', async(e, eqObj) => {
-        if (!eqObj.deviceSerialNnumber && eqObj.stid && eqObj.eqid) {
+        if (eqObj.stid && eqObj.eqid) {
             const { stid, eqid } = eqObj;
             const res = await $scope.deviceInfo.getData({ stid, eqid });
             const { hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow } = res.body;

@@ -84,22 +84,22 @@ ajaxData(
         $scope.rdatasource[0] && $scope.rtrClick($scope.rdatasource[0], 0);
         $scope.rcolumn = [
             {
-                title: '',
+                title: '申请人',
                 dataIndex: 'createUname',
                 align: 'center'
             },
             {
-                title: '',
+                title: '申请编号',
                 dataIndex: 'sn',
                 align: 'left'
             },
             {
-                title: '',
-                dataIndex: 'modifyTime',
+                title: '申请时间',
+                dataIndex: 'createTime',
                 align: 'center',
                 render(text, item) {
                     if (item.state !== '00') return '';
-                    return new Date(text).Format('yyyy-MM-dd');
+                    return new Date(text - 8 * 24 * 60 * 60 * 1000).Format('yyyy-MM-dd');
                 }
             },
         ];

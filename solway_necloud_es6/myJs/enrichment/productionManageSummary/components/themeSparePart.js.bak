@@ -89,15 +89,16 @@ ajaxData(
         else if (tabIndex === 2) fileName = 'picking';
         else if (tabIndex === 3) fileName = 'outStock';
         else if (tabIndex === 4) fileName = 'returningLibrary';
-
         $ocLazyLoad.load('theme/js/dist/enrichment/productionManageSummary/components/' + fileName + '.js').then(() => {
-            $scope.tpl4 = 'tpl/enrichment/productionManageSummary/components/' + fileName + '.html'
-            if ($scope['tpl' + tabIndex + 'loaded']) return $scope.$broadcast('popUp', obj);
-
-            $scope.tplLoaded = () => {
-                $scope['tpl' + tabIndex + 'loaded'] = true;
-                $scope.$broadcast('popUp', obj);
-            };
+            $scope.tpl4 = 'tpl/enrichment/productionManageSummary/components/' + fileName + '.html';
+            if (!$scope['tpl' + tabIndex + 'loaded']) {
+                $scope.tplLoaded = () => {
+                    if ($scope['tpl' + tabIndex + 'loaded']) return;
+                    $scope['tpl' + tabIndex + 'loaded'] = true;
+                    $scope.$broadcast('popUp', obj);
+                    $scope.$apply();
+                };
+            }
         });
     };
 
@@ -155,19 +156,19 @@ ajaxData(
         const { tabIndex } = $scope;
         if (tabIndex === 0) {
             $scope.opFittingsRoomSelectByCondition.getData();
-            $scope.opFittingsDictFdnumPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+            $scope.opFittingsDictFdnumPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 1) {
             $scope.opFittingsRoomSelectByCondition.getData();
-            $scope.fittingsInPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+            $scope.fittingsInPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 2) {
             $scope.opFittingsRoomSelectByCondition.getData();
-            $scope.opWorkFittingsReqPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+            $scope.opWorkFittingsReqPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 3) {
             $scope.selectCurrComUsers.getData({ hasTel: 1 });
-            $scope.opWorkFittingsOutPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+            $scope.opWorkFittingsOutPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 4) {
             $scope.selectCurrComUsers.getData({ hasTel: 1 });
-            $scope.opFittingsRebackPage.getData({ pageIndex: 0, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+            $scope.opFittingsRebackPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         }
     }
 
@@ -270,11 +271,6 @@ ajaxData(
     // 备件 领料 分页
     $scope.opWorkFittingsReqPage.subscribe(res => {
         $scope.datasource = res.body.data
-        // .filter(v => {
-        //     if (v.state !== '01') return true;
-        //     if (v.createUid !== v.currUid) return false;
-        //     return true;
-        // });
         $scope.paging = res.body;
         $scope.pagingGetData = $scope.opWorkFittingsReqPage.getData;
         $scope.closeMessagePopUp();
@@ -342,6 +338,21 @@ ajaxData(
                 align: 'left'
             },
             {
+                title: '申请日期',
+                dataIndex: 'createTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '申请人',
+                dataIndex: 'createUname',
+                sort: true,
+                align: 'center'
+            },
+            {
                 title: '出库时间',
                 dataIndex: 'modifyTime',
                 sort: true,
@@ -353,9 +364,13 @@ ajaxData(
             },
             {
                 title: '操作人',
-                dataIndex: 'createUname',
+                dataIndex: 'modifyUname',
                 sort: true,
-                align: 'center'
+                align: 'center',
+                render(text, item) {
+                    if (item.state !== '00') return '';
+                    return text;
+                }
             },
             {
                 title: '备注',

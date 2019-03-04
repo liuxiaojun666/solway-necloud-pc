@@ -90,29 +90,15 @@ ajaxData({
 
         // 注册事件
         $scope.getDeviceLayoutSvg.subscribe(res => {
-            $("#svgView").find("g rect.rectLayout").on('dblclick', function () {
+            $("#svgView").find("g[type=windTurbine] rect").on('dblclick', function () {
                 const $device = $(this).parents("g");
                 const type = $device.attr("type");
                 const deviceId = $device.attr("deviceId");
                 const id = $device.attr("id");
                 const stationId = parentAjaxData.currentStationData.currentSTID;
-                switch (type) {
-                    case "NBQHLX":
-                        showHistoryData_byRTMDeviceLogId(stationId, id, deviceId, "2", "1");
-                        break;
-                    case "HLX":
-                        showHistoryData_byRTMDeviceLogId(stationId, id, deviceId, "1");
-                        break;
-                    case "NBQ":
-                        showHistoryData_byRTMDeviceLogId(stationId, id, deviceId, "2", "0");
-                        break;
-                    case "XB":
-                        showHistoryData_byRTMDeviceLogId(stationId, id, deviceId, "3");
-                        break;
-                    case "videoImage":
-                        videoHandle(id, deviceId);
-                        break;
-                }
+                if (type === 'videoImage') return videoHandle(id, deviceId);
+                $scope.showInformation({ sid: stationId, did: deviceId });
+                // $scope.$broadcast('equipmentPopUpWp', { stid: stationId, eqid: deviceId });
             });
         });
 
@@ -127,23 +113,6 @@ ajaxData({
             await myAjaxData.timeout(10 * 1000);
             $scope.getDeviceStatus.getData({});
         });
-
-        // 事件处理函数   弹出窗
-        function showHistoryData_byRTMDeviceLogId(pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
-            var res = { deviceSerialNnumber: deviceSerialNnumber, deviceId: deviceid, pstationid: pstationid, deviceTypeNow: deviceType, };
-            $scope.deviceTypeNow = deviceType;
-            $scope.inverterType = hasJB;
-            if (deviceType == '3') {
-                $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
-                $scope.$broadcast("showDeviceDetail3broad", res);
-            } else if (deviceType == '2') {
-                $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
-                $scope.$broadcast("showDeviceDetail2broad", res);
-            } else if (deviceType == '1') {
-                $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
-                $scope.$broadcast("showDeviceDetail1broad", res);
-            }
-        };
 
         // 视频 处理  获取视频列表
         function videoHandle(id, deviceid) {
