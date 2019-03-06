@@ -24,6 +24,11 @@ ajaxData(
             data: {},
             later: true
         },
+        deviceStatusFromRedis: {
+            name: 'GETdeviceStatusFromRedis',
+            data: {},
+            later: true
+        }
     }, {
         __serviceName__: 'mainEquipmentService',
     }
@@ -57,17 +62,29 @@ ajaxData(
         if ($scope.stClassLIst.res.stClass02) {
             od2 = new Odometer({ el: document.getElementById('odometer2'), value: 100 });
         }
-        od && od.update('1' + 95);
-        od2 && od2.update('1' + '00');
-        od2 && $(od2.el).find('.odometer-digit').eq(0).find('.odometer-value').text(1);
+        $scope.deviceStatusFromRedis.getData();
     });
 
-    // 运维效率响应处理
-    // $scope.analysis_company_operation_station_accum_list.subscribe(res => {
-    //     $scope.analysis_company_operation_station_accum_list.res.body.data.maxNum = res.body.data.reduce((a, b) => {
-    //         const newNum = b.res_hours_avg + b.repair_hours_avg;
-    //         return a > newNum ? a : newNum;
-    //     }, 0);
-    // });
-
+    $scope.deviceStatusFromRedis.subscribe(res => {
+        const class01 = res['01'] || {
+            comm: 0,
+            fault: 0,
+            maintain: 0,
+            run: 0,
+            wait: 0
+        };
+        const class02 = res['02'] || {
+            comm: 0,
+            fault: 0,
+            maintain: 0,
+            run: 0,
+            wait: 0
+        };
+        const class01RunRate = class01.run / Object.values(class01).reduce((a, b) => a + b, 0) * 100;
+        const class02RunRate = 100;// class02.run / Object.values(class02).reduce((a, b) => a + b, 0) * 100;
+        od && od.update('1' + ('00000000' + (class02RunRate || 100).toFixed()).substr(-2));
+        od2 && od2.update('1' + ('00000000' + class01RunRate.toFixed()).substr(-2));
+        if (class02RunRate === 100) od && $(od.el).find('.odometer-digit').eq(0).find('.odometer-value').text(1);
+        if (class01RunRate === 100) od2 && $(od2.el).find('.odometer-digit').eq(0).find('.odometer-value').text(1);
+    });
 });
