@@ -4,23 +4,27 @@ ajaxData(
             name: 'GETstClassLIst',
             data: {}
         },
-        home_pv_company_pgc_year_stationlist: {
-            name: 'GEThome_pv_company_pgc_year_stationlist',
+        pvwpStationOverview: {
+            name: 'GETpvwpStationOverview',
+            data: {}
+        },
+        home_pv_company_rad_year_stationlist: {
+            name: 'GEThome_pv_company_rad_year_stationlist',
             data: {},
             later: true
         },
-        home_pv_company_pr_year_stationlist: {
-            name: 'GEThome_pv_company_pr_year_stationlist',
+        home_pv_company_real_hours_year_stationlist: {
+            name: 'GEThome_pv_company_real_hours_year_stationlist',
             data: {},
             later: true
         },
-        home_wp_company_pgc_year_stationlist: {
-            name: 'GEThome_wp_company_pgc_year_stationlist',
+        home_wp_company_ws_avg_year_stationlist: {
+            name: 'GEThome_wp_company_ws_avg_year_stationlist',
             data: {},
             later: true
         },
-        home_wp_company_pba_year_stationlist: {
-            name: 'GEThome_wp_company_pba_year_stationlist',
+        home_wp_company_real_hours_year_stationlist: {
+            name: 'GEThome_wp_company_real_hours_year_stationlist',
             data: {},
             later: true
         },
@@ -38,10 +42,10 @@ ajaxData(
     $scope.stClassLIst.subscribe(res => {
         const date = new Date().getFullYear();
         [
-            'home_pv_company_pgc_year_stationlist',
-            'home_pv_company_pr_year_stationlist',
-            'home_wp_company_pgc_year_stationlist',
-            'home_wp_company_pba_year_stationlist',
+            'home_pv_company_rad_year_stationlist',
+            'home_pv_company_real_hours_year_stationlist',
+            'home_wp_company_ws_avg_year_stationlist',
+            'home_wp_company_real_hours_year_stationlist',
         ].forEach(element => $scope[element].getData({
             queryCode: [element],
             queryType: 1,
@@ -49,18 +53,25 @@ ajaxData(
         }));
     });
 
-    $scope.stClassLIst.subscribe(async res => {
-        await myAjaxData.timeout(0);
-        od = new Odometer({ el: document.getElementById('odometer'), value: 100 });
-        od && od.update('1000' + 95);
+    $scope.home_pv_company_rad_year_stationlist.subscribe(res => {
+        $scope.home_pv_company_rad_year_stationlist.res.body.data = res.body.data.sort((a, b) => b.rad_chk - a.rad_chk);
     });
 
-    // 运维效率响应处理
-    // $scope.analysis_company_operation_station_accum_list.subscribe(res => {
-    //     $scope.analysis_company_operation_station_accum_list.res.body.data.maxNum = res.body.data.reduce((a, b) => {
-    //         const newNum = b.res_hours_avg + b.repair_hours_avg;
-    //         return a > newNum ? a : newNum;
-    //     }, 0);
-    // });
+    $scope.home_pv_company_real_hours_year_stationlist.subscribe(res => {
+        $scope.home_pv_company_real_hours_year_stationlist.res.body.data = res.body.data.sort((a, b) => b.real_hours - a.real_hours);
+    });
 
+    $scope.home_wp_company_ws_avg_year_stationlist.subscribe(res => {
+        $scope.home_wp_company_ws_avg_year_stationlist.res.body.data = res.body.data.sort((a, b) => b.ws_avg - a.ws_avg);
+    });
+
+    $scope.home_wp_company_real_hours_year_stationlist.subscribe(res => {
+        $scope.home_wp_company_real_hours_year_stationlist.res.body.data = res.body.data.sort((a, b) => b.real_hours - a.real_hours);
+    });
+
+    $scope.pvwpStationOverview.subscribe(async res => {
+        await myAjaxData.timeout(0);
+        od = new Odometer({ el: document.getElementById('odometer'), value: 100000 });
+        od && od.update('1' + ('00000000' + (+res.body.co2_o).toFixed()).substr(-6));
+    });
 });

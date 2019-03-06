@@ -83,6 +83,7 @@ ajaxData(
     };
 
     $scope.publicFunc = (obj) => {
+        myAjaxData.config.publicObj = obj;
         const { tabIndex } = $scope;
         let fileName = '';
         if (tabIndex === 1) fileName = 'putInStorage';
@@ -93,11 +94,11 @@ ajaxData(
             $scope.tpl4 = 'tpl/enrichment/productionManageSummary/components/' + fileName + '.html';
             if (!$scope['tpl' + tabIndex + 'loaded']) {
                 $scope.tplLoaded = () => {
-                    if ($scope['tpl' + tabIndex + 'loaded']) return;
                     $scope['tpl' + tabIndex + 'loaded'] = true;
-                    $scope.$broadcast('popUp', obj);
-                    $scope.$apply();
+                    $scope.$broadcast('popUp', myAjaxData.config.publicObj);
                 };
+            } else {
+                $scope.$broadcast('popUp', myAjaxData.config.publicObj);
             }
         });
     };
