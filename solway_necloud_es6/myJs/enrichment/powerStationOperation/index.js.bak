@@ -1,0 +1,120 @@
+ajaxData({
+    getCompanyList: {
+        name: 'POSTCompanyListData',
+        data: {},
+        later: true
+    },
+    stationOperationList:{
+        name: 'GETstationOperationList',
+        data: {},
+        later: true
+    }
+}, {})('powerStationOperationCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '电站运行';//当前页面名称；
+
+    const stClassMap = {'01':'光伏','02':'风电'};
+
+    //初始化条件
+    const initParams = () =>{
+        $scope.comIds = '';
+        $scope.stClass = '';
+    }
+
+    initParams();
+    
+
+    //列表
+    $scope.getStationList = () =>{
+        const checkedStatus = [];
+        $("input[name='status']:checked").map((index,v)=>{
+            checkedStatus.push(v.dataset.status)
+        })
+        console.log(checkedStatus);
+
+        $scope.stationOperationList.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            comIds:$scope.comIds,
+            stClass:$scope.stClass
+        }).then(res=>{
+            console.log(res);
+        });
+    }
+
+    $scope.getStationList();
+
+    const initCompanyList = () => {
+        $scope.getCompanyList.getData({
+        }).then(res => {
+            $scope.companyList = res;
+        })
+    }
+
+    initCompanyList();
+
+     //查询
+     $scope.search = () =>{
+        $scope.ifShowModel = false;
+        $scope.ifBeback = true;
+        $scope.getStationList();
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.ifShowModel = false;
+    }
+
+    //显示查询条件弹框
+    $scope.showSearchModel = (e) =>{
+        e.stopPropagation();
+        $scope.ifShowModel = !$scope.ifShowModel;
+    }
+
+    //刷新
+    $scope.refresh = () =>{
+        $scope.getStationList();
+    }
+
+    //后退
+    $scope.beback = (e)=>{
+        $scope.ifBeback = false;
+        initParams();
+        $scope.getStationList();
+    }
+
+    $scope.column = [
+        {
+            title: '集团名称',
+            dataIndex: 'comName',
+            align: 'center',
+        },{
+            title: '电站类型',
+            dataIndex: 'stationClass',
+            align: 'center',
+            render(text,record){
+                return stClassMap[text];
+            }
+        }, {
+            title: '电站名称',
+            dataIndex: 'stName',
+            align: 'center',
+        }, {
+            title: '状态',
+            dataIndex: 'st_statusDesc',
+            align: 'center',
+        }, {
+            title: '更新时刻',
+            dataIndex: 'updateTime',
+            align: 'center',
+            render(text, record) {
+                return text?new Date(text).Format('yyyy-MM-dd hh:mm:ss'):'-'
+            }
+        }
+    ]
+
+  
+
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});
