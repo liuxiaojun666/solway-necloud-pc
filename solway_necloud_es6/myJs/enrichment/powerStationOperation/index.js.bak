@@ -1,0 +1,183 @@
+ajaxData({
+    getCompanyList: {
+        name: 'POSTCompanyListData',
+        data: {},
+        later: true
+    },
+    stationOperationList:{
+        name: 'GETstationOperationList',
+        data: {},
+        later: true
+    }
+}, {})('powerStationOperationCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster','$interval'], ($scope, myAjaxData, historicalRecord, $timeout,toaster,$interval) => {
+    $scope.moduleName = '电站运行';//当前页面名称；
+
+    const stClassMap = {'01':'光伏','02':'风电'};
+
+    //初始化条件
+    const initParams = () =>{
+        $scope.comIds = '';
+        $scope.stClass = '';
+        $scope.loading = true;
+    }
+
+    initParams();
+
+    //列表
+    $scope.getStationList = () =>{
+        $scope.loading = true;
+        $scope.stationOperationList.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            comIds:$scope.comIds,
+            stClass:$scope.stClass
+        })
+        
+    }
+
+    $scope.stationOperationList.subscribe(res=>{
+        $scope.loading = false;
+        if(res.code == 0){
+            $scope.stationList = res.body.data;
+            $scope.stationSourceData = res.body.data;
+            $scope.resetDataList();
+        }
+    })
+
+    const initCompanyList = () => {
+        $scope.getCompanyList.getData({
+        }).then(res => {
+            $scope.companyList = res;
+        })
+    }
+
+    initCompanyList();
+
+     //查询
+     $scope.search = () =>{
+        $scope.ifShowModel = false;
+        $scope.ifBeback = true;
+        $scope.getStationList();
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.ifShowModel = false;
+    }
+
+    //显示查询条件弹框
+    $scope.showSearchModel = (e) =>{
+        e.stopPropagation();
+        $scope.ifShowModel = !$scope.ifShowModel;
+    }
+
+    //刷新
+    $scope.refresh = () =>{
+        $scope.getStationList();
+    }
+
+    //后退
+    $scope.beback = (e)=>{
+        $scope.ifBeback = false;
+        initParams();
+        $scope.getStationList();
+    }
+
+    $scope.column = [
+        {
+            title: '集团名称',
+            dataIndex: 'comName',
+            sort: !0,
+            width:'20%',
+            align: 'center',
+        },{
+            title: '电站类型',
+            dataIndex: 'stationClass',
+            align: 'center',
+            render(text,record){
+                return stClassMap[text];
+            }
+        }, {
+            title: '电站名称',
+            dataIndex: 'stName',
+            align: 'center',
+        }, {
+            title: '状态',
+            dataIndex: 'st_statusDesc',
+            align: 'center',
+            render(text,record){
+                if (record.st_comm == 1) return '通讯中断'
+                else if(record.st_status == 1) return '故障'
+                else if(record.st_status == 2) return '报警'
+                else return '正常'
+            }
+        }, {
+            title: '更新时刻',
+            dataIndex: 'updateTime',
+            align: 'center',
+            render(text, record) {
+                return text?new Date(text).Format('yyyy-MM-dd hh:mm:ss'):'-'
+            }
+        }
+    ]
+
+    $scope.resetDataList = () =>{
+        const checkedStatus = [];
+        $("input[name='statusItem']:checked").map((index,v)=>{
+            checkedStatus.push(v.value)
+        })
+        const resData = $scope.stationSourceData;
+        let newArr = [];
+        if(checkedStatus.length == 4){
+            $scope.stationList = $scope.stationSourceData;
+            $scope.$apply();
+            return false;
+        }
+        if(checkedStatus.includes('2')){ //正常
+            newArr = newArr.concat(resData.filter(item=>(item.st_comm != 1 && item.st_status != 1 && item.st_status != 2)));
+        }
+        if(checkedStatus.includes('3')){ //故障
+            newArr = newArr.concat(resData.filter(item=>(item.st_comm != 1 && item.st_comm != 2 && item.st_status == 1)));
+        }
+        if(checkedStatus.includes('4')){ //报警
+            newArr = newArr.concat(resData.filter(item=>(item.st_comm != 1 && item.st_comm != 2 && item.st_status == 2)));
+        }
+        if(checkedStatus.includes('5')){ //中断
+            newArr = newArr.concat(resData.filter(item=> item.st_comm == 1));
+        }
+
+        $scope.stationList = newArr;
+        $scope.$apply();
+    }
+
+    
+    $('input[name="statusCheckAll"]').prop('checked',true);
+    $('input[name="statusItem"]').prop('checked',true);
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+       
+        let $checkAll =  $(".powerStationOperation").find('input[name="statusCheckAll"]');
+        let $checkEvery =  $(".powerStationOperation").find('input[name="statusItem"]');
+        $(".powerStationOperation").on('click','input[name="statusCheckAll"]', (e)=>{
+            Array.from($checkEvery).forEach(item=>item.checked = e.target.checked);
+            $scope.resetDataList();
+            
+        });
+        $(".powerStationOperation").on('click','input[name="statusItem"]', (e)=>{
+            $checkAll.prop('checked', Array.from($checkEvery).every(item => item.checked=== true));
+            $scope.resetDataList();
+        });
+
+        $scope.getStationList();
+
+    },2000);
+
+
+    const interval = $interval(()=>{
+        $scope.getStationList();
+    },30000);
+
+    $scope.$on('$destroy', () => {
+        $interval.cancel(interval);
+    });
+});

@@ -1,4 +1,10 @@
 ajaxData({
+    // 给默认选中电站
+    getuserAuthHandleSetSTClass: {
+        name: 'GETUserAuthHandleSetSTClass',
+        data: {},
+        later: true
+    },
     getCurrentInfoNew: {
         name: 'GETgetCurrentInfoNew',
         data: {},
@@ -141,40 +147,44 @@ ajaxData({
     $scope.moduleName = '运行配置';
 
     $scope.$on('broadcastSwitchStation',(e,data)=>{
-        // if(data.stFlag !== 1){
-        //     toaster.pop('error','','请选择电站');
-        // }
-
         $scope.initPageParams();
     })
 
     $scope.menuActive = id =>{
         $scope.activeMenuBtn = id;
         document.getElementById(id).scrollIntoView()
-        // let scrollH = $("#"+id).offset().top;
-        // console.log(top)
-        // $('.scroll-area').animate({scrollTop: scrollH}, 0)
     }
 
     $scope.menuActive('a')
 
-    // const scrollFunc = e =>{
-    //     e = e || window.event; 
-    // }
-    // if (document.addEventListener) {//firefox 
-    //     document.addEventListener('DOMMouseScroll', scrollFunc, false); 
-    // } 
-    // window.onmousewheel = document.onmousewheel = scrollFunc;
+    // 电站 信息  对比
+    async function diffStationInfo() {
+        if (!myAjaxData.currentStationData.currentSTID && myAjaxData.currentStationData.currentSTID !== 0) { // 没有选择过电站
+            const res = await $scope.getuserAuthHandleSetSTClass.getData({});
+            if (res.result === false) {
+                alert('没有选择任何 公司 或 电站，请联系管理员');
+                return window.location.href = '/index.html';
+            }
+
+            const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            myAjaxData.setCurrentStationData(stationInfo);
+
+            return window.location.reload();
+        }
+    }
+
 
     $scope.initPageParams = async()=>{
         $scope.ifStationFlag = true;
 
         const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '03', isGroup: 0 });
-        if(stationInfo.currentType){
+        if(stationInfo.currentType === null){
+            await diffStationInfo();
+        }else if(stationInfo.currentType === 1 || stationInfo.currentType === 2){
             $scope.ifStationFlag = false;
-            // toaster.pop('error','','请选择一个电站！（集团和公司均没数据）');
             return false;
         }
+
         $scope.pstationid = stationInfo.currentSTID;
         $scope.currentStationName = stationInfo.currentDataName;
         getAerographDetail();
