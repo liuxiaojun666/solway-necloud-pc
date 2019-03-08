@@ -26,10 +26,16 @@ ajaxData(
 
     // 运维效率响应处理
     $scope.analysis_company_operation_station_accum_list.promise.then(res => {
-        $scope.analysis_company_operation_station_accum_list.res.body.data.maxNum = res.body.data.reduce((a, b) => {
-            const newNum = b.res_hours_avg + b.repair_hours_avg;
-            return a > newNum ? a : newNum;
-        }, 0);
+        $scope.analysis_company_operation_station_accum_list.res.body.data = res.body.data.sort((a, b) => (b.res_hours_avg + b.repair_hours_avg) - (a.res_hours_avg + a.repair_hours_avg))
+        $scope.analysis_company_operation_station_accum_list.res.body.data.maxNum = $scope.analysis_company_operation_station_accum_list.res.body.data[0].res_hours_avg + $scope.analysis_company_operation_station_accum_list.res.body.data[0].repair_hours_avg;
+        // res.body.data.reduce((a, b) => {
+        //     const newNum = b.res_hours_avg + b.repair_hours_avg;
+        //     return a > newNum ? a : newNum;
+        // }, 0);
+    });
+
+    $scope.completerate.subscribe(res => {
+        $scope.completerate.res.body.CompleteRateDetail = res.body.CompleteRateDetail.sort((a, b) => b.okPctChk - a.okPctChk);
     });
 
 });

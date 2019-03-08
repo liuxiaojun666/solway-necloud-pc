@@ -1,5 +1,9 @@
 ajaxData(
     {
+        stClassLIst: {
+            name: 'GETstClassLIst',
+            data: {}
+        },
         runTimeMonitor: {
             name: 'GETrunTimeMonitor',
             data: {},
@@ -8,13 +12,15 @@ ajaxData(
         },
         companyDayTodayTime2: {
             name: 'GETPowerCompanyDayTodayTime2',
-            data: {
-                queryType: 1,
-                dateType: 3,
-                date: new Date().Format('yyyy-MM-dd'),
-                dataType: 2,
-                stime: 0
-            },
+            data: { },
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+        companyDayTodayTimeWp: {
+            name: 'GETrunAcpTimeList',
+            data: {},
+            later: true,
             onlyLatest: true,
             sameTimeOnce: true,
         },
@@ -23,17 +29,51 @@ ajaxData(
             data: {},
             onlyLatest: true,
             sameTimeOnce: true,
-        }
+        },
+        pvwpStationOverview: {
+            name: 'GETpvwpStationOverview',
+            data: {},
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
     }, {
         __serviceName__: 'mainMonitoringService',
-        companyDayTodayTimeLineData: { xdata: [], line1: [], line2: [], line3: [] }
+        companyDayTodayTimeLineData: { xdata: [], line1: [], line2: [], line3: [] },
+        companyDayTodayTimeLineDataWp: { xdata: [], line1: [], line2: [], line3: [] },
     }
 )('mainMonitoringCtrl', ['$scope', 'mainMonitoringService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
     myAjaxData.config.companyDayTodayTimeLineData = { xdata: [], line1: [], line2: [], line3: [] };
     $('.themeMonitoring.ng-clock').removeClass('ng-clock');
     // 滚动数字
     const od = new Odometer({ el: document.getElementById('odometer'), value: 100000000 });
-    $scope.runTimeMonitor.subscribe(res => od.update(100000000 + res.dayGeneratingPowerKWh + ''));
+
+    $scope.pvwpStationOverview.subscribe(res => od.update(100000000 + ( +res.body.ov.real_kwh_chk.toFixed()) + ''));
+
+
+    // 电站类型列表
+    $scope.stClassLIst.subscribe(res => {
+        $scope.stClassLIst.res.stClass01 = res.data.some(v => v.id === '01');
+        $scope.stClassLIst.res.stClass02 = res.data.some(v => v.id === '02');
+        if ($scope.stClassLIst.res.stClass01) {
+            $scope.companyDayTodayTime2.getData({
+                queryType: 1,
+                dateType: 3,
+                date: new Date().Format('yyyy-MM-dd'),
+                dataType: 2,
+                stime: 0
+            });
+        }
+        if ($scope.stClassLIst.res.stClass02) {
+            $scope.companyDayTodayTimeWp.getData({
+                queryType: 1,
+                dateType: 3,
+                date: new Date().Format('yyyy-MM-dd'),
+                dataType: 2,
+                stime: 0
+            });
+        }
+    });
+
 
     // 基本信息 装机容量
     const myPieChart = echarts.init(document.getElementById('pieChart'));
@@ -113,15 +153,27 @@ ajaxData(
 
     // 功率曲线
     $scope.companyDayTodayTime2.subscribe(res => {
-        const { companyDayTodayTimeLineData } = myAjaxData.config;
-        const { xdata, line1, line2, line3 } = companyDayTodayTimeLineData;
-        const length = xdata.length;
-        $scope.xdata = companyDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaTime);
-        $scope.ydatas = [[
-            companyDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_p),
-            companyDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_shd_p)
-        ]];
-        myAjaxData.config.companyDayTodayTimeLineData = companyDayTodayTimeLineData;
+        // const { companyDayTodayTimeLineData } = myAjaxData.config;
+        // const { xdata, line1, line2, line3 } = companyDayTodayTimeLineData;
+        // const length = xdata.length;
+        // $scope.xdata = companyDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaTime);
+        // $scope.ydatas = [[
+        //     companyDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_p),
+        //     companyDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_shd_p)
+        // ]];
+        // myAjaxData.config.companyDayTodayTimeLineData = companyDayTodayTimeLineData;
+    });
+
+    $scope.companyDayTodayTimeWp.subscribe(res => {
+        // const { companyDayTodayTimeLineDataWp } = myAjaxData.config;
+        // const { xdata, line1, line2, line3 } = companyDayTodayTimeLineDataWp;
+        // const length = xdata.length;
+        // $scope.xdata = companyDayTodayTimeLineDataWp.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaxisTime);
+        // $scope.ydatas = [[
+        //     companyDayTodayTimeLineDataWp.line1 = line1.slice(0, length - 1).concat(res.body.echarts_power),
+        //     companyDayTodayTimeLineDataWp.line2 = line2.slice(0, length - 1).concat(res.body.echarts_predictPower)
+        // ]];
+        // myAjaxData.config.companyDayTodayTimeLineDataWp = companyDayTodayTimeLineDataWp;
     });
 
     // 设备运行情况 台数
@@ -193,10 +245,18 @@ ajaxData(
 
     // 定时刷新数据
     const timer = $interval(() => {
-        $scope.runTimeMonitor.getData();
+        $scope.pvwpStationOverview.getData();
         $scope.deviceStatusFromRedis.getData();
-        const variable = $scope.companyDayTodayTime2.res.body.echarts_xaTime;
-        $scope.companyDayTodayTime2.getData({ stime: variable[variable.length - 1].split(':').join('') });
+
+        if ($scope.companyDayTodayTime2.res) {
+            const variable = $scope.companyDayTodayTime2.res.body.echarts_xaTime;
+            $scope.companyDayTodayTime2.getData({ stime: variable[variable.length - 1].split(':').join('') });
+        }
+        if ($scope.companyDayTodayTimeWp.res) {
+            const variable2 = $scope.companyDayTodayTimeWp.res.body.echarts_xaxisTime;
+            $scope.companyDayTodayTimeWp.getData({ stime: variable2[variable2.length - 1].split(':').join('') });
+        }
+
     }, 5000);
 
     // 实例销毁 清除定时器 清除事件绑定
