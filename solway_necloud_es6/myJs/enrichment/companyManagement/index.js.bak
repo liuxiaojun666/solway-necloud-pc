@@ -1,6 +1,6 @@
 ajaxData({
-    companyList:{
-        name: 'GETcompanyList',
+    companyListNew:{
+        name: 'GETcompanyListNew',
         data: {},
         later: true
     }
@@ -9,46 +9,48 @@ ajaxData({
 
     //列表
     $scope.getCompanyList = () =>{
-        $scope.companyList.getData({
+        $scope.loading = true;
+        $scope.companyListNew.getData({
             pageIndex: 0,
             pageSize: 10,
-            keyWords:$scope.keyWords,
-            // stClass:$scope.stClass
-        }).then(res=>{
-            console.log(res);
-        });
+            comName:$scope.keyWords,
+        })
     }
+
+    $scope.companyListNew.subscribe(res=>{
+        $scope.loading = false;
+    })
 
     $scope.getCompanyList();
 
     $scope.column = [
         {
             title: '集团名称',
-            dataIndex: 'comName',
+            dataIndex: 'COM_NAME',
             align: 'center',
         },{
             title: '最早接入时间',
-            dataIndex: 'comUpdateTime',
+            dataIndex: 'expiryDate',
             align: 'center',
             render(text, record) {
-                return text && new Date(text).Format('yyyy-MM-dd hh:mm:ss')
+                return text?new Date(text).Format('yyyy-MM-dd'):'-'
             }
         }, {
             title: '装机容量',
-            dataIndex: 'comName',
+            dataIndex: 'BuildCapacity',
             align: 'center',
         }, {
             title: '电站数量',
-            dataIndex: 'comName',
+            dataIndex: 'count00',
             align: 'center',
         }, {
             title: '联系人',
-            dataIndex: 'comCont',
+            dataIndex: 'COM_CONT',
             align: 'center',
             
         }, {
             title: '联系电话',
-            dataIndex: 'comTel',
+            dataIndex: 'COM_TEL',
             align: 'center',
         }
     ]
