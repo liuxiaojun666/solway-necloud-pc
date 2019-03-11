@@ -10,17 +10,15 @@ ajaxData(
             onlyLatest: true,
             sameTimeOnce: true
         },
-        companyDayTodayTime2: {
-            name: 'GETPowerCompanyDayTodayTime2',
-            data: { },
-            later: true,
-            onlyLatest: true,
-            sameTimeOnce: true,
-        },
-        companyDayTodayTimeWp: {
-            name: 'GETrunAcpTimeList',
-            data: {},
-            later: true,
+        companyDayTodayTime: {
+            name: 'GETrunAcpTimeListPvwp',
+            data: {
+                queryType: 1,
+                dateType: 3,
+                date: new Date().Format('yyyy-MM-dd'),
+                dataType: 2,
+                stime: 0
+            },
             onlyLatest: true,
             sameTimeOnce: true,
         },
@@ -38,40 +36,22 @@ ajaxData(
         },
     }, {
         __serviceName__: 'mainMonitoringService',
-        companyDayTodayTimeLineData: { xdata: [], line1: [], line2: [], line3: [] },
-        companyDayTodayTimeLineDataWp: { xdata: [], line1: [], line2: [], line3: [] },
+        companyDayTodayTimeLineData: { xdata: [], line1: [], line2: [] },
+        companyDayTodayTimeLineDataWp: { xdata: [], line1: [], line2: [] },
     }
 )('mainMonitoringCtrl', ['$scope', 'mainMonitoringService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
-    myAjaxData.config.companyDayTodayTimeLineData = { xdata: [], line1: [], line2: [], line3: [] };
+    myAjaxData.config.companyDayTodayTimeLineData = { xdata: [], line1: [], line2: [] };
     $('.themeMonitoring.ng-clock').removeClass('ng-clock');
     // 滚动数字
     const od = new Odometer({ el: document.getElementById('odometer'), value: 100000000 });
 
-    $scope.pvwpStationOverview.subscribe(res => od.update(100000000 + ( +res.body.ov.real_kwh_chk.toFixed()) + ''));
+    $scope.pvwpStationOverview.subscribe(res => od.update(100000000 + (+res.body.ov.real_kwh_chk.toFixed()) + ''));
 
 
     // 电站类型列表
     $scope.stClassLIst.subscribe(res => {
         $scope.stClassLIst.res.stClass01 = res.data.some(v => v.id === '01');
         $scope.stClassLIst.res.stClass02 = res.data.some(v => v.id === '02');
-        if ($scope.stClassLIst.res.stClass01) {
-            $scope.companyDayTodayTime2.getData({
-                queryType: 1,
-                dateType: 3,
-                date: new Date().Format('yyyy-MM-dd'),
-                dataType: 2,
-                stime: 0
-            });
-        }
-        if ($scope.stClassLIst.res.stClass02) {
-            $scope.companyDayTodayTimeWp.getData({
-                queryType: 1,
-                dateType: 3,
-                date: new Date().Format('yyyy-MM-dd'),
-                dataType: 2,
-                stime: 0
-            });
-        }
     });
 
 
@@ -152,29 +132,49 @@ ajaxData(
     });
 
     // 功率曲线
-    $scope.companyDayTodayTime2.subscribe(res => {
-        // const { companyDayTodayTimeLineData } = myAjaxData.config;
-        // const { xdata, line1, line2, line3 } = companyDayTodayTimeLineData;
-        // const length = xdata.length;
-        // $scope.xdata = companyDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaTime);
-        // $scope.ydatas = [[
-        //     companyDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_p),
-        //     companyDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_shd_p)
-        // ]];
-        // myAjaxData.config.companyDayTodayTimeLineData = companyDayTodayTimeLineData;
+    $scope.companyDayTodayTime.subscribe(res => {
+        if (!($scope.stClassLIst.res.stClass01 && !$scope.stClassLIst.res.stClass02)) return;
+        const { companyDayTodayTimeLineData } = myAjaxData.config;
+        const { xdata, line1, line2 } = companyDayTodayTimeLineData;
+        const length = xdata.length;
+        $scope.xdata = companyDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.chart_pv.echarts_xaTime);
+        $scope.ydatas = [[
+            companyDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.chart_pv.echarts_p),
+            companyDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.chart_pv.echarts_shd_p)
+        ]];
+        myAjaxData.config.companyDayTodayTimeLineData = companyDayTodayTimeLineData;
+    });
+    $scope.companyDayTodayTime.subscribe(res => {
+        if (!(!$scope.stClassLIst.res.stClass01 && $scope.stClassLIst.res.stClass02)) return;
+        const { companyDayTodayTimeLineDataWp } = myAjaxData.config;
+        const { xdata, line1, line2 } = companyDayTodayTimeLineDataWp;
+        const length = xdata.length;
+        $scope.xdata = companyDayTodayTimeLineDataWp.xdata = xdata.slice(0, length - 1).concat(res.body.chart_wp.echarts_xaxisTime);
+        $scope.ydatas = [[
+            companyDayTodayTimeLineDataWp.line1 = line1.slice(0, length - 1).concat(res.body.chart_wp.echarts_power),
+            companyDayTodayTimeLineDataWp.line2 = line2.slice(0, length - 1).concat(res.body.chart_wp.echarts_predictPower)
+        ]];
+        myAjaxData.config.companyDayTodayTimeLineDataWp = companyDayTodayTimeLineDataWp;
+    });
+    $scope.companyDayTodayTime.subscribe(res => {
+        if (!($scope.stClassLIst.res.stClass01 && $scope.stClassLIst.res.stClass02)) return;
+        const { companyDayTodayTimeLineData } = myAjaxData.config;
+        const { companyDayTodayTimeLineDataWp } = myAjaxData.config;
+        const { line1: pline1, line2: pline2 } = companyDayTodayTimeLineData;
+        const { xdata, line1: wline1, line2: wline2 } = companyDayTodayTimeLineDataWp;
+        const length = xdata.length;
+        $scope.xdata = companyDayTodayTimeLineDataWp.xdata = xdata.slice(0, length - 1).concat(res.body.chart_wp.echarts_xaxisTime);
+        const arrLength = res.body.chart_wp.echarts_power.length - res.body.chart_pv.echarts_p.length;
+        $scope.ydatas = [[
+            new Array(arrLength).fill('').concat(companyDayTodayTimeLineData.line1 = pline1.slice(0, length - 1).concat(res.body.chart_pv.echarts_p)),
+            new Array(arrLength).fill('').concat(companyDayTodayTimeLineData.line2 = pline2.slice(0, length - 1).concat(res.body.chart_pv.echarts_shd_p))
+        ],[
+            companyDayTodayTimeLineDataWp.line1 = wline1.slice(0, length - 1).concat(res.body.chart_wp.echarts_power),
+            companyDayTodayTimeLineDataWp.line2 = wline2.slice(0, length - 1).concat(res.body.chart_wp.echarts_predictPower)
+        ]];
+        myAjaxData.config.companyDayTodayTimeLineDataWp = companyDayTodayTimeLineDataWp;
     });
 
-    $scope.companyDayTodayTimeWp.subscribe(res => {
-        // const { companyDayTodayTimeLineDataWp } = myAjaxData.config;
-        // const { xdata, line1, line2, line3 } = companyDayTodayTimeLineDataWp;
-        // const length = xdata.length;
-        // $scope.xdata = companyDayTodayTimeLineDataWp.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaxisTime);
-        // $scope.ydatas = [[
-        //     companyDayTodayTimeLineDataWp.line1 = line1.slice(0, length - 1).concat(res.body.echarts_power),
-        //     companyDayTodayTimeLineDataWp.line2 = line2.slice(0, length - 1).concat(res.body.echarts_predictPower)
-        // ]];
-        // myAjaxData.config.companyDayTodayTimeLineDataWp = companyDayTodayTimeLineDataWp;
-    });
 
     // 设备运行情况 台数
     const myPieChart1 = echarts.init(document.getElementById('pieChart1'));
@@ -248,13 +248,9 @@ ajaxData(
         $scope.pvwpStationOverview.getData();
         $scope.deviceStatusFromRedis.getData();
 
-        if ($scope.companyDayTodayTime2.res) {
-            const variable = $scope.companyDayTodayTime2.res.body.echarts_xaTime;
-            $scope.companyDayTodayTime2.getData({ stime: variable[variable.length - 1].split(':').join('') });
-        }
-        if ($scope.companyDayTodayTimeWp.res) {
-            const variable2 = $scope.companyDayTodayTimeWp.res.body.echarts_xaxisTime;
-            $scope.companyDayTodayTimeWp.getData({ stime: variable2[variable2.length - 1].split(':').join('') });
+        if ($scope.companyDayTodayTime.res) {
+            const variable = $scope.companyDayTodayTime.res.body.echarts_xaTime;
+            // $scope.companyDayTodayTime.getData({ stime: variable[variable.length - 1].split(':').join('') });
         }
 
     }, 5000);
