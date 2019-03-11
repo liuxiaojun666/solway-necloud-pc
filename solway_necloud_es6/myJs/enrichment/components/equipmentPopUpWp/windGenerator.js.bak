@@ -71,6 +71,32 @@ ajaxData(
         level: 2
     });
 
+    ;(() => {
+        const { pstationid, deviceSerialNnumber, deviceId } = eqService.config.eqObj;
+        const dateStr = (new Date).Format('yyyy-MM-dd hh:mm');
+        $scope.newHistoryData.getData({
+            pageIndex: 1,
+            pageSize: 500,
+            devicetype: 18,
+            begindate: dateStr.split(' ')[0] + ' 00:00',
+            enddate: dateStr,
+            stationid: pstationid,
+            serialnumber: deviceSerialNnumber,
+            id: deviceId
+        });
+    })();
+
+    $scope.newHistoryData.subscribe(res => {
+        if ($scope.tabIndex !== 0) return;
+        const line1 = [], line2 = [];
+        $scope.xdata = res[0].data.reverse().map(v => {
+            line1.push(v.wdspd);
+            line2.push(v.w);
+            return new Date(v.dtime * 1000).Format('yyyy-MM-dd hh:mm:ss').substr(-8);
+        });
+        $scope.ydatas = [[line1], [line2]];
+    });
+
     // 获取子系统
     $scope.windTurbineSubSystem.getData({level: 2}).then(res => {
         $scope.windTurbineSubSystem.res.body.reverse();
@@ -89,7 +115,7 @@ ajaxData(
             {
                 dataIndex: 'sStartTime',
                 title: '发生时间',
-                width: '180px',
+                width: '120px',
                 align: 'center',
                 sort: true,
                 render(text) {
@@ -106,7 +132,7 @@ ajaxData(
             {
                 dataIndex: 'eventDesc',
                 title: '故障描述',
-                width: '200px',
+                // width: '200px',
                 align: 'left',
                 sort: true,
             }
@@ -146,6 +172,7 @@ ajaxData(
 
     // 历史数据 列表 接口 返回 处理
     $scope.newHistoryData.subscribe(async res => {
+        if ($scope.tabIndex !== 1) return;
         $scope.column = [
             {
                 dataIndex: 'dtime',
