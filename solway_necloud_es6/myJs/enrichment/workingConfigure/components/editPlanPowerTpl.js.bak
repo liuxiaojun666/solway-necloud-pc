@@ -19,6 +19,10 @@ ajaxData({
     $scope.planYear = new Date();
     $scope.endDate = new Date('2099');
 
+    function sortNumber(a,b){
+        return Number(a.month) - Number(b.month);
+    }
+
      //初始
     $scope.$on('addPlanPowerBroad',function(e,data){
         $scope.year = data.year;
@@ -39,7 +43,7 @@ ajaxData({
             stid:$scope.pstationid
         }).then(res=>{
             if(res.code == 0){
-                $scope.planPowerListData = res.body;
+                $scope.planPowerListData = res.body.sort(sortNumber);
             }
         });
     }
