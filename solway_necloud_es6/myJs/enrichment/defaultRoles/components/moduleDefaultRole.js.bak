@@ -156,7 +156,7 @@ ajaxData({
                     // sort: true,
                     render(text, item) {
                         return text.map(v => `<label class="configBtn" style="margin-right: 2em;position:relative;line-height:2;">
-                                <input name="btnIds" ${item.btnIds.split(',').includes(v.id + '') && 'checked'} value="${v.id}" class="configBtn" type="checkbox" style="vertical-align:text-bottom;pointer-events:none;"/>
+                                <input name="btnIds" ${(item.btnIds || '').split(',').includes(v.id + '') && 'checked'} value="${v.id}" class="configBtn" type="checkbox" style="vertical-align:text-bottom;pointer-events:none;"/>
                                 <span class="configBtn" style="pointer-events: none;">${v.name}</span>
                             </label>`).join('');
                     }
@@ -217,6 +217,16 @@ ajaxData({
                 });
             }
         };
+
+        // 按钮配置回调
+        $scope.updateConfigDefaultRoleModule.subscribe(res => {
+            if (res.code === 0) {
+                toaster.pop('success', '', res.msg);
+                $scope.getRoleList.getData();
+            } else {
+                toaster.pop('error', '', res.msg);
+            }
+        });
 
         //新增
         $scope.addModule = () => {

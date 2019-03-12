@@ -31,6 +31,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
         updated: '=',
         beforeDestroy: '=',
         destroyed: '=',
+        clearable: '=',
     },
     template: `
     <div class="calendar" style="position:relative;">
@@ -53,7 +54,24 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
             font-size: 30px;
             color: #fff;
         }
+        .calendar span.clearable {
+            position:absolute;
+            font-size:20px;
+            right:0;
+            top:0;
+            width:30px;
+            height:100%;
+            line-height:1;
+            opacity:0;
+            color:red;
+            background:rgba(255,255,255,.5);
+            border-radius: 0px;
+        }
+        .calendar:hover span.clearable{
+            opacity: 1;
+        }
     </style>
+        <span title="清空" ng-if="clearable" ng-click="clearUp();" class="clearable">x</span>
         <span ng-show="showArrow" ng-click="changeDateTime(-1)"><i class="fa fa-angle-left"></i></span>
         <input type="text" style="min-width: {{week ? '155' : '100'}}px;">
         <span ng-show="showArrow" ng-click="changeDateTime(1)"><i class="fa fa-angle-right"></i></span>
@@ -142,6 +160,10 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
                 else $element.find('.fa-angle-right').parent().addClass('disabled')
             } else if (!noChange) $element.find('.fa-angle-right').parent().removeClass('disabled')
             return num
+        }
+        $scope.clearUp = () => {
+            $('#' + $scope.randomId).val('')
+            $scope.dateTime.showDate = ''
         }
         let changeCount = 0
         $scope.$watch('dateTime', (newValue, oldValue) => {

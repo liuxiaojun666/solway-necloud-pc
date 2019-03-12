@@ -17,6 +17,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         barWidth: '=',
         splitLine: '=',
         datazoom: '=',
+        linezoom: '=',
         symbolSize: '=',
         splitNumber: '=',
         imagesymboloptions: '=',
@@ -79,6 +80,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 types = [], 
                 colors = [], 
                 datazoom,
+                linezoom,
                 areaFill, 
                 markLine,
                 legend = {},
@@ -169,7 +171,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         }
                     }
                 })),
-                dataZoom: datazoom && (((width - 100) / ydatas[0][0].length / (types[0].concat(types[1]).filter(v => v === 'bar').length)) < (barWidth + 10)) && [{
+                dataZoom: datazoom && (((width - 100) / ydatas[0][0].length / (types[0].concat(types[1]).filter(v => (v === 'bar' || linezoom)).length)) < (barWidth + 10)) && [{
                     type: 'slider',
                     xAxisIndex: 0,
                     filterMode: 'empty',

@@ -43,19 +43,25 @@ ajaxData({
         getCustomModules();
     });
 
+    $scope.includes = (str, i) => str.includes(i);
+
     //保存
     $scope.save = () =>{
-        let appIdArr = [];
-        
+        const appIdArr = [];
+        const btnIds = [];
         $("input[name='roleModuleIds']:checked").map((index,v)=>{
             appIdArr.push(v.value)
             const curPid = v.dataset.pid;
             if(curPid != '0' && !appIdArr.includes(curPid)){
                 appIdArr.push(curPid);
             }
+            const btns = $(v).parents('tr').find('input[name="btnNames"]').map((i, v) => {
+                if (v.checked) return v.value;
+            })::[].join();
+            btnIds.push(btns);
         })
 
-        const parentAndChildArr = appIdArr.map((index,v)=>({'appId':index}))
+        const parentAndChildArr = appIdArr.map((index, v) => ({ 'appId': index, btnIds: btnIds[v]}))
 
         let formData = {
             'roleId':$scope.roleId,
