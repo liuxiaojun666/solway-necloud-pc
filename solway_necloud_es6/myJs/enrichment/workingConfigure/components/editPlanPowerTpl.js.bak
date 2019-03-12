@@ -19,6 +19,10 @@ ajaxData({
     $scope.planYear = new Date();
     $scope.endDate = new Date('2099');
 
+    function sortNumber(a,b){
+        return Number(a.month) - Number(b.month);
+    }
+
      //初始
     $scope.$on('addPlanPowerBroad',function(e,data){
         $scope.year = data.year;
@@ -39,7 +43,7 @@ ajaxData({
             stid:$scope.pstationid
         }).then(res=>{
             if(res.code == 0){
-                $scope.planPowerListData = res.body;
+                $scope.planPowerListData = res.body.sort(sortNumber);
             }
         });
     }
@@ -52,12 +56,12 @@ ajaxData({
 
     //保存
     $scope.savePlanPower = () =>{
-        for(let i=0;i<$scope.planPowerListData.length;i++){
-            if(!$scope.planPowerListData[i].plannedValue){
-                toaster.pop('error','','每个月的计划发电量不能为空');
-                return;
-            }
-        }
+        // for(let i=0;i<$scope.planPowerListData.length;i++){
+        //     if(!$scope.planPowerListData[i].plannedValue){
+        //         toaster.pop('error','','每个月的计划发电量不能为空');
+        //         return;
+        //     }
+        // }
         $scope.planPowerSave.getData($scope.planPowerListData).then(res=>{
             if(res.code == 0){
                 toaster.pop('success','','保存成功');

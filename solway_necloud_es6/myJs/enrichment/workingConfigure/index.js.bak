@@ -445,6 +445,7 @@ ajaxData({
         if (!$solway.formValidation($scope.initialPowerData, '.initial-power', toaster)) return;//校验非空
 
         $scope.initialPowerData['expirydate'] = new Date($scope.expiryDate).Format("yyyy-MM-dd");
+        $scope.initialPowerData['flag'] = $("input[name='ifFlag']:checked").val();
         $scope.initialPowerSave.getData($scope.initialPowerData).then(res=>{
             if(res.type == 'success'){
                 toaster.pop('success','','保存成功');
@@ -592,18 +593,22 @@ ajaxData({
     /****************************************  限电配置   *********************************************** */
 
     $scope.getDeviceTypeName = {2:'逆变器'};
+    $scope.deviceTypeList = [{name:'',deviceType:'',id:1},{name:'逆变器',deviceType:'2',id:2}]
 
     $scope.changeDeviceType = deviceType =>{
         $scope.selectDevicesByStation.getData({
             stid: $scope.pstationid,
             deviceType: deviceType,
         }).then(res=>{
-            $scope.currentDeviceList = res;
+            const selectAllArr = [{deviceType:"",id: '0',name: "",serialNumber: ''}]
+            $scope.currentDeviceList = selectAllArr.concat(res);
         });
     }
 
-    $scope.restrictEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
+    // $scope.restrictEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
     $scope.restrictStartDate = new Date();
+    $scope.restrictEndDate = new Date();
+    $scope.restrictEndDate.showDate = ''
     $scope.getRestrictPowerData = () =>{
         $scope.restrictPowerList.getData({
             pageIndex:0,
@@ -615,7 +620,13 @@ ajaxData({
             for(let i=0;i<$scope.restrictPowerListData.length;i++){
                 $scope.restrictPowerListData[i]['disabled'] = true;
                 $scope.restrictPowerListData[i]['startDate'] = new Date($scope.restrictPowerListData[i]['startDate']);
-                $scope.restrictPowerListData[i]['endDate'] = new Date($scope.restrictPowerListData[i]['endDate']);
+                if($scope.restrictPowerListData[i]['endDate']){
+                    $scope.restrictPowerListData[i]['endDate'] = new Date($scope.restrictPowerListData[i]['endDate']);
+                }else{
+                    $scope.restrictPowerListData[i]['endDate'] = '';
+                    $scope.restrictPowerListData[i]['noEndDate'] = new Date();
+                    $scope.restrictPowerListData[i]['noEndDate'].showDate = '';
+                }
             }
         });
     }
@@ -647,11 +658,12 @@ ajaxData({
             formData['eqid'] = $scope.restrictDeviceId;
             formData['dtype'] = $scope.restrictDeviceType;
             formData['startDate'] = new Date($scope.restrictStartDate).Format("yyyy-MM-dd");
-            formData['endDate'] = new Date($scope.restrictEndDate).Format("yyyy-MM-dd");
+            formData['endDate'] = $scope.restrictEndDate.showDate;
         }else{
             delete item.createUser;
             delete item.createTime;
             delete item.disabled;
+            delete item.modifyTime;
             item.startDate = item.startDate.showDate;
             item.endDate = item.endDate.showDate;
             formData = item;
@@ -688,7 +700,8 @@ ajaxData({
     /****************************************  检修配置   *********************************************** */
 
     $scope.overhaulStartDate =  new Date();
-    $scope.overhaulEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
+    $scope.overhaulEndDate = new Date();
+    $scope.overhaulEndDate.showDate = '';
     const getOverhaulList = () =>{
         $scope.overhaulList.getData({
             pageIndex:0,
@@ -700,7 +713,13 @@ ajaxData({
             for(let i=0;i<$scope.overhaulListData.length;i++){
                 $scope.overhaulListData[i]['disabled'] = true;
                 $scope.overhaulListData[i]['startDate'] = new Date($scope.overhaulListData[i]['startDate']);
-                $scope.overhaulListData[i]['endDate'] = new Date($scope.overhaulListData[i]['endDate']);
+                if($scope.overhaulListData[i]['endDate']){
+                    $scope.overhaulListData[i]['endDate'] = new Date($scope.overhaulListData[i]['endDate']);
+                }else{
+                    $scope.overhaulListData[i]['endDate'] = '';
+                    $scope.overhaulListData[i]['noEndDate'] = new Date();
+                    $scope.overhaulListData[i]['noEndDate'].showDate = '';
+                }
             }
         });
     }
@@ -732,11 +751,12 @@ ajaxData({
             formData['eqid'] = $scope.overhaulDeviceId;
             formData['dtype'] = $scope.overhaulDeviceType;
             formData['startDate'] = new Date($scope.overhaulStartDate).Format("yyyy-MM-dd");
-            formData['endDate'] = new Date($scope.overhaulEndDate).Format("yyyy-MM-dd");
+            formData['endDate'] = $scope.overhaulEndDate.showDate
         }else{
             delete item.createUser;
             delete item.createTime;
             delete item.disabled;
+            delete item.modifyTime;
             item.startDate = item.startDate.showDate;
             item.endDate = item.endDate.showDate;
             formData = item;
@@ -788,7 +808,13 @@ ajaxData({
             for(let i=0;i<$scope.cleanListData.length;i++){
                 $scope.cleanListData[i]['disabled'] = true;
                 $scope.cleanListData[i]['startDate'] = new Date($scope.cleanListData[i]['startDate']);
-                $scope.cleanListData[i]['endDate'] = $scope.cleanListData[i]['endDate'] ? new Date($scope.cleanListData[i]['endDate']):'';
+                if($scope.cleanListData[i]['endDate']){
+                    $scope.cleanListData[i]['endDate'] = new Date($scope.cleanListData[i]['endDate']);
+                }else{
+                    $scope.cleanListData[i]['endDate'] = '';
+                    $scope.cleanListData[i]['noEndDate'] = new Date();
+                    $scope.cleanListData[i]['noEndDate'].showDate = '';
+                }
             }
         });
     }
@@ -825,10 +851,11 @@ ajaxData({
             delete item.disabled;
             delete item.reportSite;
             item.startDate = item.startDate.showDate;
-            item.endDate = item.endDate.showDate;
+            item.endDate = item.endDate?item.endDate.showDate:(item.noEndDate.showDate);
+            delete item.modifyTime;
             formData = item;
         }
-        
+       
         if(!formData.startDate){
             toaster.pop('error','','清洗开始时间必填！');
         }
