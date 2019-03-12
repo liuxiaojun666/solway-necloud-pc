@@ -11,6 +11,18 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    moduleBtnUpdate: {
+        name: 'moduleBtnUpdate',
+        data: {},
+        later: true,
+        sameTimeOnce: true
+    },
+    moduleBtnDelete: {
+        name: 'moduleBtnDelete',
+        data: {},
+        later: true,
+        sameTimeOnce: true
+    },
 }, {
         __serviceName__: 'systemModuleService',
     })('moduleSystemCtrl', ['$scope', 'systemModuleService', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
@@ -23,6 +35,7 @@ ajaxData({
         // 主页面初始化完成 回调
         $scope.mainPageInitComplete = async () => {
             $('.ng-clock').removeClass('ng-clock');
+            $scope.serviceType = '1';
             $scope.initComplete = true;
             await myAjaxData.timeout(0);
 
@@ -35,7 +48,7 @@ ajaxData({
             await myAjaxData.timeout(0);
 
             $scope.systemModulelist.getData({
-                category: $scope.serviceType,
+                category: $scope.serviceType || '1',
                 keywords: $scope.keywords,
             });
         }
@@ -61,7 +74,7 @@ ajaxData({
                     dataIndex: 'name',
                     width: '18%',
                     align: 'left',
-                    sort: true,
+                    // sort: true,
                     render(text, record) {
                         if (record.pid != 0) {
                             return '<span style="padding-left:4em">' + text + '</span>';
@@ -72,23 +85,39 @@ ajaxData({
                 }, {
                     title: '唯一编码',
                     dataIndex: 'code',
-                    width: '26%',
+                    width: '10%',
                     align: 'center',
-                    sort: true,
+                    // sort: true,
                 }, {
                     title: '分类',
                     dataIndex: 'category',
-                    width:'22%',
+                    width: '10%',
                     align: 'center',
-                    sort: true,
+                    // sort: true,
                     render(text) {
                         return categoryMap[text]
+                    }
+                }, {
+                    title: '按钮配置',
+                    dataIndex: 'btns',
+                    width: '22%',
+                    align: 'left',
+                    style: 'position:relative;',
+                    // sort: true,
+                    render(text) {
+                        return '<ul style="padding:0;list-style:none;">' 
+                            + text.map(v => `<li style="margin-right: 2em;position:relative;border-bottom:1px solid #092139;line-height:2;">
+                                        <span>${v.name}</span>
+                                        <span class="deleteBtn" data-id="${v.id}" style="position:absolute;right:2em;color:#ff8080;padding:0 15px;">x</span>
+                                    </li>`).join('') 
+                                + '</ul>'
+                                + `<span title="添加按钮" class="addBtn" style="position:absolute;right:0;padding: 0 0.5em;font-size:30px;top:5px;color:#1ddabe;">+</span>`;
                     }
                 }, {
                     title: '服务模式',
                     dataIndex: 'serviceMode',
                     align: 'center',
-                    sort: true,
+                    // sort: true,
                     render(text) {
                         return serviceModeMap[text]
                     }
@@ -96,11 +125,11 @@ ajaxData({
                     title: '顺序号',
                     dataIndex: 'weight',
                     align: 'center',
-                    sort: true,
+                    // sort: true,
                 }, {
                     title: '操作',
                     align: 'center',
-                    sort: true,
+                    // sort: true,
                     render(text, item, index) {
                         return `
                         <div class="clearfix">
@@ -137,9 +166,54 @@ ajaxData({
                 $solway.confirm({ message: '确定删除此模块？' }, () => {
                     deleteModule(moduleId)
                 });
-            };
+            } else if (event.target.className.includes('addBtn')) {
+                $scope.showAddBtnModal = true;
+                $scope.addBtnObj = {
+                    modelName: item.name,
+                    name: '',
+                    appId: item.id,
+                    weight: 10,
+                    code: ''
+                };
+            } else if (event.target.className.includes('deleteBtn')) {
+                $solway.confirm({ message: '确定删除此按钮权限配置？' }, () => {
+                    $scope.moduleBtnDelete.getData({
+                        id: event.target.dataset.id
+                    });
+                });
+            }
 
         };
+
+        $scope.moduleBtnDelete.subscribe(res => {
+            if (res.code === 0) {
+                toaster.pop('success', '', res.msg);
+                $scope.systemModulelist.getData();
+            } else {
+                toaster.pop('error', '', res.msg);
+            }
+        });
+
+        // 按钮添加
+        $scope.addBtnSubmit = () => {
+            if (!$scope.addBtnObj.code || !$scope.addBtnObj.name) return toaster.pop('error', '', '请填写完整');
+
+            $scope.moduleBtnUpdate.getData({
+                ...$scope.addBtnObj,
+                modelName: null
+            });
+        };
+
+        // 添加按钮监听
+        $scope.moduleBtnUpdate.subscribe(res => {
+            if (res.code === 0) {
+                toaster.pop('success', '', res.msg);
+                $scope.showAddBtnModal = false;
+                $scope.systemModulelist.getData();
+            } else {
+                toaster.pop('error', '', res.msg);
+            }
+        });
 
         //新增
         $scope.addModule = () => {

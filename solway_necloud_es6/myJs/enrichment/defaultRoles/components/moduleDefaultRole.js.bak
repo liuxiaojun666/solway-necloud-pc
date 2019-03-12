@@ -29,6 +29,11 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
+    },
+    updateConfigDefaultRoleModule:{
+        name: 'updateConfigDefaultRoleModule',
+        data: {},
+        later: true,
     }
 }, {
         __serviceName__: 'moduleDefaultRoleService',
@@ -120,7 +125,7 @@ ajaxData({
                     dataIndex: 'originalName',
                     width: '20%',
                     align: 'left',
-                    sort: true,
+                    // sort: true,
                     render(text, record) {
                         if (record.appPid != 0) {
                             return '<span style="padding-left:4em">' + text + '</span>';
@@ -133,14 +138,27 @@ ajaxData({
                     dataIndex: 'code',
                     width: '26%',
                     align: 'center',
-                    sort: true,
+                    // sort: true,
                 }, {
                     title: '服务模式',
                     dataIndex: 'serviceMode',
                     align: 'center',
-                    sort: true,
+                    // sort: true,
                     render(text) {
                         return serviceModeMap[text]
+                    }
+                }, {
+                    title: '按钮配置',
+                    dataIndex: 'btns',
+                    width: '22%',
+                    align: 'left',
+                    style: 'position:relative;',
+                    // sort: true,
+                    render(text, item) {
+                        return text.map(v => `<label class="configBtn" style="margin-right: 2em;position:relative;line-height:2;">
+                                <input name="btnIds" ${item.btnIds.split(',').includes(v.id + '') && 'checked'} value="${v.id}" class="configBtn" type="checkbox" style="vertical-align:text-bottom;pointer-events:none;"/>
+                                <span class="configBtn" style="pointer-events: none;">${v.name}</span>
+                            </label>`).join('');
                     }
                 }, {
                     title: '操作',
@@ -184,12 +202,20 @@ ajaxData({
             });
         }
 
-        $scope.trClick = (item, index, event) => {
+        $scope.trClick = async (item, index, event) => {
             if (event.target.className.includes('icon-shanchu1')) {
                 $solway.confirm({ message: '确定删除此模块？' }, () => {
                     deleteDefaultRoleModule(item.roleId)
                 });
-            };
+            } else if (event.target.className.includes('configBtn')) {
+                await myAjaxData.timeout(0);
+                // const eles = $(event.target.parentElement).find('input'):: [].filter(v => v.checked):: [].map(v => v.value)
+                $scope.updateConfigDefaultRoleModule.getData({
+                    roleType: $scope.roleType,
+                    appId: item.appId,
+                    btnIds: $(event.target.parentElement).find('input'):: [].filter(v => v.checked):: [].map(v => v.value).join()
+                });
+            }
         };
 
         //新增
