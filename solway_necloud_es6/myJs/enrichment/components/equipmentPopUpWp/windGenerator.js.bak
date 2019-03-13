@@ -34,6 +34,11 @@ ajaxData(
             data: {},
             later: true,
         },
+        windTurbineSubSystemRunData: {
+            name: 'GETwindTurbineSubSystemRunData',
+            data: {},
+            later: true,
+        },
         runFaultList: {
             name: 'GETrunFaultList',
             data: {},
@@ -98,9 +103,12 @@ ajaxData(
     });
 
     // 获取子系统
-    $scope.windTurbineSubSystem.getData({level: 2}).then(res => {
-        $scope.windTurbineSubSystem.res.body.reverse();
+    $scope.deviceInfoWidthDialog.subscribe(res => {
+        $scope.windTurbineSubSystem.getData({ level: 2, productId: res.body.device.protocolid}).then(res => {
+            $scope.windTurbineSubSystem.res.body.reverse();
+        });
     });
+
 
 
     $scope.runFaultList.getData({
@@ -141,15 +149,33 @@ ajaxData(
 
 
     $scope.getSvgData = obj => {
+        $scope.currentSvgTabData = obj;
         $scope.activeId = obj.id;
         $scope.svgUrl = 'document/svg/wp_device/' + $scope.deviceInfoWidthDialog.res.body.device.protocolid + '-' + obj.dictValue + '.svg';
+        $scope.windTurbineSubSystemRunData.getData({
+            deviceId: eqService.config.eqObj.deviceId,
+            level: 2,
+            subId: obj.dictValue
+        });
     };
+
+    $scope.windTurbineSubSystemRunData.subscribe(res => {
+        $scope.data = res.body;
+    });
     
     // 状态刷新
     const timer = $interval(() => {
         if ($scope.tabIndex !== 0) return;
         if ($scope.rtmSingleStationComm.res.comm === 1) return;
-        $scope.selectWindTurbineSubSystemRunData.getData();
+        if ($scope.activeId === -9999) {
+            $scope.selectWindTurbineSubSystemRunData.getData();
+        } else {
+            $scope.windTurbineSubSystemRunData.getData({
+                deviceId: eqService.config.eqObj.deviceId,
+                level: 2,
+                subId: $scope.currentSvgTabData.dictValue
+            });
+        }
     }, 5 * 1000);
 
     // 历史数据 列表 接口请求
