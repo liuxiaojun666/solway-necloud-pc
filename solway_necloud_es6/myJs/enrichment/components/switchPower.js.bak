@@ -23,6 +23,7 @@ app.directive('switchPowerEnrich', ['myAjaxData', '$rootScope', (myAjaxData, $ro
         });
 
         $scope.$on('broadcastSwitchStation', (event, data) => {
+            if (!data) return;
             $scope.currentDataName = data.dataName;
             $scope.currentSTClass = data.currentSTClass;
             myAjaxData.setCurrentStationData({ currentDataName: data.dataName, currentSTID: data.dataId, currentStationsInfo: data.currentStationsInfo });
