@@ -632,6 +632,11 @@ ajaxData({
 
     //编辑
     $scope.editRestrict = item =>{
+        if($scope.restrictEditActive){//若当前清洗为编辑状态，先操作完，再进行下一个
+            toaster.pop('error','','当前仍有编辑状态，请先处理，再进行下一个！');
+            return; 
+        } 
+        $scope.restrictEditActive = true;
         for(let i=0;i<$scope.restrictPowerListData.length;i++){
             if($scope.restrictPowerListData[i].id == item.id){
                 $scope.restrictPowerListData[i]['disabled'] = false;
@@ -641,6 +646,7 @@ ajaxData({
 
     //取消
     $scope.cancleRestrict = item =>{
+        $scope.restrictEditActive = false;
         for(let i=0;i<$scope.restrictPowerListData.length;i++){
             if($scope.restrictPowerListData[i].id == item.id){
                 $scope.restrictPowerListData[i]['disabled'] = true;
@@ -675,6 +681,7 @@ ajaxData({
         }
         $scope.restrictPowerSave.getData(formData).then(res=>{
             if(res.code == 0){
+                $scope.restrictEditActive = false;
                 toaster.pop('success','','保存成功');
                 $scope.addLineRestrict = false;
                 $scope.getRestrictPowerData();
@@ -726,6 +733,11 @@ ajaxData({
 
     //编辑
     $scope.editOverhaul = item =>{
+        if($scope.overhaulEditActive){//若当前清洗为编辑状态，先操作完，再进行下一个
+            toaster.pop('error','','当前仍有编辑状态，请先处理，再进行下一个！');
+            return; 
+        } 
+        $scope.overhaulEditActive = true;
         for(let i=0;i<$scope.overhaulListData.length;i++){
             if($scope.overhaulListData[i].id == item.id){
                 $scope.overhaulListData[i]['disabled'] = false;
@@ -735,6 +747,7 @@ ajaxData({
 
     //取消
     $scope.cancleOverhaul = item =>{
+        $scope.overhaulEditActive = false;
         for(let i=0;i<$scope.overhaulListData.length;i++){
             if($scope.overhaulListData[i].id == item.id){
                 $scope.overhaulListData[i]['disabled'] = true;
@@ -769,6 +782,7 @@ ajaxData({
         }
         $scope.overhaulSave.getData(formData).then(res=>{
             if(res.code == 0){
+                $scope.overhaulEditActive = false;
                 toaster.pop('success','','保存成功');
                 $scope.addLineOverhaul = false;
                 getOverhaulList();
@@ -822,6 +836,11 @@ ajaxData({
 
     //编辑
     $scope.editClean = item =>{
+        if($scope.cleanEditActive){//若当前清洗为编辑状态，先操作完，再进行下一个
+            toaster.pop('error','','当前仍有编辑状态，请先处理，再进行下一个！');
+            return; 
+        } 
+        $scope.cleanEditActive = true;
         for(let i=0;i<$scope.cleanListData.length;i++){
             if($scope.cleanListData[i].id == item.id){
                 $scope.cleanListData[i]['disabled'] = false;
@@ -831,6 +850,7 @@ ajaxData({
 
     //取消
     $scope.cancleClean = item =>{
+        $scope.cleanEditActive = false;
         for(let i=0;i<$scope.cleanListData.length;i++){
             if($scope.cleanListData[i].id == item.id){
                 $scope.cleanListData[i]['disabled'] = true;
@@ -864,6 +884,7 @@ ajaxData({
         }
         $scope.cleanTimeSave.getData(formData).then(res=>{
             if(res.code == 0){
+                $scope.cleanEditActive = false;
                 toaster.pop('success','','保存成功');
                 $scope.addLineClean = false;
                 getCleanTimeList();
