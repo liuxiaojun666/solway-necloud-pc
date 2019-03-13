@@ -623,7 +623,6 @@ ajaxData({
                 if($scope.restrictPowerListData[i]['endDate']){
                     $scope.restrictPowerListData[i]['endDate'] = new Date($scope.restrictPowerListData[i]['endDate']);
                 }else{
-                    $scope.restrictPowerListData[i]['endDate'] = '';
                     $scope.restrictPowerListData[i]['noEndDate'] = new Date();
                     $scope.restrictPowerListData[i]['noEndDate'].showDate = '';
                 }
@@ -657,7 +656,7 @@ ajaxData({
             formData['stid'] = $scope.pstationid;
             formData['eqid'] = $scope.restrictDeviceId;
             formData['dtype'] = $scope.restrictDeviceType;
-            formData['startDate'] = new Date($scope.restrictStartDate).Format("yyyy-MM-dd");
+            formData['startDate'] = $scope.restrictStartDate.showDate;
             formData['endDate'] = $scope.restrictEndDate.showDate;
         }else{
             delete item.createUser;
@@ -665,12 +664,14 @@ ajaxData({
             delete item.disabled;
             delete item.modifyTime;
             item.startDate = item.startDate.showDate;
-            item.endDate = item.endDate.showDate;
+            item.endDate = item.endDate?item.endDate.showDate:(item.noEndDate.showDate);
+            delete item.noEndDate;
             formData = item;
         }
         
         if(!formData.startDate){
             toaster.pop('error','','限电开始时间必填！');
+            return;
         }
         $scope.restrictPowerSave.getData(formData).then(res=>{
             if(res.code == 0){
@@ -716,7 +717,6 @@ ajaxData({
                 if($scope.overhaulListData[i]['endDate']){
                     $scope.overhaulListData[i]['endDate'] = new Date($scope.overhaulListData[i]['endDate']);
                 }else{
-                    $scope.overhaulListData[i]['endDate'] = '';
                     $scope.overhaulListData[i]['noEndDate'] = new Date();
                     $scope.overhaulListData[i]['noEndDate'].showDate = '';
                 }
@@ -750,20 +750,22 @@ ajaxData({
             formData['stid'] = $scope.pstationid;
             formData['eqid'] = $scope.overhaulDeviceId;
             formData['dtype'] = $scope.overhaulDeviceType;
-            formData['startDate'] = new Date($scope.overhaulStartDate).Format("yyyy-MM-dd");
-            formData['endDate'] = $scope.overhaulEndDate.showDate
+            formData['startDate'] = $scope.overhaulStartDate.showDate;
+            formData['endDate'] = $scope.overhaulEndDate.showDate;
         }else{
             delete item.createUser;
             delete item.createTime;
             delete item.disabled;
             delete item.modifyTime;
             item.startDate = item.startDate.showDate;
-            item.endDate = item.endDate.showDate;
+            item.endDate = item.endDate?item.endDate.showDate:(item.noEndDate.showDate);
+            delete item.noEndDate;
             formData = item;
         }
         
         if(!formData.startDate){
             toaster.pop('error','','检修开始时间必填！');
+            return;
         }
         $scope.overhaulSave.getData(formData).then(res=>{
             if(res.code == 0){
@@ -811,7 +813,6 @@ ajaxData({
                 if($scope.cleanListData[i]['endDate']){
                     $scope.cleanListData[i]['endDate'] = new Date($scope.cleanListData[i]['endDate']);
                 }else{
-                    $scope.cleanListData[i]['endDate'] = '';
                     $scope.cleanListData[i]['noEndDate'] = new Date();
                     $scope.cleanListData[i]['noEndDate'].showDate = '';
                 }
@@ -853,11 +854,13 @@ ajaxData({
             item.startDate = item.startDate.showDate;
             item.endDate = item.endDate?item.endDate.showDate:(item.noEndDate.showDate);
             delete item.modifyTime;
+            delete item.noEndDate;
             formData = item;
         }
        
         if(!formData.startDate){
             toaster.pop('error','','清洗开始时间必填！');
+            return ;
         }
         $scope.cleanTimeSave.getData(formData).then(res=>{
             if(res.code == 0){
