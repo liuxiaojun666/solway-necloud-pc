@@ -1,0 +1,79 @@
+ajaxData({
+    powerStationList:{
+        name: 'GETpowerStationList',
+        data: {},
+        later: true
+    }
+}, {})('accountManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '台账管理';
+    
+    $scope.getStationList = () =>{
+        $scope.powerStationList.getData({
+            pageIndex : 0,
+            pageSize : 10,
+            parentIsNull:1,
+            keyWords : $scope.keyWords,
+        })
+    }
+
+    $scope.getStationList();
+    
+    $scope.column = [
+        {
+            title: '电站编号',
+            dataIndex: 'stationcode',
+            align: 'center',
+            sort: !0
+        },{
+            title: '电站名称',
+            width:'25%',
+            dataIndex: 'stationname',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '所属企业',
+            dataIndex: 'companyname',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '负责人',
+            dataIndex: 'managername',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '联系电话',
+            dataIndex: 'stationtel',
+            align: 'center'
+        }, {
+            title: '所属省份',
+            dataIndex: 'province',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="授权"></i>
+                </div>
+                `
+            },
+        }
+    ]
+
+    $scope.trClick = (item, index, event) => {
+        console.log(item)
+        if(item.stationClass == '01'){ //光伏
+            $scope.accountSolar = true;
+        }else if(item.stationClass == '02'){ //风电
+            $scope.accountWind = true;
+        }
+    };
+
+   
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});
