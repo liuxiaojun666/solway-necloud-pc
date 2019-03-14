@@ -1,0 +1,201 @@
+ajaxData({
+    // info
+    analysis_station_real_shd_year_info: {
+        name: 'GETanalysis_station_real_shd_year_info',
+        data: {},
+        later: true
+    },
+    // 时间 列表
+    analysis_station_real_shd_year_timelist: {
+        name: 'GETanalysis_station_real_shd_year_timelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 时间 曲线
+    analysis_station_real_shd_year_timeline: {
+        name: 'GETanalysis_station_real_shd_year_timeline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
+    __serviceName__: 'realStationYearService',
+})('realStationYearCtrl', ['$scope', 'realStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape } = historicalRecord.get().themeRealStationYear || {};
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeRealStationYear: {
+                ...historicalRecord.get().themeRealStationYear || {},
+                showShape
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 接口请求
+    $scope.diffGetData = async (getInfo) => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull(getInfo);
+        const { showShape, dateTime, tabIndex, dateType, dataType } = $scope;
+        if (dateType !== 2) return;
+        if (dataType !== 0) return;
+        if (getInfo) {
+            $scope.analysis_station_real_shd_year_info.getData({
+                queryCode: 'analysis_station_real_shd_year_info',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        }
+        if (showShape === 'list') {
+            $scope.analysis_station_real_shd_year_timelist.getData({
+                queryCode: 'analysis_station_real_shd_year_timelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (showShape === 'chart') {
+            $scope.analysis_station_real_shd_year_timeline.getData({
+                queryCode: 'analysis_station_real_shd_year_timeline',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        }
+    };
+
+    // 时间 列表
+    $scope.analysis_station_real_shd_year_timelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '日期',
+                dataIndex: 'dtime',
+                align: 'center',
+                sort: true,
+            },
+            {
+                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
+                dataIndex: 'real_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '限电损失电量' + '(' + res.body.units.restrict_we + ')',
+                dataIndex: 'restrict_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '检修损失电量' + '(' + res.body.units.repair_we + ')',
+                dataIndex: 'repair_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '故障损失电量' + '(' + res.body.units.fail_we + ')',
+                dataIndex: 'fail_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '衰减损失电量' + '(' + res.body.units.decay_we + ')',
+                dataIndex: 'decay_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '积灰损失电量' + '(' + res.body.units.dust_we + ')',
+                dataIndex: 'dust_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '其他损失电量' + '(' + res.body.units.other_we + ')',
+                dataIndex: 'other_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '应发电量' + '(' + res.body.units.shd_kwh_chk + ')',
+                dataIndex: 'shd_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '能量可利用率' + '(' + res.body.units.pba + ')',
+                dataIndex: 'pba',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 时间 曲线
+    $scope.analysis_station_real_shd_year_timeline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[
+            res.body.data.real_kwh_chk, 
+            res.body.data.shade_we, 
+            res.body.data.restrict_we, 
+            res.body.data.repair_we, 
+            res.body.data.other_we, 
+            res.body.data.fail_we, 
+            res.body.data.decay_we, 
+            res.body.data.dust_we, 
+            res.body.data.shd_kwh_chk], [res.body.data.pba]];
+    };
+
+    // 数据置空
+    function setDataNull(getInfo) {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.analysis_station_real_shd_year_timelist.res = null;
+        $scope.analysis_station_real_shd_year_timeline.res = null;
+        if (getInfo) $scope.analysis_station_real_shd_year_info.res = null;
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});

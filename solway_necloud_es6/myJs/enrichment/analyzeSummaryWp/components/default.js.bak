@@ -1,0 +1,212 @@
+ajaxData({
+    wpEnergyFlowDiagram: {
+        name: 'GETwpEnergyFlowDiagram',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+        __serviceName__: 'themeAnalyzeWpDefaultService',
+        themeMap: {
+            '灰尘损失电量': {
+                name: 'dust',
+                color: '#83a3c6',
+            },
+            '资源偏差': {
+                name: 'resourcesDeviation',
+                color: '#e7cb5d',
+            },
+            '模型偏差': {
+                name: 'modelDeviation',
+                color: '#c36deb',
+            },
+            '故障损失电量': {
+                name: 'fault',
+                color: '#ff7777',
+            },
+            '检修损失电量': {
+                name: 'repair',
+                color: '#ff8e56',
+            },
+            '衰减损失电量': {
+                name: 'decay',
+                color: '#38ba9a',
+            },
+            '限电损失电量': {
+                name: 'restrict',
+                color: '#6c5bd1',
+            },
+            '阴影损失电量': {
+                name: 'shadow',
+                color: '#43a2eb',
+            },
+            '线损电量': {
+                name: 'lineLoss',
+                color: '#72db44',
+            },
+            '评估电量': {
+                name: 'assess',
+                color: '#2b5d95',
+            },
+            '实发电量': {
+                name: 'real',
+                color: '#2b5d95',
+            },
+        }
+    })('themeAnalyzeWpDefaultCtrl', ['$scope', 'themeAnalyzeWpDefaultService', 'actionRecord', 'toaster', '$timeout'], ($scope, myAjaxData, historicalRecord, toaster, $timeout) => {
+        /// 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+        let myChart;
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            const { searchKey = '' } = historicalRecord.get().themeAnalyzeWpDefault || {};
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            await myAjaxData.timeout(0);
+            $('.ng-clock').removeClass('ng-clock');
+            initChart();
+            $scope.initComplete = true;
+            getData();
+            return $scope.$apply();
+        };
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => getData();
+
+        // 日期改变
+        $scope.dateUpdated = async () => {
+            await myAjaxData.timeout(0);
+            return getData();
+        };
+
+        // 初始化 能流图
+        function initChart() {
+            myChart = echartsSankey.init(document.getElementById('main'));
+
+            // 宽高改变  重新画
+            const resizeFunc = async () => {
+                await myAjaxData.timeout(1);
+                myChart.resize();
+            };
+            window.addEventListener('resize', resizeFunc);
+            $scope.$on('$destroy', () => {
+                window.removeEventListener('resize', resizeFunc);
+                myChart && echarts.dispose(myChart);
+                myChart = null;
+            });
+
+            // 点击事件监听
+            myChart.on('click', function (obj) {
+                if (obj.data.target || obj.data.source) return;
+                const {themeMap} = myAjaxData.config;
+                const {target, source, name} = obj.data;
+                const theme = themeMap[(Object.keys(themeMap).includes(target) ? target : source) || name];
+                if (!theme) return;
+                if (theme.name === 'null') return;
+                // $scope.$emit('changeTheme', theme.name);
+                $scope.$apply();
+            });
+        }
+
+        // echarts 绘制
+        function drawing() {
+            const option = {
+                tooltip: {
+                    show: true,
+                    trigger: 'item',
+                    formatter(params) {
+                        if (params.data.target) return '';
+                        return params.name + '(kWh): ' + params.value;
+                    }
+                },
+                series: {
+                    type: 'sankey',
+                    layout: 'none',
+                    draggable: false,
+                    left: 40,
+                    right: 130,
+                    top: 30,
+                    bottom: 30,
+                    nodeGap: 15,
+                    itemStyle: {
+                        normal: {
+                            color: '#2b5d95',
+                            borderColor: 'rgba(163,202,245,.1)',
+                            borderWidth: 3,
+                            opacity: 1,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            shadowBlur: 10
+                        }
+                    },
+                    lineStyle: {
+                        normal: {
+                            color: '#419eff',
+                            opacity: 0.2,
+                            curveness: 0.7
+                        },
+                        emphasis: {
+                            opacity: 0.3
+                        }
+                    },
+                    label: {
+                        normal: {
+                            formatter: p => p.data.name + ((p.data.r === + p.data.r) ? ': ' + p.data.r + '%' : ''),
+                            color: '#fff',
+                            fontSize: 14,
+                        }
+                    },
+                    data: $scope.wpEnergyFlowDiagram.res.body.data.map(v => {
+                        const { themeMap } = myAjaxData.config;
+                        if (Object.keys(themeMap).includes(v.name)) {
+                            return {
+                                ...v,
+                                itemStyle: {
+                                    normal: {
+                                        color: themeMap[v.name].color,
+                                        borderWidth: 13,
+                                    }
+                                },
+                            };
+                        }
+                        return v;
+                    }),
+                    links: $scope.wpEnergyFlowDiagram.res.body.links.map(v => {
+                        const { themeMap } = myAjaxData.config;
+                        if (Object.keys(themeMap).includes(v.target) || Object.keys(themeMap).includes(v.source)) {
+                            return {
+                                ...v,
+                                lineStyle: {
+                                    color: (themeMap[v.target] || themeMap[v.source]).color,
+                                    opacity: 0.3,
+                                },
+                            };
+                        }
+                        return v;
+                    }),
+                }
+            };
+            myChart.setOption(option, true);
+            $timeout(() => $scope.firstDrawingComplete = true, 1000);
+        }
+
+        // 请求接口
+        async function getData() {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            const { dateTime, dateType, dataType } = $scope;
+            $scope.wpEnergyFlowDiagram.getData({
+                queryType: dataType === 0 ? 3 : 1,
+                dateType: [4, 2, 1, 0][dateType],
+                date: dateType === 3 ? '2019' : dateTime.showDate
+            });
+            return $scope.$apply();
+        }
+
+        // 接口回调
+        $scope.wpEnergyFlowDiagram.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.wpEnergyFlowDiagram.res.body = res.body || { data: [], links: [] };
+            return drawing();
+        };
+    });

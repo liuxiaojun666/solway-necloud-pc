@@ -55,11 +55,14 @@ ajaxData({
             if(appPid != 0 && !stationIdsArr.includes(appPid)) stationIdsArr.push(appPid)
             
         })
-        const appIds = stationIdsArr.join(',');
+        
        
         $scope.update.getData({
-            appIds:appIds,
-            roleType:$scope.roleType
+            roleType:$scope.roleType,
+            apps: stationIdsArr.map(v => ({
+                appId: v,
+                btnIds: ''
+            })),
         }).then(res=>{
             if(res.code == 0){
                 toaster.pop('success', '',res.msg)
