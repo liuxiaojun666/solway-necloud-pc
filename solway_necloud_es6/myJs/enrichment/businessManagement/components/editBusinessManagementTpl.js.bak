@@ -40,13 +40,13 @@ ajaxData({
     }
 
     const initShowImages = (data,customConfig) =>{
-        if(data.logo){
+        if(data && data.logo){
             $("#showLogo").attr("src", data.logo);
         }
-        if(customConfig.logo_lg){
+        if(customConfig && customConfig.logo_lg){
             $("#showLogolg").attr("src", customConfig.logo_lg);
         }
-        if(customConfig.logo_sm){
+        if(customConfig && customConfig.logo_sm){
             $("#showLogosm").attr("src", customConfig.logo_sm);
         }
     }
@@ -60,7 +60,7 @@ ajaxData({
                 initShowImages(data,customConfig);
 
                 $scope.formData = data;
-                $scope.customConfig = customConfig;
+                $scope.customConfig = customConfig?customConfig:{};
                 
                 $scope.admintime = new Date(data.admintime);
                 getProvence();
@@ -171,6 +171,13 @@ ajaxData({
     //保存
     $scope.save = () =>{
         if(!$scope.customConfig.logo_sm) delete $scope.customConfig.logo_sm_flag;
+
+        let checkedArr = [];
+        $("input[name='stationType']:checked").each(function(){
+            checkedArr.push(this.value);
+        })
+        $scope.formData['comType'] = checkedArr.join(",");
+
         $scope.update.getData({
             data:  JSON.stringify($scope.formData),
             customConfig : JSON.stringify($scope.customConfig)
