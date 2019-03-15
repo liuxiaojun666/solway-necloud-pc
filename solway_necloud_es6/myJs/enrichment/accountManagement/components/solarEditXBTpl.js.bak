@@ -26,12 +26,12 @@ ajaxData({
     // 初始
     $scope.$on('editXBBroad',function(e,data){
         if(data){
-            $scope.formData = data;
+            $scope.formData = angular.copy(data);
             if(data.manufid){
                 $scope.changemanufacturer();
             }
-            $scope.formData['begindate'] = data.begindate?new Date(data.begindate):new Date();
-            $scope.formData['enddate'] = data.enddate?new Date(data.enddate):new Date();
+            $scope.formData['begindate'] = $scope.formData.begindate?new Date($scope.formData.begindate):new Date();
+            $scope.formData['enddate'] = $scope.formData.enddate?new Date($scope.formData.enddate):new Date();
             if(!data.begindate) $scope.formData['begindate'].showDate = '';
             if(!data.enddate) $scope.formData['enddate'].showDate = '';
         }else{
@@ -68,6 +68,9 @@ ajaxData({
     $scope.saveXB = () =>{
         if (!$solway.formValidation($scope.formData, '.editXBTpl', toaster)) return;//校验非空
 
+        $scope.formData['begindate'] = $scope.formData['begindate'].showDate ;
+        $scope.formData['enddate']   = $scope.formData['enddate'].showDate;
+        // debugger
         $scope.updateDeviceXB.getData($scope.formData).then(res=>{
             debugger
             if(res.key == 0){
