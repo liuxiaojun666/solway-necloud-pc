@@ -615,18 +615,21 @@ ajaxData({
             pageSize:10,
             stid:$scope.pstationid
         }).then(res=>{
-            $scope.restrictPowerListData = res.body.data;
+            if(res.code == 0 && res.body && res.body.data){
+                $scope.restrictPowerListData = res.body.data;
             
-            for(let i=0;i<$scope.restrictPowerListData.length;i++){
-                $scope.restrictPowerListData[i]['disabled'] = true;
-                $scope.restrictPowerListData[i]['startDate'] = new Date($scope.restrictPowerListData[i]['startDate']);
-                if($scope.restrictPowerListData[i]['endDate']){
-                    $scope.restrictPowerListData[i]['endDate'] = new Date($scope.restrictPowerListData[i]['endDate']);
-                }else{
-                    $scope.restrictPowerListData[i]['noEndDate'] = new Date();
-                    $scope.restrictPowerListData[i]['noEndDate'].showDate = '';
+                for(let i=0;i<$scope.restrictPowerListData.length;i++){
+                    $scope.restrictPowerListData[i]['disabled'] = true;
+                    $scope.restrictPowerListData[i]['startDate'] = new Date($scope.restrictPowerListData[i]['startDate']);
+                    if($scope.restrictPowerListData[i]['endDate']){
+                        $scope.restrictPowerListData[i]['endDate'] = new Date($scope.restrictPowerListData[i]['endDate']);
+                    }else{
+                        $scope.restrictPowerListData[i]['noEndDate'] = new Date();
+                        $scope.restrictPowerListData[i]['noEndDate'].showDate = '';
+                    }
                 }
             }
+            
         });
     }
 
@@ -716,18 +719,20 @@ ajaxData({
             pageSize:10,
             stid:$scope.pstationid
         }).then(res=>{
-            $scope.overhaulListData = res.body.data;
-            
-            for(let i=0;i<$scope.overhaulListData.length;i++){
-                $scope.overhaulListData[i]['disabled'] = true;
-                $scope.overhaulListData[i]['startDate'] = new Date($scope.overhaulListData[i]['startDate']);
-                if($scope.overhaulListData[i]['endDate']){
-                    $scope.overhaulListData[i]['endDate'] = new Date($scope.overhaulListData[i]['endDate']);
-                }else{
-                    $scope.overhaulListData[i]['noEndDate'] = new Date();
-                    $scope.overhaulListData[i]['noEndDate'].showDate = '';
+            if(res.code == 0 && res.body && res.body.data){
+                $scope.overhaulListData = res.body.data;
+                for(let i=0;i<$scope.overhaulListData.length;i++){
+                    $scope.overhaulListData[i]['disabled'] = true;
+                    $scope.overhaulListData[i]['startDate'] = new Date($scope.overhaulListData[i]['startDate']);
+                    if($scope.overhaulListData[i]['endDate']){
+                        $scope.overhaulListData[i]['endDate'] = new Date($scope.overhaulListData[i]['endDate']);
+                    }else{
+                        $scope.overhaulListData[i]['noEndDate'] = new Date();
+                        $scope.overhaulListData[i]['noEndDate'].showDate = '';
+                    }
                 }
             }
+            
         });
     }
 
@@ -819,18 +824,21 @@ ajaxData({
             pageSize:10,
             stid:$scope.pstationid
         }).then(res=>{
-            $scope.cleanListData = res.body.data;
+            if(res.code == 0 && res.body && res.body.data){
+                $scope.cleanListData = res.body.data;
             
-            for(let i=0;i<$scope.cleanListData.length;i++){
-                $scope.cleanListData[i]['disabled'] = true;
-                $scope.cleanListData[i]['startDate'] = new Date($scope.cleanListData[i]['startDate']);
-                if($scope.cleanListData[i]['endDate']){
-                    $scope.cleanListData[i]['endDate'] = new Date($scope.cleanListData[i]['endDate']);
-                }else{
-                    $scope.cleanListData[i]['noEndDate'] = new Date();
-                    $scope.cleanListData[i]['noEndDate'].showDate = '';
+                for(let i=0;i<$scope.cleanListData.length;i++){
+                    $scope.cleanListData[i]['disabled'] = true;
+                    $scope.cleanListData[i]['startDate'] = new Date($scope.cleanListData[i]['startDate']);
+                    if($scope.cleanListData[i]['endDate']){
+                        $scope.cleanListData[i]['endDate'] = new Date($scope.cleanListData[i]['endDate']);
+                    }else{
+                        $scope.cleanListData[i]['noEndDate'] = new Date();
+                        $scope.cleanListData[i]['noEndDate'].showDate = '';
+                    }
                 }
             }
+            
         });
     }
 
