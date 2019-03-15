@@ -56,14 +56,14 @@ ajaxData({
         $scope.systemModulelist.getDataCallback = (success, res) => {
             $scope.loading = false;
 
-            const data = res.body,childData = res.body;
+            const data = res.body, childData = res.body;
             $scope.systemList = [];
-            for(let i=0;i<data.length;i++){
-                if(data[i].pid == 0){
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].pid == 0) {
                     $scope.systemList.push(data[i]);
                 }
-                for(let j=0;j<childData.length;j++){
-                    if(childData[j].pid == data[i].id){
+                for (let j = 0; j < childData.length; j++) {
+                    if (childData[j].pid == data[i].id) {
                         $scope.systemList.push(childData[j]);
                     }
                 }
@@ -98,22 +98,6 @@ ajaxData({
                         return categoryMap[text]
                     }
                 }, {
-                    title: '按钮配置',
-                    dataIndex: 'btns',
-                    width: '22%',
-                    align: 'left',
-                    style: 'position:relative;',
-                    // sort: true,
-                    render(text) {
-                        return '<ul style="padding:0;list-style:none;">' 
-                            + text.map(v => `<li style="margin-right: 2em;position:relative;border-bottom:1px solid #092139;line-height:2;">
-                                        <span>${v.name}</span>
-                                        <span class="deleteBtn" data-id="${v.id}" style="position:absolute;right:2em;color:#ff8080;padding:0 15px;">x</span>
-                                    </li>`).join('') 
-                                + '</ul>'
-                                + `<span title="添加按钮" class="addBtn" style="position:absolute;right:0;padding: 0 0.5em;font-size:30px;top:5px;color:#1ddabe;">+</span>`;
-                    }
-                }, {
                     title: '服务模式',
                     dataIndex: 'serviceMode',
                     align: 'center',
@@ -127,12 +111,30 @@ ajaxData({
                     align: 'center',
                     // sort: true,
                 }, {
+                    title: '按钮配置',
+                    dataIndex: 'btns',
+                    width: '22%',
+                    align: 'left',
+                    style: 'position:relative;',
+                    // sort: true,
+                    render(text) {
+                        return text.map(v => `<span style="display:inline-block;margin-right:2em;">${v.name}</span>`).join('');
+                        // return '<ul style="padding:0;list-style:none;">'
+                        //     + text.map(v => `<li style="margin-right: 2em;position:relative;border-bottom:1px solid #092139;line-height:2;">
+                        //                 <span>${v.name}</span>
+                        //                 <span class="deleteBtn" data-id="${v.id}" style="position:absolute;right:2em;color:#ff8080;padding:0 15px;">x</span>
+                        //             </li>`).join('')
+                        //     + '</ul>'
+                        //     + `<span title="添加按钮" class="addBtn" style="position:absolute;right:0;padding: 0 0.5em;font-size:30px;top:5px;color:#1ddabe;">+</span>`;
+                    }
+                }, {
                     title: '操作',
                     align: 'center',
                     // sort: true,
                     render(text, item, index) {
                         return `
                         <div class="clearfix">
+                            <i title="按钮配置" class="iconfont icon-peizhi" style="font-size: 22px;color:#1ddabe;margin-right:15px;"></i>
                             <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
                             <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
                         </div>
@@ -166,28 +168,53 @@ ajaxData({
                 $solway.confirm({ message: '确定删除此模块？' }, () => {
                     deleteModule(moduleId)
                 });
-            } else if (event.target.className.includes('addBtn')) {
-                $scope.showAddBtnModal = true;
-                $scope.addBtnObj = {
-                    modelName: item.name,
-                    name: '',
-                    appId: item.id,
-                    weight: 10,
-                    code: ''
-                };
-            } else if (event.target.className.includes('deleteBtn')) {
-                $solway.confirm({ message: '确定删除此按钮权限配置？' }, () => {
-                    $scope.moduleBtnDelete.getData({
-                        id: event.target.dataset.id
-                    });
-                });
+            } else if (event.target.className.includes('icon-peizhi')) {
+                $scope.moduleBtnDelete.beforGetData(item);
             }
 
+        };
+
+        $scope.moduleBtnDelete.beforGetData = (item) => {
+            $scope.showAddBtnModal = true;
+            $scope.addBtnObj = {
+                modelName: item.name,
+                name: '',
+                appId: item.id,
+                weight: 10,
+                code: '',
+                btns: item.btns,
+                addBtnDisplay: false,
+                btnColumn: [
+                    {
+                        title: '名称',
+                        dataIndex: 'name'
+                    },
+                    {
+                        title: '编码',
+                        dataIndex: 'code'
+                    },
+                    {
+                        title: '操作',
+                        dataIndex: 'id',
+                        align: 'center',
+                        render(text) {
+                            return `<i class="iconfont icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>`
+                        }
+                    },
+                ],
+                trClick(item, index, event) {
+                    if (!event.target.className.includes('icon-shanchu1')) return;
+                    $solway.confirm({ message: '确定删除此按钮权限配置？' }, () => {
+                        $scope.moduleBtnDelete.getData({ id: item.id });
+                    });
+                }
+            };
         };
 
         $scope.moduleBtnDelete.subscribe(res => {
             if (res.code === 0) {
                 toaster.pop('success', '', res.msg);
+                $scope.showAddBtnModal = false;
                 $scope.systemModulelist.getData();
             } else {
                 toaster.pop('error', '', res.msg);
@@ -196,11 +223,17 @@ ajaxData({
 
         // 按钮添加
         $scope.addBtnSubmit = () => {
+
+            if (!$scope.addBtnObj.addBtnDisplay) return $scope.addBtnObj.addBtnDisplay = true;
+
             if (!$scope.addBtnObj.code || !$scope.addBtnObj.name) return toaster.pop('error', '', '请填写完整');
 
             $scope.moduleBtnUpdate.getData({
                 ...$scope.addBtnObj,
-                modelName: null
+                modelName: null,
+                btns: null,
+                trClick: null,
+                btnColumn: null
             });
         };
 
@@ -228,7 +261,7 @@ ajaxData({
         });
 
         //取消
-        $scope.$on('cancelCallback',function(){
+        $scope.$on('cancelCallback', function () {
             $scope.showAddModule = false;
         });
 
