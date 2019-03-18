@@ -29,7 +29,14 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
-    }
+    },
+    deviceHLXList:{
+        name:'GETdeviceHLXList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    
     
 }, {
     __serviceName__: 'accountSolarTplService',
@@ -55,6 +62,7 @@ ajaxData({
         initDeviceData(data.id);
         $scope.getXBData();
         $scope.getNBQData();
+        $scope.getHLXData();
     });
 
     //导出模板---箱变、逆变器、汇流箱
@@ -331,5 +339,77 @@ ajaxData({
     $scope.$on("cancelNBQ",function(){
         $scope.editNBQModel = false;
     })
+
+
+    /* ********************* 汇流箱部分 ***********************/
+
+    $scope.getHLXData = () =>{
+        $scope.deviceHLXList.getData({
+            pageIndex:0,
+            pageSize:10,
+            pstationid:$scope.stationId
+        });
+    }
+
+    $scope.columnHLX = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'hlxCheckboxName',
+            render(text, record, index) {
+                return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="hlxCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+            }
+        },{
+            title: '编号',
+            dataIndex: 'code',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '设备名称',
+            dataIndex: 'name',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '所属逆变器',
+            dataIndex: 'invertername',
+            align: 'center'
+        }, {
+            title: '产品型号',
+            width:'20%',
+            dataIndex: 'productname',
+            align: 'center'
+        }, {
+            title: '组串数',
+            dataIndex: 'batterygcount',
+            align: 'center'
+        }, {
+            title: '位置',
+            width:'80px',
+            dataIndex: 'address',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ];
+    
+
+    //新增汇流箱
+    $scope.newHLX = () =>{
+        $scope.editHLXModel = true;
+        $scope.$broadcast('editHLXBroad','');
+    }
    
 });
