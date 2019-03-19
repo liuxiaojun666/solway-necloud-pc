@@ -83,6 +83,7 @@ window.ajaxData = (b, a) => {
         };
         c.getData = o => {
             if (!i[o.name]) return d.getData(o);
+            if (!o.saveParam) return d.getData({name: o.name, data: o.data});
             if (Array.isArray(o.data)) return d.getData({name: o.name, data: o.data});
             for (let key in o.data) {
                 i[o.name][key] = o.data[key];
@@ -149,7 +150,7 @@ window.ajaxData = (b, a) => {
                     }
                     N[g].reqData = k;
                     const _number = ++N[g].getData.reqNumber;
-                    let i = Z.getData({ name: b[g].name, data: k });
+                    let i = Z.getData({ name: b[g].name, data: k, saveParam: N[g].saveParam});
                     N[g].promise = i;
                     N[g].isLoding = !0;
                     N.isLoding = E();
@@ -186,6 +187,8 @@ window.ajaxData = (b, a) => {
                 N[g].onlyLatest = b[g].onlyLatest;
                 N[g]._cache = b[g].cache;
                 N[g].sameTimeOnce = b[g].sameTimeOnce;
+                const { saveParam = true } = b[g];
+                N[g].saveParam = saveParam;
                 N[g].isLoding = !1;
                 if (b[g].later) continue;
                 if (b[g].data.__stationId__) {
