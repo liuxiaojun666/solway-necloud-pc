@@ -1,0 +1,112 @@
+
+ajaxData({
+    manufacturerList:{
+        name:'GETmanufacturerList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    selectByManuList:{
+        name:'GETselectByManuList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    belongsXBList:{
+        name:'GETbelongsXBList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    updateDeviceNBQ:{
+        name:'POSTupdateDeviceNBQ',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+    
+}, {
+    __serviceName__: 'editNBQTplService',
+})('editNBQTplModelCtrl', ['$scope', 'editNBQTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    
+    const getBelongsXBData = () =>{
+        $scope.belongsXBList.getData({pstationid:$scope.stationId}).then(res=>{
+            $scope.belongsXB = res;
+        });
+    }
+    // 初始
+    $scope.$on('editNBQBroad',async(e,data)=>{
+        getBelongsXBData();
+        if(data){
+            $scope.formData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+
+            $scope.formData = angular.copy(data);
+            if(data.manufid){
+                $scope.changemanufacturer();
+            }
+            $scope.formData['begindate'] = $scope.formData.begindate?new Date($scope.formData.begindate):new Date();
+            $scope.formData['enddate'] = $scope.formData.enddate?new Date($scope.formData.enddate):new Date();
+            if(!data.begindate) $scope.formData['begindate'].showDate = '';
+            if(!data.enddate) $scope.formData['enddate'].showDate = '';
+
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        }else{
+            $scope.formData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+            $scope.formData['begindate'] = new Date();
+            $scope.formData['enddate'] = new Date();
+            $scope.formData['begindate'].showDate = '';
+            $scope.formData['enddate'].showDate = '';
+            $scope.formData['pstationid'] = $scope.stationId;
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        }
+    });
+
+    //获取厂商列表
+    $scope.getManufacturerList = ()=>{
+        $scope.manufacturerList.getData({
+        }).then(res=>{
+            $scope.manufacturerList = res;
+        });
+    }
+    $scope.getManufacturerList();
+
+    //选择某一厂商，获取产品型号列表
+    $scope.changemanufacturer = () =>{
+		$scope.selectByManuList.getData({
+            manufid : $scope.formData.manufid,
+        }).then(res=>{
+            $scope.productList = res;
+        });
+    }
+    
+
+     //保存
+    $scope.saveNBQ = () =>{
+        if (!$solway.formValidation($scope.formData, '.editNBQTpl', toaster)) return;//校验非空
+
+        $scope.formData['begindate'] = $scope.formData['begindate'].showDate ;
+        $scope.formData['enddate']   = $scope.formData['enddate'].showDate;
+        $scope.formData['hasJB'] = $("input[name='ifSmallNBQ']:checked").val();
+        $scope.formData['hasJBN'] = $("input[name='ifSmallNBQ']:checked").val();
+
+        $scope.updateDeviceNBQ.getData($scope.formData).then(res=>{
+            if(res.type == 'success'){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('editNBQCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
+
+    //取消
+    $scope.cancelNBQ = () =>{
+        $scope.$emit('cancelNBQ');
+    }
+});
