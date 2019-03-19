@@ -16,7 +16,8 @@ ajaxData({
         name:'POSTupdateDeviceHLX',
         data: {},
         later: true,
-        onlyLatest: true
+        onlyLatest: true,
+        saveParam:false
     },
     belongsNBQList:{
         name:'GETbelongsNBQList',
@@ -84,17 +85,60 @@ ajaxData({
         });
     }
 
+    //根据选中复选框得到整型值及有效组串数
+	function maskCodeParseJBRe(){
+		let arrayObj = [];
+		let maskCodeInt=0;
+		var i=0;
+		$("input[name=maskCodeCheckJB]:checked").each(function(){
+			i++;
+			maskCodeInt += Math.pow(2,parseInt($(this).val()));
+	    });
+		arrayObj[0]=i;
+		arrayObj[1]=maskCodeInt;
+		return arrayObj;
+	}
+
     // 初始
     $scope.$on('editHLXBroad',async(e,data)=>{
         initMaskCodeData();
         initManufactureData(1);
         getBelongsNBQData();
+        let relist = maskCodeParseJBRe();
+				$("#junbatterygcount").val(relist[0]);
+				$("#maskCodeJB").val(relist[1]);
         if(data){
-            $scope.formData = {};
+            console.log(data)
+            $scope.formData = {
+                id:data.id,
+                code:data.code,
+                name:data.name,
+                pstationid:data.pstationid,
+                manufid:data.manufid,
+                productid:data.productid,
+                maskCode: data.maskCode,
+                batterygcount: data.batterycount,
+                // serialnumber:data.serialnumber ,
+                // factid: ,
+                inverterid: data.inverterid,
+                manufid: data.manufid,
+                productid: data.productid,
+                // maskCodeCheckJB: 0,
+                begindate: data.begindate,
+                enddate: data.enddate,
+                address: data.address,
+                batterymanufid:data.batterymanufid ,
+                batteryprodid: data.batteryprodid,
+                batterypower: data.batterypower,
+                batterycount: data.batterycount,
+                cycle: data.cycle,
+                timeout: data.timeout,
+                mainparameter: data.mainparameter,
+                standardoper: data.standardoper,
+
+            };
             await myAjaxData.timeout(0);
             $scope.$apply();
-
-            $scope.formData = angular.copy(data);
 
             if(data.manufid){
                 $scope.changemanufacturer(1);
