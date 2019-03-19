@@ -108,7 +108,7 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, currentDeviceType = '2', tabIndex = 0, checkboxStatus = [true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
+        let { showShape, currentDeviceType = '2', tabIndex = 0, checkboxStatus = [true, true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
         $scope.changeShowShape((tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'chart'));
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -340,8 +340,8 @@ ajaxData(
                 width: '120px',
                 fixed: 'left',
                 sort: true,
-                render(text) {
-                    return `<text style="color: #428bca;">${text}</text>`
+                render(text, item) {
+                    return `<text style="color: #428bca;${item.shadeFlag ? ' background:#ccc;' : ''}">${text}</text>`
                 }
             },
             {
@@ -862,7 +862,7 @@ ajaxData(
                 fixed: 'left',
                 sort: true,
                 render(text) {
-                    return `<text style="color: #428bca;">${text}</text>`
+                    return `<text style="color: #428bca;${item.shadeFlag ? ' background:#ccc;' : ''}">${text}</text>`
                 }
             },
             {
