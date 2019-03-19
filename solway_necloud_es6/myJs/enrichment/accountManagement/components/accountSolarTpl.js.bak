@@ -36,7 +36,12 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
-    
+    deleteDeviceHLX:{
+        name:'POSTdeleteDeviceHLX',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
     
 }, {
     __serviceName__: 'accountSolarTplService',
@@ -405,11 +410,61 @@ ajaxData({
         }
     ];
     
+    //删除逆变器
+    const deleteHLX = ids =>{
+        $scope.deleteDeviceHLX.getData({junctionids:ids.join(',')}).then(res=>{
+            if (res.type == 'success'){
+                toaster.pop('success','','删除成功');
+                $scope.getHLXData();
+            }else{
+                toaster.pop('error', '','删除失败')
+            }
+        });
+    }
+
+    //编辑
+    $scope.trClickEditHLX = (item, index, event) =>{
+        if(event.target.className.includes('icon-bianji-copy')) {
+            $scope.editHLXModel = true;
+            $scope.$broadcast('editHLXBroad',item);
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此逆变器？' }, () => {
+                deleteHLX([item.id])
+            });
+        }
+    }
 
     //新增汇流箱
     $scope.newHLX = () =>{
         $scope.editHLXModel = true;
         $scope.$broadcast('editHLXBroad','');
     }
+
+    //批量删除-汇流箱
+    $scope.deleteBatchHLX = () =>{
+        let ids = [];
+        $("input[name='hlxCheckboxName']:checked").each(function () {
+            ids.push(this.dataset.id);
+        });
+        if (ids.length == 0){
+            alert("请选择删除的数据");
+            return;
+        }
+        $solway.confirm({ message: '确定删除所选的汇流箱？' }, () => {
+            deleteHLX(ids)
+        });
+    }
+
+
+    //编辑逆变器成功回调
+    $scope.$on('editHLXCallback',function(){
+        $scope.editHLXModel = false;
+        $scope.getHLXData();
+    })
+
+    //编辑逆变器取消回调
+    $scope.$on("cancelHLX",function(){
+        $scope.editHLXModel = false;
+    })
    
 });

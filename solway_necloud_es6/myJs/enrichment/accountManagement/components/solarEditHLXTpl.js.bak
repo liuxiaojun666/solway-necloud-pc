@@ -1,39 +1,116 @@
 
 ajaxData({
-    // manufacturerList:{
-    //     name:'GETmanufacturerList',
-    //     data: {},
-    //     later: true,
-    //     onlyLatest: true
-    // },
-    // selectByManuList:{
-    //     name:'GETselectByManuList',
-    //     data: {},
-    //     later: true,
-    //     onlyLatest: true
-    // },
-    // updateDeviceXB:{
-    //     name:'POSTupdateDeviceXB',
-    //     data: {},
-    //     later: true,
-    //     onlyLatest: true
-    // },
+    manufacturerList:{
+        name:'GETmanufacturerList',
+        data: {},
+        later: true,
+        // onlyLatest: true
+    },
+    selectByManuList:{
+        name:'GETselectByManuList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    updateDeviceHLX:{
+        name:'POSTupdateDeviceHLX',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    belongsNBQList:{
+        name:'GETbelongsNBQList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    
     
 }, {
     __serviceName__: 'editHLXTplService',
 })('editHLXTplModelCtrl', ['$scope', 'editHLXTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
     
+    //组串掩码数据
+    const initMaskCodeData = () =>{
+        let maskCodeCheckList = [];
+        for(let  i=0;i<20;i++){
+            maskCodeCheckList.push({'index':i,'value':i+1})
+        }
+        $scope.maskCodeCheckList = maskCodeCheckList;
+    }
+
+    //产品型号
+    $scope.changemanufacturer = type =>{
+        let manufid = type==1?$scope.formData.manufid:$scope.formData.batterymanufid;
+
+        $scope.selectByManuList.getData({
+            manufid :manufid,
+			devicetype: type
+        }).then(res=>{
+            if(type==1){
+                $scope.productList = res;
+                if(res && res.length){
+                    $scope.productList.unshift({id :null,manufname : '-请选择-'});
+                }
+            }else if(type==7){
+                $scope.batteryproduct = res;
+                if(res && res.length){
+                    $scope.batteryproduct.unshift({id :null,manufname : '-请选择-'});
+                }
+            }
+        });
+    }
+    //设备厂商、电池板厂商
+    const initManufactureData = type =>{
+        $scope.manufacturerList.getData({devicetype:type}).then(res=>{
+            if(type==1){
+                $scope.deviceManufacturerList = res;
+                if(res && res.length){
+                    $scope.deviceManufacturerList.unshift({id :null,manufname : '-请选择-'});
+                }
+            }else if(type==7){
+                $scope.batterymanufacturerList = res;
+                if(res && res.length){
+                    $scope.batterymanufacturerList.unshift({id :null,manufname : '-请选择-'});
+                }
+            }
+        });
+    }
+
+    //所属逆变器列表
+    const getBelongsNBQData = () =>{
+        $scope.belongsNBQList.getData({pstationid:$scope.stationId}).then(res=>{
+            $scope.belongsNBQDataList = res;
+        });
+    }
+
     // 初始
     $scope.$on('editHLXBroad',async(e,data)=>{
+        initMaskCodeData();
+        initManufactureData(1);
+        getBelongsNBQData();
         if(data){
             $scope.formData = {};
             await myAjaxData.timeout(0);
             $scope.$apply();
 
             $scope.formData = angular.copy(data);
+
             if(data.manufid){
-                $scope.changemanufacturer();
+                $scope.changemanufacturer(1);
             }
+            if(data.batterymanufid){
+                $scope.changemanufacturer(7);
+            }
+
+            for(var i=0;i<20;i++){
+                if(((1<<i)&data.maskCode)>0){
+                    $("input[name='maskCodeCheckJB'][value='"+i+"']").prop("checked", true);
+                }else{
+                    $("input[name='maskCodeCheckJB'][value='"+i+"']").prop("checked", false);
+                }
+            }
+
             $scope.formData['begindate'] = $scope.formData.begindate?new Date($scope.formData.begindate):new Date();
             $scope.formData['enddate'] = $scope.formData.enddate?new Date($scope.formData.enddate):new Date();
             if(!data.begindate) $scope.formData['begindate'].showDate = '';
@@ -50,50 +127,39 @@ ajaxData({
             $scope.formData['begindate'].showDate = '';
             $scope.formData['enddate'].showDate = '';
             $scope.formData['pstationid'] = $scope.stationId;
+            for(let i=0;i<16;i++){
+                $("input[name='maskCodeCheckJB'][value='"+i+"']").prop("checked", true);
+            }
             await myAjaxData.timeout(0);
             $scope.$apply();
         }
+        await myAjaxData.timeout(0);
+        initManufactureData(7);
     });
 
-    // //获取厂商列表
-    // $scope.getManufacturerList = ()=>{
-    //     $scope.manufacturerList.getData({
-    //     }).then(res=>{
-    //         // let defaultOption = {'id':1,'manufname':'请选择厂商'};
-    //         $scope.manufacturerList = res;
-    //         // console.log(res)
-    //     });
-    // }
-    // $scope.getManufacturerList();
+     //保存
+    $scope.saveHLX = () =>{
+        if (!$solway.formValidation($scope.formData, '.editHLXTpl', toaster)) return;//校验非空
 
-    // //选择某一厂商，获取产品型号列表
-    // $scope.changemanufacturer = () =>{
-	// 	$scope.selectByManuList.getData({
-    //         manufid : $scope.formData.manufid,
-    //     }).then(res=>{
-    //         $scope.productList = res;
-    //     });
-    // }
-    
+        $scope.formData['begindate'] = $scope.formData['begindate'].showDate ;
+        $scope.formData['enddate']   = $scope.formData['enddate'].showDate;
+        let maskCodeCheckedArr = [];
+        $("input[name=maskCodeCheckJB]:checked").each(function(){
+			maskCodeCheckedArr.push(this.value)
+        });
+        $scope.formData['maskCodeCheckJB'] = maskCodeCheckedArr.join(',');
+        $scope.updateDeviceHLX.getData($scope.formData).then(res=>{
+            if(res.type == 'success'){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('editHLXCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
 
-    //  //保存
-    // $scope.saveXB = () =>{
-    //     if (!$solway.formValidation($scope.formData, '.editXBTpl', toaster)) return;//校验非空
-
-    //     $scope.formData['begindate'] = $scope.formData['begindate'].showDate ;
-    //     $scope.formData['enddate']   = $scope.formData['enddate'].showDate;
-    //     $scope.updateDeviceXB.getData($scope.formData).then(res=>{
-    //         if(res.type == 'success'){
-    //             toaster.pop('success','','保存成功');
-    //             $scope.$emit('editXBCallback');
-    //         }else{
-    //             toaster.pop('error', '','保存失败')
-    //         }
-    //     });
-    // }
-
-    // //取消
-    // $scope.cancelXB = () =>{
-    //     $scope.$emit('cancelXB');
-    // }
+    //取消
+    $scope.cancelHLX = () =>{
+        $scope.$emit('cancelHLX');
+    }
 });
