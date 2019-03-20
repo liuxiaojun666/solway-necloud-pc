@@ -100,8 +100,10 @@ ajaxData(
                 title: '发电小数数(h)',
                 dataIndex: '',
                 width: '15%',
-                sort: true,
                 align: 'right',
+                render(text, item, index) {
+                    return ((item.daykwh / item.acc_kw) || 0).toFixed(1);
+                }
             },
         ];
     });

@@ -1,0 +1,72 @@
+ajaxData(
+    {
+        analysis_wp_station_pe_month_devicelist: {
+            name: 'GETanalysis_wp_station_pe_month_devicelist',
+            data: {},
+            later: true
+        },
+        turbinePEList: {
+            name: 'GETturbinePEList',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'powerCurveStationMonthService',
+    }
+)('powerCurveStationMonthCtrl', ['$scope', 'powerCurveStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    let myChart;
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { } = historicalRecord.get().themePowerCurveStationMonth || {};
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+    // 接口请求
+    $scope.diffGetData = async () => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull();
+        const { dateTime, dateType, dataType } = $scope;
+        if (dateType !== 1) return;
+        if (dataType !== 0) return;
+        $scope.analysis_wp_station_pe_month_devicelist.getData({
+            queryCode: 'analysis_wp_station_pe_month_devicelist',
+            queryType: 3,
+            date: dateTime.showDate
+        });
+    };
+
+    // 数据置空
+    function setDataNull() {
+        $scope.analysis_wp_station_pe_month_devicelist.res = null;
+    }
+
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+        window.removeEventListener('resize', myChart.resize);
+    });
+});
