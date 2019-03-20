@@ -58,10 +58,12 @@ ajaxData({
     //获取厂商列表
     $scope.getManufacturerList = ()=>{
         $scope.manufacturerList.getData({
+            devicetype:3
         }).then(res=>{
-            // let defaultOption = {'id':1,'manufname':'请选择厂商'};
             $scope.manufacturerList = res;
-            // console.log(res)
+            if(res && res.length){
+                $scope.manufacturerList.unshift({id :null,manufname : '-请选择-'});
+            }
         });
     }
     $scope.getManufacturerList();
@@ -72,6 +74,9 @@ ajaxData({
             manufid : $scope.formData.manufid,
         }).then(res=>{
             $scope.productList = res;
+            if(res && res.length){
+                $scope.productList.unshift({id :null,productname : '-请选择-'});
+            }
         });
     }
     
