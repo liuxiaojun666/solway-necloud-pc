@@ -41,7 +41,21 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
-    }
+    },
+    deviceOtherList:{
+        name:'GETdeviceOtherList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    deleteDeviceOther:{
+        name:'POSTdeleteDeviceOther',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    
+    
     
 }, {
     __serviceName__: 'accountSolarTplService',
@@ -68,6 +82,7 @@ ajaxData({
         $scope.getXBData();
         $scope.getNBQData();
         $scope.getHLXData();
+        $scope.getOtherData();
     });
 
     //导出模板---箱变、逆变器、汇流箱
@@ -168,7 +183,8 @@ ajaxData({
         $scope.deviceXBList.getData({
             pageIndex:0,
             pageSize:10,
-            pstationid:$scope.stationId
+            pstationid:$scope.stationId,
+            keyWords:$scope.keyWordsXB
         })
     }
 
@@ -224,7 +240,8 @@ ajaxData({
         $scope.deviceNBQList.getData({
             pageIndex:0,
             pageSize:10,
-            pstationid:$scope.stationId
+            pstationid:$scope.stationId,
+            keyWords:$scope.keyWordsNBQ
         });
     }
 
@@ -352,7 +369,8 @@ ajaxData({
         $scope.deviceHLXList.getData({
             pageIndex:0,
             pageSize:10,
-            pstationid:$scope.stationId
+            pstationid:$scope.stationId,
+            keyWords:$scope.keyWordsHLX
         });
     }
 
@@ -466,5 +484,124 @@ ajaxData({
     $scope.$on("cancelHLX",function(){
         $scope.editHLXModel = false;
     })
+
+
+    /* ********************* 其他设备 ***********************/
+
+    $scope.getOtherData = () =>{
+        $scope.deviceOtherList.getData({
+            pageIndex:0,
+            pageSize:10,
+            pstationid:$scope.stationId,
+            keyWords:$scope.keyWordsOther
+        });
+    }
+
+    $scope.columnOther = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'otherCheckboxName',
+            render(text, record, index) {
+                return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="otherCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+            }
+        },{
+            title: '编号',
+            dataIndex: 'code',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '设备名称',
+            dataIndex: 'name',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '所属电站',
+            dataIndex: 'pstationname',
+            align: 'center'
+        }, {
+            title: '产品型号',
+            width:'20%',
+            dataIndex: 'productname',
+            align: 'center'
+        }, {
+            title: '位置',
+            width:'80px',
+            dataIndex: 'address',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ];
+    
+    //编辑
+    $scope.trClickEditOther = (item, index, event) =>{
+        if(event.target.className.includes('icon-bianji-copy')) {
+            $scope.editOtherModel = true;
+            $scope.$broadcast('editOtherBroad',item);
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此设备？' }, () => {
+                deleteOther([item.id])
+            });
+        }
+    }
+
+    //新增其他设备
+    $scope.newOther = () =>{
+        $scope.editOtherModel = true;
+        $scope.$broadcast('editOtherBroad','');
+    }
+
+    //删除逆变器
+    const deleteOther = ids =>{
+        $scope.deleteDeviceOther.getData({otherids:ids.join(',')}).then(res=>{
+            if (res.type == 'success'){
+                toaster.pop('success','','删除成功');
+                $scope.getOtherData();
+            }else{
+                toaster.pop('error', '','删除失败')
+            }
+        });
+    }
+
+    //批量删除-其他设备
+    $scope.deleteBatchOther = () =>{
+        let ids = [];
+        $("input[name='otherCheckboxName']:checked").each(function () {
+            ids.push(this.dataset.id);
+        });
+        if (ids.length == 0){
+            alert("请选择删除的数据");
+            return;
+        }
+        $solway.confirm({ message: '确定删除所选的设备？' }, () => {
+            deleteOther(ids)
+        });
+    }
+
+    //编辑逆变器成功回调
+    $scope.$on('editOtherCallback',function(){
+        $scope.editOtherModel = false;
+        $scope.getOtherData();
+    })
+
+    //编辑逆变器取消回调
+    $scope.$on("cancelOther",function(){
+        $scope.editOtherModel = false;
+    })
+    
    
 });
