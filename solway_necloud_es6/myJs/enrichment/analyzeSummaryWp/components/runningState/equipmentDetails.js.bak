@@ -11,15 +11,24 @@ ajaxData(
             later: true
         },
     }, {
-        __serviceName__: 'shadeEquipmentDetailsService',
+        __serviceName__: 'runningStateEquipmentDetailsService',
     }
-)('shadowEquipmentDetailsCtrl', ['$scope', 'shadeEquipmentDetailsService'], ($scope, myAjaxData) => {
-    $scope.$on('equipmentDetails', (e, { eqid, eq_name, is_sn, stid = null }) => {
-        $scope.eqid = eqid;
-        $scope.stid = stid;
+)('runningStateEquipmentDetailsCtrl', ['$scope', 'runningStateEquipmentDetailsService'], ($scope) => {
+
+    $scope.$on('equipmentDetails', (_e, { eqid, eq_name }) => {
         $scope.eq_name = eq_name;
-        $scope.is_sn = is_sn;
-        $scope.diffGetdata();
+        $scope.turbineVPPoints.res = null;
+        $scope.turbineVPList.res = null;
+        ['turbineVPPoints', 'turbineVPList'].forEach(v => $scope[v].getData({
+            dateType: 2,
+            date: $scope.dateTime.showDate,
+            queryType: 3,
+            eqid
+        }));
     });
+
+    $scope.turbineVPList.tooltipFormatter = (params, _ticket, _callback) => {
+        return params[0].axisId.substr(0, 3) + '：' + params[0].name + 'm/s' + '<br/>' + params.map(v => v.seriesName + '：   ' + v.value + '<br/>').join('');
+    };
 
 });

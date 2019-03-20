@@ -5,6 +5,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         height: '=',
         ynames: '=',
         linenames: '=',
+        xname: '=',
         xdata: '=',
         ydatas: '=',
         yMin: '=',
@@ -73,6 +74,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 fontColor, 
                 linenames = [], 
                 ynames = [], 
+                xname = '', 
                 xdata = [], 
                 ydatas = [[[]]], 
                 yMin = [],
@@ -135,7 +137,11 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     axisTick: {
                         inside: true
                     },
-                    data: xdata
+                    data: xdata,
+                    name: xname,
+                    nameTextStyle: {
+                        color: fontColor
+                    }
                 }],
                 yAxis: ynames.map((name, i) => ({
                     type: 'value',
