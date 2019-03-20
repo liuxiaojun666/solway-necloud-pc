@@ -51,12 +51,12 @@ ajaxData({
             if(type==1){
                 $scope.productList = res;
                 if(res && res.length){
-                    $scope.productList.unshift({id :null,manufname : '-请选择-'});
+                    $scope.productList.unshift({id :null,productname : '-请选择-'});
                 }
             }else if(type==7){
                 $scope.batteryproduct = res;
                 if(res && res.length){
-                    $scope.batteryproduct.unshift({id :null,manufname : '-请选择-'});
+                    $scope.batteryproduct.unshift({id :null,productname : '-请选择-'});
                 }
             }
         });
@@ -89,7 +89,7 @@ ajaxData({
 	function maskCodeParseJBRe(){
 		let arrayObj = [];
 		let maskCodeInt=0;
-		var i=0;
+		let i=0;
 		$("input[name=maskCodeCheckJB]:checked").each(function(){
 			i++;
 			maskCodeInt += Math.pow(2,parseInt($(this).val()));
@@ -104,11 +104,11 @@ ajaxData({
         initMaskCodeData();
         initManufactureData(1);
         getBelongsNBQData();
-        let relist = maskCodeParseJBRe();
-				$("#junbatterygcount").val(relist[0]);
-				$("#maskCodeJB").val(relist[1]);
+        
         if(data){
-            console.log(data)
+            $scope.formData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
             $scope.formData = {
                 id:data.id,
                 code:data.code,
@@ -118,14 +118,9 @@ ajaxData({
                 productid:data.productid,
                 maskCode: data.maskCode,
                 batterygcount: data.batterycount,
-                // serialnumber:data.serialnumber ,
-                // factid: ,
                 inverterid: data.inverterid,
                 manufid: data.manufid,
                 productid: data.productid,
-                // maskCodeCheckJB: 0,
-                begindate: data.begindate,
-                enddate: data.enddate,
                 address: data.address,
                 batterymanufid:data.batterymanufid ,
                 batteryprodid: data.batteryprodid,
@@ -135,10 +130,7 @@ ajaxData({
                 timeout: data.timeout,
                 mainparameter: data.mainparameter,
                 standardoper: data.standardoper,
-
             };
-            await myAjaxData.timeout(0);
-            $scope.$apply();
 
             if(data.manufid){
                 $scope.changemanufacturer(1);
@@ -185,13 +177,17 @@ ajaxData({
     $scope.saveHLX = () =>{
         if (!$solway.formValidation($scope.formData, '.editHLXTpl', toaster)) return;//校验非空
 
-        $scope.formData['begindate'] = $scope.formData['begindate'].showDate ;
-        $scope.formData['enddate']   = $scope.formData['enddate'].showDate;
+        $scope.formData['begindate'] = $scope.formData['begindate']?$scope.formData['begindate'].showDate:'' ;
+        $scope.formData['enddate']   = $scope.formData['enddate']?$scope.formData['enddate'].showDate:'';
         let maskCodeCheckedArr = [];
         $("input[name=maskCodeCheckJB]:checked").each(function(){
 			maskCodeCheckedArr.push(this.value)
         });
         $scope.formData['maskCodeCheckJB'] = maskCodeCheckedArr.join(',');
+
+        let relist = maskCodeParseJBRe();
+        $scope.formData['batterygcount'] = relist[0];
+        $scope.formData['maskCode'] = relist[1];
         $scope.updateDeviceHLX.getData($scope.formData).then(res=>{
             if(res.type == 'success'){
                 toaster.pop('success','','保存成功');
