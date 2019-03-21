@@ -1,0 +1,377 @@
+
+ajaxData({
+    stationDeviceNumber:{
+        name:'GETstationDeviceNumber',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    windTowerList:{
+        name:'GETwindTowerList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    deleteDeviceWindTower:{
+        name:'POSTdeleteDeviceWindTower',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // deviceNBQList:{
+    //     name:'GETdeviceNBQList',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // },
+    // deleteDeviceNBQ:{
+    //     name:'POSTdeleteDeviceNBQ',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // },
+    // deviceHLXList:{
+    //     name:'GETdeviceHLXList',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // },
+    // deleteDeviceHLX:{
+    //     name:'POSTdeleteDeviceHLX',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // },
+    // deviceOtherList:{
+    //     name:'GETdeviceOtherList',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // },
+    // deleteDeviceOther:{
+    //     name:'POSTdeleteDeviceOther',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // },
+    
+    
+    
+}, {
+    __serviceName__: 'accountWindTplService',
+})('accountWindTplCtrl', ['$scope', 'accountWindTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    $scope.menuActive = id =>{
+        $scope.activeMenuBtn = id;
+        document.getElementById(id).scrollIntoView()
+    }
+
+    $scope.menuActive('deviceTypeA');
+    $scope.exportVersion = '00';
+
+    $scope.endDate = new Date('2099');
+
+    const statusMap = {'00':'正常','01':'故障','02':'检修','03':'停用'};
+
+    const initDeviceData = id =>{
+        $scope.stationDeviceNumber.getData({id:id}).then(res=>{
+            console.log(res)
+            $scope.devNumberData = res;
+        });
+    }
+
+    $scope.$on('windBroad',(e,data)=>{
+        $scope.stationId = data.id;
+        initDeviceData(data.id);
+        $scope.getWindTowerData();
+        // $scope.getNBQData();
+    });
+
+    // //导出模板---箱变、逆变器、汇流箱
+    // $scope.exportExcelData = type => {
+    //     const version = $('select[name=version' + type + ']').val();
+    //     let url = "PowerStation/downloadTemplate.htm";
+    //     url +='?stid='+$scope.stationId;
+    //     url += '&version='+version;
+    //     url +='&deviceType='+type;
+    //     window.location.href = url;
+    // }
+
+    // //导入模板---
+    // $scope.importExcelData = (type) =>{
+    //     $scope.$broadcast('importBroad',{modalType:type});
+    //     $scope.importExcelModel = true;
+    // }
+
+    // //导出
+    // $scope.export = () =>{
+    //     let url = "PowerStation/downloadPowerData.htm";
+    //     url +='?id='+$scope.stationId;
+	// 	url += '&version='+ $scope.exportVersion;
+	// 	url +='&sign=1';
+	// 	window.location.href = url;
+        
+    // }
+
+    /* ********************* 测风塔部分 ***********************/
+
+    // $scope.$on('importSuccessCallback',function(){
+    //     $scope.importExcelModel = false;
+    // })
+
+    $scope.columnWindTower = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'windTowerCheckboxName',
+            render(text, record, index) {
+                return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="windTowerCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+            }
+        },{
+            title: '编号',
+            dataIndex: 'code',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '设备名称',
+            dataIndex: 'name',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '状态',
+            dataIndex: 'status',
+            align: 'center',
+            render(text){
+                return statusMap[text]
+            }
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
+
+    const deleteWindTower = ids =>{
+        $scope.deleteDeviceWindTower.getData({ids:ids.join(',')}).then(res=>{
+            if (res.code == '0'){
+                toaster.pop('success','','删除成功');
+                $scope.getWindTowerData();
+            }else{
+                toaster.pop('error', '','删除失败')
+            }
+        });
+        // $http({
+        //     method : "POST",
+        //     url : "BoxChange/deleteBatch.htm",
+        //     params : {
+        //         boxids:ids
+        //     }
+        // }).success(function(res) {
+        //     if (res.type == 'success'){
+        //         toaster.pop('success','','删除成功');
+        //         $scope.getXBData();
+        //     }else{
+        //         toaster.pop('error', '','删除失败')
+        //     }
+        // });
+    }
+    
+    //获取测风塔列表
+    $scope.getWindTowerData = () =>{
+        $scope.windTowerList.getData({
+            pageIndex:0,
+            pageSize:10,
+            pstationID:$scope.stationId,
+            keywords:$scope.keyWordsWindTower
+        })
+    }
+
+    //新增测风塔
+    $scope.newWindTower = () =>{
+        $scope.editWindPowerModel = true;
+        $scope.$broadcast('editWindTowerBroad','');
+    }
+
+    //编辑测风塔
+    $scope.trClickEditWindTower = (item, index, event) =>{
+        if(event.target.className.includes('icon-bianji-copy')) {
+            $scope.editWindPowerModel = true;
+            $scope.$broadcast('editWindTowerBroad',item);
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此测风塔？' }, () => {
+                deleteWindTower([item.id])
+            });
+        }
+        
+    }
+
+    //批量删除-箱变
+    $scope.deleteBatchWindTower = () =>{
+        let ids = [];
+        $("input[name='windTowerCheckboxName']:checked").each(function () {
+            ids.push(this.dataset.id);
+        });
+        if (ids.length == 0){
+            alert("请选择删除的数据");
+            return;
+        }
+        $solway.confirm({ message: '确定删除所选的测风塔？' }, () => {
+            deleteWindTower(ids)
+        });
+    }
+
+    //编辑测风塔-成功回调
+    $scope.$on('editWindTowerCallback',function(){
+        $scope.editWindPowerModel = false;
+        $scope.getWindTowerData();
+    })
+
+    //编辑测风塔-取消回调
+    $scope.$on("cancelWindTower",function(){
+        $scope.editWindPowerModel = false;
+    })
+
+
+    /* ********************* 风机部分 ***********************/
+
+    // $scope.getNBQData = () =>{
+    //     $scope.deviceNBQList.getData({
+    //         pageIndex:0,
+    //         pageSize:10,
+    //         pstationid:$scope.stationId,
+    //         keyWords:$scope.keyWordsNBQ
+    //     });
+    // }
+
+    // $scope.columnNBQ = [
+    //     {
+    //         title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+    //         dataIndex: '',
+    //         width: '60px',
+    //         align: 'center',
+    //         checkboxName: 'nbqCheckboxName',
+    //         render(text, record, index) {
+    //             return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="nbqCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+    //         }
+    //     },{
+    //         title: '编号',
+    //         dataIndex: 'code',
+    //         sort: !0,
+    //         align: 'center'
+    //     }, {
+    //         title: '设备名称',
+    //         dataIndex: 'name',
+    //         align: 'center',
+    //         sort: !0
+    //     }, {
+    //         title: '所属箱变',
+    //         dataIndex: 'boxchangename',
+    //         align: 'center'
+    //     }, {
+    //         title: '产品型号',
+    //         width:'20%',
+    //         dataIndex: 'productname',
+    //         align: 'center'
+    //     }, {
+    //         title: '容量',
+    //         dataIndex: 'realcapacity',
+    //         align: 'center'
+    //     }, {
+    //         title: '是否小逆',
+    //         width:'80px',
+    //         dataIndex: 'hasJB',
+    //         align: 'center'
+    //     }, {
+    //         title: '操作',
+    //         dataIndex: '',
+    //         align: 'center',
+    //         sort: !0,
+    //         render(text, item, index) {
+    //             return `
+    //             <div class="clearfix">
+    //                 <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+    //                 <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+    //             </div>
+    //             `
+    //         },
+    //     }
+    // ];
+    
+    // //新增逆变器
+    // $scope.newNBQ = () =>{
+    //     $scope.editNBQModel = true;
+    //     $scope.$broadcast('editNBQBroad','');
+    // }
+
+    // //删除逆变器
+    // const deleteNBQ = ids =>{
+    //     $http({
+    //         method : "POST",
+    //         url : "Inverter/deleteBatch.htm",
+    //         params : {
+    //             inverids:ids
+    //         }
+    //     }).success(function(res) {
+    //         if (res.type == 'success'){
+    //             toaster.pop('success','','删除成功');
+    //             $scope.getNBQData();
+    //         }else{
+    //             toaster.pop('error', '','删除失败')
+    //         }
+    //     });
+    // }
+
+    // //编辑
+    // $scope.trClickEditNBQ = (item, index, event) =>{
+    //     if(event.target.className.includes('icon-bianji-copy')) {
+    //         $scope.editNBQModel = true;
+    //         $scope.$broadcast('editNBQBroad',item);
+    //     }else if(event.target.className.includes('icon-shanchu1')) {
+    //         $solway.confirm({ message: '确定删除此逆变器？' }, () => {
+    //             deleteNBQ([item.id])
+    //         });
+    //     }
+    // }
+
+    
+    // //批量删除-逆变器
+    // $scope.deleteBatchNBQ = () =>{
+    //     let ids = [];
+    //     $("input[name='nbqCheckboxName']:checked").each(function () {
+    //         ids.push(this.dataset.id);
+    //     });
+    //     if (ids.length == 0){
+    //         alert("请选择删除的数据");
+    //         return;
+    //     }
+    //     $solway.confirm({ message: '确定删除所选的逆变器？' }, () => {
+    //         deleteNBQ(ids)
+    //     });
+    // }
+
+    // //编辑逆变器成功回调
+    // $scope.$on('editNBQCallback',function(){
+    //     $scope.editNBQModel = false;
+    //     $scope.getNBQData();
+    // })
+
+    // //编辑逆变器取消回调
+    // $scope.$on("cancelNBQ",function(){
+    //     $scope.editNBQModel = false;
+    // })
+
+
+  
+    
+   
+});
