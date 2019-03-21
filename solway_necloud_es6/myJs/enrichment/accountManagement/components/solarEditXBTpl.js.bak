@@ -16,7 +16,8 @@ ajaxData({
         name:'POSTupdateDeviceXB',
         data: {},
         later: true,
-        onlyLatest: true
+        onlyLatest: true,
+        saveParam:false
     },
     
 }, {
@@ -30,7 +31,22 @@ ajaxData({
             await myAjaxData.timeout(0);
             $scope.$apply();
 
-            $scope.formData = angular.copy(data);
+            $scope.formData = {
+                id: data.id,
+                serialnumber: data.serialnumber,
+                code: data.code,
+                name: data.name,
+                pstationid: data.pstationid,
+                // factid: ,
+                address: data.address,
+                manufid: data.manufid,
+                productid: data.productid,
+                begindate: data.begindate,
+                enddate: data.enddate,
+                cycle: data.cycle,
+                timeout: data.timeout,
+                mainparameter: data.mainparameter
+            };
             if(data.manufid){
                 $scope.changemanufacturer();
             }

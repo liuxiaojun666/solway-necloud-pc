@@ -63,13 +63,11 @@ ajaxData({
         zTreeObj = $.fn.zTree.init($("#classifyTree"), setting, data);
 
         if (pid) {
-            console.log("有parrentId")
             let node = zTreeObj.getNodeByParam("id", pid);
             zTreeObj.expandNode(node, true);
             zTreeObj.checkNode(node, true, true, true);
         }
         if (id && data.flag) {//编辑
-            console.log("编辑")
             let node = zTreeObj.getNodeByParam("id", id);
             zTreeObj.setChkDisabled(node, true, false, true);
             zTreeObj.expandNode(node, false);
@@ -82,7 +80,6 @@ ajaxData({
             devicetype: 4,
             id:$scope.formData['id']
         }).then(res=>{
-            console.log(res)
             initZtree(res.treeData);
         });
     }
@@ -109,7 +106,6 @@ ajaxData({
             $scope.hideUpperLevel = true;
         }
         $scope.manufacturerList.getData({devicetype:type}).then(res=>{
-            console.log(res)
             $scope.deviceManufacturerList = res;
             if(res && res.length){
                 $scope.deviceManufacturerList.unshift({id :null,manufname : '-请选择-'});
@@ -119,8 +115,6 @@ ajaxData({
 
     // 初始
     $scope.$on('editOtherBroad',async(e,data)=>{
-        console.log(data)
-        
         if(data){
             $scope.formData = {};
             await myAjaxData.timeout(0);
@@ -128,6 +122,7 @@ ajaxData({
 
             $scope.formData = {
                 id:data.id,
+                serialnumber:data.serialnumber,
                 code: data.code,
                 name: data.name,
                 pstationid: data.pstationid,

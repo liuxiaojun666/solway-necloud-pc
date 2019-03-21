@@ -22,7 +22,8 @@ ajaxData({
         name:'POSTupdateDeviceNBQ',
         data: {},
         later: true,
-        onlyLatest: true
+        onlyLatest: true,
+        saveParam:false
     }
     
 }, {
@@ -42,7 +43,33 @@ ajaxData({
             await myAjaxData.timeout(0);
             $scope.$apply();
 
-            $scope.formData = angular.copy(data);
+            $scope.formData = {
+                id: data.id,
+                maskCode: data.maskCode,
+                batterygcount: data.batterygcount,
+                junid: data.junid,
+                serialnumber: data.serialnumber,
+                deviceSN: data.deviceSN,
+                code: data.code,
+                name: data.name,
+                pstationid: data.pstationid,
+                address: data.address,
+                manufid: data.manufid,
+                productid: data.productid,
+                capacity: data.capacity,
+                boxchangeid: data.boxchangeid,
+                realcapacity:data.realcapacity,
+                hasJBN: data.hasJBN,
+                hasJB:data.hasJB,
+                inverterroom: data.inverterroom,
+                invertergid: data.invertergid,
+                begindate: data.begindate,
+                enddate:data.enddate,
+                cycle: data.cycle,
+                timeout: data.timeout,
+                mainparameter: data.mainparameter,
+                repaircard: data.repaircard,
+            };
             if(data.manufid){
                 $scope.changemanufacturer();
             }
