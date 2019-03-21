@@ -46,6 +46,7 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
         destroyed: '=',
         tableExportFileName: '=',
         placeholder: '=',
+        checkboxOnchange: '=',
     },
     templateUrl: 'tpl/publicComponent/myTable.html' + window.stamp,
     link($scope, $element) {
@@ -81,10 +82,12 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
                 e.stopPropagation();
                 if (this.checked) Array.from($inputs()).forEach(v => v.checked = true);
                 else Array.from($inputs()).forEach(v => v.checked = false);
+                $scope.checkboxOnchange && $scope.checkboxOnchange(this.checked, $inputs());
             }
             function everyHandle(e) {
                 e.stopPropagation();
                 $element.find('th input:checkbox').prop('checked', Array.from($inputs()).every(v => v.checked === true));
+                $scope.checkboxOnchange && $scope.checkboxOnchange($element.find('th input:checkbox')[0].checked, $inputs());
             }
             $element.on('$destroy', () => {
                 $element.off('click', 'th input:checkbox', allHandle);

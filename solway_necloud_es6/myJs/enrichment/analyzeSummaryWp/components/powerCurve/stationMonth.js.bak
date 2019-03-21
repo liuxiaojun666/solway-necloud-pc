@@ -58,9 +58,78 @@ ajaxData(
         });
     };
 
+
+    $scope.analysis_wp_station_pe_month_devicelist.subscribe(() => {
+        $scope.column = [
+            {
+                title: '<label class="i-checks m-b-none"><input checked type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
+                dataIndex: 'eqid',
+                align: 'center',
+                width: '50px',
+                checkboxName: 'batchprocessing',
+                render(text) {
+                    return '<label class="i-checks m-b-none"><input checked data-identifies="' + text + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                }
+            },
+            {
+                title: '风机名称',
+                dataIndex: 'eq_name',
+                align: 'left',
+                sort: true,
+            },
+            {
+                title: '效率(%)',
+                dataIndex: 'pe_score',
+                align: 'right',
+                sort: true,
+            }
+        ];
+    });
+
+    $scope.analysis_wp_station_pe_month_devicelist.subscribe(res => {
+        $scope.turbinePEList.getData({
+            dataType: 2,
+            date: $scope.dateTime.showDate,
+            dateType: 2,
+            queryType: 3,
+            eqids: res.body.data.map(v => v.eqid).join()
+        });
+    });
+
+    $scope.trClick = (item, index, event) => {
+        $(event.target).parents('tr').css('background', '#fff').siblings().css('background', '')
+        // $scope.turbinePEList.res.names;
+        // $scope.turbinePEList.chart = {
+        //     ...$scope.turbinePEList.chart,
+        //     colors: []
+        // };
+    };
+
+    $scope.checkboxOnchange = (_all ,elements) => {
+        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies).join()
+        $scope.turbinePEList.getData({
+            dataType: 2,
+            date: $scope.dateTime.showDate,
+            dateType: 2,
+            queryType: 3,
+            eqids
+        });
+    };
+
+    $scope.turbinePEList.subscribe(res => {
+        $scope.turbinePEList.chart = {
+            types: [(new Array(Object.keys(res.body.names).length)).fill('line')],
+            xdata: res.body.x,
+            linenames: [Object.values(res.body.names)],
+            colors: [(new Array(Object.keys(res.body.names).length)).fill('#fff')],
+            ydatas: [Object.keys(res.body.names).map(v => res.body[v])]
+        };
+    });
+
     // 数据置空
     function setDataNull() {
         $scope.analysis_wp_station_pe_month_devicelist.res = null;
+        $scope.turbinePEList.res = null;
     }
 
 
