@@ -96,13 +96,22 @@ ajaxData(
         });
     });
 
-    $scope.trClick = (item, index, event) => {
-        $(event.target).parents('tr').css('background', '#fff').siblings().css('background', '')
-        // $scope.turbinePEList.res.names;
-        // $scope.turbinePEList.chart = {
-        //     ...$scope.turbinePEList.chart,
-        //     colors: []
-        // };
+    $scope.trClick = async (item, _index, event) => {
+        $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '')
+        const idIndex = Object.keys($scope.turbinePEList.res.body.names).findIndex(v => v === item.eqid + '');
+        const {colors} = $scope.turbinePEList.chart;
+        colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
+        $scope.turbinePEList.chart.display = false;
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+        await myAjaxData.timeout(0);
+        $scope.turbinePEList.chart = {
+            ...$scope.turbinePEList.chart,
+            colors,
+            activeId: item.eqid,
+            display: true
+        };
+        $scope.$apply();
     };
 
     $scope.checkboxOnchange = (_all ,elements) => {
@@ -117,12 +126,19 @@ ajaxData(
     };
 
     $scope.turbinePEList.subscribe(res => {
+        const { activeId } = $scope.turbinePEList.chart || {};
+        if (!res.body.x) return $scope.turbinePEList.chart = { activeId };
+        const eqids = Object.keys(res.body.names);
+        const colors = [(new Array(eqids.length)).fill('#fff')];
+        colors[0][eqids.findIndex(v => v === activeId + '')] = '#577BFF';
         $scope.turbinePEList.chart = {
-            types: [(new Array(Object.keys(res.body.names).length)).fill('line')],
+            display: true,
+            types: [(new Array(eqids.length)).fill('line')],
             xdata: res.body.x,
             linenames: [Object.values(res.body.names)],
-            colors: [(new Array(Object.keys(res.body.names).length)).fill('#fff')],
-            ydatas: [Object.keys(res.body.names).map(v => res.body[v])]
+            colors,
+            activeId,
+            ydatas: [eqids.map(v => res.body[v])]
         };
     });
 
