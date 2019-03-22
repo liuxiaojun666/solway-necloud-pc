@@ -7,22 +7,22 @@ ajaxData({
         onlyLatest: true
     }
 }, {
-    __serviceName__: 'importExcelTplService',
-})('importModelCtrl', ['$scope', 'importExcelTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    __serviceName__: 'importExcelTplWindService',
+})('importModelWindCtrl', ['$scope', 'importExcelTplWindService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
     
-    $scope.$on('importBroad',(e,data)=>{
+    $scope.$on('importWindBroad',(e,data)=>{
         $scope.type = data.modalType;
     })
     //保存
     $scope.saveImport = () =>{
         $scope.importExcel.getData({
-            excelFile:$('input[name=excelFile]')[0].files[0],
+            excelFile:$('input[name=excelFileWind]')[0].files[0],
             stid:$scope.stationId,
             deviceType:$scope.type
         }).then(res=>{
             if(res.code == 0){
                 toaster.pop('success','','上传成功');
-                $scope.$emit('importSuccessCallback');
+                $scope.$emit('importWindSuccessCallback');
             }else{
                 toaster.pop('error','','上传失败');
             }
@@ -31,6 +31,6 @@ ajaxData({
 
     //取消
     $scope.cancelImport = () =>{
-        $scope.$emit('importSuccessCallback');
+        $scope.$emit('importWindSuccessCallback');
     }
 });
