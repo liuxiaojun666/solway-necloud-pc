@@ -58,37 +58,37 @@ ajaxData({
         $scope.getTurbineData();
     });
 
-    // //导出模板---箱变、逆变器、汇流箱
-    // $scope.exportExcelData = type => {
-    //     const version = $('select[name=version' + type + ']').val();
-    //     let url = "PowerStation/downloadTemplate.htm";
-    //     url +='?stid='+$scope.stationId;
-    //     url += '&version='+version;
-    //     url +='&deviceType='+type;
-    //     window.location.href = url;
-    // }
+    //导出模板---测风塔，风机
+    $scope.exportExcelData = type => {
+        const version = $('select[name=version' + type + ']').val();
+        let url = "PowerStation/downloadTemplate.htm";
+        url +='?stid='+$scope.stationId;
+        url += '&version='+version;
+        url +='&deviceType='+type;
+        window.location.href = url;
+    }
 
-    // //导入模板---
-    // $scope.importExcelData = (type) =>{
-    //     $scope.$broadcast('importBroad',{modalType:type});
-    //     $scope.importExcelModel = true;
-    // }
+    //导入模板---
+    $scope.importExcelData = (type) =>{
+        $scope.$broadcast('importWindBroad',{modalType:type});
+        $scope.importExcelModelWind = true;
+    }
 
-    // //导出
-    // $scope.export = () =>{
-    //     let url = "PowerStation/downloadPowerData.htm";
-    //     url +='?id='+$scope.stationId;
-	// 	url += '&version='+ $scope.exportVersion;
-	// 	url +='&sign=1';
-	// 	window.location.href = url;
+    //导出
+    $scope.export = () =>{
+        let url = "PowerStation/downloadPowerData.htm";
+        url +='?id='+$scope.stationId;
+		url += '&version='+ $scope.exportVersion;
+		url +='&sign=1';
+		window.location.href = url;
         
-    // }
+    }
 
     /* ********************* 测风塔部分 ***********************/
 
-    // $scope.$on('importSuccessCallback',function(){
-    //     $scope.importExcelModel = false;
-    // })
+    $scope.$on('importWindSuccessCallback',function(){
+        $scope.importExcelModelWind = false;
+    })
 
     $scope.columnWindTower = [
         {
