@@ -1,0 +1,34 @@
+ajaxData({
+    // 级别
+    bigDataExportLevel: {
+        name: 'GETbigDataExportLevel',
+        data: {
+            dictType: 'BIGDATA_EXPORT_LEVEL'
+        }
+    },
+
+}, {})('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+    
+    historicalRecord.init();// 历史记录 初始化
+    $scope.beforeLoading = true; // 页面loading
+    $scope.moduleName = '专家分析';//当前页面名称；
+    $scope.endDate = new Date((+new Date) - 1000 * 60 * 60 * 24); // 日历可选 的截止日期
+    historyInitCallback();
+    
+    $scope.value = 5;
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const { } = historiData;
+        $scope.beforeLoading = false;
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+    };
+    
+    $scope.$on('$destroy', () => {
+        
+    });
+
+
+});
+

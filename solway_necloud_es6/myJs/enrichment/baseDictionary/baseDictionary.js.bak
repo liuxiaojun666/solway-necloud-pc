@@ -1,0 +1,163 @@
+ajaxData({
+    baseDictionaryList: {
+        name: 'GETbaseDictionaryList',
+        data: {},
+        later: true
+    },
+    delDictionary: {
+        name: 'delDictionary',
+        data: {},
+        later: true
+    },
+
+}, {})('baseDictionaryCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+    historicalRecord.init();// 历史记录 初始化
+    historicalRecord.get();//获取记录
+    $scope.moduleName = '字典管理';//当前页面名称
+    
+
+    //获取表格列表数据
+    $scope.getList = () => {
+        $scope.baseDictionaryList.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            keyWords: $scope.keyWords,
+            dictCode: $scope.dictCode,
+            dictName: $scope.dictName
+        })
+    }
+    $scope.getList();
+
+    //新增按钮
+    $scope.newDiction = () => {
+        $scope.newStationModel = true;
+        $scope.$broadcast('broadAddStation', { 'id': '' });
+    }
+
+    //删除功能抽离
+    const delDictionaryFun = (param) => {
+        $scope.delDictionary.getData(param)
+            .then((res) => {
+                if (res.key == 0) {
+                    toaster.pop('success', '', '删除成功');
+                    $scope.getList();
+                } else {
+                    toaster.pop('error', '', '删除失败');
+                }
+            })
+    }
+
+    //删除按钮
+    const deleteDictionary = (id) => {
+        delDictionaryFun({ ids: id });
+    }
+
+    //批量删除
+    $scope.batchDelete = () => {
+        const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
+        if (ids.length == 0) {
+            toaster.pop('error', '', '请至少选择一条字典');
+        } else {
+            $solway.confirm({ message: '确定删除字典吗？' }, () => {
+                delDictionaryFun({ ids: ids.join() });
+            });
+        }
+    }
+
+    //更多查询
+    $scope.searchFlag = true;
+    $scope.SearchText = '更多查询';
+
+    $scope.moreSearch = () => {
+        $scope.searchFlag = !$scope.searchFlag;
+        $scope.SearchText = $scope.searchFlag ? '更多查询' : '收起';
+    }
+
+    //表格的表头设置
+    $scope.column = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'batchprocessing',
+            render(text, record, index) {
+                return `<label class="i-checks m-b-none"><input data-identifies="${record.id}" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>`;
+            }
+        },
+        {
+            title: '编号',
+            dataIndex: 'id',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '字典类型',
+            width: '25%',
+            dataIndex: 'dictType',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '字典名',
+            dataIndex: 'dictName',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '字典编码',
+            dataIndex: 'dictCode',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '字典英文名',
+            dataIndex: 'dictEnName',
+            align: 'center'
+        }, {
+            title: '描述',
+            dataIndex: 'description',
+            align: 'center'
+        }, {
+            title: '字典值',
+            dataIndex: 'dictValue',
+            align: 'center'
+        },
+        {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render: function () {
+                function render(text, item, index) {
+                    return '\n                <div class="clearfix">\n                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="\u6388\u6743"></i>\n                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>\n                </div>\n                ';
+                }
+
+                return render;
+            }()
+        }];
+
+    //点击表格后的事件委托（设置按钮、删除按钮）
+    $scope.trClick = (item, index, event) => {
+        if (event.target.className.includes('icon-bianji-copy')) {
+            $scope.newStationModel = true;
+            $scope.$broadcast('broadAddStation', { 'id': item.id })
+        } else if (event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此字典？' }, () => {
+                deleteDictionary(item.id);
+            });
+        }
+    }
+
+
+    //取消 新增后的回调
+    $scope.$on('cancelCallback', () => {
+        $scope.newStationModel = false;
+    });
+
+    $scope.$on('addCallback', () => {
+        $scope.newStationModel = false;
+        $scope.getList();
+    });
+
+    //头部折叠框 显示
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    }, 2000);
+});
