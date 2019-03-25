@@ -1,0 +1,70 @@
+ajaxData({
+    AddbaseDictionary:{
+        name:'AddbaseDictionary',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    baseDictionaryDetail:{
+        name:'baseDictionaryDetail',
+        data: {},
+        later: true
+    },
+}, {
+    __serviceName__: 'newStationTplService',
+})('newStationTplCtrl', ['$scope', 'newStationTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
+
+    $scope.endDate = new Date('2099');
+    
+    const clearDateTime = () =>{
+        $scope.startProductTime = null;
+        $scope.endProductTime = null;
+    }
+
+    const getDictionaryDetail = () =>{
+        $scope.baseDictionaryDetail.getData({id:$scope.id}).then(res=>{
+            $scope.formData = res.data;
+        })
+    }
+    //根据广播传递的值，判断是新增 还是 编辑
+    $scope.$on('broadAddStation',(index,v)=>{
+        clearDateTime();
+        $scope.id = v.id;
+        if($scope.id){
+            getDictionaryDetail();
+        }else{
+            $scope.formData = {};
+            $scope.startProductTime = new Date();
+            $scope.endProductTime = new Date((new Date).setDate((new Date).getDate() + 7));
+        }
+    });
+
+    //保存
+    $scope.save = () =>{
+        if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
+
+        let formData = {
+            id: $scope.id,
+            dictType: $scope.formData.dictType,
+            dictName: $scope.formData.dictName,
+            dictCode: $scope.formData.dictCode,
+            dictEnName: $scope.formData.dictEnName,
+            description: $scope.formData.description,
+            dictValue: $scope.formData.dictValue
+        }
+
+        $scope.AddbaseDictionary.getData(formData).then(res=>{
+            if(res.key == 0){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('addCallback');
+            }else{
+                toaster.pop('error','','保存失败');
+            }
+        })
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+    }
+});
