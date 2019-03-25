@@ -1,6 +1,5 @@
 let gulp = require('gulp'),
 	replace = require('gulp-replace'),
-	header = require('gulp.header'),
 	babel = require('gulp-babel'),
 	livereload = require('gulp-livereload'),
 	gulpSequence = require('gulp-sequence'),
@@ -14,7 +13,6 @@ let gulp = require('gulp'),
 	rename = require("gulp-rename"),
 	del = require('del'),
 	fs = require('fs'),
-	path = require('path'),
 	autoprefixer = require('gulp-autoprefixer'),
 	uglify = require('gulp-uglify'),
 	pump = require('pump'),
@@ -135,7 +133,7 @@ gulp.task('watch', [], () => {
 })
 
 
-gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:888'))
+gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:8888'))
 gulp.task('startNginx', () => cmd.run(`cd E:\\tools\\nginx-1.14.2 && start nginx`))
 
 gulp.task('updateCode', () => {
