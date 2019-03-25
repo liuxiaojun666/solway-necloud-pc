@@ -1,0 +1,126 @@
+ajaxData(
+    {
+        turbineVPPoints: {
+            name: 'GETturbineVPPoints',
+            data: {},
+            later: true
+        },
+        turbineVPList: {
+            name: 'GETturbineVPList',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'runningStateEquipmentDetailsService',
+    }
+)('runningStateEquipmentDetailsCtrl', ['$scope', 'runningStateEquipmentDetailsService'], ($scope) => {
+    let myChart;
+    $scope.$on('equipmentDetails', (_e, { eqid, eq_name }) => {
+        $scope.eq_name = eq_name;
+        $scope.turbineVPPoints.res = null;
+        $scope.turbineVPList.res = null;
+        myChart && echarts.dispose(myChart);
+        myChart = null;
+        ['turbineVPPoints', 'turbineVPList'].forEach(v => $scope[v].getData({
+            dateType: 2,
+            date: $scope.dateTime.showDate,
+            queryType: 3,
+            eqid
+        }));
+    });
+
+    $scope.turbineVPList.tooltipFormatter = (params, _ticket, _callback) => {
+        return params[0].axisId.substr(0, 3) + '：' + params[0].name + 'm/s' + '<br/>' + params.map(v => v.seriesName + '：   ' + v.value + '<br/>').join('');
+    };
+
+    $scope.turbineVPPoints.subscribe(res => {
+        myChart = echarts.init(document.getElementById('scatterChart'));
+        const option = {
+            color: ['#75D3FF', '#FF7575', '#F9D79C', '#A39CF9', '#577BFF'],
+            grid: {
+                left: '40',
+                right: '60',
+                bottom: '40',
+                containLabel: true
+            },
+            tooltip: {
+                showDelay: 0,
+                formatter: function (params) {
+                    if (params.value.length > 1) {
+                        return params.seriesName + ' :<br/>' + params.value[0] + 'm/s; ' + params.value[1] + 'kW ';
+                    }
+                    else {
+                        return params.seriesName + ' :<br/>' + params.name + ' : ' + params.value + 'kW ';
+                    }
+                },
+            },
+            legend: {
+                data: ['停待机', '爬坡', '转矩控制', '满发变桨', '限负荷'],
+                left: 'center',
+                top: 30,
+                textStyle: {
+                    fontSize: 12,
+                    color: '#fffeff'
+                },
+            },
+            xAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    axisLabel: {
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '风速',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    axisLabel: {
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '功率',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            series: ['停待机', '爬坡', '转矩控制', '满发变桨', '限负荷'].map(v => ({
+                name: v,
+                type: 'scatter',
+                data: res.body[v]
+            }))
+        };
+        myChart.setOption(option, true);
+    });
+
+    $scope.$on('$destroy', () => {
+        myChart && echarts.dispose(myChart);
+        myChart = null;
+    });
+
+});
