@@ -135,11 +135,11 @@ gulp.task('watch', [], () => {
 })
 
 
-gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:888'))
-gulp.task('startNginx', () => cmd.run(`cd E:\\tools\\nginx-1.14.2 && start nginx`))
+gulp.task('openChrome', () => cmd.run('start "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" http://127.0.0.1:8888'))
+gulp.task('startNginx', () => cmd.run(`cd D:\\tool\\nginx-1.14.2 && start nginx`))
 
 gulp.task('updateCode', () => {
-	svnUpdate()
+	// svnUpdate()
 
 	cmd.get(`git pull`, (err, data, stderr) => {
 		if (err) return console.log(`git pull error\n`, err, data, stderr)
