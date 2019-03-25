@@ -23,29 +23,43 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
-    
-    
-    
-    // updateDeviceOther:{
-    //     name:'POSTupdateDeviceOther',
-    //     data: {},
-    //     later: true,
-    //     onlyLatest: true,
-    //     saveParam:false
-    // },
+    taskTypeList:{
+        name:'GETtaskTypeList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    updateDataInit:{
+        name:'POSTupdateDataInit',
+        data: {},
+        later: true,
+        onlyLatest: true,
+        saveParam:false
+    },
     
 }, {
     __serviceName__: 'editDataInitTplService',
 })('editDataInitTplModelCtrl', ['$scope', 'editDataInitTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
    
+    $scope.endDate = new Date('2099');
+
+    const getTaskTypeData = () =>{
+        $scope.taskTypeList.getData().then(res=>{
+            if(res.code == 0 && res.data && res.data.types){
+                $scope.taskList = res.data.types;
+                $scope.taskList.unshift({key:"",name:'请选择'});
+            }
+        });
+    }
+
     //公司列表
     const initCompanyList = () => {
         $scope.companyListData.getData({
         }).then(res => {
-            console.log(res)
-            $scope.companyList = res;
-            // $scope.selectedCompanyId = res[0].comId;
-            // $scope.initModulesList();
+            if(res && res.length){
+                $scope.companyList = res;
+                $scope.companyList.unshift({comId:"",comName:'请选择'});
+            }
         })
     }
 
@@ -54,38 +68,45 @@ ajaxData({
         $scope.stationListByComid.getData({
             companyid: $scope.formData.comId
         }).then(res => {
-            $scope.stationList = res;
-            // if ($scope.stationList.length){
-                
-            // }
+            if(res && res.length){
+                $scope.stationList = res;
+                $scope.stationList.unshift({id:"",stationname:'请选择', stationClass: ''});
+            }
         })
     }
 
-    //选择完电站
-    $scope.changeStation = () =>{
+    //设备类型列表
+    $scope.getDeviceTypeList = () =>{
         angular.forEach($scope.stationList,(item,v) => {
             if(item.id == $scope.formData.sid){
                 $scope.stationClass = item.stationClass;
             }
         });
-        $scope.getDeviceTypeList();
-    }
-
-    //设备类型列表
-    $scope.getDeviceTypeList = () =>{
+        $scope.deviceTypeDataList = [];
         $scope.deviceTypeList.getData({'stationClass':$scope.stationClass}).then(res=>{
-            console.log(res)
+            if(res.code == 0 && res.body){
+                let data = res.body;
+                angular.forEach(data,(v,key,item) => {
+                    $scope.deviceTypeDataList.push({'id':key,'name':v})
+                });
+                $scope.deviceTypeDataList.unshift({'id':'','name':'请选择'});
+            }
         });
     }
 
     //设备列表
-    $scope.changeDeviceType = deviceType =>{
+    $scope.getDeviceList = () =>{
+        let deviceType = $scope.formData.deviceType;
         $scope.selectDevicesByStation.getData({
-            stid: $scope.pstationid,
+            stid: $scope.formData.sid,
             deviceType: deviceType,
         }).then(res=>{
-            const selectAllArr = [{deviceType:"",id: '0',name: "",serialNumber: ''}]
-            $scope.currentDeviceList = selectAllArr.concat(res);
+            if(res && res.length){
+                $scope.deviceList = res;
+                $scope.deviceList.unshift({id:'',name:'请选择', serialNumber: '', deviceType: ''});
+            }else{
+                $scope.deviceList = []
+            }
         });
     }
 
@@ -93,6 +114,7 @@ ajaxData({
     // 初始
     $scope.$on('editDataInitBroad',async(e,data)=>{
         initCompanyList();
+        getTaskTypeData();
         if(data){
             $scope.formData = {};
             await myAjaxData.timeout(0);
@@ -100,24 +122,31 @@ ajaxData({
 
             $scope.formData = {
                 id:data.id,
-                serialnumber:data.serialnumber,
-                code: data.code,
-                name: data.name,
-                pstationid: data.pstationid,
-                address: data.address,
-                devicetype: data.devicetype,
-                pname: data.pname,
-                pid: data.pid,
-                manufid: data.manufid,
-                productid: data.productid,
-              
+                serialNumber:data.serialNumber,
+                comId: data.comId,
+                did:data.did,
+                sid: data.sid,
+                stationClass:data.stationClass,
+                deviceType:data.deviceType,
+                type: data.type
             };
 
+            if(data.comId){
+                $scope.getStationList();
+            }
 
-            $scope.formData['begindate'] = data.begindate?new Date(data.begindate):new Date();
-            $scope.formData['enddate'] = data.enddate?new Date(data.enddate):new Date();
-            if(!data.begindate) $scope.formData['begindate'].showDate = '';
-            if(!data.enddate) $scope.formData['enddate'].showDate = '';
+            if(data.sid){
+                $scope.getDeviceTypeList();
+            }
+
+            if(data.deviceType){
+                $scope.getDeviceList();
+            }
+
+            $scope.formData['beginTime'] = data.beginTime?new Date(data.beginTime):new Date();
+            $scope.formData['endTime'] = data.endTime?new Date(data.endTime):new Date();
+            if(!data.beginTime) $scope.formData['beginTime'].showDate = '';
+            if(!data.endTime) $scope.formData['endTime'].showDate = '';
 
             await myAjaxData.timeout(0);
             $scope.$apply();
@@ -125,14 +154,10 @@ ajaxData({
             $scope.formData = {};
             await myAjaxData.timeout(0);
             $scope.$apply();
-            $scope.formData['begindate'] = new Date();
-            $scope.formData['enddate'] = new Date();
-            $scope.formData['begindate'].showDate = '';
-            $scope.formData['enddate'].showDate = '';
-            $scope.formData['pstationid'] = $scope.stationId;
-
-            $scope.formData['devicetype'] = 4;
-            $scope.initManufactureData(4);
+            $scope.formData['beginTime'] = new Date();
+            $scope.formData['endTime'] = new Date();
+            $scope.formData['beginTime'].showDate = '';
+            $scope.formData['endTime'].showDate = '';
 
             await myAjaxData.timeout(0);
             $scope.$apply();
@@ -141,28 +166,29 @@ ajaxData({
        
     });
 
-    // $scope.showTreeSelect = () =>{
-    //     $scope.ifShowTree = $scope.ifShowTree?false:true;
-    // }
-    //  //保存
-    // $scope.saveOther = () =>{
-    //     if (!$solway.formValidation($scope.formData, '.editOtherTpl', toaster)) return;//校验非空
+     //保存
+    $scope.save = () =>{
+        if (!$solway.formValidation($scope.formData, '.editDataInitTpl', toaster)) return;//校验非空
 
-    //     $scope.formData['begindate'] = $scope.formData['begindate']?$scope.formData['begindate'].showDate:'' ;
-    //     $scope.formData['enddate']   = $scope.formData['enddate']?$scope.formData['enddate'].showDate:'';
+        $scope.formData['beginTime'] = $scope.formData['beginTime']?$scope.formData['beginTime'].showDate:'' ;
+        $scope.formData['endTime']   = $scope.formData['endTime']?$scope.formData['endTime'].showDate:'';
+        $scope.formData['stationClass'] = $scope.stationClass;
 
-    //     $scope.updateDeviceOther.getData($scope.formData).then(res=>{
-    //         if(res.type == 'success'){
-    //             toaster.pop('success','','保存成功');
-    //             $scope.$emit('editOtherCallback');
-    //         }else{
-    //             toaster.pop('error', '','保存失败')
-    //         }
-    //     });
-    // }
+        $scope.updateDataInit.getData($scope.formData).then(res=>{
+            if(res.code == '0'){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('editCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
 
-    // //取消
-    // $scope.cancelOther = () =>{
-    //     $scope.$emit('cancelOther');
-    // }
+     //取消
+     $scope.cancel = () =>{
+        $scope.$emit('cancel');
+    }
+
+    
+
 });
