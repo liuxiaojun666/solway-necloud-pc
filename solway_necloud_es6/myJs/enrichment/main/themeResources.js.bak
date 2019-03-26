@@ -8,23 +8,23 @@ ajaxData(
             name: 'GETpvwpStationOverview',
             data: {}
         },
-        home_pv_company_rad_year_stationlist: {
-            name: 'GEThome_pv_company_rad_year_stationlist',
+        home_pv_company_rad_month_stationlist: {
+            name: 'GEThome_pv_company_rad_month_stationlist',
             data: {},
             later: true
         },
-        home_pv_company_real_hours_year_stationlist: {
-            name: 'GEThome_pv_company_real_hours_year_stationlist',
+        home_pv_company_real_hours_month_stationlist: {
+            name: 'GEThome_pv_company_real_hours_month_stationlist',
             data: {},
             later: true
         },
-        home_wp_company_ws_avg_year_stationlist: {
-            name: 'GEThome_wp_company_ws_avg_year_stationlist',
+        home_wp_company_ws_avg_month_stationlist: {
+            name: 'GEThome_wp_company_ws_avg_month_stationlist',
             data: {},
             later: true
         },
-        home_wp_company_real_hours_year_stationlist: {
-            name: 'GEThome_wp_company_real_hours_year_stationlist',
+        home_wp_company_real_hours_month_stationlist: {
+            name: 'GEThome_wp_company_real_hours_month_stationlist',
             data: {},
             later: true
         },
@@ -40,12 +40,12 @@ ajaxData(
         $scope.stClassLIst.res.stClass02 = res.data.some(v => v.id === '02');
     });
     $scope.stClassLIst.subscribe(res => {
-        const date = new Date().getFullYear();
+        const date = new Date().Format('yyyy-MM-dd').substr(0, 7);
         [
-            'home_pv_company_rad_year_stationlist',
-            'home_pv_company_real_hours_year_stationlist',
-            'home_wp_company_ws_avg_year_stationlist',
-            'home_wp_company_real_hours_year_stationlist',
+            'home_pv_company_rad_month_stationlist',
+            'home_pv_company_real_hours_month_stationlist',
+            'home_wp_company_ws_avg_month_stationlist',
+            'home_wp_company_real_hours_month_stationlist',
         ].forEach(element => $scope[element].getData({
             queryCode: [element],
             queryType: 1,
@@ -53,20 +53,20 @@ ajaxData(
         }));
     });
 
-    $scope.home_pv_company_rad_year_stationlist.subscribe(res => {
-        $scope.home_pv_company_rad_year_stationlist.res.body.data = res.body.data.sort((a, b) => b.rad_chk - a.rad_chk);
+    $scope.home_pv_company_rad_month_stationlist.subscribe(res => {
+        $scope.home_pv_company_rad_month_stationlist.res.body.data = res.body.data.sort((a, b) => b.rad_chk - a.rad_chk);
     });
 
-    $scope.home_pv_company_real_hours_year_stationlist.subscribe(res => {
-        $scope.home_pv_company_real_hours_year_stationlist.res.body.data = res.body.data.sort((a, b) => b.real_hours - a.real_hours);
+    $scope.home_pv_company_real_hours_month_stationlist.subscribe(res => {
+        $scope.home_pv_company_real_hours_month_stationlist.res.body.data = res.body.data.sort((a, b) => b.real_hours - a.real_hours);
     });
 
-    $scope.home_wp_company_ws_avg_year_stationlist.subscribe(res => {
-        $scope.home_wp_company_ws_avg_year_stationlist.res.body.data = res.body.data.sort((a, b) => b.ws_avg - a.ws_avg);
+    $scope.home_wp_company_ws_avg_month_stationlist.subscribe(res => {
+        $scope.home_wp_company_ws_avg_month_stationlist.res.body.data = res.body.data.sort((a, b) => b.ws_avg - a.ws_avg);
     });
 
-    $scope.home_wp_company_real_hours_year_stationlist.subscribe(res => {
-        $scope.home_wp_company_real_hours_year_stationlist.res.body.data = res.body.data.sort((a, b) => b.real_hours - a.real_hours);
+    $scope.home_wp_company_real_hours_month_stationlist.subscribe(res => {
+        $scope.home_wp_company_real_hours_month_stationlist.res.body.data = res.body.data.sort((a, b) => b.real_hours - a.real_hours);
     });
 
     $scope.pvwpStationOverview.subscribe(async res => {

@@ -4,23 +4,23 @@ ajaxData(
             name: 'GETstClassLIst',
             data: {}
         },
-        home_pv_company_pgc_year_stationlist: {
-            name: 'GEThome_pv_company_pgc_year_stationlist',
+        home_pv_company_pgc_month_stationlist: {
+            name: 'GEThome_pv_company_pgc_month_stationlist',
             data: {},
             later: true
         },
-        home_pv_company_pr_year_stationlist: {
-            name: 'GEThome_pv_company_pr_year_stationlist',
+        home_pv_company_pr_month_stationlist: {
+            name: 'GEThome_pv_company_pr_month_stationlist',
             data: {},
             later: true
         },
-        home_wp_company_pgc_year_stationlist: {
-            name: 'GEThome_wp_company_pgc_year_stationlist',
+        home_wp_company_pgc_month_stationlist: {
+            name: 'GEThome_wp_company_pgc_month_stationlist',
             data: {},
             later: true
         },
-        home_wp_company_pba_year_stationlist: {
-            name: 'GEThome_wp_company_pba_year_stationlist',
+        home_wp_company_pba_month_stationlist: {
+            name: 'GEThome_wp_company_pba_month_stationlist',
             data: {},
             later: true
         },
@@ -41,12 +41,12 @@ ajaxData(
         $scope.stClassLIst.res.stClass02 = res.data.some(v => v.id === '02');
     });
     $scope.stClassLIst.subscribe(res => {
-        const date = new Date().getFullYear();
+        const date = new Date().Format('yyyy-MM-dd').substr(0, 7);
         [
-            'home_pv_company_pgc_year_stationlist',
-            'home_pv_company_pr_year_stationlist',
-            'home_wp_company_pgc_year_stationlist',
-            'home_wp_company_pba_year_stationlist',
+            'home_pv_company_pgc_month_stationlist',
+            'home_pv_company_pr_month_stationlist',
+            'home_wp_company_pgc_month_stationlist',
+            'home_wp_company_pba_month_stationlist',
         ].forEach(element => $scope[element].getData({
             queryCode: [element],
             queryType: 1,
