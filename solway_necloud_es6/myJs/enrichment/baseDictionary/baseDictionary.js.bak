@@ -12,19 +12,36 @@ ajaxData({
 
 }, {})('baseDictionaryCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
     historicalRecord.init();// 历史记录 初始化
-    historicalRecord.get();//获取记录
+    $scope.beforeLoading = true;
+    historyInitCallback();
     $scope.moduleName = '字典管理';//当前页面名称
-    
+
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get(); //获取记录
+        const { keyWords,dictCode,dictName } = historiData;
+
+        $scope.keyWords = keyWords;
+        $scope.dictCode = dictCode;
+        $scope.dictName = dictName;
+
+        $scope.beforeLoading = false;
+    };
 
     //获取表格列表数据
     $scope.getList = () => {
         $scope.baseDictionaryList.getData({
             pageIndex: 0,
             pageSize: 10,
-            keyWords: $scope.keyWords,
+            dictName: $scope.keyWords,
             dictCode: $scope.dictCode,
             dictName: $scope.dictName
         })
+        historicalRecord.set({
+            keyWords: $scope.keyWords,
+            dictCode: $scope.dictCode,
+            dictName: $scope.dictName
+        });
     }
     $scope.getList();
 
@@ -34,22 +51,19 @@ ajaxData({
         $scope.$broadcast('broadAddStation', { 'id': '' });
     }
 
-    //删除功能抽离
-    const delDictionaryFun = (param) => {
-        $scope.delDictionary.getData(param)
-            .then((res) => {
-                if (res.key == 0) {
-                    toaster.pop('success', '', '删除成功');
-                    $scope.getList();
-                } else {
-                    toaster.pop('error', '', '删除失败');
-                }
-            })
-    }
+    //删除接口的 统一处理
+    $scope.delDictionary.subscribe(res => {
+        if (res.key == 0) {
+            toaster.pop('success', '', '删除成功');
+            $scope.getList();
+        } else {
+            toaster.pop('error', '', '删除失败');
+        }
+    });
 
     //删除按钮
     const deleteDictionary = (id) => {
-        delDictionaryFun({ ids: id });
+        $scope.delDictionary.getData({ ids: id })
     }
 
     //批量删除
@@ -59,7 +73,7 @@ ajaxData({
             toaster.pop('error', '', '请至少选择一条字典');
         } else {
             $solway.confirm({ message: '确定删除字典吗？' }, () => {
-                delDictionaryFun({ ids: ids.join() });
+                $scope.delDictionary.getData({ ids: ids.join() });
             });
         }
     }
@@ -126,7 +140,7 @@ ajaxData({
             sort: !0,
             render: function () {
                 function render(text, item, index) {
-                    return '\n                <div class="clearfix">\n                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="\u6388\u6743"></i>\n                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>\n                </div>\n                ';
+                    return `<div class="clearfix"><i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="\u6388\u6743"></i><i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i></div>`;
                 }
 
                 return render;

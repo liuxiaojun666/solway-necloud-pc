@@ -1,0 +1,77 @@
+ajaxData({
+    AddbaseDictionary: {
+        name: 'AddbaseDictionary',
+        data: {},
+        later: true
+    }
+}, {
+        __serviceName__: 'newStationTplService',
+    })('horizonIndexCtrl', ['$scope', 'newStationTplService', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+
+        $scope.endDate = new Date('2099');
+
+        const clearDateTime = () => {
+            $scope.startProductTime = null;
+            $scope.endProductTime = null;
+        }
+
+        const getDictionaryDetail = () => {
+            $scope.baseDictionaryDetail.getData({ id: $scope.id }).then(res => {
+                $scope.formData = res.data;
+            })
+        }
+
+        //保存
+        $scope.save = () => {
+            if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
+
+            let formData = {
+                id: $scope.id,
+                dictType: $scope.formData.dictType,
+                dictName: $scope.formData.dictName,
+                dictCode: $scope.formData.dictCode,
+                dictEnName: $scope.formData.dictEnName,
+                description: $scope.formData.description,
+                dictValue: $scope.formData.dictValue
+            }
+
+            $scope.AddbaseDictionary.getData(formData).then(res => {
+                if (res.key == 0) {
+                    toaster.pop('success', '', '保存成功');
+                    $scope.$emit('addCallback');
+                } else {
+                    toaster.pop('error', '', '保存失败');
+                }
+            })
+        }
+        //获取父级发送的横轴指标 选择的option
+        $scope.$on('horizonIndexNum',(index,item)=>{
+            var a = document.getElementsByClassName("ce-box")[item-1];
+            a.getElementsByTagName('input').checked = true;
+        })
+        //左侧多选按钮->右侧 穿梭
+        $scope.shuttle = () => {
+            $scope.ids = document.querySelectorAll('[name=choseItem]'):: [].filter(item => item.checked).map(item => item.dataset.identifies);
+            console.log($scope.ids)
+            $scope.values = document.querySelectorAll('[name=choseItem]'):: [].filter(item => item.checked).map(item => item.dataset.values);
+            console.log($scope.values)
+        }
+
+        //右侧删除小按钮
+        $scope.delRight = (index) => {
+            $scope.values.splice(index, 1);
+            console.log($scope.values)
+        }
+
+        //点击改变颜色
+        $scope.actived = 'rgba(49, 255, 199, 1)';
+        $scope.activedFlag = false;
+        $scope.tongBi = () => {
+            $scope.activedFlag = !$scope.activedFlag;
+        }
+
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('cancelCallback');
+        }
+    });
