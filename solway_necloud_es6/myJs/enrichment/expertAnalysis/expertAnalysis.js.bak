@@ -8,27 +8,106 @@ ajaxData({
     },
 
 }, {})('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
-    
+
     historicalRecord.init();// 历史记录 初始化
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '专家分析';//当前页面名称；
     $scope.endDate = new Date((+new Date) - 1000 * 60 * 60 * 24); // 日历可选 的截止日期
     historyInitCallback();
-    
-    $scope.value = 5;
+
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
         const historiData = historicalRecord.get();
-        const { } = historiData;
+        const {
+            startDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
+            endDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
+        } = historiData;
+        $scope.startDate = startDate;
+        $scope.endDate = endDate;
         $scope.beforeLoading = false;
         await myAjaxData.timeout(0);
         $scope.$apply();
     };
-    
-    $scope.$on('$destroy', () => {
-        
+
+    //图表函数组
+    function chartsOne() {
+        var dom = document.getElementById("container");
+        var myChart = echarts.init(dom);
+        var app = {};
+        var option = null;
+        option = {
+            xAxis: {
+                //改变x轴字体颜色为白色
+                axisLabel: {
+                    show: true,
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                //去掉x轴分隔线
+                splitLine: {
+                    show: false
+                }
+
+            },
+            yAxis: {
+                axisLabel: {
+                    show: true,
+                    textStyle: {
+                        color: '#fff'
+                    }
+                }
+            },
+            series: [{
+                symbolSize: 20,
+                data: [
+                    [10.0, 8.04],
+                    [8.0, 6.95],
+                    [13.0, 7.58],
+                    [9.0, 8.81],
+                    [11.0, 8.33],
+                    [14.0, 9.96],
+                    [6.0, 7.24],
+                    [4.0, 4.26],
+                    [12.0, 10.84],
+                    [7.0, 4.82],
+                    [5.0, 5.68]
+                ],
+                type: 'scatter'
+            }],
+            grid: {
+                top: "30px",
+                left: "40px",
+                right: "30px",
+                bottom: "30px"
+            }
+        };
+        ;
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    }
+    chartsOne();
+
+    //选中下拉框 弹出框
+    $scope.horizonIndexChange = () => {
+        var mySelect = document.getElementById("horizonIndex");
+        var index = mySelect.selectedIndex;
+        console.log(index)
+        $scope.$broadcast('horizonIndexNum',index);
+        if (mySelect.options[1].selected || mySelect.options[2].selected) {
+            $scope.horizonIndexModel = true;
+        }
+    }
+
+
+    //取消 新增后的回调
+    $scope.$on('cancelCallback', () => {
+        $scope.horizonIndexModel = false;
     });
 
-
+    $scope.$on('addCallback', () => {
+        $scope.horizonIndexModel = false;
+    });
 });
 
