@@ -62,7 +62,12 @@ ajaxData({
         //         return;
         //     }
         // }
+        if($scope.savePlanPowerLoading) return;
+        $scope.savePlanPowerLoading = true;
+
         $scope.planPowerSave.getData($scope.planPowerListData).then(res=>{
+            $scope.savePlanPowerLoading = false;
+
             if(res.code == 0){
                 toaster.pop('success','','保存成功');
                 $scope.$emit('savePlanPowerCallback');

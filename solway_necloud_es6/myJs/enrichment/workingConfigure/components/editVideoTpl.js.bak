@@ -29,9 +29,14 @@ ajaxData({
 
     // //保存
     $scope.saveVideo = () =>{
+        if($scope.saveVideoLoading) return;
+
+        $scope.saveVideoLoading = true;
         if (!$solway.formValidation($scope.formData, '.addVideoModelTpl', toaster)) return;//校验非空
 
         $scope.videoConfigureSave.getData($scope.formData).then(res=>{
+            $scope.saveVideoLoading = false;
+
             if(res.key == 0){
                 toaster.pop('success','','保存成功');
                 $scope.$emit('saveVideoCallback');
