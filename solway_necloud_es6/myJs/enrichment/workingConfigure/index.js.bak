@@ -302,6 +302,8 @@ ajaxData({
 
     //保存气象仪配置信息
     $scope.saveAerograph = () =>{
+        if($scope.saveAerographLoading) return;
+        $scope.saveAerographLoading = true;
         let formData = {
             isborrow: $scope.isborrow,
             weatherdetail: $scope.weatherdetail,
@@ -313,6 +315,7 @@ ajaxData({
             formData['aroundid'] = 'on';
             if(!$scope.aerographId){
                 toaster.pop('error','','请选择要引用的气象仪');
+                $scope.saveAerographLoading = false;
                 return;
             }
             formData['borrowpstationid'] = $scope.borrowpstationid;
@@ -322,6 +325,8 @@ ajaxData({
             formData['borrowdeviceid'] = $scope.aerographSelfId;
         }
         $scope.updateAerograph.getData(formData).then(res=>{
+            $scope.saveAerographLoading = false;
+
             if(res.type == 'success'){
                 toaster.pop('success','','保存成功');
                 $scope.aerographEdit = false;
@@ -365,6 +370,9 @@ ajaxData({
 
     //通讯中断消息  保存
     $scope.saveInterruptNote = () =>{
+        if($scope.saveInterruptLoading) return;
+        $scope.saveInterruptLoading = true;
+
         let isrectip = [];
         $("input[name='interruptNoteCheckbox']").each(function(i){
             if($(this).prop('checked')){
@@ -376,6 +384,7 @@ ajaxData({
 			isrectip: isrectip.join(","),
 			leadvalue: $scope.timeOffset
         }).then(res=>{
+            $scope.saveInterruptLoading = false;
             if(res.key == 0){
                 toaster.pop('success','','保存成功');
                 $scope.interruptEditCancel();
@@ -404,11 +413,16 @@ ajaxData({
 
     //消息配置  保存
     $scope.saveNote = () =>{
+        if($scope.saveNoteLoading) return;
+
+        $scope.saveNoteLoading = true;
         let ismessage = $("input[name='noteConfigure']:checked").val();
         $scope.updateNoteSave.getData({
             id:$scope.pstationid,
             ismessage:ismessage
         }).then(res=>{
+            $scope.saveNoteLoading = false;
+
             if(res == 1){
                 toaster.pop('success','','保存成功');
                 $scope.noteEditCancel();
@@ -442,11 +456,17 @@ ajaxData({
 
     //保存
     $scope.saveInitialPower = () =>{
+        if($scope.saveInitPowerLoading) return;
+
+        $scope.saveInitPowerLoading = true;
+
         if (!$solway.formValidation($scope.initialPowerData, '.initial-power', toaster)) return;//校验非空
 
         $scope.initialPowerData['expirydate'] = new Date($scope.expiryDate).Format("yyyy-MM-dd");
         $scope.initialPowerData['flag'] = $("input[name='ifFlag']:checked").val();
         $scope.initialPowerSave.getData($scope.initialPowerData).then(res=>{
+            $scope.saveInitPowerLoading = false;
+
             if(res.type == 'success'){
                 toaster.pop('success','','保存成功');
                 $scope.cancelInitialPower();
@@ -659,6 +679,8 @@ ajaxData({
 
     //编辑保存
     $scope.saveRestrict = (item,type) =>{
+        if($scope.saveTimeLoading) return;
+        $scope.saveTimeLoading = true;
         let formData = {}
         if(type == 'add'){
             formData['id'] = null;
@@ -680,9 +702,12 @@ ajaxData({
         
         if(!formData.startDate){
             toaster.pop('error','','限电开始时间必填！');
+            $scope.saveTimeLoading = false;
             return;
         }
         $scope.restrictPowerSave.getData(formData).then(res=>{
+            $scope.saveTimeLoading = false;
+
             if(res.code == 0){
                 $scope.restrictEditActive = false;
                 toaster.pop('success','','保存成功');
@@ -762,6 +787,9 @@ ajaxData({
 
     //编辑保存
     $scope.saveOverhaul = (item,type) =>{
+        if($scope.saveOverhaulLoading) return;
+
+        $scope.saveOverhaulLoading = true;
         let formData = {}
         if(type == 'add'){
             formData['id'] = null;
@@ -783,9 +811,12 @@ ajaxData({
         
         if(!formData.startDate){
             toaster.pop('error','','检修开始时间必填！');
+            $scope.saveOverhaulLoading = false;
             return;
         }
         $scope.overhaulSave.getData(formData).then(res=>{
+            $scope.saveOverhaulLoading = false;
+
             if(res.code == 0){
                 $scope.overhaulEditActive = false;
                 toaster.pop('success','','保存成功');
@@ -868,6 +899,8 @@ ajaxData({
 
     //编辑保存
     $scope.saveClean = (item,type) =>{
+        if($scope.saveCleanLoading) return;
+        $scope.saveCleanLoading = true;
         let formData = {}
         if(type == 'add'){
             formData['id'] = null;
@@ -888,9 +921,12 @@ ajaxData({
        
         if(!formData.startDate){
             toaster.pop('error','','清洗开始时间必填！');
+            $scope.saveCleanLoading = false;
             return ;
         }
         $scope.cleanTimeSave.getData(formData).then(res=>{
+            $scope.saveCleanLoading = false;
+
             if(res.code == 0){
                 $scope.cleanEditActive = false;
                 toaster.pop('success','','保存成功');
@@ -945,7 +981,11 @@ ajaxData({
         //         return;
         //     }
         // }
+        if($scope.saveAssessmentLoading) return;
+        $scope.saveAssessmentLoading = true;
         $scope.assessmentUpdate.getData($scope.assessmentListData).then(res=>{
+            $scope.saveAssessmentLoading = false;
+
             if(res.code == 0){
                 $scope.assessmentDisabled = true;
                 toaster.pop('success','','保存成功');
