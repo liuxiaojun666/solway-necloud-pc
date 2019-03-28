@@ -120,7 +120,14 @@ ajaxData({
                     align: 'left',
                     render(text, item, index) {
                         return `
-                            <span class="clickable">${text}</span>
+                            ${(() => {
+                                if (item.st_comm == 1) return (`<span class="clickable">${text}</span>` || '') + '<i title="通讯中断" class="iconfont icon-icon-life-alarm-copy" style="color: #9d9d9d;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                                else if (item.st_comm == 2) return (`<span class="clickable">${text}</span>` || '') + '<i title="通讯初始化" class="iconfont icon-icon-life-alarm-copy" style="color: #9d9d9d;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                                else if (item.st_status == 99) return (`<span class="clickable">${text}</span>` || '') + '<i title="正常" class="iconfont icon-icon-life-alarm-copy" style="color: #52b876;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                                else if (item.st_status == 1) return (`<span class="clickable">${text}</span>` || '') + '<i title="故障" class="iconfont icon-icon-life-alarm-copy" style="color: #ff6161;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                                else if (item.st_status == 2) return (`<span class="clickable">${text}</span>` || '') + '<i title="报警" class="iconfont icon-icon-life-alarm-copy" style="color: #be9856;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                                return (`<span class="clickable">${text}</span>` || '');
+                            })()}
                             <svg style="width: 40px;height: 40px;display:none;position:absolute;right:1em;top:5px;" class="symbol-icon icon-new1" aria-hidden="true">
                                 <use xlink:href="#icon-new1"></use>
                             </svg>`

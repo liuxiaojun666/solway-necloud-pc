@@ -1,0 +1,152 @@
+ajaxData(
+    {
+        turbineDynamoPoints: {
+            name: 'GETturbineDynamoPoints',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'dynamoStationMonthService',
+    }
+)('dynamoStationMonthCtrl', ['$scope', 'dynamoStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { } = historicalRecord.get().themeDynamoStationMonth || {};
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+    // 接口请求
+    $scope.diffGetData = async () => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull();
+        const { dateTime, dateType, dataType } = $scope;
+        if (dateType !== 1) return;
+        if (dataType !== 0) return;
+        $scope.turbineDynamoPoints.getData({
+            dataType: 2,
+            date: dateTime.showDate,
+            dateType: 2,
+            queryType: 3,
+        });
+    };
+
+
+    $scope.turbineDynamoPoints.subscribe(() => {
+        $scope.column = [
+            {
+                title: '<label class="i-checks m-b-none"><input checked type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
+                dataIndex: 'eqid',
+                align: 'center',
+                width: '50px',
+                checkboxName: 'batchprocessing',
+                render(text) {
+                    return '<label class="i-checks m-b-none"><input checked data-identifies="' + text + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                }
+            },
+            {
+                title: '风机名称',
+                dataIndex: 'eq_name',
+                align: 'left',
+                sort: true,
+            },
+            {
+                title: '油温状况',
+                dataIndex: 'gearbox_temp_status',
+                align: 'center',
+                sort: true,
+                render(text) {
+                    return ['', '正常', '温控不良'][text] || '';
+                }
+            }
+        ];
+    });
+
+    $scope.trClick = async (item, _index, event) => {
+        event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
+        const idIndex = Object.keys($scope.turbineDynamoPoints.res.body.names).findIndex(v => v === item.eqid + '');
+        const { colors } = $scope.turbineDynamoPoints.chart;
+        colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
+        const { display } = $scope.turbineDynamoPoints.chart;
+        $scope.turbineDynamoPoints.chart.display = false;
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+        await myAjaxData.timeout(0);
+        $scope.turbineDynamoPoints.chart = {
+            ...$scope.turbineDynamoPoints.chart,
+            colors,
+            display,
+            activeEqid: item.eqid
+        };
+        $scope.$apply();
+    };
+
+    $scope.checkboxOnchange = async(_all ,elements) => {
+        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies);
+        if (!eqids.length) {
+            $scope.turbineDynamoPoints.chart.display = false;
+            return $scope.$apply();
+        }
+        $scope.turbineDynamoPoints.res.body.ll.forEach(v => {
+            if (eqids.includes(v.eqid + '')) $scope.turbineDynamoPoints.res.body.names[v.eqid + ''] = v.eq_name;
+            else delete $scope.turbineDynamoPoints.res.body.names[v.eqid];
+        });
+        const { activeEqid } = $scope.turbineDynamoPoints.chart;
+        await $scope.turbineDynamoPoints.subscribeArr[1].s($scope.turbineDynamoPoints.res);
+        if (!activeEqid) return $scope.$apply();
+        await $scope.trClick({ eqid: activeEqid });
+        $scope.$apply();
+    };
+
+    $scope.turbineDynamoPoints.subscribe(async res => {
+        await myAjaxData.timeout(0);
+        const equments = res.body.names;
+        const eq_keys = Object.keys(equments);
+        if (eq_keys.length === 0) {
+            $scope.turbineDynamoPoints.chart.display = false;
+            return $scope.$apply();
+        }
+        const colors = [(new Array(eq_keys.length)).fill('#fff')];
+        $scope.turbineDynamoPoints.chart = {
+            display: true,
+            types: [(new Array(eq_keys.length)).fill('scatter')],
+            linenames: [Object.values(equments)],
+            colors,
+            ydatas: [eq_keys.map((v) => res.body[v])]
+        };
+        $scope.$apply();
+    });
+
+    // 数据置空
+    function setDataNull() {
+        $scope.turbineDynamoPoints.res = null;
+    }
+
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});

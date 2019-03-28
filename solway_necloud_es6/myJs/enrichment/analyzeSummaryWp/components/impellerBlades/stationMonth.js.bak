@@ -208,6 +208,7 @@ ajaxData(
 
     // 查看设备详情
     $scope.equipmentDetailruning = (item, index, event) => {
+        if ($scope.classTab !== 0) return;
         if ($scope.tabIndex !== 1) return;
         const { stid, eqid } = item;
         if (event.target.className.includes('clickable')) {
@@ -288,51 +289,59 @@ ajaxData(
     });
 
     $scope.trClick = async (item, _index, event) => {
-        $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '')
-        const idIndex = Object.keys($scope.turbinePEList.res.body.names).findIndex(v => v === item.eqid + '');
-        const { colors } = $scope.turbinePEList.chart;
+        event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
+        const idIndex = Object.keys($scope.turbineClimbPoints.res.body.names).findIndex(v => v === item.eqid + '');
+        const { colors } = $scope.turbineClimbPoints.chart;
         colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
-        $scope.turbinePEList.chart.display = false;
+        const { display } = $scope.turbineClimbPoints.chart;
+        $scope.turbineClimbPoints.chart.display = false;
         await myAjaxData.timeout(0);
         $scope.$apply();
         await myAjaxData.timeout(0);
-        $scope.turbinePEList.chart = {
-            ...$scope.turbinePEList.chart,
+        $scope.turbineClimbPoints.chart = {
+            ...$scope.turbineClimbPoints.chart,
             colors,
-            activeId: item.eqid,
-            display: true
+            display,
+            activeEqid: item.eqid
         };
         $scope.$apply();
     };
 
-    $scope.checkboxOnchange = (_all, elements) => {
-        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies).join()
-        $scope.turbinePEList.getData({
-            dataType: 2,
-            date: $scope.dateTime.showDate,
-            dateType: 2,
-            queryType: 3,
-            eqids
+    $scope.checkboxOnchange = async (_all, elements) => {
+        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies);
+        if (!eqids.length) {
+            $scope.turbineClimbPoints.chart.display = false;
+            return $scope.$apply();
+        }
+        $scope.turbineClimbPoints.res.body.ll.forEach(v => {
+            if (eqids.includes(v.eqid + '')) $scope.turbineClimbPoints.res.body.names[v.eqid + ''] = v.eq_name;
+            else delete $scope.turbineClimbPoints.res.body.names[v.eqid];
         });
+        const { activeEqid } = $scope.turbineClimbPoints.chart;
+        await $scope.turbineClimbPoints.subscribeArr[1].s($scope.turbineClimbPoints.res);
+        if (!activeEqid) return $scope.$apply();
+        await $scope.trClick({eqid: activeEqid});
+        $scope.$apply();
     };
 
     // 叶片零度 散点
-    $scope.turbineClimbPoints.subscribe(res => {
-        return;
-        const { activeId } = $scope.turbinePEList.chart || {};
-        if (!res.body.x) return $scope.turbinePEList.chart = { activeId };
-        const eqids = Object.keys(res.body.names);
-        const colors = [(new Array(eqids.length)).fill('#fff')];
-        colors[0][eqids.findIndex(v => v === activeId + '')] = '#577BFF';
-        $scope.turbinePEList.chart = {
+    $scope.turbineClimbPoints.subscribe(async res => {
+        await myAjaxData.timeout(0);
+        const equments = res.body.names;
+        const eq_keys = Object.keys(equments);
+        if (eq_keys.length === 0) {
+            $scope.turbineClimbPoints.chart.display = false;
+            return $scope.$apply();
+        }
+        const colors = [(new Array(eq_keys.length)).fill('#fff')];
+        $scope.turbineClimbPoints.chart = {
             display: true,
-            types: [(new Array(eqids.length)).fill('line')],
-            xdata: res.body.x,
-            linenames: [Object.values(res.body.names)],
+            types: [(new Array(eq_keys.length)).fill('scatter')],
+            linenames: [Object.values(equments)],
             colors,
-            activeId,
-            ydatas: [eqids.map(v => res.body[v])]
+            ydatas: [eq_keys.map((v) => res.body[v])]
         };
+        $scope.$apply();
     });
 
 
