@@ -1,54 +1,61 @@
 ajaxData(
     {
         // info
-        analysis_wp_station_st_month_info: {
-            name: 'GETanalysis_wp_station_st_month_info',
+        analysis_wp_station_pitch_month_info: {
+            name: 'GETanalysis_wp_station_pitch_month_info',
             data: {},
             later: true
         },
         // 时间 列表
-        analysis_wp_station_st_month_timelist: {
-            name: 'GETanalysis_wp_station_st_month_timelist',
+        analysis_wp_station_pitch_month_timelist: {
+            name: 'GETanalysis_wp_station_pitch_month_timelist',
             data: {},
             later: true,
             onlyLatest: true
         },
         // 时间 曲线
-        analysis_wp_station_st_month_timeline: {
-            name: 'GETanalysis_wp_station_st_month_timeline',
+        analysis_wp_station_pitch_month_timeline: {
+            name: 'GETanalysis_wp_station_pitch_month_timeline',
             data: {},
             later: true,
             onlyLatest: true
         },
         // 设备 列表
-        analysis_wp_station_st_month_devicelist: {
-            name: 'GETanalysis_wp_station_st_month_devicelist',
+        analysis_wp_station_pitch_month_devicelist: {
+            name: 'GETanalysis_wp_station_pitch_month_devicelist',
             data: {},
             later: true,
             onlyLatest: true
         },
         // 设备 曲线
-        analysis_wp_station_st_month_deviceline: {
-            name: 'GETanalysis_wp_station_st_month_deviceline',
+        analysis_wp_station_pitch_month_deviceline: {
+            name: 'GETanalysis_wp_station_pitch_month_deviceline',
             data: {},
             later: true,
             onlyLatest: true
         },
+        // 叶片零度
+        turbineClimbPoints: {
+            name: 'GETturbineClimbPoints',
+            data: {},
+            later: true
+        },
     }, {
-        __serviceName__: 'runningStateStationMonthService',
+        __serviceName__: 'impellerBladesStationMonthService',
     }
-)('runningStateStationMonthCtrl', ['$scope', 'runningStateStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+)('impellerBladesStationMonthCtrl', ['$scope', 'impellerBladesStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0 } = historicalRecord.get().themeRunningStateStationMonth || {};
+        let { showShape, tabIndex = 0, classTab = 0 } = historicalRecord.get().themeImpellerBladesStationMonth || {};
         $scope.changeShowShape(showShape || 'chart');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
         await $scope.dateUpdated();
+        $scope.classTab = classTab;
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -69,12 +76,24 @@ ajaxData(
     };
 
 
+    $scope.changeClassTab = classTab => {
+        $scope.classTab = classTab;
+        historicalRecord.set({
+            themeImpellerBladesStationMonth: {
+                ...historicalRecord.get().themeImpellerBladesStationMonth || {},
+                classTab
+            }
+        });
+        $scope.diffGetData();
+    };
+
+
     // tab 切换
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeRunningStateStationMonth: {
-                ...historicalRecord.get().themeRunningStateStationMonth || {},
+            themeImpellerBladesStationMonth: {
+                ...historicalRecord.get().themeImpellerBladesStationMonth || {},
                 tabIndex
             }
         });
@@ -85,8 +104,8 @@ ajaxData(
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeRunningStateStationMonth: {
-                ...historicalRecord.get().themeRunningStateStationMonth || {},
+            themeImpellerBladesStationMonth: {
+                ...historicalRecord.get().themeImpellerBladesStationMonth || {},
                 showShape
             }
         });
@@ -98,38 +117,45 @@ ajaxData(
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         setDataNull(getInfo);
-        const { showShape, dateTime, tabIndex, dateType, dataType } = $scope;
+        const { showShape, dateTime, tabIndex, dateType, dataType, classTab } = $scope;
         if (dateType !== 1) return;
         if (dataType !== 0) return;
-        if (getInfo) {
-            $scope.analysis_wp_station_st_month_info.getData({
-                queryCode: 'analysis_wp_station_st_month_info',
+        if (getInfo && classTab === 0) {
+            $scope.analysis_wp_station_pitch_month_info.getData({
+                queryCode: 'analysis_wp_station_pitch_month_info',
                 queryType: 3,
                 date: dateTime.showDate
             });
         }
-        if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_wp_station_st_month_timelist.getData({
-                queryCode: 'analysis_wp_station_st_month_timelist',
+        if (classTab === 0 && tabIndex === 0 && showShape === 'list') {
+            $scope.analysis_wp_station_pitch_month_timelist.getData({
+                queryCode: 'analysis_wp_station_pitch_month_timelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
-        } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_wp_station_st_month_timeline.getData({
-                queryCode: 'analysis_wp_station_st_month_timeline',
+        } else if (classTab === 0 && tabIndex === 0 && showShape === 'chart') {
+            $scope.analysis_wp_station_pitch_month_timeline.getData({
+                queryCode: 'analysis_wp_station_pitch_month_timeline',
                 queryType: 3,
                 date: dateTime.showDate
             });
-        } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_wp_station_st_month_devicelist.getData({
-                queryCode: 'analysis_wp_station_st_month_devicelist',
+        } else if (classTab === 0 && tabIndex === 1 && showShape === 'list') {
+            $scope.analysis_wp_station_pitch_month_devicelist.getData({
+                queryCode: 'analysis_wp_station_pitch_month_devicelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
-        } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_wp_station_st_month_deviceline.getData({
-                queryCode: 'analysis_wp_station_st_month_deviceline',
+        } else if (classTab === 0 && tabIndex === 1 && showShape === 'chart') {
+            $scope.analysis_wp_station_pitch_month_deviceline.getData({
+                queryCode: 'analysis_wp_station_pitch_month_deviceline',
                 queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (classTab === 1) {
+            $scope.turbineClimbPoints.getData({
+                queryType: 3,
+                dataType: 2,
+                dateType: 2,
                 date: dateTime.showDate
             });
         }
@@ -141,25 +167,8 @@ ajaxData(
         $scope.$broadcast('equipmentDetails', obj);
     };
 
-    // 图表 点击 事件 处理 函数
-    // $scope.chartClick = (params) => {
-    //     if ($scope.tabIndex !== 1) return;
-    //     const { eq_name, eqid } = $scope.analysis_wp_station_st_month_deviceline.res.body.data;
-    //     $scope.equipmentDetail({
-    //         eq_name: params.name,
-    //         eqid: eqid[eq_name.indexOf(params.name)]
-    //     });
-    //     $scope.$apply();
-    // };
-
-    // 设备 列表 点击行
-    // $scope.equipmentListTrClick = (item, index) => {
-    //     const { eqid, eq_name } = item;
-    //     $scope.equipmentDetail({ eqid, eq_name });
-    // };
-
     // 时间 列表
-    $scope.analysis_wp_station_st_month_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_pitch_month_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -176,20 +185,14 @@ ajaxData(
                 }
             },
             {
-                title: '高效设备' + '(台)',
-                dataIndex: 'high_count',
+                title: '正常变桨台数' + '(台)',
+                dataIndex: 'opitch_count',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '正常设备' + '(台)',
-                dataIndex: 'middle_count',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '低效设备' + '(台)',
-                dataIndex: 'low_count',
+                title: '异常变桨台数' + '(台)',
+                dataIndex: 'epitch_count',
                 align: 'right',
                 sort: true,
             },
@@ -197,10 +200,10 @@ ajaxData(
     };
 
     // 时间 曲线
-    $scope.analysis_wp_station_st_month_timeline.subscribe((res) => {
+    $scope.analysis_wp_station_pitch_month_timeline.subscribe((res) => {
         if ($scope.showShape !== 'chart') return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.high_count, res.body.data.middle_count, res.body.data.low_count]];
+        $scope.ydatas = [[res.body.data.epitch_count, res.body.data.opitch_count]];
     });
 
     // 查看设备详情
@@ -217,7 +220,7 @@ ajaxData(
     };
 
     // 设备 列表
-    $scope.analysis_wp_station_st_month_devicelist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_pitch_month_devicelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -232,68 +235,123 @@ ajaxData(
                 }
             },
             {
-                title: '停待机' + '(' + res.body.units.stop_st_r + ')',
-                dataIndex: 'stop_st_r',
+                title: '异常变桨小时' + '(' + res.body.units.epitch_hour + ')',
+                dataIndex: 'epitch_hour',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '限负荷' + '(' + res.body.units.limit_st_r + ')',
-                dataIndex: 'limit_st_r',
+                title: '异常变桨率' + '(' + res.body.units.epitch_r + ')',
+                dataIndex: 'epitch_r',
                 align: 'right',
                 sort: true,
-            },
-            {
-                title: '爬坡' + '(' + res.body.units.climb_st_r + ')',
-                dataIndex: 'climb_st_r',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '转矩控制' + '(' + res.body.units.torque_st_r + ')',
-                dataIndex: 'torque_st_r',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '满发变桨' + '(' + res.body.units.full_st_r + ')',
-                dataIndex: 'full_st_r',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '运行效率',
-                dataIndex: 'ope',
-                align: 'center',
-                sort: true,
-                render(text) {
-                    return ['', '高效', '正常', '低效'][text];
-                }
             },
         ];
     };
 
     // 设备 曲线
-    $scope.analysis_wp_station_st_month_deviceline.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_pitch_month_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.eq_name;
-        $scope.ydatas = [[res.body.data.stop_st_r, res.body.data.climb_st_r, res.body.data.torque_st_r, res.body.data.full_st_r, res.body.data.limit_st_r]];
+        $scope.ydatas = [[res.body.data.epitch_hour], [res.body.data.epitch_r]];
     };
+
+    // 叶片零度 列表
+    $scope.turbineClimbPoints.subscribe(() => {
+        $scope.column = [
+            {
+                title: '<label class="i-checks m-b-none"><input checked type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
+                dataIndex: 'eqid',
+                align: 'center',
+                width: '50px',
+                checkboxName: 'batchprocessing',
+                render(text) {
+                    return '<label class="i-checks m-b-none"><input checked data-identifies="' + text + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                }
+            },
+            {
+                title: '风机名称',
+                dataIndex: 'eq_name',
+                align: 'left',
+                sort: true,
+            },
+            {
+                title: '初始爬坡效率效率(%)',
+                dataIndex: 'init_climb_e',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return text && text.toFixed(2);
+                }
+            }
+        ];
+    });
+
+    $scope.trClick = async (item, _index, event) => {
+        $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '')
+        const idIndex = Object.keys($scope.turbinePEList.res.body.names).findIndex(v => v === item.eqid + '');
+        const { colors } = $scope.turbinePEList.chart;
+        colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
+        $scope.turbinePEList.chart.display = false;
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+        await myAjaxData.timeout(0);
+        $scope.turbinePEList.chart = {
+            ...$scope.turbinePEList.chart,
+            colors,
+            activeId: item.eqid,
+            display: true
+        };
+        $scope.$apply();
+    };
+
+    $scope.checkboxOnchange = (_all, elements) => {
+        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies).join()
+        $scope.turbinePEList.getData({
+            dataType: 2,
+            date: $scope.dateTime.showDate,
+            dateType: 2,
+            queryType: 3,
+            eqids
+        });
+    };
+
+    // 叶片零度 散点
+    $scope.turbineClimbPoints.subscribe(res => {
+        return;
+        const { activeId } = $scope.turbinePEList.chart || {};
+        if (!res.body.x) return $scope.turbinePEList.chart = { activeId };
+        const eqids = Object.keys(res.body.names);
+        const colors = [(new Array(eqids.length)).fill('#fff')];
+        colors[0][eqids.findIndex(v => v === activeId + '')] = '#577BFF';
+        $scope.turbinePEList.chart = {
+            display: true,
+            types: [(new Array(eqids.length)).fill('line')],
+            xdata: res.body.x,
+            linenames: [Object.values(res.body.names)],
+            colors,
+            activeId,
+            ydatas: [eqids.map(v => res.body[v])]
+        };
+    });
+
 
     // 数据置空
     function setDataNull(getInfo) {
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_wp_station_st_month_timelist.res = null;
-        $scope.analysis_wp_station_st_month_timeline.res = null;
-        $scope.analysis_wp_station_st_month_devicelist.res = null;
-        $scope.analysis_wp_station_st_month_deviceline.res = null;
-        if (getInfo) $scope.analysis_wp_station_st_month_info.res = null;
+        $scope.analysis_wp_station_pitch_month_timelist.res = null;
+        $scope.analysis_wp_station_pitch_month_timeline.res = null;
+        $scope.analysis_wp_station_pitch_month_devicelist.res = null;
+        $scope.analysis_wp_station_pitch_month_deviceline.res = null;
+        $scope.turbineClimbPoints.res = null;
+        if (getInfo) $scope.analysis_wp_station_pitch_month_info.res = null;
     }
 
     // 销毁 事件
     $scope.$on('$destroy', () => {
         setDataNull();
+        window.removeEventListener('resize', myChart.resize);
     });
 });
