@@ -1,0 +1,152 @@
+ajaxData(
+    {
+        turbineGearboxPoints: {
+            name: 'GETturbineGearboxPoints',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'gearBoxStationMonthService',
+    }
+)('gearBoxStationMonthCtrl', ['$scope', 'gearBoxStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { } = historicalRecord.get().themeGearBoxStationMonth || {};
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+    // 接口请求
+    $scope.diffGetData = async () => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull();
+        const { dateTime, dateType, dataType } = $scope;
+        if (dateType !== 1) return;
+        if (dataType !== 0) return;
+        $scope.turbineGearboxPoints.getData({
+            dataType: 2,
+            date: dateTime.showDate,
+            dateType: 2,
+            queryType: 3,
+        });
+    };
+
+
+    $scope.turbineGearboxPoints.subscribe(() => {
+        $scope.column = [
+            {
+                title: '<label class="i-checks m-b-none"><input checked type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
+                dataIndex: 'eqid',
+                align: 'center',
+                width: '50px',
+                checkboxName: 'batchprocessing',
+                render(text) {
+                    return '<label class="i-checks m-b-none"><input checked data-identifies="' + text + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                }
+            },
+            {
+                title: '风机名称',
+                dataIndex: 'eq_name',
+                align: 'left',
+                sort: true,
+            },
+            {
+                title: '油温状况',
+                dataIndex: 'gearbox_temp_status',
+                align: 'center',
+                sort: true,
+                render(text) {
+                    return ['', '正常', '温控不良'][text] || '';
+                }
+            }
+        ];
+    });
+
+    $scope.trClick = async (item, _index, event) => {
+        event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
+        const idIndex = Object.keys($scope.turbineGearboxPoints.res.body.names).findIndex(v => v === item.eqid + '');
+        const { colors } = $scope.turbineGearboxPoints.chart;
+        colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
+        const { display } = $scope.turbineGearboxPoints.chart;
+        $scope.turbineGearboxPoints.chart.display = false;
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+        await myAjaxData.timeout(0);
+        $scope.turbineGearboxPoints.chart = {
+            ...$scope.turbineGearboxPoints.chart,
+            colors,
+            display,
+            activeEqid: item.eqid
+        };
+        $scope.$apply();
+    };
+
+    $scope.checkboxOnchange = async(_all ,elements) => {
+        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies);
+        if (!eqids.length) {
+            $scope.turbineGearboxPoints.chart.display = false;
+            return $scope.$apply();
+        }
+        $scope.turbineGearboxPoints.res.body.ll.forEach(v => {
+            if (eqids.includes(v.eqid + '')) $scope.turbineGearboxPoints.res.body.names[v.eqid + ''] = v.eq_name;
+            else delete $scope.turbineGearboxPoints.res.body.names[v.eqid];
+        });
+        const { activeEqid } = $scope.turbineGearboxPoints.chart;
+        await $scope.turbineGearboxPoints.subscribeArr[1].s($scope.turbineGearboxPoints.res);
+        if (!activeEqid) return $scope.$apply();
+        await $scope.trClick({ eqid: activeEqid });
+        $scope.$apply();
+    };
+
+    $scope.turbineGearboxPoints.subscribe(async res => {
+        await myAjaxData.timeout(0);
+        const equments = res.body.names;
+        const eq_keys = Object.keys(equments);
+        if (eq_keys.length === 0) {
+            $scope.turbineGearboxPoints.chart.display = false;
+            return $scope.$apply();
+        }
+        const colors = [(new Array(eq_keys.length)).fill('#fff')];
+        $scope.turbineGearboxPoints.chart = {
+            display: true,
+            types: [(new Array(eq_keys.length)).fill('scatter')],
+            linenames: [Object.values(equments)],
+            colors,
+            ydatas: [eq_keys.map((v) => res.body[v])]
+        };
+        $scope.$apply();
+    });
+
+    // 数据置空
+    function setDataNull() {
+        $scope.turbineGearboxPoints.res = null;
+    }
+
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});
