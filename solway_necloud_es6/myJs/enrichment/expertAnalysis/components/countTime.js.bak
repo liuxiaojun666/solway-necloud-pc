@@ -1,0 +1,113 @@
+ajaxData({
+    AddbaseDictionary: {
+        name: 'AddbaseDictionary',
+        data: {},
+        later: true
+    }
+}, {})('countTimeCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+
+    //保存
+    $scope.save = () => {
+        if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
+
+        let formData = {
+            id: $scope.id,
+            dictType: $scope.formData.dictType,
+            dictName: $scope.formData.dictName,
+            dictCode: $scope.formData.dictCode,
+            dictEnName: $scope.formData.dictEnName,
+            description: $scope.formData.description,
+            dictValue: $scope.formData.dictValue
+        }
+
+        $scope.AddbaseDictionary.getData(formData).then(res => {
+            if (res.key == 0) {
+                toaster.pop('success', '', '保存成功');
+                $scope.$emit('addCallback');
+            } else {
+                toaster.pop('error', '', '保存失败');
+            }
+        })
+    }
+
+    //获取父级发送的横轴指标 选择的option
+    $scope.$on('countTimeNum', (item, index) => {
+        $scope.selectIndex = index;
+        $scope.radioIndex = index;
+    })
+
+    //单选框选中-> 更改select的值
+    $scope.radioToSelect = () => {
+        // $scope.timeGroup = [];
+        var radioIndex = document.querySelectorAll('[name=cTime]'):: [].filter(item => item.checked).map(item => item.dataset.index);
+        $scope.$emit('radioIndexNum', { 'radioIndex': radioIndex, 'type': 'countTime' });
+        $scope.radioIndex = radioIndex[0];
+    }
+
+    // var sleep = () =>{
+    //     setTimeout(() => {
+    //     console.log(1)
+            
+    //     }, 5000);
+    // }
+
+    // sleep();
+
+    //独立添加按钮
+    $scope.timeGroupDay = [];
+    $scope.timeGroupMonth = [];
+    $scope.timeGroupYear = [];
+    $scope.timeGroupUser = [];
+
+    const key = {
+        1:'timeGroupDay',
+        2:'timeGroupMonth',
+        3:'timeGroupYear',
+        5:'timeGroupUser',
+    }
+    $scope.oneAdd = () => {
+        if($scope.radioIndex != 5){
+            $scope[key[$scope.radioIndex]].push({
+                date: new Date
+            })
+        } else {
+            $scope[key[$scope.radioIndex]].push({
+                date: new Date,
+                startDate: new Date,
+                endDate: new Date
+            })
+        }
+
+        // debugger
+        // await myAjaxData.timeout(10)
+        
+    }
+
+    //右侧删除小按钮
+    $scope.delRight = (id, index) => {
+        $scope[key[$scope.radioIndex]].splice(index, 1);
+    }
+
+    //全部删除
+    $scope.delRightAll = () => {
+        if ($scope[key[$scope.radioIndex]].length == 0) {
+            toaster.pop('error', '', '请至少选择一条');
+        } else {
+            $solway.confirm({ message: '确定全部删除吗？' }, () => {
+                $scope[key[$scope.radioIndex]] = [];
+                $scope.$apply();
+            });
+        }
+    }
+
+
+    //取消
+    $scope.cancel = () => {
+        $scope.$emit('cancelCallback');
+    }
+
+    //确定
+    $scope.confirm = () => {
+        $scope.$emit('addCallback');
+    }
+});

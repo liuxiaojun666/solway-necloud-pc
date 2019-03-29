@@ -8,19 +8,6 @@ ajaxData({
         __serviceName__: 'newStationTplService',
     })('horizonIndexCtrl', ['$scope', 'newStationTplService', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
 
-        $scope.endDate = new Date('2099');
-
-        const clearDateTime = () => {
-            $scope.startProductTime = null;
-            $scope.endProductTime = null;
-        }
-
-        const getDictionaryDetail = () => {
-            $scope.baseDictionaryDetail.getData({ id: $scope.id }).then(res => {
-                $scope.formData = res.data;
-            })
-        }
-
         //保存
         $scope.save = () => {
             if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
@@ -44,34 +31,95 @@ ajaxData({
                 }
             })
         }
+
         //获取父级发送的横轴指标 选择的option
-        $scope.$on('horizonIndexNum',(index,item)=>{
-            var a = document.getElementsByClassName("ce-box")[item-1];
-            a.getElementsByTagName('input').checked = true;
+        $scope.$on('horizonIndexNum', (item, index) => {
+            $scope.selectIndex = index;
+            // console.log($scope.selectIndex)
+            // var a = document.getElementsByClassName("ce-box")[index - 1];
+            // a.getElementsByTagName('input')[0].checked = true;
         })
-        //左侧多选按钮->右侧 穿梭
+
+        //单选框选中-> 更改select的值
+        $scope.radioToSelect = () => {
+            var radioIndex = document.querySelectorAll('[name=horizon]'):: [].filter(item => item.checked).map(item => item.dataset.index);
+            $scope.$emit('radioIndexNum', { 'radioIndex': radioIndex, 'type': 'horizon' });
+            $scope.radioIndex = radioIndex[0];
+        }
+
+        //左侧多选按钮-> 右侧 穿梭
         $scope.shuttle = () => {
             $scope.ids = document.querySelectorAll('[name=choseItem]'):: [].filter(item => item.checked).map(item => item.dataset.identifies);
-            console.log($scope.ids)
-            $scope.values = document.querySelectorAll('[name=choseItem]'):: [].filter(item => item.checked).map(item => item.dataset.values);
-            console.log($scope.values)
+            for (var i = 0; i < $scope.ids.length; i++) {
+                $scope.ids[i] = JSON.parse($scope.ids[i]);
+            }
         }
 
         //右侧删除小按钮
-        $scope.delRight = (index) => {
-            $scope.values.splice(index, 1);
-            console.log($scope.values)
+        $scope.delRight = (id, index) => {
+            var checkInput = document.querySelectorAll('[name=choseItem]'):: [].filter(item => item.checked)
+                .filter(item => JSON.parse(item.dataset.identifies).id == id);
+            $scope.ids.splice(index, 1);
+            checkInput[0].checked = false;
+        }
+
+        //全部删除
+        $scope.delRightAll = () => {
+            var checkInput = document.querySelectorAll('[name=choseItem]'):: [].filter(item => item.checked);
+            if (checkInput.length == 0) {
+                toaster.pop('error', '', '请至少选择一条');
+            } else {
+                $solway.confirm({ message: '确定全部删除吗？' }, () => {
+                    $scope.ids = [];
+                    checkInput.map((item, index) => {
+                        checkInput[index].checked = false;
+                    })
+                    $scope.$apply();
+                });
+            }
         }
 
         //点击改变颜色
-        $scope.actived = 'rgba(49, 255, 199, 1)';
-        $scope.activedFlag = false;
-        $scope.tongBi = () => {
-            $scope.activedFlag = !$scope.activedFlag;
+        $scope.arr = [
+            {
+                'id': 22,
+                'name': 'A箱温度',
+                'activeT': false,
+                'activeH': false,
+            },
+            {
+                'id': 23,
+                'name': 'B箱温度',
+                'activeT': false,
+                'activeH': false,
+            }
+        ]
+
+        $scope.tongBi = (id, type) => {
+            if (type == 'tong') {
+                $scope.arr.map((item) => {
+                    if (item.id == id) {
+                        item.activeT = !item.activeT;
+                    }
+                })
+            } else {
+                $scope.arr.map((item) => {
+                    if (item.id == id) {
+                        item.activeH = !item.activeH;
+                    }
+                })
+            }
+            $scope.activedId = id;
         }
 
+        
         //取消
         $scope.cancel = () => {
             $scope.$emit('cancelCallback');
+        }
+
+        //确定
+        $scope.confirm = () => {
+            $scope.$emit('addCallback');
         }
     });
