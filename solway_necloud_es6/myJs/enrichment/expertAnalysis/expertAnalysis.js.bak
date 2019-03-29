@@ -31,6 +31,10 @@ ajaxData({
 
     //图表函数组
     function chartsOne() {
+        var data = [
+            [[28604, 77, 17096869, 'Australia', 1990], [31163, 77.4, 27662440, 'Canada', 1990], [1516, 68, 1154605773, 'China', 1990], [13670, 74.7, 10582082, 'Cuba', 1990], [28599, 75, 4986705, 'Finland', 1990], [29476, 77.1, 56943299, 'France', 1990], [31476, 75.4, 78958237, 'Germany', 1990], [28666, 78.1, 254830, 'Iceland', 1990], [1777, 57.7, 870601776, 'India', 1990], [29550, 79.1, 122249285, 'Japan', 1990], [2076, 67.9, 20194354, 'North Korea', 1990], [12087, 72, 42972254, 'South Korea', 1990], [24021, 75.4, 3397534, 'New Zealand', 1990], [43296, 76.8, 4240375, 'Norway', 1990], [10088, 70.8, 38195258, 'Poland', 1990], [19349, 69.6, 147568552, 'Russia', 1990], [10670, 67.3, 53994605, 'Turkey', 1990], [26424, 75.7, 57110117, 'United Kingdom', 1990], [37062, 75.4, 252847810, 'United States', 1990]],
+            [[44056, 81.8, 23968973, 'Australia', 2015], [43294, 81.7, 35939927, 'Canada', 2015], [13334, 76.9, 1376048943, 'China', 2015], [21291, 78.5, 11389562, 'Cuba', 2015], [38923, 80.8, 5503457, 'Finland', 2015], [37599, 81.9, 64395345, 'France', 2015], [44053, 81.1, 80688545, 'Germany', 2015], [42182, 82.8, 329425, 'Iceland', 2015], [5903, 66.8, 1311050527, 'India', 2015], [36162, 83.5, 126573481, 'Japan', 2015], [1390, 71.4, 25155317, 'North Korea', 2015], [34644, 80.7, 50293439, 'South Korea', 2015], [34186, 80.6, 4528526, 'New Zealand', 2015], [64304, 81.6, 5210967, 'Norway', 2015], [24787, 77.3, 38611794, 'Poland', 2015], [23038, 73.13, 143456918, 'Russia', 2015], [19360, 76.5, 78665830, 'Turkey', 2015], [38225, 81.4, 64715810, 'United Kingdom', 2015], [53354, 79.1, 321773631, 'United States', 2015]]
+        ];
         var dom = document.getElementById("container");
         var myChart = echarts.init(dom);
         var app = {};
@@ -47,6 +51,12 @@ ajaxData({
                 //去掉x轴分隔线
                 splitLine: {
                     show: false
+                },
+                //设置轴线的属性
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(68, 150, 255, 1)'
+                    }
                 }
 
             },
@@ -56,24 +66,72 @@ ajaxData({
                     textStyle: {
                         color: '#fff'
                     }
+                },
+                //设置y轴分隔线
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(68, 150, 255, 1)'
+                    }
+                },
+                //设置轴线的属性
+                axisLine: {
+                    show: false
+                },
+                //去掉刻度线
+                axisTick: {
+                    show: false
                 }
             },
             series: [{
-                symbolSize: 20,
-                data: [
-                    [10.0, 8.04],
-                    [8.0, 6.95],
-                    [13.0, 7.58],
-                    [9.0, 8.81],
-                    [11.0, 8.33],
-                    [14.0, 9.96],
-                    [6.0, 7.24],
-                    [4.0, 4.26],
-                    [12.0, 10.84],
-                    [7.0, 4.82],
-                    [5.0, 5.68]
-                ],
-                type: 'scatter'
+                name: '1990',
+                symbolSize: 10,
+                data: data[0],
+                type: 'scatter',
+                label: {
+                    emphasis: {
+                        show: true,
+                        formatter: function (param) {
+                            return param.data[3];
+                        },
+                        position: 'top'
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+                            offset: 0,
+                            color: 'rgb(251, 118, 123)'
+                        }, {
+                            offset: 1,
+                            color: 'rgb(204, 46, 72)'
+                        }])
+                    }
+                }
+            }, {
+                name: '2015',
+                symbolSize: 10,
+                data: data[1],
+                type: 'scatter',
+                label: {
+                    emphasis: {
+                        show: true,
+                        formatter: function (param) {
+                            return param.data[3];
+                        },
+                        position: 'top'
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+                            offset: 0,
+                            color: 'rgb(129, 227, 238)'
+                        }, {
+                            offset: 1,
+                            color: 'rgb(25, 183, 207)'
+                        }])
+                    }
+                }
             }],
             grid: {
                 top: "30px",
@@ -90,24 +148,58 @@ ajaxData({
     chartsOne();
 
     //选中下拉框 弹出框
-    $scope.horizonIndexChange = () => {
-        var mySelect = document.getElementById("horizonIndex");
-        var index = mySelect.selectedIndex;
-        console.log(index)
-        $scope.$broadcast('horizonIndexNum',index);
-        if (mySelect.options[1].selected || mySelect.options[2].selected) {
-            $scope.horizonIndexModel = true;
+    $scope.analysisObjectModel = true;
+    $scope.horizonIndexChange = (param) => {
+        if (param == 1) {
+            // 横轴指标弹出
+            var mySelect = document.getElementById("horizonIndex");
+            var index = mySelect.selectedIndex;
+            $scope.$broadcast('horizonIndexNum', index);
+            if (!mySelect.options[0].selected) {
+                $scope.horizonIndexModel = true;
+            }
+        } else if (param == 2) {
+            // 统计时间弹出
+            var mySelect = document.getElementById("countTime");
+            var index = mySelect.selectedIndex;
+            $scope.$broadcast('countTimeNum', index);
+            if (!mySelect.options[0].selected) {
+                $scope.countTimeModel = true;
+            }
+        } else if (param == 3) {
+            // 分析对象弹出
+            var mySelect = document.getElementById("analysisObject");
+            var index = mySelect.selectedIndex;
+            $scope.$broadcast('analysisObjectNum', index);
+            if (!mySelect.options[0].selected) {
+                $scope.analysisObjectModel = true;
+            }
         }
+
     }
 
+    //获取子级发送的radio横轴指标 去选择option
+    $scope.$on('radioIndexNum', (item, index) => {
+        if (index.type == 'horizon') {
+            // var opts = document.getElementById("horizonIndex");
+            // opts.options[index.radioIndex].selected = true;
+            $scope.horizonRadio = index.radioIndex;  
+        } else if (index.type == 'countTime'){ 
+            $scope.cTimeRadio = index.radioIndex;
+        } else if (index.type == 'analysisObject'){ 
+            $scope.aObjectRadio = index.radioIndex;
+        }
+    })
 
     //取消 新增后的回调
     $scope.$on('cancelCallback', () => {
         $scope.horizonIndexModel = false;
+        $scope.countTimeModel = false;
     });
 
     $scope.$on('addCallback', () => {
         $scope.horizonIndexModel = false;
+        $scope.countTimeModel = false;
     });
 });
 

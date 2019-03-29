@@ -18,6 +18,9 @@ ajaxData({
     __serviceName__: 'editManufacturerTplService',
 })('editManufacturerTplModelCtrl', ['$scope', 'editManufacturerTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
    
+    const regPhone = /^(\d{3,4}-)?\d{7,8}$/ ;
+    const regZipCode = /^[0-9]{6}$/ ;
+
     const getProvence = ()=>{
         $scope.selectProvince.getData({
             treeLevel:1,
@@ -87,6 +90,18 @@ ajaxData({
 
      //保存
     $scope.save = () =>{
+        if($scope.formData.presalescall && !regPhone.test($scope.formData.presalescall)){
+            toaster.pop('error','','售前电话格式不正确'); return;
+        } 
+
+        if($scope.formData.aftersalescall && !regPhone.test($scope.formData.aftersalescall)){
+            toaster.pop('error','','售后电话格式不正确'); return;
+        } 
+
+        if($scope.formData.postcode && !regZipCode.test($scope.formData.postcode)){
+            toaster.pop('error','','邮编格式不正确'); return;
+        } 
+
         if (!$solway.formValidation($scope.formData, '.editManufacturerTpl', toaster)) return;//校验非空
 
         $scope.updateManufacturer.getData($scope.formData).then(res=>{
