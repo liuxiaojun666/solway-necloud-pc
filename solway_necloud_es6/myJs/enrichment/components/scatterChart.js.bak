@@ -32,6 +32,7 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
         markLine: '=', // 标记线
         legend: '=',
         grid: '=',
+        linedatas: '='
     },
     link($scope, $element) {
         let myChart;
@@ -55,7 +56,6 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
 
         const drawing = () => {
             const {
-                stack = [[''], []],
                 width,
                 toFixed = 1,
                 interval = void 0,
@@ -85,6 +85,7 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                 linezoom,
                 areaFill,
                 markLine,
+                linedatas = [],
                 legend = {},
                 grid = {
                     top: '60',
@@ -213,7 +214,17 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                         value: imagesymboloptions.images[i] && v,
                         symbol: imagesymboloptions.images[i],
                     }))
-                })
+                }).concat(linedatas.map(v => ({
+                    name: v.name,
+                    type: 'line',
+                    showSymbol: false,
+                    data: v.data,
+                    itemStyle: {
+                        normal: {
+                            color: v.color
+                        }
+                    },
+                })))
             };
             myChart.setOption(option, true);
         };

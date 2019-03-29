@@ -73,12 +73,12 @@ ajaxData(
                 sort: true,
             },
             {
-                title: '油温状况',
-                dataIndex: 'gearbox_temp_status',
+                title: '偏差率',
+                dataIndex: 'dynamo_rs_torque_error',
                 align: 'center',
                 sort: true,
                 render(text) {
-                    return ['', '正常', '温控不良'][text] || '';
+                    return text && text.toFixed(2);
                 }
             }
         ];
@@ -133,6 +133,11 @@ ajaxData(
             display: true,
             types: [(new Array(eq_keys.length)).fill('scatter')],
             linenames: [Object.values(equments)],
+            linedatas: [{
+                data: res.body.dynamo_rs_torque_curve,
+                name: '中位数转速转矩曲线',
+                color: 'rgba(255, 113, 113, 1)'
+            }],
             colors,
             ydatas: [eq_keys.map((v) => res.body[v])]
         };

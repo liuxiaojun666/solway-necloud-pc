@@ -1,0 +1,413 @@
+ajaxData(
+    {
+        // 风向标 info
+        analysis_wp_station_vane_month_info: {
+            name: 'GETanalysis_wp_station_vane_month_info',
+            data: {},
+            later: true
+        },
+        // 风向标 时间 列表
+        analysis_wp_station_vane_month_timelist: {
+            name: 'GETanalysis_wp_station_vane_month_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 风向标 时间 曲线
+        analysis_wp_station_vane_month_timeline: {
+            name: 'GETanalysis_wp_station_vane_month_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 风向标 设备 列表
+        analysis_wp_station_vane_month_devicelist: {
+            name: 'GETanalysis_wp_station_vane_month_devicelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 风向标 设备 曲线
+        analysis_wp_station_vane_month_deviceline: {
+            name: 'GETanalysis_wp_station_vane_month_deviceline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        
+        // 风速计 info
+        analysis_wp_station_wsm_month_info: {
+            name: 'GETanalysis_wp_station_wsm_month_info',
+            data: {},
+            later: true
+        },
+        // 风速计 时间 列表
+        analysis_wp_station_wsm_month_timelist: {
+            name: 'GETanalysis_wp_station_wsm_month_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 风速计 时间 曲线
+        analysis_wp_station_wsm_month_timeline: {
+            name: 'GETanalysis_wp_station_wsm_month_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 风速计 设备 列表
+        analysis_wp_station_wsm_month_devicelist: {
+            name: 'GETanalysis_wp_station_wsm_month_devicelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 风速计 设备 曲线
+        analysis_wp_station_wsm_month_deviceline: {
+            name: 'GETanalysis_wp_station_wsm_month_deviceline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        
+    }, {
+        __serviceName__: 'machineRoomStationMonthService',
+    }
+)('machineRoomStationMonthCtrl', ['$scope', 'machineRoomStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, tabIndex = 0, classTab = 0 } = historicalRecord.get().themeMachineRoomStationMonth || {};
+        $scope.changeShowShape(showShape || 'chart');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.classTab = classTab;
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+
+    $scope.changeClassTab = classTab => {
+        $scope.classTab = classTab;
+        historicalRecord.set({
+            themeMachineRoomStationMonth: {
+                ...historicalRecord.get().themeMachineRoomStationMonth || {},
+                classTab
+            }
+        });
+        $scope.diffGetData();
+    };
+
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeMachineRoomStationMonth: {
+                ...historicalRecord.get().themeMachineRoomStationMonth || {},
+                tabIndex
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeMachineRoomStationMonth: {
+                ...historicalRecord.get().themeMachineRoomStationMonth || {},
+                showShape
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 接口请求
+    $scope.diffGetData = async (getInfo) => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull(getInfo);
+        const { showShape, dateTime, tabIndex, dateType, dataType, classTab } = $scope;
+        if (dateType !== 1) return;
+        if (dataType !== 0) return;
+        if (getInfo && classTab === 0) {
+            $scope.analysis_wp_station_vane_month_info.getData({
+                queryCode: 'analysis_wp_station_vane_month_info',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (getInfo && classTab === 1) {
+            $scope.analysis_wp_station_wsm_month_info.getData({
+                queryCode: 'analysis_wp_station_wsm_month_info',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        }
+        if (classTab === 0 && tabIndex === 0 && showShape === 'list') {
+            $scope.analysis_wp_station_vane_month_timelist.getData({
+                queryCode: 'analysis_wp_station_vane_month_timelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (classTab === 0 && tabIndex === 0 && showShape === 'chart') {
+            $scope.analysis_wp_station_vane_month_timeline.getData({
+                queryCode: 'analysis_wp_station_vane_month_timeline',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (classTab === 0 && tabIndex === 1 && showShape === 'list') {
+            $scope.analysis_wp_station_vane_month_devicelist.getData({
+                queryCode: 'analysis_wp_station_vane_month_devicelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (classTab === 0 && tabIndex === 1 && showShape === 'chart') {
+            $scope.analysis_wp_station_vane_month_deviceline.getData({
+                queryCode: 'analysis_wp_station_vane_month_deviceline',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (classTab === 1 && tabIndex === 0 && showShape === 'list') {
+            $scope.analysis_wp_station_wsm_month_timelist.getData({
+                queryCode: 'analysis_wp_station_wsm_month_timelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (classTab === 1 && tabIndex === 0 && showShape === 'chart') {
+            $scope.analysis_wp_station_wsm_month_timeline.getData({
+                queryCode: 'analysis_wp_station_wsm_month_timeline',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (classTab === 1 && tabIndex === 1) {
+            $scope.analysis_wp_station_wsm_month_devicelist.getData({
+                queryCode: 'analysis_wp_station_wsm_month_devicelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (classTab === 1 && tabIndex === 1 && showShape === 'chart') {
+            // $scope.analysis_wp_station_wsm_month_deviceline.getData({
+            //     queryCode: 'analysis_wp_station_wsm_month_deviceline',
+            //     queryType: 3,
+            //     date: dateTime.showDate
+            // });
+        }
+    };
+
+    // 设备详情 弹出 处理 函数
+    $scope.equipmentDetail = (obj) => {
+        if ($scope.classTab === 0) {
+            $scope.equipmentDetailShow = true;
+            $scope.$broadcast('equipmentDetails', obj);
+        } else if ($scope.classTab === 1) {
+            $scope.equipmentDetailShow2 = true;
+            $scope.$broadcast('equipmentDetails2', obj);
+        }
+    };
+
+    // 风向标 时间 列表
+    $scope.analysis_wp_station_vane_month_timelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '日期',
+                dataIndex: 'dtime',
+                align: 'center',
+                style: 'position:relative;',
+                sort: true,
+            },
+            {
+                title: '正常设备台数' + '(台)',
+                dataIndex: 'vane_middle_count',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '严重设备台数' + '(台)',
+                dataIndex: 'vane_serious_count',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '轻微设备台数' + '(台)',
+                dataIndex: 'vane_slight_count',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 风向标 时间 曲线
+    $scope.analysis_wp_station_vane_month_timeline.subscribe((res) => {
+        if ($scope.showShape !== 'chart') return;
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data.vane_middle_count, res.body.data.vane_slight_count, res.body.data.vane_serious_count]];
+    });
+
+    // 查看设备详情
+    $scope.equipmentDetailruning = (item, index, event) => {
+        // if ($scope.classTab !== 0) return;
+        if ($scope.tabIndex !== 1) return;
+        const { stid, eqid } = item;
+        if (event.target.className.includes('clickable')) {
+            return $scope.$broadcast("equipmentPopUpWp", {
+                stid,
+                eqid
+            });
+        }
+        $scope.equipmentDetail(item);
+    };
+
+    // 风向标 设备 列表
+    $scope.analysis_wp_station_vane_month_devicelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '名称',
+                dataIndex: 'eq_name',
+                align: 'left',
+                width: '20%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '偏航误差',
+                dataIndex: 'vane_yaw_error',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '评估',
+                dataIndex: 'vane_assess',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 风向标 设备 曲线
+    $scope.analysis_wp_station_vane_month_deviceline.getDataCallback = (success, res) => {
+        if (!success) return;
+        // $scope.xdata = res.body.data.eq_name;
+        // $scope.ydatas = [[res.body.data.epitch_hour], [res.body.data.epitch_r]];
+    };
+
+    // 风速计 时间 列表
+    $scope.analysis_wp_station_wsm_month_timelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '日期',
+                dataIndex: 'dtime',
+                align: 'center',
+                style: 'position:relative;',
+                sort: true,
+            },
+            {
+                title: '正常设备台数' + '(台)',
+                dataIndex: 'wsm_middle_count',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '严重设备台数' + '(台)',
+                dataIndex: 'wsm_serious_count',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '轻微设备台数' + '(台)',
+                dataIndex: 'wsm_slight_count',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 风速计 时间 曲线
+    $scope.analysis_wp_station_wsm_month_timeline.subscribe((res) => {
+        if ($scope.showShape !== 'chart') return;
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data.wsm_middle_count, res.body.data.wsm_slight_count, res.body.data.wsm_serious_count]];
+    });
+
+    // 风速计 设备 列表
+    $scope.analysis_wp_station_wsm_month_devicelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '名称',
+                dataIndex: 'eq_name',
+                align: 'left',
+                width: '20%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '异常率',
+                dataIndex: 'ewsm_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '评估',
+                dataIndex: 'wsm_assess',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 风速计 设备 曲线
+    $scope.analysis_wp_station_wsm_month_deviceline.getDataCallback = (success, res) => {
+        if (!success) return;
+        // $scope.xdata = res.body.data.eq_name;
+        // $scope.ydatas = [[res.body.data.epitch_hour], [res.body.data.epitch_r]];
+    };
+
+
+    // 数据置空
+    function setDataNull(getInfo) {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.analysis_wp_station_vane_month_timelist.res = null;
+        $scope.analysis_wp_station_vane_month_timeline.res = null;
+        $scope.analysis_wp_station_vane_month_devicelist.res = null;
+        $scope.analysis_wp_station_vane_month_deviceline.res = null;
+        if (getInfo) $scope.analysis_wp_station_vane_month_info.res = null;
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});

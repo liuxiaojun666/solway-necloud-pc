@@ -1,0 +1,28 @@
+ajaxData(
+    {
+        turbineVaneList: {
+            name: 'GETturbineVaneList',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'machineRoomEquipmentDetailsService',
+    }
+)('machineRoomEquipmentDetailsCtrl', ['$scope', 'machineRoomEquipmentDetailsService'], ($scope) => {
+    $scope.$on('equipmentDetails', (_e, { eqid, eq_name }) => {
+        $scope.eq_name = eq_name;
+        $scope.turbineVaneList.res = null;
+        $scope.turbineVaneList.getData({
+            dataType: 2,
+            dateType: 2,
+            date: $scope.dateTime.showDate,
+            queryType: 3,
+            eqid
+        });
+    });
+
+    $scope.$on('$destroy', () => {
+        $scope.turbineVaneList.res = null;
+    });
+
+});
