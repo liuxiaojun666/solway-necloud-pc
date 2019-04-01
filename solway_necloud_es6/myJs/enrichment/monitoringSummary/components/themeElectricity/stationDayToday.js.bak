@@ -85,6 +85,13 @@ ajaxData(
                 dataIndex: 'statusDesc',
                 width: '15%',
                 sort: true,
+                render(text, item) {
+                    if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                    else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else return `<span>${text}</span>`;
+                }
             },
             {
                 title: '设备名称',

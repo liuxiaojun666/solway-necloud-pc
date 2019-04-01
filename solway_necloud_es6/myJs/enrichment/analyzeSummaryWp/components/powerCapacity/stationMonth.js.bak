@@ -9,6 +9,7 @@ ajaxData(
         __serviceName__: 'powerCapacityStationMonthService',
     }
 )('powerCapacityStationMonthCtrl', ['$scope', 'powerCapacityStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    $('#timeRange > span').hide();
     let myChart;
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
@@ -146,5 +147,6 @@ ajaxData(
     $scope.$on('$destroy', () => {
         setDataNull();
         window.removeEventListener('resize', myChart.resize);
+        $('#timeRange > span').show();
     });
 });

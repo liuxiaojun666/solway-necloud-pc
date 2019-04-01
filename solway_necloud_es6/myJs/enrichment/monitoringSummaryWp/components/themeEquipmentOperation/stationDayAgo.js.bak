@@ -2,14 +2,14 @@ ajaxData(
     {
         //电站日功率时间列表（历史日
         stationDayAgoTimeList: {
-            name: 'GETPowerStationDayAgoTimeList',
+            name: 'GETPowerStationDayAgoTimeListWp',
             data: {},
             later: true,
             onlyLatest: true,
         },
         //电站日功率时间曲线（历史日
         stationDayAgoTimeLine: {
-            name: 'GETPowerStationDayAgoTimeLine',
+            name: 'GETPowerStationDayAgoTimeLineWp',
             data: {},
             later: true,
             onlyLatest: true,
@@ -128,8 +128,8 @@ ajaxData(
                 align: 'right',
             },
             {
-                title: '光照强度(W/㎡)',
-                dataIndex: 'sun_curve',
+                title: '风速(m/s)',
+                dataIndex: 'ws_curve',
                 sort: true,
                 width: '',
                 align: 'right',
@@ -140,7 +140,7 @@ ajaxData(
     $scope.stationDayAgoTimeLine.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.x;
-        $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.sun_curve]]
+        $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.ws_curve]]
     };
 
 });
