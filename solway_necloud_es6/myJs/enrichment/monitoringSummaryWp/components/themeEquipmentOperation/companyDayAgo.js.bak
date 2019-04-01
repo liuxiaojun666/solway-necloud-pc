@@ -2,28 +2,28 @@ ajaxData(
     {
         // 公司历史日 时间 列表
         companyDayAgoTimeList: {
-            name: 'GETPowerCompanyDayAgoTimeList',
+            name: 'GETPowerCompanyDayAgoTimeListWp',
             data: {},
             later: true,
             onlyLatest: true
         },
         // 公司历史日 时间 曲线
         companyDayAgoTimeLine: {
-            name: 'GETPowerCompanyDayAgoTimeLine',
+            name: 'GETPowerCompanyDayAgoTimeLineWp',
             data: {},
             later: true,
             onlyLatest: true
         },
         //集团-历史日-列表
         query_wp_company_day_dev_stationlist: {
-            name: 'GETqu_wpery_company_day_dev_stationlist',
+            name: 'GETquery_wp_company_day_dev_stationlist',
             data: {},
             later: true,
             onlyLatest: true
         },
         //集团-历史日-曲线
         query_wp_company_day_dev_stationline: {
-            name: 'GETqu_wpery_company_day_dev_stationline',
+            name: 'GETquery_wp_company_day_dev_stationline',
             data: {},
             later: true,
             onlyLatest: true
@@ -188,8 +188,8 @@ ajaxData(
                 align: 'right',
             },
             {
-                title: '光照强度(W/㎡)',
-                dataIndex: 'sun_curve',
+                title: '风速(m/s)',
+                dataIndex: 'ws_curve',
                 sort: true,
                 width: '',
                 align: 'right',
@@ -200,7 +200,7 @@ ajaxData(
     $scope.companyDayAgoTimeLine.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.x;
-        $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.sun_curve]]
+        $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.ws_curve]]
     };
 
 
@@ -219,7 +219,7 @@ ajaxData(
             },
             {
                 title: '总台数',
-                dataIndex: 'eqcount',
+                dataIndex: 'wt_count',
                 sort: 'true',
                 align: 'right'
             },
@@ -307,7 +307,7 @@ ajaxData(
             
         } else if ($scope.tabIndex === 1) {
             $scope.selectOptions = {
-                eqcount: '总台数',
+                wt_count: '总台数',
                 fail_count: '故障台次',
                 restrict_count: '限电台次',
                 repair_count: '检修台次',

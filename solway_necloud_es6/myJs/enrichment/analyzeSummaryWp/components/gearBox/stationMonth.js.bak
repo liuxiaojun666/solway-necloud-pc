@@ -9,6 +9,7 @@ ajaxData(
         __serviceName__: 'gearBoxStationMonthService',
     }
 )('gearBoxStationMonthCtrl', ['$scope', 'gearBoxStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    $('#timeRange > span').hide();
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -148,5 +149,6 @@ ajaxData(
     // 销毁 事件
     $scope.$on('$destroy', () => {
         setDataNull();
+        $('#timeRange > span').show();
     });
 });
