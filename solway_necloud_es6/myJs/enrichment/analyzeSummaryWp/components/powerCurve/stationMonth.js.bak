@@ -51,15 +51,16 @@ ajaxData(
         const { dateTime, dateType, dataType } = $scope;
         if (dateType !== 1) return;
         if (dataType !== 0) return;
-        $scope.analysis_wp_station_pe_month_devicelist.getData({
-            queryCode: 'analysis_wp_station_pe_month_devicelist',
+        $scope.turbinePEList.getData({
+            dataType: 2,
+            date: dateTime.showDate,
+            dateType: 2,
             queryType: 3,
-            date: dateTime.showDate
         });
     };
 
 
-    $scope.analysis_wp_station_pe_month_devicelist.subscribe(() => {
+    $scope.turbinePEList.subscribe(() => {
         $scope.column = [
             {
                 title: '<label class="i-checks m-b-none"><input checked type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
@@ -86,21 +87,12 @@ ajaxData(
         ];
     });
 
-    $scope.analysis_wp_station_pe_month_devicelist.subscribe(res => {
-        $scope.turbinePEList.getData({
-            dataType: 2,
-            date: $scope.dateTime.showDate,
-            dateType: 2,
-            queryType: 3,
-            eqids: res.body.data.map(v => v.eqid).join()
-        });
-    });
-
     $scope.trClick = async (item, _index, event) => {
-        $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '')
+        event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
         const idIndex = Object.keys($scope.turbinePEList.res.body.names).findIndex(v => v === item.eqid + '');
-        const {colors} = $scope.turbinePEList.chart;
+        const { colors } = $scope.turbinePEList.chart;
         colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
+        const { display } = $scope.turbinePEList.chart;
         $scope.turbinePEList.chart.display = false;
         await myAjaxData.timeout(0);
         $scope.$apply();
@@ -108,38 +100,56 @@ ajaxData(
         $scope.turbinePEList.chart = {
             ...$scope.turbinePEList.chart,
             colors,
-            activeId: item.eqid,
-            display: true
+            display,
+            activeEqid: item.eqid
         };
         $scope.$apply();
     };
 
-    $scope.checkboxOnchange = (_all ,elements) => {
-        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies).join()
-        $scope.turbinePEList.getData({
-            dataType: 2,
-            date: $scope.dateTime.showDate,
-            dateType: 2,
-            queryType: 3,
-            eqids
+    $scope.checkboxOnchange = async (_all ,elements) => {
+        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies);
+        if (!eqids.length) {
+            $scope.turbinePEList.chart.display = false;
+            return $scope.$apply();
+        }
+        $scope.turbinePEList.res.body.ll.forEach(v => {
+            if (eqids.includes(v.eqid + '')) $scope.turbinePEList.res.body.names[v.eqid + ''] = v.eq_name;
+            else delete $scope.turbinePEList.res.body.names[v.eqid];
         });
+        const { activeEqid } = $scope.turbinePEList.chart;
+        await $scope.turbinePEList.subscribeArr[1].s($scope.turbinePEList.res);
+        if (!activeEqid) return $scope.$apply();
+        await $scope.trClick({ eqid: activeEqid });
+        $scope.$apply();
     };
 
-    $scope.turbinePEList.subscribe(res => {
-        const { activeId } = $scope.turbinePEList.chart || {};
-        if (!res.body.x) return $scope.turbinePEList.chart = { activeId };
-        const eqids = Object.keys(res.body.names);
-        const colors = [(new Array(eqids.length)).fill('#fff')];
-        colors[0][eqids.findIndex(v => v === activeId + '')] = '#577BFF';
+    $scope.turbinePEList.subscribe(async res => {
+        await myAjaxData.timeout(0);
+        const equments = res.body.names;
+        const eq_keys = Object.keys(equments);
+        if (eq_keys.length === 0) {
+            $scope.turbinePEList.chart.display = false;
+            return $scope.$apply();
+        }
+        const colors = [(new Array(eq_keys.length)).fill('#fff')];
         $scope.turbinePEList.chart = {
             display: true,
-            types: [(new Array(eqids.length)).fill('line')],
-            xdata: res.body.x,
-            linenames: [Object.values(res.body.names)],
+            types: [(new Array(eq_keys.length)).fill('line')],
+            linenames: [Object.values(equments)],
             colors,
-            activeId,
-            ydatas: [eqids.map(v => res.body[v])]
+            xdata: res.body.x,
+            ydatas: [eq_keys.map((v) => res.body[v])]
         };
+        $scope.$apply();
+        // $scope.turbinePEList.chart = {
+        //     display: true,
+        //     types: [(new Array(eqids.length)).fill('line')],
+        //     xdata: res.body.x,
+        //     linenames: [Object.values(res.body.names)],
+        //     colors,
+        //     activeId,
+        //     ydatas: [eqids.map(v => res.body[v])]
+        // };
     });
 
     $scope.turbinePEList.tooltipFormatter = (params) => {
@@ -148,7 +158,6 @@ ajaxData(
 
     // 数据置空
     function setDataNull() {
-        $scope.analysis_wp_station_pe_month_devicelist.res = null;
         $scope.turbinePEList.res = null;
     }
 
