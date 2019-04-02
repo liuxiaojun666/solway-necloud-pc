@@ -109,10 +109,11 @@ ajaxData(
                     }
                 }
             ],
-            series: ['停待机', '爬坡', '转矩控制', '满发变桨', '限负荷'].map(v => ({
+            series: Object.values(res.body.names).map((v, i) => ({
                 name: v,
                 type: 'scatter',
-                data: res.body[v]
+                symbolSize: 8,
+                data: res.body[Object.keys(res.body.names)[i]]
             }))
         };
         myChart.setOption(option, true);
