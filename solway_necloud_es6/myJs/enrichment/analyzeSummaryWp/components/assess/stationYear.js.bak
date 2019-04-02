@@ -1,27 +1,27 @@
 ajaxData({
     // info
-    analysis_station_eval_send_year_info: {
-        name: 'GETanalysis_station_eval_send_year_info',
+    analysis_wp_station_eval_send_year_info: {
+        name: 'GETanalysis_wp_station_eval_send_year_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_station_eval_send_year_timelist: {
-        name: 'GETanalysis_station_eval_send_year_timelist',
+    analysis_wp_station_eval_send_year_timelist: {
+        name: 'GETanalysis_wp_station_eval_send_year_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_station_eval_send_year_timeline: {
-        name: 'GETanalysis_station_eval_send_year_timeline',
+    analysis_wp_station_eval_send_year_timeline: {
+        name: 'GETanalysis_wp_station_eval_send_year_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'assessStationYearService',
-})('assessStationYearCtrl', ['$scope', 'assessStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'assessStationYearWpService',
+})('assessStationYearWpCtrl', ['$scope', 'assessStationYearWpService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -73,21 +73,21 @@ ajaxData({
         if (dateType !== 2) return;
         if (dataType !== 0) return;
         if (getInfo) {
-            $scope.analysis_station_eval_send_year_info.getData({
-                queryCode: 'analysis_station_eval_send_year_info',
+            $scope.analysis_wp_station_eval_send_year_info.getData({
+                queryCode: 'analysis_wp_station_eval_send_year_info',
                 queryType: 3,
                 date: dateTime.showDate
             });
         }
         if (showShape === 'list') {
-            $scope.analysis_station_eval_send_year_timelist.getData({
-                queryCode: 'analysis_station_eval_send_year_timelist',
+            $scope.analysis_wp_station_eval_send_year_timelist.getData({
+                queryCode: 'analysis_wp_station_eval_send_year_timelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (showShape === 'chart') {
-            $scope.analysis_station_eval_send_year_timeline.getData({
-                queryCode: 'analysis_station_eval_send_year_timeline',
+            $scope.analysis_wp_station_eval_send_year_timeline.getData({
+                queryCode: 'analysis_wp_station_eval_send_year_timeline',
                 queryType: 3,
                 date: dateTime.showDate
             });
@@ -95,7 +95,7 @@ ajaxData({
     };
 
     // 时间 列表
-    $scope.analysis_station_eval_send_year_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_eval_send_year_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -106,14 +106,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '评估电量' + '(' + res.body.units.eval_kwh_d + ')',
-                dataIndex: 'eval_kwh_d',
+                title: '评估电量' + '(' + res.body.units.eval_kwh + ')',
+                dataIndex: 'eval_kwh',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '上网电量' + '(' + res.body.units.send_kwh_chk + ')',
-                dataIndex: 'send_kwh_chk',
+                title: '上网电量' + '(' + res.body.units.send_kwh + ')',
+                dataIndex: 'send_kwh',
                 align: 'right',
                 sort: true,
             },
@@ -127,10 +127,10 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_station_eval_send_year_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_eval_send_year_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.eval_kwh_d, res.body.data.send_kwh_chk], [res.body.data.ste_dev_we_r]];
+        $scope.ydatas = [[res.body.data.eval_kwh, res.body.data.send_kwh], [res.body.data.ste_dev_we_r]];
     };
 
     // 数据置空
@@ -138,9 +138,9 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_station_eval_send_year_timelist.res = null;
-        $scope.analysis_station_eval_send_year_timeline.res = null;
-        if (getInfo) $scope.analysis_station_eval_send_year_info.res = null;
+        $scope.analysis_wp_station_eval_send_year_timelist.res = null;
+        $scope.analysis_wp_station_eval_send_year_timeline.res = null;
+        if (getInfo) $scope.analysis_wp_station_eval_send_year_info.res = null;
     }
 
     // 销毁 事件

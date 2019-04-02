@@ -1,27 +1,27 @@
 ajaxData({
     // info
-    analysis_company_eval_fra_accum_info: {
-        name: 'GETanalysis_company_eval_fra_accum_info',
+    analysis_wp_company_eval_fra_accum_info: {
+        name: 'GETanalysis_wp_company_eval_fra_accum_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_company_eval_fra_accum_timelist: {
-        name: 'GETanalysis_company_eval_fra_accum_timelist',
+    analysis_wp_company_eval_fra_accum_timelist: {
+        name: 'GETanalysis_wp_company_eval_fra_accum_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_company_eval_fra_accum_timeline: {
-        name: 'GETanalysis_company_eval_fra_accum_timeline',
+    analysis_wp_company_eval_fra_accum_timeline: {
+        name: 'GETanalysis_wp_company_eval_fra_accum_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'resourcesDeviationCompanyAccumulativeService',
-})('resourcesDeviationCompanyAccumulativeCtrl', ['$scope', 'resourcesDeviationCompanyAccumulativeService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'resourcesDeviationCompanyAccumulativeWpService',
+})('resourcesDeviationCompanyAccumulativeWpCtrl', ['$scope', 'resourcesDeviationCompanyAccumulativeWpService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -72,21 +72,21 @@ ajaxData({
         if (dateType !== 3) return;
         if (dataType <= 0) return;
         if (getInfo) {
-            $scope.analysis_company_eval_fra_accum_info.getData({
-                queryCode: 'analysis_company_eval_fra_accum_info',
+            $scope.analysis_wp_company_eval_fra_accum_info.getData({
+                queryCode: 'analysis_wp_company_eval_fra_accum_info',
                 queryType: 1,
                 date: dateTime.showDate
             });
         }
         if (showShape === 'list') {
-            $scope.analysis_company_eval_fra_accum_timelist.getData({
-                queryCode: 'analysis_company_eval_fra_accum_timelist',
+            $scope.analysis_wp_company_eval_fra_accum_timelist.getData({
+                queryCode: 'analysis_wp_company_eval_fra_accum_timelist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (showShape === 'chart') {
-            $scope.analysis_company_eval_fra_accum_timeline.getData({
-                queryCode: 'analysis_company_eval_fra_accum_timeline',
+            $scope.analysis_wp_company_eval_fra_accum_timeline.getData({
+                queryCode: 'analysis_wp_company_eval_fra_accum_timeline',
                 queryType: 1,
                 date: dateTime.showDate
             });
@@ -94,7 +94,7 @@ ajaxData({
     };
 
     // 时间 列表
-    $scope.analysis_company_eval_fra_accum_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_eval_fra_accum_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -105,26 +105,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '评估辐射总量' + '(' + res.body.units.eval_rad_d + ')',
-                dataIndex: 'eval_rad_d',
+                title: '评估电量' + '(' + res.body.units.eval_kwh + ')',
+                dataIndex: 'eval_kwh',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '实际辐射总量' + '(' + res.body.units.rad_chk + ')',
-                dataIndex: 'rad_chk',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '评估电量' + '(' + res.body.units.eval_kwh_d + ')',
-                dataIndex: 'eval_kwh_d',
-                align: 'right',
-                sort: true,
-            },
-            {
-                title: '理论电量' + '(' + res.body.units.fra_kwh_chk + ')',
-                dataIndex: 'fra_kwh_chk',
+                title: '理论电量' + '(' + res.body.units.fra_kwh + ')',
+                dataIndex: 'fra_kwh',
                 align: 'right',
                 sort: true,
             },
@@ -138,11 +126,11 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_company_eval_fra_accum_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_eval_fra_accum_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.eval_kwh_d, res.body.data.fra_kwh_chk], [res.body.data.res_dev_we_r]];
-        $scope.ydatas2 = [[res.body.data.eval_rad_d, res.body.data.rad_chk], [res.body.data.res_dev_rad_r]];
+        $scope.ydatas = [[res.body.data.eval_kwh, res.body.data.fra_kwh], [res.body.data.res_dev_we_r]];
+        // $scope.ydatas2 = [[res.body.data.eval_rad_d, res.body.data.rad_chk], [res.body.data.res_dev_rad_r]];
     };
 
     // 数据置空
@@ -151,9 +139,9 @@ ajaxData({
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
         $scope.ydatas2 = void 0;
-        $scope.analysis_company_eval_fra_accum_timelist.res = null;
-        $scope.analysis_company_eval_fra_accum_timeline.res = null;
-        if (getInfo) $scope.analysis_company_eval_fra_accum_info.res = null;
+        $scope.analysis_wp_company_eval_fra_accum_timelist.res = null;
+        $scope.analysis_wp_company_eval_fra_accum_timeline.res = null;
+        if (getInfo) $scope.analysis_wp_company_eval_fra_accum_info.res = null;
     }
 
     // 销毁 事件

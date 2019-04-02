@@ -1,27 +1,27 @@
 ajaxData({
     // info
-    analysis_company_eval_fra_month_info: {
-        name: 'GETanalysis_company_eval_fra_month_info',
+    analysis_wp_company_eval_fra_month_info: {
+        name: 'GETanalysis_wp_company_eval_fra_month_info',
         data: {},
         later: true
     },
     // 电站 列表
-    analysis_company_eval_fra_month_stationlist: {
-        name: 'GETanalysis_company_eval_fra_month_stationlist',
+    analysis_wp_company_eval_fra_month_stationlist: {
+        name: 'GETanalysis_wp_company_eval_fra_month_stationlist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_company_eval_fra_month_stationline: {
-        name: 'GETanalysis_company_eval_fra_month_stationline',
+    analysis_wp_company_eval_fra_month_stationline: {
+        name: 'GETanalysis_wp_company_eval_fra_month_stationline',
         data: {},
         later: true,
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'resourcesDeviationCompanyMonthService',
-})('resourcesDeviationCompanyMonthCtrl', ['$scope', 'resourcesDeviationCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'resourcesDeviationCompanyMonthWpService',
+})('resourcesDeviationCompanyMonthWpCtrl', ['$scope', 'resourcesDeviationCompanyMonthWpService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -55,7 +55,7 @@ ajaxData({
                 dataType: 0,
                 id: item.stid,
                 isGroup: "0",
-                stClass: '01'
+                stClass: '02'
             }
         });
     };
@@ -87,21 +87,21 @@ ajaxData({
         if (dateType !== 1) return;
         if (dataType <= 0) return;
         if (getInfo) {
-            $scope.analysis_company_eval_fra_month_info.getData({
-                queryCode: 'analysis_company_eval_fra_month_info',
+            $scope.analysis_wp_company_eval_fra_month_info.getData({
+                queryCode: 'analysis_wp_company_eval_fra_month_info',
                 queryType: 1,
                 date: dateTime.showDate
             });
         }
         if (showShape === 'list') {
-            $scope.analysis_company_eval_fra_month_stationlist.getData({
-                queryCode: 'analysis_company_eval_fra_month_stationlist',
+            $scope.analysis_wp_company_eval_fra_month_stationlist.getData({
+                queryCode: 'analysis_wp_company_eval_fra_month_stationlist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (showShape === 'chart') {
-            $scope.analysis_company_eval_fra_month_stationline.getData({
-                queryCode: 'analysis_company_eval_fra_month_stationline',
+            $scope.analysis_wp_company_eval_fra_month_stationline.getData({
+                queryCode: 'analysis_wp_company_eval_fra_month_stationline',
                 queryType: 1,
                 date: dateTime.showDate
             });
@@ -109,7 +109,7 @@ ajaxData({
     };
 
     // 电站 列表
-    $scope.analysis_company_eval_fra_month_stationlist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_eval_fra_month_stationlist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -127,30 +127,22 @@ ajaxData({
                 dataIndex: 'inst_kw',
                 align: 'right',
                 sort: true,
-                width: '9%',
             },
             {
-                title: '评估辐射总量' + '(' + res.body.units.eval_rad_d + ')',
-                dataIndex: 'eval_rad_d',
+                title: '平均风速' + '(' + res.body.units.ws_avg + ')',
+                dataIndex: 'ws_avg',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '实际辐射总量' + '(' + res.body.units.rad_chk + ')',
-                dataIndex: 'rad_chk',
+                title: '评估电量' + '(' + res.body.units.eval_kwh + ')',
+                dataIndex: 'eval_kwh',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '评估电量' + '(' + res.body.units.eval_kwh_d + ')',
-                dataIndex: 'eval_kwh_d',
-                align: 'right',
-                sort: true,
-                width: '11%'
-            },
-            {
-                title: '理论电量' + '(' + res.body.units.fra_kwh_chk + ')',
-                dataIndex: 'fra_kwh_chk',
+                title: '理论电量' + '(' + res.body.units.fra_kwh + ')',
+                dataIndex: 'fra_kwh',
                 align: 'right',
                 sort: true,
                 width: '11%'
@@ -166,11 +158,11 @@ ajaxData({
     };
 
     // 电站 曲线
-    $scope.analysis_company_eval_fra_month_stationline.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_eval_fra_month_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
-        $scope.ydatas = [[res.body.data.eval_kwh_d, res.body.data.fra_kwh_chk], [res.body.data.res_dev_we_r]];
-        $scope.ydatas2 = [[res.body.data.eval_rad_d, res.body.data.rad_chk], [res.body.data.res_dev_rad_r]];
+        $scope.ydatas = [[res.body.data.eval_kwh, res.body.data.fra_kwh], [res.body.data.res_dev_we_r]];
+        // $scope.ydatas2 = [[res.body.data.eval_rad_d, res.body.data.rad_chk], [res.body.data.res_dev_rad_r]];
     };
 
     // 数据置空
@@ -179,9 +171,9 @@ ajaxData({
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
         $scope.ydatas2 = void 0;
-        $scope.analysis_company_eval_fra_month_stationlist.res = null;
-        $scope.analysis_company_eval_fra_month_stationline.res = null;
-        if (getInfo) $scope.analysis_company_eval_fra_month_info.res = null;
+        $scope.analysis_wp_company_eval_fra_month_stationlist.res = null;
+        $scope.analysis_wp_company_eval_fra_month_stationline.res = null;
+        if (getInfo) $scope.analysis_wp_company_eval_fra_month_info.res = null;
     }
 
     // 销毁 事件
