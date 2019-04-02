@@ -56,7 +56,7 @@ ajaxData(
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
         await $scope.dateUpdated();
-        $scope.classTab = classTab;
+        $scope.changeClassTab(classTab);
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -78,6 +78,8 @@ ajaxData(
 
 
     $scope.changeClassTab = classTab => {
+        if (classTab === 1) $('#timeRange > div').hide();
+        else $('#timeRange > div').show();
         $scope.classTab = classTab;
         historicalRecord.set({
             themeImpellerBladesStationMonth: {
@@ -345,6 +347,10 @@ ajaxData(
         $scope.$apply();
     });
 
+    $scope.turbineClimbPoints.tooltipFormatter = (params) => {
+        return params[0].value[0] + 'm/s<br/>' + params.map(v => v.seriesName + '功率(kWh):    ' + v.value[1] + '<br/>').join('');
+    };
+
 
     // 数据置空
     function setDataNull(getInfo) {
@@ -363,5 +369,6 @@ ajaxData(
     $scope.$on('$destroy', () => {
         setDataNull();
         $('#timeRange > span').show();
+        $('#timeRange > div').show();
     });
 });
