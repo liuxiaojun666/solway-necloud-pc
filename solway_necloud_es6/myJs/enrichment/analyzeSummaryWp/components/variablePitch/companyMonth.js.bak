@@ -1,7 +1,7 @@
 ajaxData({
     // info
-    analysis_company_decay_month_info: {
-        name: 'GETanalysis_company_decay_month_info',
+    analysis_wp_company_pitch_we_month_info: {
+        name: 'GETanalysis_wp_company_pitch_we_month_info',
         data: {},
         later: true
     },
@@ -48,14 +48,14 @@ ajaxData({
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'decayCompanyMonthService',
-})('decayCompanyMonthCtrl', ['$scope', 'decayCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'variablePitchCompanyMonthService',
+})('variablePitchCompanyMonthCtrl', ['$scope', 'variablePitchCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0} = historicalRecord.get().themeDecayCompanyMonth || {};
+        let { showShape, tabIndex = 0} = historicalRecord.get().themeVariableCompanyMonth || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -77,20 +77,13 @@ ajaxData({
     // 点击电站名  跳转到电站页面
     $scope.trClick = (item, index, event) => {
         if (!event.target.className.includes('clickable')) return;
-        if (event.target.className.includes('eq')) {
-            const { stid, eqid } = item;
-            return $scope.$broadcast("equipmentPopUp", {
-                stid,
-                eqid
-            });
-        };
 
         $scope.reloadParentPage({
             stationData: {
                 dataType: 0,
                 id: item.stid,
                 isGroup: "0",
-                stClass: '01'
+                stClass: '02'
             }
         });
     };
@@ -105,8 +98,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeDecayCompanyMonth: {
-                ...historicalRecord.get().themeDecayCompanyMonth || {},
+            themeVariableCompanyMonth: {
+                ...historicalRecord.get().themeVariableCompanyMonth || {},
                 tabIndex
             }
         });
@@ -117,8 +110,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeDecayCompanyMonth: {
-                ...historicalRecord.get().themeDecayCompanyMonth || {},
+            themeVariableCompanyMonth: {
+                ...historicalRecord.get().themeVariableCompanyMonth || {},
                 showShape
             }
         });
@@ -134,8 +127,8 @@ ajaxData({
         if (dateType !== 1) return;
         if (dataType <= 0) return;
         if (getInfo) {
-            $scope.analysis_company_decay_month_info.getData({
-                queryCode: 'analysis_company_decay_month_info',
+            $scope.analysis_wp_company_pitch_we_month_info.getData({
+                queryCode: 'analysis_wp_company_pitch_we_month_info',
                 queryType: 1,
                 date: dateTime.showDate
             });
@@ -194,8 +187,8 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量' + '(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 align: 'right',
                 sort: true,
             },
@@ -243,8 +236,8 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量' + '(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 align: 'right',
                 sort: true,
             },
@@ -267,7 +260,7 @@ ajaxData({
     $scope.analysis_company_decay_month_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.decay_we], [res.body.data.decay_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh, res.body.data.decay_we], [res.body.data.decay_we_r]];
     };
 
     // 设备 列表
@@ -302,8 +295,8 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量' + '(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 align: 'right',
                 sort: true,
             },
@@ -340,7 +333,7 @@ ajaxData({
         $scope.analysis_company_decay_month_stationline.res = null;
         $scope.analysis_station_decay_month_devicelist.res = null;
         $scope.analysis_station_decay_month_deviceline.res = null;
-        if (getInfo) $scope.analysis_company_decay_month_info.res = null;
+        if (getInfo) $scope.analysis_wp_company_pitch_we_month_info.res = null;
     }
 
     // 销毁 事件
