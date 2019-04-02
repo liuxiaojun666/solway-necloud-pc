@@ -140,6 +140,10 @@ ajaxData(
         $scope.$apply();
     });
 
+    $scope.turbineGearboxPoints.tooltipFormatter = (params) => {
+        return params[0].value[0] + 'm/s<br/>' + params.map(v => v.seriesName + '油温(℃):    ' + v.value[1] + '<br/>').join('');
+    };
+
     // 数据置空
     function setDataNull() {
         $scope.turbineGearboxPoints.res = null;

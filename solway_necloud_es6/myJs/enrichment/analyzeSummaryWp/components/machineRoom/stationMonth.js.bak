@@ -200,18 +200,18 @@ ajaxData(
                 queryType: 3,
                 date: dateTime.showDate
             });
-        } else if (classTab === 1 && tabIndex === 1) {
+        } else if (classTab === 1 && tabIndex === 1 && showShape === 'list') {
             $scope.analysis_wp_station_wsm_month_devicelist.getData({
                 queryCode: 'analysis_wp_station_wsm_month_devicelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (classTab === 1 && tabIndex === 1 && showShape === 'chart') {
-            // $scope.analysis_wp_station_wsm_month_deviceline.getData({
-            //     queryCode: 'analysis_wp_station_wsm_month_deviceline',
-            //     queryType: 3,
-            //     date: dateTime.showDate
-            // });
+            $scope.analysis_wp_station_wsm_month_deviceline.getData({
+                queryCode: 'analysis_wp_station_wsm_month_deviceline',
+                queryType: 3,
+                date: dateTime.showDate
+            });
         }
     };
 
@@ -304,8 +304,11 @@ ajaxData(
             {
                 title: '评估',
                 dataIndex: 'vane_assess',
-                align: 'right',
+                align: 'center',
                 sort: true,
+                render(text) {
+                    return ['', '正常', '轻微', '严重'][text];
+                }
             },
         ];
     };
@@ -313,9 +316,17 @@ ajaxData(
     // 风向标 设备 曲线
     $scope.analysis_wp_station_vane_month_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
-        // $scope.xdata = res.body.data.eq_name;
-        // $scope.ydatas = [[res.body.data.epitch_hour], [res.body.data.epitch_r]];
+        $scope.xdata = res.body.data.eq_name;
+        $scope.ydatas = [[
+            res.body.data.vane_assess.map((v, i) => v === 1 ? res.body.data.vane_yaw_error[i] : '-'),
+            res.body.data.vane_assess.map((v, i) => v === 2 ? res.body.data.vane_yaw_error[i] : '-'),
+            res.body.data.vane_assess.map((v, i) => v === 3 ? res.body.data.vane_yaw_error[i] : '-'),
+        ]];
     };
+
+    $scope.analysis_wp_station_vane_month_deviceline.tooltipFormatter = (params) => {
+        return params[0].name + '<br/>偏差度(度)：' + params.map(v => v.value).join('').split('-').join('');
+    }
 
     // 风速计 时间 列表
     $scope.analysis_wp_station_wsm_month_timelist.getDataCallback = (success, res) => {
@@ -381,8 +392,11 @@ ajaxData(
             {
                 title: '评估',
                 dataIndex: 'wsm_assess',
-                align: 'right',
+                align: 'center',
                 sort: true,
+                render(text) {
+                    return ['', '正常', '轻微', '严重'][text];
+                }
             },
         ];
     };
@@ -390,9 +404,16 @@ ajaxData(
     // 风速计 设备 曲线
     $scope.analysis_wp_station_wsm_month_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
-        // $scope.xdata = res.body.data.eq_name;
-        // $scope.ydatas = [[res.body.data.epitch_hour], [res.body.data.epitch_r]];
+        $scope.xdata = res.body.data.eq_name;
+        $scope.ydatas = [[
+            res.body.data.wsm_assess.map((v, i) => v === 1 ? res.body.data.ewsm_r[i] : null),
+            res.body.data.wsm_assess.map((v, i) => v === 2 ? res.body.data.ewsm_r[i] : null),
+            res.body.data.wsm_assess.map((v, i) => v === 3 ? res.body.data.ewsm_r[i] : null),
+        ]];
     };
+    $scope.analysis_wp_station_wsm_month_deviceline.tooltipFormatter = (params) => {
+        return params[0].name + '<br/>异常率(%)：' + params.map(v => v.value).join('').split('-').join('');
+    }
 
 
     // 数据置空
@@ -404,7 +425,14 @@ ajaxData(
         $scope.analysis_wp_station_vane_month_timeline.res = null;
         $scope.analysis_wp_station_vane_month_devicelist.res = null;
         $scope.analysis_wp_station_vane_month_deviceline.res = null;
-        if (getInfo) $scope.analysis_wp_station_vane_month_info.res = null;
+        $scope.analysis_wp_station_wsm_month_timelist.res = null;
+        $scope.analysis_wp_station_wsm_month_timeline.res = null;
+        $scope.analysis_wp_station_wsm_month_devicelist.res = null;
+        $scope.analysis_wp_station_wsm_month_deviceline.res = null;
+        if (getInfo) {
+            $scope.analysis_wp_station_vane_month_info.res = null;
+            $scope.analysis_wp_station_wsm_month_info.res = null;
+        }
     }
 
     // 销毁 事件
