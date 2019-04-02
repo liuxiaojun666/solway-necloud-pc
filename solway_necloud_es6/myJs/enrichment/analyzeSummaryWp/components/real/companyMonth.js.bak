@@ -1,27 +1,27 @@
 ajaxData({
     // info
-    analysis_company_real_shd_month_info: {
-        name: 'GETanalysis_company_real_shd_month_info',
+    analysis_wp_company_real_shd_month_info: {
+        name: 'GETanalysis_wp_company_real_shd_month_info',
         data: {},
         later: true
     },
     // 电站 列表
-    analysis_company_real_shd_month_stationlist: {
-        name: 'GETanalysis_company_real_shd_month_stationlist',
+    analysis_wp_company_real_shd_month_stationlist: {
+        name: 'GETanalysis_wp_company_real_shd_month_stationlist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_company_real_shd_month_stationline: {
-        name: 'GETanalysis_company_real_shd_month_stationline',
+    analysis_wp_company_real_shd_month_stationline: {
+        name: 'GETanalysis_wp_company_real_shd_month_stationline',
         data: {},
         later: true,
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'realCompanyMonthService',
-})('realCompanyMonthCtrl', ['$scope', 'realCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'realCompanyMonthWpService',
+})('realCompanyMonthWpCtrl', ['$scope', 'realCompanyMonthWpService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -52,7 +52,7 @@ ajaxData({
                 dataType: 0,
                 id: item.stid,
                 isGroup: "0",
-                stClass: '01'
+                stClass: '02'
             }
         });
     };
@@ -86,21 +86,21 @@ ajaxData({
         if (dateType !== 1) return;
         if (dataType <= 0) return;
         if (getInfo) {
-            $scope.analysis_company_real_shd_month_info.getData({
-                queryCode: 'analysis_company_real_shd_month_info',
+            $scope.analysis_wp_company_real_shd_month_info.getData({
+                queryCode: 'analysis_wp_company_real_shd_month_info',
                 queryType: 1,
                 date: dateTime.showDate
             });
         }
         if (showShape === 'list') {
-            $scope.analysis_company_real_shd_month_stationlist.getData({
-                queryCode: 'analysis_company_real_shd_month_stationlist',
+            $scope.analysis_wp_company_real_shd_month_stationlist.getData({
+                queryCode: 'analysis_wp_company_real_shd_month_stationlist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (showShape === 'chart') {
-            $scope.analysis_company_real_shd_month_stationline.getData({
-                queryCode: 'analysis_company_real_shd_month_stationline',
+            $scope.analysis_wp_company_real_shd_month_stationline.getData({
+                queryCode: 'analysis_wp_company_real_shd_month_stationline',
                 queryType: 1,
                 date: dateTime.showDate
             });
@@ -108,7 +108,7 @@ ajaxData({
     };
 
     // 电站 列表
-    $scope.analysis_company_real_shd_month_stationlist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_real_shd_month_stationlist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -129,14 +129,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量' + '(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
-                dataIndex: 'shade_we',
+                title: '亚健康损失电量' + '(' + res.body.units.sub_health_we + ')',
+                dataIndex: 'sub_health_we',
                 align: 'right',
                 sort: true,
             },
@@ -165,20 +165,14 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '积灰损失电量' + '(' + res.body.units.dust_we + ')',
-                dataIndex: 'dust_we',
-                align: 'right',
-                sort: true,
-            },
-            {
                 title: '其他损失电量' + '(' + res.body.units.other_we + ')',
                 dataIndex: 'other_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '应发电量' + '(' + res.body.units.shd_kwh_chk + ')',
-                dataIndex: 'shd_kwh_chk',
+                title: '应发电量' + '(' + res.body.units.shd_kwh + ')',
+                dataIndex: 'shd_kwh',
                 align: 'right',
                 sort: true,
             },
@@ -192,19 +186,18 @@ ajaxData({
     };
 
     // 电站 曲线
-    $scope.analysis_company_real_shd_month_stationline.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_real_shd_month_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
         $scope.ydatas = [[
-            res.body.data.real_kwh_chk,
-            res.body.data.shade_we,
+            res.body.data.real_kwh,
+            res.body.data.sub_health_we,
             res.body.data.restrict_we,
             res.body.data.repair_we,
             res.body.data.other_we,
             res.body.data.fail_we,
             res.body.data.decay_we,
-            res.body.data.dust_we,
-            res.body.data.shd_kwh_chk], [res.body.data.pba]];
+            res.body.data.shd_kwh], [res.body.data.pba]];
     };
 
     // 数据置空
@@ -212,9 +205,9 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_company_real_shd_month_stationlist.res = null;
-        $scope.analysis_company_real_shd_month_stationline.res = null;
-        if (getInfo) $scope.analysis_company_real_shd_month_info.res = null;
+        $scope.analysis_wp_company_real_shd_month_stationlist.res = null;
+        $scope.analysis_wp_company_real_shd_month_stationline.res = null;
+        if (getInfo) $scope.analysis_wp_company_real_shd_month_info.res = null;
     }
 
     // 销毁 事件
