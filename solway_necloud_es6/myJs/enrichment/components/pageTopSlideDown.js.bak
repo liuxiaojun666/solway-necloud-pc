@@ -13,6 +13,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
         ];
         $scope.goChildrenPage = (routerUrl, theme) => {
             const {stClass} = $scope;
+            $solway.setStore('systemInfo', { stClass: stClass });
             if (stClass === '02' && wpPages.includes(routerUrl)) {
                 routerUrl += 'Wp';
             }
@@ -151,8 +152,9 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
                 url: window.interface['GETgetCurrentInfoNew'],
                 params: { }
             }).success(function (res) {
-                $scope.stClass = res.currentSTClass || '01';
+                $scope.stClass = res.currentSTClass || $scope.stClass;
                 $scope.currentSTinfo = res;
+                $solway.setStore('systemInfo', { stClass: $scope.stClass });
             });
         }
 
@@ -161,8 +163,9 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
         // 获取记录
         function historyInitCallback() {
             const record = $solway.getStore().systemInfo;
-            const { systemTab = 'concept' } = record;
+            const { systemTab = 'concept', stClass = '01' } = record;
             $scope.systemTab = systemTab;
+            $scope.stClass = stClass;
 
             $scope.setActiveClass();
         };
