@@ -1,34 +1,34 @@
 ajaxData({
     // info
-    analysis_company_decay_accum_info: {
-        name: 'GETanalysis_company_decay_accum_info',
+    analysis_wp_company_sub_health_accum_info: {
+        name: 'GETanalysis_wp_company_sub_health_accum_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_company_decay_accum_timelist: {
-        name: 'GETanalysis_company_decay_accum_timelist',
+    analysis_wp_company_sub_health_accum_timelist: {
+        name: 'GETanalysis_wp_company_sub_health_accum_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_company_decay_accum_timeline: {
-        name: 'GETanalysis_company_decay_accum_timeline',
+    analysis_wp_company_sub_health_accum_timeline: {
+        name: 'GETanalysis_wp_company_sub_health_accum_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 列表
-    analysis_company_decay_accum_stationlist: {
-        name: 'GETanalysis_company_decay_accum_stationlist',
+    analysis_wp_company_sub_health_accum_stationlist: {
+        name: 'GETanalysis_wp_company_sub_health_accum_stationlist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 电站 曲线
-    analysis_company_decay_accum_stationline: {
-        name: 'GETanalysis_company_decay_accum_stationline',
+    analysis_wp_company_sub_health_accum_stationline: {
+        name: 'GETanalysis_wp_company_sub_health_accum_stationline',
         data: {},
         later: true,
         onlyLatest: true
@@ -48,14 +48,14 @@ ajaxData({
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'decayCompanyAccumulativeService',
-})('decayCompanyAccumulativeCtrl', ['$scope', 'decayCompanyAccumulativeService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'subHealthCompanyAccumulativeService',
+})('subHealthCompanyAccumulativeCtrl', ['$scope', 'subHealthCompanyAccumulativeService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0 } = historicalRecord.get().themeDecayCompanyAccum || {};
+        let { showShape, tabIndex = 0 } = historicalRecord.get().themeSubHealthCompanyAccum || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -89,7 +89,7 @@ ajaxData({
                 dataType: 0,
                 id: item.stid,
                 isGroup: "0",
-                stClass: '01'
+                stClass: '02'
             }
         });
     };
@@ -104,8 +104,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeDecayCompanyAccum: {
-                ...historicalRecord.get().themeDecayCompanyAccum || {},
+            themeSubHealthCompanyAccum: {
+                ...historicalRecord.get().themeSubHealthCompanyAccum || {},
                 tabIndex
             }
         });
@@ -116,8 +116,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeDecayCompanyAccum: {
-                ...historicalRecord.get().themeDecayCompanyAccum || {},
+            themeSubHealthCompanyAccum: {
+                ...historicalRecord.get().themeSubHealthCompanyAccum || {},
                 showShape
             }
         });
@@ -133,33 +133,33 @@ ajaxData({
         if (dateType !== 3) return;
         if (dataType <= 0) return;
         if (getInfo) {
-            $scope.analysis_company_decay_accum_info.getData({
-                queryCode: 'analysis_company_decay_accum_info',
+            $scope.analysis_wp_company_sub_health_accum_info.getData({
+                queryCode: 'analysis_wp_company_sub_health_accum_info',
                 queryType: 1,
                 date: dateTime.showDate
             });
         }
         if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_company_decay_accum_timelist.getData({
-                queryCode: 'analysis_company_decay_accum_timelist',
+            $scope.analysis_wp_company_sub_health_accum_timelist.getData({
+                queryCode: 'analysis_wp_company_sub_health_accum_timelist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_company_decay_accum_timeline.getData({
-                queryCode: 'analysis_company_decay_accum_timeline',
+            $scope.analysis_wp_company_sub_health_accum_timeline.getData({
+                queryCode: 'analysis_wp_company_sub_health_accum_timeline',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_company_decay_accum_stationlist.getData({
-                queryCode: 'analysis_company_decay_accum_stationlist',
+            $scope.analysis_wp_company_sub_health_accum_stationlist.getData({
+                queryCode: 'analysis_wp_company_sub_health_accum_stationlist',
                 queryType: 1,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_company_decay_accum_stationline.getData({
-                queryCode: 'analysis_company_decay_accum_stationline',
+            $scope.analysis_wp_company_sub_health_accum_stationline.getData({
+                queryCode: 'analysis_wp_company_sub_health_accum_stationline',
                 queryType: 1,
                 date: dateTime.showDate
             });
@@ -174,7 +174,7 @@ ajaxData({
             $scope.analysis_station_decay_accum_deviceline.getData({
                 queryCode: 'analysis_station_decay_accum_deviceline',
                 queryType: 1,
-                sort: 'decay_we_r,desc',
+                sort: 'sub_health_we_r,desc',
                 date: dateTime.showDate,
                 decay_status: 1
             });
@@ -182,7 +182,7 @@ ajaxData({
     };
 
     // 时间 列表
-    $scope.analysis_company_decay_accum_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_sub_health_accum_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -193,20 +193,20 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量' + '(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失电量' + '(' + res.body.units.decay_we + ')',
-                dataIndex: 'decay_we',
+                title: '亚健康损失电量' + '(' + res.body.units.sub_health_we + ')',
+                dataIndex: 'sub_health_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失比例' + '(' + res.body.units.decay_we_r + ')',
-                dataIndex: 'decay_we_r',
+                title: '亚健康损失比例' + '(' + res.body.units.sub_health_we_r + ')',
+                dataIndex: 'sub_health_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -214,14 +214,14 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_company_decay_accum_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_sub_health_accum_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.decay_we], [res.body.data.decay_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh, res.body.data.sub_health_we], [res.body.data.sub_health_we_r]];
     };
 
     // 电站 列表
-    $scope.analysis_company_decay_accum_stationlist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_sub_health_accum_stationlist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -242,20 +242,20 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量' + '(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失电量' + '(' + res.body.units.decay_we + ')',
-                dataIndex: 'decay_we',
+                title: '亚健康损失电量' + '(' + res.body.units.sub_health_we + ')',
+                dataIndex: 'sub_health_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失比例' + '(' + res.body.units.decay_we_r + ')',
-                dataIndex: 'decay_we_r',
+                title: '亚健康损失比例' + '(' + res.body.units.sub_health_we_r + ')',
+                dataIndex: 'sub_health_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -263,10 +263,10 @@ ajaxData({
     };
 
     // 电站 曲线
-    $scope.analysis_company_decay_accum_stationline.getDataCallback = (success, res) => {
+    $scope.analysis_wp_company_sub_health_accum_stationline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.decay_we], [res.body.data.decay_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh, res.body.data.sub_health_we], [res.body.data.sub_health_we_r]];
     };
 
     // 设备 列表
@@ -301,20 +301,20 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量' + '(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失电量' + '(' + res.body.units.decay_we + ')',
-                dataIndex: 'decay_we',
+                title: '亚健康损失电量' + '(' + res.body.units.sub_health_we + ')',
+                dataIndex: 'sub_health_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失比例' + '(' + res.body.units.decay_we_r + ')',
-                dataIndex: 'decay_we_r',
+                title: '亚健康损失比例' + '(' + res.body.units.sub_health_we_r + ')',
+                dataIndex: 'sub_health_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -325,7 +325,7 @@ ajaxData({
     $scope.analysis_station_decay_accum_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.st_name.map((v, i) => v + '\n' + res.body.data.eq_name[i]);
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.decay_we], [res.body.data.decay_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh, res.body.data.sub_health_we], [res.body.data.sub_health_we_r]];
     };
 
     // 数据置空
@@ -333,13 +333,13 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_company_decay_accum_timelist.res = null;
-        $scope.analysis_company_decay_accum_timeline.res = null;
-        $scope.analysis_company_decay_accum_stationlist.res = null;
-        $scope.analysis_company_decay_accum_stationline.res = null;
+        $scope.analysis_wp_company_sub_health_accum_timelist.res = null;
+        $scope.analysis_wp_company_sub_health_accum_timeline.res = null;
+        $scope.analysis_wp_company_sub_health_accum_stationlist.res = null;
+        $scope.analysis_wp_company_sub_health_accum_stationline.res = null;
         $scope.analysis_station_decay_accum_devicelist.res = null;
         $scope.analysis_station_decay_accum_deviceline.res = null;
-        if (getInfo) $scope.analysis_company_decay_accum_info.res = null;
+        if (getInfo) $scope.analysis_wp_company_sub_health_accum_info.res = null;
     }
 
     // 销毁 事件
