@@ -1,47 +1,47 @@
 ajaxData({
     // info
-    analysis_station_decay_month_info: {
-        name: 'GETanalysis_station_decay_month_info',
+    analysis_wp_station_yaw_month_info: {
+        name: 'GETanalysis_wp_station_yaw_month_info',
         data: {},
         later: true
     },
     // 时间 列表
-    analysis_station_decay_month_timelist: {
-        name: 'GETanalysis_station_decay_month_timelist',
+    analysis_wp_station_yaw_month_timelist: {
+        name: 'GETanalysis_wp_station_yaw_month_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 时间 曲线
-    analysis_station_decay_month_timeline: {
-        name: 'GETanalysis_station_decay_month_timeline',
+    analysis_wp_station_yaw_month_timeline: {
+        name: 'GETanalysis_wp_station_yaw_month_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 设备 列表
-    analysis_station_decay_month_devicelist: {
-        name: 'GETanalysis_station_decay_month_devicelist',
+    analysis_wp_station_yaw_month_devicelist: {
+        name: 'GETanalysis_wp_station_yaw_month_devicelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     // 设备 曲线
-    analysis_station_decay_month_deviceline: {
-        name: 'GETanalysis_station_decay_month_deviceline',
+    analysis_wp_station_yaw_month_deviceline: {
+        name: 'GETanalysis_wp_station_yaw_month_deviceline',
         data: {},
         later: true,
         onlyLatest: true
     },
 }, {
-    __serviceName__: 'decayStationMonthService',
-})('decayStationMonthCtrl', ['$scope', 'decayStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    __serviceName__: 'yawStationMonthService',
+})('yawStationMonthCtrl', ['$scope', 'yawStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, tabIndex = 0 } = historicalRecord.get().themeDecayStationMonth || {};
+        let { showShape, tabIndex = 0 } = historicalRecord.get().themeYawStationMonth || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -71,8 +71,8 @@ ajaxData({
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
         historicalRecord.set({
-            themeDecayStationMonth: {
-                ...historicalRecord.get().themeDecayStationMonth || {},
+            themeYawStationMonth: {
+                ...historicalRecord.get().themeYawStationMonth || {},
                 tabIndex
             }
         });
@@ -83,8 +83,8 @@ ajaxData({
     $scope.changeShowShape = showShape => {
         $scope.showShape = showShape;
         historicalRecord.set({
-            themeDecayStationMonth: {
-                ...historicalRecord.get().themeDecayStationMonth || {},
+            themeYawStationMonth: {
+                ...historicalRecord.get().themeYawStationMonth || {},
                 showShape
             }
         });
@@ -100,36 +100,36 @@ ajaxData({
         if (dateType !== 1) return;
         if (dataType !== 0) return;
         if (getInfo) {
-            $scope.analysis_station_decay_month_info.getData({
-                queryCode: 'analysis_station_decay_month_info',
+            $scope.analysis_wp_station_yaw_month_info.getData({
+                queryCode: 'analysis_wp_station_yaw_month_info',
                 queryType: 3,
                 date: dateTime.showDate
             });
         }
         if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_station_decay_month_timelist.getData({
-                queryCode: 'analysis_station_decay_month_timelist',
+            $scope.analysis_wp_station_yaw_month_timelist.getData({
+                queryCode: 'analysis_wp_station_yaw_month_timelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_station_decay_month_timeline.getData({
-                queryCode: 'analysis_station_decay_month_timeline',
+            $scope.analysis_wp_station_yaw_month_timeline.getData({
+                queryCode: 'analysis_wp_station_yaw_month_timeline',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_station_decay_month_devicelist.getData({
-                queryCode: 'analysis_station_decay_month_devicelist',
+            $scope.analysis_wp_station_yaw_month_devicelist.getData({
+                queryCode: 'analysis_wp_station_yaw_month_devicelist',
                 queryType: 3,
                 date: dateTime.showDate,
                 decay_status: 1
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_station_decay_month_deviceline.getData({
-                queryCode: 'analysis_station_decay_month_deviceline',
+            $scope.analysis_wp_station_yaw_month_deviceline.getData({
+                queryCode: 'analysis_wp_station_yaw_month_deviceline',
                 queryType: 3,
-                sort: 'decay_we_r,desc',
+                sort: 'yaw_we_r,desc',
                 date: dateTime.showDate,
                 decay_status: 1
             });
@@ -145,7 +145,7 @@ ajaxData({
     // 图表 点击 事件 处理 函数
     $scope.chartClick = (params) => {
         if ($scope.tabIndex !== 1) return;
-        const { eq_name, eqid } = $scope.analysis_station_decay_month_deviceline.res.body.data;
+        const { eq_name, eqid } = $scope.analysis_wp_station_yaw_month_deviceline.res.body.data;
         $scope.equipmentDetail({
             eq_name: params.name,
             eqid: eqid[eq_name.indexOf(params.name)]
@@ -160,7 +160,7 @@ ajaxData({
     };
 
     // 时间 列表
-    $scope.analysis_station_decay_month_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_yaw_month_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -178,20 +178,20 @@ ajaxData({
                 // }
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量' + '(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失电量' + '(' + res.body.units.decay_we + ')',
-                dataIndex: 'decay_we',
+                title: '偏航损失电量' + '(' + res.body.units.yaw_we + ')',
+                dataIndex: 'yaw_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失比例' + '(' + res.body.units.decay_we_r + ')',
-                dataIndex: 'decay_we_r',
+                title: '偏航损失比例' + '(' + res.body.units.yaw_we_r + ')',
+                dataIndex: 'yaw_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -199,11 +199,11 @@ ajaxData({
     };
 
     // 时间 曲线
-    $scope.analysis_station_decay_month_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_yaw_month_timeline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.decay_we], [res.body.data.decay_we_r]];
-        $scope.imageSymbolsData = res.body.data.real_kwh_chk.map((v, i) => v + res.body.data.decay_we[i]);
+        $scope.ydatas = [[res.body.data.real_kwh, res.body.data.yaw_we], [res.body.data.yaw_we_r]];
+        $scope.imageSymbolsData = res.body.data.real_kwh.map((v, i) => v + res.body.data.yaw_we[i]);
         $scope.imageSymbols = res.body.data.weather_code.map(v => {
             return 'image://' + window.baseUrl + '/theme/images/enrichment/public/' + ['', 'qingtian', 'yintian', 'yu', 'xue', 'wumai', 'other'][v] + '.png'
         });
@@ -213,14 +213,14 @@ ajaxData({
     $scope.equipmentDetailruning = (item, index, event) => {
         if (!event.target.className.includes('clickable')) return;
         const { stid, eqid } = item;
-        $scope.$broadcast("equipmentPopUp", {
+        $scope.$broadcast("equipmentPopUpWp", {
             stid,
             eqid
         });
     };
 
     // 设备 列表
-    $scope.analysis_station_decay_month_devicelist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_yaw_month_devicelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -241,20 +241,20 @@ ajaxData({
                 sort: true,
             },
             {
-                title: '实发电量' + '(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量' + '(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失电量' + '(' + res.body.units.decay_we + ')',
-                dataIndex: 'decay_we',
+                title: '偏航损失电量' + '(' + res.body.units.yaw_we + ')',
+                dataIndex: 'yaw_we',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '衰减损失比例' + '(' + res.body.units.decay_we_r + ')',
-                dataIndex: 'decay_we_r',
+                title: '偏航损失比例' + '(' + res.body.units.yaw_we_r + ')',
+                dataIndex: 'yaw_we_r',
                 align: 'right',
                 sort: true,
             },
@@ -262,10 +262,10 @@ ajaxData({
     };
 
     // 设备 曲线
-    $scope.analysis_station_decay_month_deviceline.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_yaw_month_deviceline.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.xdata = res.body.data.eq_name;
-        $scope.ydatas = [[res.body.data.real_kwh_chk, res.body.data.decay_we], [res.body.data.decay_we_r]];
+        $scope.ydatas = [[res.body.data.real_kwh, res.body.data.yaw_we], [res.body.data.yaw_we]];
     };
 
     // 数据置空
@@ -273,11 +273,11 @@ ajaxData({
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_station_decay_month_timelist.res = null;
-        $scope.analysis_station_decay_month_timeline.res = null;
-        $scope.analysis_station_decay_month_devicelist.res = null;
-        $scope.analysis_station_decay_month_deviceline.res = null;
-        if (getInfo) $scope.analysis_station_decay_month_info.res = null;
+        $scope.analysis_wp_station_yaw_month_timelist.res = null;
+        $scope.analysis_wp_station_yaw_month_timeline.res = null;
+        $scope.analysis_wp_station_yaw_month_devicelist.res = null;
+        $scope.analysis_wp_station_yaw_month_deviceline.res = null;
+        if (getInfo) $scope.analysis_wp_station_yaw_month_info.res = null;
     }
 
     // 销毁 事件
