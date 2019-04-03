@@ -1,29 +1,31 @@
-ajaxData({
-    // 给默认选中电站
-    getuserAuthHandleSetSTClass: {
-        name: 'GETUserAuthHandleSetSTClass',
-        data: {},
-        later: true
-    },
-    // 切换电站
-    changeStation: {
-        name: 'GETUserAuthHandleChangeDataType',
-        data: {},
-        later: true
-    },
-    // 基本电站信息
-    getUserAuthHandleGetCurrentInfo: {
-        name: 'GETUserAuthHandleGetCurrentInfo',
-        data: {},
-        later: true
-    },
-    // 电站基本信息 新
-    getCurrentInfoNew: {
-        name: 'GETgetCurrentInfoNew',
-        data: {},
-        later: true
-    }
-}, {})('analyzeSummaryWpCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout'], ($scope, myAjaxData, historicalRecord, $timeout) => {
+ajaxData(
+    {
+        // 给默认选中电站
+        getuserAuthHandleSetSTClass: {
+            name: 'GETUserAuthHandleSetSTClass',
+            data: {},
+            later: true
+        },
+        // 切换电站
+        changeStation: {
+            name: 'GETUserAuthHandleChangeDataType',
+            data: {},
+            later: true
+        },
+        // 基本电站信息
+        getUserAuthHandleGetCurrentInfo: {
+            name: 'GETUserAuthHandleGetCurrentInfo',
+            data: {},
+            later: true
+        },
+        // 电站基本信息 新
+        getCurrentInfoNew: {
+            name: 'GETgetCurrentInfoNew',
+            data: {},
+            later: true
+        }
+    }, {}
+)('analyzeSummaryWpCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout'], ($scope, myAjaxData, historicalRecord, $timeout) => {
     historicalRecord.init();// 历史记录 初始化
     $scope.beforeLoading = true; // 页面loading
     $scope.themeLoading = true;
@@ -88,6 +90,17 @@ ajaxData({
         if (!switchArguments) return;
         $scope.dataType = switchArguments.dataType;
         historicalRecord.set({ stationData: switchArguments });
+        if (switchArguments.dataType !== 0 && [
+            'powerCurve',            
+            'runningState',            
+            'powerCapacity',            
+            'impellerBlades',            
+            'machineRoom',            
+            'gearBox',            
+            'dynamo',            
+        ].includes($scope.theme)) {
+            return $scope.goIndex();
+        }
         return computeThemeDetail();
     };
 
@@ -142,7 +155,7 @@ ajaxData({
         $scope.themeLoading = true;
         return computeThemeDetail(theme);
     });
-    
+
     // 返回 首页 能流图
     $scope.goIndex = () => computeThemeDetail('default');
 
