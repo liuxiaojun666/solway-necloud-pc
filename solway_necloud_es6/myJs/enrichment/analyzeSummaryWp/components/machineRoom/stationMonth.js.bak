@@ -34,7 +34,7 @@ ajaxData(
             later: true,
             onlyLatest: true
         },
-        
+
         // 风速计 info
         analysis_wp_station_wsm_month_info: {
             name: 'GETanalysis_wp_station_wsm_month_info',
@@ -69,7 +69,7 @@ ajaxData(
             later: true,
             onlyLatest: true
         },
-        
+
     }, {
         __serviceName__: 'machineRoomStationMonthService',
     }
@@ -224,6 +224,22 @@ ajaxData(
             $scope.equipmentDetailShow2 = true;
             $scope.$broadcast('equipmentDetails2', obj);
         }
+    };
+
+    // 图表 点击 事件 处理 函数
+    $scope.chartClick = (params) => {
+        if ($scope.tabIndex !== 1) return;
+        const {
+            eq_name,
+            eqid
+        } = $scope.classTab === 0
+        ? $scope.analysis_wp_station_vane_month_deviceline.res.body.data
+        : $scope.analysis_wp_station_wsm_month_deviceline.res.body.data;
+        $scope.equipmentDetail({
+            eq_name: params.name,
+            eqid: eqid[eq_name.indexOf(params.name)]
+        });
+        $scope.$apply();
     };
 
     // 风向标 时间 列表

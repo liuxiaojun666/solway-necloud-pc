@@ -170,6 +170,17 @@ ajaxData(
         $scope.$broadcast('equipmentDetails', obj);
     };
 
+    // 图表 点击 事件 处理 函数
+    $scope.chartClick = (params) => {
+        if ($scope.tabIndex !== 1) return;
+        const { eq_name, eqid } = $scope.analysis_wp_station_pitch_month_deviceline.res.body.data;
+        $scope.equipmentDetail({
+            eq_name: params.name,
+            eqid: eqid[eq_name.indexOf(params.name)]
+        });
+        $scope.$apply();
+    };
+
     // 时间 列表
     $scope.analysis_wp_station_pitch_month_timelist.getDataCallback = (success, res) => {
         if (!success) return;
