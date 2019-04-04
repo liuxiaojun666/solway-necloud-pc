@@ -68,6 +68,9 @@ ajaxData(
             tooltip: {
                 showDelay: 0,
                 formatter: function (params) {
+                    if (!params.value.join) {
+                        return params.name + params.value + '以上';
+                    }
                     return params.data[3] + '<br/>' 
                             + '运行状态：' + params.data[0] 
                             + '<br/>'
@@ -146,10 +149,10 @@ ajaxData(
                             }
                         },
                         data : [
-                            { xAxis: 0.6},
-                            { xAxis: 0.9},
-                            {yAxis:0.96},
-                            {yAxis:0.99}
+                            { xAxis: 0.6, name: '正常标志线'},
+                            { xAxis: 0.9, name: '高效标志线'},
+                            {yAxis:0.96, name: '正常标志线'},
+                            {yAxis:0.99, name: '高效标志线'}
                         ]
                     }
                     // markLine: {

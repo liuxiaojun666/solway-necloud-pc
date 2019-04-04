@@ -8,8 +8,10 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
         xname: '=',
         xdata: '=',
         ydatas: '=',
-        yMin: '=',
-        yMax: '=',
+        ymin: '=',
+        ymax: '=',
+        xmin: '=',
+        xmax: '=',
         colors: '=',
         types: '=',
         backgroundColor: '=',
@@ -77,8 +79,10 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                 xname = '',
                 xdata = [],
                 ydatas = [[[]]],
-                yMin = [],
-                yMax = [],
+                ymin,
+                ymax,
+                xmin,
+                xmax,
                 types = [],
                 colors = [],
                 datazoom,
@@ -144,6 +148,8 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                     axisTick: {
                         inside: true
                     },
+                    min: xmin,
+                    max: xmax,
                     // data: xdata,
                     name: xname,
                     nameTextStyle: {
@@ -158,8 +164,8 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                     },
                     splitNumber,
                     interval,
-                    min: yMin[i],
-                    max: yMax[i],
+                    min: ymin,
+                    max: ymax,
                     axisTick: {
                         show: false //是否显示坐标轴刻度
                     },
