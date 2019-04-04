@@ -32,6 +32,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         markLine: '=', // 标记线
         legend: '=',
         grid: '=',
+        datazoomEnd: '=',
     },
     link($scope, $element) {
         let myChart;
@@ -85,6 +86,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 linezoom,
                 areaFill, 
                 markLine,
+                datazoomEnd,
                 legend = {},
                 grid = {
                     top: '60',
@@ -181,7 +183,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     type: 'slider',
                     xAxisIndex: 0,
                     filterMode: 'empty',
-                    end: (width - 100) / ydatas[0][0].length * 2
+                    end: datazoomEnd || (width - 100) / ydatas[0][0].length * 2
                     // handleSize: $scope.width
                 }],
                 series: ydatas.map((v, i) => (v.map((data, xi) => ({
