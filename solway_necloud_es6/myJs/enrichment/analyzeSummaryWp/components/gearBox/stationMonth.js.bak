@@ -104,7 +104,7 @@ ajaxData(
         $scope.$apply();
     };
 
-    $scope.checkboxOnchange = async(_all ,elements) => {
+    $scope.checkboxOnchange = async (_all, elements) => {
         const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies);
         if (!eqids.length) {
             $scope.turbineGearboxPoints.chart.display = false;
@@ -139,6 +139,29 @@ ajaxData(
         };
         $scope.$apply();
     });
+
+    $scope.turbineGearboxPoints.markLine = {
+        lineStyle: {
+            normal: {
+                type: 'solid',
+                color: 'rgba(255,255,255,0.4)'
+            }
+        },
+        label: {
+            normal: {
+                show: true,
+                position: 'end',
+                color: 'rgba(255,255,255,1)',
+            }
+        },
+        data: [
+            { yAxis: 60, name: '' },
+            { yAxis: 65, name: '' },
+            { yAxis: 70, name: '' },
+            { yAxis: 75, name: '' },
+            { yAxis: 80, name: '' },
+        ]
+    };
 
     $scope.turbineGearboxPoints.tooltipFormatter = (params) => {
         return params[0].value[0] + 'rpm<br/>' + params.map(v => v.seriesName + '油温(℃):    ' + v.value[1] + '<br/>').join('');
