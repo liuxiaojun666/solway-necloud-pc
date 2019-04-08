@@ -22,9 +22,10 @@ ajaxData({
 }, {
     __serviceName__: 'resourcesDeviationCompanyMonthWpService',
 })('resourcesDeviationCompanyMonthWpCtrl', ['$scope', 'resourcesDeviationCompanyMonthWpService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    $('#switchPowerEnrich i.switch-station.iconfont.icon-qiehuan.switchPowerIcon').hide();
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
-
+    
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
         let { showShape} = historicalRecord.get().themeResourcesDeviationCompanyMonth || {};
@@ -179,5 +180,6 @@ ajaxData({
     // 销毁 事件
     $scope.$on('$destroy', () => {
         setDataNull();
+        $('#switchPowerEnrich i.switch-station.iconfont.icon-qiehuan.switchPowerIcon').show();
     });
 });

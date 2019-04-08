@@ -104,6 +104,17 @@ ajaxData({
                 const theme = themeMap[(Object.keys(themeMap).includes(target) ? target : source) || name];
                 if (!theme) return;
                 if (theme.name === 'null') return;
+                if ($scope.dataType === 0 && $scope.dateType === 1) {
+                    if ([
+                        'resourcesDeviation',
+                        'modelDeviation',
+                        'assess',
+                        'real',
+                        'restrict',
+                        'repair',
+                        'lineLoss'
+                    ].includes(theme.name)) return;
+                }
                 $scope.$emit('changeTheme', theme.name);
                 $scope.$apply();
             });
