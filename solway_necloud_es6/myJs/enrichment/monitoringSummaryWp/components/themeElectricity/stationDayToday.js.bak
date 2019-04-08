@@ -87,6 +87,9 @@ ajaxData(
                 dataIndex: 'name',
                 width: '25%',
                 sort: true,
+                render(text) {
+                    return `<text style="color: #428bca;">${text}</text>`
+                }
             },
             {
                 title: '装机容量(kW)',
@@ -113,6 +116,10 @@ ajaxData(
             },
         ];
     });
+
+    $scope.showInformation = (item, index, event) => {
+        $scope.$broadcast('equipmentPopUpWp', { stid: item.sid, eqid: item.did});
+    };
 
     // 定时器  定时刷新接口
     const timer = $interval(() => $scope.stationDayTodayData.getData({}), 10000);
