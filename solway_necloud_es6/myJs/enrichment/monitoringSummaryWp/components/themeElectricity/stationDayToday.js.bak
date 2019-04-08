@@ -111,6 +111,8 @@ ajaxData(
                 width: '15%',
                 align: 'right',
                 render(text, item, index) {
+                    if (!item.daykwh || !item.acc_kw) return '-';
+                    if (item.daykwh < 0) return '-';
                     return ((item.daykwh / item.acc_kw) || 0).toFixed(1);
                 }
             },
