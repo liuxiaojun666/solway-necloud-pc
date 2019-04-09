@@ -71,13 +71,10 @@ ajaxData({
                 },
                 {
                     title: '实发电量(kWh)',
-                    dataIndex: 'real_kwh',
+                    dataIndex: 'real_kwh_o',
                     width: '10%',
                     sort: true,
                     align: 'right',
-                    render(text) {
-                        return text && text[0];
-                    }
                 },
                 {
                     title: '上网电量(kWh)',
@@ -98,10 +95,13 @@ ajaxData({
                 },
                 {
                     title: '发电小时数(h)',
-                    dataIndex: 'real_hours_h',
+                    dataIndex: 'real_hours_o',
                     width: '10%',
                     sort: true,
-                    align: 'right'
+                    align: 'right',
+                    render(text) {
+                        return (text || 0).toFixed(1);
+                    }
                 },
             ];
         };
