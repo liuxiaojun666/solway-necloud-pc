@@ -1,28 +1,28 @@
 ajaxData({
     //累计详情---集团---列表
-    query_company_accum_detail_timelist_his: {
-        name: 'GETquery_company_accum_detail_timelist_his',
+    query_wp_company_accum_timelist: {
+        name: 'GETquery_wp_company_accum_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     //累计详情---集团---柱状图
-    query_company_accum_detail_timebar_his: {
-        name: 'GETquery_company_accum_detail_timebar_his',
+    query_wp_company_accum_timeline: {
+        name: 'GETquery_wp_company_accum_timeline',
         data: {},
         later: true,
         onlyLatest: true
     },
     //累计详情---电站---列表
-    query_station_accum_detail_timelist_his: {
-        name: 'GETquery_station_accum_detail_timelist_his',
+    query_wp_station_accum_timelist: {
+        name: 'GETquery_wp_station_accum_timelist',
         data: {},
         later: true,
         onlyLatest: true
     },
     //累计详情---电站---柱状图
-    query_station_accum_detail_timebar_his: {
-        name: 'GETquery_station_accum_detail_timebar_his',
+    query_wp_station_accum_timeline: {
+        name: 'GETquery_wp_station_accum_timeline',
         data: {},
         later: true,
         onlyLatest: true
@@ -87,30 +87,30 @@ ajaxData({
         await myAjaxData.timeout(0);
         $scope.accumulativeDetailLoading = true;
         if ($scope.dataType && $scope.showShape == 'list'){ //集团列表
-            $scope.query_company_accum_detail_timelist_his.getData({
-                'queryCode': 'query_company_accum_detail_timelist_his',
+            $scope.query_wp_company_accum_timelist.getData({
+                'queryCode': 'query_wp_company_accum_timelist',
                 'queryType': 1
             });
         } else if ($scope.dataType && $scope.showShape == 'chart') { //集团柱状图
-            $scope.query_company_accum_detail_timebar_his.getData({
-                'queryCode': 'query_company_accum_detail_timebar_his',
+            $scope.query_wp_company_accum_timeline.getData({
+                'queryCode': 'query_wp_company_accum_timeline',
                 'queryType': 1
             });
         } else if (!$scope.dataType && $scope.showShape == 'list') { //电站列表
-            $scope.query_station_accum_detail_timelist_his.getData({
-                'queryCode': 'query_station_accum_detail_timelist_his',
+            $scope.query_wp_station_accum_timelist.getData({
+                'queryCode': 'query_wp_station_accum_timelist',
                 'queryType': 3
             });
         } else if (!$scope.dataType && $scope.showShape == 'chart') { //电站柱状图
-            $scope.query_station_accum_detail_timebar_his.getData({
-                'queryCode': 'query_station_accum_detail_timebar_his',
+            $scope.query_wp_station_accum_timeline.getData({
+                'queryCode': 'query_wp_station_accum_timeline',
                 'queryType': 3
             });
         }
     };
 
     // 集团列表--接口处理
-    $scope.query_company_accum_detail_timelist_his.getDataCallback = (success, res) => {
+    $scope.query_wp_company_accum_timelist.getDataCallback = (success, res) => {
         $scope.accumulativeDetailLoading = false;
         if (!success) return;
         $scope.column = [
@@ -121,26 +121,26 @@ ajaxData({
                 align: 'center',
             },
             {
-                title: '应发电量(' + res.body.units.shd_kwh_chk + ')',
-                dataIndex: 'shd_kwh_chk',
+                title: '应发电量(' + res.body.units.shd_kwh + ')',
+                dataIndex: 'shd_kwh',
                 sort: 'true',
                 align: 'right'
             },
             {
-                title: '实发电量(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 sort: 'true',
                 align: 'right'
             },
             {
-                title: '上网电量(' + res.body.units.send_kwh_chk + ')',
-                dataIndex: 'send_kwh_chk',
+                title: '上网电量(' + res.body.units.send_kwh + ')',
+                dataIndex: 'send_kwh',
                 sort: 'true',
                 align: 'right'
             },
             {
-                title: '损失电量(' + res.body.units.fail_we + ')',
-                dataIndex: 'fail_we',
+                title: '损失电量(' + res.body.units.we + ')',
+                dataIndex: 'we',
                 sort: 'true',
                 align: 'right'
             },
@@ -151,8 +151,8 @@ ajaxData({
                 align: 'right'
             },
             {
-                title: '平均风速(' + res.body.units.aa + ')',
-                dataIndex: 'aa',
+                title: '平均风速(' + res.body.units.ws_avg + ')',
+                dataIndex: 'ws_avg',
                 sort: 'true',
                 align: 'right'
             },
@@ -178,11 +178,11 @@ ajaxData({
     };
 
     // 集团柱状图--接口处理
-    $scope.query_company_accum_detail_timebar_his.getDataCallback = (success, res) => {
+    $scope.query_wp_company_accum_timeline.getDataCallback = (success, res) => {
         $scope.accumulativeDetailLoading = false;    
         diffSelectOptions(res.body.units);//图表设置selectOptions  
-        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
 
@@ -191,7 +191,7 @@ ajaxData({
     }
 
     // 电站列表--接口处理
-    $scope.query_station_accum_detail_timelist_his.getDataCallback = (success, res) => {
+    $scope.query_wp_station_accum_timelist.getDataCallback = (success, res) => {
         $scope.accumulativeDetailLoading = false;
         if (!success) return;
         $scope.column = [
@@ -202,26 +202,26 @@ ajaxData({
                 align: 'center',
             },
             {
-                title: '应发电量(' + res.body.units.shd_kwh_chk + ')',
-                dataIndex: 'shd_kwh_chk',
+                title: '应发电量(' + res.body.units.shd_kwh + ')',
+                dataIndex: 'shd_kwh',
                 sort: 'true',
                 align: 'right'
             },
             {
-                title: '实发电量(' + res.body.units.real_kwh_chk + ')',
-                dataIndex: 'real_kwh_chk',
+                title: '实发电量(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
                 sort: 'true',
                 align: 'right'
             },
             {
-                title: '上网电量(' + res.body.units.send_kwh_chk + ')',
-                dataIndex: 'send_kwh_chk',
+                title: '上网电量(' + res.body.units.send_kwh + ')',
+                dataIndex: 'send_kwh',
                 sort: 'true',
                 align: 'right'
             },
             {
-                title: '损失电量(' + res.body.units.fail_we + ')',
-                dataIndex: 'fail_we',
+                title: '损失电量(' + res.body.units.we + ')',
+                dataIndex: 'we',
                 sort: 'true',
                 align: 'right'
             },
@@ -239,8 +239,8 @@ ajaxData({
             // },
 
             {
-                title: '平均风速(' + res.body.units.aa + ')',
-                dataIndex: 'aa',
+                title: '平均风速(' + res.body.units.ws_avg + ')',
+                dataIndex: 'ws_avg',
                 sort: 'true',
                 align: 'right'
             },
@@ -260,11 +260,11 @@ ajaxData({
     }
 
     // 电站柱状图--接口处理
-    $scope.query_station_accum_detail_timebar_his.getDataCallback = (success, res) => {
+    $scope.query_wp_station_accum_timeline.getDataCallback = (success, res) => {
         $scope.accumulativeDetailLoading = false;
         diffSelectOptions(res.body.units);
-        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh_chk';
-        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh_chk';
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
     }
@@ -275,21 +275,21 @@ ajaxData({
         const { select1, select2 } = $scope;
         
         if ($scope.dataType){//集团
-            $scope.xdata = $scope.query_company_accum_detail_timebar_his.res.body.data.dtime;
-            $scope.ydatas = [[$scope.query_company_accum_detail_timebar_his.res.body.data[select1]], [$scope.query_company_accum_detail_timebar_his.res.body.data[select2]]];
+            $scope.xdata = $scope.query_wp_company_accum_timeline.res.body.data.dtime;
+            $scope.ydatas = [[$scope.query_wp_company_accum_timeline.res.body.data[select1]], [$scope.query_wp_company_accum_timeline.res.body.data[select2]]];
         } else if (!$scope.dataType){//电站
-            $scope.xdata = $scope.query_station_accum_detail_timebar_his.res.body.data.dtime;
-            $scope.ydatas = [[$scope.query_station_accum_detail_timebar_his.res.body.data[select1]], [$scope.query_station_accum_detail_timebar_his.res.body.data[select2]]]
+            $scope.xdata = $scope.query_wp_station_accum_timeline.res.body.data.dtime;
+            $scope.ydatas = [[$scope.query_wp_station_accum_timeline.res.body.data[select1]], [$scope.query_wp_station_accum_timeline.res.body.data[select2]]]
         }
     }
 
     // selectOption赋值
     function diffSelectOptions(units) {
         $scope.selectOptions = {
-            shd_kwh_chk: '应发电量' + units.shd_kwh_chk,
-            real_kwh_chk: '实发电量' + units.real_kwh_chk,
-            send_kwh_chk: '上网电量' + units.send_kwh_chk,
-            fail_we: '损失电量' + units.fail_we,
+            shd_kwh: '应发电量' + units.shd_kwh,
+            real_kwh: '实发电量' + units.real_kwh,
+            send_kwh: '上网电量' + units.send_kwh,
+            we: '损失电量' + units.we,
             real_hours: '发电小时数' + units.real_hours,
             // rad_chk: '辐射总量' + units.rad_chk,
             pba: 'pba',
