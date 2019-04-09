@@ -29,6 +29,22 @@ ajaxData({
         $scope.$apply();
     };
 
+    var myChart = echarts.getInstanceByDom(document.getElementById("container"));
+    // 切换图表排列方式
+    $scope.chartSortIndex = 4;
+    $scope.chartSort = (index) => {
+        $scope.chartSortIndex = index;
+        if ($scope.chartSortIndex == 1) {
+            $scope.chartStyle = { 'width': '100%', 'height': '100%' }
+        } else if ($scope.chartSortIndex == 2) {
+            $scope.chartStyle = { 'width': '100%', 'height': '49%' }
+        } else if ($scope.chartSortIndex == 3) {
+            $scope.chartStyle = { 'width': '49%', 'height': '100%' }
+        } else if ($scope.chartSortIndex == 4) {
+            $scope.chartStyle = { 'width': '49%' }
+        }
+
+    }
     //图表函数组
     function chartsOne() {
         var data = [
@@ -37,7 +53,6 @@ ajaxData({
         ];
         var dom = document.getElementById("container");
         var myChart = echarts.init(dom);
-        var app = {};
         var option = null;
         option = {
             xAxis: {
@@ -134,23 +149,37 @@ ajaxData({
                 }
             }],
             grid: {
-                top: "30px",
-                left: "40px",
-                right: "30px",
-                bottom: "30px"
+                top: "15%",
+                left: "7%",
+                right: "7%",
+                bottom: "18%"
             }
         };
-        ;
         if (option && typeof option === "object") {
             myChart.setOption(option, true);
         }
     }
     chartsOne();
 
+    //resize图表
+    var myChart = echarts.getInstanceByDom(document.getElementById("container"));
+    $('.table1').resize(function () {
+        myChart.resize();
+    });
+
+
     //选中下拉框 弹出框
     $scope.analysisObjectModel = true;
     $scope.horizonIndexChange = (param) => {
         if (param == 1) {
+            // 纵轴指标弹出
+            var mySelect = document.getElementById("verticalIndex");
+            var index = mySelect.selectedIndex;
+            $scope.$broadcast('verticalIndexNum', index);
+            if (!mySelect.options[0].selected) {
+                $scope.verticalIndexModel = true;
+            }
+        }else if (param == 2) {
             // 横轴指标弹出
             var mySelect = document.getElementById("horizonIndex");
             var index = mySelect.selectedIndex;
@@ -158,7 +187,7 @@ ajaxData({
             if (!mySelect.options[0].selected) {
                 $scope.horizonIndexModel = true;
             }
-        } else if (param == 2) {
+        } else if (param == 3) {
             // 统计时间弹出
             var mySelect = document.getElementById("countTime");
             var index = mySelect.selectedIndex;
@@ -166,7 +195,7 @@ ajaxData({
             if (!mySelect.options[0].selected) {
                 $scope.countTimeModel = true;
             }
-        } else if (param == 3) {
+        } else if (param == 4) {
             // 分析对象弹出
             var mySelect = document.getElementById("analysisObject");
             var index = mySelect.selectedIndex;
@@ -181,25 +210,28 @@ ajaxData({
     //获取子级发送的radio横轴指标 去选择option
     $scope.$on('radioIndexNum', (item, index) => {
         if (index.type == 'horizon') {
-            // var opts = document.getElementById("horizonIndex");
-            // opts.options[index.radioIndex].selected = true;
-            $scope.horizonRadio = index.radioIndex;  
-        } else if (index.type == 'countTime'){ 
+            $scope.horizonRadio = index.radioIndex;
+        } else if (index.type == 'countTime') {
             $scope.cTimeRadio = index.radioIndex;
-        } else if (index.type == 'analysisObject'){ 
+        } else if (index.type == 'analysisObject') {
             $scope.aObjectRadio = index.radioIndex;
+        } else if (index.type == 'vertical') {
+            $scope.verticalRadio = index.radioIndex;
         }
     })
 
     //取消 新增后的回调
+    $scope.analysisObjectModel = false;
     $scope.$on('cancelCallback', () => {
         $scope.horizonIndexModel = false;
         $scope.countTimeModel = false;
+        $scope.analysisObjectModel = false;
     });
 
     $scope.$on('addCallback', () => {
         $scope.horizonIndexModel = false;
         $scope.countTimeModel = false;
+        $scope.analysisObjectModel = false;
     });
 });
 

@@ -36,22 +36,71 @@ ajaxData({
         $scope.radioIndex = index;
     })
 
+
+    var myDate = new Date();
+    var maxYear = myDate.getFullYear();
+    // console.log(maxYear)
+    var Year = myDate.getMonth();
+    // console.log(Year + 1)
+
+    $scope.maxYear = () => {
+        var myDate = new Date();
+        return myDate.getFullYear();
+    }
+    // layui日历
+    //日
+
+    // $(".laydate").each(function(){
+    //     laydate.render({
+    //       elem: this, //指定元素  表示当前的元素
+    //       type: 'datetime',  
+    //       theme: '#245182'  //主题  颜色改变
+    //     });
+    // })
+
+    laydate.render({
+        elem: '#cander1', //指定元素
+        position: 'static',
+        showBottom: false,
+        theme: '#245182',
+        done: function (value, date) {
+            $scope[key[$scope.radioIndex]].push(value);
+            $scope.$apply();
+        }
+    });
+    //月
+    laydate.render({
+        elem: '#cander2', //指定元素
+        position: 'static',
+        showBottom: false,
+        type: 'month',
+        theme: '#245182',
+        done: function (value, date) {
+            setTimeout(()=>{
+                console.log(1)
+            },10)
+        }
+    });
+    //年
+    laydate.render({
+        elem: '#cander3', //指定元素
+        position: 'static',
+        showBottom: false,
+        type: 'year',
+        theme: '#245182',
+        done: function(value, date){
+            console.log(1)
+            alert('你选择的日期是：' + value + '\n获得的对象是' + JSON.stringify(date));
+          }
+    });
+
+
     //单选框选中-> 更改select的值
     $scope.radioToSelect = () => {
-        // $scope.timeGroup = [];
         var radioIndex = document.querySelectorAll('[name=cTime]'):: [].filter(item => item.checked).map(item => item.dataset.index);
         $scope.$emit('radioIndexNum', { 'radioIndex': radioIndex, 'type': 'countTime' });
         $scope.radioIndex = radioIndex[0];
     }
-
-    // var sleep = () =>{
-    //     setTimeout(() => {
-    //     console.log(1)
-            
-    //     }, 5000);
-    // }
-
-    // sleep();
 
     //独立添加按钮
     $scope.timeGroupDay = [];
@@ -60,13 +109,13 @@ ajaxData({
     $scope.timeGroupUser = [];
 
     const key = {
-        1:'timeGroupDay',
-        2:'timeGroupMonth',
-        3:'timeGroupYear',
-        5:'timeGroupUser',
+        1: 'timeGroupDay',
+        2: 'timeGroupMonth',
+        3: 'timeGroupYear',
+        5: 'timeGroupUser',
     }
     $scope.oneAdd = () => {
-        if($scope.radioIndex != 5){
+        if ($scope.radioIndex != 5) {
             $scope[key[$scope.radioIndex]].push({
                 date: new Date
             })
@@ -77,10 +126,7 @@ ajaxData({
                 endDate: new Date
             })
         }
-
-        // debugger
         // await myAjaxData.timeout(10)
-        
     }
 
     //右侧删除小按钮
