@@ -4,7 +4,7 @@ ajaxData({
         data: {},
         later: true
     }
-}, { __serviceName__: 'newStationTplService', })('horizonIndexCtrl', ['$scope', 'newStationTplService', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+}, {})('verticalIndexCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
 
     //保存
     $scope.save = () => {
@@ -31,15 +31,15 @@ ajaxData({
     }
 
     //获取父级发送的横轴指标 选择的option
-    $scope.$on('horizonIndexNum', (item, index) => {
+    $scope.$on('verticalIndexNum', (item, index) => {
         $scope.selectIndex = index;
         $scope.radioIndex = index;
     })
 
     //单选框选中-> 更改select的值
     $scope.radioToSelect = () => {
-        var radioIndex = document.querySelectorAll('[name=horizon]'):: [].filter(item => item.checked).map(item => item.dataset.index);
-        $scope.$emit('radioIndexNum', { 'radioIndex': radioIndex, 'type': 'horizon' });
+        var radioIndex = document.querySelectorAll('[name=vertical]'):: [].filter(item => item.checked).map(item => item.dataset.index);
+        $scope.$emit('radioIndexNum', { 'radioIndex': radioIndex, 'type': 'vertical' });
         $scope.radioIndex = radioIndex[0];
     }
 
