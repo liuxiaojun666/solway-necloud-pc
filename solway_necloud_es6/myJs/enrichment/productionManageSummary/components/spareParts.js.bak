@@ -17,12 +17,19 @@ ajaxData(
         opFittingsDictUpdate: {
             name: 'opFittingsDictUpdate',
             data: {},
-            later: true
+            later: true,
+            sameTimeOnce: true
+        },
+        opFittingsDictDelete: {
+            name: 'opFittingsDictDelete',
+            data: {},
+            later: true,
+            sameTimeOnce: true
         }
     }, {
         __serviceName__: 'themeSparePartsService'
     }
-)('themeSparePartsCtrl', ['$scope', 'themeSparePartsService', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, _toaster, _$ocLazyLoad) => {
+)('themeSparePartsCtrl', ['$scope', 'themeSparePartsService', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, toaster, $ocLazyLoad) => {
 
     $scope.$on('popUp', (_event, _obj) => {
         $scope.opFittingsDictPage.reqDta = {
@@ -33,12 +40,21 @@ ajaxData(
 
 
     $scope.opFittingsDictSelectCtg1.blur = async () => {
-        await myAjaxData.timeout(0);
+        await myAjaxData.timeout(200);
         $scope.opFittingsDictSelectCtg1.slideDown = false;
         $scope.$apply();
     };
 
 
+    $scope.opFittingsDictSelectCtg2.blur = async () => {
+        await myAjaxData.timeout(200);
+        $scope.opFittingsDictSelectCtg2.slideDown = false;
+        $scope.$apply();
+    };
+
+    $scope.opFittingsDictSelectCtg1.filter = $scope.opFittingsDictSelectCtg2.filter = (text = '', str = '') => str && str.includes(text);
+
+    // 列表 分页
     $scope.opFittingsDictPage.column = [
         {
             title: '大类',
@@ -67,7 +83,7 @@ ajaxData(
             title: '厂商',
             dataIndex: 'manuf',
             sort: true,
-            width: '150px',
+            width: '200px',
             align: 'left'
         },
         {
@@ -96,7 +112,7 @@ ajaxData(
         {
             title: '备注',
             dataIndex: 'remark',
-            width: '150px'
+            width: '200px'
         },
         {
             title: '操作',
@@ -104,11 +120,44 @@ ajaxData(
             align: 'center',
             render(_text) {
                 return `
-                    <i style="color:#FF6262;font-size:20px;margin:0 10px;" class="iconfont icon-shanchu1"></i>
-                    <i style="color:#29C6B0;font-size:20px;margin:0 10px;" class="iconfont icon-bianji-copy"></i>
+                    <i style="color:#FF6262;font-size:20px;margin:0 5px;" class="iconfont icon-shanchu1"></i>
+                    <i style="color:#29C6B0;font-size:20px;margin:0 5px;" class="iconfont icon-bianji-copy"></i>
                 `;
             }
         }
     ];
+
+    // 点击行  编辑 或 删除 监听
+    $scope.opFittingsDictPage.trClick = (item, index, event) => {
+        const str = event.target.className;
+        if (str.includes('icon-shanchu1')) {
+            $scope.opFittingsDictDelete.beforReq(item.id);
+        } else if (str.includes('icon-bianji-copy')) {
+            $scope.opFittingsDictUpdate.edit = true;
+            const { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id } = item;
+            $scope.opFittingsDictUpdate.formData = { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id };
+        }
+    };
+
+    // 保存 更新 处理结果
+    $scope.opFittingsDictUpdate.subscribe(res => {
+        if (res.code !== 0) return toaster.pop('error', '', res.msg);
+        toaster.pop('success', '', res.msg);
+        $scope.opFittingsDictUpdate.edit = false;
+        $scope.opFittingsDictPage.getData();
+    });
+
+    // 删除 备件
+    $scope.opFittingsDictDelete.beforReq = id => {
+        $ocLazyLoad.load(['theme/js/dist/components/confirm.js' + stamp])
+            .then(() => $solway.confirm(
+                { title: '删除备件', message: ' 确定删除该备件吗？' },
+                () => $scope.opFittingsDictDelete.getData({ id }).then(res => {
+                    if (res.code !== 0) return toaster.pop('error', '', res.msg);
+                    toaster.pop('success', '', res.msg);
+                    $scope.opFittingsDictPage.getData();
+                })
+            ));
+    };
 
 });
