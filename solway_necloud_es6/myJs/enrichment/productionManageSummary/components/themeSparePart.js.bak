@@ -86,12 +86,13 @@ ajaxData(
         myAjaxData.config.publicObj = obj;
         const { tabIndex } = $scope;
         let fileName = '';
-        if (tabIndex === 1) fileName = 'putInStorage';
+        if (tabIndex === 0) fileName = 'spareParts';
+        else if (tabIndex === 1) fileName = 'putInStorage';
         else if (tabIndex === 2) fileName = 'picking';
         else if (tabIndex === 3) fileName = 'outStock';
         else if (tabIndex === 4) fileName = 'returningLibrary';
         $ocLazyLoad.load('theme/js/dist/enrichment/productionManageSummary/components/' + fileName + '.js').then(() => {
-            $scope.tpl4 = 'tpl/enrichment/productionManageSummary/components/' + fileName + '.html';
+            $scope['tpl' + tabIndex] = 'tpl/enrichment/productionManageSummary/components/' + fileName + '.html';
             if (!$scope['tpl' + tabIndex + 'loaded']) {
                 $scope.tplLoaded = () => {
                     $scope['tpl' + tabIndex + 'loaded'] = true;
