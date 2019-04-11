@@ -16,15 +16,33 @@
     <link type="image/x-icon" rel="shortcut icon" ng-href="{{currCompanyLogo}}">
     <script>
         window.stamp = window.name = window.name || window.localStorage.stamp;
-        if (!window.stamp) window.location.href = window.location.host + '/login.html';
+        if (!window.stamp) window.location.href = 'http://' + window.location.host + '/login.html';
+
+        // 只允许打开一个窗口
+        var xx = function () {
+            window.opener = null;
+            window.open("", "_self", "");
+            window.close();
+            location.href = "about:blank";
+        };
+        if (window.localStorage.hasWindow) {
+            alert('为防止未知错误，建议使用一个窗口访问系统，您已打开窗口。');
+            if (confirm('确定继续访问将重新登录系统')) window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+            else xx();
+        }
+        else {
+            window.addEventListener('beforeunload', function (e) {
+                window.localStorage.hasWindow = '';
+            });
+            window.localStorage.hasWindow = 'true';
+        }
     </script>
 </head>
 
 <body ng-controller="AppCtrl">
     <div class="app ng-scope app-header-fixed app-aside-fixed" id="app" ng-class="{'app-header-fixed':app.settings.headerFixed,
    'app-aside-fixed':app.settings.asideFixed, 'app-aside-folded':app.settings.asideFolded,
-   'app-aside-dock':app.settings.asideDock, 'container':app.settings.container}"
-        ui-view=""></div>
+   'app-aside-dock':app.settings.asideDock, 'container':app.settings.container}" ui-view=""></div>
     <div id="loadAnimation" class="data-bg-green"></div>
     <div id="loadinfo">
         <div class="k-ball-holder3">
