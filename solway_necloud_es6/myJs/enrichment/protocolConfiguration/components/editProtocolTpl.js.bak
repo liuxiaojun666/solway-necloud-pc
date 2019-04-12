@@ -1,0 +1,341 @@
+
+ajaxData({
+    manufacturerList: {
+        name: 'GETmanufacturerList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    selectByManuList: {
+        name: 'GETselectByManuList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    commProtocolList: {
+        name: 'GETcommProtocolList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    statusTypeListSolor: {
+        name: 'GETstatusTypeListSolor',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    statusTypeListWind: {
+        name: 'GETstatusTypeListWind',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    updateProtocol: {
+        name: 'POSTupdateProtocol',
+        data: {},
+        later: true,
+        saveParam: false,
+        onlyLatest: true
+    },
+    statusCodeListByProduct: {
+        name: 'GETstatusCodeListByProduct',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    faultCodeList: {
+        name: 'GETfaultCodeList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+
+
+}, {
+        __serviceName__: 'editProtocolTplService',
+    })('editProtocolTplCtrl', ['$scope', 'editProtocolTplService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
+
+        //状态分类列表
+        const getStatusTypeList = type => {
+            if (type == 'wind') {
+                $scope.statusTypeListWind.getData({ deviceType: $scope.deviceType }).then(res => {
+                    $scope.statusTypeList = res;
+                    console.log(res)
+                })
+            } else if (type == 'solar') {
+                $scope.statusTypeListSolor.getData().then(res => {
+                    $scope.statusTypeList = res;
+                    console.log(res)
+
+                })
+            }
+        }
+
+        //生产厂商、
+        const initManufactureData = () => {
+            $scope.manufacturerList.getData().then(res => {
+                $scope.deviceManufacturerList = res;
+                if (res && res.length) {
+                    $scope.deviceManufacturerList.unshift({ id: null, manufname: '-请选择-' });
+                }
+            });
+        }
+
+        //产品型号
+        $scope.changemanufacturer = () => {
+            $scope.selectByManuList.getData({
+                manufid: $scope.formData.manufid,
+            }).then(res => {
+                $scope.productList = res;
+                if (res && res.length) {
+                    $scope.productList.unshift({ id: null, productname: '-请选择-' });
+                }
+            });
+        }
+
+
+        //选择产品
+        $scope.changeProduct = () => {
+            $scope.statusTypeList = [];
+            angular.forEach($scope.productList, (item) => {
+                if (item.id == $scope.formData.productid) {
+                    $scope.deviceType = item.devicetype;
+                    $scope.formData.productidStr = item.productname;
+                }
+            });
+
+            if ($scope.deviceType == '17' || $scope.deviceType == '18') {//风电状态列表
+                getStatusTypeList('wind');
+            } else {//光伏
+                getStatusTypeList('solar');
+            }
+        }
+
+        //通讯规约
+        const initCommProtoList = () => {
+            $scope.commProtocolList.getData().then(res => {
+                $scope.protocolf = res;
+            })
+        }
+
+        //编辑时，通过产品ID获取状态码配置的列表
+        const getStatusCodeList = id => {
+            $scope.statusCodeListByProduct.getData({ protocolid: id }).then(res => {
+                res.map(item => (item.faultlevel = Number(item.faultlevel)));
+                $scope.statusdata = res;
+            });
+        }
+
+        $scope.$on("editProtocolBroad", async (e, data) => {
+            let item = data.item;
+
+            initManufactureData();
+            initCommProtoList();
+
+            $scope.formData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+
+            $scope.editDisabled = false;
+            $scope.tabActive = 'statusCode';//tab默认显示状态码
+            if (data.item) {
+                if (data.copyId) {
+                    $scope.formData['copyId'] = data.copyId;
+                } else {
+                    $scope.editDisabled = true;
+                }
+                $scope.formData = {
+                    id: item.id,
+                    faultdiagnosistype: item.faultdiagnosistype,
+                    manufid: item.manufid,
+                    productid: item.productid,
+                    commid: item.commid,
+                    name: item.name,
+                    isdefault: item.isdefault,
+                    prostr: item.prostr,
+                    statusdiagnosistype: item.statusdiagnosistype
+                }
+                getStatusCodeList(item.id);
+                $scope.changemanufacturer();
+                await myAjaxData.timeout(0);
+                $scope.$apply();
+                $scope.changeProduct();
+            } else {
+                $scope.formData.isdefault = '1';
+                $scope.formData.statusdiagnosistype = '2';
+                $scope.formData.faultdiagnosistype = '2';//新增时，不操作故障码，默认传2
+                $scope.statusdata = [];
+                $scope.count = 0;
+                $scope.statusdata.push({ 'serNum': $scope.count, "faultcodeindex": "0", "faultcode": "", "faultlevel": "", "faultdesc": "" });
+                $scope.count++;
+            }
+        });
+
+        //切换tab,状态码或者故障码
+        $scope.changeCodeTypeTab = type => {
+            $scope.tabActive = type;
+            if (type == 'faultCode') {
+                $scope.getFaultCodeList();
+            }
+        }
+
+        //切换整型，或者按位------状态码
+        $scope.changeJudgeType = type => {
+            $scope.formData.statusdiagnosistype = type;
+        }
+
+        //切换整型，或者按位------故障码
+        $scope.changeJudgeTypeFault = type => {
+            $scope.formData.faultdiagnosistype = type;
+        }
+
+
+        //增加一行
+        $scope.addLine = () => {
+            $scope.statusdata.push({ 'serNum': $scope.count, "faultcodeindex": "0", "faultcode": "", "faultlevel": "", "faultdesc": "" });
+            $scope.count++;
+        }
+
+        //删除一行
+        $scope.deleteLine = serNum => {
+            for (let i = 0, list = $scope.statusdata; i < list.length; i++) {
+                if (list[i].serNum == serNum) {
+                    $scope.statusdata.splice(i, 1)
+                }
+            }
+        }
+
+        //十进制-》十六进制
+        $scope.hexadecimal = num => {
+            let reg = /^0[x,X]/;
+            let regWord = /[a-z,A-Z,\uFF00-\uFFEF,\u4E00-\u9FA5\uF900-\uFA2D]+/;
+            if (reg.test(num)) {
+                return num;
+            } if (regWord.test(num)) {
+                return "请输入一个正确的数字";
+            } else {
+                return num ? Number(num).toString(16) : '';
+            }
+        }
+
+        //保存
+        $scope.save = () => {
+            if (!$solway.formValidation($scope.formData, '.editProtocolTpl', toaster)) return;//校验非空
+
+            $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
+
+            $scope.updateProtocol.getData($scope.formData).then(res => {
+                if (res.id) {
+                    toaster.pop('success', '', '保存成功');
+                    $scope.$emit('editCallback');
+                } else {
+                    toaster.pop('error', '', '保存失败')
+                }
+            });
+        }
+
+
+        //故障码列表
+        $scope.getFaultCodeList = () => {
+            $scope.faultCodeList.getData({
+                pageIndex: 0,
+                pageSize: 10,
+                protocolID: $scope.formData.id,
+                keyWords: $scope.keyWordsFaultcode
+            })
+        }
+
+        $scope.columnFaultCode = [
+            {
+                title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+                dataIndex: '',
+                width: '60px',
+                align: 'center',
+                checkboxName: 'productCheckboxName',
+                render(text, record, index) {
+                    return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="productCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+                }
+            }, {
+                title: '故障代码',
+                dataIndex: 'faultCode',
+                sort: !0,
+                align: 'center'
+            }, {
+                title: '故障中文描述',
+                dataIndex: 'faultDescCH',
+                align: 'center',
+
+            }, {
+                title: '故障分类',
+                dataIndex: 'prostr',
+                sort: !0,
+                align: 'center'
+            }, {
+                title: '故障原因及处理流程',
+                dataIndex: 'faultHandle',
+                sort: !0,
+                align: 'center'
+            }, {
+                title: '附件',
+                dataIndex: 'prostr',
+                sort: !0,
+                align: 'center',
+                render(text, item, index) {
+                    let returnStr = '';
+                    if (item.file1) {
+                        returnStr += ` <i class="fa fa-paperclip attachment-active" ></i>`
+                    } else {
+                        returnStr += ` <i class="fa fa-paperclip" ></i>`
+                    }
+                    if (item.file2) {
+                        returnStr += ` <i class="fa fa-paperclip attachment-active" ></i>`
+                    } else {
+                        returnStr += ` <i class="fa fa-paperclip" ></i>`
+                    }
+                    if (item.file3) {
+                        returnStr += ` <i class="fa fa-paperclip attachment-active" ></i>`
+                    } else {
+                        returnStr += ` <i class="fa fa-paperclip" ></i>`
+                    }
+                    return returnStr;
+                }
+            }, {
+                title: '操作',
+                dataIndex: '',
+                align: 'center',
+                sort: !0,
+                render(text, item, index) {
+                    return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" ></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+                },
+            }
+        ]
+
+        $scope.trClickFaultCode = (item, index, event) => {
+            if(event.target.className.includes('icon-bianji-copy')) {
+                $scope.editFaultCodeTpl = true;
+                $scope.$broadcast('editFaultCodeBroad',{'item':item});
+            }else if(event.target.className.includes('icon-shanchu1')) {
+                // $solway.confirm({ message: '确定删除此条数据？' }, () => {
+                //     deleteData([item.id])
+                // });
+            }
+        };
+        //故障码新增
+        $scope.newFaultCode = () =>{
+            $scope.editFaultCodeTpl = true;
+            $scope.$broadcast('editFaultCodeBroad',"");
+        }
+
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('cancel');
+        }
+
+
+
+    });
