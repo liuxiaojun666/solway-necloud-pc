@@ -1,0 +1,73 @@
+ajaxData(
+    {
+        // 库房列表
+        opFittingsRoomSelectByCondition: {
+            name: 'GETopFittingsRoomSelectByCondition',
+            data: {},
+            later: true,
+        },
+        // 库房 创建
+        opFittingsRoomUpdate: {
+            name: 'opFittingsRoomUpdate',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+        // 库房 删除
+        opFittingsRoomDelete: {
+            name: 'opFittingsRoomDelete',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+    }, {
+        __serviceName__: 'themeWarehouseService'
+    }
+)('themeWarehouseCtrl', ['$scope', 'themeWarehouseService', 'toaster', '$ocLazyLoad'], ($scope, _myAjaxData, toaster, $ocLazyLoad) => {
+
+    $scope.$on('popUpKf', (_event, _obj) => {
+        const { tabIndex } = $scope;
+        if (tabIndex !== 0) return;
+        $scope.down = true;
+        $scope.putList = [];
+        $scope.opFittingsRoomSelectByCondition.getData();
+    });
+
+    $scope.opFittingsRoomSelectByCondition.subscribe(res => {
+        $scope.putList = (res.body || []).map(v => ({
+            edit: false,
+            id: v.id,
+            name: v.name,
+            remark: v.remark
+        }));
+    });
+
+    $scope.insert = () => $scope.putList.unshift({ edit: true, name: '', remark: '' });
+
+    $scope.deleteItem = (obj, index) => {
+        if (!obj.id) return $scope.putList.splice(index, 1);
+        $ocLazyLoad.load(['theme/js/dist/components/confirm.js' + stamp]).then(() => $solway.confirm(
+            { title: '删除库房', message: ' 确定删除该库房吗？' },
+            () => $scope.opFittingsRoomDelete.getData({ id: obj.id })
+        ));
+    };
+
+    $scope.opFittingsRoomDelete.subscribe(res => {
+        if (res.code !== 0) return toaster.pop('error', '', res.msg);
+        toaster.pop('success', '', res.msg);
+        $scope.opFittingsRoomSelectByCondition.getData();
+    });
+
+    $scope.submit = (obj) => {
+        const { id, name, remark } = obj;
+        if (!name) return toaster.pop('error', '', '请填写库房名称');
+        $scope.opFittingsRoomUpdate.getData({ id, name, remark });
+    };
+
+    $scope.opFittingsRoomUpdate.subscribe(res => {
+        if (res.code !== 0) return toaster.pop('error', '', res.msg);
+        toaster.pop('success', '', res.msg);
+        $scope.opFittingsRoomSelectByCondition.getData();
+    });
+
+});

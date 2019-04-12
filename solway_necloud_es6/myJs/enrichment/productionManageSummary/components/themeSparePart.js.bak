@@ -104,6 +104,20 @@ ajaxData(
         });
     };
 
+    $scope.warehouse = () => {
+        $ocLazyLoad.load('theme/js/dist/enrichment/productionManageSummary/components/warehouse.js').then(() => {
+            $scope.warehouseTpl = 'tpl/enrichment/productionManageSummary/components/warehouse.html';
+            if (!$scope['warehouseTplLoaded']) {
+                $scope.kftplLoaded = () => {
+                    $scope['warehouseTplLoaded'] = true;
+                    $scope.$broadcast('popUpKf');
+                };
+            } else {
+                $scope.$broadcast('popUpKf');
+            }
+        });
+    };
+
     $scope.trClick = async (item, index, event) => {
         const { tabIndex } = $scope;
         if (tabIndex === 1) {

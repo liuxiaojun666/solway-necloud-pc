@@ -10,9 +10,8 @@ ajaxData(
         },
         opFittingsDictPage: {
             name: 'GETopFittingsDictPage',
-            data: {
-                pageSize: 20
-            },
+            data: {},
+            later: true
         },
         opFittingsDictUpdate: {
             name: 'opFittingsDictUpdate',
@@ -33,9 +32,17 @@ ajaxData(
 
     $scope.$on('popUp', (_event, _obj) => {
         $scope.opFittingsDictPage.reqDta = {
-            keywords: ''
+            keywords: '',
+            ctg1: '',
+            ctg2: '',
         };
 
+    });
+
+
+    $scope.opFittingsDictSelectCtg2.subscribe(res => {
+        $scope.opFittingsDictPage.reqDta.ctg2 = '';
+        $scope.opFittingsDictPage.getData($scope.opFittingsDictPage.reqDta);
     });
 
 
@@ -134,9 +141,20 @@ ajaxData(
             $scope.opFittingsDictDelete.beforReq(item.id);
         } else if (str.includes('icon-bianji-copy')) {
             $scope.opFittingsDictUpdate.edit = true;
-            const { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id } = item;
-            $scope.opFittingsDictUpdate.formData = { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id };
+            const { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark } = item;
+            $scope.opFittingsDictUpdate.formData = { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark };
         }
+    };
+
+    // 保存更新  验证  提交
+    $scope.opFittingsDictUpdate.beforGetData = () => {
+        $ocLazyLoad.load([
+            'theme/js/dist/components/formValidation.js' + stamp,
+        ]).then(() => {
+            const { formData } = $scope.opFittingsDictUpdate;
+            if (!$solway.formValidation(formData, '.spareParts .partForm', toaster)) return;
+            $scope.opFittingsDictUpdate.getData(formData);
+        });
     };
 
     // 保存 更新 处理结果
