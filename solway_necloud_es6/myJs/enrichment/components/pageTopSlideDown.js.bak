@@ -8,12 +8,12 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
     templateUrl: 'tpl/enrichment/components/pageSlideDown.html' + window.stamp,
     link($scope, $element) {
         const wpPages = [
-            'monitoringSummary', 
+            'monitoringSummary',
             'analyzeSummary',
             'actionPlanSummary'
         ];
         $scope.goChildrenPage = (routerUrl, theme) => {
-            const {stClass} = $scope;
+            const { stClass } = $scope;
             $solway.setStore('systemInfo', { stClass: stClass });
             if (stClass === '02' && wpPages.includes(routerUrl)) {
                 routerUrl += 'Wp';
@@ -27,7 +27,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
                 $http({
                     method: "GET",
                     url: window.interface['GETUserAuthHandleSetSTClass'],
-                    params: {stClass}
+                    params: { stClass }
                 }).success(function (res) {
                     $state.go(routerUrl);
                 });
@@ -125,7 +125,9 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
             url: window.interface['GETstClassLIst'],
             params: {}
         }).success(res => {
-            if (res.data.length === 2) {
+            if (res.data.length === 1) {
+                $scope.stClass = res.data[0].id;
+            } else if (res.data.length === 2) {
                 $scope.switchStClassDisplay = true;
             }
         });
@@ -151,7 +153,7 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
             $http({
                 method: "GET",
                 url: window.interface['GETgetCurrentInfoNew'],
-                params: { }
+                params: {}
             }).success(function (res) {
                 $scope.stClass = res.currentSTClass || $scope.stClass;
                 $scope.currentSTinfo = res;
