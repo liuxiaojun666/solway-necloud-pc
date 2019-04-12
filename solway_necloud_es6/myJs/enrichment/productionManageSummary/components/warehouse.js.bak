@@ -42,10 +42,19 @@ ajaxData(
         }));
     });
 
-    $scope.insert = () => $scope.putList.unshift({ edit: true, name: '', remark: '' });
+    $scope.insert = () => {
+        if ($scope.putList.some(v => v.edit)) return toaster.pop('error', '', '只允许同时编辑一条,不要贪多哦！');
+        $scope.putList.unshift({ edit: true, name: '', remark: '' });
+    };
+
+    $scope.editItem = (_obj, index) => {
+        if ($scope.putList.some(v => v.edit)) return toaster.pop('error', '', '只允许同时编辑一条,不要贪多哦！');
+        $scope.putList[index].edit = true;
+    };
 
     $scope.deleteItem = (obj, index) => {
         if (!obj.id) return $scope.putList.splice(index, 1);
+        if (typeof index === 'number') return $scope.putList[index].edit = false;
         $ocLazyLoad.load(['theme/js/dist/components/confirm.js' + stamp]).then(() => $solway.confirm(
             { title: '删除库房', message: ' 确定删除该库房吗？' },
             () => $scope.opFittingsRoomDelete.getData({ id: obj.id })
