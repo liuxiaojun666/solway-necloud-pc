@@ -1,4 +1,3 @@
-
 ajaxData({
     manufacturerList: {
         name: 'GETmanufacturerList',
@@ -48,25 +47,40 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
-    }
-
-
+    },
+    deleteBatchFaultCode: {
+        name: 'POSTdeleteBatchFaultCode',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    hasFaultCode: {
+        name: 'GEThasFaultCode',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    deleteHasFaultCode: {
+        name: 'POSTdeleteHasFaultCode',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    
 }, {
         __serviceName__: 'editProtocolTplService',
     })('editProtocolTplCtrl', ['$scope', 'editProtocolTplService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
 
         //状态分类列表
         const getStatusTypeList = type => {
+            $scope.stationType = type;  //电站类型（光伏还是风电）
             if (type == 'wind') {
                 $scope.statusTypeListWind.getData({ deviceType: $scope.deviceType }).then(res => {
                     $scope.statusTypeList = res;
-                    console.log(res)
                 })
             } else if (type == 'solar') {
                 $scope.statusTypeListSolor.getData().then(res => {
                     $scope.statusTypeList = res;
-                    console.log(res)
-
                 })
             }
         }
@@ -184,9 +198,36 @@ ajaxData({
             $scope.formData.statusdiagnosistype = type;
         }
 
+        const deleteExistFaultData = () =>{
+            $scope.deleteHasFaultCode.getData({protocolID:$scope.formData.id}).then(res=>{
+                if(res.code == 0){
+                    toaster.pop('success','',res.message);
+                    $scope.getFaultCodeList();
+                }else{
+                    toaster.pop('error', '', '删除失败')
+                }
+            });
+        }
+
         //切换整型，或者按位------故障码
         $scope.changeJudgeTypeFault = type => {
-            $scope.formData.faultdiagnosistype = type;
+
+            $scope.hasFaultCode.getData({protocolID:$scope.formData.id}).then(res=>{
+                if (!res) {
+					if (confirm("切换故障码类型，将清空数据已填的故障码数据。\n确认清空吗？")) {
+                        deleteExistFaultData();
+                        $scope.formData.faultdiagnosistype = type
+					} else {
+                        $scope.formData.faultdiagnosistype = (type=='1'?'2':'1');
+                        console.log($scope.formData.faultdiagnosistype)
+                        // $scope.changeFaultCodeRealStatus(false);
+                        // $("input[name='faultdiagnosistype']").val($scope.formData.faultdiagnosistype)
+					}
+				} else {
+                    $scope.formData.faultdiagnosistype = type
+					// $scope.changeFaultCodeRealStatus(true);
+				}
+            });
         }
 
 
@@ -220,7 +261,7 @@ ajaxData({
 
         //保存
         $scope.save = () => {
-            if (!$solway.formValidation($scope.formData, '.editProtocolTpl', toaster)) return;//校验非空
+            if (!$solway.formValidation($scope.formData, '.editProtocolTple', toaster)) return;//校验非空
 
             $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
 
@@ -251,9 +292,9 @@ ajaxData({
                 dataIndex: '',
                 width: '60px',
                 align: 'center',
-                checkboxName: 'productCheckboxName',
+                checkboxName: 'faultCodeCheckboxName',
                 render(text, record, index) {
-                    return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="productCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="faultCodeCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
                 }
             }, {
                 title: '故障代码',
@@ -315,26 +356,69 @@ ajaxData({
             }
         ]
 
+        const deleteBatch = ids =>{
+            $scope.deleteBatchFaultCode.getData({ids:ids.join(',')}).then(res=>{
+                if (res.code == '0'){
+                    toaster.pop('success','','删除成功');
+                    $scope.getFaultCodeList();
+                }else{
+                    toaster.pop('error', '','删除失败')
+                }
+            });
+        }
+
+        $scope.deleteBatchFaultCodeData = () =>{
+            let ids = [];
+            $("input[name='faultCodeCheckboxName']:checked").each(function () {
+                ids.push(this.dataset.id);
+            });
+            if (ids.length == 0){
+                alert("请选择删除的数据");
+                return;
+            }
+            $solway.confirm({ message: '确定删除所选的数据？' }, () => {
+                deleteBatch(ids)
+            });
+        }
+
         $scope.trClickFaultCode = (item, index, event) => {
             if(event.target.className.includes('icon-bianji-copy')) {
                 $scope.editFaultCodeTpl = true;
                 $scope.$broadcast('editFaultCodeBroad',{'item':item});
             }else if(event.target.className.includes('icon-shanchu1')) {
-                // $solway.confirm({ message: '确定删除此条数据？' }, () => {
-                //     deleteData([item.id])
-                // });
+                $solway.confirm({ message: '确定删除此条数据？' }, () => {
+                    deleteBatch([item.id])
+                });
             }
         };
+
         //故障码新增
         $scope.newFaultCode = () =>{
             $scope.editFaultCodeTpl = true;
-            $scope.$broadcast('editFaultCodeBroad',"");
+            $scope.$broadcast('editFaultCodeBroad',{'item':'','protocolID':$scope.formData.id});
         }
 
         //取消
         $scope.cancel = () => {
             $scope.$emit('cancel');
         }
+
+        //下载故障码附件
+		$scope.download = function(id, index){
+			window.open("PFaultCodeReal/downloadAttachment.htm?id=" + id + "&index=" + index);
+		}
+
+
+        //编辑故障码成功回调
+        $scope.$on('editFaultCodeCallback',function(){
+            $scope.editFaultCodeTpl = false;
+            $scope.getFaultCodeList();
+        })
+
+        //故障码取消回调
+        $scope.$on("cancelFaultCode",function(){
+            $scope.editFaultCodeTpl = false;
+        })
 
 
 
