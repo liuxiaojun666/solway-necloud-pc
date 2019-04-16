@@ -3,380 +3,260 @@ ajaxData({
         name: 'AddbaseDictionary',
         data: {},
         later: true
+    },
+    //分析对象 - 设备列表
+    queryStTreeWithDevices: {
+        name: 'GETqueryStTreeWithDevices',
+        data: {},
+        later: true
+    },
+    //分析对象 - 电站列表、区域（部门）列表、集团列表
+    queryTreeWithSt: {
+        name: 'GETqueryTreeWithSt',
+        data: {},
+        later: true
     }
-}, {})('analysisObjectCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+}, {
+        __serviceName__: 'analysisObjectService'
+    })('analysisObjectCtrl', ['$scope', 'analysisObjectService', 'actionRecord', '$timeout', 'toaster', '$ocLazyLoad', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, $ocLazyLoad, parentmyAjaxData) => {
 
-    //保存
-    $scope.save = () => {
-        if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
+        //初始化树
+        let zTree;
 
-        let formData = {
-            id: $scope.id,
-            dictType: $scope.formData.dictType,
-            dictName: $scope.formData.dictName,
-            dictCode: $scope.formData.dictCode,
-            dictEnName: $scope.formData.dictEnName,
-            description: $scope.formData.description,
-            dictValue: $scope.formData.dictValue
+        //保存
+        $scope.save = () => {
+            if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
+
+            let formData = {
+                id: $scope.id,
+                dictType: $scope.formData.dictType,
+                dictName: $scope.formData.dictName,
+                dictCode: $scope.formData.dictCode,
+                dictEnName: $scope.formData.dictEnName,
+                description: $scope.formData.description,
+                dictValue: $scope.formData.dictValue
+            }
+
+            $scope.AddbaseDictionary.getData(formData).then(res => {
+                if (res.key == 0) {
+                    toaster.pop('success', '', '保存成功');
+                    $scope.$emit('addCallback');
+                } else {
+                    toaster.pop('error', '', '保存失败');
+                }
+            })
         }
 
-        $scope.AddbaseDictionary.getData(formData).then(res => {
-            if (res.key == 0) {
-                toaster.pop('success', '', '保存成功');
-                $scope.$emit('addCallback');
-            } else {
-                toaster.pop('error', '', '保存失败');
+        //获取父级发送的数据
+        $scope.$on('analysObDataNew', (item, index) => {
+            if (index.analysObDataNew) {
+                $scope.analysObDataNew = index.analysObDataNew;
+                $scope.analysObDataNewDevice = index.analysObDataNewDevice;
+                //默认获取第一项的数据
+                // $scope.radioToSelect($scope.analysObDataNew[0], 0);
+                $scope.radioDevice();
+                $scope.equipChoice($scope.analysObDataNewDevice[0], 0);
             }
         })
-    }
 
-    //获取父级发送的横轴指标 选择的option
-    $scope.$on('analysisObjectNum', (item, index) => {
-        $scope.selectIndex = index;
-        $scope.radioIndex = index;
-        treeData();
-    })
+        //获取父级发送的横轴指标 选择的option
+        // $scope.$on('analysisObjectNum', (item, index) => {
+        //     $scope.selectIndex = index;
+        //     $scope.radioIndex = index;
+        //     treeData();
+        // })
 
-    //单选框选中-> 更改select的值
-    $scope.radioToSelect = () => {
-        var radioIndex = document.querySelectorAll('[name=aObject]'):: [].filter(item => item.checked).map(item => item.dataset.index);
-        $scope.$emit('radioIndexNum', { 'radioIndex': radioIndex, 'type': 'analysisObject' });
-        $scope.radioIndex = radioIndex[0];
-        treeData();
-    }
-
-    //tree数据的获取
-    function treeData() {
-        if ($scope.radioIndex == 2) {
-            $scope.zNodes = [
-                { id: 1, pId: 0, name: "父节点222" },
-                { id: 11, pId: 1, name: "父节点222 - 折叠" },
-                { id: 111, pId: 11, name: "子节点1" },
-                { id: 113, pId: 11, name: "子节点1" },
-                { id: 114, pId: 11, name: "子节点1" },
-                { id: 12, pId: 1, name: "父节点12222 - 折叠" },
-                { id: 121, pId: 12, name: "子节点1" },
-                { id: 122, pId: 12, name: "子节点1" },
-                { id: 124, pId: 12, name: "子节点1" },
-            ];
-        } else if ($scope.radioIndex == 1) {
-            $scope.zNodes = [
-                { id: 1, pId: 0, name: "父节点1" },
-                { id: 11, pId: 1, name: "父节点11 - 折叠" },
-                { id: 111, pId: 11, name: "叶子节点111" },
-                { id: 112, pId: 11, name: "叶子节点112" },
-                { id: 113, pId: 11, name: "叶子节点113" },
-                { id: 114, pId: 11, name: "叶子节点114" },
-                { id: 12, pId: 1, name: "父节点12 - 折叠" },
-                { id: 121, pId: 12, name: "叶子节点121" },
-                { id: 122, pId: 12, name: "叶子节点122" },
-                { id: 123, pId: 12, name: "叶子节点123" },
-                { id: 124, pId: 12, name: "叶子节点124" },
-                { id: 13, pId: 1, name: "父节点13 - 没有子节点" }
-            ];
-
+        //处理点击设备radio
+        $scope.radioDevice = () => {
+            $scope.analysisObjectK = 99;
+            $scope.zNodes = [];
+            $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备' });
         }
-        $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
-    }
-
-    //选择设备
-    $scope.equipChoice = (id) => {
-        $scope.equipChoiceId = id;
-    }
-
-    //------------------------------------------------ztree 树形控件
-    //ztree插件配置
-    $scope.setting = {
-        check: {
-            enable: true
-        },
-        view: {
-            showLine: false,
-            showIcon: true,
-            fontCss: getFontCss,
-            dblClickExpand: false,
-            nameIsHTML: false,
-        },
-        data: {
-            simpleData: {
-                enable: true,
-                idKey: "id",
-                pIdKey: "pId",
-                rootPId: 0
-            },
-            key: {
-                name: "name"
-            }
-        },
-        callback: {
-            onClick: onNodeClick,
-            onCheck: checkChangeFn
+        //处理点击机型radio
+        $scope.radioType = () => {
+            $scope.analysisObjectK = 100;
+            $scope.zNodes = [];
+            $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 100, 'value': '机型' });
         }
-    };
 
-    $scope.objectDevice = [];
-    $scope.objectPower = [];
-    $scope.objectArea = [];
-    $scope.objectGroup = [];
+        //点击单个设备
+        $scope.equipChoice = (item, index) => {
+            parentmyAjaxData.config.dmsType = item.k;
+            treeData(item.k);
+            $scope.equipChoiceIndex = index;
+            $scope.$emit('deviceTimeLat', item.ll);
+        }
 
-    const key = {
-        1: 'objectDevice',
-        2: 'objectPower',
-        3: 'objectArea',
-        4: 'objectGroup'
-    }
+        //单选框选中-> 更改父级的值
+        $scope.radioIndex = 0;
+        $scope.radioToSelect = (item, index) => {
+            $scope.analysisObjectK = item.k;
+            parentmyAjaxData.config.dmsType = item.k;
+            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': item.k, 'value': item.v });
+            $scope.radioIndex = index;
+            treeData(item.k);
+        }
 
-    //初始化树
-    $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
-    var zTree = $.fn.zTree.getZTreeObj("tree");
-
-    //单击父节点展开 子节点
-    function onNodeClick(e, treeId, treeNode) {
-        zTree.expandNode(treeNode);
-        $(".curSelectedNode").removeClass("curSelectedNode");
-    }
-
-    //点击多选框 ->右侧穿梭
-    function checkChangeFn(event, treeId, treeNode) {
-        var checkedNode = zTree.getCheckedNodes(true);
-        $scope[key[$scope.radioIndex]] = [];
-        checkedNode.map(item => {
-            if (!item.children) {
-                $scope[key[$scope.radioIndex]].push(item);
+        //tree数据的获取
+        function treeData(k) {
+            // 调 集团 电站 区域接口
+            const st = {
+                1: 3,
+                2: 2,
+                3: 1
             }
-        })
-    }
-
-    //右侧删除小按钮
-    $scope.delRight = (id, index) => {
-        zTree.checkNode(zTree.getNodeByParam("id", id), false, true);
-        $scope[key[$scope.radioIndex]].splice(index, 1);
-    }
-
-    //全部删除
-    $scope.delRightAll = () => {
-        if ($scope[key[$scope.radioIndex]].length == 0) {
-            toaster.pop('error', '', '请至少选择一条');
-        } else {
-            $solway.confirm({ message: '确定全部删除吗？' }, () => {
-                $scope[key[$scope.radioIndex]].map((item) => {
-                    zTree.checkNode(zTree.getNodeByParam("id", item.id), false, true);
+            // 调设备的接口
+            const devices = {
+                401: 1,
+                402: 2,
+                403: 3,
+                404: 4,
+                405: 5,
+                417: 17,
+                418: 18
+            }
+            if (k == 1 || k == 2 || k == 3) {
+                $scope.queryTreeWithSt.getData({
+                    busiType: st[k]
                 })
-                $scope[key[$scope.radioIndex]] = [];
-                $scope.$apply();
-            });
+
+                $scope.queryTreeWithSt.subscribe(res => {
+                    $scope.zNodes = res.body;
+                    $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                });
+            } else if (k.substr(0, 1) == "4") {
+                $scope.queryStTreeWithDevices.getData({
+                    deviceType: devices[k]
+                })
+
+                $scope.queryStTreeWithDevices.subscribe(res => {
+                    $scope.zNodes = res.body;
+                    $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                });
+            }
         }
-    }
 
-    //搜索功能
-    // fuzzySearch('tree', '#key', false, true);
-
- 
-    //节点变颜色
-    var nodeList = zTree.getNodesByParamFuzzy("name", "叶子节点", null);
-    updateNodes(true);
-
-    function updateNodes(highlight) {
-        var zTree = $.fn.zTree.getZTreeObj("tree");
-        for (var i = 0, l = nodeList.length; i < l; i++) {
-            nodeList[i].highlight = highlight;
-            zTree.updateNode(nodeList[i]);
-        }
-    }
-    //节点样式方法
-    function getFontCss(treeId, treeNode) {
-        return treeNode.highlight ? { color: "red" } : { color: '#fff' }
-    }
-
-
-
-
-
-
-    //------------------------------------------------自己写的 树形控件
-    $scope.allArr = [
-        {
-            "id": 0, "value": "集团", 'state': false, 'open': false, children: [
-                {
-                    "id": 1, "value": "华北集团", 'state': false, 'open': true, children: [
-                        { "id": 11, "value": "A电站", 'state': false },
-                        { "id": 12, "value": "B电站", 'state': false },
-                        { "id": 13, "value": "C电站", 'state': false }
-                    ]
-                }, {
-                    "id": 2, "value": "华南集团", 'state': false, 'open': true, children: [
-                        { "id": 21, "value": "D电站", 'state': false },
-                        { "id": 22, "value": "E电站", 'state': false },
-                        { "id": 23, "value": "F电站", 'state': false }
-                    ]
+        //------------------------------------------------ztree 树形控件
+        //ztree插件配置
+        $scope.setting = {
+            check: {
+                enable: true
+            },
+            view: {
+                showLine: false,
+                showIcon: true,
+                fontCss: getFontCss,
+                dblClickExpand: false,
+                nameIsHTML: false,
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                    idKey: "id",
+                    pIdKey: "pid",
+                    rootPId: 0
+                },
+                key: {
+                    name: "name"
                 }
-            ]
-        },
+            },
+            callback: {
+                onClick: onNodeClick,
+                onCheck: checkChangeFn
+            }
+        };
 
-    ];
-    $scope.checkeds = [];
-    $scope.allCheck = false;
+        $scope.objectDevice = [];
+        $scope.objectPower = [];
+        $scope.objectArea = [];
+        $scope.objectGroup = [];
 
-    //监听ids数组长度，当长度小于总长度，改变全选按钮的checked值
-    //计算最里边子级的长度
-    $scope.idsLength = 0;
-    var render = (data) => {
-        data.forEach((item) => {
-            if (item.children) {
-                render(item.children);
+        const key = {
+            0: 'objectDevice',
+            1: 'objectPower',
+            2: 'objectArea',
+            3: 'objectGroup'
+        }
+
+        //单击父节点展开 子节点
+        function onNodeClick(e, treeId, treeNode) {
+            zTree.expandNode(treeNode);
+            $(".curSelectedNode").removeClass("curSelectedNode");
+        }
+
+        //独立添加
+        $scope.oneAdd = () => {
+            $scope[key[$scope.radioIndex]] = $scope.millleArr;
+        }
+        //成组添加
+        $scope.groupAdd = () => {
+            $scope[key[$scope.radioIndex]] = $scope.millleArr;
+        }
+
+        //点击多选框 ->右侧穿梭
+        function checkChangeFn(event, treeId, treeNode) {
+            var checkedNode = zTree.getCheckedNodes(true);
+            // $scope[key[$scope.radioIndex]] = [];
+            $scope.millleArr = [];
+            checkedNode.map(item => {
+                if (!item.children) {
+                    // $scope[key[$scope.radioIndex]].push(item);
+                    $scope.millleArr.push(item);
+                }
+            })
+        }
+
+        //右侧删除小按钮
+        $scope.delRight = (id, index) => {
+            zTree.checkNode(zTree.getNodeByParam("id", id), false, true);
+            $scope[key[$scope.radioIndex]].splice(index, 1);
+        }
+
+        //全部删除
+        $scope.delRightAll = () => {
+            if ($scope[key[$scope.radioIndex]].length == 0) {
+                toaster.pop('error', '', '请至少选择一条');
             } else {
-                $scope.idsLength++;
+                $solway.confirm({ message: '确定全部删除吗？' }, () => {
+                    $scope[key[$scope.radioIndex]].map((item) => {
+                        zTree.checkNode(zTree.getNodeByParam("id", item.id), false, true);
+                    })
+                    $scope[key[$scope.radioIndex]] = [];
+                    $scope.$apply();
+                });
             }
-        });
-    }
-    render($scope.allArr);
-    //监听
-    var AllWatch = $scope.$watch('checkeds', (newValue, oldValue) => {
-        if (newValue.length == $scope.idsLength) {
-            $scope.allCheck = true;
-        } else {
-            $scope.allCheck = false;
         }
-    }, true)
 
-
-
-    //左侧多选按钮-> 右侧 穿梭
-    $scope.shuttle = (arr) => {
-        //ng-model 的写法
-        arr.children.filter(item => item.state).map((item, index) => {
-            if ($scope.checkeds.indexOf(item) == '-1') {
-                $scope.checkeds.push(item);
-            }
+        //按需加载ztree文件
+        $ocLazyLoad.load([
+            'vendor/jquery/ztree/js/jquery.ztree.core.js', //ztree
+        ]).then(() => $ocLazyLoad.load([
+            'vendor/jquery/ztree/js/jquery.ztree.exhide.js', //ztree
+            'vendor/jquery/ztree/js/jquery.ztree.excheck.js', //ztree        
+        ])).then(() => $ocLazyLoad.load([
+            'vendor/jquery/ztree/js/fuzzysearch.js', //ztree
+        ])).then(() => {
+            $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+            zTree = $.fn.zTree.getZTreeObj("tree");
+            //搜索功能
+            fuzzySearch('tree', '#key', false, true);
         })
-        $scope.checkeds = $scope.checkeds.filter(item => item.state);
-        //判断子级是否被全部选中
-        if (arr.children.filter(item => item.state).length == arr.children.length) {
-            arr.state = true;
-        } else {
-            arr.state = false;
+
+        //节点样式方法
+        function getFontCss(treeId, treeNode) {
+            return treeNode.highlight ? { color: "red" } : { color: '#fff' }
         }
-    }
 
-    //全选按钮
-    $scope.shuttleAll = (e) => {
-        //ng-model、递归 的写法
-        var render = (data, flag) => {
-            data.forEach((item, index) => {
-                item.state = flag;
-                if (item.children) {
-                    render(item.children, flag);
-                } else {
-                    if (flag == true) {
-                        if ($scope.checkeds.indexOf(item) == '-1') {
-                            $scope.checkeds.push(item);
-                        }
-                    } else {
-                        $scope.checkeds = [];
-                    }
-                }
-            });
+
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('cancelCallback');
         }
-        if (e.target.checked) {
-            render($scope.allArr, true);
-        } else {
-            render($scope.allArr, false);
+
+        //确定
+        $scope.confirm = () => {
+            $scope.$emit('addCallback');
         }
-    }
-
-    //删除数组中的指定元素
-    const removeByValue = (arr, val) => {
-        for (var i = 0; i < arr.length; i++) {
-            if (arr[i] == val) {
-                arr.splice(i, 1);
-                break;
-            }
-        }
-    }
-
-    //二级全选按钮
-    $scope.shuttleSecond = (e, arr) => {
-        var render = (data, flag) => {
-            data.forEach((item, index) => {
-                item.state = flag;
-                if (item.children) {
-                    render(item.children, flag);
-                } else {
-                    if (flag == true) {
-                        if ($scope.checkeds.indexOf(item) == '-1') {
-                            $scope.checkeds.push(item);
-                        }
-                    } else {
-                        removeByValue($scope.checkeds, item);
-                    }
-                }
-            });
-        }
-        if (e.target.checked) {
-            render(arr, true);
-        } else {
-            render(arr, false);
-        }
-    }
-
-    //右侧删除小按钮
-    // $scope.delRight = (id, index) => {
-    //     //ng-model写法
-    //     var render = (data) => {
-    //         data.forEach((item) => {
-    //             if (item.id == id) {
-    //                 item.state = false;
-    //             }
-    //             if (item.children) {
-    //                 render(item.children);
-    //             }
-    //         });
-    //     }
-    //     render($scope.allArr);
-    //     $scope.checkeds.splice(index, 1);
-    // }
-
-    //全部删除
-    // $scope.delRightAll = () => {
-    //     if ($scope.checkeds.length == 0) {
-    //         toaster.pop('error', '', '请至少选择一条');
-    //     } else {
-    //         $solway.confirm({ message: '确定全部删除吗？' }, () => {
-    //             //ng-model写法
-    //             var render = (data, flag) => {
-    //                 data.forEach((item, index) => {
-    //                     item.state = flag;
-    //                     if (item.children) {
-    //                         render(item.children, flag);
-    //                     } else {
-    //                         flag == true ? $scope.checkeds[index] = item : $scope.checkeds = [];
-    //                     }
-    //                 });
-    //             }
-    //             render($scope.allArr, false);
-    //             $scope.$apply();
-    //         });
-    //     }
-    // }
-
-
-    //树形控件下拉
-    $scope.toggle = (data) => {
-        if (data.children && data.children.length > 0) {
-            data.open = !data.open;
-        }
-    }
-
-
-    //取消
-    $scope.cancel = () => {
-        $scope.$emit('cancelCallback');
-        AllWatch();
-    }
-
-    //确定
-    $scope.confirm = () => {
-        $scope.$emit('addCallback');
-        AllWatch();
-    }
-});
+    });

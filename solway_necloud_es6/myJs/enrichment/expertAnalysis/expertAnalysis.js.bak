@@ -1,13 +1,16 @@
 ajaxData({
-    // 级别
-    bigDataExportLevel: {
-        name: 'GETbigDataExportLevel',
+    // 分析类型
+    HighAnalysis_selectAnlsType: {
+        name: 'GETHighAnalysis_selectAnlsType',
         data: {
-            dictType: 'BIGDATA_EXPORT_LEVEL'
+            stationClass: '01'
         }
-    },
+    }
 
-}, {})('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+}, {
+    herizonData: {}, //横轴数据 纵轴数据
+    dmsType: null //分析对象参数
+})('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
 
     historicalRecord.init();// 历史记录 初始化
     $scope.beforeLoading = true; // 页面loading
@@ -29,6 +32,11 @@ ajaxData({
         $scope.$apply();
     };
 
+    // 分析类型下拉框的数据获取
+    $scope.HighAnalysis_selectAnlsType.subscribe(res => {
+        $scope.selectData = res.body;
+    });
+    
     var myChart = echarts.getInstanceByDom(document.getElementById("container"));
     // 切换图表排列方式
     $scope.chartSortIndex = 4;
@@ -43,8 +51,14 @@ ajaxData({
         } else if ($scope.chartSortIndex == 4) {
             $scope.chartStyle = { 'width': '49%' }
         }
-
     }
+
+    // 图表的点击
+    $scope.checkChart = null;
+    $scope.checkChartFun = (index) => {
+        $scope.checkChart = index;
+    }
+
     //图表函数组
     function chartsOne() {
         var data = [
@@ -168,56 +182,119 @@ ajaxData({
     });
 
 
-    //选中下拉框 弹出框
+    // 选中第一个下拉框 动态改变其他的下拉框
+    $scope.queryData = {
+
+    }
+    //点击 弹出框
     $scope.analysisObjectModel = true;
-    $scope.horizonIndexChange = (param) => {
+    $scope.horizonIndexChange = (param, id) => {
         if (param == 1) {
+            //向纵轴指标发送数据
+            $scope.$broadcast('verticalData');
             // 纵轴指标弹出
-            var mySelect = document.getElementById("verticalIndex");
-            var index = mySelect.selectedIndex;
-            $scope.$broadcast('verticalIndexNum', index);
-            if (!mySelect.options[0].selected) {
+            if ($scope.queryData.timeLat) {
                 $scope.verticalIndexModel = true;
             }
-        }else if (param == 2) {
+        } else if (param == 2) {
             // 横轴指标弹出
-            var mySelect = document.getElementById("horizonIndex");
-            var index = mySelect.selectedIndex;
-            $scope.$broadcast('horizonIndexNum', index);
-            if (!mySelect.options[0].selected) {
+            if ($scope.queryData.timeLat) {
                 $scope.horizonIndexModel = true;
             }
         } else if (param == 3) {
             // 统计时间弹出
-            var mySelect = document.getElementById("countTime");
-            var index = mySelect.selectedIndex;
-            $scope.$broadcast('countTimeNum', index);
-            if (!mySelect.options[0].selected) {
-                $scope.countTimeModel = true;
+            $scope.countTimeModel = true;
+        } else if (param == 4) {  //时间纬度 数据处理
+            if (!$scope.queryData.timeLat) {
+                $scope.queryData.horizonIndexV = '请选择';
+                $scope.queryData.verticalIndexV = '请选择';
+            } else {
+                //向横轴指标发送数据
+                $scope.$broadcast('dmsTime', $scope.queryData.timeLat);
             }
-        } else if (param == 4) {
+        } else if (param == 5) {
             // 分析对象弹出
-            var mySelect = document.getElementById("analysisObject");
-            var index = mySelect.selectedIndex;
-            $scope.$broadcast('analysisObjectNum', index);
-            if (!mySelect.options[0].selected) {
+            if ($scope.analysObDataNew) {
                 $scope.analysisObjectModel = true;
             }
-        }
+        } else if (param == 6) {
+            // 分析类型下拉框 选中处理数据
+            if (!$scope.queryData.analysisType) {
+                $scope.analysObDataNew = null;
+                $scope.analysObDataNewDevice = null;
+                $scope.queryData.analysisObjectV = '请选择';
+                $scope.timeLat = null;
+                $scope.queryData.timeLat = '';
+                $scope.queryData.horizonIndexV = '请选择';
+            } else {
+                var key;
+                for (key in $scope.selectData) {
+                    if ($scope.queryData.analysisType == $scope.selectData[key].k) {
+                        $scope.analysObDataOld = $scope.selectData[key].ll;
+                    }
+                }
+                $scope.analysObDataNew = $scope.analysObDataOld.filter((item) => {
+                    return item.k.substr(0, 1) != "4";
+                })
+                $scope.analysObDataNewDevice = $scope.analysObDataOld.filter((item) => {
+                    return item.k.substr(0, 1) == "4";
+                })
+            }
 
+            //向分析对象发送数据
+            $scope.$broadcast('analysObDataNew', { 'analysObDataNew': $scope.analysObDataNew, 'analysObDataNewDevice': $scope.analysObDataNewDevice });
+
+            //向横轴指标发送anlsType
+            $scope.$broadcast('anlsType', $scope.queryData.analysisType);
+        } else if (param == 7) {
+            // 分析指标弹出
+            $scope.analysIndexModel = true;
+        }
     }
 
-    //获取子级发送的radio横轴指标 去选择option
-    $scope.$on('radioIndexNum', (item, index) => {
-        if (index.type == 'horizon') {
-            $scope.horizonRadio = index.radioIndex;
-        } else if (index.type == 'countTime') {
-            $scope.cTimeRadio = index.radioIndex;
-        } else if (index.type == 'analysisObject') {
-            $scope.aObjectRadio = index.radioIndex;
-        } else if (index.type == 'vertical') {
-            $scope.verticalRadio = index.radioIndex;
+    //给按钮赋初始值
+    $scope.queryData.analysisObjectV = '请选择';
+    $scope.queryData.timeLatV = '请选择';
+    $scope.queryData.countTimeV = '请选择';
+    $scope.queryData.horizonIndexV = '请选择';
+    $scope.queryData.verticalIndexV = '请选择';
+    $scope.queryData.analysIndexV = '请选择';
+
+    //获取子级发送的数据(被选择的radio)
+    $scope.$on('radioToFather', (event, data) => {
+        if (data.type == 'horizon') {
+            //选择的是横轴指标
+            // $scope.horizonRadio = index.radioIndex;
+            $scope.queryData.horizonIndexK = data.k;
+            $scope.queryData.horizonIndexV = data.value;
+        } else if (data.type == 'countTime') {
+            // $scope.cTimeRadio = index.radioIndex;
+            $scope.queryData.countTimeV = data.name;
+        } else if (data.type == 'analysisObject') {
+            // $scope.aObjectRadio = index.radioIndex;
+            $scope.queryData.analysisObjectK = data.k;
+            $scope.queryData.analysisObjectV = data.value;
+            // 取时间纬度的数据
+            $scope.analysObDataNew.map((item) => {
+                if (item.k == $scope.queryData.analysisObjectK) {
+                    $scope.timeLat = item.ll;
+                }
+            })
+            //横轴指标获取dmsType
+            $scope.$broadcast('dmsType');
+        } else if (data.type == 'vertical') {
+            //选择的是纵轴指标
+            // $scope.verticalRadio = data.radioIndex;
+            $scope.queryData.verticalIndexV = data.value;
+        } else if (data.type == 'analys') {
+            //选择的是分析指标
+            $scope.queryData.analysIndexV = data.value;
         }
+    })
+
+    // 逆变器 汇流箱 点击 特殊处理 时间纬度的数据
+    $scope.$on('deviceTimeLat', (item, v) => {
+        $scope.timeLat = v;
     })
 
     //取消 新增后的回调
@@ -226,12 +303,14 @@ ajaxData({
         $scope.horizonIndexModel = false;
         $scope.countTimeModel = false;
         $scope.analysisObjectModel = false;
+        $scope.verticalIndexModel = false;
     });
 
     $scope.$on('addCallback', () => {
-        $scope.horizonIndexModel = false;
+        $scope.verticalIndexModel = false;
         $scope.countTimeModel = false;
         $scope.analysisObjectModel = false;
+        $scope.verticalIndexModel = false;
     });
 });
 
