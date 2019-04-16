@@ -71,6 +71,9 @@ ajaxData({
         __serviceName__: 'editProtocolTplService',
     })('editProtocolTplCtrl', ['$scope', 'editProtocolTplService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
 
+        let reg = /^0[x,X][0-9a-fA-F]{0,}$/;
+        let regWord = /[a-z,A-Z,\uFF00-\uFFEF,\u4E00-\u9FA5\uF900-\uFA2D]+/;
+
         $scope.setTitleFault = () =>{
             const setTitleMap = {'1':'故障代码','2':'故障索引'}
             $scope.faultTitle = setTitleMap[$scope.formData['faultdiagnosistype']]
@@ -151,9 +154,19 @@ ajaxData({
 
         //编辑时，通过产品ID获取状态码配置的列表
         const getStatusCodeList = id => {
+            $scope.statusdata = [];
             $scope.statusCodeListByProduct.getData({ protocolid: id }).then(res => {
-                res.map(item => (item.faultlevel = Number(item.faultlevel)));
-                $scope.statusdata = res;
+                res.map((item,index) =>{
+                    item.faultlevel = Number(item.faultlevel)
+                    $scope.statusdata.push({
+                        serNum:index,
+                        faultcodeindex:item.faultcodeindex,
+                        faultcode:item.faultcode,
+                        faultlevel:item.faultlevel,
+                        faultdesc:item.faultdesc
+                    });
+                })
+                $scope.count = res.length;
             });
         }
 
@@ -318,7 +331,6 @@ ajaxData({
 
         //切换整型，或者按位------故障码
         $scope.changeJudgeTypeFault = type => {
-
             $scope.hasFaultCode.getData({protocolID:$scope.formData.id}).then(res=>{
                 if (!res) {
 					if (confirm("切换故障码类型，将清空数据已填的故障码数据。\n确认清空吗？")) {
@@ -326,11 +338,12 @@ ajaxData({
                         $scope.formData.faultdiagnosistype = type;
 					} else {
                         $scope.formData.faultdiagnosistype = (type=='1'?'2':'1');
-                        $("input[name='faultdiagnosistype']").eq($scope.formData.faultdiagnosistype-1).prop("checked",true)
+                        $("input[name='faultdiagnosistype']").eq($scope.formData.faultdiagnosistype-1).prop("checked",true);
 					}
 				} else {
                     $scope.formData.faultdiagnosistype = type
                 }
+                $scope.save(true);
                 $scope.setTitleFault();
             });
         }
@@ -353,8 +366,6 @@ ajaxData({
 
         //十进制-》十六进制
         $scope.hexadecimal = num => {
-            let reg = /^0[x,X][0-9a-fA-F]{0,}$/;
-            let regWord = /[a-z,A-Z,\uFF00-\uFFEF,\u4E00-\u9FA5\uF900-\uFA2D]+/;
             if (reg.test(num)) {
                 return num;
             } if (regWord.test(num)) {
@@ -365,17 +376,31 @@ ajaxData({
         }
 
         //保存
-        $scope.save = () => {
+        $scope.save = noCallback => {
             if (!$solway.formValidation($scope.formData, '.editProtocolTple', toaster)) return;//校验非空
 
             if($scope.stationType == 'wind'){
                 $scope.formData['faultdiagnosistype'] = 1;
                 $scope.formData['statusdiagnosistype'] = 1;
             }
+
+            for(let i=0;i<$scope.statusdata.length;i++){
+                if(!$scope.statusdata[i].faultcode || !$scope.statusdata[i].faultlevel) {
+                    toaster.pop('error', '', '状态码和状态分类均不能为空')
+                    return;
+                }
+                if(reg.test($scope.statusdata[i].faultcode)){//16进制
+                    $scope.statusdata[i].faultcode = parseInt($scope.statusdata[i].faultcode,16)
+                }else if(regWord.test($scope.statusdata[i].faultcode)){
+                    toaster.pop('error','','状态码必须是一个数字');
+                    return;
+                }
+            }
             $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
 
             $scope.updateProtocol.getData($scope.formData).then(res => {
                 if (res.id) {
+                    if(noCallback) return;
                     toaster.pop('success', '', '保存成功');
                     $scope.$emit('editCallback');
                 } else {
