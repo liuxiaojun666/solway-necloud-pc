@@ -24,6 +24,11 @@ ajaxData(
             data: {},
             later: true,
             sameTimeOnce: true
+        },
+        opFittingsDictSelectManuf: {
+            name: 'GETopFittingsDictSelectManuf',
+            data: {},
+            later: true,
         }
     }, {
         __serviceName__: 'themeSparePartsService'
@@ -59,7 +64,16 @@ ajaxData(
         $scope.$apply();
     };
 
-    $scope.opFittingsDictSelectCtg1.filter = $scope.opFittingsDictSelectCtg2.filter = (text = '', str = '') => str && str.includes(text);
+    $scope.opFittingsDictSelectManuf.blur = async () => {
+        await myAjaxData.timeout(200);
+        $scope.opFittingsDictSelectManuf.slideDown = false;
+        $scope.$apply();
+    };
+
+    $scope.opFittingsDictSelectCtg1.filter = 
+    $scope.opFittingsDictSelectCtg2.filter = 
+    $scope.opFittingsDictSelectManuf.filter = 
+    (text = '', str = '') => str && str.includes(text);
 
     // 列表 分页
     $scope.opFittingsDictPage.column = [
@@ -143,6 +157,7 @@ ajaxData(
             $scope.opFittingsDictUpdate.edit = true;
             const { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark } = item;
             $scope.opFittingsDictUpdate.formData = { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark };
+            $scope.opFittingsDictSelectManuf.getData();
         }
     };
 
