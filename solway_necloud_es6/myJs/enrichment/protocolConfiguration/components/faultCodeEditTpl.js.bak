@@ -1,0 +1,168 @@
+
+ajaxData({
+    bigDataExportType: {
+        name: 'GETbigDataExportType',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    faultLevelList: {
+        name: 'GETfaultLevelList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    faultCodeFileUpload: {
+        name: 'POSTfaultCodeFileUpload',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    faultCodeUpdate: {
+        name: 'POSTfaultCodeUpdate',
+        data: {},
+        later: true,
+        saveParam: false,
+        onlyLatest: true
+    },
+}, {
+        __serviceName__: 'editFaultCodeService',
+    })('editFaultCodeTplModelCtrl', ['$scope', 'editFaultCodeService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
+
+        $(".editFaultCodeTpl").on('change','.file',function(){
+            let id = $(this).attr("id");
+            if(id) $scope.uploadFile(id)
+        })
+
+        const getFaultTypeList = () =>{
+            let param = $scope.stationType=="solar"?"FAULT_REAL_TYPE":"FAULT_REAL_TYPE_WP";
+            $scope.bigDataExportType.getData({dictType:param}).then(res=>{
+                $scope.dicts = res;
+            });
+        }
+
+        const getFaultLevelData = () =>{
+            $scope.faultLevelList.getData({'dictType':'FAULT_LEVEL'}).then(res=>{
+                $scope.faultLevel = res;
+            });
+        }
+        
+
+        $scope.$on("editFaultCodeBroad", async (e, v) => {
+            let data = v.item;
+            getFaultTypeList();
+            if($scope.stationType == 'wind'){
+                getFaultLevelData();
+                
+            }
+            
+            $scope.faultformData = {};
+            $scope.suggestList = [];
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+
+            if (data) {
+                $scope.faultformData = {
+                    id:data.id,
+                    protocolID:data.protocolID,
+                    faultCode:data.faultCode,
+                    faultType:data.faultType,
+                    faultClass : data.faultClass,
+                    faultDescCH:data.faultDescCH,
+                    faultDescEN:data.faultDescEN,
+                    faultHandle:data.faultHandle,
+                    descp:data.descp,
+                }
+                $scope.file1 = data.file1;
+                $scope.file2 = data.file2;
+                $scope.file3 = data.file3;
+                $scope.num = data.realAdvices.length;
+                let realAdvices = data.realAdvices;
+                realAdvices.map((item,index)=>{
+                    $scope.suggestList.push({'serNum':index+1,'id':item.id,'content':item.content})
+                })
+            } else {
+                $scope.num = 1;
+                $scope.file1 = '';
+                $scope.file2 = '';
+                $scope.file3 = '';
+                $scope.suggestList.push({ 'serNum': $scope.num, "content": "" ,"id":''});
+                $scope.faultformData['protocolID'] = v.protocolID;
+            }
+
+            // await myAjaxData.timeout(0);
+            // $scope.$apply();
+        });
+
+ 
+        //添加一行推荐建议
+        $scope.addLineRecommend = () =>{
+            $scope.num++;
+            $scope.suggestList.push({ 'serNum': $scope.num, "content": "","id":'' });
+        }
+
+        //删除一行
+        $scope.deleteLine = serNum => {
+            for (let i = 0, list = $scope.suggestList; i < list.length; i++) {
+                if (list[i].serNum == serNum) {
+                    $scope.suggestList.splice(i, 1)
+                }
+            }
+        }
+
+        //上传附件
+        $scope.uploadFile = id =>{
+            $scope.faultCodeFileUpload.getData({
+                file:$('#'+id)[0].files[0],
+            }).then(res=>{
+                if(res.code == 0){
+                    toaster.pop('success','','上传成功');
+                    $scope[id] = res.data.originalFilename;
+                    $scope.setFileFormData(id,res.data);
+                }else{
+                    toaster.pop('error','',res.message?res.message:'上传失败');
+                }
+            });
+        }
+
+        $scope.setFileFormData = (id,data) =>{
+            let index = id.includes(1)?1:(id.includes(2)?2:3);
+            $scope.faultformData['fileName'+index] = data.originalFilename;
+            $scope.faultformData['file'+index] = data.fileName;
+        }
+
+        //删除附件
+        $scope.delFile = name =>{
+            $scope[name] = '';
+            let index = name.includes(1)?1:(name.includes(2)?2:3);
+            $scope.faultformData['fileName'+index] ='';
+            $scope.faultformData['file'+index] = ''
+        }
+
+
+        //保存
+        $scope.save = () => {
+            if (!$solway.formValidation($scope.faultformData, '.editFaultCodeTpl', toaster)) return;//校验非空
+
+            if($scope.suggestList.length){
+                $scope.suggestList.map(item=>{ 
+                    if(item.serNum) delete item.serNum
+                })
+            }
+            $scope.faultformData['adviceStr'] = JSON.stringify($scope.suggestList);
+            $scope.faultCodeUpdate.getData($scope.faultformData).then(res => {
+                if (res.code == 0) {
+                    toaster.pop('success', '', '保存成功');
+                    $scope.$emit('editFaultCodeCallback');
+                } else {
+                    toaster.pop('error', '', '保存失败')
+                }
+            });
+        }
+
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('cancelFaultCode');
+        }
+
+    });

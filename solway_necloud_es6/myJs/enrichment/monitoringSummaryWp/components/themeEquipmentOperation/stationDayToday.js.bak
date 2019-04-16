@@ -133,7 +133,7 @@ ajaxData(
             }
         });
         if ($scope.tabIndex === 1 && $scope.showShape === 'chart') {
-            $scope.getDeviceLayout.getData({});
+            // $scope.getDeviceLayout.getData({});
             $scope.rtmSingleStationComm.getData({ dateString: new Date().Format("yyyy-MM-dd") });
         }
         setDataNull();
@@ -233,8 +233,13 @@ ajaxData(
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
             $scope.realtimeWindTurbine.getData({
-                search: $scope.searchKey,
-                status: '00,01,02,03,04,099',
+                search: '',
+                status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
+                    .filter(v => v !== false)
+                    .join()
+                    .replace('06', '099')
+                    .replace('05', '06')
+                    .replace('01', '01,05'),
                 pageIndex: 0,
                 pageSize: 999
             });
