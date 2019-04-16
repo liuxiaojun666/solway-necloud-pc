@@ -1,9 +1,4 @@
 ajaxData({
-    AddbaseDictionary: {
-        name: 'AddbaseDictionary',
-        data: {},
-        later: true
-    },
     // 获取指标
     HighAnalysis_selectFds: {
         name: 'GETHighAnalysis_selectFds',
@@ -11,32 +6,8 @@ ajaxData({
         later: true
     },
 }, {
-        __serviceName__: 'horizonService'
-    })('horizonIndexCtrl', ['$scope', 'horizonService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
-
-        //保存
-        $scope.save = () => {
-            if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
-
-            let formData = {
-                id: $scope.id,
-                dictType: $scope.formData.dictType,
-                dictName: $scope.formData.dictName,
-                dictCode: $scope.formData.dictCode,
-                dictEnName: $scope.formData.dictEnName,
-                description: $scope.formData.description,
-                dictValue: $scope.formData.dictValue
-            }
-
-            $scope.AddbaseDictionary.getData(formData).then(res => {
-                if (res.key == 0) {
-                    toaster.pop('success', '', '保存成功');
-                    $scope.$emit('addCallback');
-                } else {
-                    toaster.pop('error', '', '保存失败');
-                }
-            })
-        }
+        __serviceName__: 'analysService'
+    })('analysIndexCtrl', ['$scope', 'analysService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
         //获取分析类型 发送的anlsType
         $scope.$on('anlsType', (item, v) => {
@@ -50,23 +21,16 @@ ajaxData({
         $scope.$on('dmsTime', (item, v) => {
             $scope.dmsTime = v;
             // $scope.getHerizonData();
-            $scope.HighAnalysis_selectFds.getData({
-                stationClass: "01",
-                anlsType: $scope.anlsType,
-                dmsType: $scope.dmsType,
-                dmsTime: $scope.dmsTime
-            })
         })
 
         //获取横轴指标的数据
-        // $scope.getHerizonData = () => {
-        //     $scope.HighAnalysis_selectFds.getData({
-        //         stationClass: "01",
-        //         anlsType: $scope.anlsType,
-        //         dmsType: $scope.dmsType,
-        //         dmsTime: $scope.dmsTime
-        //     })
-        // }
+        $scope.HighAnalysis_selectFds.getData({
+            stationClass: "01",
+            anlsType: $scope.anlsType,
+            dmsType: $scope.dmsType,
+            dmsTime: $scope.dmsTime
+        })
+
         $scope.HighAnalysis_selectFds.subscribe(res => {
             $scope.herizonData = res.body;
             $scope.radioToSelect($scope.herizonData.ctg1, 0);
@@ -87,7 +51,7 @@ ajaxData({
         //单选框选中-> 更改select的值
         $scope.radioIndex = 0;
         $scope.radioToSelect = (item, index) => {
-            $scope.$emit('radioToFather', { 'type': 'horizon', 'k': item.k, 'value': item.v });
+            $scope.$emit('radioToFather', { 'type': 'analys', 'value': item.v });
             $scope.herizonBottom = item.ll;
             //给数据赋初始show值
             $scope.herizonBottom.map((item) => {
@@ -96,8 +60,6 @@ ajaxData({
             $scope.radioIndex = index;
             //处理fdStyle 字段
             fdStyleFun();
-            //往纵轴指标发送数据
-            parentmyAjaxData.config.herizonData = $scope.herizonData;
         }
 
         //处理fdStyle 字段

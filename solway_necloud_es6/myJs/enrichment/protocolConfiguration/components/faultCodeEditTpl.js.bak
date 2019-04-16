@@ -6,6 +6,12 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    faultLevelList: {
+        name: 'GETfaultLevelList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     faultCodeFileUpload: {
         name: 'POSTfaultCodeFileUpload',
         data: {},
@@ -30,9 +36,14 @@ ajaxData({
 
         const getFaultTypeList = () =>{
             let param = $scope.stationType=="solar"?"FAULT_REAL_TYPE":"FAULT_REAL_TYPE_WP";
-            console.log(param)
             $scope.bigDataExportType.getData({dictType:param}).then(res=>{
                 $scope.dicts = res;
+            });
+        }
+
+        const getFaultLevelData = () =>{
+            $scope.faultLevelList.getData({'dictType':'FAULT_LEVEL'}).then(res=>{
+                $scope.faultLevel = res;
             });
         }
         
@@ -40,18 +51,23 @@ ajaxData({
         $scope.$on("editFaultCodeBroad", async (e, v) => {
             let data = v.item;
             getFaultTypeList();
+            if($scope.stationType == 'wind'){
+                getFaultLevelData();
+                
+            }
+            
             $scope.faultformData = {};
             $scope.suggestList = [];
             await myAjaxData.timeout(0);
             $scope.$apply();
 
             if (data) {
-                console.log(data)
                 $scope.faultformData = {
                     id:data.id,
                     protocolID:data.protocolID,
                     faultCode:data.faultCode,
                     faultType:data.faultType,
+                    faultClass : data.faultClass,
                     faultDescCH:data.faultDescCH,
                     faultDescEN:data.faultDescEN,
                     faultHandle:data.faultHandle,
@@ -67,6 +83,9 @@ ajaxData({
                 })
             } else {
                 $scope.num = 1;
+                $scope.file1 = '';
+                $scope.file2 = '';
+                $scope.file3 = '';
                 $scope.suggestList.push({ 'serNum': $scope.num, "content": "" ,"id":''});
                 $scope.faultformData['protocolID'] = v.protocolID;
             }
@@ -131,7 +150,6 @@ ajaxData({
                 })
             }
             $scope.faultformData['adviceStr'] = JSON.stringify($scope.suggestList);
-            console.log($scope.faultformData)
             $scope.faultCodeUpdate.getData($scope.faultformData).then(res => {
                 if (res.code == 0) {
                     toaster.pop('success', '', '保存成功');
