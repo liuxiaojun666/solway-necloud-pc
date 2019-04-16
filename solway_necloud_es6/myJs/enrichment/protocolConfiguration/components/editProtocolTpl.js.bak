@@ -71,12 +71,29 @@ ajaxData({
         __serviceName__: 'editProtocolTplService',
     })('editProtocolTplCtrl', ['$scope', 'editProtocolTplService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
 
+        $scope.setTitleFault = () =>{
+            const setTitleMap = {'1':'故障代码','2':'故障索引'}
+            $scope.faultTitle = setTitleMap[$scope.formData['faultdiagnosistype']]
+            $scope.columnFaultCode.splice(1,1,{
+                title: $scope.faultTitle,
+                dataIndex: 'faultCode',
+                sort: !0,
+                align: 'center'
+            })
+        }
+        
         //状态分类列表
         const getStatusTypeList = type => {
             $scope.stationType = type;  //电站类型（光伏还是风电）
             if (type == 'wind') {
                 $scope.statusTypeListWind.getData({ deviceType: $scope.deviceType }).then(res => {
                     $scope.statusTypeList = res;
+                })
+                $scope.columnFaultCode.splice(5,0,{
+                    title: '故障级别',
+                    dataIndex: 'faultClassName',
+                    sort: !0,
+                    align: 'center'
                 })
             } else if (type == 'solar') {
                 $scope.statusTypeListSolor.getData().then(res => {
@@ -140,9 +157,92 @@ ajaxData({
             });
         }
 
+        //下载故障码附件
+		const download = (id, index,filename)=>{
+            // window.open(window.baseUrl+"/PFaultCodeReal/downloadAttachment.htm?id=" + id + "&index=" + index);
+            $solway.download({
+                url:window.baseUrl+"/PFaultCodeReal/downloadAttachment.htm?id=" + id + "&index=" + index,
+                filename,
+            })
+        }
+        
+        //初始化table列
+        const initTableColumn = () =>{
+            $scope.columnFaultCode = [
+                {
+                    title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+                    dataIndex: '',
+                    width: '60px',
+                    align: 'center',
+                    checkboxName: 'faultCodeCheckboxName',
+                    render(text, record, index) {
+                        return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="faultCodeCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    }
+                }, {
+                    title: '故障索引',
+                    dataIndex: 'faultCode',
+                    sort: !0,
+                    align: 'center'
+                }, {
+                    title: '故障中文描述',
+                    dataIndex: 'faultDescCH',
+                    align: 'center',
+    
+                }, {
+                    title: '故障分类',
+                    dataIndex: 'faultTypeName',
+                    sort: !0,
+                    align: 'center'
+                }, {
+                    title: '故障原因及处理流程',
+                    dataIndex: 'faultHandle',
+                    sort: !0,
+                    align: 'center'
+                }, {
+                    title: '附件',
+                    dataIndex: 'prostr',
+                    sort: !0,
+                    align: 'center',
+                    render(text, item, index) {
+                        let returnStr = '';
+                        if (item.file1) {
+                            returnStr += ` <i class="fa fa-paperclip attachment-active" id="1" ></i>`
+                        } else {
+                            returnStr += ` <i class="fa fa-paperclip" ></i>`
+                        }
+                        if (item.file2) {
+                            returnStr += ` <i class="fa fa-paperclip attachment-active" id="2"></i>`
+                        } else {
+                            returnStr += ` <i class="fa fa-paperclip" ></i>`
+                        }
+                        if (item.file3) {
+                            returnStr += ` <i class="fa fa-paperclip attachment-active" id="3"></i>`
+                        } else {
+                            returnStr += ` <i class="fa fa-paperclip" ></i>`
+                        }
+                        return returnStr;
+                    }
+                }, {
+                    title: '操作',
+                    dataIndex: '',
+                    align: 'center',
+                    sort: !0,
+                    render(text, item, index) {
+                        return `
+                    <div class="clearfix">
+                        <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" ></i>
+                        <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                    </div>
+                    `
+                    },
+                }
+            ]
+        }
+
         $scope.$on("editProtocolBroad", async (e, data) => {
             let item = data.item;
 
+            initTableColumn();
             initManufactureData();
             initCommProtoList();
 
@@ -152,7 +252,9 @@ ajaxData({
 
             $scope.editDisabled = false;
             $scope.tabActive = 'statusCode';//tab默认显示状态码
-            if (data.item) {
+            if (item) {
+                $scope.deviceType = item.deviceType;
+                $scope.showFaultTab = true;//编辑时，可现实故障码tab
                 if (data.copyId) {
                     $scope.formData['copyId'] = data.copyId;
                 } else {
@@ -175,14 +277,19 @@ ajaxData({
                 $scope.$apply();
                 $scope.changeProduct();
             } else {
+                $scope.showFaultTab = false;
+
                 $scope.formData.isdefault = '1';
                 $scope.formData.statusdiagnosistype = '2';
                 $scope.formData.faultdiagnosistype = '2';//新增时，不操作故障码，默认传2
+                
                 $scope.statusdata = [];
                 $scope.count = 0;
                 $scope.statusdata.push({ 'serNum': $scope.count, "faultcodeindex": "0", "faultcode": "", "faultlevel": "", "faultdesc": "" });
                 $scope.count++;
             }
+
+            $scope.setTitleFault();
         });
 
         //切换tab,状态码或者故障码
@@ -216,17 +323,15 @@ ajaxData({
                 if (!res) {
 					if (confirm("切换故障码类型，将清空数据已填的故障码数据。\n确认清空吗？")) {
                         deleteExistFaultData();
-                        $scope.formData.faultdiagnosistype = type
+                        $scope.formData.faultdiagnosistype = type;
 					} else {
                         $scope.formData.faultdiagnosistype = (type=='1'?'2':'1');
-                        console.log($scope.formData.faultdiagnosistype)
-                        // $scope.changeFaultCodeRealStatus(false);
-                        // $("input[name='faultdiagnosistype']").val($scope.formData.faultdiagnosistype)
+                        $("input[name='faultdiagnosistype']").eq($scope.formData.faultdiagnosistype-1).prop("checked",true)
 					}
 				} else {
                     $scope.formData.faultdiagnosistype = type
-					// $scope.changeFaultCodeRealStatus(true);
-				}
+                }
+                $scope.setTitleFault();
             });
         }
 
@@ -248,7 +353,7 @@ ajaxData({
 
         //十进制-》十六进制
         $scope.hexadecimal = num => {
-            let reg = /^0[x,X]/;
+            let reg = /^0[x,X][0-9a-fA-F]{0,}$/;
             let regWord = /[a-z,A-Z,\uFF00-\uFFEF,\u4E00-\u9FA5\uF900-\uFA2D]+/;
             if (reg.test(num)) {
                 return num;
@@ -263,6 +368,10 @@ ajaxData({
         $scope.save = () => {
             if (!$solway.formValidation($scope.formData, '.editProtocolTple', toaster)) return;//校验非空
 
+            if($scope.stationType == 'wind'){
+                $scope.formData['faultdiagnosistype'] = 1;
+                $scope.formData['statusdiagnosistype'] = 1;
+            }
             $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
 
             $scope.updateProtocol.getData($scope.formData).then(res => {
@@ -285,76 +394,6 @@ ajaxData({
                 keyWords: $scope.keyWordsFaultcode
             })
         }
-
-        $scope.columnFaultCode = [
-            {
-                title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
-                dataIndex: '',
-                width: '60px',
-                align: 'center',
-                checkboxName: 'faultCodeCheckboxName',
-                render(text, record, index) {
-                    return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="faultCodeCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
-                }
-            }, {
-                title: '故障代码',
-                dataIndex: 'faultCode',
-                sort: !0,
-                align: 'center'
-            }, {
-                title: '故障中文描述',
-                dataIndex: 'faultDescCH',
-                align: 'center',
-
-            }, {
-                title: '故障分类',
-                dataIndex: 'prostr',
-                sort: !0,
-                align: 'center'
-            }, {
-                title: '故障原因及处理流程',
-                dataIndex: 'faultHandle',
-                sort: !0,
-                align: 'center'
-            }, {
-                title: '附件',
-                dataIndex: 'prostr',
-                sort: !0,
-                align: 'center',
-                render(text, item, index) {
-                    let returnStr = '';
-                    if (item.file1) {
-                        returnStr += ` <i class="fa fa-paperclip attachment-active" ></i>`
-                    } else {
-                        returnStr += ` <i class="fa fa-paperclip" ></i>`
-                    }
-                    if (item.file2) {
-                        returnStr += ` <i class="fa fa-paperclip attachment-active" ></i>`
-                    } else {
-                        returnStr += ` <i class="fa fa-paperclip" ></i>`
-                    }
-                    if (item.file3) {
-                        returnStr += ` <i class="fa fa-paperclip attachment-active" ></i>`
-                    } else {
-                        returnStr += ` <i class="fa fa-paperclip" ></i>`
-                    }
-                    return returnStr;
-                }
-            }, {
-                title: '操作',
-                dataIndex: '',
-                align: 'center',
-                sort: !0,
-                render(text, item, index) {
-                    return `
-                <div class="clearfix">
-                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" ></i>
-                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
-                </div>
-                `
-                },
-            }
-        ]
 
         const deleteBatch = ids =>{
             $scope.deleteBatchFaultCode.getData({ids:ids.join(',')}).then(res=>{
@@ -389,6 +428,8 @@ ajaxData({
                 $solway.confirm({ message: '确定删除此条数据？' }, () => {
                     deleteBatch([item.id])
                 });
+            }else if(event.target.className.includes('attachment-active')){
+                download(item.id,event.target.id,item.fileName1);
             }
         };
 
@@ -402,11 +443,6 @@ ajaxData({
         $scope.cancel = () => {
             $scope.$emit('cancel');
         }
-
-        //下载故障码附件
-		$scope.download = function(id, index){
-			window.open("PFaultCodeReal/downloadAttachment.htm?id=" + id + "&index=" + index);
-		}
 
 
         //编辑故障码成功回调
