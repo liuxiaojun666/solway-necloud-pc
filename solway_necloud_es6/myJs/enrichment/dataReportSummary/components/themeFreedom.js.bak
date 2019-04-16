@@ -122,10 +122,12 @@ ajaxData(
 
     $scope.trClick = (item, index, event) => {
         if (!event.target.className.includes('clickable')) return;
+        const _filename = item.fileName.split('.');
+        const extension = _filename[_filename.length - 1];
         if (event.target.className.includes('download')) {
-            $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name + item.fileName);
+            $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name + '.' + extension);
         } else if (event.target.className.includes('preview')) {
-            $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name + item.fileName, true);
+            $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name, true);
         }
     };
 
