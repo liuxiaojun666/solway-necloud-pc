@@ -1,23 +1,41 @@
 ajaxData(
     {
+        // 用户列表
         userList: {
             name: 'GETadministratorList',
             data: {},
             later: true,
             onlyLatest: true
         },
+        // 库管查询
         opUserBusiConfigMult02getCurrData: {
             name: 'GETopUserBusiConfigMult02getCurrData',
             data: {},
             later: true,
             onlyLatest: true
         },
+        // 库管更新
         opUserBusiConfigMult02updateCurrData: {
             name: 'opUserBusiConfigMult02updateCurrData',
             data: {},
             later: true,
             sameTimeOnce: true
         },
+        // 发红包查询
+        opUserBusiConfigSingle01getCurrData: {
+            name: 'GETopUserBusiConfigSingle01getCurrData',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 发红包更新
+        opUserBusiConfigSingle01updateCurrData: {
+            name: 'opUserBusiConfigSingle01updateCurrData',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+        // 删除
         opUserBusiConfigDelete: {
             name: 'opUserBusiConfigDelete',
             data: {},
@@ -30,19 +48,35 @@ ajaxData(
 )('roleConfigurationCtrl', ['$scope', 'roleConfigurationService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
 
     $scope.$on('roleConfiguration', () => {
-        $scope.tabIndex = 0;
-        $scope.opUserBusiConfigMult02getCurrData.getData();
+        $scope.changeTab(0);
     });
     
+    // tab 切换
+    $scope.changeTab = index => {
+
+        $scope.tabIndex = index;
+
+        switch (index) {
+            case 0:
+                $scope.opUserBusiConfigMult02getCurrData.getData();
+                break;
+        
+            case 1:
+                $scope.opUserBusiConfigSingle01getCurrData.getData();
+                break;
+        
+            default:
+                break;
+        }
+    };
+
     // 库房管理员  人员查看
-    $scope.opUserBusiConfigMult02getCurrData.subscribe(res => {
-        $scope.userList.getData();
-    });
+    $scope.opUserBusiConfigMult02getCurrData.subscribe(() => $scope.userList.getData());
 
     // 库房管理员 保存 或 删除
     $scope.opUserBusiConfigMult02updateCurrData.itemChange = item => {
-        if (item.checked) return $scope.opUserBusiConfigMult02updateCurrData.getData({ userId: item.userid});
-        $scope.opUserBusiConfigDelete.getData({id: item.id});
+        if (item.checked) return $scope.opUserBusiConfigMult02updateCurrData.getData({ userId: item.userid });
+        $scope.opUserBusiConfigDelete.getData({ id: item.id });
     };
 
     // 库房管理员 保存更新后操作
@@ -55,33 +89,81 @@ ajaxData(
         $scope.userList.getData();
     });
 
-    // 库房管理员  删除  操作结果处理
-    $scope.opUserBusiConfigDelete.subscribe(res => {
-        if (res.code !== 0) return toaster.pop('error', '', res.msg);
-        toaster.pop('success', '', res.msg);
-        $scope.opUserBusiConfigMult02getCurrData.getData();
+    // 发红包  人员查看
+    $scope.opUserBusiConfigSingle01getCurrData.subscribe(() => $scope.userList.getData());
+
+    // 发红包 保存 或 删除
+    $scope.opUserBusiConfigSingle01updateCurrData.itemChange = item => {
+        if (item.checked) return $scope.opUserBusiConfigSingle01updateCurrData.getData({ userId: item.userid });
+        $scope.opUserBusiConfigDelete.getData({ id: item.id });
+    };
+
+    // 发红包 保存更新后操作
+    $scope.opUserBusiConfigSingle01updateCurrData.subscribe(res => {
+        if (res.code !== 0) toaster.pop('error', '', res.msg);
+        else {
+            toaster.pop('success', '', res.msg);
+            $scope.opUserBusiConfigSingle01getCurrData.getData();
+        }
         $scope.userList.getData();
     });
 
-    // 集团所有人员列表
-    $scope.userList.subscribe(res => {
+    // 删除  操作结果处理
+    $scope.opUserBusiConfigDelete.subscribe(res => {
+        if (res.code !== 0) return toaster.pop('error', '', res.msg);
+        toaster.pop('success', '', res.msg);
         const {tabIndex} = $scope;
-        if (tabIndex === 0) {
-            const checkedArr = [...$scope.opUserBusiConfigMult02getCurrData.res.body];
-            if (!checkedArr.length) return;
-            $scope.userList.res = res.map(v => {
-                let _v = {...v};
-                checkedArr.forEach(xv => {
-                    if (xv.userId === v.userid) {
-                        _v =  {
-                            ...v,
-                            id: xv.id,
-                            checked: true
-                        };
-                    }
-                });
-                return _v;
-            });
+
+        switch (tabIndex) {
+            case 0:
+                $scope.opUserBusiConfigMult02getCurrData.getData();
+                $scope.userList.getData();
+                break;
+
+            case 1:
+                $scope.opUserBusiConfigSingle01getCurrData.getData();
+                $scope.userList.getData();
+                break;
+        
+            default:
+                break;
         }
+    });
+
+    // 集团所有人员列表 处理
+    $scope.userList.subscribe(res => {
+        const { tabIndex } = $scope;
+        let checkedArr;
+        switch (tabIndex) {
+            case 0:
+                checkedArr = $scope.userList.checkedArr = [...$scope.opUserBusiConfigMult02getCurrData.res.body];
+                if (!checkedArr.length) return;
+                break;
+        
+            case 1:
+                checkedArr = $scope.userList.checkedArr = [$scope.opUserBusiConfigSingle01getCurrData.res.body];
+                if (!checkedArr[0].userId) return;
+                break;
+        
+            default:
+                break;
+        }
+    });
+
+    // 集团所有人员列表 处理
+    $scope.userList.subscribe(res => {
+        $scope.userList.res = res.map(v => {
+            let _v = { ...v };
+            $scope.userList.checkedArr.forEach(xv => {
+                if (xv.userId === v.userid) {
+                    _v = {
+                        ...v,
+                        id: xv.id,
+                        checked: true
+                    };
+                }
+            });
+            return _v;
+        });
     });
 });

@@ -1,10 +1,12 @@
 ajaxData({
-    AddbaseDictionary: {
-        name: 'AddbaseDictionary',
-        data: {},
-        later: true
-    }
-}, {})('verticalIndexCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+AddbaseDictionary: {
+    name: 'AddbaseDictionary',
+    data: {},
+    later: true
+}
+}, {
+    __serviceName__: 'verticalService'
+})('verticalIndexCtrl', ['$scope', 'verticalService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
     //保存
     $scope.save = () => {
@@ -30,31 +32,50 @@ ajaxData({
         })
     }
 
-    //获取父级发送的横轴指标 选择的option
-    $scope.$on('verticalIndexNum', (item, index) => {
-        $scope.selectIndex = index;
-        $scope.radioIndex = index;
+    // 获取纵轴指标的数据
+    $scope.$on('verticalData', () => {
+        $scope.verticalData = parentmyAjaxData.config.herizonData;
+        $scope.radioToSelect($scope.verticalData.ctg1, 0);
     })
 
+    //获取父级发送的横轴指标 选择的option
+    // $scope.$on('verticalIndexNum', (item, index) => {
+    //     $scope.selectIndex = index;
+    //     $scope.radioIndex = index;
+    // })
+
+    //搜索功能
+    $scope.getList = () => {
+        $scope.herizonBottom.map((item) => {
+            if (item.fdName.includes($scope.keyWords)) {
+                item.show = true;
+            } else {
+                item.show = false;
+            }
+        })
+    }
+
     //单选框选中-> 更改select的值
-    $scope.radioToSelect = () => {
-        var radioIndex = document.querySelectorAll('[name=vertical]'):: [].filter(item => item.checked).map(item => item.dataset.index);
-        $scope.$emit('radioIndexNum', { 'radioIndex': radioIndex, 'type': 'vertical' });
-        $scope.radioIndex = radioIndex[0];
+    $scope.radioIndex = 0;
+    $scope.radioToSelect = (item, index) => {
+        $scope.$emit('radioToFather', { 'type': 'vertical', 'k': item.k, 'value': item.v });
+        $scope.verticalBottom = item.ll;
+        $scope.radioIndex = index;
     }
 
 
-    $scope.horizonPoint = [];
-    $scope.horizonKpi = [];
+    $scope.verticalPoint = [];
+    $scope.verticalKpi = [];
 
     const key = {
-        1: 'horizonPoint',
-        2: 'horizonKpi'
+        0: 'verticalPoint',
+        1: 'verticalKpi'
     }
     //左侧多选按钮-> 右侧 穿梭
     $scope.shuttle = () => {
         $scope[key[$scope.radioIndex]] = [];
-        $scope.arr.filter(item => item.checked).map((item, index) => {
+        $scope.verticalBottom.filter(item => item.checked && !item.checkedH).map((item, index) => {
+            item.checkedV = item.checked;
             if ($scope[key[$scope.radioIndex]].indexOf(item) == '-1') {
                 $scope[key[$scope.radioIndex]].push(item);
             }
@@ -62,9 +83,9 @@ ajaxData({
     }
 
     //右侧删除小按钮
-    $scope.delRight = (id, index) => {
-        $scope.arr.forEach((item) => {
-            if (item.id == id) {
+    $scope.delRight = (fdKey, index) => {
+        $scope.verticalBottom.forEach((item) => {
+            if (item.fdKey == fdKey) {
                 item.checked = false;
             }
         })
@@ -78,7 +99,7 @@ ajaxData({
         } else {
             $solway.confirm({ message: '确定全部删除吗？' }, () => {
                 $scope[key[$scope.radioIndex]] = [];
-                $scope.arr.forEach((item) => {
+                $scope.verticalBottom.forEach((item) => {
                     item.checked = false;
                 })
                 $scope.$apply();
@@ -86,40 +107,21 @@ ajaxData({
         }
     }
 
-    //左侧数据
-    $scope.arr = [
-        {
-            'id': 22,
-            'name': 'A箱温度',
-            'checked': false,
-            'activeT': false,
-            'activeH': false,
-        },
-        {
-            'id': 23,
-            'name': 'B箱温度',
-            'checked': false,
-            'activeT': false,
-            'activeH': false,
-        }
-    ]
-
     //点击同比 环比
-    $scope.tongBi = (id, type) => {
+    $scope.tongBi = (fdKey, type) => {
         if (type == 'tong') {
-            $scope.arr.map((item) => {
-                if (item.id == id) {
-                    item.activeT = !item.activeT;
+            $scope.verticalBottom.map((item) => {
+                if (item.fdKey == fdKey) {
+                    item.fdTb == 0 ? item.fdTb = 1 : item.fdTb = 0;
                 }
             })
         } else {
-            $scope.arr.map((item) => {
-                if (item.id == id) {
-                    item.activeH = !item.activeH;
+            $scope.verticalBottom.map((item) => {
+                if (item.fdKey == fdKey) {
+                    item.fdHb == 0 ? item.fdHb = 1 : item.fdHb = 0;
                 }
             })
         }
-        $scope.activedId = id;
     }
 
 
