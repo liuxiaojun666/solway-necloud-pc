@@ -1,0 +1,3090 @@
+'use strict';
+
+((function (win) {
+    var i = location.host.split(':')[1] ? '' : document.getElementById('routerJS').getAttribute('param');
+    win.noFormSubmit = [
+        'opReportLayUpdateByCom',
+        'POSTupdateBuyModule',
+        'opWorkFittingsInCreate',
+        'opWorkFittingsReqCreate',
+        'opWorkFittingsOutCreate',
+        'POSTassessmentUpdate',
+        'POSTplanPowerSave',
+        'opWorkFittingsOutCreate',
+        'opFittingsRebackCreate',
+        'updateConfigDefaultRoleModule',
+        'POSTupdateConfigureRoleModule'
+    ];
+    win.uploadFileApi = [
+        'insertRptTpl', 
+        'updateRptTplFile', 
+        'opWorkTplTicketUpdate', 
+        'opWorkTicketCreate',
+        'opWorkTicketModify',
+        'finishTask',
+        'uploadImageSingle',
+        'opFittingsDictImportTemplate',
+        'POSTimportExcel',
+        'POSTfaultCodeFileUpload'
+    ];
+    win.interface = {
+        GETgoHome: i + '/UserAuthHandle/goHome.htm',
+        //获取当前电站基本信息
+        GETgetCurrentInfoNew: i + "/UserAuthHandle/getCurrentInfoNew.htm",
+        getBaseMessageList: i + "/BaseMessage/getBaseMessageList.htm",
+        getCustomConfigByComId: i + "/Login/getCustomConfigByComId.htm",
+        /**
+         * [getRunTimeMonitor description]
+         * @params {id:1
+                    bidss:2001,2002,2003,2004,2005,2006,2007,2008,2009,
+                    iidss:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
+                    jidss:146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,
+                    quickSelect:false}
+         */
+        getStationFaultData2: i + '/RtmDeviceLayout/getStationFaultData2.htm',
+
+        //工作票分页列表  ?pageIndex=0&pageSize=10
+        rpdWorkTicketPage: i + '/rpdWorkTicket/page.htm',
+
+        //组串阴影遮挡 分页  (Integer pageIndex, Integer pageSize, String keyWords, EqPaintMsgVo item)
+        //EqPaintMsgVo (deviceId、 deviceType 、startDate、endDate)
+        GETanalysisPage: i + '/analysis/eqPaint/msg/page.htm',
+        //组串阴影遮挡 详情页  (Integer id, Integer stId, Integer deviceId)
+        GETselectEqPaintingData: i + '/analysis/eqPaint/selectEqPaintingData.htm',
+
+        //发电稳定度 （分页）
+        GETStabilityPage: i + '/analysis/power/stability/page.htm',
+        //发电稳定度曲线 （详情）
+        GETStabilityLine: i + '/analysis/power/stability/line.htm',
+
+        //故障情况评估（分页）
+        GETFailureAssessmentPage: i + '/analysis/device/failureAssessment/page.htm',
+        //故障情况评估曲线 (详情)
+        GETFailureAssessmentDetail: i + '/analysis/device/failureAssessment/detail.htm',
+
+        //设备衰减分析 (分页)
+        GETInverterAttenuationPage: i + '/analysis/device/inverterAttenuation/page.htm',
+        //设备衰减分析曲线（详情）
+        GETInverterAttenuationLine: i + '/analysis/device/inverterAttenuation/line.htm',
+        //获取设备类型
+        GETgetDeviceType: i + '/DeviceStation/getDeviceType.htm',
+
+        //获取设备名称 汇流箱
+        GETgetJunctionBox: i + '/HistoryData/getJunctionBox.htm',
+
+        //获取设备名称 逆变器
+        GETgetInverter: i + '/HistoryData/getInverter.htm',
+
+        //获取设备名称 箱变
+        GETgetBoxchange: i + '/HistoryData/getBoxchange.htm',
+
+        //获取设备名称 电表
+        GETgetAmmeter: i + '/HistoryData/getAmmeter.htm',
+
+        //获取设备名称 气象站
+        GETgetAerograph: i + '/HistoryData/getAerograph.htm',
+
+        //设备分析  品牌 ?powerType=PV&idType=1&ids=137&timeType=ACCUM&dateStr=2017-01&indicators=FAULTRATE'
+        GETdeviceAnalysisRankingBrand: i + '/deviceAnalysis/ranking/brand.htm',
+
+        //设备分析  省份 ?powerType=PV&idType=1&ids=137&timeType=ACCUM&dateStr=2017-01&indicators=FAULTRATE'
+        GETdeviceAnalysisRankingProvince: i + '/deviceAnalysis/ranking/province.htm',
+
+        //设备分析  故障类型 ?powerType=PV&idType=1&ids=137&timeType=ACCUM&dateStr=2017-01&indicators=FAULTRATE'
+        GETdeviceAnalysisRankingFaultType: i + '/deviceAnalysis/ranking/faultType.htm',
+        //任务列表
+        GETTaskList: i + '/wxa/task/selectPcPage.htm',
+        //电站列表
+        GETStationList: i + '/authComUserRel/pStidsList.htm',
+        //电站列表
+        GETStationList2: i + '/UserAuthHandle/getAllSTListForPCByRole.htm',
+        //查询所有电站的地理位置
+        GETStationsPos: i + '/wxa/task/selectStation.htm',
+        //省    treeLevel':1,'parentId':1
+        POSTSelectProvince: i + '/BaseRegion/selectByTreeLevel.htm',
+        //市    "treeLevel":2,"parentId":id(省id)
+        POSTSelectCity: i + '/BaseRegion/selectByTreeLevel.htm',
+        //县    "treeLevel":3,"parentId":id(市id)
+        POSTSelectCountry: i + '/BaseRegion/selectByTreeLevel.htm',
+        //根据地址获取经纬度 "add":str(省+市+县+街道)
+        POSTLatandlng: i + '/GetLatAndLngByBaidu/getlatandlng.htm',
+        //获取检修人员  latitude,longitude,range
+        GETSelectRepairPerson: i + '/wxa/user/selectRepairPerson.htm',
+        //任务发布   taskVo+opType(0:仅保存，1：保存并发布)+userIds
+        POSTCreatTask: i + '/wxa/task/doCreate.htm',
+        //PC任务详情  id
+        GETTaskDetailPC: i + '/wxa/task/pcDetail.htm',
+        //计算应得红包数额
+        GETTaskBonusNum: i + '/wxa/task/getBonusNum.htm',
+        //审核任务
+        POSTTaskExamine: i + '/wxa/task/doAudit.htm',
+        //废除任务
+        POSTTaskDoInvalid: i + '/wxa/task/doInvalid.htm',
+        //发红包
+        POSTRedPacket: i + '/wxa/task/doBouns.htm',
+        //红包接收人
+        GETBonusReciever: i + '/wxa/user/selectRecvBounsPerson.htm',
+        //手动发红包列表
+        GETManualHandoutBonus: i + '/opShareBonusManual/page.htm',
+        //手动发红包详情
+        GETManualBonusDetail: i + '/opShareBonusManual/selectById.htm',
+        //红包统计
+        GETselectStationTaskStatistics: i + '/wxa/task/selectStationTaskStatistics.htm',
+        //人员列表
+        GETPersonList: i + '/wxa/user/page.htm',
+        //人员备注修改
+        POSTPersonRemarkUpdate: i + '/wxa/user/updateRemark.htm',
+        //人员详情
+        GETAuditDetail: i + '/wxa/user/detail.htm',
+        //人员认证审核
+        POSTAuditPerson: i + '/wxa/user/doAudit.htm',
+        //手动发红包新增保存
+        POSTManualBonusUpdate: i + '/opShareBonusManual/update.htm',
+        //自动发任务列表
+        GETAutomaticTaskList: i + '/opShareTimeTask/page.htm',
+        //自动发任务新增
+        POSTAutomaticTaskCreate: i + '/opShareTimeTask/update.htm',
+        //自动发任务详情
+        GETAutomaticTaskDetail: i + '/opShareTimeTask/selectById.htm',
+        //自动发任务的删除
+        POSTAutomaticTaskDelete: i + '/opShareTimeTask/delete.htm',
+        //电站Id的获取
+        POSTPowerStationId: i + '/UserAuthHandle/getAllSTListBySession.htm',
+        //储热首页温度获取  
+        GETHeatPageTemperature: i + '/heat/getCurrentHeatData.htm',
+        //储热首页功率获取
+        POSTHeatPagePower: i + '/MobileRtmDeviceMonitor/getRunTimeMonitor.htm',
+        //工作票列表
+        GETrpdWorkTicketPage: i + '/rpdWorkTicket/page.htm',
+        //PR异常分页   逆变器发电效率异常分析分页
+        GETdevicePrPage: i + '/analysis/device/devicePr/page.htm',
+        //PR曲线   逆变器发电效率异常分析曲线
+        GETdevicePrLine: i + '/analysis/device/devicePr/line.htm',
+        //PR异常报警  逆变器发电效率异常分析 报警
+        GETdevicePrWarning: i + '/analysis/device/devicePr/lineWarning.htm',
+        //逆变器PBA异常 分页
+        GETdevicePbaPage: i + '/analysis/device/devicePba/page.htm',
+        //逆变器PBA异常 报警
+        GETdevicePbalineWarning: i + '/analysis/device/devicePba/lineWarning.htm',
+        //逆变器PBA异常 曲线
+        GETdevicePbaline: i + '/analysis/device/devicePba/line.htm',
+        //逆变器转换效率异常 分页
+        GETdeviceTransPage: i + '/analysis/device/deviceTrans/page.htm',
+        //逆变器转换效率异常 报警
+        GETdeviceTranslineWarning: i + '/analysis/device/deviceTrans/lineWarning.htm',
+        //逆变器转换效率异常 曲线
+        GETdeviceTransline: i + '/analysis/device/deviceTrans/line.htm',
+        //逆变器 电压 异常 分页
+        GETdeviceVoltPage: i + '/analysis/device/deviceVolt/page.htm',
+        //逆变器 电压 异常 报警
+        GETdeviceVoltlineWarning: i + '/analysis/device/deviceVolt/lineWarning.htm',
+        //逆变器 电压 异常 曲线
+        GETdeviceVoltline: i + '/analysis/device/deviceVolt/line.htm',
+        //逆变器 温度 异常 分页
+        GETtemperatureAnomalyPage: i + '/analysis/device/temperatureAnomaly/page.htm',
+        //逆变器 温度 异常 报警
+        GETtemperatureAnomalyWarning: i + '/analysis/device/temperatureAnomaly/lineWarning.htm',
+        //逆变器 温度 异常 曲线
+        GETtemperatureAnomalyline: i + '/analysis/device/temperatureAnomaly/line.htm',
+        //(风电|光伏)运维汇总数据
+        GETrepairTotal: i + '/peopleAnalysis/repairTotal.htm',
+        //(风电|光伏)运维数据排行分析       检修台次
+        GETrepairCount: i + '/peopleAnalysis/repairRanking/repairCount.htm',
+        //(风电|光伏)运维数据排行分析       检修时间
+        GETrepairHours: i + '/peopleAnalysis/repairRanking/repairHours.htm',
+        //(风电|光伏)运维数据排行分析       检修成功率
+        GETrepairSuccessRate: i + '/peopleAnalysis/repairRanking/repairSuccessRate.htm',
+        //(风电|光伏)运维数据排行分析       检修响应时间
+        GETrepairRespHours: i + '/peopleAnalysis/repairRanking/repairRespHours.htm',
+        //(风电|光伏)运维数据排行分析       检修台数
+        GETrepairNum: i + '/peopleAnalysis/repairRanking/repairNum.htm',
+
+        //(风云榜|光明榜)榜单数据排行分析    检修台次
+        GETRankingRepairCount: i + '/peopleAnalysis/listRanking/repairCount.htm',
+        //(风云榜|光明榜)榜单数据排行分析    检修时间
+        GETRankingRepairHours: i + '/peopleAnalysis/listRanking/repairHours.htm',
+        //(风云榜|光明榜)榜单数据排行分析    检修成功率
+        GETRankingRepairSuccessRate: i + '/peopleAnalysis/listRanking/repairSuccessRate.htm',
+        //(风云榜|光明榜)榜单数据排行分析    检修响应时间
+        GETRankingRepairResHours: i + '/peopleAnalysis/listRanking/repairRespHours.htm',
+        //(风云榜|光明榜)榜单数据排行分析    检修台数
+        GETRankingRepairNum: i + '/peopleAnalysis/listRanking/repairNum.htm',
+
+        //专家库列表
+        GETExpertLibrary: i + '/peopleAnalysis/lib.htm',
+
+        //结算电量分析-列表
+        GETSettlePowerList: i + '/opSettlementPower/page.htm',
+        //结算电量分析-详情
+        GETSettlePowerDetail: i + '/opSettlementPower/selectById.htm',
+        //结算电量分析-保存更新
+        POSTSettlePowerUpdate: i + '/opSettlementPower/update.htm',
+        //结算电量分析-删除
+        POSTSettlePowerDelete: i + '/opSettlementPower/delete.htm',
+
+        //设备数据排行分析                      品牌总排名
+        GETrankingBrand: i + '/deviceAnalysis/ranking/brand.htm',
+        //设备数据排行分析                      品牌总排名
+        GETrankingBrand2: i + '/deviceAnalysis/ranking/brand.htm',
+        //设备数据排行分析                      品牌 省份
+        GETrankingProvince: i + '/deviceAnalysis/ranking/province.htm',
+        //设备数据排行分析                      品牌 省份
+        GETrankingProvince2: i + '/deviceAnalysis/ranking/province.htm',
+        //设备数据排行分析                      各故障类型排名
+        GETrankingFaultType: i + '/deviceAnalysis/ranking/faultType.htm',
+        //设备数据排行分析                      各机型排名
+        GETrankingProject: i + '/deviceAnalysis/ranking/project.htm',
+        //设备数据排行分析                      各机型排名
+        GETrankingProject2: i + '/deviceAnalysis/ranking/project.htm',
+
+        //设备数据线性分析                      品牌 
+        GETlineBrand: i + '/deviceAnalysis/line/brand.htm',
+        //设备数据线性分析                      故障类型 
+        GETlineFaultType: i + '/deviceAnalysis/line/faultType.htm',
+        //设备数据线性分析                      设备类型 
+        GETlineProject: i + '/deviceAnalysis/line/project.htm',
+        //矩阵视图                      所有设备
+        GETDeviceLayout: i + '/RtmDeviceLayout/getDeviceLayout.htm',
+        //逆变器视图状态  ?pageIndex=2&pageSize=10&pstationid=3011&search=&status=00&status=01&status=02&status=03&status=04
+        GETRealDataBInverter: i + '/DeviceStation/getRealDataBInverter2.htm',
+        //逆变器获取设备信息 用  serialnumber  获取 deviceId
+        GETselectByConditionMap: i + '/Inverter/selectByConditionMap.htm',
+        //品牌列表接口  powerType = PV | WP
+        GETselectBypowerType: i + '/Manufacturer/selectByPowerType.htm',
+        //故障类型列表接口  光伏：dictType传  FAULT_REAL_TYPE  风电：dictType传  WT_SYSTEM
+        GETBasedictionarySelectAll: i + '/Basedictionary/selectAll.htm',
+        //专家库  详情 "powerType": "PV", "id": "string"
+        GETmasterDetail: i + '/peopleAnalysis/masterDetail.htm',
+
+        //专家库  详情 专家详细数据分析 检修台次 品牌 图表 "powerType": "PV", "id": "string"
+        GETrepairCountBrand: i + '/peopleAnalysis/master/repairCount/brand.htm',
+        //专家库  详情 专家详细数据分析 检修台次 设备 图表 "powerType": "PV", "id": "string"
+        GETrepairCountProject: i + '/peopleAnalysis/master/repairCount/project.htm',
+        //专家库  详情 专家详细数据分析 检修台次 故障类型 图表 "powerType": "PV", "id": "string"
+        GETrepairCountFaultType: i + '/peopleAnalysis/master/repairCount/faultType.htm',
+
+        //专家库  详情 专家详细数据分析 检修时间 品牌 图表 "powerType": "PV", "id": "string"
+        GETrepairHoursBrand: i + '/peopleAnalysis/master/repairHours/brand.htm',
+        //专家库  详情 专家详细数据分析 检修时间 设备 图表 "powerType": "PV", "id": "string"
+        GETrepairHoursProject: i + '/peopleAnalysis/master/repairHours/project.htm',
+        //专家库  详情 专家详细数据分析 检修时间 故障类型 图表 "powerType": "PV", "id": "string"
+        GETrepairHoursFaultType: i + '/peopleAnalysis/master/repairHours/faultType.htm',
+
+        //专家库  详情 专家详细数据分析 检修成功率 品牌 图表 "powerType": "PV", "id": "string"
+        GETrepairSuccessRateBrand: i + '/peopleAnalysis/master/repairSuccessRate/brand.htm',
+        //专家库  详情 专家详细数据分析 检修成功率 设备 图表 "powerType": "PV", "id": "string"
+        GETrepairSuccessRateProject: i + '/peopleAnalysis/master/repairSuccessRate/project.htm',
+        //专家库  详情 专家详细数据分析 检修成功率 故障类型 图表 "powerType": "PV", "id": "string"
+        GETrepairSuccessRateFaultType: i + '/peopleAnalysis/master/repairSuccessRate/faultType.htm',
+
+        //专家库  详情 专家详细数据分析 检修影响时间 品牌 图表 "powerType": "PV", "id": "string"
+        GETrepairRespHoursBrand: i + '/peopleAnalysis/master/repairRespHours/brand.htm',
+        //专家库  详情 专家详细数据分析 检修影响时间 设备 图表 "powerType": "PV", "id": "string"
+        GETrepairRespHoursProject: i + '/peopleAnalysis/master/repairRespHours/project.htm',
+        //专家库  详情 专家详细数据分析 检修影响时间 故障类型 图表 "powerType": "PV", "id": "string"
+        GETrepairRespHoursFaultType: i + '/peopleAnalysis/master/repairRespHours/faultType.htm',
+
+        //专家库  详情 专家详细数据分析 检修台数 品牌 图表 "powerType": "PV", "id": "string"
+        GETrepairNumBrand: i + '/peopleAnalysis/master/repairNum/brand.htm',
+        //专家库  详情 专家详细数据分析 检修台数 设备 图表 "powerType": "PV", "id": "string"
+        GETrepairNumProject: i + '/peopleAnalysis/master/repairNum/project.htm',
+        //专家库  详情 专家详细数据分析 检修台数 故障类型 图表 "powerType": "PV", "id": "string"
+        GETrepairNumFaultType: i + '/peopleAnalysis/master/repairNum/faultType.htm',
+        //矩阵视图 所有设备状态
+        GETdeviceLayoutV2: i + '/RtmDeviceLayout/getDeviceLayoutV2.htm',
+        //功率预测 列表
+        GETforecastPowerList: i + '/analysis/power/forecastPower/list.htm',
+        //功率预测 曲线
+        GETforecastPowerLine: i + '/analysis/power/forecastPower/line.htm',
+        //矩阵视图 电站状态
+        GETRtmSingleStationComm: i + '/MobileRtmStationStatus/getRtmSingleStationComm.htm',
+
+        //公司列表信息
+        POSTCompanyListData: i + '/Company/selectAllByAdmin.htm',
+        //电站列表信息
+        POSTStationListByComid: i + '/PowerStation/selectByCompanyId.htm',
+        //服务协议-列表
+        GETServiceProtocolList: i + '/opServiceAgreement/page.htm',
+        //服务协议-保存
+        POSTServiceProtocolSave: i + '/opServiceAgreement/update.htm',
+        //服务协议-详情
+        GETServiceProtocolDetail: i + '/opServiceAgreement/selectById.htm',
+        //服务协议-删除
+        POSTServiceProtocolDelete: i + '/opServiceAgreement/delete.htm',
+        //查询集团下 省份
+        GETprovinces: i + '/Company/getProvinces.htm',
+
+        //报表模板配置列表
+        GETselectByCondition: i + '/opReportTpl/selectByCondition.htm',
+        //报表模板配置列表 分页
+        GETselectByConditionPage: i + '/opReportTpl/page.htm',
+        //报表模板配置 明细
+        GETopReportTplSelectById: i + '/opReportTpl/selectById.htm',
+        //报表模板配置 保存更新
+        OpReportTplUpdate: i + '/opReportTpl/update.htm',
+        //报表模板配置 删除
+        OpReportTplDelete: i + '/opReportTpl/delete.htm',
+        //报表模板配置 批量删除
+        OpReportTplDeleteBatch: i + '/opReportTpl/deleteBatch.htm',
+        //报表模板配置 模板列表
+        GETloadReportProviders: i + '/ureport/designer/loadReportProviders',
+
+        //报表展示配置 列表
+        GETopReportLaySelectByCondition: i + '/opReportLay/selectByCondition.htm',
+        //报表展示配置 列表 分页
+        GETopReportLaySelectByConditionPage: i + '/opReportLay/page.htm',
+        //报表展示配置 保存 更新
+        opReportLayUpdate: i + '/opReportLay/update.htm',
+        //报表展示配置 详细
+        GETopReportLaySelectById: i + '/opReportLay/selectById.htm',
+        //报表展示配置 删除
+        opReportLayDelete: i + '/opReportLay/delete.htm',
+        //报表展示配置 批量删除
+        opReportLayDeleteBatch: i + '/opReportLay/deleteBatch.htm',
+
+        //报表展示模板配置 列表
+        GETopReportLayRelSelectByCondition: i + '/opReportLayRel/selectByCondition.htm',
+        //报表展示模板配置 列表 分页
+        GETopReportLayRelPage: i + '/opReportLayRel/page.htm',
+        //报表展示模板配置 保存 更新
+        opReportLayRelUpdate: i + '/opReportLayRel/update.htm',
+        //报表展示模板配置 详细
+        GETopReportLayRelSelectById: i + '/opReportLayRel/selectById.htm',
+        //报表展示模板配置 删除
+        opReportLayRelDelete: i + '/opReportLayRel/delete.htm',
+        //报表展示模板配置 批量删除
+        opReportLayRelDeleteBatch: i + '/opReportLayRel/deleteBatch.htm',
+
+        // 报表 报表展示配置  获取公司列表
+        GETopReportLaySelectByCom: i + '/opReportLay/selectByCom.htm',
+        // 报表 报表展示配置  公司保存 更新
+        opReportLayUpdateByCom: i + '/opReportLay/updateByCom.htm',
+
+        // 报表 角色或用户订阅配置  获取公司列表
+        GETopReportTargetRelSelectByCom: i + '/opReportTargetRel/selectByCom.htm',
+        // 查角色
+        GETroleInformationListAdmin: i + '/Role/roleInformationListAdmin.htm',
+
+        // 报表展示  tab
+        GETreportShowTab: i + '/report/show/tab.htm',
+        // 报表展示  view
+        GETreportShowView: i + '/report/show/view.htm',
+        // 报表展示  判断用户是否订阅
+        GETreportShowUserCheckSubscribe: i + '/report/show/userCheckSubscribe.htm',
+        // 报表展示  用户订阅操作
+        reportShowUserDoSubscribe: i + '/report/show/userDoSubscribe.htm',
+
+        // 自由报表 列表   **************************
+        GETfreeRptPage: i + '/freeRpt/page.htm',
+        // 自由报表 作废报表
+        freeRptInvalId: i + '/freeRpt/invalid.htm',
+        // 自由报表 下载报表 ?id=取列表中的fid  23 24 **********************
+        GETminioDownload: i + '/minio/download.htm',
+        // 自由报表订阅列表
+        GETfreeRptSubGetRptSubList: i + '/freeRptSub/getRptSubList.htm',
+        // 自由报表订阅
+        freeRptSubscribe: i + '/freeRptSub/subscribe.htm',
+        // 自由报表取消订阅
+        freeRptUnSubscribe: i + '/freeRptSub/unSubscribe.htm',
+        // 自由报表模板管理列表
+        GETrptTplList: i + '/freeRptTpl/getRptTplList.htm',
+        // 自由报表 启用和作废  **************
+        freeRptTplSetEnable: i + '/freeRptTpl/setEnable.htm',
+        // 自由报表 添加新模板
+        insertRptTpl: i + '/freeRptTpl/insertRptTpl.htm',
+        // 自由报表 更新模板
+        updateRptTpl: i + '/freeRptTpl/updateRptTpl.htm',
+        // 自由报表 更新模板
+        updateRptTplFile: i + '/freeRptTpl/updateRptTpl.htm',
+        // 自由报表 删除模板
+        freeRptTplDeleteBatch: i + '/freeRptTpl/deleteBatch.htm',
+        // 电站列表 集团 + 公司 + 电站 列表
+        GETselectComInfo: i + '/freeRptTpl/selectComInfo.htm',
+
+        // 默认给 选中 第一个电站
+        GETUserAuthHandleSetSTClass: i + '/UserAuthHandle/setSTClass.htm',
+        // 切换电站  ?dataType=0&id=150&isGroup=0&stClass=01
+        GETUserAuthHandleChangeDataType: i + '/UserAuthHandle/changeDataType.htm',
+        // 获取当前电站基本信息
+        GETUserAuthHandleGetCurrentInfo: i + '/UserAuthHandle/getCurrentInfo.htm',
+        //主题1---基本情况
+        GETBasicSituationInfo: i + '/pv/monitor/runBaseInfo.htm',
+
+        //主题2---资源主题
+        GETResourceInfo: i + '/pv/monitor/getRunRes.htm',
+
+        //主题3---功率主题（当日）
+        GETPowerCurrentInfo: i + '/pv/monitor/getRunAcp.htm',
+        //主题3---功率主题（历史日）
+        GETquery_station_day_kw_subject_his: i + '/his/query.htm',
+
+        //主题4---电量主题---（集团/电站）---当日
+        GETElectricityCurrent: i + '/pv/monitor/getRunKWPower.htm',
+        //主题4---电量主题---电站---历史日
+        GETquery_station_day_elec_subject_his: i + '/his/query.htm',
+        //主题4---电量主题---电站---月
+        GETquery_station_month_elec_subject_his: i + '/his/query.htm',
+        //主题4---电量主题---电站---年
+        GETquery_station_year_elec_subject_his: i + '/his/query.htm',
+        //主题4---电量主题---集团---历史日
+        GETquery_company_day_elec_subject_his: i + '/his/query.htm',
+        //主题4---电量主题---集团---月
+        GETquery_company_month_elec_subject_his: i + '/his/query.htm',
+        //主题4---电量主题---集团---年
+        GETquery_company_year_elec_subject_his: i + '/his/query.htm',
+
+        //主题5---设备运行主题---（集团/电站）---当日
+        GETEquipmentInfo: i + '/pv/monitor/getRunStatusInfo.htm',
+        //主题5---设备运行主题---电站---历史日
+        GETquery_station_day_dev_subject_his: i + '/his/query.htm',
+        //主题5---设备运行主题---电站---月
+        GETquery_station_month_dev_subject_his: i + '/his/query.htm',
+        //主题5---设备运行主题---电站---年
+        GETquery_station_year_dev_subject_his: i + '/his/query.htm',
+        //主题5---设备运行主题---集团---历史日
+        GETquery_company_day_dev_subject_his: i + '/his/query.htm',
+        //主题5---设备运行主题---集团---月
+        GETquery_company_month_dev_subject_his: i + '/his/query.htm',
+        //主题5---设备运行主题---集团---年
+        GETquery_company_year_dev_subject_his: i + '/his/query.htm',
+
+        //（设备运行&功率）
+        //主题5---设备运行主题---（集团/电站）---当日
+        GETgetRunAcpStatus: i + '/pv/monitor/getRunAcpStatus.htm',
+
+
+        //累计---集团
+        GETquery_company_accum_subject_his: i + '/his/query.htm',
+        //累计---电站
+        GETquery_station_accum_subject_his: i + '/his/query.htm',
+
+        //累计详情---集团---列表
+        GETquery_company_accum_detail_timelist_his: i + '/his/query.htm',
+        //累计详情---集团---柱状图
+        GETquery_company_accum_detail_timebar_his: i + '/his/query.htm',
+        //累计详情---电站---列表
+        GETquery_station_accum_detail_timelist_his: i + '/his/query.htm',
+        //累计详情---电站---柱状图
+        GETquery_station_accum_detail_timebar_his: i + '/his/query.htm',
+
+
+        //设备运行详情---集团---当日
+        GETequipmentDetailCompanyToday: i + '/pv/monitor/getRunStatusInfoList.htm',
+        //设备运行详情---集团---历史日---列表
+        GETquery_company_day_dev_detail_stationlist_his: i + '/his/query.htm',
+        //设备运行详情---集团---历史日---曲线
+        GETquery_company_day_dev_detail_stationline_his: i + '/his/query.htm',
+        //设备运行详情---集团---月---时间列表
+        GETquery_company_month_dev_detail_timelist_his: i + '/his/query.htm',
+        //设备运行详情---集团---月---时间曲线
+        GETquery_company_month_dev_detail_timeline_his: i + '/his/query.htm',
+        //设备运行详情---集团---月---电站列表
+        GETquery_company_month_dev_detail_stationlist_his: i + '/his/query.htm',
+        //设备运行详情---集团---月---电站曲线
+        GETquery_company_month_dev_detail_stationline_his: i + '/his/query.htm',
+        //设备运行详情---集团---年---时间列表
+        GETquery_company_year_dev_detail_timelist_his: i + '/his/query.htm',
+        //设备运行详情---集团---年---时间曲线
+        GETquery_company_year_dev_detail_timeline_his: i + '/his/query.htm',
+        //设备运行详情---集团---年---电站列表
+        GETquery_company_year_dev_detail_stationlist_his: i + '/his/query.htm',
+        //设备运行详情---集团---年---电站曲线
+        GETquery_company_year_dev_detail_stationline_his: i + '/his/query.htm',
+
+        //设备运行详情---电站---当日---故障分析统计
+        GETfaultAlarmTotalStatistics: i + '/FaultAlarm/faultAlarmTotalStatistics.htm',
+        //设备运行详情---电站---当日---故障列表
+        GETgetStationFaultAlarmRtData: i + '/FaultAlarm/getStationFaultAlarmRtData.htm',
+        // 设备运行详情  电站 发电能力
+        GETquery_station_day_dev_power_timelist_his: i + '/his/query.htm',
+
+
+        //设备运行详情---电站---月---时间列表
+        GETquery_station_month_dev_detail_timelist_his: i + '/his/query.htm',
+        //设备运行详情---电站---月---时间曲线
+        GETquery_station_month_dev_detail_timeline_his: i + '/his/query.htm',
+        //设备运行详情---电站---月---设备列表
+        GETquery_station_month_dev_detail_devlist_his: i + '/his/query.htm',
+        //设备运行详情---电站---月---设备曲线
+        GETquery_station_month_dev_detail_devline_his: i + '/his/query.htm',
+        //设备运行详情---电站---年---时间列表
+        GETquery_station_year_dev_detail_timelist_his: i + '/his/query.htm',
+        //设备运行详情---电站---年---时间曲线
+        GETquery_station_year_dev_detail_timeline_his: i + '/his/query.htm',
+        //设备运行详情---电站---年---设备列表
+        GETquery_station_year_dev_detail_devlist_his: i + '/his/query.htm',
+        //设备运行详情---电站---年---设备曲线
+        GETquery_station_year_dev_detail_devline_his: i + '/his/query.htm',
+
+
+        //运行日志列表
+        POSTdeviceloglist: i + '/DeviceLog/deviceRunList.htm',
+
+
+
+
+
+
+
+
+
+
+
+        // 电站 资源 日 /pv/monitor/getRunResList.htm?queryType=3&dateType=3&date=2018-06-26
+        GETresourceDetailStationDay: i + '/pv/monitor/getRunResList.htm',
+        // 电站 资源 历史日
+        GETquery_station_day_res_timeone_his: i + '/his/query.htm',
+        // 电站 资源 月 详情  时间 列表
+        GETquery_station_month_res_timelist_his: i + '/his/query.htm',
+        // 电站 资源 月 详情  时间 曲线
+        GETquery_station_month_res_timeline_his: i + '/his/query.htm',
+        // 电站 资源 年 详情  时间 列表
+        GETquery_station_year_res_timelist_his: i + '/his/query.htm',
+        // 电站 资源 年 详情  时间 曲线
+        GETquery_station_year_res_timeline_his: i + '/his/query.htm',
+        // 集团 当日 /pv/monitor/getRunResList.htm?queryType=1&dateType=3&date=2018-06-26
+        GETresourceDetailCompanyDayToday: i + '/pv/monitor/getRunResList.htm',
+        // 集团 历史日 query_company_day_res_timelist_his
+        GETquery_company_day_res_timelist_his: i + '/his/query.htm',
+        // 集团月资源详情时间列表
+        GETquery_company_month_res_timelist_his: i + '/his/query.htm',
+        // 集团月资源详情时间曲线
+        GETquery_company_month_res_timeline_his: i + '/his/query.htm',
+        // 集团月资源详情电站列表
+        GETquery_company_month_res_stationlist_his: i + '/his/query.htm',
+        // 集团月资源详情电站曲线
+        GETquery_company_month_res_stationline_his: i + '/his/query.htm',
+        // 集团年资源详情时间列表
+        GETquery_company_year_res_timelist_his: i + '/his/query.htm',
+        // 集团年资源详情时间曲线
+        GETquery_company_year_res_timeline_his: i + '/his/query.htm',
+        // 集团年资源详情电站列表
+        GETquery_company_year_res_stationlist_his: i + '/his/query.htm',
+        // 集团年资源详情电站曲线
+        GETquery_company_year_res_stationline_his: i + '/his/query.htm',
+
+
+        // 基本情况
+        // 电站   今日 日 月 年
+        GETpvMonitorGetRunBaseList: i + '/pv/monitor/getRunBaseList.htm',
+        // 集团  今日 日 月 年
+        GETBaseSituationCompanyData: i + '/pv/monitor/getRunBaseList.htm',
+        // 电站 视频监控
+        GETPowerStationMonitorSelectVideos: i + '/PowerStationMonitor/selectVideos.htm',
+
+
+        // 功率主题  
+        // 电站 当日 时间 /pv/monitorData/getRunAcpTimeList.htm?queryType=3&dateType=3&date=2018-07-02
+        GETPowerStationDayTodayTime: i + '/pv/monitorData/getRunAcpTimeList.htm',
+        // 电站 当日 时间 /pv/monitorData/getRunAcpTimeList.htm?queryType=3&dateType=3&date=2018-07-02
+        GETPowerStationDayTodayTime2: i + '/pv/monitorData/getRunAcpTimeList.htm',
+        // 布局视图
+        GETDeviceLayoutSvg: i + '/RtmDeviceLayout/getDeviceLayoutSvg.htm',
+        // 布局视图状态更新
+        GETDeviceStatus: i + '/RtmDeviceLayout/getDeviceStatus.htm',
+        // 布局视图获取视频names
+        GETVideoNames: i + '/DeviceLayout/getVideoNames.htm',
+        //电站日功率时间曲线（历史日  pv/monitor/getKWLine.htm?queryType=3&date=2018-06-18&dateType=3
+        GETPowerStationDayAgoTimeLine: i + '/pv/monitor/getKWLine.htm',
+        //电站日功率时间列表（历史日  pv/monitor/getKWList.htm?queryType=3&date=2018-06-18&dateType=3
+        GETPowerStationDayAgoTimeList: i + '/pv/monitor/getKWList.htm',
+        // 电站 设备 电表 列表视图
+        GETRunRealDataMeter: i + '/DeviceStation/getRunRealDataMeter.htm',
+        // 公司 今日/pv/monitorData/getRunAcpTimeList.htm?queryType=1&dateType=3&date=2018-07-02
+        GETPowerCompanyDayTodayTime: i + '/pv/monitorData/getRunAcpTimeList.htm',
+        // 公司 今日/pv/monitorData/getRunAcpTimeList.htm?queryType=1&dateType=3&date=2018-07-02
+        GETPowerCompanyDayTodayTime2: i + '/pv/monitorData/getRunAcpTimeList.htm',
+        // 公司 今日/pv/monitorData/getRunAcpStationList.htm?queryType=1&dateType=3&date=2018-07-03
+        GETPowerCompanyDayTodayStation: i + '/pv/monitorData/getRunAcpStationList.htm',
+        // 公司 当日 逆变器 设备列表/DeviceStation/getRunRealDataBInverter.htm?pageIndex=0&pageSize=10&status=00,01,02
+        // GETrunRealDataBInverter: i + '/DeviceStation/getRunRealDataBInverter.htm',
+        GETrunRealDataBInverter: i + '/pv/monitorData/getRunRealDataBInverter.htm',
+        // 公司 当日 汇流箱 设备列表
+        // GETrunRealDataBJunction: i + '/DeviceStation/getRunRealDataBJunction.htm',
+        GETrunRealDataBJunction: i + '/pv/monitorData/getRunRealDataBJunction.htm',
+        // 公司 当日 箱变 设备列表
+        GETrunRealDataBBoxChange: i + '/DeviceStation/getRunRealDataBBoxChange.htm',
+        //公司日功率时间曲线（历史日  pv/monitor/getKWLine.htm?queryType=1&date=2018-06-18&dateType=3
+        GETPowerCompanyDayAgoTimeLine: i + '/pv/monitor/getKWLine.htm',
+        //公司日功率时间列表（历史日  pv/monitor/getKWList.htm?queryType=1&date=2018-06-18&dateType=3
+        GETPowerCompanyDayAgoTimeList: i + '/pv/monitor/getKWList.htm',
+        // 公司  功率 历史日  电站  列表
+        GETquery_company_day_kw_detail_stationlist_his: i + '/his/query.htm',
+        // 列表视图 箱变 列表
+        GETDeviceStationGetRunRealDataBBoxChange: i + '/DeviceStation/getRunRealDataBBoxChange.htm',
+        // 列表视图 箱变 列表
+        GETDeviceStationGetRealDataBBoxChange: i + '/DeviceStation/getRealDataBBoxChange.htm',
+        // 列表视图 逆变器 列表
+        // GETDeviceStationGetRunRealDataBInverter: i + '/DeviceStation/getRunRealDataBInverter.htm',
+        // 列表视图 逆变器 列表
+        GETDeviceStationGetRunRealDataBInverter: i + '/pv/monitorData/getRunRealDataBInverter.htm',
+        // 列表视图 汇流箱 列表
+        // GETDeviceStationGetRunRealDataBJunction: i + '/DeviceStation/getRunRealDataBJunction.htm',
+        // 列表视图 汇流箱 列表
+        GETDeviceStationGetRunRealDataBJunction: i + '/pv/monitorData/getRunRealDataBJunction.htm',
+
+
+        // 电量主题
+        // 电站 当日 ?queryType=3&dateType=3&date=2018-06-26|参数补充 & status=1 & status=2 & status=3 & status=4 & search
+        GETpvMonitorDataGetRunKWPowerList: i + '/pv/monitorData/getRunKWPowerList.htm',
+        // 电站 历史日  列表
+        GETquery_station_day_elec_his_list: i + '/his/query.htm',
+        // 电站 历史日  图表
+        GETquery_station_day_elec_his_line: i + '/his/query.htm',
+        // 电站 月 时间 列表
+        GETquery_station_month_elec_detail_timelist_his: i + '/his/query.htm',
+        // 电站 月 时间 曲线
+        GETquery_station_month_elec_detail_timeline_his: i + '/his/query.htm',
+        // 电站 月 设备 列表
+        GETquery_station_month_elec_devlist_his: i + '/his/query.htm',
+        // 电站 月 设备 曲线
+        GETquery_station_month_elec_devline_his: i + '/his/query.htm',
+        // 电站 年 时间 列表
+        GETquery_station_year_elec_detail_timelist_his: i + '/his/query.htm',
+        // 电站 年 时间 曲线
+        GETquery_station_year_elec_detail_timeline_his: i + '/his/query.htm',
+        // 电站 年 设备 列表
+        GETquery_station_year_elec_devlist_his: i + '/his/query.htm',
+        // 电站 年 设备 列表
+        GETquery_station_year_elec_devlist_his: i + '/his/query.htm',
+        // 电站 年 设备 曲线
+        GETquery_station_year_elec_devline_his: i + '/his/query.htm',
+        // 集团 今日 /pv/monitor/getRunKWPowerList.htm?queryType=1&dateType=3&date=2018-06-26
+        GETpvMonitorGetRunKWPowerList: i + '/pv/monitor/getRunKWPowerList.htm',
+        // 集团 历史 日 列表
+        GETquery_company_day_elec_detail_stationlist_his: i + '/his/query.htm',
+        // 集团 历史 日 图
+        GETquery_company_day_elec_detail_stationline_his: i + '/his/query.htm',
+        // 集团 历史 月 时间 列表
+        GETquery_company_month_elec_detail_timelist_his: i + '/his/query.htm',
+        // 集团 历史 月 时间 图表
+        GETquery_company_month_elec_detail_timeline_his: i + '/his/query.htm',
+        // 集团 历史 月 电站 列表
+        GETquery_company_month_elec_detail_stationlist_his: i + '/his/query.htm',
+        // 集团 历史 月 电站 图表
+        GETquery_company_month_elec_detail_stationline_his: i + '/his/query.htm',
+        // 集团 历史 年 时间 列表
+        GETquery_company_year_elec_detail_timelist_his: i + '/his/query.htm',
+        // 集团 历史 年 时间 图表
+        GETquery_company_year_elec_detail_timeline_his: i + '/his/query.htm',
+        // 集团 历史 年 电站 列表
+        GETquery_company_year_elec_detail_stationlist_his: i + '/his/query.htm',
+        // 集团 历史 年 电站 图表
+        GETquery_company_year_elec_detail_stationline_his: i + '/his/query.htm',
+        // 电站 年 电量结算 汇总 ?year=2018
+        GETopSettlementPowerAnalysisByNumTotal: i + '/opSettlementPower/analysisByNumTotal.htm',
+        // 电站 月 电量结算 ?queryDate=2018-06
+        GETopSettlementPowerAnalysisByNumMonth: i + '/opSettlementPower/analysisByNumMonth.htm',
+        // 电站 年 电量结算 列表 style=1&year=2018
+        GETopSettlementPowerAnalysisByNumList: i + '/opSettlementPower/analysisByNum.htm',
+        // 电站 年 电量结算 图表 style=2&year=2018
+        GETopSettlementPowerAnalysisByNumLine: i + '/opSettlementPower/analysisByNum.htm',
+
+
+        //运维知识
+        //产品资料、故障指导、历史维修等列表
+        GETknowledgeBaseList: i + '/shareRepository/selectByPageShareRepository.htm',
+        //所有厂商列表
+        GETmanufacturerList: i + '/Manufacturer/selectAll.htm',
+        //产品型号列表
+        GETselectByManuList: i + '/Product/selectByManuf.htm',
+        //文档分类
+        GETrepClass: i + '/Basedictionary/selectAll.htm',
+        //设备分类列表
+        GETdeviceTypeList: i + '/shareRepository/selectAllDeviceType.htm',
+        //卡片详情
+        GETcardDetail: i + '/shareRepository/getOne.htm',
+        //浏览次数增加
+        POSTaddViewsCount: +'/shareRepository/addViewsCount.htm',
+
+        // 高效运维 专业运维 电站列表
+        GETAllSTListForPCBySession: i + '/UserAuthHandle/getAllSTListForPCBySession.htm',
+        // 高效运维 专业运维 消息列表
+        /**
+         * 1）isHis:0=当日全部消息和昨日未关闭消息；1=昨日之前已关闭全部消息
+    2）queryType:0=全部，1=已关闭，2未关闭
+    3）handStatus[]：处理情况状态，00：等待确认；01：待受理；02：待处理；03：完成；04：被处理；05：验收中 。
+         */
+        GETBaseMessageListNew: i + '/BaseMessage/getBaseMessageListNew.htm',
+        // 高效运维 专业运维 消息处理  批量标记为已读
+        readBaseMessages: i + '/BaseMessage/readBaseMessages.htm',
+        // 高效运维 专业运维 消息处理  批量标记为已读  全部标记为已读
+        readBaseAllMessages: i + '/BaseMessage/readBaseAllMessages.htm',
+        // 高效运维 专业运维 消息处理  批量 关闭消息
+        eventNoHandles: i + '/EventHandle/eventNoHandles.htm',
+
+        //高效运维 专业运维 消息详情 列表
+        noteDetailChatlist: i + '/BaseMessage/getTopBaseMessageDetailNew.htm',
+        //当前用户信息
+        loginUserInfo: i + '/Login/getLoginUser.htm',
+        //当前用户信息
+        GETloginUserInfo: i + '/Login/getLoginUser.htm',
+        //共享任务详情列表
+        GETShareTaskDetailList: i + '/wxa/task/pcDetailToList.htm',
+
+        //事件详情
+        POSTeventDetail: i + '/FaultHand/getFaultAlarmById.htm',
+        //任务详情
+        POSTtaskDetail: i + '/Optask/selectById.htm',
+        //事件处理详情
+        POSTeventHandleDetail: i + '/EventHandle/getEventHandleDetailById.htm',
+
+        //派人处理
+        POSTpersonHandle: i + '/EventHandle/eventHandle.htm',
+        //不处理
+        POSTnohandle: i + '/EventHandle/eventNoHandle.htm',
+        //获取事件日志
+        POSTeventDiary: i + '/DeviceLog/selectDeviceById.htm',
+        //获取人员列表
+        POSTpersonList: i + '/AdminUser/selectAllNoSelf.htm',
+        //受理
+        POSTacceptHandle: i + '/Optask/acceptTask.htm',
+        //是否发布过共享运维
+        GETcheckTaskId: i + '/opShareTimeTask/checkTaskId.htm',
+
+
+        // 查询 电站 人员    ?sid=3012
+        GETselectAllUserBySTID: i + '/AdminUser/selectAllUserBySTID.htm',
+        // 高效运维  专业 运维  发布任务
+        opTimeTaskUpdate: i + '/opTimeTask/update.htm',
+        // 高效运维  共享 运维  批量作废 ids
+        wxaTaskDoInvalids: i + '/wxa/task/doInvalids.htm',
+        // 高效运维  共享 运维  发布任务
+        opShareTimeTaskUpdateV2: i + '/opShareTimeTask/updateV2.htm',
+        // 高效运维 共享 运维 发布任务 查询 电站 可推送 人员
+        GETopShareUserStationRelSelectByCondition: i + '/opShareUserStationRel/selectByStationId.htm',
+        // 高效运维  共享运维 定时任务管理  列表
+        GETopShareTimeTaskList: i + '/opShareTimeTask/selectByCondition.htm',
+        // 高效运维 共享运维 打开关闭 定时任务
+        opShareTimeTaskAutoPub: i + '/opShareTimeTask/autoPub.htm',
+
+        // 高效运维 专业运维 定时任务 管理 列表
+        GETopTimeTaskList: i + '/opTimeTask/selectByCondition.htm',
+        // 高效运维 专业运维 定时任务 管理 删除
+        opTimeTaskDelete: i + '/opTimeTask/delete.htm',
+        // 高效运维 专业运维 定时任务 管理 打开 关闭
+        opTimeTaskAutoPub: i + '/opTimeTask/autoPub.htm',
+
+
+        //运维人员
+
+        // 电站-专业运维时间分析-月-列表
+        GETanalysis_station_operation_time_month_list: i + '/his/query.htm',
+        // 电站-专业运维时间分析-年-列表
+        GETanalysis_station_operation_time_year_list: i + '/his/query.htm',
+        // 电站-专业运维时间分析-累计-列表
+        GETanalysis_station_operation_time_accum_list: i + '/his/query.htm',
+
+        //公司-专业运维时间分析-月-列表
+        GETanalysis_company_operation_time_month_list: i + '/his/query.htm',
+        //公司-专业运维时间分析-年-列表
+        GETanalysis_company_operation_time_year_list: i + '/his/query.htm',
+        // 公司-专业运维时间分析-累计-列表
+        GETanalysis_company_operation_time_accum_list: i + '/his/query.htm',
+
+        // 公司-专业运维电站分析-月-列表
+        GETanalysis_company_operation_station_month_list: i + '/his/query.htm',
+        //公司-专业运维电站分析-年-列表
+        GETanalysis_company_operation_station_year_list: i + '/his/query.htm',
+        //公司-专业运维电站分析-累计-列表
+        GETanalysis_company_operation_station_accum_list: i + '/his/query.htm',
+
+        // 电站-专业运维设备分析-月-列表
+        GETanalysis_station_operation_dev_month_list: i + '/his/query.htm',
+        // 电站-专业运维设备分析-年-列表
+        GETanalysis_station_operation_dev_year_list: i + '/his/query.htm',
+        // 电站-专业运维设备分析-累计-列表
+        GETanalysis_station_operation_dev_accum_list: i + '/his/query.htm',
+
+        // 公司-专业运维人员分析-月-列表
+        GETanalysis_company_operation_person_month_list: i + '/his/query.htm',
+        // 公司-专业运维人员分析-年-列表
+        GETanalysis_company_operation_person_year_list: i + '/his/query.htm',
+        // 公司-专业运维人员分析-累计-列表
+        GETanalysis_company_operation_person_accum_list: i + '/his/query.htm',
+
+        // 电站-专业运维人员分析-月-列表
+        GETanalysis_station_operation_person_month_list: i + '/his/query.htm',
+        // 电站-专业运维人员分析-年-列表
+        GETanalysis_station_operation_person_year_list: i + '/his/query.htm',
+        // 电站-专业运维人员分析-累计-列表
+        GETanalysis_station_operation_person_accum_list: i + '/his/query.htm',
+
+        //共享人员列表
+        GETsharePeopleList: i + '/wxa/user/selectUserEfficiency.htm',
+        //共享人员详情---注册信息   (GETAuditDetail)
+        // GETsharePeopleRegInfo:i + '/wxa/task/detail.htm',
+        //共享人员详情---维修记录
+        GETsharePeopleRepairRecord: i + '/wxa/task/selectPcPage.htm',
+        //人员管理列表
+        GETpeopleManageList: i + '/wxa/user/page.htm',
+        //给人员添加电站
+        POSTupdateBatch: i + '/opShareUserStationRel/updateBatch.htm',
+
+
+
+
+
+        //人员注册信息
+        GETregInfo: i + '/AdminUser/regInfo.htm',
+
+        //电站-专业运维人员-故障分析-月-曲线
+        GETanalysis_station_operation_person_ft_month_line: i + '/his/query.htm',
+        //电站-专业运维人员-品牌分析-月-曲线
+        GETanalysis_station_operation_person_manuf_month_line: i + '/his/query.htm',
+        //电站-专业运维人员-型号分析-月-曲线
+        GETanalysis_station_operation_person_product_month_line: i + '/his/query.htm',
+        //电站-专业运维人员-维修记录-月-列表
+        GETanalysis_station_operation_person_oprecord_month_list: i + '/his/query.htm',
+
+        // 电站-专业运维人员-故障分析-年-曲线
+        GETanalysis_station_operation_person_ft_year_line: i + '/his/query.htm',
+        // 电站-专业运维人员-品牌分析-年-曲线
+        GETanalysis_station_operation_person_manuf_year_line: i + '/his/query.htm',
+        // 电站-专业运维人员-型号分析-年-曲线
+        GETanalysis_station_operation_person_product_year_line: i + '/his/query.htm',
+        // 电站-专业运维人员-维修记录-年-列表
+        GETanalysis_station_operation_person_oprecord_year_list: i + '/his/query.htm',
+
+        // 电站-专业运维人员-故障分析-累计-曲线 
+        GETanalysis_station_operation_person_ft_accum_line: i + '/his/query.htm',
+        // 电站-专业运维人员-品牌分析-累计-曲线 
+        GETanalysis_station_operation_person_manuf_accum_line: i + '/his/query.htm',
+        // 电站-专业运维人员-型号分析-累计-曲线
+        GETanalysis_station_operation_person_product_accum_line: i + '/his/query.htm',
+        // 电站-专业运维人员-维修记录-累计-列表
+        GETanalysis_station_operation_person_oprecord_accum_list: i + '/his/query.htm',
+
+        //  公司-专业运维人员-故障分析-月-曲线
+        GETanalysis_company_operation_person_ft_month_line: i + '/his/query.htm',
+        //  公司-专业运维人员-品牌分析-月-曲线
+        GETanalysis_company_operation_person_manuf_month_line: i + '/his/query.htm',
+        //  公司-专业运维人员-型号分析-月-曲线
+        GETanalysis_company_operation_person_product_month_line: i + '/his/query.htm',
+        //  公司-专业运维人员-维修记录-月-列表
+        GETanalysis_company_operation_person_oprecord_month_list: i + '/his/query.htm',
+
+        // 公司-专业运维人员-故障分析-年-曲线
+        GETanalysis_company_operation_person_ft_year_line: i + '/his/query.htm',
+        // 公司-专业运维人员-品牌分析-年-曲线
+        GETanalysis_company_operation_person_manuf_year_line: i + '/his/query.htm',
+        // 公司-专业运维人员-型号分析-年-曲线 
+        GETanalysis_company_operation_person_product_year_line: i + '/his/query.htm',
+        // 公司-专业运维人员-维修记录-年-列表
+        GETanalysis_company_operation_person_oprecord_year_list: i + '/his/query.htm',
+
+        // 公司-专业运维人员-故障分析-累计-曲线
+        GETanalysis_company_operation_person_ft_accum_line: i + '/his/query.htm',
+        // 公司-专业运维人员-品牌分析-累计-曲线
+        GETanalysis_company_operation_person_manuf_accum_line: i + '/his/query.htm',
+        // 公司-专业运维人员-型号分析-累计-曲线
+        GETanalysis_company_operation_person_product_accum_line: i + '/his/query.htm',
+        // 公司-专业运维人员-维修记录-累计-列表
+        GETanalysis_company_operation_person_oprecord_accum_list: i + '/his/query.htm',
+
+
+
+
+
+
+
+
+
+        // 运行 分析
+        // 运行 分析 首页 能流图  ?queryType=1&dateType=1&date=2018-8-13
+        GETanalysisEnergyFlowDiagram: i + '/pv/analysis/getEnergyFlowDiagram.htm',
+        // 运行分析 灰尘分析 集团 月 info
+        GETanalysis_company_dust_month_info: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 月 电站 列表
+        GETanalysis_company_dust_month_stationlist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 月 电站 曲线
+        GETanalysis_company_dust_month_stationline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 月 时间 列表
+        GETanalysis_company_dust_month_timelist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 月 时间 曲线
+        GETanalysis_company_dust_month_timeline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 年 info
+        GETanalysis_company_dust_year_info: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 年 电站 列表
+        GETanalysis_company_dust_year_stationlist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 年 电站 曲线
+        GETanalysis_company_dust_year_stationline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 年 时间 列表
+        GETanalysis_company_dust_year_timelist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 年 时间 曲线
+        GETanalysis_company_dust_year_timeline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 累计 info
+        GETanalysis_company_dust_accum_info: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 累计 电站 列表
+        GETanalysis_company_dust_accum_stationlist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 累计 电站 曲线
+        GETanalysis_company_dust_accum_stationline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 累计 时间 列表
+        GETanalysis_company_dust_accum_timelist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 集团 累计 时间 曲线
+        GETanalysis_company_dust_accum_timeline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 月 info
+        GETanalysis_station_dust_month_info: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 月 设备 列表
+        GETanalysis_station_dust_month_devicelist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 月 设备 曲线
+        GETanalysis_station_dust_month_deviceline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 月 时间 列表
+        GETanalysis_station_dust_month_timelist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 月 时间 曲线
+        GETanalysis_station_dust_month_timeline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 年 info
+        GETanalysis_station_dust_year_info: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 年 设备 列表
+        GETanalysis_station_dust_year_devicelist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 年 设备 曲线
+        GETanalysis_station_dust_year_deviceline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 年 时间 列表
+        GETanalysis_station_dust_year_timelist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 年 时间 曲线
+        GETanalysis_station_dust_year_timeline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 累计 info
+        GETanalysis_station_dust_accum_info: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 累计 时间 列表
+        GETanalysis_station_dust_accum_timelist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 累计 时间 曲线
+        GETanalysis_station_dust_accum_timeline: i + '/his/query.htm',
+
+        // 运行分析 灰尘分析 电站 清洗报告 列表
+        GETanalysis_station_clean_invlist: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 清洗报告 曲线
+        GETanalysis_station_clean_invline: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 清洗报告 基本信息
+        GETanalysis_station_clean_info: i + '/his/query.htm',
+        // 运行分析 灰尘分析 电站 设备 时间 列表 pv/analysis/getInvDustWeMList.htm?dateType=2&queryType=3&date=2018-05-18&eqid=5
+        GETinvDustWeMList: i + '/pv/analysis/getInvDustWeList.htm',
+        // 运行分析 灰尘分析 电站 设备 时间 曲线 pv/analysis/getInvDustWeMLine.htm?dateType=2&queryType=3&date=2018-05-18&eqid=5
+        GETinvDustWeMLine: i + '/pv/analysis/getInvDustWeLine.htm',
+
+        // 运行分析 灰尘分析 电站 累计 清洗记录
+        GETanalysis_station_clean_page: i + '/his/query.htm',
+
+
+        // 运行分析 阴影分析 集团 月 info
+        GETanalysis_company_shade_month_info: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 月 电站 列表
+        GETanalysis_company_shade_month_stationlist: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 月 电站 曲线
+        GETanalysis_company_shade_month_stationline: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 月 时间 列表
+        GETanalysis_company_shade_month_timelist: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 月 时间 曲线
+        GETanalysis_company_shade_month_timeline: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 年 info
+        GETanalysis_company_shade_year_info: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 年 电站 列表
+        GETanalysis_company_shade_year_stationlist: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 年 电站 曲线
+        GETanalysis_company_shade_year_stationline: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 年 时间 列表
+        GETanalysis_company_shade_year_timelist: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 年 时间 曲线
+        GETanalysis_company_shade_year_timeline: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 累计 info
+        GETanalysis_company_shade_accum_info: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 累计 电站 列表
+        GETanalysis_company_shade_accum_stationlist: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 累计 电站 曲线
+        GETanalysis_company_shade_accum_stationline: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 累计 时间 列表
+        GETanalysis_company_shade_accum_timelist: i + '/his/query.htm',
+        // 运行分析 阴影分析 集团 累计 时间 曲线
+        GETanalysis_company_shade_accum_timeline: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 月 info
+        GETanalysis_station_shade_month_info: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 月 设备 列表
+        GETanalysis_station_shade_month_devicelist: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 月 设备 曲线
+        GETanalysis_station_shade_month_deviceline: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 月 时间 列表
+        GETanalysis_station_shade_month_timelist: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 月 时间 曲线
+        GETanalysis_station_shade_month_timeline: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 年 info
+        GETanalysis_station_shade_year_info: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 年 设备 列表
+        GETanalysis_station_shade_year_devicelist: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 年 设备 曲线
+        GETanalysis_station_shade_year_deviceline: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 年 时间 列表
+        GETanalysis_station_shade_year_timelist: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 年 时间 曲线
+        GETanalysis_station_shade_year_timeline: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 累计 info
+        GETanalysis_station_shade_accum_info: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 累计 时间 列表
+        GETanalysis_station_shade_accum_timelist: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 累计 时间 曲线
+        GETanalysis_station_shade_accum_timeline: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 累计 设备 列表
+        GETanalysis_station_shade_accum_devicelist: i + '/his/query.htm',
+        // 运行分析 阴影分析 电站 累计 设备 曲线
+        GETanalysis_station_shade_accum_deviceline: i + '/his/query.htm',
+
+        // 运行分析 阴影分析 电站 设备 时间 列表 pv/analysis/getInvShadeWeMList.htm?dateType=2&queryType=3&date=2018-05-18&eqid=5
+        GETinvShadeWeMList: i + '/pv/analysis/getInvShadeWeList.htm',
+        // 运行分析 阴影分析 电站 设备 时间 曲线 pv/analysis/getInvShadeWeMLine.htm?dateType=2&queryType=3&date=2018-05-18&eqid=5
+        GETinvShadeWeMLine: i + '/pv/analysis/getInvShadeWeLine.htm',
+
+        //组串阴影遮挡 详情页  (Integer id, Integer stId, Integer deviceId)
+        GETselectEqPaintingMonthData: i + '/analysis/eqPaint/selectEqPaintingMonthData.htm',
+
+
+        // 运行分析 故障分析
+        // 运行分析 故障分析 集团 月 info
+        GETanalysis_company_fail_month_info: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 月 电站 列表
+        GETanalysis_company_fail_month_stationlist: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 月 电站 曲线
+        GETanalysis_company_fail_month_stationline: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 月 时间 列表
+        GETanalysis_company_fail_month_timelist: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 月 时间 曲线
+        GETanalysis_company_fail_month_timeline: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 年 info
+        GETanalysis_company_fail_year_info: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 年 电站 列表
+        GETanalysis_company_fail_year_stationlist: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 年 电站 曲线
+        GETanalysis_company_fail_year_stationline: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 年 时间 列表
+        GETanalysis_company_fail_year_timelist: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 年 时间 曲线
+        GETanalysis_company_fail_year_timeline: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 累计 info
+        GETanalysis_company_fail_accum_info: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 累计 电站 列表
+        GETanalysis_company_fail_accum_stationlist: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 累计 电站 曲线
+        GETanalysis_company_fail_accum_stationline: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 累计 时间 列表
+        GETanalysis_company_fail_accum_timelist: i + '/his/query.htm',
+        // 运行分析 故障分析 集团 累计 时间 曲线
+        GETanalysis_company_fail_accum_timeline: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 月 info
+        GETanalysis_station_fail_month_info: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 月 设备 列表
+        GETanalysis_station_fail_month_devicelist: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 月 设备 曲线
+        GETanalysis_station_fail_month_deviceline: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 月 时间 列表
+        GETanalysis_station_fail_month_timelist: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 月 时间 曲线
+        GETanalysis_station_fail_month_timeline: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 年 info
+        GETanalysis_station_fail_year_info: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 年 设备 列表
+        GETanalysis_station_fail_year_devicelist: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 年 设备 曲线
+        GETanalysis_station_fail_year_deviceline: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 年 时间 列表
+        GETanalysis_station_fail_year_timelist: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 年 时间 曲线
+        GETanalysis_station_fail_year_timeline: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 累计 info
+        GETanalysis_station_fail_accum_info: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 累计 时间 列表
+        GETanalysis_station_fail_accum_timelist: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 累计 时间 曲线
+        GETanalysis_station_fail_accum_timeline: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 累计 设备 列表
+        GETanalysis_station_fail_accum_devicelist: i + '/his/query.htm',
+        // 运行分析 故障分析 电站 累计 设备 曲线
+        GETanalysis_station_fail_accum_deviceline: i + '/his/query.htm',
+
+
+        // 运行分析 衰减分析
+        // 运行分析 衰减分析 集团 月 info
+        GETanalysis_company_decay_month_info: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 月 电站 列表
+        GETanalysis_company_decay_month_stationlist: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 月 电站 曲线
+        GETanalysis_company_decay_month_stationline: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 月 时间 列表
+        GETanalysis_company_decay_month_timelist: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 月 时间 曲线
+        GETanalysis_company_decay_month_timeline: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 年 info
+        GETanalysis_company_decay_year_info: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 年 电站 列表
+        GETanalysis_company_decay_year_stationlist: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 年 电站 曲线
+        GETanalysis_company_decay_year_stationline: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 年 时间 列表
+        GETanalysis_company_decay_year_timelist: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 年 时间 曲线
+        GETanalysis_company_decay_year_timeline: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 累计 info
+        GETanalysis_company_decay_accum_info: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 累计 电站 列表
+        GETanalysis_company_decay_accum_stationlist: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 累计 电站 曲线
+        GETanalysis_company_decay_accum_stationline: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 累计 时间 列表
+        GETanalysis_company_decay_accum_timelist: i + '/his/query.htm',
+        // 运行分析 衰减分析 集团 累计 时间 曲线
+        GETanalysis_company_decay_accum_timeline: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 月 info
+        GETanalysis_station_decay_month_info: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 月 设备 列表
+        GETanalysis_station_decay_month_devicelist: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 月 设备 曲线
+        GETanalysis_station_decay_month_deviceline: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 月 时间 列表
+        GETanalysis_station_decay_month_timelist: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 月 时间 曲线
+        GETanalysis_station_decay_month_timeline: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 年 info
+        GETanalysis_station_decay_year_info: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 年 设备 列表
+        GETanalysis_station_decay_year_devicelist: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 年 设备 曲线
+        GETanalysis_station_decay_year_deviceline: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 年 时间 列表
+        GETanalysis_station_decay_year_timelist: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 年 时间 曲线
+        GETanalysis_station_decay_year_timeline: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 累计 info
+        GETanalysis_station_decay_accum_info: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 累计 时间 列表
+        GETanalysis_station_decay_accum_timelist: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 累计 时间 曲线
+        GETanalysis_station_decay_accum_timeline: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 累计 设备 列表
+        GETanalysis_station_decay_accum_devicelist: i + '/his/query.htm',
+        // 运行分析 衰减分析 电站 累计 设备 曲线
+        GETanalysis_station_decay_accum_deviceline: i + '/his/query.htm',
+
+
+
+        // 运行分析 线损分析
+        // 运行分析 线损分析 集团 月 info
+        GETanalysis_company_line_month_info: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 月 电站 列表
+        GETanalysis_company_line_month_stationlist: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 月 电站 曲线
+        GETanalysis_company_line_month_stationline: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 月 时间 列表
+        GETanalysis_company_line_month_timelist: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 月 时间 曲线
+        GETanalysis_company_line_month_timeline: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 年 info
+        GETanalysis_company_line_year_info: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 年 电站 列表
+        GETanalysis_company_line_year_stationlist: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 年 电站 曲线
+        GETanalysis_company_line_year_stationline: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 年 时间 列表
+        GETanalysis_company_line_year_timelist: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 年 时间 曲线
+        GETanalysis_company_line_year_timeline: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 累计 info
+        GETanalysis_company_line_accum_info: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 累计 电站 列表
+        GETanalysis_company_line_accum_stationlist: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 累计 电站 曲线
+        GETanalysis_company_line_accum_stationline: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 累计 时间 列表
+        GETanalysis_company_line_accum_timelist: i + '/his/query.htm',
+        // 运行分析 线损分析 集团 累计 时间 曲线
+        GETanalysis_company_line_accum_timeline: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 月 info
+        GETanalysis_station_line_month_info: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 月 设备 列表
+        GETanalysis_station_line_month_devicelist: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 月 设备 曲线
+        GETanalysis_station_line_month_deviceline: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 月 时间 列表
+        GETanalysis_station_line_month_timelist: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 月 时间 曲线
+        GETanalysis_station_line_month_timeline: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 年 info
+        GETanalysis_station_line_year_info: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 年 设备 列表
+        GETanalysis_station_line_year_devicelist: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 年 设备 曲线
+        GETanalysis_station_line_year_deviceline: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 年 时间 列表
+        GETanalysis_station_line_year_timelist: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 年 时间 曲线
+        GETanalysis_station_line_year_timeline: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 累计 info
+        GETanalysis_station_line_accum_info: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 累计 时间 列表
+        GETanalysis_station_line_accum_timelist: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 累计 时间 曲线
+        GETanalysis_station_line_accum_timeline: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 累计 设备 列表
+        GETanalysis_station_line_accum_devicelist: i + '/his/query.htm',
+        // 运行分析 线损分析 电站 累计 设备 曲线
+        GETanalysis_station_line_accum_deviceline: i + '/his/query.htm',
+
+
+
+        // 运行分析 限电分析
+        // 运行分析 限电分析 集团 月 info
+        GETanalysis_company_restrict_month_info: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 月 电站 列表
+        GETanalysis_company_restrict_month_stationlist: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 月 电站 曲线
+        GETanalysis_company_restrict_month_stationline: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 月 时间 列表
+        GETanalysis_company_restrict_month_timelist: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 月 时间 曲线
+        GETanalysis_company_restrict_month_timeline: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 年 info
+        GETanalysis_company_restrict_year_info: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 年 电站 列表
+        GETanalysis_company_restrict_year_stationlist: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 年 电站 曲线
+        GETanalysis_company_restrict_year_stationline: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 年 时间 列表
+        GETanalysis_company_restrict_year_timelist: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 年 时间 曲线
+        GETanalysis_company_restrict_year_timeline: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 累计 info
+        GETanalysis_company_restrict_accum_info: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 累计 电站 列表
+        GETanalysis_company_restrict_accum_stationlist: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 累计 电站 曲线
+        GETanalysis_company_restrict_accum_stationline: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 累计 时间 列表
+        GETanalysis_company_restrict_accum_timelist: i + '/his/query.htm',
+        // 运行分析 限电分析 集团 累计 时间 曲线
+        GETanalysis_company_restrict_accum_timeline: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 月 info
+        GETanalysis_station_restrict_month_info: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 月 设备 列表
+        GETanalysis_station_restrict_month_devicelist: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 月 设备 曲线
+        GETanalysis_station_restrict_month_deviceline: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 月 时间 列表
+        GETanalysis_station_restrict_month_timelist: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 月 时间 曲线
+        GETanalysis_station_restrict_month_timeline: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 年 info
+        GETanalysis_station_restrict_year_info: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 年 设备 列表
+        GETanalysis_station_restrict_year_devicelist: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 年 设备 曲线
+        GETanalysis_station_restrict_year_deviceline: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 年 时间 列表
+        GETanalysis_station_restrict_year_timelist: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 年 时间 曲线
+        GETanalysis_station_restrict_year_timeline: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 累计 info
+        GETanalysis_station_restrict_accum_info: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 累计 时间 列表
+        GETanalysis_station_restrict_accum_timelist: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 累计 时间 曲线
+        GETanalysis_station_restrict_accum_timeline: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 累计 设备 列表
+        GETanalysis_station_restrict_accum_devicelist: i + '/his/query.htm',
+        // 运行分析 限电分析 电站 累计 设备 曲线
+        GETanalysis_station_restrict_accum_deviceline: i + '/his/query.htm',
+
+
+
+        // 运行分析 检修分析
+        // 运行分析 检修分析 集团 月 info
+        GETanalysis_company_repair_month_info: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 月 电站 列表
+        GETanalysis_company_repair_month_stationlist: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 月 电站 曲线
+        GETanalysis_company_repair_month_stationline: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 月 时间 列表
+        GETanalysis_company_repair_month_timelist: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 月 时间 曲线
+        GETanalysis_company_repair_month_timeline: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 年 info
+        GETanalysis_company_repair_year_info: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 年 电站 列表
+        GETanalysis_company_repair_year_stationlist: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 年 电站 曲线
+        GETanalysis_company_repair_year_stationline: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 年 时间 列表
+        GETanalysis_company_repair_year_timelist: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 年 时间 曲线
+        GETanalysis_company_repair_year_timeline: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 累计 info
+        GETanalysis_company_repair_accum_info: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 累计 电站 列表
+        GETanalysis_company_repair_accum_stationlist: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 累计 电站 曲线
+        GETanalysis_company_repair_accum_stationline: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 累计 时间 列表
+        GETanalysis_company_repair_accum_timelist: i + '/his/query.htm',
+        // 运行分析 检修分析 集团 累计 时间 曲线
+        GETanalysis_company_repair_accum_timeline: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 月 info
+        GETanalysis_station_repair_month_info: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 月 设备 列表
+        GETanalysis_station_repair_month_devicelist: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 月 设备 曲线
+        GETanalysis_station_repair_month_deviceline: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 月 时间 列表
+        GETanalysis_station_repair_month_timelist: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 月 时间 曲线
+        GETanalysis_station_repair_month_timeline: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 年 info
+        GETanalysis_station_repair_year_info: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 年 设备 列表
+        GETanalysis_station_repair_year_devicelist: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 年 设备 曲线
+        GETanalysis_station_repair_year_deviceline: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 年 时间 列表
+        GETanalysis_station_repair_year_timelist: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 年 时间 曲线
+        GETanalysis_station_repair_year_timeline: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 累计 info
+        GETanalysis_station_repair_accum_info: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 累计 时间 列表
+        GETanalysis_station_repair_accum_timelist: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 累计 时间 曲线
+        GETanalysis_station_repair_accum_timeline: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 累计 设备 列表
+        GETanalysis_station_repair_accum_devicelist: i + '/his/query.htm',
+        // 运行分析 检修分析 电站 累计 设备 曲线
+        GETanalysis_station_repair_accum_deviceline: i + '/his/query.htm',
+
+        // 运行分析 发电能力
+        /* analysis_company_pgc_month_info	集团-发电能力-月-INFO */
+        GETanalysis_company_pgc_month_info: i + '/his/query.htm',
+        /* analysis_company_pgc_month_stationlist	集团-发电能力-月-电站列表 */
+        GETanalysis_company_pgc_month_stationlist: i + '/his/query.htm',
+        /* analysis_company_pgc_month_stationline	集团-发电能力-月-电站曲线 */
+        GETanalysis_company_pgc_month_stationline: i + '/his/query.htm',
+        /* analysis_company_pgc_month_timelist	集团-发电能力-月-时间列表 */
+        GETanalysis_company_pgc_month_timelist: i + '/his/query.htm',
+        /* analysis_company_pgc_month_timeline	集团-发电能力-月-时间曲线 */
+        GETanalysis_company_pgc_month_timeline: i + '/his/query.htm',
+        /* analysis_company_pgc_year_info	集团-发电能力-年-INFO */
+        GETanalysis_company_pgc_year_info: i + '/his/query.htm',
+        /* analysis_company_pgc_year_stationlist	集团-发电能力-年-电站列表 */
+        GETanalysis_company_pgc_year_stationlist: i + '/his/query.htm',
+        /* analysis_company_pgc_year_stationline	集团-发电能力-年-电站曲线 */
+        GETanalysis_company_pgc_year_stationline: i + '/his/query.htm',
+        /* analysis_company_pgc_year_timelist	集团-发电能力-年-时间列表 */
+        GETanalysis_company_pgc_year_timelist: i + '/his/query.htm',
+        /* analysis_company_pgc_year_timeline	集团-发电能力-年-时间曲线 */
+        GETanalysis_company_pgc_year_timeline: i + '/his/query.htm',
+        /* analysis_company_pgc_accum_info	集团-发电能力-累计-INFO */
+        GETanalysis_company_pgc_accum_info: i + '/his/query.htm',
+        /* analysis_company_pgc_accum_stationlist	集团-发电能力-累计-电站列表 */
+        GETanalysis_company_pgc_accum_stationlist: i + '/his/query.htm',
+        /* analysis_company_pgc_accum_stationline	集团-发电能力-累计-电站曲线 */
+        GETanalysis_company_pgc_accum_stationline: i + '/his/query.htm',
+        /* analysis_company_pgc_accum_timelist	集团-发电能力-累计-时间列表 */
+        GETanalysis_company_pgc_accum_timelist: i + '/his/query.htm',
+        /* analysis_company_pgc_accum_timeline	集团-发电能力-累计-时间曲线 */
+        GETanalysis_company_pgc_accum_timeline: i + '/his/query.htm',
+        /* analysis_station_pgc_month_info	电站-发电能力-月-INFO */
+        GETanalysis_station_pgc_month_info: i + '/his/query.htm',
+        /* analysis_station_pgc_month_devicelist	电站-发电能力-月-设备列表 */
+        GETanalysis_station_pgc_month_devicelist: i + '/his/query.htm',
+        /* analysis_station_pgc_month_deviceline	电站-发电能力-月-设备曲线 */
+        GETanalysis_station_pgc_month_deviceline: i + '/his/query.htm',
+        /* analysis_station_pgc_month_timelist	电站-发电能力-月-时间列表 */
+        GETanalysis_station_pgc_month_timelist: i + '/his/query.htm',
+        /* analysis_station_pgc_month_timeline	电站-发电能力-月-时间曲线 */
+        GETanalysis_station_pgc_month_timeline: i + '/his/query.htm',
+        /* analysis_station_pgc_year_info	电站-发电能力-年-INFO */
+        GETanalysis_station_pgc_year_info: i + '/his/query.htm',
+        /* analysis_station_pgc_year_devicelist	电站-发电能力-年-设备列表 */
+        GETanalysis_station_pgc_year_devicelist: i + '/his/query.htm',
+        /* analysis_station_pgc_year_deviceline	电站-发电能力-年-设备曲线 */
+        GETanalysis_station_pgc_year_deviceline: i + '/his/query.htm',
+        /* analysis_station_pgc_year_timelist	电站-发电能力-年-时间列表 */
+        GETanalysis_station_pgc_year_timelist: i + '/his/query.htm',
+        /* analysis_station_pgc_year_timeline	电站-发电能力-年-时间曲线 */
+        GETanalysis_station_pgc_year_timeline: i + '/his/query.htm',
+        //analysis_station_pgc_year_timeline_days 电站-发电能力-年-时间 发电能力 */
+        GETanalysis_station_pgc_year_timeline_days: i + '/his/query.htm',
+        /* analysis_station_pgc_accum_info	电站-发电能力-累计-INFO */
+        GETanalysis_station_pgc_accum_info: i + '/his/query.htm',
+        /* analysis_station_pgc_accum_devicelist	电站-发电能力-累计-设备列表 */
+        GETanalysis_station_pgc_accum_devicelist: i + '/his/query.htm',
+        /* analysis_station_pgc_accum_deviceline	电站-发电能力-累计-设备曲线 */
+        GETanalysis_station_pgc_accum_deviceline: i + '/his/query.htm',
+        /* analysis_station_pgc_accum_timelist	电站-发电能力-累计-时间列表 */
+        GETanalysis_station_pgc_accum_timelist: i + '/his/query.htm',
+        /* analysis_station_pgc_accum_timeline	电站-发电能力-累计-时间曲线 */
+        GETanalysis_station_pgc_accum_timeline: i + '/his/query.htm',
+        /* analysis_station_pgc_accum_devicebaselist	电站-发电能力-累计-设备基因 */
+        GETanalysis_station_pgc_accum_devicebaselist: i + '/his/query.htm',
+        /* analysis_station_pgc_accum_devicebaseline	电站-发电能力-累计-设备基因 */
+        GETanalysis_station_pgc_accum_devicebaseline: i + '/his/query.htm',
+
+        // 运行分析 阴影画像
+        //analysis_company_str_shade_stationlist	集团 - 组串阴影分析 - 电站列表
+        GETanalysis_company_str_shade_stationlist: i + '/his/query.htm',
+        //analysis_company_str_shade_stationline	集团 - 组串阴影分析 - 电站曲线
+        GETanalysis_company_str_shade_stationline: i + '/his/query.htm',
+        //analysis_station_str_shade_timelist	电站 - 组串阴影分析 - 时间列表
+        GETanalysis_station_str_shade_timelist: i + '/his/query.htm',
+        //analysis_station_str_shade_timeline	电站 - 组串阴影分析 - 时间曲线
+        GETanalysis_station_str_shade_timeline: i + '/his/query.htm',
+        //analysis_station_str_shade_devicelist	电站 - 组串阴影分析 - 设备列表
+        GETanalysis_station_str_shade_devicelist: i + '/his/query.htm',
+        //analysis_station_str_shade_deviceline	电站 - 组串阴影分析 - 设备曲线
+        GETanalysis_station_str_shade_deviceline: i + '/his/query.htm',
+        // /pv/analysis/getStationStrShadeOneDeviceStrLine.htm 画像  ?queryType=3&date=2017-12-03&dateType=3&eqid=35
+        GETstationStrShadeOneDeviceStrLine: i + '/pv/analysis/getStationStrShadeOneDeviceStrLine.htm',
+        // /pv/analysis/getStationStrShadeOneDeviceStrLine.htm 画像 小图 ?queryType=3&date=2017-12-03&dateType=3&eqid=35
+        GETstationStrShadeOneDeviceStrShadeStatus: i + '/pv/analysis/getStationStrShadeOneDeviceStrShadeStatus.htm',
+
+        // 运行分析 故障分析
+        //analysis_sun_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_sun_dev_falt_year_common_list1: i + '/his/query.htm',
+        //analysis_sun_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_sun_dev_falt_year_common_list2: i + '/his/query.htm',
+        //analysis_sun_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_sun_dev_falt_year_common_list3: i + '/his/query.htm',
+        //analysis_sun_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_sun_dev_falt_year_common_list4: i + '/his/query.htm',
+        //analysis_sun_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_sun_dev_falt_year_common_list5: i + '/his/query.htm',
+        //analysis_sun_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_sun_dev_falt_year_common_list6: i + '/his/query.htm',
+        //analysis_sun_dev_falt_year_common_line	故障分析通用接口 - 年 - 曲线
+        GETanalysis_sun_dev_falt_year_common_line: i + '/his/query.htm',
+        //analysis_sun_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_sun_dev_falt_accum_common_list1: i + '/his/query.htm',
+        //analysis_sun_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_sun_dev_falt_accum_common_list2: i + '/his/query.htm',
+        //analysis_sun_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_sun_dev_falt_accum_common_list3: i + '/his/query.htm',
+        //analysis_sun_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_sun_dev_falt_accum_common_list4: i + '/his/query.htm',
+        //analysis_sun_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_sun_dev_falt_accum_common_list5: i + '/his/query.htm',
+        //analysis_sun_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_sun_dev_falt_accum_common_list6: i + '/his/query.htm',
+        //analysis_sun_dev_falt_accum_common_line	故障分析通用接口 - 累计 - 曲线
+        GETanalysis_sun_dev_falt_accum_common_line: i + '/his/query.htm',
+
+        // 运行分析 模型偏差
+        //analysis_company_fra_shd_month_info	集团 - 应发 - 理论 - 模型偏差 - 月 - INFO
+        GETanalysis_company_fra_shd_month_info: i + '/his/query.htm',
+        //analysis_company_fra_shd_month_stationlist	集团 - 应发 - 理论 - 模型偏差 - 月 - 电站列表
+        GETanalysis_company_fra_shd_month_stationlist: i + '/his/query.htm',
+        //analysis_company_fra_shd_month_stationline	集团 - 应发 - 理论 - 模型偏差 - 月 - 电站曲线
+        GETanalysis_company_fra_shd_month_stationline: i + '/his/query.htm',
+        //analysis_company_fra_shd_year_info	集团 - 应发 - 理论 - 模型偏差 - 年 - INFO
+        GETanalysis_company_fra_shd_year_info: i + '/his/query.htm',
+        //analysis_company_fra_shd_year_stationlist	集团 - 应发 - 理论 - 模型偏差 - 年 - 电站列表
+        GETanalysis_company_fra_shd_year_stationlist: i + '/his/query.htm',
+        //analysis_company_fra_shd_year_stationline	集团 - 应发 - 理论 - 模型偏差 - 年 - 电站曲线
+        GETanalysis_company_fra_shd_year_stationline: i + '/his/query.htm',
+        //analysis_company_fra_shd_year_timelist	集团 - 应发 - 理论 - 模型偏差 - 年 - 时间列表
+        GETanalysis_company_fra_shd_year_timelist: i + '/his/query.htm',
+        //analysis_company_fra_shd_year_timeline	集团 - 应发 - 理论 - 模型偏差 - 年 - 时间曲线
+        GETanalysis_company_fra_shd_year_timeline: i + '/his/query.htm',
+        //analysis_company_fra_shd_accum_info	集团 - 应发 - 理论 - 模型偏差 - 累计 - INFO
+        GETanalysis_company_fra_shd_accum_info: i + '/his/query.htm',
+        //analysis_company_fra_shd_accum_stationlist	集团 - 应发 - 理论 - 模型偏差 - 累计 - 电站列表
+        GETanalysis_company_fra_shd_accum_stationlist: i + '/his/query.htm',
+        //analysis_company_fra_shd_accum_stationline	集团 - 应发 - 理论 - 模型偏差 - 累计 - 电站曲线
+        GETanalysis_company_fra_shd_accum_stationline: i + '/his/query.htm',
+        //analysis_company_fra_shd_accum_timelist	集团 - 应发 - 理论 - 模型偏差 - 累计 - 时间列表
+        GETanalysis_company_fra_shd_accum_timelist: i + '/his/query.htm',
+        //analysis_company_fra_shd_accum_timeline	集团 - 应发 - 理论 - 模型偏差 - 累计 - 时间曲线
+        GETanalysis_company_fra_shd_accum_timeline: i + '/his/query.htm',
+        //analysis_station_fra_shd_year_info	电站 - 应发 - 理论 - 模型偏差 - 年 - INFO
+        GETanalysis_station_fra_shd_year_info: i + '/his/query.htm',
+        //analysis_station_fra_shd_year_timelist	电站 - 应发 - 理论 - 模型偏差 - 年 - 时间列表
+        GETanalysis_station_fra_shd_year_timelist: i + '/his/query.htm',
+        //analysis_station_fra_shd_year_timeline	电站 - 应发 - 理论 - 模型偏差 - 年 - 时间曲线
+        GETanalysis_station_fra_shd_year_timeline: i + '/his/query.htm',
+        //analysis_station_fra_shd_accum_info	电站 - 应发 - 理论 - 模型偏差 - 累计 - INFO
+        GETanalysis_station_fra_shd_accum_info: i + '/his/query.htm',
+        //analysis_station_fra_shd_accum_timelist	电站 - 应发 - 理论 - 模型偏差 - 累计 - 时间列表
+        GETanalysis_station_fra_shd_accum_timelist: i + '/his/query.htm',
+        //analysis_station_fra_shd_accum_timeline	电站 - 应发 - 理论 - 模型偏差 - 累计 - 时间曲线
+        GETanalysis_station_fra_shd_accum_timeline: i + '/his/query.htm',
+
+        // 运行分析 资源偏差
+        // analysis_company_eval_fra_month_info	集团 - 评估 - 理论 - 资源偏差 - 月 - INFO
+        GETanalysis_company_eval_fra_month_info: i + '/his/query.htm',
+        // analysis_company_eval_fra_month_stationlist	集团 - 评估 - 理论 - 资源偏差 - 月 - 电站列表
+        GETanalysis_company_eval_fra_month_stationlist: i + '/his/query.htm',
+        // analysis_company_eval_fra_month_stationline	集团 - 评估 - 理论 - 资源偏差 - 月 - 电站曲线
+        GETanalysis_company_eval_fra_month_stationline: i + '/his/query.htm',
+        // analysis_company_eval_fra_year_info	集团 - 评估 - 理论 - 资源偏差 - 年 - INFO
+        GETanalysis_company_eval_fra_year_info: i + '/his/query.htm',
+        // analysis_company_eval_fra_year_stationlist	集团 - 评估 - 理论 - 资源偏差 - 年 - 电站列表
+        GETanalysis_company_eval_fra_year_stationlist: i + '/his/query.htm',
+        // analysis_company_eval_fra_year_stationline	集团 - 评估 - 理论 - 资源偏差 - 年 - 电站曲线
+        GETanalysis_company_eval_fra_year_stationline: i + '/his/query.htm',
+        // analysis_company_eval_fra_year_timelist	集团 - 评估 - 理论 - 资源偏差 - 年 - 时间列表
+        GETanalysis_company_eval_fra_year_timelist: i + '/his/query.htm',
+        // analysis_company_eval_fra_year_timeline	集团 - 评估 - 理论 - 资源偏差 - 年 - 时间曲线
+        GETanalysis_company_eval_fra_year_timeline: i + '/his/query.htm',
+        // analysis_company_eval_fra_accum_info	集团 - 评估 - 理论 - 资源偏差 - 累计 - INFO
+        GETanalysis_company_eval_fra_accum_info: i + '/his/query.htm',
+        // analysis_company_eval_fra_accum_stationlist	集团 - 评估 - 理论 - 资源偏差 - 累计 - 电站列表
+        GETanalysis_company_eval_fra_accum_stationlist: i + '/his/query.htm',
+        // analysis_company_eval_fra_accum_stationline	集团 - 评估 - 理论 - 资源偏差 - 累计 - 电站曲线
+        GETanalysis_company_eval_fra_accum_stationline: i + '/his/query.htm',
+        // analysis_company_eval_fra_accum_timelist	集团 - 评估 - 理论 - 资源偏差 - 累计 - 时间列表
+        GETanalysis_company_eval_fra_accum_timelist: i + '/his/query.htm',
+        // analysis_company_eval_fra_accum_timeline	集团 - 评估 - 理论 - 资源偏差 - 累计 - 时间曲线
+        GETanalysis_company_eval_fra_accum_timeline: i + '/his/query.htm',
+        // analysis_station_eval_fra_year_info	电站 - 评估 - 理论 - 资源偏差 - 年 - INFO
+        GETanalysis_station_eval_fra_year_info: i + '/his/query.htm',
+        // analysis_station_eval_fra_year_timelist	电站 - 评估 - 理论 - 资源偏差 - 年 - 时间列表
+        GETanalysis_station_eval_fra_year_timelist: i + '/his/query.htm',
+        // analysis_station_eval_fra_year_timeline	电站 - 评估 - 理论 - 资源偏差 - 年 - 时间曲线
+        GETanalysis_station_eval_fra_year_timeline: i + '/his/query.htm',
+        // analysis_station_eval_fra_accum_info	电站 - 评估 - 理论 - 资源偏差 - 累计 - INFO
+        GETanalysis_station_eval_fra_accum_info: i + '/his/query.htm',
+        // analysis_station_eval_fra_accum_timelist	电站 - 评估 - 理论 - 资源偏差 - 累计 - 时间列表
+        GETanalysis_station_eval_fra_accum_timelist: i + '/his/query.htm',
+        // analysis_station_eval_fra_accum_timeline	电站 - 评估 - 理论 - 资源偏差 - 累计 - 时间曲线
+        GETanalysis_station_eval_fra_accum_timeline: i + '/his/query.htm',
+
+        // 运行分析 评估电量
+        //analysis_company_eval_send_month_info	集团 - 评估 - 上网 - 偏差 - 月 - INFO
+        GETanalysis_company_eval_send_month_info: i + '/his/query.htm',
+        //analysis_company_eval_send_month_stationlist	集团 - 评估 - 上网 - 偏差 - 月 - 电站列表
+        GETanalysis_company_eval_send_month_stationlist: i + '/his/query.htm',
+        //analysis_company_eval_send_month_stationline	集团 - 评估 - 上网 - 偏差 - 月 - 电站曲线
+        GETanalysis_company_eval_send_month_stationline: i + '/his/query.htm',
+        //analysis_company_eval_send_year_info	集团 - 评估 - 上网 - 偏差 - 年 - INFO
+        GETanalysis_company_eval_send_year_info: i + '/his/query.htm',
+        //analysis_company_eval_send_year_stationlist	集团 - 评估 - 上网 - 偏差 - 年 - 电站列表
+        GETanalysis_company_eval_send_year_stationlist: i + '/his/query.htm',
+        //analysis_company_eval_send_year_stationline	集团 - 评估 - 上网 - 偏差 - 年 - 电站曲线
+        GETanalysis_company_eval_send_year_stationline: i + '/his/query.htm',
+        //analysis_company_eval_send_year_timelist	集团 - 评估 - 上网 - 偏差 - 年 - 时间列表
+        GETanalysis_company_eval_send_year_timelist: i + '/his/query.htm',
+        //analysis_company_eval_send_year_timeline	集团 - 评估 - 上网 - 偏差 - 年 - 时间曲线
+        GETanalysis_company_eval_send_year_timeline: i + '/his/query.htm',
+        //analysis_company_eval_send_accum_info	集团 - 评估 - 上网 - 偏差 - 累计 - INFO
+        GETanalysis_company_eval_send_accum_info: i + '/his/query.htm',
+        //analysis_company_eval_send_accum_stationlist	集团 - 评估 - 上网 - 偏差 - 累计 - 电站列表
+        GETanalysis_company_eval_send_accum_stationlist: i + '/his/query.htm',
+        //analysis_company_eval_send_accum_stationline	集团 - 评估 - 上网 - 偏差 - 累计 - 电站曲线
+        GETanalysis_company_eval_send_accum_stationline: i + '/his/query.htm',
+        //analysis_company_eval_send_accum_timelist	集团 - 评估 - 上网 - 偏差 - 累计 - 时间列表
+        GETanalysis_company_eval_send_accum_timelist: i + '/his/query.htm',
+        //analysis_company_eval_send_accum_timeline	集团 - 评估 - 上网 - 偏差 - 累计 - 时间曲线
+        GETanalysis_company_eval_send_accum_timeline: i + '/his/query.htm',
+        //analysis_station_eval_send_year_info	电站 - 评估 - 上网 - 偏差 - 年 - INFO
+        GETanalysis_station_eval_send_year_info: i + '/his/query.htm',
+        //analysis_station_eval_send_year_timelist	电站 - 评估 - 上网 - 偏差 - 年 - 时间列表
+        GETanalysis_station_eval_send_year_timelist: i + '/his/query.htm',
+        //analysis_station_eval_send_year_timeline	电站 - 评估 - 上网 - 偏差 - 年 - 时间曲线
+        GETanalysis_station_eval_send_year_timeline: i + '/his/query.htm',
+        //analysis_station_eval_send_accum_info	电站 - 评估 - 上网 - 偏差 - 累计 - INFO
+        GETanalysis_station_eval_send_accum_info: i + '/his/query.htm',
+        //analysis_station_eval_send_accum_timelist	电站 - 评估 - 上网 - 偏差 - 累计 - 时间列表
+        GETanalysis_station_eval_send_accum_timelist: i + '/his/query.htm',
+        //analysis_station_eval_send_accum_timeline	电站 - 评估 - 上网 - 偏差 - 累计 - 时间曲线
+        GETanalysis_station_eval_send_accum_timeline: i + '/his/query.htm',
+
+        // 运行分析 实发电量
+        // analysis_company_real_shd_month_info	集团 - 实发 - 应发 - 能力利用率偏差 - 月 - INFO
+        GETanalysis_company_real_shd_month_info: i + '/his/query.htm',
+        // analysis_company_real_shd_month_stationlist	集团 - 实发 - 应发 - 能力利用率偏差 - 月 - 电站列表
+        GETanalysis_company_real_shd_month_stationlist: i + '/his/query.htm',
+        // analysis_company_real_shd_month_stationline	集团 - 实发 - 应发 - 能力利用率偏差 - 月 - 电站曲线
+        GETanalysis_company_real_shd_month_stationline: i + '/his/query.htm',
+        // analysis_company_real_shd_year_info	集团 - 实发 - 应发 - 能力利用率偏差 - 年 - INFO
+        GETanalysis_company_real_shd_year_info: i + '/his/query.htm',
+        // analysis_company_real_shd_year_stationlist	集团 - 实发 - 应发 - 能力利用率偏差 - 年 - 电站列表
+        GETanalysis_company_real_shd_year_stationlist: i + '/his/query.htm',
+        // analysis_company_real_shd_year_stationline	集团 - 实发 - 应发 - 能力利用率偏差 - 年 - 电站曲线
+        GETanalysis_company_real_shd_year_stationline: i + '/his/query.htm',
+        // analysis_company_real_shd_year_timelist	集团 - 实发 - 应发 - 能力利用率偏差 - 年 - 时间列表
+        GETanalysis_company_real_shd_year_timelist: i + '/his/query.htm',
+        // analysis_company_real_shd_year_timeline	集团 - 实发 - 应发 - 能力利用率偏差 - 年 - 时间曲线
+        GETanalysis_company_real_shd_year_timeline: i + '/his/query.htm',
+        // analysis_company_real_shd_accum_info	集团 - 实发 - 应发 - 能力利用率偏差 - 累计 - INFO
+        GETanalysis_company_real_shd_accum_info: i + '/his/query.htm',
+        // analysis_company_real_shd_accum_stationlist	集团 - 实发 - 应发 - 能力利用率偏差 - 累计 - 电站列表
+        GETanalysis_company_real_shd_accum_stationlist: i + '/his/query.htm',
+        // analysis_company_real_shd_accum_stationline	集团 - 实发 - 应发 - 能力利用率偏差 - 累计 - 电站曲线
+        GETanalysis_company_real_shd_accum_stationline: i + '/his/query.htm',
+        // analysis_company_real_shd_accum_timelist	集团 - 实发 - 应发 - 能力利用率偏差 - 累计 - 时间列表
+        GETanalysis_company_real_shd_accum_timelist: i + '/his/query.htm',
+        // analysis_company_real_shd_accum_timeline	集团 - 实发 - 应发 - 能力利用率偏差 - 累计 - 时间曲线
+        GETanalysis_company_real_shd_accum_timeline: i + '/his/query.htm',
+        // analysis_station_real_shd_year_info	电站 - 实发 - 应发 - 能力利用率偏差 - 年 - INFO
+        GETanalysis_station_real_shd_year_info: i + '/his/query.htm',
+        // analysis_station_real_shd_year_timelist	电站 - 实发 - 应发 - 能力利用率偏差 - 年 - 时间列表
+        GETanalysis_station_real_shd_year_timelist: i + '/his/query.htm',
+        // analysis_station_real_shd_year_timeline	电站 - 实发 - 应发 - 能力利用率偏差 - 年 - 时间曲线
+        GETanalysis_station_real_shd_year_timeline: i + '/his/query.htm',
+        // analysis_station_real_shd_accum_info	电站 - 实发 - 应发 - 能力利用率偏差 - 累计 - INFO
+        GETanalysis_station_real_shd_accum_info: i + '/his/query.htm',
+        // analysis_station_real_shd_accum_timelist	电站 - 实发 - 应发 - 能力利用率偏差 - 累计 - 时间列表
+        GETanalysis_station_real_shd_accum_timelist: i + '/his/query.htm',
+        // analysis_station_real_shd_accum_timeline	电站 - 实发 - 应发 - 能力利用率偏差 - 累计 - 时间曲线
+        GETanalysis_station_real_shd_accum_timeline: i + '/his/query.htm',
+
+        // 行动方案
+        // 运检管理 人员效率
+        GETaction_station_clean_suggest_people_effic_list: i + '/his/query.htm',
+        // 主题
+        GETaction_station_clean_suggest_subject: i + '/his/query.htm',
+        // 清洗建议 清洗建议
+        GETaction_station_clean_suggest_mark_30day_line: i + '/his/query.htm',
+        // 实时建议：/pv/analysis/getStationLastDayCleanData.htm?date=2018-11-26&dateType=1&queryType=3&price=5.8&cost=5000 price：电价 cost：成本
+        GETstationLastDayCleanData: i + '/pv/analysis/getStationLastDayCleanData.htm',
+        // 实时建议：/pv/analysis/getStationCleanCost.htm 取默认成本
+        GETstationCleanCost: i + '/pv/analysis/getStationCleanCost.htm',
+        // 曲线：/pv/analysis/getStationPreBestCleanDataLine.htm?date=2018-11-25&dateType=3  date：获取明细中的日期
+        GETstationPreBestCleanDataLine: i + '/pv/analysis/getStationPreBestCleanDataLine.htm',
+        // 清洗建议 灰尘异常
+        GETaction_station_clean_suggest_dust_30day_line: i + '/his/query.htm',
+        // 清洗建议 灰尘差异
+        GETaction_station_clean_suggest_dust_top5_line: i + '/his/query.htm',
+        // 清洗建议 灰尘差异
+        GETaction_station_clean_suggest_dust_bottom5_line: i + '/his/query.htm',
+        // 清洗建议-灰尘异常-灰尘损失电量
+        GETaction_station_clean_suggest_dust_30day_dust_we: i + '/his/query.htm',
+        // 低效设备-阴影异常设备
+        GETaction_station_clean_suggest_dev_shade_list: i + '/his/query.htm',
+        // 低效设备-PR异常设备
+        GETaction_station_clean_suggest_dev_pr_list: i + '/his/query.htm',
+        // 低效设备-PR异常设备  pr bottom 10
+        GETinvPrBottom10: i + '/pv/analysis/getInvPrBottom10.htm',
+        // 低效设备-衰减异常设备
+        GETaction_station_clean_suggest_dev_decay_list: i + '/his/query.htm',
+        // 电站 设备体检 故障设备 台数
+        GETpvAlarmGetRunFaultInfo: i + '/pv/alarm/getRunFaultInfo.htm',
+        // 电站 设备体检 故障设备 列表
+        GETpvAlarmGetRunFaultList: i + '/pv/alarm/getRunFaultList.htm',
+        // 电站 设备体检 故障设备 列表
+        GETaction_station_clean_suggest_people_effic_name_list: i + '/his/query.htm',
+        // 行动方案-公司-电站清洗总数
+        GETactionCompanyCleanSuggestNum: i + '/pv/analysis/getActionCompanyCleanSuggestNum.htm',
+        // 行动方案-公司-电站清洗建议列表
+        GETactionCompanyCleanSuggest: i + '/pv/analysis/getActionCompanyCleanSuggest.htm',
+        // 行动方案-公司-设备体检设备故障数
+        GETactionCompanyDevFaultNum: i + '/pv/analysis/getActionCompanyDevFaultNum.htm',
+        // 行动方案-公司-设备体检
+        GETactionCompanyDevCheckup: i + '/pv/analysis/getActionCompanyDevCheckup.htm',
+        // 行动方案-公司-运检管理
+        GETActionCompanyRunningManage: i + '/pv/analysis/getActionCompanyRunningManage.htm',
+        // 行动方案-公司-运检管理
+        GETactionCompanyRunningTaskNum: i + '/pv/analysis/getActionCompanyRunningTaskNum.htm',
+
+
+        // 获取清洗报告的 下载地址 /opStationClean/getCleanReport.htm?stid=3013&startDateStr=2018-06-04&endDateStr=2018-06-09
+        GETCleanReport: i + '/opStationClean/getCleanReport.htm',
+
+        // 数据导出
+        // 级别：/Basedictionary/selectAll.htm?dictType=BIGDATA_EXPORT_LEVEL
+        GETbigDataExportLevel: i + '/Basedictionary/selectAll.htm',
+        // 类型：/Basedictionary/selectAll.htm?dictType=BIGDATA_EXPORT_TYPE
+        GETbigDataExportType: i + '/Basedictionary/selectAll.htm',
+        // 类型 bigdataExportTable/getTypes?level
+        GETbigdataExportTableGetTypes: i + '/bigdataExportTable/getTypes.htm',
+        // 列名
+        GETbigDataExportSelectByCondition: i + '/bigdataExportColumn/selectByCondition.htm',
+        // 设备列表 /PowerStation/selectDevicesByStation?stid&deviceType
+        GETselectDevicesByStation: i + '/PowerStation/selectDevicesByStation.htm',
+        // 创建任务 /bigdataExport/update
+        bigdataExportUpdate: i + '/bigdataExport/update.htm',
+        // 任务列表 /bigdataExport/selectByCondition
+        GETbigdataExportPage: i + '/bigdataExport/selectByCondition.htm',
+
+
+
+        //系统模块配置
+        //系统模块列表
+        GETsystemModulelist:i+'/moduleInfo/selectByCondition.htm',
+        //判断编码是否存在
+        GETcheckCodeExist:i+'/moduleInfo/checkCodeExist.htm',
+        //保存新增模块
+        POSTupdateModule:i+'/moduleInfo/update.htm',
+        //模块明细
+        GETselectModule:i+'/moduleInfo/selectById.htm',
+        //删除系统模块
+        POSTdeleteModule:i+'/moduleInfo/delete.htm',
+
+        //默认角色
+        //默认角色列表
+        GETgetRoleList:i+'/moduleCompanyTemplate/selectConfigDefaultRoleModules.htm',
+        //获取该角色未配置模块列表
+        GETunConfiguredModulelist:i+'/moduleCompanyTemplate/queryUnSelectModules.htm',
+        //保存  给某角色下配置默认模块
+        POSTupdateConfigureRoleModule:i+'/moduleCompanyTemplate/updateConfigDefaultRoleModules.htm',
+        //删除  某角色下的模块
+        POSTdeleteConfigureRoleModule:i+'/moduleCompanyTemplate/delete.htm',
+        //获取角色接收信息模版
+        GETgetByRoleType:i+'/moduleRoleRecmsgTemplate/getByRoleType.htm',
+        //角色接收信息保存
+        POSTroleMsgUpdate:i+'/moduleRoleRecmsgTemplate/update.htm',
+
+        
+        
+        //企业管理
+        GETbusinessManagementData:i+'/Company/baseInfo.htm',
+        //企业管理---保存
+        POSTbusinessManagementSave:i+'/Company/updateInfo.htm',
+
+        //部门管理
+        //部门详情
+        GETdepartmentDetail:i+'/authDepartment/editDepartment.htm',
+        //部门保存
+        POSTupdateDepartment:i+'/authDepartment/updateDepartment.htm',
+        //部门删除
+        POSTdeleteDepartment:i+'/authDepartment/deleteDepartmentData.htm',
+
+        //用户管理---集团管理员
+        GETuserList:i+'/authComUserRel/listInfo.htm',
+        //角色列表
+        GETroleList:i+'/authComUserRel/deptListRole.htm',
+        //电站组，电站信息
+        GETstationData:i+'/authComUserRel/pStidsList.htm',
+        //邀请人员保存
+        POSTupdateInvitation:i+'/authComUserRel/updateAuthComUserRel.htm',
+        //授权详情
+        GETauthorityDetail:i+'/authComUserRel/editAuthComUserRel.htm',
+        //授权保存
+        POSTauthoritySave:i+'/authComUserRel/modifyAuthComUserRel.htm',
+        //授权-删除人员
+        POSTdeleteAuthority:i+'/authComUserRel/deleteAuthComUserRel.htm',
+        //可移交的管理员列表
+        GETadministratorList:i+'/Company/selectadminuser.htm',
+        //移交
+        POSTadministratorSave:i+'/Company/changeadminuser.htm',
+
+        //用户管理---系统管理员
+        GETuserListSystem:i+'/AdminUser/userInformationList.htm',
+        //用户详情
+        GETpersonDetail:i+'/AdminUser/selectById.htm',
+        //保存用户
+        POSTupdatePerson:i+'/AdminUser/updateData.htm',
+        //系统角色列表
+        GETroleListSystem:i+'/AdminUser/queryAuthRole.htm',
+        //已授权的电站
+        GETauthorityStations:i+'/AdminUser/queryAuthStation.htm',
+        //待授权的电站
+        GETauthWaitStations:i+'/AdminUser/queryAuthWaitStation.htm',
+
+        //电站管理
+        GETpowerStationList:i+'/PowerStation/powerStationList.htm',
+        //电站详情
+        GETpowerStationDetail:i+'/PowerStation/selectById.htm',
+        //某公司下的部门
+        GETdepListCompany:i+'/authDepartment/getDepartmentTree.htm',
+        //负责人列表
+        GETpersonInCharge:i+'/AdminUser/selectAll.htm',
+        //电站编号自动生成
+        GETstationCode:i+'/PowerStation/generatePowerCode.htm',
+        //电站保存
+        POSTstationSave:i+'/PowerStation/update.htm',
+        //删除电站
+        POSTdeleteStation:i+'/PowerStation/delete.htm',
+
+        //电站分组管理
+        //分组列表
+        GETgroupList:i+'/AuthPowerStationGroup/initgroupData.htm',
+        //属于分组的电站列表
+        GETpowerStationsBelongsGroup:i+'/AuthPowerStationGroup/AuthPowerStationGroupList.htm',
+        //添加分组
+        POSTaddGroup:i+'/AuthPowerStationGroup/savegroupdata.htm',
+        //删除分组
+        POSTdeleteGroup:i+'/AuthPowerStationGroup/deletegroup.htm',
+        //分组所属电站列表
+        GETauthGroupStations:i+'/AuthPowerStationGroup/powerstationList.htm',
+        //给分组保存电站
+        POSTsaveStationsForGroup:i+'/AuthPowerStationGroup/savedata.htm',
+        //删除分组的某电站
+        POSTdeleteStationFromGroup:i+'/AuthPowerStationGroup/delete.htm',
+
+        //布局视图
+        GETsvgManagementList:i+'/BLayoutConfig/queryBLayoutConfigByPage.htm',
+        //批量删除
+        GETsvgDeleteBatch:i+'/BLayoutConfig/deleteBLayoutConfig.htm',
+        //详情
+        GETlayoutDetail:i+'/BLayoutConfig/queryBLayoutSvgById.htm',
+        //电站列表
+        GETqueryBPowerStation:i+'/BLayoutConfig/queryBPowerStation.htm',
+
+        //权限管理
+        //部门树
+        GETdepartmentList:i+'/authDepartment/initDepartmentData.htm',
+        //角色列表 
+        GETroleAllList:i+'/Role/roleInformationList.htm',
+        //添加角色
+        POSTaddRole:i+'/Role/updateRole.htm',
+        //接收消息类型
+        GETnewsTypeList:i+'/Basedictionary/selectAll.htm',
+        //角色详情
+        GETselectRoleDetail:i+'/Role/selectById.htm',
+        //删除角色
+        POSTdeleteRole:i+'/Role/delete.htm',
+        //获取自定义模块
+        GETselectCustomModules:i+'/moduleCompanyRole/selectCustomModules.htm',
+        //保存自定义模块
+        POSTupdateCustomModules:i+'/moduleCompanyRole/updateCustomModules.htm',
+
+
+
+        //权限，购买模块
+        //获取   需要购买的模块及公司已经购买的模块
+        GETselectCompanyModules:i+'/moduleInfo/selectCompanyModules.htm',
+        //更新   
+        POSTupdateBuyModule:i+'/moduleInfo/updateCompanyBuyModule.htm',
+
+        //运行配置
+        //气象仪详情
+        GETaerographDetail:i+'/CfgWeather/selectByStationId.htm',
+        //查询 当前电站的气象仪
+        GETaerographList:i+'/OtherDevice/selectAll.htm',
+        //查询 周边可引用的气象仪列表
+        GETaerographListAround:i+'/MobileHmDeviceMonitor/getStationWeaterAround.htm',
+        //保存 气象仪配置信息
+        POSTupdateAerograph:i+'/CfgWeather/update.htm',
+
+        //通讯中断消息配置详情
+        GETinterruptNoteDetail:i+'/BpstationConfig/queryBpstationConfig.htm',
+        //保存
+        POSTinterruptNoteSave:i+'/BpstationConfig/updateBpstationConfig.htm',
+
+        //消息配置保存
+        POSTupdateNoteSave:i+'/PowerStation/updateIsMessage.htm',
+
+        //初始电量 详情
+        GETinitialPowerDetail:i+'/Expirytw/selectByStationId.htm',
+        //保存
+        POSTinitialPowerSave:i+'/Expirytw/update.htm',
+
+        //视频监控点配置列表
+        GETvideoConfigureList:i+'/PVideoConfig/queryPVideoConfigList.htm',
+        //视频配置保存
+        POSTvideoConfigureSave:i+'/PVideoConfig/updateVideoConfig.htm',
+        //删除视频配置
+        POSTvideoConfigureDelete:i+'/PVideoConfig/deleteVideoConfig.htm',
+
+        //限电配置列表
+        GETrestrictPowerList:i+'/opDevicePowerRestrict/page.htm',
+        //保存
+        POSTrestrictPowerSave:i+'/opDevicePowerRestrict/update.htm',
+        //删除
+        POSTrestrictPowerDelete:i+'/opDevicePowerRestrict/delete.htm',
+
+        //检修配置列表
+        GEToverhaulList:i+'/opDeviceExamineRepair/page.htm',
+        //保存
+        POSToverhaulSave:i+'/opDeviceExamineRepair/update.htm',
+        //删除
+        POSToverhaulDelete:i+'/opDeviceExamineRepair/delete.htm',
+
+        //清洗时间配置列表
+        GETcleanTimeList:i+'/opStationClean/page.htm',
+        //保存
+        POSTcleanTimeSave:i+'/opStationClean/update.htm',
+        //删除
+        POSTcleanTimeDelete:i+'/opStationClean/delete.htm',
+
+        //评估电量  列表
+        GETassessmentList:i+'/bPstationAssessment/selectOfMonth.htm',
+        //保存 批量
+        POSTassessmentUpdate:i+'/bPstationAssessment/update.htm',
+
+        //计划电量 年 列表
+        GETplanPowerList:i+'/opProductionPlan/selectByYear.htm',
+        //月 列表
+        GETplanPowerListMonth:i+'/opProductionPlan/selectByYearAndMonth.htm',
+        //保存 批量
+        POSTplanPowerSave:i+'/opProductionPlan/update.htm',
+        //删除
+        POSTplanPowerDelete:i+'/opProductionPlan/deleteByYear.htm',
+
+
+        //电站运行列表
+        GETstationOperationList:i+'/pvwp/station/getStationRunStatus.htm',
+
+        //集团管理列表
+        GETcompanyList:i+'/Company/companyList.htm',
+        GETcompanyListNew:i+'/Company/selectCompanyInfo1.htm',
+
+
+        //台账管理---光伏
+        //电站下的设备数量信息
+        GETstationDeviceNumber:i+'/PowerStation/selectDeviceCount.htm',
+        //箱变列表-分页
+        GETdeviceXBList :i+'/BoxChange/boxChangeList.htm',
+        //箱变保存
+        POSTupdateDeviceXB :i+'/BoxChange/update.htm',
+        //箱变删除
+        POSTdeleteDeviceXB:i+'/BoxChange/deleteBatch.htm',
+
+        //逆变器-分页
+        GETdeviceNBQList:i+'/Inverter/inverterList.htm',
+        //所属的箱变列表
+        GETbelongsXBList:i+'/BoxChange/selectByStation.htm',
+        //逆变器-保存
+        POSTupdateDeviceNBQ:i+'/Inverter/update.htm',
+        POSTdeleteDeviceNBQ:i+'/Inverter/delete.htm',
+
+        //汇流箱-分页
+        GETdeviceHLXList:i+'/JunctionBox/junctionBoxList.htm',
+        //汇流箱-保存
+        POSTupdateDeviceHLX:i+'/JunctionBox/update.htm',
+        //所属的逆变器列表
+        GETbelongsNBQList:i+'/Inverter/selectByStationNoXiaoNi.htm',
+        //汇流箱删除
+        POSTdeleteDeviceHLX:i+'/JunctionBox/deleteBatch.htm',
+
+        //其他设备-分页
+        GETdeviceOtherList:i+'/OtherDevice/otherDeviceList.htm',
+        //上级设备列表
+        GETupperLevelDeviceList:i+'/OtherDevice/getTree.htm',
+        //其他设备-保存
+        POSTupdateDeviceOther:i+'/OtherDevice/update.htm',
+        //其他设备-删除
+        POSTdeleteDeviceOther:i+'/OtherDevice/deleteBatch.htm',
+
+        //导入
+        POSTimportExcel:i+'/PowerStation/importExcelData.htm',
+
+        //台账管理---风电
+        //测风塔列表 -分页
+        GETwindTowerList:i+'/bWindTower/page.htm',
+        //测风塔保存
+        POSTupdateDeviceWindTower:i+'/bWindTower/update.htm',
+        //测风塔-详情
+        GETwindTowerDetail:i+'/bWindTower/selectById.htm',
+        //测风塔-删除
+        POSTdeleteDeviceWindTower:i+'/bWindTower/deleteBatch.htm',
+
+        //风机机组 --分页
+        GETturbineList: i+'/bWindTurbine/page.htm',
+        //风机---保存
+        POSTupdateDeviceTurbine:i+'/bWindTurbine/update.htm',
+        //风机---删除
+        POSTdeleteDeviceTurbine:i+'/bWindTurbine/deleteBatch.htm',
+
+        //数据初始化-列表
+        GETdataInitList:i+'/systemDataInit/page.htm',
+        //设备类型-列表
+        GETdeviceTypeList:i+'/PowerStation/getDeviceTypes.htm',
+        //任务类型列表
+        GETtaskTypeList:i+'/systemDataInit/getConsumeSelectData.htm',
+        //保存
+        POSTupdateDataInit:i+'/systemDataInit/update.htm',
+        //删除
+        POSTdeleteDataInit:i+'/systemDataInit/deleteBatch.htm',
+
+
+        //厂商管理-列表
+        GETmanufacturerListManagement:i+'/Manufacturer/manufacturerList.htm',
+        //保存
+        POSTupdateManufacturer:i+'/Manufacturer/update.htm',
+        //删除
+        POSTdeleteManufacturer:i+'/Manufacturer/deleteBatch.htm',
+
+
+        //产品管理-列表
+        GETproductList:i+'/Product/productList.htm',
+        //保存
+        POSTupdateProduct:i+'/Product/update.htm',
+        //删除
+        POSTdeleteProduct:i+'/Product/deleteBatch.htm',
+
+        //协议配置-列表
+        GETprotocolList:i+'/Protocol/protocolList.htm',
+        //协议-批量删除
+        POSTdeleteBatchProtocol:i+'/Protocol/deleteBatch.htm',
+        //状态分类-列表-光伏
+        GETstatusTypeListSolor:i+'/PFaultCode/getFaultLevel.htm',
+        //状态分类-列表-风电
+        GETstatusTypeListWind:i+'/PFaultCode/getStatusTypeList.htm',
+        //通讯规约-列表
+        GETcommProtocolList:i+'/CommProtocol/selectAll.htm',
+        //协议-保存
+        POSTupdateProtocol:i+'/Protocol/update.htm',
+        //某协议下对应的状态码配置
+        GETstatusCodeListByProduct:i+'/PFaultCode/selectAll.htm',
+        //故障码列表
+        GETfaultCodeList:i+'/PFaultCodeReal/list.htm',
+        //故障码批量删除
+        POSTdeleteBatchFaultCode:i+'/PFaultCodeReal/deleteBatch.htm',
+        //故障码配置保存
+        POSTfaultCodeUpdate:i+'/PFaultCodeReal/update.htm',
+        //上传附件
+        POSTfaultCodeFileUpload:i+'/PFaultCodeReal/fileUpload.htm',
+        //是否已经有了故障码协议
+        GEThasFaultCode:i+'/PFaultCodeReal/hasFaultCodeReal.htm',
+        //删除已有协议数据
+        POSTdeleteHasFaultCode:i+'/PFaultCodeReal/deleteByProtocol.htm',
+        //故障级别?dictType=FAULT_LEVEL
+        GETfaultLevelList:i+'/Basedictionary/selectAll.htm',
+
+
+
+        // UserAuthHandle/getUiStates.htm 系统管理员|集团管理员获取菜单
+        GETuiStates: i + '/UserAuthHandle/getUiStates.htm',
+
+        // PowerStation/getDeviceInfo?stid=&eqid=
+        GETdeviceInfo: i + '/PowerStation/getDeviceInfo.htm',
+        //InverterStanding/inverterCount.htm?pageIndex=0&param=2837
+        GETinverterCount: i + '/InverterStanding/inverterCount.htm',
+        // 逆变器  小时数获取
+        GETinverterHours: i + '/InverterStanding/getInverterHours.htm',
+        // 逆变器 实时状态
+        GETsingleRealDataBInverter: i + '/DeviceStation/getSingleRealDataBInverter.htm',
+        // 设备 历史数据 /HistoryData/getNewHistoryData.htm?begindate=2018-12-05+13:12&devicetype=2&enddate=2018-12-06+13:12&id=2837&pageIndex=1&pageSize=10&serialnumber=16&stationid=3002
+        GETnewHistoryData: i + '/HistoryData/getNewHistoryData.htm',
+        // 设备 故障信息 
+        GETfaultAlarmList: i + '/FaultAlarm/faultAlarmList.htm',
+        // 汇流箱 基本信息
+        GETbjunctionCount: i + '/BjunctionStanding/bjunctionCount.htm',
+        // 汇流箱 运行小时数信息
+        GETjunctionBoxHours: i + '/BjunctionStanding/getJunctionBoxHours.htm',
+        // 汇流箱 实时数据
+        GETsingleRealDataBJunction: i + '/DeviceStation/getSingleRealDataBJunction.htm',
+        // 箱变 基本信息
+        GETboxChangeCount: i + '/BboxChange/bboxChangeCount.htm',
+        // 箱变 运行小时数信息
+        GETboxChangeHours: i + '/BboxChange/getBoxChangeHours.htm',
+        // 箱变 实时数据
+        GETsingleRealDataBBoxChange: i + '/DeviceStation/getSingleRealDataBBoxChange.htm',
+        // 电表 基本信息
+        GETmeterCount: i + '/OtherDevice/meterCount.htm',
+        // 电表 运行小时数信息
+        GETmeterHours: i + '/OtherDevice/getMeterHours.htm',
+        // 电表 实时数据
+        GETsingleRealDataMeter: i + '/DeviceStation/getSingleRealDataMeter.htm',
+
+
+        // 生产管理
+        // 生产管理 两票
+        // 生产管理 两票 模板管理  列表  分页
+        GETopWorkTplTicketPage: i + '/opWorkTpl/ticket/page.htm',
+        // 生产管理 两票 模板管理  列表
+        GETopWorkTplTicketList: i + '/opWorkTpl/ticket/list.htm',
+        // 生产管理 两票 模板管理  提交模板  新增 更新
+        opWorkTplTicketUpdate: i + '/opWorkTpl/ticket/update.htm',
+        // 生产管理 两票 模板管理  删除
+        opWorkTplTicketDelete: i + '/opWorkTpl/ticket/delete.htm',
+        // 生产管理 两票 模板管理  查看明细
+        GETopWorkTplTicketSelectById: i + '/opWorkTpl/ticket/selectById.htm',
+        // 生产管理 两票 票据创建
+        opWorkTicketCreate: i + '/opWork/ticket/create.htm',
+        // 生产管理 两票 票据列表分页
+        GETopWorkTicketPage: i + '/opWork/ticket/page.htm',
+        // 生产管理 两票 标记已读
+        opWorkTicketRead: i + '/opWork/msg/read.htm',
+        // 生产管理 两票 标记已读 批量
+        opWorkTicketReadBatch: i + '/opWork/msg/read/batch.htm',
+        // 生产管理 两票 详细列表
+        GETopWorkTicketList: i + '/opWork/ticket/task/list.htm',
+        // 生产管理 两票 任务处理
+        opWorkTicketHandle: i + '/opWork/ticket/handle.htm',
+        // 生产管理 两票 票据转交
+        opWorkTicketTo: i + '/opWork/ticket/to.htm',
+        // 生产管理 两票 票据编辑
+        opWorkTicketModify: i + '/opWork/ticket/modify.htm',
+
+
+        // 首页 地图 接口
+        GETpowerStationStatusDataNew2: i + '/MobileRtmDeviceMonitor/getPowerStationStatusDataNew2.htm',
+        //首页基本信息获取  监控
+        GETrunTimeMonitor: i + '/MobileRtmDeviceMonitor/getRunTimeMonitor.htm',
+        //首页基本信息获取  监控  设备运行台数
+        GETdeviceStatusFromRedis: i + '/MobileRtmDeviceMonitor/getDeviceStatusFromRedis.htm',
+        // 首页地图电站小弹窗
+        GETpowerStationModalShowData: i + '/MobileRtmDeviceMonitor/getPowerStationModalShowData.htm',
+        // 首页 人员管理  运行天数
+        GETsafeRunDayCount: i + '/Company/getSafeRunDayCount.htm',
+        // 首页 人员管理 两票合格率
+        GETcompleterate: i + '/opWork/ticket/completerate.htm',
+        // 获取电站类型列表
+        GETstClassLIst: i + '/UserAuthHandle/getSTClassLIst.htm',
+        // 首页 设备性能 发电能力
+        GEThome_pv_company_pgc_year_stationlist: i + '/his/query.htm',
+        // 首页 设备性能  pr
+        GEThome_pv_company_pr_year_stationlist: i + '/his/query.htm',
+        // 首页 设备性能  发电能力
+        GEThome_wp_company_pgc_year_stationlist: i + '/his/query.htm',
+        // 首页 设备性能  pba
+        GEThome_wp_company_pba_year_stationlist: i + '/his/query.htm',
+        // 首页 设备性能 发电能力
+        GEThome_pv_company_pgc_month_stationlist: i + '/his/query.htm',
+        // 首页 设备性能  pr
+        GEThome_pv_company_pr_month_stationlist: i + '/his/query.htm',
+        // 首页 设备性能  发电能力
+        GEThome_wp_company_pgc_month_stationlist: i + '/his/query.htm',
+        // 首页 设备性能  pba
+        GEThome_wp_company_pba_month_stationlist: i + '/his/query.htm',
+
+        // 当前角色下电站列表
+        // /UserAuthHandle/getAllSTListByType.htm?currentView=00&isGroup=1&type=1
+        // type=0 //1 公司, 2 公司 + 部门, 3 公司 + 电站, 4 公司 + 部门 + 电站， 5 电站
+        GETallSTListByType: i + '/UserAuthHandle/getAllSTListByType.htm',
+
+
+        // 风电
+        // 资源 top 日
+        GETwpMonitorGetRunRes: i + '/wp/monitor/getRunRes.htm',
+        //query_wp_station_month_res_subject_his	风电- 电站 - 月 - 资源主题
+        GETquery_wp_station_month_res_subject_his: i + '/his/query.htm',
+        //query_wp_station_year_res_subject_his	风电 - 电站 - 年 - 资源主题
+        GETquery_wp_station_year_res_subject_his: i + '/his/query.htm',
+        //query_wp_company_month_res_subject_his	风电 - 集团 - 月 - 资源主题
+        GETquery_wp_company_month_res_subject_his: i + '/his/query.htm',
+        //query_wp_company_year_res_subject_his	风电 - 集团 - 年 - 资源主题
+        GETquery_wp_company_year_res_subject_his: i + '/his/query.htm',
+        // 资源 bottom 日
+        GETwpMonitorGetRunResDetail: i + '/wp/monitor/getRunResDetail.htm',
+        //query_wp_station_month_res_timelist	风电- 电站 - 月 - 资源 - 时间列表
+        GETquery_wp_station_month_res_timelist: i + '/his/query.htm',
+        //query_wp_station_month_res_timeline	风电 - 电站 - 月 - 资源 - 时间曲线
+        GETquery_wp_station_month_res_timeline: i + '/his/query.htm',
+        //query_wp_station_year_res_timelist	风电 - 电站 - 年 - 资源 - 时间列表
+        GETquery_wp_station_year_res_timelist: i + '/his/query.htm',
+        //query_wp_station_year_res_timeline	风电 - 电站 - 年 - 资源 - 时间曲线
+        GETquery_wp_station_year_res_timeline: i + '/his/query.htm',
+        //query_wp_company_month_res_timelist	风电 - 集团 - 月 - 资源 - 时间列表
+        GETquery_wp_company_month_res_timelist: i + '/his/query.htm',
+        //query_wp_company_month_res_timeline	风电 - 集团 - 月 - 资源 - 时间曲线
+        GETquery_wp_company_month_res_timeline: i + '/his/query.htm',
+        //query_wp_company_year_res_timelist	风电 - 集团 - 年 - 资源 - 时间列表
+        GETquery_wp_company_year_res_timelist: i + '/his/query.htm',
+        //query_wp_company_year_res_timeline	风电 - 集团 - 年 - 资源 - 时间曲线
+        GETquery_wp_company_year_res_timeline: i + '/his/query.htm',
+        //query_wp_company_month_res_stationlist	风电 - 集团 - 月 - 资源 - 电站列表
+        GETquery_wp_company_month_res_stationlist: i + '/his/query.htm',
+        //query_wp_company_month_res_stationline	风电 - 集团 - 月 - 资源 - 电站曲线
+        GETquery_wp_company_month_res_stationline: i + '/his/query.htm',
+        //query_wp_company_year_res_stationlist	风电 - 集团 - 年 - 资源 - 电站列表
+        GETquery_wp_company_year_res_stationlist: i + '/his/query.htm',
+        //query_wp_company_year_res_stationline	风电 - 集团 - 年 - 资源 - 电站曲线
+        GETquery_wp_company_year_res_stationline: i + '/his/query.htm',
+
+        // 风电 电量主题
+        // wp/monitor/getRunKWPower.htm 当日
+        GETwpMonitorGetRunKWPower: i + '/wp/monitor/getRunKWPower.htm',
+        // query_wp_station_day_elec_subject_his	风电- 电站日电量主题历史查询
+        GETquery_wp_station_day_elec_subject_his: i + '/his/query.htm',
+        // uery_wp_station_month_elec_subject_his	风电 - 电站月电量主题历史查询
+        GETquery_wp_station_month_elec_subject_his: i + '/his/query.htm',
+        // uery_wp_station_year_elec_subject_his	风电 - 电站年电量主题历史查询
+        GETquery_wp_station_year_elec_subject_his: i + '/his/query.htm',
+        // uery_wp_company_day_elec_subject_his	风电 - 集团日电量主题历史查询
+        GETquery_wp_company_day_elec_subject_his: i + '/his/query.htm',
+        // uery_wp_company_month_elec_subject_his	风电 - 集团月电量主题历史查询
+        GETquery_wp_company_month_elec_subject_his: i + '/his/query.htm',
+        // uery_wp_company_year_elec_subject_his	风电 - 集团年电量主题历史查询
+        GETquery_wp_company_year_elec_subject_his: i + '/his/query.htm',
+        // query_wp_station_day_elec_devlist	风电- 电站 - 日 - 电量 - 设备 - 列表
+        GETquery_wp_station_day_elec_devlist: i + '/his/query.htm',
+        // query_wp_station_day_elec_devline	风电 - 电站 - 日 - 电量 - 设备 - 曲线
+        GETquery_wp_station_day_elec_devline: i + '/his/query.htm',
+        // query_wp_station_month_elec_timelist	风电 - 电站 - 月 - 电量 - 时间 - 列表
+        GETquery_wp_station_month_elec_timelist: i + '/his/query.htm',
+        // query_wp_station_month_elec_timeline	风电 - 电站 - 月 - 电量 - 时间 - 曲线
+        GETquery_wp_station_month_elec_timeline: i + '/his/query.htm',
+        // query_wp_station_month_elec_devlist	风电 - 电站 - 月 - 电量 - 设备 - 列表
+        GETquery_wp_station_month_elec_devlist: i + '/his/query.htm',
+        // query_wp_station_month_elec_devline	风电 - 电站 - 月 - 电量 - 设备 - 曲线
+        GETquery_wp_station_month_elec_devline: i + '/his/query.htm',
+        // query_wp_station_year_elec_timelist	风电 - 电站 - 年 - 电量 - 时间 - 列表
+        GETquery_wp_station_year_elec_timelist: i + '/his/query.htm',
+        // query_wp_station_year_elec_timeline	风电 - 电站 - 年 - 电量 - 时间 - 曲线
+        GETquery_wp_station_year_elec_timeline: i + '/his/query.htm',
+        // query_wp_station_year_elec_devlist	风电 - 电站 - 年 - 电量 - 设备 - 列表
+        GETquery_wp_station_year_elec_devlist: i + '/his/query.htm',
+        // query_wp_station_year_elec_devline	风电 - 电站 - 年 - 电量 - 设备 - 曲线
+        GETquery_wp_station_year_elec_devline: i + '/his/query.htm',
+        // 实时日 详情 /wp/monitor/getRunKWPowerList.htm
+        GETrunKWPowerList: i + '/wp/monitor/getRunKWPowerList.htm',
+        // query_wp_company_day_elec_timelist	风电 - 集团 - 日 - 电量 - 时间 - 列表
+        GETquery_wp_company_day_elec_timelist: i + '/his/query.htm',
+        // query_wp_company_day_elec_timeline	风电 - 集团 - 日 - 电量 - 时间 - 曲线
+        GETquery_wp_company_day_elec_timeline: i + '/his/query.htm',
+        // query_wp_company_day_elec_stationlist	风电 - 集团 - 日 - 电量 - 电站 - 列表
+        GETquery_wp_company_day_elec_stationlist: i + '/his/query.htm',
+        // query_wp_company_day_elec_stationline	风电 - 集团 - 日 - 电量 - 电站 - 曲线
+        GETquery_wp_company_day_elec_stationline: i + '/his/query.htm',
+        // query_wp_company_month_elec_timelist	风电 - 集团 - 月 - 电量 - 时间 - 列表
+        GETquery_wp_company_month_elec_timelist: i + '/his/query.htm',
+        // query_wp_company_month_elec_timeline	风电 - 集团 - 月 - 电量 - 时间 - 曲线
+        GETquery_wp_company_month_elec_timeline: i + '/his/query.htm',
+        // query_wp_company_month_elec_stationlist	风电 - 集团 - 月 - 电量 - 电站 - 列表
+        GETquery_wp_company_month_elec_stationlist: i + '/his/query.htm',
+        // query_wp_company_month_elec_stationline	风电 - 集团 - 月 - 电量 - 电站 - 曲线
+        GETquery_wp_company_month_elec_stationline: i + '/his/query.htm',
+        // query_wp_company_year_elec_timelist	风电 - 集团 - 年 - 电量 - 时间 - 列表
+        GETquery_wp_company_year_elec_timelist: i + '/his/query.htm',
+        // query_wp_company_year_elec_timeline	风电 - 集团 - 年 - 电量 - 时间 - 曲线
+        GETquery_wp_company_year_elec_timeline: i + '/his/query.htm',
+        // query_wp_company_year_elec_stationlist	风电 - 集团 - 年 - 电量 - 电站 - 列表
+        GETquery_wp_company_year_elec_stationlist: i + '/his/query.htm',
+        // query_wp_company_year_elec_stationline	风电 - 集团 - 年 - 电量 - 电站 - 曲线        
+        GETquery_wp_company_year_elec_stationline: i + '/his/query.htm',
+
+        // query_wp_station_day_dev_subject_his	风电- 电站 - 日 - 设备运行 - 主题
+        GETquery_wp_station_day_dev_subject_his: i + '/his/query.htm',
+        // query_wp_station_month_dev_subject_his	风电 - 电站 - 月 - 设备运行 - 主题
+        GETquery_wp_station_month_dev_subject_his: i + '/his/query.htm',
+        // query_wp_station_year_dev_subject_his	风电 - 电站 - 年 - 设备运行 - 主题
+        GETquery_wp_station_year_dev_subject_his: i + '/his/query.htm',
+        // query_wp_company_day_dev_subject_his	风电 - 集团 - 日 - 设备运行 - 主题
+        GETquery_wp_company_day_dev_subject_his: i + '/his/query.htm',
+        // query_wp_company_month_dev_subject_his	风电 - 集团 - 月 - 设备运行 - 主题
+        GETquery_wp_company_month_dev_subject_his: i + '/his/query.htm',
+        // query_wp_company_year_dev_subject_his	风电 - 集团 - 年 - 设备运行 - 主题
+        GETquery_wp_company_year_dev_subject_his: i + '/his/query.htm',
+
+        //公司日功率时间曲线（历史日  wp/monitor/getKWLine.htm?queryType=1&date=2018-06-18&dateType=3
+        GETPowerCompanyDayAgoTimeLineWp: i + '/wp/monitor/getKWLine.htm',
+        //公司日功率时间列表（历史日  wp/monitor/getKWList.htm?queryType=1&date=2018-06-18&dateType=3
+        GETPowerCompanyDayAgoTimeListWp: i + '/wp/monitor/getKWList.htm',
+        // query_wp_company_day_dev_stationlist	风电- 集团 - 日 - 设备运行 - 电站 - 列表
+        GETquery_wp_company_day_dev_stationlist: i + '/his/query.htm',
+        // query_wp_company_day_dev_stationline	风电 - 集团 - 日 - 设备运行 - 电站 - 曲线
+        GETquery_wp_company_day_dev_stationline: i + '/his/query.htm',
+        // query_wp_company_month_dev_stationlist	风电 - 集团 - 月 - 设备运行 - 电站 - 列表
+        GETquery_wp_company_month_dev_stationlist: i + '/his/query.htm',
+        // query_wp_company_month_dev_stationline	风电 - 集团 - 月 - 设备运行 - 电站 - 曲线
+        GETquery_wp_company_month_dev_stationline: i + '/his/query.htm',
+        // query_wp_company_month_dev_timelist	风电 - 集团 - 月 - 设备运行 - 时间 - 列表
+        GETquery_wp_company_month_dev_timelist: i + '/his/query.htm',
+        // query_wp_company_month_dev_timeline	风电 - 集团 - 月 - 设备运行 - 时间 - 曲线
+        GETquery_wp_company_month_dev_timeline: i + '/his/query.htm',
+        // query_wp_company_year_dev_stationlist	风电 - 集团 - 年 - 设备运行 - 电站 - 列表
+        GETquery_wp_company_year_dev_stationlist: i + '/his/query.htm',
+        // query_wp_company_year_dev_stationline	风电 - 集团 - 年 - 设备运行 - 电站 - 曲线
+        GETquery_wp_company_year_dev_stationline: i + '/his/query.htm',
+        // query_wp_company_year_dev_timelist	风电 - 集团 - 年 - 设备运行 - 时间 - 列表
+        GETquery_wp_company_year_dev_timelist: i + '/his/query.htm',
+        // query_wp_company_year_dev_timeline	风电 - 集团 - 年 - 设备运行 - 时间 - 曲线
+        GETquery_wp_company_year_dev_timeline: i + '/his/query.htm',
+        //电站日功率时间曲线（历史日  wp/monitor/getKWLine.htm?queryType=3&date=2018-06-18&dateType=3
+        GETPowerStationDayAgoTimeLineWp: i + '/wp/monitor/getKWLine.htm',
+        //电站日功率时间列表（历史日  wp/monitor/getKWList.htm?queryType=3&date=2018-06-18&dateType=3
+        GETPowerStationDayAgoTimeListWp: i + '/wp/monitor/getKWList.htm',
+        // query_wp_station_month_dev_timelist	风电 - 电站 - 月 - 设备运行 - 时间 - 列表
+        GETquery_wp_station_month_dev_timelist: i + '/his/query.htm',
+        // query_wp_station_month_dev_timeline	风电 - 电站 - 月 - 设备运行 - 时间 - 曲线
+        GETquery_wp_station_month_dev_timeline: i + '/his/query.htm',
+        // query_wp_station_month_dev_devlist	风电 - 电站 - 月 - 设备运行 - 设备 - 列表
+        GETquery_wp_station_month_dev_devlist: i + '/his/query.htm',
+        // query_wp_station_month_dev_devline	风电 - 电站 - 月 - 设备运行 - 设备 - 曲线
+        GETquery_wp_station_month_dev_devline: i + '/his/query.htm',
+        // query_wp_station_year_dev_timelist	风电 - 电站 - 年 - 设备运行 - 时间 - 列表
+        GETquery_wp_station_year_dev_timelist: i + '/his/query.htm',
+        // query_wp_station_year_dev_timeline	风电 - 电站 - 年 - 设备运行 - 时间 - 曲线
+        GETquery_wp_station_year_dev_timeline: i + '/his/query.htm',
+        // query_wp_station_year_dev_devlist	风电 - 电站 - 年 - 设备运行 - 设备 - 列表
+        GETquery_wp_station_year_dev_devlist: i + '/his/query.htm',
+        // query_wp_station_year_dev_devline	风电 - 电站 - 年 - 设备运行 - 设备 - 列表
+        GETquery_wp_station_year_dev_devline: i + '/his/query.htm',
+        // query_wp_station_year_dev_devline	风电 - 集团 - 电站 实时
+        GETrunStatusInfoList: i + '/wp/monitor/getRunStatusInfoList.htm',
+
+
+        GETqueryCompanyInvite: i + '/BaseMessage/queryCompanyInvite.htm',
+        GEThandleCompanyInvite: i + '/authComUserRel/handleCompanyInvite.htm',
+        userPasswordChangeModel: i + '/AdminUser/userPasswordChangeModel.htm',
+        deleteGroup: i + '/userGroup/deleteGroup.htm',
+        deleteGroupRel: i + '/userGroup/deleteGroupRel.htm',
+        GETlistGroup: i + '/userGroup/listGroup.htm',
+        GETlistPStations: i + '/userGroup/listPStations.htm',
+        GETunGroupBPS: i + '/userGroup/unGroupBPS.htm',
+        updateGroupRel: i + '/userGroup/updateGroupRel.htm',
+        updateDataSelective: i + '/AdminUser/updateDataSelective.htm',
+        assignTaskManualHandle: i + '/Optask/assignTaskManualHandle.htm',
+        GETfaultNohandReason: i + '/FaultHand/getFaultNohandReason.htm',
+        updateInspectedMan: i + '/Optask/updateInspectedMan.htm',
+        GETfaultTypeHandList: i + '/Optask/getFaultTypeHandList.htm',
+        finishTask: i + '/Optask/finishTask.htm',
+        rejectTask: i + '/Optask/rejectTask.htm',
+        recallTask: i + '/Optask/recallTask.htm',
+        inspectedHandle: i + '/Optask/inspectedHandle.htm',
+        GETcurrInfo: i + '/UserAuthHandle/getCurrInfo.htm',
+        GETselectByCondition: i + '/bWiringdiagramConfig/selectByCondition.htm',
+        GETsvgData: i + '/wiringDiagram/getSvgData.htm',
+        updateGroup: i + '/userGroup/updateGroup.htm',
+        GETserviceAgreement: i + '/PowerStation/getServiceAgreement.htm',
+        GETroleListForPC: i + '/UserAuthHandle/getRoleListForPC.htm',
+        GETsTListByLevel: i + '/UserAuthHandle/getSTListByLevel.htm',
+        GETrunAlarmConfirmBatch: i + '/pv/alarm/getRunAlarmConfirmBatch.htm',
+        GETrunAlarmList: i + '/pv/alarm/getRunAlarmList.htm',
+        changeRoleNew: i + '/UserAuthHandle/changeRoleNew.htm',
+        GETrightListForPCNew: i + '/UserAuthHandle/getRightListForPCNew.htm',
+        GETqueryCompanyInviteCount: i + '/BaseMessage/queryCompanyInviteCount.htm',
+        logout: i + '/Login/logout.htm',
+        GETsuggest: i + '/shareRepository/getSuggest.htm',
+
+        // 结算电量  汇总
+        GETanalysisByNaturalMonthTotal: i + '/opSettlementPower/analysisByNaturalMonthTotal.htm',
+        // 结算电量  列表
+        GETanalysisByNaturalMonth: i + '/opSettlementPower/analysisByNaturalMonth.htm',
+        // 结算电量  电站列表
+        GETanalysisByNaturalMonthTotalOfStation: i + '/opSettlementPower/analysisByNaturalMonthTotalOfStation.htm',
+        // 结算电量 图片上传
+        uploadImageSingle: i + '/uploadImage/single.htm',
+
+
+        // 生产管理 备件管理
+        // 备件管理 保存 更新
+        opFittingsDictUpdate: i + '/opFittingsDict/update.htm',
+        // 备件管理 备件 删除
+        opFittingsDictDelete: i + '/opFittingsDict/delete.htm',
+        // 备件管理 列表
+        GETopFittingsDictPage: i + '/opFittingsDict/page.htm',
+        // 备件管理 大类 列表
+        GETopFittingsDictSelectCtg1: i + '/opFittingsDict/selectCtg1.htm',
+        // 备件管理 小类 列表
+        GETopFittingsDictSelectCtg2: i + '/opFittingsDict/selectCtg2.htm',
+        // 备件管理 备件清单分页
+        GETopFittingsDictFdnumPage: i + '/opFittingsDict/fdnum/page.htm',
+        // 备件管理 备件 厂商
+        GETopFittingsDictSelectManuf: i + '/opFittingsDict/selectManuf.htm',
+        // 备件管理 库房列表
+        GETopFittingsRoomSelectByCondition: i + '/opFittingsRoom/selectByCondition.htm',
+        // 备件管理 库房管理 保存更新
+        opFittingsRoomUpdate: i + '/opFittingsRoom/update.htm',
+        // 备件管理 库房管理 删除
+        opFittingsRoomDelete: i + '/opFittingsRoom/delete.htm',
+        // 备件管理 备件入库分页
+        GETfittingsInPage: i + '/opWork/fittings/in/page.htm',
+        // 备件管理 备件型号
+        GETopFittingsDictSelectCurrData: i + '/opFittingsDict/selectCurrData.htm',
+        // 备件管理 备件入库 创建
+        opWorkFittingsInCreate: i + '/opWork/fittings/in/create.htm',
+        // 备件管理 备件入库清单
+        GETfittingsInFoods: i + '/opWork/fittings/in/goods.htm',
+        // 备件管理 备件入库 批量入库模板
+        GETfittingsDownloadTemplate: i + '/opFittingsDict/downloadTemplate.htm',
+        // 备件管理 备件入库 批量入库 上传
+        opFittingsDictImportTemplate: i + '/opFittingsDict/importTemplate.htm',
+
+        // 备件管理 领料 分页
+        GETopWorkFittingsReqPage: i + '/opWork/fittings/req/page.htm',
+        // 备件管理 领料 申请 创建
+        opWorkFittingsReqCreate: i + '/opWork/fittings/req/create.htm',
+        // 备件管理 领料 申请 清单
+        GETopWorkFittingsReqGoods: i + '/opWork/fittings/req/goods.htm',
+        // 备件管理 领料 申请 任务列表
+        GETopWorkFittingsReqTasks: i + '/opWork/fittings/req/tasks.htm',
+        // 备件管理 领料 申请 转交处理
+        opWorkFittingsReqTo: i + '/opWork/fittings/req/to.htm',
+        // 备件管理 领料 申请 处理 作废 批准
+        opWorkFittingsReqHandle: i + '/opWork/fittings/req/handle.htm',
+        // 备件管理 出库 分页
+        GETopWorkFittingsOutPage: i + '/opWork/fittings/out/page.htm',
+        // 备件管理 出库 清单
+        GETopWorkFittingsOutGoods: i + '/opWork/fittings/out/goods.htm',
+        // 备件管理 出库 创建
+        opWorkFittingsOutCreate: i + '/opWork/fittings/out/create.htm',
+        // 备件管理 出库 备件个数   /opFittingsDictRoom/selectByFD.htm?fdId=3
+        GETopFittingsDictRoomSelectByFD: i + '/opFittingsDictRoom/selectByFD.htm',
+        // 备件管理 还库 分页
+        GETopFittingsRebackPage: i + '/opWork/fittings/reback/page.htm',
+        // 备件管理 还库 清单
+        GETopFittingsRebackGoods: i + '/opWork/fittings/reback/goods.htm',
+        // 备件管理 还库 创建
+        opFittingsRebackCreate: i + '/opWork/fittings/reback/create.htm',
+        
+        // 人员列表 当前角色下
+        GETselectCurrComUsers: i + '/AdminUser/selectCurrComUsers.htm',
+
+        // 风电 监控 列表视图 风机组
+        GETrealtimeWindTurbine: i + '/WpDeviceStation/getRealtimeWindTurbine.htm',
+        // 风电 监控 列表视图 风机组  ?status=00,01,02,03,04,099
+        // GETrealtimeWindTurbine2: i + '/WpDeviceStation/getRunRealDataWindTurbine.htm',
+        GETrealtimeWindTurbine2: i + '/wp/monitor/getRunRealDataWindTurbine.htm',
+        // 风电 监控 列表视图 测风塔
+        // GETrealtimeWindTower: i + '/WpDeviceStation/getRealtimeWindTower.htm',
+        GETrealtimeWindTower: i + '/wp/monitor//getRunRealDataWindTower.htm',
+        // 风电 监控 功率趋势
+        GETrunTimeChartPower: i + '/WpRtmStationMonitor/getRunTimeChartPower.htm',
+        // 风电 监控 故障列表
+        GETwpStationFaultAlarmRtData: i + '/WpRtmFaultAlarm/getWpStationFaultAlarmRtData.htm',
+        // 风电 监控 功率趋势
+        GETrunAcpTimeList: i + '/wp/monitorData/getRunAcpTimeList.htm',
+        // 风电 设备弹窗 风机 历史数据
+        GETwpHistoryData: i + '/wpHistoryData/getWpHistoryData.htm',
+        // 风电 设备弹窗 风机 故障信息
+        GETwpFaultAlarmList: i + '/WpRtmFaultAlarm/faultAlarmList.htm',
+        // 风电 设备弹窗 风机 运行小时数
+        GETdeviceHours: i + '/pvwp/device/getDeviceHours.htm',
+        // 风电 设备弹窗 风机 基本信息
+        GETdeviceInfoWidthDialog: i + '/pvwp/device/getDeviceInfoWidthDialog.htm',
+        // 风电 设备弹窗 风机 实时信息
+        GETselectWindTurbineSubSystemRunData: i + '/wp/monitor/selectWindTurbineSubSystemRunData.htm',
+        // 风电 设备运行 top 今日
+        GETrunAcpStatus: i + '/wp/monitor/getRunAcpStatus.htm',
+        // home_pv_company_rad_year_stationlist	首页- 光伏 - 集团 - 辐射总量 - 年 - 电站列表
+        GEThome_pv_company_rad_year_stationlist: i + '/his/query.htm',
+        // home_pv_company_real_hours_year_stationlist	首页 - 光伏 - 集团 - 有效小时数 - 年 - 电站列表
+        GEThome_pv_company_real_hours_year_stationlist: i + '/his/query.htm',
+        // home_wp_company_ws_avg_year_stationlist	首页 - 风电 - 集团 - 平均风速 - 年 - 电站列表
+        GEThome_wp_company_ws_avg_year_stationlist: i + '/his/query.htm',
+        // home_wp_company_real_hours_year_stationlist	首页 - 风电 - 集团 - 有效小时数 - 年 - 电站列表
+        GEThome_wp_company_real_hours_year_stationlist: i + '/his/query.htm',
+        // home_pv_company_rad_month_stationlist	首页- 光伏 - 集团 - 辐射总量 - 月 - 电站列表
+        GEThome_pv_company_rad_month_stationlist: i + '/his/query.htm',
+        // home_pv_company_real_hours_month_stationlist	首页 - 光伏 - 集团 - 有效小时数 - 月 - 电站列表
+        GEThome_pv_company_real_hours_month_stationlist: i + '/his/query.htm',
+        // home_wp_company_ws_avg_month_stationlist	首页 - 风电 - 集团 - 平均风速 - 月 - 电站列表
+        GEThome_wp_company_ws_avg_month_stationlist: i + '/his/query.htm',
+        // home_wp_company_real_hours_month_stationlist	首页 - 风电 - 集团 - 有效小时数 - 月 - 电站列表
+        GEThome_wp_company_real_hours_month_stationlist: i + '/his/query.htm',
+        // 首页实时信息
+        GETpvwpStationOverview: i + '/pvwp/station/overview.htm',
+        // 功率趋势 光伏 + 风电
+        GETrunAcpTimeListPvwp: i + '/pvwp/station/getRunAcpTimeList.htm',
+        // 风电监控设备弹窗 子系统 
+        GETwindTurbineSubSystem: i + '/wp/monitor/getWindTurbineSubSystem.htm',
+        // 风电监控设备弹窗 子系统 svg 数据  ?deviceId=6&level=2&subId=2
+        GETwindTurbineSubSystemRunData: i + '/wp/monitor/getWindTurbineSubSystemRunData.htm',
+        // 风电监控设备弹窗  实时故障列表
+        GETrunFaultList: i + '/pvwp/alarm/getRunFaultList.htm',
+
+        // 系统模块 添加按钮 /moduleBtn/update
+        moduleBtnUpdate: i + '/moduleBtn/update.htm',
+        // 系统模块 删除按钮 /moduleBtn/delete
+        moduleBtnDelete: i + '/moduleBtn/delete.htm',
+        // 默认角色 按钮 操作
+        updateConfigDefaultRoleModule: i + '/moduleCompanyTemplate/updateConfigDefaultRoleModule.htm',
+
+        // 风电 运行分析 能流图
+        GETwpEnergyFlowDiagram: i + '/wp/analysis/getEnergyFlowDiagram.htm',
+        // analysis_wp_station_st_month_info	电站- 风电 - 风机状态 - 月 - INFO
+        GETanalysis_wp_station_st_month_info: i + 'his/query.htm',
+        // analysis_wp_station_st_month_devicelist	电站 - 风电 - 风机状态 - 月 - 设备列表
+        GETanalysis_wp_station_st_month_devicelist: i + 'his/query.htm',
+        // analysis_wp_station_st_month_deviceline	电站 - 风电 - 风机状态 - 月 - 设备曲线
+        GETanalysis_wp_station_st_month_deviceline: i + 'his/query.htm',
+        // analysis_wp_station_st_month_timelist	电站 - 风电 - 风机状态 - 月 - 时间列表
+        GETanalysis_wp_station_st_month_timelist: i + 'his/query.htm',
+        // analysis_wp_station_st_month_timeline	电站 - 风电 - 风机状态 - 月 - 时间曲线
+        GETanalysis_wp_station_st_month_timeline: i + 'his/query.htm',
+        // 运行状态弹窗 /wp/analysis/getTurbineVPPoints.htm?dateType=2&date=2019-03-18&queryType=3&eqid=5
+        GETturbineVPPoints: i + '/wp/analysis/getTurbineVPPoints.htm',
+        // 运行状态弹窗 /wp/analysis/getTurbineVPList.htm?dateType=2&date=2019-03-18&queryType=3&eqid=5
+        GETturbineVPList: i + '/wp/analysis/getTurbineVPList.htm',
+
+        //analysis_wp_station_fra_shd_year_info   电站-风电-应发-理论-模型偏差-年-INFO
+        GETanalysis_wp_station_fra_shd_year_info:i+'his/query.htm',
+        //analysis_wp_station_fra_shd_year_timelist  电站-风电-应发-理论-模型偏差-年-时间列表
+        GETanalysis_wp_station_fra_shd_year_timelist:i+'his/query.htm',
+        //analysis_wp_station_fra_shd_year_timeline 电站-风电-应发-理论-模型偏差-年-时间曲线
+        GETanalysis_wp_station_fra_shd_year_timeline:i+'his/query.htm',
+        //analysis_wp_station_fra_shd_accum_info 电站-风电-应发-理论-模型偏差-累计-INFO
+        GETanalysis_wp_station_fra_shd_accum_info:i+'his/query.htm',
+        //analysis_wp_station_fra_shd_accum_timelist 电站-风电-应发-理论-模型偏差-累计-时间列表
+        GETanalysis_wp_station_fra_shd_accum_timelist:i+'his/query.htm',
+        //analysis_wp_station_fra_shd_accum_timeline 电站-风电-应发-理论-模型偏差-累计-时间曲线
+        GETanalysis_wp_station_fra_shd_accum_timeline:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_month_info 集团-风电-应发-理论-模型偏差-月-INFO
+        GETanalysis_wp_company_fra_shd_month_info:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_month_stationlist 集团-风电-应发-理论-模型偏差-月-电站列表
+        GETanalysis_wp_company_fra_shd_month_stationlist:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_month_stationline 集团-风电-应发-理论-模型偏差-月-电站曲线
+        GETanalysis_wp_company_fra_shd_month_stationline:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_year_info  集团-风电-应发-理论-模型偏差-年-INFO
+        GETanalysis_wp_company_fra_shd_year_info:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_year_stationlist 集团-风电-应发-理论-模型偏差-年-电站列表
+        GETanalysis_wp_company_fra_shd_year_stationlist:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_year_stationline  集团-风电-应发-理论-模型偏差-年-电站曲线
+        GETanalysis_wp_company_fra_shd_year_stationline:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_year_timelist  集团-风电-应发-理论-模型偏差-年-时间列表
+        GETanalysis_wp_company_fra_shd_year_timelist:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_year_timeline  集团-风电-应发-理论-模型偏差-年-时间曲线
+        GETanalysis_wp_company_fra_shd_year_timeline:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_accum_info  集团-风电-应发-理论-模型偏差-累计-INFO
+        GETanalysis_wp_company_fra_shd_accum_info:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_accum_timelist 集团-风电-应发-理论-模型偏差-累计-时间列表
+        GETanalysis_wp_company_fra_shd_accum_timelist:i+'his/query.htm',
+        //analysis_wp_company_fra_shd_accum_timeline   集团-风电-应发-理论-模型偏差-累计-时间曲线
+
+        GETanalysis_wp_company_fra_shd_accum_timeline:i+'his/query.htm',
+        //analysis_wp_company_eval_send_month_info  集团-风电-评估-上网-偏差-月-INFO
+        GETanalysis_wp_company_eval_send_month_info:i+'his/query.htm',
+        //analysis_wp_company_eval_send_month_stationlist  集团-风电-评估-上网-偏差-月-电站列表
+        GETanalysis_wp_company_eval_send_month_stationlist:i+'his/query.htm',
+        //analysis_wp_company_eval_send_month_stationline   集团-风电-评估-上网-偏差-月-电站曲线
+        GETanalysis_wp_company_eval_send_month_stationline:i+'his/query.htm',
+        //analysis_wp_company_eval_send_year_info   集团-风电-评估-上网-偏差-年-INFO
+        GETanalysis_wp_company_eval_send_year_info:i+'his/query.htm',
+        //analysis_wp_company_eval_send_year_stationlist  集团-风电-评估-上网-偏差-年-电站列表
+        GETanalysis_wp_company_eval_send_year_stationlist:i+'his/query.htm',
+        //analysis_wp_company_eval_send_year_stationline  集团-风电-评估-上网-偏差-年-电站曲线
+        GETanalysis_wp_company_eval_send_year_stationline:i+'his/query.htm',
+        //analysis_wp_company_eval_send_year_timelist  集团-风电-评估-上网-偏差-年-时间列表
+        GETanalysis_wp_company_eval_send_year_timelist:i+'his/query.htm',
+        //analysis_wp_company_eval_send_year_timeline   集团-风电-评估-上网-偏差-年-时间曲线
+        GETanalysis_wp_company_eval_send_year_timeline:i+'his/query.htm',
+        //analysis_wp_company_eval_send_accum_info  集团-风电-评估-上网-偏差-累计-INFO
+        GETanalysis_wp_company_eval_send_accum_info:i+'his/query.htm',
+        //analysis_wp_company_eval_send_accum_timelist 集团-风电-评估-上网-偏差-累计-时间列表
+        GETanalysis_wp_company_eval_send_accum_timelist:i+'his/query.htm',
+        //analysis_wp_company_eval_send_accum_timeline  集团-风电-评估-上网-偏差-累计-时间曲线
+        GETanalysis_wp_company_eval_send_accum_timeline:i+'his/query.htm',
+        //analysis_wp_station_eval_send_year_info  电站-风电-评估-上网-偏差-年-INFO
+        GETanalysis_wp_station_eval_send_year_info:i+'his/query.htm',
+        //analysis_wp_station_eval_send_year_timelist  电站-风电-评估-上网-偏差-年-时间列表
+        GETanalysis_wp_station_eval_send_year_timelist:i+'his/query.htm',
+        //analysis_wp_station_eval_send_year_timeline 电站-风电-评估-上网-偏差-年-时间曲线
+        GETanalysis_wp_station_eval_send_year_timeline:i+'his/query.htm',
+        //analysis_wp_station_eval_send_accum_info  电站-风电-评估-上网-偏差-累计-INFO
+        GETanalysis_wp_station_eval_send_accum_info:i+'his/query.htm',
+        //analysis_wp_station_eval_send_accum_timelist  电站-风电-评估-上网-偏差-累计-时间列表
+        GETanalysis_wp_station_eval_send_accum_timelist:i+'his/query.htm',
+        //analysis_wp_station_eval_send_accum_timeline  电站-风电-评估-上网-偏差-累计-时间曲线
+        GETanalysis_wp_station_eval_send_accum_timeline:i+'his/query.htm',
+
+        //analysis_wp_company_eval_fra_month_info  集团-风电-评估-理论-资源偏差-月-INFO
+        GETanalysis_wp_company_eval_fra_month_info:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_month_stationlist  集团-风电-评估-理论-资源偏差-月-电站列表
+        GETanalysis_wp_company_eval_fra_month_stationlist:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_month_stationline  集团-风电-评估-理论-资源偏差-月-电站曲线
+        GETanalysis_wp_company_eval_fra_month_stationline:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_year_info  集团-风电-评估-理论-资源偏差-年-INFO
+        GETanalysis_wp_company_eval_fra_year_info:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_year_stationlist  集团-风电-评估-理论-资源偏差-年-电站列表
+        GETanalysis_wp_company_eval_fra_year_stationlist:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_year_stationline  集团-风电-评估-理论-资源偏差-年-电站曲线
+        GETanalysis_wp_company_eval_fra_year_stationline:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_year_timelist   集团-风电-评估-理论-资源偏差-年-时间列表
+        GETanalysis_wp_company_eval_fra_year_timelist:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_year_timeline  集团-风电-评估-理论-资源偏差-年-时间曲线
+        GETanalysis_wp_company_eval_fra_year_timeline:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_accum_info  集团-风电-评估-理论-资源偏差-累计-INFO
+        GETanalysis_wp_company_eval_fra_accum_info:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_accum_timelist  集团-风电-评估-理论-资源偏差-累计-时间列表
+        GETanalysis_wp_company_eval_fra_accum_timelist:i+'his/query.htm',
+        //analysis_wp_company_eval_fra_accum_timeline  集团-风电-评估-理论-资源偏差-累计-时间曲线
+        GETanalysis_wp_company_eval_fra_accum_timeline:i+'his/query.htm',
+        //analysis_wp_station_eval_fra_year_info  电站-风电-评估-理论-资源偏差-年-INFO
+        GETanalysis_wp_station_eval_fra_year_info:i+'his/query.htm',
+        //analysis_wp_station_eval_fra_year_timelist  电站-风电-评估-理论-资源偏差-年-时间列表
+        GETanalysis_wp_station_eval_fra_year_timelist :i+'his/query.htm',
+        //analysis_wp_station_eval_fra_year_timeline  电站-风电-评估-理论-资源偏差-年-时间曲线
+        GETanalysis_wp_station_eval_fra_year_timeline:i+'his/query.htm',
+        //analysis_wp_station_eval_fra_accum_info  电站-风电-评估-理论-资源偏差-累计-INFO
+        GETanalysis_wp_station_eval_fra_accum_info:i+'his/query.htm',
+        //analysis_wp_station_eval_fra_accum_timelist   电站-风电-评估-理论-资源偏差-累计-时间列表
+        GETanalysis_wp_station_eval_fra_accum_timelist:i+'his/query.htm',
+        //analysis_wp_station_eval_fra_accum_timeline   电站-风电-评估-理论-资源偏差-累计-时间曲线
+        GETanalysis_wp_station_eval_fra_accum_timeline:i+'his/query.htm',
+
+        //analysis_wp_company_fail_month_info  集团-风电-故障损失电量-月-INFO
+        GETanalysis_wp_company_fail_month_info:i+'his/query.htm',
+        //analysis_wp_company_fail_month_stationlist   集团-风电-故障损失电量-月-电站列表
+        GETanalysis_wp_company_fail_month_stationlist:i+'his/query.htm',
+        //analysis_wp_company_fail_month_stationline  集团-风电-故障损失电量-月-电站曲线
+        GETanalysis_wp_company_fail_month_stationline:i+'his/query.htm',
+        //analysis_wp_company_fail_month_timelist	集团-风电-故障损失电量-月-时间列表
+        GETanalysis_wp_company_fail_month_timelist:i+'his/query.htm',
+        //analysis_wp_station_fail_month_devicelist	集团-风电-故障损失电量-月|年-设备列表 || 电站-风电-故障损失电量-月-设备列表
+        GETanalysis_wp_station_fail_month_devicelist:i+'his/query.htm',
+        //analysis_wp_station_fail_month_deviceline	集团-风电-故障损失电量-月|年-设备曲线 || 电站-风电-故障损失电量-月-设备曲线
+        GETanalysis_wp_station_fail_month_deviceline:i+'his/query.htm',
+        //analysis_wp_company_fail_year_info	集团-风电-故障损失电量-年-INFO
+        GETanalysis_wp_company_fail_year_info:i+'his/query.htm',
+        //analysis_wp_company_fail_year_stationlist	集团-风电-故障损失电量-年-电站列表
+        GETanalysis_wp_company_fail_year_stationlist:i+'his/query.htm',
+        //analysis_wp_company_fail_year_stationline	集团-风电-故障损失电量-年-电站曲线
+        GETanalysis_wp_company_fail_year_stationline:i+'his/query.htm',
+        //analysis_wp_company_fail_year_timelist	集团-风电-故障损失电量-年-时间列表
+        GETanalysis_wp_company_fail_year_timelist:i+'his/query.htm',
+        //analysis_wp_company_fail_year_timeline	集团-风电-故障损失电量-年-时间曲线
+        GETanalysis_wp_company_fail_year_timeline:i+'his/query.htm',
+        //analysis_wp_company_fail_accum_info	集团-风电-故障损失电量-累计-INFO
+        GETanalysis_wp_company_fail_accum_info:i+'his/query.htm',
+        //analysis_wp_company_fail_accum_timelist	集团-风电-故障损失电量-累计-时间列表
+        GETanalysis_wp_company_fail_accum_timelist:i+'his/query.htm',
+        //analysis_wp_company_fail_accum_timeline	集团-风电-故障损失电量-累计-时间曲线
+        GETanalysis_wp_company_fail_accum_timeline:i+'his/query.htm',
+        //analysis_wp_station_fail_month_info	电站-风电-故障损失电量-月-INFO
+        GETanalysis_wp_station_fail_month_info:i+'his/query.htm',
+        //analysis_wp_station_fail_year_info	电站-风电-故障损失电量-年-INFO
+        GETanalysis_wp_station_fail_year_info:i+'his/query.htm',
+        //analysis_wp_station_fail_year_timelist	电站-风电-故障损失电量-年-时间列表
+        GETanalysis_wp_station_fail_year_timelist:i+'his/query.htm',
+        //analysis_wp_station_fail_year_timeline	电站-风电-故障损失电量-年-时间曲线
+        GETanalysis_wp_station_fail_year_timeline:i+'his/query.htm',
+        //analysis_wp_station_fail_accum_info	电站-风电-故障损失电量-累计-INFO
+        GETanalysis_wp_station_fail_accum_info:i+'his/query.htm',
+        //analysis_wp_station_fail_accum_timelist	电站-风电-故障损失电量-累计-时间列表
+        GETanalysis_wp_station_fail_accum_timelist:i+'his/query.htm',
+        //analysis_wp_station_fail_accum_timeline	电站-风电-故障损失电量-累计-时间曲线
+        GETanalysis_wp_station_fail_accum_timeline:i+'his/query.htm',
+
+        //analysis_wp_company_restrict_month_info	集团-风电-限电损失电量-月-INFO
+        GETanalysis_wp_company_restrict_month_info:i+'his/query.htm',
+        //analysis_wp_company_restrict_month_stationlist	集团-风电-限电损失电量-月-电站列表
+        GETanalysis_wp_company_restrict_month_stationlist:i+'his/query.htm',
+        //analysis_wp_company_restrict_month_stationline	集团-风电-限电损失电量-月-电站曲线
+        GETanalysis_wp_company_restrict_month_stationline:i+'his/query.htm',
+        //analysis_wp_company_restrict_year_info	集团-风电-限电损失电量-年-INFO
+        GETanalysis_wp_company_restrict_year_info:i+'his/query.htm',
+        //analysis_wp_company_restrict_year_stationlist	集团-风电-限电损失电量-年-电站列表
+        GETanalysis_wp_company_restrict_year_stationlist:i+'his/query.htm',
+        //analysis_wp_company_restrict_year_stationline	集团-风电-限电损失电量-年-电站曲线
+        GETanalysis_wp_company_restrict_year_stationline:i+'his/query.htm',
+        //analysis_wp_company_restrict_year_timelist	集团-风电-限电损失电量-年-时间列表
+        GETanalysis_wp_company_restrict_year_timelist:i+'his/query.htm',
+        //analysis_wp_company_restrict_year_timeline	集团-风电-限电损失电量-年-时间曲线
+        GETanalysis_wp_company_restrict_year_timeline:i+'his/query.htm',
+        //analysis_wp_company_restrict_accum_info	集团-风电-限电损失电量-累计-INFO
+        GETanalysis_wp_company_restrict_accum_info:i+'his/query.htm',
+        //analysis_wp_company_restrict_accum_stationlist	集团-风电-限电损失电量-累计-电站列表
+        GETanalysis_wp_company_restrict_accum_stationlist:i+'his/query.htm',
+        //analysis_wp_company_restrict_accum_stationline	集团-风电-限电损失电量-累计-电站曲线
+        GETanalysis_wp_company_restrict_accum_stationline:i+'his/query.htm',
+        //analysis_wp_company_restrict_accum_timelist	集团-风电-限电损失电量-累计-时间列表
+        GETanalysis_wp_company_restrict_accum_timelist:i+'his/query.htm',
+        //analysis_wp_company_restrict_accum_timeline	集团-风电-限电损失电量-累计-时间曲线
+        GETanalysis_wp_company_restrict_accum_timeline:i+'his/query.htm',
+        //analysis_wp_station_restrict_year_info	电站-风电-限电损失电量-年-INFO
+        GETanalysis_wp_station_restrict_year_info:i+'his/query.htm',
+        //analysis_wp_station_restrict_year_timelist	电站-风电-限电损失电量-年-时间列表
+        GETanalysis_wp_station_restrict_year_timelist:i+'his/query.htm',
+        //analysis_wp_station_restrict_year_timeline	电站-风电-限电损失电量-年-时间曲线
+        GETanalysis_wp_station_restrict_year_timeline:i+'his/query.htm',
+        //analysis_wp_station_restrict_accum_info	电站-风电-限电损失电量-累计-INFO
+        GETanalysis_wp_station_restrict_accum_info:i+'his/query.htm',
+        //analysis_wp_station_restrict_accum_timelist	电站-风电-限电损失电量-累计-时间列表
+        GETanalysis_wp_station_restrict_accum_timelist:i+'his/query.htm',
+        //analysis_wp_station_restrict_accum_timeline	电站-风电-限电损失电量-累计-时间曲线
+        GETanalysis_wp_station_restrict_accum_timeline:i+'his/query.htm',
+
+        //analysis_wp_company_repair_month_info	集团-风电-检修损失电量-月-INFO
+        GETanalysis_wp_company_repair_month_info:i+'his/query.htm',
+        //analysis_wp_company_repair_month_stationlist	集团-风电-检修损失电量-月-电站列表
+        GETanalysis_wp_company_repair_month_stationlist:i+'his/query.htm',
+        //analysis_wp_company_repair_month_stationline	集团-风电-检修损失电量-月-电站曲线
+        GETanalysis_wp_company_repair_month_stationline:i+'his/query.htm',
+        //analysis_wp_company_repair_year_info	集团-风电-检修损失电量-年-INFO
+        GETanalysis_wp_company_repair_year_info:i+'his/query.htm',
+        //analysis_wp_company_repair_year_stationlist	集团-风电-检修损失电量-年-电站列表
+        GETanalysis_wp_company_repair_year_stationlist:i+'his/query.htm',
+        //analysis_wp_company_repair_year_stationline	集团-风电-检修损失电量-年-电站曲线
+        GETanalysis_wp_company_repair_year_stationline:i+'his/query.htm',
+        //analysis_wp_company_repair_year_timelist	集团-风电-检修损失电量-年-时间列表
+        GETanalysis_wp_company_repair_year_timelist:i+'his/query.htm',
+        //analysis_wp_company_repair_year_timeline	集团-风电-检修损失电量-年-时间曲线
+        GETanalysis_wp_company_repair_year_timeline:i+'his/query.htm',
+        //analysis_wp_company_repair_accum_info	集团-风电-检修损失电量-累计-INFO
+        GETanalysis_wp_company_repair_accum_info:i+'his/query.htm',
+        //analysis_wp_company_repair_accum_stationlist	集团-风电-检修损失电量-累计-电站列表
+        GETanalysis_wp_company_repair_accum_stationlist:i+'his/query.htm',
+        //analysis_wp_company_repair_accum_stationline	集团-风电-检修损失电量-累计-电站曲线
+        GETanalysis_wp_company_repair_accum_stationline:i+'his/query.htm',
+        //analysis_wp_company_repair_accum_timelist	集团-风电-检修损失电量-累计-时间列表
+        GETanalysis_wp_company_repair_accum_timelist:i+'his/query.htm',
+        //analysis_wp_company_repair_accum_timeline	集团-风电-检修损失电量-累计-时间曲线
+        GETanalysis_wp_company_repair_accum_timeline:i+'his/query.htm',
+        //analysis_wp_station_repair_year_info	电站-风电-检修损失电量-年-INFO
+        GETanalysis_wp_station_repair_year_info:i+'his/query.htm',
+        //analysis_wp_station_repair_year_timelist	电站-风电-检修损失电量-年-时间列表
+        GETanalysis_wp_station_repair_year_timelist:i+'his/query.htm',
+        //analysis_wp_station_repair_year_timeline	电站-风电-检修损失电量-年-时间曲线
+        GETanalysis_wp_station_repair_year_timeline:i+'his/query.htm',
+        //analysis_wp_station_repair_accum_info	电站-风电-检修损失电量-累计-INFO
+        GETanalysis_wp_station_repair_accum_info:i+'his/query.htm',
+        //analysis_wp_station_repair_accum_timelist	电站-风电-检修损失电量-累计-时间列表
+        GETanalysis_wp_station_repair_accum_timelist:i+'his/query.htm',
+        //analysis_wp_station_repair_accum_timerepair	电站-风电-检修损失电量-累计-时间曲线
+        GETanalysis_wp_station_repair_accum_timerepair:i+'his/query.htm',
+
+        //analysis_wp_company_real_shd_month_info	集团-实发-应发-能力利用率偏差-月-INFO
+        GETanalysis_wp_company_real_shd_month_info:i+'his/query.htm',
+        //analysis_wp_company_real_shd_month_stationlist	集团-实发-应发-能力利用率偏差-月-电站列表
+        GETanalysis_wp_company_real_shd_month_stationlist:i+'his/query.htm',
+        //analysis_wp_company_real_shd_month_stationline	集团-实发-应发-能力利用率偏差-月-电站曲线
+        GETanalysis_wp_company_real_shd_month_stationline:i+'his/query.htm',
+        //analysis_wp_company_real_shd_year_info	集团-实发-应发-能力利用率偏差-年-INFO
+        GETanalysis_wp_company_real_shd_year_info:i+'his/query.htm',
+        //analysis_wp_company_real_shd_year_stationlist	集团-实发-应发-能力利用率偏差-年-电站列表
+        GETanalysis_wp_company_real_shd_year_stationlist:i+'his/query.htm',
+        //analysis_wp_company_real_shd_year_stationline	集团-实发-应发-能力利用率偏差-年-电站曲线
+        GETanalysis_wp_company_real_shd_year_stationline:i+'his/query.htm',
+        //analysis_wp_company_real_shd_year_timelist	集团-实发-应发-能力利用率偏差-年-时间列表
+        GETanalysis_wp_company_real_shd_year_timelist:i+'his/query.htm',
+        //analysis_wp_company_real_shd_year_timeline	集团-实发-应发-能力利用率偏差-年-时间曲线
+        GETanalysis_wp_company_real_shd_year_timeline:i+'his/query.htm',
+        //analysis_wp_company_real_shd_accum_info	集团-实发-应发-能力利用率偏差-累计-INFO
+        GETanalysis_wp_company_real_shd_accum_info:i+'his/query.htm',
+        //analysis_wp_company_real_shd_accum_timelist	集团-实发-应发-能力利用率偏差-累计-时间列表
+        GETanalysis_wp_company_real_shd_accum_timelist:i+'his/query.htm',
+        //analysis_wp_company_real_shd_accum_timeline	集团-实发-应发-能力利用率偏差-累计-时间曲线
+        GETanalysis_wp_company_real_shd_accum_timeline:i+'his/query.htm',
+        //analysis_wp_station_real_shd_year_info	电站-实发-应发-能力利用率偏差-年-INFO
+        GETanalysis_wp_station_real_shd_year_info:i+'his/query.htm',
+        //analysis_wp_station_real_shd_year_timelist	电站-实发-应发-能力利用率偏差-年-时间列表
+        GETanalysis_wp_station_real_shd_year_timelist:i+'his/query.htm',
+        //analysis_wp_station_real_shd_year_timeline	电站-实发-应发-能力利用率偏差-年-时间曲线
+        GETanalysis_wp_station_real_shd_year_timeline:i+'his/query.htm',
+        //analysis_wp_station_real_shd_accum_info	电站-实发-应发-能力利用率偏差-累计-INFO
+        GETanalysis_wp_station_real_shd_accum_info:i+'his/query.htm',
+        //analysis_wp_station_real_shd_accum_timelist	电站-实发-应发-能力利用率偏差-累计-时间列表
+        GETanalysis_wp_station_real_shd_accum_timelist:i+'his/query.htm',
+        //analysis_wp_station_real_shd_accum_timeline	电站-实发-应发-能力利用率偏差-累计-时间曲线
+        GETanalysis_wp_station_real_shd_accum_timeline:i+'his/query.htm',
+
+        //analysis_wp_company_pitch_we_month_info 集团-风电-变桨损失偏差-月-INFO
+        GETanalysis_wp_company_pitch_we_month_info:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_month_stationlist 集团-风电-变桨损失偏差-月-电站列表
+        GETanalysis_wp_company_pitch_we_month_stationlist:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_month_stationline 集团-风电-变桨损失偏差-月-电站曲线
+        GETanalysis_wp_company_pitch_we_month_stationline:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_month_timelist', '集团-风电-变桨损失偏差-月-时间列表
+        GETanalysis_wp_company_pitch_we_month_timelist:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_month_timeline', '集团-风电-变桨损失偏差-月-时间曲线
+        GETanalysis_wp_company_pitch_we_month_timeline:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_year_info 集团-风电-变桨损失偏差-年-INFO
+        GETanalysis_wp_company_pitch_we_year_info:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_year_stationlist 集团-风电-变桨损失偏差-年-电站列表
+        GETanalysis_wp_company_pitch_we_year_stationlist:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_year_stationline 集团-风电-变桨损失偏差-年-电站曲线
+        GETanalysis_wp_company_pitch_we_year_stationline:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_year_timelist 集团-风电-变桨损失偏差-年-时间列表
+        GETanalysis_wp_company_pitch_we_year_timelist:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_year_timeline 集团-风电-变桨损失偏差-年-时间曲线
+        GETanalysis_wp_company_pitch_we_year_timeline:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_accum_info 集团-风电-变桨损失偏差-累计-INFO
+        GETanalysis_wp_company_pitch_we_accum_info:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_accum_stationlist 集团-风电-变桨损失偏差-累计-电站列表
+        GETanalysis_wp_company_pitch_we_accum_stationlist:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_accum_stationline 集团-风电-变桨损失偏差-累计-电站曲线
+        GETanalysis_wp_company_pitch_we_accum_stationline:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_accum_timelist 集团-风电-变桨损失偏差-累计-时间列表
+        GETanalysis_wp_company_pitch_we_accum_timelist:i+'his/query.htm',
+        //analysis_wp_company_pitch_we_accum_timeline 集团-风电-变桨损失偏差-累计-时间曲线
+        GETanalysis_wp_company_pitch_we_accum_timeline:i+'his/query.htm',
+        //analysis_wp_station_pitch_we_month_info', '电站-风电-变桨损失偏差-月-INFO'
+        GETanalysis_wp_station_pitch_we_month_info:i+'his/query.htm',
+        //'analysis_wp_station_pitch_we_month_devicelist', '电站-风电-变桨损失偏差-月-设备列表', 
+        GETanalysis_wp_station_pitch_we_month_devicelist:i+'his/query.htm',
+        //'analysis_wp_station_pitch_we_month_deviceline', '电站-风电-变桨损失偏差-月-设备曲线', 
+        GETanalysis_wp_station_pitch_we_month_deviceline:i+'his/query.htm',
+        //'analysis_wp_station_pitch_we_month_timelist', '电站-风电-变桨损失偏差-月-时间列表',
+        GETanalysis_wp_station_pitch_we_month_timelist:i+'his/query.htm',
+        //'analysis_wp_station_pitch_we_month_timeline', '电站-风电-变桨损失偏差-月-时间曲线', 
+        GETanalysis_wp_station_pitch_we_month_timeline:i+'his/query.htm',
+        //analysis_wp_station_pitch_we_year_info 电站-风电-变桨损失偏差-年-INFO
+        GETanalysis_wp_station_pitch_we_year_info:i+'his/query.htm',
+        //analysis_wp_station_pitch_we_year_timelist 电站-风电-变桨损失偏差-年-时间列表
+        GETanalysis_wp_station_pitch_we_year_timelist:i+'his/query.htm',
+        //analysis_wp_station_pitch_we_year_timeline 电站-风电-变桨损失偏差-年-时间曲线
+        GETanalysis_wp_station_pitch_we_year_timeline:i+'his/query.htm',
+        // 'analysis_wp_station_pitch_we_year_devicelist', '电站-风电-变桨损失偏差-年-设备列表', 
+        GETanalysis_wp_station_pitch_we_year_devicelist:i+'his/query.htm',
+        // 'analysis_wp_station_pitch_we_year_deviceline', '电站-风电-变桨损失偏差-年-设备曲线', 
+        GETanalysis_wp_station_pitch_we_year_deviceline:i+'his/query.htm',
+        // analysis_wp_station_pitch_we_accum_info 电站-风电-变桨损失偏差-累计-INFO
+        GETanalysis_wp_station_pitch_we_accum_info:i+'his/query.htm',
+        // analysis_wp_station_pitch_we_accum_timelist 电站-风电-变桨损失偏差-累计-时间列表
+        GETanalysis_wp_station_pitch_we_accum_timelist:i+'his/query.htm',
+        // analysis_wp_station_pitch_we_accum_timeline 电站-风电-变桨损失偏差-累计-时间曲线
+        GETanalysis_wp_station_pitch_we_accum_timeline:i+'his/query.htm',
+        // 'analysis_wp_station_pitch_we_accum_devicelist', '电站-风电-变桨损失偏差-累计-设备列表',
+        GETanalysis_wp_station_pitch_we_accum_devicelist:i+'his/query.htm',
+        // 'analysis_wp_station_pitch_we_accum_deviceline', '电站-风电-变桨损失偏差-累计-设备曲线',
+        GETanalysis_wp_station_pitch_we_accum_deviceline:i+'his/query.htm',
+
+        //analysis_wp_company_yaw_we_month_info 集团-风电-偏航损失偏差-月-INFO
+        GETanalysis_wp_company_yaw_we_month_info:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_month_stationlist 集团-风电-偏航损失偏差-月-电站列表
+        GETanalysis_wp_company_yaw_we_month_stationlist:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_month_stationline 集团-风电-偏航损失偏差-月-电站曲线
+        GETanalysis_wp_company_yaw_we_month_stationline:i+'his/query.htm',
+        // 'analysis_wp_company_yaw_month_timelist', '集团-风电-偏航损失偏差-月-时间列表', 
+        GETanalysis_wp_company_yaw_month_timelist:i+'his/query.htm',
+        // 'analysis_wp_company_yaw_month_timeline', '集团-风电-偏航损失偏差-月-时间曲线', NUL
+        GETanalysis_wp_company_yaw_month_timeline:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_year_info 集团-风电-偏航损失偏差-年-INFO
+        GETanalysis_wp_company_yaw_we_year_info:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_year_stationlist 集团-风电-偏航损失偏差-年-电站列表
+        GETanalysis_wp_company_yaw_we_year_stationlist:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_year_stationline 集团-风电-偏航损失偏差-年-电站曲线
+        GETanalysis_wp_company_yaw_we_year_stationline:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_year_timelist 集团-风电-偏航损失偏差-年-时间列表
+        GETanalysis_wp_company_yaw_we_year_timelist:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_year_timeline 集团-风电-偏航损失偏差-年-时间曲线
+        GETanalysis_wp_company_yaw_we_year_timeline:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_accum_info 集团-风电-偏航损失偏差-累计-INFO
+        GETanalysis_wp_company_yaw_we_accum_info:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_accum_stationlist 集团-风电-偏航损失偏差-累计-电站列表
+        GETanalysis_wp_company_yaw_we_accum_stationlist:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_accum_stationline 集团-风电-偏航损失偏差-累计-电站曲线
+        GETanalysis_wp_company_yaw_we_accum_stationline:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_accum_timelist 集团-风电-偏航损失偏差-累计-时间列表
+        GETanalysis_wp_company_yaw_we_accum_timelist:i+'his/query.htm',
+        // analysis_wp_company_yaw_we_accum_timeline 集团-风电-偏航损失偏差-累计-时间曲线
+        GETanalysis_wp_company_yaw_we_accum_timeline:i+'his/query.htm',
+        // 'analysis_wp_station_yaw_month_info', '电站-风电-偏航损失偏差-月-INFO', NULL, 'wind
+        GETanalysis_wp_station_yaw_month_info:i+'his/query.htm',
+        // 'analysis_wp_station_yaw_month_devicelist', '电站-风电-偏航损失偏差-月-设备列表', N
+        GETanalysis_wp_station_yaw_month_devicelist:i+'his/query.htm',
+        // 'analysis_wp_station_yaw_month_deviceline', '电站-风电-偏航损失偏差-月-设备曲线', N
+        GETanalysis_wp_station_yaw_month_deviceline:i+'his/query.htm',
+        // 'analysis_wp_station_yaw_month_timelist', '电站-风电-偏航损失偏差-月-时间列表', NUL
+        GETanalysis_wp_station_yaw_month_timelist:i+'his/query.htm',
+        // 'analysis_wp_station_yaw_month_timeline', '电站-风电-偏航损失偏差-月-时间曲线', NUL
+        GETanalysis_wp_station_yaw_month_timeline:i+'his/query.htm',
+        // analysis_wp_station_yaw_we_year_info 电站-风电-偏航损失偏差-年-INFO
+        GETanalysis_wp_station_yaw_we_year_info:i+'his/query.htm',
+        // analysis_wp_station_yaw_we_year_timelist 电站-风电-偏航损失偏差-年-时间列表
+        GETanalysis_wp_station_yaw_we_year_timelist:i+'his/query.htm',
+        // analysis_wp_station_yaw_we_year_timeline 电站-风电-偏航损失偏差-年-时间曲线
+        GETanalysis_wp_station_yaw_we_year_timeline:i+'his/query.htm',
+        // 'analysis_wp_station_yaw_year_devicelist', '电站-风电-偏航损失偏差-年-设备列表', NU
+        GETanalysis_wp_station_yaw_year_devicelist:i+'his/query.htm',
+        // 'analysis_wp_station_yaw_year_deviceline', '电站-风电-偏航损失偏差-年-设备曲线', NU
+        GETanalysis_wp_station_yaw_year_deviceline:i+'his/query.htm',
+        // analysis_wp_station_yaw_we_accum_info 电站-风电-偏航损失偏差-累计-INFO
+        GETanalysis_wp_station_yaw_we_accum_info:i+'his/query.htm',
+        // analysis_wp_station_yaw_we_accum_timelist 电站-风电-偏航损失偏差-累计-时间列表
+        GETanalysis_wp_station_yaw_we_accum_timelist:i+'his/query.htm',
+        // analysis_wp_station_yaw_we_accum_timeline 电站-风电-偏航损失偏差-累计-时间曲线
+        GETanalysis_wp_station_yaw_we_accum_timeline:i+'his/query.htm',
+        // 'analysis_wp_station_yaw_accum_devicelist', '电站-风电-偏航损失偏差-累计-设备列表',
+        GETanalysis_wp_station_yaw_accum_devicelist:i+'his/query.htm',
+        // 'analysis_wp_station_yaw_accum_deviceline', '电站-风电-偏航损失偏差-累计-设备曲线',
+        GETanalysis_wp_station_yaw_accum_deviceline:i+'his/query.htm',
+
+
+        //字典管理模块
+        //字典列表
+        GETbaseDictionaryList: i+'/Basedictionary/selectByPage.htm',
+        //新增
+        AddbaseDictionary: i+'Basedictionary/updateBaseDictionary.htm',
+        //获取详情
+        baseDictionaryDetail: i+'Basedictionary/selectByPrimaryKey.htm',
+        //删除
+        delDictionary: i+'Basedictionary/deleteByPrimaryKeys.htm',
+        
+        // 发电能力 散点图：wp/analysis/getTurbineOPEList.htm?dataType=2&date=2019-03-18&dateType=2&queryType=3
+        GETturbineOPEList: i + '/wp/analysis/getTurbineOPEList.htm',
+        // 电站-风电-风机功率效率-月-设备列表
+        GETanalysis_wp_station_pe_month_devicelist: i + '/his/query.htm',
+        // 功率曲线分析（先查列表） 左图 ?dataType=2&date=2019-03-18&dateType=2&queryType=3&eqids=1,2,3,4,5,6,7
+        GETturbinePEList: i + '/wp/analysis/getTurbinePEList.htm',
+
+        // analysis_wp_station_pitch_month_info	电站- 风电 - 风机叶轮叶片变桨 - 月 - INFO
+        GETanalysis_wp_station_pitch_month_info: i + '/his/query.htm',
+        // analysis_wp_station_pitch_month_devicelist	电站 - 风电 - 风机叶轮叶片变桨 - 月 - 设备列表
+        GETanalysis_wp_station_pitch_month_devicelist: i + '/his/query.htm',
+        // analysis_wp_station_pitch_month_deviceline	电站 - 风电 - 风机叶轮叶片变桨 - 月 - 设备曲线
+        GETanalysis_wp_station_pitch_month_deviceline: i + '/his/query.htm',
+        // analysis_wp_station_pitch_month_timelist	电站 - 风电 - 风机叶轮叶片变桨 - 月 - 时间列表
+        GETanalysis_wp_station_pitch_month_timelist: i + '/his/query.htm',
+        // analysis_wp_station_pitch_month_timeline	电站 - 风电 - 风机叶轮叶片变桨 - 月 - 时间曲线
+        GETanalysis_wp_station_pitch_month_timeline: i + '/his/query.htm',
+        // 叶轮叶片： wp/analysis/getTurbineClimbPoints.htm?dataType=2&date=2019-03-18&dateType=2&queryType=3
+        GETturbineClimbPoints: i + '/wp/analysis/getTurbineClimbPoints.htm',
+        // 变桨(风速-功率|角度)： wp/analysis/getTurbinePitchPoints.htm?dataType=2&date=2019-03-18&dateType=2&queryType=3&eqid=1
+        GETturbinePitchPoints: i + '/wp/analysis/getTurbinePitchPoints.htm',
+        // 齿轮箱： wp/analysis/getTurbineGearboxPoints.htm?dataType=2&date=2019-03-18&dateType=2&queryType=3
+        GETturbineGearboxPoints: i + '/wp/analysis/getTurbineGearboxPoints.htm',
+        // 发电机： wp/analysis/getTurbineDynamoPoints.htm?dataType=2&date=2019-03-18&dateType=2&queryType=3
+        GETturbineDynamoPoints: i + '/wp/analysis/getTurbineDynamoPoints.htm',
+        // analysis_wp_station_wsm_month_info	电站-风电-风机风速计-月-INFO
+        GETanalysis_wp_station_wsm_month_info: i + '/his/query.htm',
+        // analysis_wp_station_wsm_month_devicelist	电站-风电-风机风速计-月-设备列表
+        GETanalysis_wp_station_wsm_month_devicelist: i + '/his/query.htm',
+        // analysis_wp_station_wsm_month_deviceline	电站-风电-风机风速计-月-设备曲线
+        GETanalysis_wp_station_wsm_month_deviceline: i + '/his/query.htm',
+        // analysis_wp_station_wsm_month_timelist	电站-风电-风机风速计-月-时间列表
+        GETanalysis_wp_station_wsm_month_timelist: i + '/his/query.htm',
+        // analysis_wp_station_wsm_month_timeline	电站-风电-风机风速计-月-时间曲线
+        GETanalysis_wp_station_wsm_month_timeline: i + '/his/query.htm',
+        // analysis_wp_station_vane_month_info	电站-风电-风机风向标-月-INFO
+        GETanalysis_wp_station_vane_month_info: i + '/his/query.htm',
+        // analysis_wp_station_vane_month_devicelist	电站-风电-风机风向标-月-设备列表
+        GETanalysis_wp_station_vane_month_devicelist: i + '/his/query.htm',
+        // analysis_wp_station_vane_month_deviceline	电站-风电-风机风向标-月-设备曲线
+        GETanalysis_wp_station_vane_month_deviceline: i + '/his/query.htm',
+        // analysis_wp_station_vane_month_timelist	电站-风电-风机风向标-月-时间列表
+        GETanalysis_wp_station_vane_month_timelist: i + '/his/query.htm',
+        // analysis_wp_station_vane_month_timeline	电站-风电-风机风向标-月-时间曲线
+        GETanalysis_wp_station_vane_month_timeline: i + '/his/query.htm',
+        // 风速计 设备弹窗： wp/analysis/getTurbineWsmPoints.htm?dataType=2&date=2019-03-18&dateType=2&queryType=3&eqid=1
+        GETturbineWsmPoints: i + '/wp/analysis/getTurbineWsmPoints.htm',
+        // 风向标 设备弹窗： wp/analysis/getTurbinePitchList.htm?dataType=2&date=2019-03-18&dateType=2&queryType=3&eqid=1
+        GETturbineVaneList: i + '/wp/analysis/getTurbineVaneList.htm',
+        // 运行分析 故障分析
+        //analysis_wt_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_wt_dev_falt_year_common_list1: i + '/his/query.htm',
+        //analysis_wt_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_wt_dev_falt_year_common_list2: i + '/his/query.htm',
+        //analysis_wt_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_wt_dev_falt_year_common_list3: i + '/his/query.htm',
+        //analysis_wt_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_wt_dev_falt_year_common_list4: i + '/his/query.htm',
+        //analysis_wt_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_wt_dev_falt_year_common_list5: i + '/his/query.htm',
+        //analysis_wt_dev_falt_year_common_list	故障分析通用接口 - 年 - 列表
+        GETanalysis_wt_dev_falt_year_common_list6: i + '/his/query.htm',
+        //analysis_wt_dev_falt_year_common_line	故障分析通用接口 - 年 - 曲线
+        GETanalysis_wt_dev_falt_year_common_line: i + '/his/query.htm',
+        //analysis_wt_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_wt_dev_falt_accum_common_list1: i + '/his/query.htm',
+        //analysis_wt_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_wt_dev_falt_accum_common_list2: i + '/his/query.htm',
+        //analysis_wt_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_wt_dev_falt_accum_common_list3: i + '/his/query.htm',
+        //analysis_wt_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_wt_dev_falt_accum_common_list4: i + '/his/query.htm',
+        //analysis_wt_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_wt_dev_falt_accum_common_list5: i + '/his/query.htm',
+        //analysis_wt_dev_falt_accum_common_list	故障分析通用接口 - 累计 - 列表
+        GETanalysis_wt_dev_falt_accum_common_list6: i + '/his/query.htm',
+        //analysis_wt_dev_falt_accum_common_line	故障分析通用接口 - 累计 - 曲线
+        GETanalysis_wt_dev_falt_accum_common_line: i + '/his/query.htm',
+
+        // analysis_wp_company_line_month_info	集团- 风电 - 线损电量 - 月 - INFO
+        GETanalysis_wp_company_line_month_info: i + '/his/query.htm',
+        // analysis_wp_company_line_month_stationlist	集团 - 风电 - 线损电量 - 月 - 电站列表
+        GETanalysis_wp_company_line_month_stationlist: i + '/his/query.htm',
+        // analysis_wp_company_line_month_stationline	集团 - 风电 - 线损电量 - 月 - 电站曲线
+        GETanalysis_wp_company_line_month_stationline: i + '/his/query.htm',
+        // analysis_wp_company_line_year_info	集团 - 风电 - 线损电量 - 年 - INFO
+        GETanalysis_wp_company_line_year_info: i + '/his/query.htm',
+        // analysis_wp_company_line_year_stationlist	集团 - 风电 - 线损电量 - 年 - 电站列表
+        GETanalysis_wp_company_line_year_stationlist: i + '/his/query.htm',
+        // analysis_wp_company_line_year_stationline	集团 - 风电 - 线损电量 - 年 - 电站曲线
+        GETanalysis_wp_company_line_year_stationline: i + '/his/query.htm',
+        // analysis_wp_company_line_year_timelist	集团 - 风电 - 线损电量 - 年 - 时间列表
+        GETanalysis_wp_company_line_year_timelist: i + '/his/query.htm',
+        // analysis_wp_company_line_year_timeline	集团 - 风电 - 线损电量 - 年 - 时间曲线
+        GETanalysis_wp_company_line_year_timeline: i + '/his/query.htm',
+        // analysis_wp_company_line_accum_info	集团 - 风电 - 线损电量 - 累计 - INFO
+        GETanalysis_wp_company_line_accum_info: i + '/his/query.htm',
+        // analysis_wp_company_line_accum_stationlist	集团 - 风电 - 线损电量 - 累计 - 电站列表
+        GETanalysis_wp_company_line_accum_stationlist: i + '/his/query.htm',
+        // analysis_wp_company_line_accum_stationline	集团 - 风电 - 线损电量 - 累计 - 电站曲线
+        GETanalysis_wp_company_line_accum_stationline: i + '/his/query.htm',
+        // analysis_wp_company_line_accum_timelist	集团 - 风电 - 线损电量 - 累计 - 时间列表
+        GETanalysis_wp_company_line_accum_timelist: i + '/his/query.htm',
+        // analysis_wp_company_line_accum_timeline	集团 - 风电 - 线损电量 - 累计 - 时间曲线
+        GETanalysis_wp_company_line_accum_timeline: i + '/his/query.htm',
+        // analysis_wp_station_line_year_info	电站 - 风电 - 线损电量 - 年 - INFO
+        GETanalysis_wp_station_line_year_info: i + '/his/query.htm',
+        // analysis_wp_station_line_year_timelist	电站 - 风电 - 线损电量 - 年 - 时间列表
+        GETanalysis_wp_station_line_year_timelist: i + '/his/query.htm',
+        // analysis_wp_station_line_year_timeline	电站 - 风电 - 线损电量 - 年 - 时间曲线
+        GETanalysis_wp_station_line_year_timeline: i + '/his/query.htm',
+        // analysis_wp_station_line_accum_info	电站 - 风电 - 线损电量 - 累计 - INFO
+        GETanalysis_wp_station_line_accum_info: i + '/his/query.htm',
+        // analysis_wp_station_line_accum_timelist	电站 - 风电 - 线损电量 - 累计 - 时间列表
+        GETanalysis_wp_station_line_accum_timelist: i + '/his/query.htm',
+        // analysis_wp_station_line_accum_timeline	电站 - 风电 - 线损电量 - 累计 - 时间曲线
+        GETanalysis_wp_station_line_accum_timeline: i + '/his/query.htm',
+
+        // analysis_wp_company_sub_health_month_info	集团- 风电 - 亚健康损失偏差 - 月 - INFO
+        GETanalysis_wp_company_sub_health_month_info: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_month_stationlist	集团 - 风电 - 亚健康损失偏差 - 月 - 电站列表
+        GETanalysis_wp_company_sub_health_month_stationlist: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_month_stationline	集团 - 风电 - 亚健康损失偏差 - 月 - 电站曲线
+        GETanalysis_wp_company_sub_health_month_stationline: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_month_timelist, '集团-风电-亚健康损失偏差-月-时间列表', NULL	
+        GETanalysis_wp_company_sub_health_month_timelist: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_month_timeline, '集团-风电-亚健康损失偏差-月-时间曲线', NULL	
+        GETanalysis_wp_company_sub_health_month_timeline: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_year_info	集团 - 风电 - 亚健康损失偏差 - 年 - INFO
+        GETanalysis_wp_company_sub_health_year_info: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_year_stationlist	集团 - 风电 - 亚健康损失偏差 - 年 - 电站列表
+        GETanalysis_wp_company_sub_health_year_stationlist: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_year_stationline	集团 - 风电 - 亚健康损失偏差 - 年 - 电站曲线
+        GETanalysis_wp_company_sub_health_year_stationline: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_year_timelist	集团 - 风电 - 亚健康损失偏差 - 年 - 时间列表
+        GETanalysis_wp_company_sub_health_year_timelist: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_year_timeline	集团 - 风电 - 亚健康损失偏差 - 年 - 时间曲线
+        GETanalysis_wp_company_sub_health_year_timeline: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_accum_info	集团 - 风电 - 亚健康损失偏差 - 累计 - INFO
+        GETanalysis_wp_company_sub_health_accum_info: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_accum_stationlist	集团 - 风电 - 亚健康损失偏差 - 累计 - 电站列表
+        GETanalysis_wp_company_sub_health_accum_stationlist: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_accum_stationline	集团 - 风电 - 亚健康损失偏差 - 累计 - 电站曲线
+        GETanalysis_wp_company_sub_health_accum_stationline: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_accum_timelist	集团 - 风电 - 亚健康损失偏差 - 累计 - 时间列表
+        GETanalysis_wp_company_sub_health_accum_timelist: i + '/his/query.htm',
+        // analysis_wp_company_sub_health_accum_timeline	集团 - 风电 - 亚健康损失偏差 - 累计 - 时间曲线
+        GETanalysis_wp_company_sub_health_accum_timeline: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_year_info	电站 - 风电 - 亚健康损失偏差 - 年 - INFO
+        GETanalysis_wp_station_sub_health_year_info: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_year_timelist	电站 - 风电 - 亚健康损失偏差 - 年 - 时间列表
+        GETanalysis_wp_station_sub_health_year_timelist: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_year_timeline	电站 - 风电 - 亚健康损失偏差 - 年 - 时间曲线
+        GETanalysis_wp_station_sub_health_year_timeline: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_year_devicelist, '电站-风电-亚健康损失偏差-年-设备列表', NUL	
+        GETanalysis_wp_station_sub_health_year_devicelist: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_year_deviceline, '电站-风电-亚健康损失偏差-年-设备曲线', NUL	
+        GETanalysis_wp_station_sub_health_year_deviceline: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_accum_info	电站 - 风电 - 亚健康损失偏差 - 累计 - INFO
+        GETanalysis_wp_station_sub_health_accum_info: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_accum_timelist	电站 - 风电 - 亚健康损失偏差 - 累计 - 时间列表
+        GETanalysis_wp_station_sub_health_accum_timelist: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_accum_timeline	电站 - 风电 - 亚健康损失偏差 - 累计 - 时间曲线
+        GETanalysis_wp_station_sub_health_accum_timeline: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_accum_devicelist, '电站-风电-亚健康损失偏差-累计-设备列表',
+        GETanalysis_wp_station_sub_health_accum_devicelist: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_accum_deviceline, '电站-风电-亚健康损失偏差-累计-设备曲线',	
+        GETanalysis_wp_station_sub_health_accum_deviceline: i + '/his/query.htm',
+        // nalysis_wp_station_sub_health_month_info, '电站 - 风电 - 亚健康损失偏差 - 月 - INFO', NULL, 'wind_	
+        GETanalysis_wp_station_sub_health_month_info: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_month_devicelist, '电站-风电-亚健康损失偏差-月-设备列表', NU	
+        GETanalysis_wp_station_sub_health_month_devicelist: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_month_deviceline, '电站-风电-亚健康损失偏差-月-设备曲线', NU	
+        GETanalysis_wp_station_sub_health_month_deviceline: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_month_timelist, '电站-风电-亚健康损失偏差-月-时间列表', NULL	
+        GETanalysis_wp_station_sub_health_month_timelist: i + '/his/query.htm',
+        // analysis_wp_station_sub_health_month_timeline, '电站-风电-亚健康损失偏差-月-时间曲线', NULL	
+        GETanalysis_wp_station_sub_health_month_timeline: i + '/his/query.htm',
+
+        // query_wp_station_accum_subject	风电- 电站 - 累计 - 主题
+        GETquery_wp_station_accum_subject: i + '/his/query.htm',
+        // query_wp_station_accum_timelist	风电 - 电站 - 累计 - 时间列表
+        GETquery_wp_station_accum_timelist: i + '/his/query.htm',
+        // query_wp_station_accum_timeline	风电 - 电站 - 累计 - 时间曲线
+        GETquery_wp_station_accum_timeline: i + '/his/query.htm',
+        // query_wp_company_accum_subject	风电 - 集团 - 累计 - 主题
+        GETquery_wp_company_accum_subject: i + '/his/query.htm',
+        // query_wp_company_accum_timelist	风电 - 集团 - 累计 - 时间列表
+        GETquery_wp_company_accum_timelist: i + '/his/query.htm',
+        // query_wp_company_accum_timeline	风电 - 集团 - 累计 - 时间曲线
+        GETquery_wp_company_accum_timeline: i + '/his/query.htm',
+
+        // 集团所有人员列表
+        GETselectComUser: i + '/Company/selectComUser.htm',
+
+        // 用户管理 角色配置  库房管理员 配置信息查询
+        GETopUserBusiConfigMult02getCurrData: i + '/opUserBusiConfig/mult/02/getCurrData.htm',
+        // 用户管理 角色配置  库房管理员 保存更新
+        opUserBusiConfigMult02updateCurrData: i + '/opUserBusiConfig/mult/02/updateCurrData.htm',
+        // 查询当前用户是否有  库管 权限
+        GETfittingManageAuth: i + '/UserAuthHandle/getFittingManageAuth.htm',
+
+        // 用户管理 角色配置  发红包 配置信息查询
+        GETopUserBusiConfigSingle01getCurrData: i + '/opUserBusiConfig/single/01/getCurrData.htm',
+        // 用户管理 角色配置  发红包 保存更新
+        opUserBusiConfigSingle01updateCurrData: i + '/opUserBusiConfig/single/01/updateCurrData.htm',
+        // 查询当前用户是否有  发红包 权限
+        GETminiAppRadPayAuth: i + '/UserAuthHandle/getMiniAppRadPayAuth.htm',
+
+        // 用户管理 角色配置  删除
+        opUserBusiConfigDelete: i + '/opUserBusiConfig/delete.htm',
+        
+        // 电站委托服务  集团管理员  列表
+        GETopEntrustCompanyStationList: i + '/OpEntrust/opEntrustCompanyStationList.htm',
+        // 电站委托服务  集团管理员  提交委托
+        insertEntrust: i + '/OpEntrust/insertEntrust.htm',
+        // 电站委托服务  集团管理员  取消委托
+        cancelEntrust: i + '/OpEntrust/cancelEntrust.htm',
+        
+        
+    }; 
+})(window));

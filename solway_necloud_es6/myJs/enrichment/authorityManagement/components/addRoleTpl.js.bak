@@ -1,108 +1,118 @@
 
 ajaxData({
-    newsTypeList:{
-        name:'GETnewsTypeList',
+    newsTypeList: {
+        name: 'GETnewsTypeList',
         data: {},
         later: true,
         onlyLatest: true
     },
-    selectRoleDetail:{
-        name:'GETselectRoleDetail',
+    selectRoleDetail: {
+        name: 'GETselectRoleDetail',
         data: {},
         later: true,
         onlyLatest: true
     },
-    update:{
-        name:'POSTaddRole',
+    update: {
+        name: 'POSTaddRole',
         data: {},
         later: true,
         onlyLatest: true
     }
 }, {
-    __serviceName__: 'addRoleTplService',
-})('addRoleTplCtrl', ['$scope', 'addRoleTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+        __serviceName__: 'addRoleTplService',
+    })('addRoleTplCtrl', ['$scope', 'addRoleTplService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
 
-    //接收消息类型列表
-    const recieveNewsTypes = () =>{
-        $scope.newsTypeList.getData({
-            dictType: "ROLE_REC_MSG_TYPE_CODE"
-        }).then(res => {
-            $scope.recMsgTypes = res;
-        });
-    }
-
-    recieveNewsTypes();
-
-    //角色详情
-    const roleDetail = () =>{
-        $scope.selectRoleDetail.getData({
-            roleId: $scope.roleId
-        }).then(res => {
-            if (res.key == "1") {
-                const data = res.data;
-                $scope.formData = data;
-                if (data.recmsgtypes) {
-                    $.each(data.recmsgtypes.split(','), function (i, v) {
-                        $("input[name='recmsgtypes'][value='" + v + "']").prop("checked", true);
-                    })
-                }
-            }
-        });
-    }
-
-    $scope.$on('broadAddRole',function(e,data){
-        $scope.formData = {};
-        $("input[name='recmsgtypes']").prop("checked", false);
-
-        $scope.roleId = data.roleId;
-        if($scope.roleId) roleDetail();
-    });
-
-    //保存
-    $scope.save = () =>{
-        const newsTypeArr = [];
-        $("input[name='recmsgtypes']:checked").map((index,v)=>{
-            newsTypeArr.push(v.value)
-        })
-       
-        $scope.formData['roleId'] = $scope.roleId;
-        $scope.formData['recmsgtypes'] = newsTypeArr.join(',');
-        $scope.formData['depid'] = $scope.depid;
-        $scope.formData['roleType'] = '02';
-
-        if (!$solway.formValidation($scope.formData, '.addRoleTpl', toaster)){
-            if(newsTypeArr.length<=0){
-                toaster.pop('error', '','验证失败:接收消息类型至少选一个')
-            }
-            return;
-        } 
-
-        if(newsTypeArr.length<=0){
-            toaster.pop('error', '','验证失败:接收消息类型至少选一个');
-            return;
+        //接收消息类型列表
+        const recieveNewsTypes = () => {
+            $scope.newsTypeList.getData({
+                dictType: "ROLE_REC_MSG_TYPE_CODE"
+            }).then(res => {
+                $scope.recMsgTypes = res;
+            });
         }
-        
-        $scope.update.getData({data: JSON.stringify($scope.formData)}).then(res=>{
-            if (res.key == 1) {
-                toaster.pop('error', '','部门不存在')
-            } else if(res.key == 2) {
-                toaster.pop('error', '','新增失败')
-            } else if(res.key == 3) {
-                toaster.pop('success', '','新增成功');
-                $scope.$emit('addRoleCallback');
-            } else if (res.key == 4) {
-                toaster.pop('error', '','修改失败')
-            } else if (res.key == 5) {
-                toaster.pop('success', '','修改成功');
-                $scope.$emit('addRoleCallback');
-            }
+
+        recieveNewsTypes();
+
+        //角色详情
+        const roleDetail = () => {
+            $scope.selectRoleDetail.getData({
+                roleId: $scope.roleId
+            }).then(res => {
+                if (res.key == "1") {
+                    const data = res.data;
+                    $scope.formData = data;
+                    if (data.recmsgtypes) {
+                        $.each(data.recmsgtypes.split(','), function (i, v) {
+                            $("input[name='recmsgtypes'][value='" + v + "']").prop("checked", true);
+                        })
+                    }
+                }
+            });
+        }
+
+        $scope.$on('broadAddRole', function (e, data) {
+            $scope.formData = {};
+            $("input[name='recmsgtypes']").prop("checked", false);
+
+            $scope.roleId = data.roleId;
+            if ($scope.roleId) roleDetail();
         });
-        
-    }
 
-    //取消
-    $scope.cancel = () =>{
-        $scope.$emit('addRoleCancelCallback');
-    }
+        //保存
+        $scope.save = () => {
+            const newsTypeArr = [];
+            $("input[name='recmsgtypes']:checked").map((index, v) => {
+                newsTypeArr.push(v.value)
+            })
 
-});
+            $scope.formData['roleId'] = $scope.roleId;
+            $scope.formData['recmsgtypes'] = newsTypeArr.join(',');
+            $scope.formData['depid'] = $scope.depid;
+            $scope.formData['roleType'] = '02';
+
+            if (!$solway.formValidation($scope.formData, '.addRoleTpl', toaster)) {
+                if (newsTypeArr.length <= 0) {
+                    toaster.pop('error', '', '验证失败:接收消息类型至少选一个')
+                }
+                return;
+            }
+
+            if (newsTypeArr.length <= 0) {
+                toaster.pop('error', '', '验证失败:接收消息类型至少选一个');
+                return;
+            }
+
+            $scope.update.getData({
+                data: JSON.stringify({
+                    ...$scope.formData,
+                    authRoleRights: [
+                        { 'rightId': 47, 'writeflag': 1 },
+                        { 'rightId': 49, 'writeflag': 0 },
+                        { 'rightId': 100, 'writeflag': 1 },
+                        { 'rightId': 101, 'writeflag': 0 }
+                    ]
+                })
+            }).then(res => {
+                if (res.key == 1) {
+                    toaster.pop('error', '', '部门不存在')
+                } else if (res.key == 2) {
+                    toaster.pop('error', '', '新增失败')
+                } else if (res.key == 3) {
+                    toaster.pop('success', '', '新增成功');
+                    $scope.$emit('addRoleCallback');
+                } else if (res.key == 4) {
+                    toaster.pop('error', '', '修改失败')
+                } else if (res.key == 5) {
+                    toaster.pop('success', '', '修改成功');
+                    $scope.$emit('addRoleCallback');
+                }
+            });
+
+        }
+
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('addRoleCancelCallback');
+        }
+
+    });

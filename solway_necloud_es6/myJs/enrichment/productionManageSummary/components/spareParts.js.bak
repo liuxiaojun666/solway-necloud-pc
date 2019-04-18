@@ -171,13 +171,15 @@ ajaxData(
             $scope.opFittingsDictUpdate.getData(formData);
         });
     };
-
+    
     // 保存 更新 处理结果
     $scope.opFittingsDictUpdate.subscribe(res => {
         if (res.code !== 0) return toaster.pop('error', '', res.msg);
         toaster.pop('success', '', res.msg);
         $scope.opFittingsDictUpdate.edit = false;
         $scope.opFittingsDictPage.getData();
+        $scope.opFittingsDictSelectCtg1.getData();
+        $scope.opFittingsDictSelectCtg2.getData();
     });
 
     // 删除 备件

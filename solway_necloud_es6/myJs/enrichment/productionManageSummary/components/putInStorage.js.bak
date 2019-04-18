@@ -3,7 +3,8 @@ ajaxData(
         // 设备型号列表
         opFittingsDictSelectCurrData: {
             name: 'GETopFittingsDictSelectCurrData',
-            data: {}
+            data: {},
+            later: true
         },
         // 批量入库模板上传
         opFittingsDictImportTemplate: {
@@ -35,6 +36,7 @@ ajaxData(
     $scope.$on('popUp', (event, obj) => {
         const {tabIndex} = $scope;
         if (tabIndex !== 1) return;
+        $scope.opFittingsDictSelectCurrData.getData();
         $scope.down = true;
 
         $scope.createDate = (new Date).Format('yyyy-MM-dd');
