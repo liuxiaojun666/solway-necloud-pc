@@ -85,7 +85,6 @@ ajaxData({
         }
 
         //单选框选中-> 更改select的值
-        $scope.radioIndex = 0;
         $scope.radioToSelect = (item, index) => {
             $scope.$emit('radioToFather', { 'type': 'horizon', 'k': item.k, 'value': item.v });
             $scope.herizonBottom = item.ll;
@@ -93,6 +92,13 @@ ajaxData({
             $scope.herizonBottom.map((item) => {
                 item.show = true;
             })
+            // $scope.herizonData.ctg1.ll.map((item) => {
+            //     item.show = true;
+            // })
+            // $scope.herizonData.ctg2.ll.map((item) => {
+            //     item.show = true;
+            // })
+
             $scope.radioIndex = index;
             //处理fdStyle 字段
             fdStyleFun();
@@ -122,7 +128,7 @@ ajaxData({
             })
         }
 
-
+        $scope.horizonCheckData = [];
         $scope.horizonPoint = [];
         $scope.horizonKpi = [];
 
@@ -131,36 +137,62 @@ ajaxData({
             1: 'horizonKpi'
         }
         //左侧多选按钮-> 右侧 穿梭
-        $scope.shuttle = () => {
-            $scope[key[$scope.radioIndex]] = [];
+        $scope.shuttle = (item,$index) => {
+            // item.checked = true;
+            // $scope.herizonBottom.map((item,index)=>{
+            //     if(index != $index){
+            //         $scope.herizonBottom[index].checked = false;
+            //     }
+            // })
+            $scope.herizonBottom.map((item)=>{
+                item.checked = false;
+            })
+            item.checked = true;
             $scope.herizonBottom.filter(item => item.checked && !item.checkedV).map((item, index) => {
                 item.checkedH = item.checked;
-                if ($scope[key[$scope.radioIndex]].indexOf(item) == '-1') {
-                    $scope[key[$scope.radioIndex]].push(item);
+                if ($scope.horizonCheckData.indexOf(item) == '-1') {
+                    $scope.horizonCheckData = [];
+                    $scope.horizonCheckData.push(item);
                 }
             })
         }
 
         //右侧删除小按钮
         $scope.delRight = (fdKey, index) => {
+            $scope.herizonData.ctg1.ll.forEach((item) => {
+                if (item.fdKey == fdKey) {
+                    item.checked = false;
+                }
+            })
+            $scope.herizonData.ctg2.ll.forEach((item) => {
+                if (item.fdKey == fdKey) {
+                    item.checked = false;
+                }
+            })
             $scope.herizonBottom.forEach((item) => {
                 if (item.fdKey == fdKey) {
                     item.checked = false;
                 }
             })
-            $scope[key[$scope.radioIndex]].splice(index, 1);
+            $scope.horizonCheckData.splice(index, 1);
         }
 
         //全部删除
         $scope.delRightAll = () => {
-            if ($scope[key[$scope.radioIndex]].length == 0) {
+            if ($scope.horizonCheckData.length == 0) {
                 toaster.pop('error', '', '请至少选择一条');
             } else {
                 $solway.confirm({ message: '确定全部删除吗？' }, () => {
-                    $scope[key[$scope.radioIndex]] = [];
-                    $scope.herizonBottom.forEach((item) => {
+                    $scope.horizonCheckData = [];
+                    $scope.herizonData.ctg1.ll.forEach((item) => {
                         item.checked = false;
                     })
+                    $scope.herizonData.ctg2.ll.forEach((item) => {
+                        item.checked = false;
+                    })
+                    // $scope.herizonBottom.forEach((item) => {
+                    //     item.checked = false;
+                    // })
                     $scope.$apply();
                 });
             }

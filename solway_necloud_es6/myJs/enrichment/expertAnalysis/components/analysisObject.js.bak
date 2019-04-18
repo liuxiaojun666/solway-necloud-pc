@@ -48,14 +48,12 @@ ajaxData({
         }
 
         //获取父级发送的数据
-        $scope.$on('analysObDataNew', (item, index) => {
-            if (index.analysObDataNew) {
-                $scope.analysObDataNew = index.analysObDataNew;
-                $scope.analysObDataNewDevice = index.analysObDataNewDevice;
+        $scope.$on('analysObDataNew', (item, data) => {
+            if (data.analysObDataNew) {
+                $scope.analysObDataNew = data.analysObDataNew;
+                $scope.analysObDataNewDevice = data.analysObDataNewDevice;
                 //默认获取第一项的数据
-                // $scope.radioToSelect($scope.analysObDataNew[0], 0);
                 $scope.radioDevice();
-                $scope.equipChoice($scope.analysObDataNewDevice[0], 0);
             }
         })
 
@@ -70,14 +68,16 @@ ajaxData({
         $scope.radioDevice = () => {
             $scope.analysisObjectK = 99;
             $scope.zNodes = [];
-            $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+            // $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
             $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备' });
+            //默认获取第一项的数据
+            $scope.equipChoiceIndex = 0;
+            $scope.equipChoice($scope.analysObDataNewDevice[0], 0);
         }
         //处理点击机型radio
         $scope.radioType = () => {
             $scope.analysisObjectK = 100;
             $scope.zNodes = [];
-            $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
             $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 100, 'value': '机型' });
         }
 
@@ -125,6 +125,9 @@ ajaxData({
                 $scope.queryTreeWithSt.subscribe(res => {
                     $scope.zNodes = res.body;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                    $scope[key[$scope.analysisObjectK]].map((item) => {
+                        zTree.checkNode(zTree.getNodeByParam("id", item.id), true, true);
+                    })
                 });
             } else if (k.substr(0, 1) == "4") {
                 $scope.queryStTreeWithDevices.getData({
@@ -134,6 +137,9 @@ ajaxData({
                 $scope.queryStTreeWithDevices.subscribe(res => {
                     $scope.zNodes = res.body;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                    $scope[key[$scope.analysisObjectK]].map((item) => {
+                        zTree.checkNode(zTree.getNodeByParam("id", item.id), true, true);
+                    })
                 });
             }
         }
@@ -174,10 +180,10 @@ ajaxData({
         $scope.objectGroup = [];
 
         const key = {
-            0: 'objectDevice',
-            1: 'objectPower',
+            99: 'objectDevice',
+            3: 'objectPower',
             2: 'objectArea',
-            3: 'objectGroup'
+            1: 'objectGroup'
         }
 
         //单击父节点展开 子节点
@@ -188,22 +194,23 @@ ajaxData({
 
         //独立添加
         $scope.oneAdd = () => {
-            $scope[key[$scope.radioIndex]] = $scope.millleArr;
+            $scope[key[$scope.analysisObjectK]] = $scope.middleArr;
         }
+
         //成组添加
         $scope.groupAdd = () => {
-            $scope[key[$scope.radioIndex]] = $scope.millleArr;
+            $scope[key[$scope.analysisObjectK]] = $scope.middleArr;
         }
 
         //点击多选框 ->右侧穿梭
         function checkChangeFn(event, treeId, treeNode) {
             var checkedNode = zTree.getCheckedNodes(true);
             // $scope[key[$scope.radioIndex]] = [];
-            $scope.millleArr = [];
+            $scope.middleArr = [];
             checkedNode.map(item => {
                 if (!item.children) {
                     // $scope[key[$scope.radioIndex]].push(item);
-                    $scope.millleArr.push(item);
+                    $scope.middleArr.push(item);
                 }
             })
         }
@@ -211,19 +218,20 @@ ajaxData({
         //右侧删除小按钮
         $scope.delRight = (id, index) => {
             zTree.checkNode(zTree.getNodeByParam("id", id), false, true);
-            $scope[key[$scope.radioIndex]].splice(index, 1);
+            $scope[key[$scope.analysisObjectK]].splice(index, 1);
+            checkChangeFn();
         }
 
         //全部删除
         $scope.delRightAll = () => {
-            if ($scope[key[$scope.radioIndex]].length == 0) {
+            if ($scope[key[$scope.analysisObjectK]].length == 0) {
                 toaster.pop('error', '', '请至少选择一条');
             } else {
                 $solway.confirm({ message: '确定全部删除吗？' }, () => {
-                    $scope[key[$scope.radioIndex]].map((item) => {
+                    $scope[key[$scope.analysisObjectK]].map((item) => {
                         zTree.checkNode(zTree.getNodeByParam("id", item.id), false, true);
                     })
-                    $scope[key[$scope.radioIndex]] = [];
+                    $scope[key[$scope.analysisObjectK]] = [];
                     $scope.$apply();
                 });
             }
