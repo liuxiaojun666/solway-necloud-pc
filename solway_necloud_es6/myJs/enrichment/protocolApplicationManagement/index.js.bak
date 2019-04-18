@@ -1,0 +1,87 @@
+ajaxData({
+    powerStationList:{
+        name: 'GETpowerStationList',
+        data: {},
+        later: true
+    }
+}, {})('protocolApplyManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '协议应用管理';
+    
+    $scope.getStationList = () =>{
+        $scope.powerStationList.getData({
+            pageIndex : 0,
+            pageSize : 10,
+            parentIsNull:1,
+            keyWords : $scope.keyWords,
+        })
+    }
+
+    $scope.getStationList();
+    
+    $scope.column = [
+        {
+            title: '电站编号',
+            dataIndex: 'stationcode',
+            align: 'center',
+            sort: !0
+        },{
+            title: '电站名称',
+            width:'25%',
+            dataIndex: 'stationname',
+            sort: !0,
+            align: 'center'
+        },{
+            title: '电站类别',
+            dataIndex: 'stationClass',
+            sort: !0,
+            align: 'center',
+            render(text, item, index) {
+                if(text == '01'){ //光伏
+                    return '光伏'
+                }else if(text == '02'){ //风电
+                    return '风电'
+                }
+            }
+        }, {
+            title: '所属企业',
+            dataIndex: 'companyname',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '负责人',
+            dataIndex: 'managername',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '联系电话',
+            dataIndex: 'stationtel',
+            align: 'center'
+        }, {
+            title: '所属省份',
+            dataIndex: 'province',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="授权"></i>
+                </div>
+                `
+            },
+        }
+    ]
+
+    $scope.trClick = (item, index, event) => {
+        $scope.editTplShow = true;
+        $scope.$broadcast('editProtocolConfBroad',item);
+    };
+
+   
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});
