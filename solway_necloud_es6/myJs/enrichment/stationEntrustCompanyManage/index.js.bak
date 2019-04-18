@@ -25,6 +25,7 @@ ajaxData(
 )('stationEntrustCompanyManageCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
     $scope.moduleName = '委托服务';//当前页面名称；
 
+    // 电站列表
     $scope.opEntrustCompanyStationList.subscribe(() => {
         $scope.opEntrustCompanyStationList.column = [
             {
@@ -34,7 +35,7 @@ ajaxData(
                 align: 'center',
                 checkboxName: 'batchprocessing',
                 render(text, record, index) {
-                    return '<label class="i-checks m-b-none"><input data-identifies="' + record.busino + '_' + record.mid + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    return '<label class="i-checks m-b-none"><input data-identifies="' + record.id + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
                 }
             },
             {
@@ -76,11 +77,65 @@ ajaxData(
                 sort: true,
                 align: 'center',
                 render(text) {
-                    return ['未委托', '已委托'][text];
+                    return ['<span style="color:#FF6767;opacity:0.8;">未委托</span>', '已委托'][text];
                 }
             },
         ];
     });
+
+    $scope.insertEntrust.commit = () => {
+
+        $solway.confirm(
+            {
+                message: '确定要将选中电站委托创维互联进行监控运维服务？'
+            },
+            async () => {
+
+                const ids = document.querySelectorAll('[name=batchprocessing]')
+                            :: [].filter(v => v.checked).map(v => v.dataset.identifies);
+
+                if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条');
+
+                const res = await $scope.insertEntrust.getData({ ids: ids.join(',') });
+
+                if (res.code !== 0) return toaster.pop('error', '', res.msg);
+
+                toaster.pop('success', '', res.msg);
+
+                $scope.opEntrustCompanyStationList.getData();
+            }
+        );
+    };
+
+
+    $scope.cancelEntrust.beforGetData = () => {
+
+        $solway.confirm(
+            {
+                message: `
+                    确定要取消以下电站的监控运维委托服务？<br/>
+                    取消委托服务将清除委托期间的运行数据。<br/>
+                    请慎重操作！
+                `
+            },
+            async () => {
+
+                const ids = document.querySelectorAll('[name=batchprocessing]')
+                            :: [].filter(v => v.checked).map(v => v.dataset.identifies);
+
+                if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条');
+
+                const res = await $scope.cancelEntrust.getData({ ids: ids.join(',') });
+
+                if (res.code !== 0) return toaster.pop('error', '', res.msg);
+
+                toaster.pop('success', '', res.msg);
+
+                $scope.opEntrustCompanyStationList.getData();
+            }
+        );
+    };
+
 
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');
