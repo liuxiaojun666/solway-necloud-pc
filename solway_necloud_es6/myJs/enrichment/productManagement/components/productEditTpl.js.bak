@@ -6,6 +6,12 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    fanChildSystemList:{
+        name:'GETfanChildSystemList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     updateProduct:{
         name:'POSTupdateProduct',
         data: {},
@@ -18,14 +24,24 @@ ajaxData({
     __serviceName__: 'editProductTplService',
 })('editProductTplModelCtrl', ['$scope', 'editProductTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
     
+    const getFanSystemData =()=>{
+        $scope.fanChildSystemList.getData({ dictType:'WT_SYS'}).then(res=>{
+            $scope.fanChildSystem = res;
+        });
+    }
+
+    getFanSystemData();
+
     // 初始
     $scope.$on('editProductBroad',async(e,data)=>{
         $scope.getManufacturerList();
+        $scope.formData = {};
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+        $("input[name='fanChild']").each(function () {
+            this.checked = false;
+        });
         if(data){
-            $scope.formData = {};
-            await myAjaxData.timeout(0);
-            $scope.$apply();
-
             $scope.formData = {
                 id: data.id,
                 productcode:data.productcode,
@@ -38,11 +54,27 @@ ajaxData({
                 mainparameter: data.mainparameter,
                 descp: data.descp
             };
+            if($scope.formData.devicetype == 17 || $scope.formData.devicetype == 18){
+                $scope.stationType = '02';
+            }else{
+                $scope.stationType = '01';
+            }
+
+            $timeout(()=>{
+                if(data.subs){
+                    let subs = data.subs.split(',');
+                    $("input[name='fanChild']").each(function () {
+                        if(subs.includes(this.dataset.ids)) this.checked = 'checked';
+                    });
+                }
+            })
+            
 
             await myAjaxData.timeout(0);
             $scope.$apply();    
         }else{
             $scope.formData = {};
+            $scope.stationType = '01';
             await myAjaxData.timeout(0);
             $scope.$apply();
         }
@@ -64,10 +96,23 @@ ajaxData({
         $scope.formData['devicetype'] = type;
     }
 
+
+    $scope.switchStationType = type =>{
+        $scope.stationType = type;
+    }
+
      //保存
     $scope.save = () =>{
         if (!$solway.formValidation($scope.formData, '.editProductTpl', toaster)) return;//校验非空
 
+        
+        if($scope.formData.devicetype == 18){
+            let checkedArr = [];
+            $("input[name='fanChild']:checked").map((index,v)=>{
+                checkedArr.push(v.dataset.ids)
+            })
+            $scope.formData['subs'] = checkedArr.join(',')
+        } 
         $scope.updateProduct.getData($scope.formData).then(res=>{
             if(res.id){
                 toaster.pop('success','','保存成功');
