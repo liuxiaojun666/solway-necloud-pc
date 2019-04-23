@@ -119,13 +119,17 @@ ajaxData({
     };
 
     $scope.$on('cancelCallback',()=>{
-        $scope.newSvgModel = false;
+        window.location.reload();
     });
 
     $scope.$on('saveSuccess',()=>{
-        $scope.newSvgModel = false;
         $scope.initSvgList();
     })
+
+    $scope.reloadPage = () =>{
+        $scope.initSvgList();
+        // $scope.newSvgModel = false;
+    }
 
  
     $timeout(() => {
