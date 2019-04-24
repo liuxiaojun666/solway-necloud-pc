@@ -14,47 +14,97 @@ ajaxData(
             sameTimeOnce: true,
             later: true
         },
-    }, 
+    },
     {
         __serviceName__: 'equipmentRunDetailService',
     }
 )('equipmentRunDetailCtrl', ['$scope', 'equipmentRunDetailService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
 
-    $scope.$on('equipmentRunDetail', (event, {state, stClass}) => {
+    $scope.$on('equipmentRunDetail', (event, { state: statusText, stClass }) => {
+        $scope.stClass = stClass;
+        $scope.status = {
+            '离线': '04',
+            '维护': '06',
+            '故障': '02',
+            '待机': '05',
+        }[statusText];
+
+        $scope.diffGetData();
+    });
+
+    $scope.diffGetData = () => {
+        $scope.datasource = null;
+        const { stClass, status } = $scope;
+
         if (stClass === '01') {
             $scope.getRunRealDataBInverter.getData({
-                status: {
-                    '离线': '04',
-                    '维护': '',
-                    '故障': '02',
-                    '待机': '',
-                }[state],
+                status: status.replace('06', '').replace('05', ''),
                 pageIndex: 0,
-                pageSize: 999
+                pageSize: 20
             });
         } else if (stClass === '02') {
             $scope.realtimeWindTurbine.getData({
-                status: {
-                    '离线': '04',
-                    '维护': '06',
-                    '故障': '02',
-                    '待机': '05',
-                }[state],
+                status,
                 pageIndex: 0,
-                pageSize: 999
+                pageSize: 20
             });
         }
-    });
+    };
 
-    $scope.getRunRealDataBInverter.column = [
+    $scope.column = [
         {
             title: '电站',
-            dataIndex: '',
-        }
+            dataIndex: 'stationName',
+        },
+        {
+            title: '设备',
+            dataIndex: 'name',
+        },
+        {
+            title: '状态',
+            dataIndex: 'statusDesc',
+            align: 'center'
+        },
+        {
+            title: '时间',
+            dataIndex: 'utime',
+            align: 'center',
+            render(text) {
+                return text && new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss');
+            }
+        },
     ];
-    
+
+    // 逆变器 处理
+    $scope.getRunRealDataBInverter.subscribe(res => {
+        $scope.paging = res;
+        $scope.pagingGetData = $scope.getRunRealDataBInverter.getData;
+        $scope.datasource = res.data || [];
+    });
+
+    // 风机 处理
+    $scope.realtimeWindTurbine.subscribe(res => {
+        $scope.paging = res;
+        $scope.pagingGetData = $scope.realtimeWindTurbine.getData;
+        $scope.datasource = res.data || [];
+    });
+
+    $scope.showInformation = (item, index, event) => {
+        $scope.$broadcast(
+            {
+                '01': "equipmentPopUp",
+                '02': "equipmentPopUpWp"
+            }[$scope.stClass],
+            {
+                stid: item.sid,
+                eqid: item.did
+            }
+        );
+    };
+
+
     // 实例销毁 清除定时器 清除事件绑定
     $scope.$on('$destroy', () => {
-        
+
     });
 });
