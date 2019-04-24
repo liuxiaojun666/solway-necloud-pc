@@ -81,6 +81,14 @@ ajaxData(
             onlyLatest: true,
             sameTimeOnce: true,
         },
+        // 列表视图  获取 设备 类型 气象站 列表
+        runRealDataWeather: {
+            name: 'GETrunRealDataWeather',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
         // 逆变器获取设备信息 用  serialnumber  获取 deviceId
         selectByConditionMap: {
             name: 'GETselectByConditionMap',
@@ -245,6 +253,14 @@ ajaxData(
                 });
                 break;
 
+            case '5':
+                if ($scope.runRealDataWeather.isLoding) return
+                $scope.runRealDataWeather.getData({
+                    search: $scope.searchKey,
+                    status: '00'
+                });
+                break;
+
             default:
                 break;
         }
@@ -302,7 +318,7 @@ ajaxData(
         if (!success) return;
         const { currentDeviceType } = $scope;
         const isChange = !res.data.some(v => v.devid === currentDeviceType);
-        $scope.getDeviceType.res.data = res.data.filter(v => (v.devid === '1' || v.devid === '2' || v.devid === '3' || v.devid === '4'));
+        // $scope.getDeviceType.res.data = res.data.filter(v => (v.devid === '1' || v.devid === '2' || v.devid === '3' || v.devid === '4'));
         if (isChange) $scope.currentDeviceType = res.data[0].devid;
         await myAjaxData.timeout(0);
         $scope.$apply();
@@ -1138,6 +1154,114 @@ ajaxData(
             },
         ];
     };
+    // 电站 今日 设备 列表视图 气象站 列表
+    $scope.runRealDataWeather.subscribe(res => {
+        $scope.column = [
+            {
+                dataIndex: 'statusDesc',
+                title: '状态',
+                width: '80px',
+                sort: true,
+                fixed: 'left',
+                render(text, item, index) {
+                    if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                    else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else return `<span>${text}</span>`;
+                }
+            },
+            {
+                dataIndex: 'did',
+                title: '编号',
+                width: '50px',
+                fixed: 'left',
+                sort: true,
+            },
+            {
+                dataIndex: 'name',
+                title: '名称',
+                width: '120px',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return text && `<text style="color: #428bca;">${text}</text>`
+                }
+            },
+            {
+                dataIndex: 'dtime',
+                title: '时间',
+                width: '130px',
+                align: 'center',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
+                }
+            }, 
+            {
+                dataIndex: 'lh',
+                title: '水平面光照强度瞬时值(W/㎡)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'ls',
+                title: '散射光照强度瞬时值(W/㎡)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'la',
+                title: '斜面光照强度瞬时值(W/㎡)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'lhd',
+                title: '水平面光照日累计(kWh)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'lsd',
+                title: '散射光照日累计(kWh)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'lad',
+                title: '斜面光照日累计(kWh)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'tm',
+                title: '组件温度(℃)',
+                width: '80px',
+                align: 'right'
+            }, {
+                dataIndex: 'ta',
+                title: '环境温度(℃)',
+                width: '80px',
+                align: 'right'
+            }, {
+                dataIndex: 'ws',
+                title: '风速(m/s)',
+                width: '80px',
+                align: 'right'
+            }, {
+                dataIndex: 'wd',
+                title: '风向(°)',
+                width: '80px',
+                align: 'right'
+            }, {
+                dataIndex: 'h2o',
+                title: '湿度(%)',
+                width: '80px',
+                align: 'right',
+            }, {
+                dataIndex: 'p',
+                title: '气压(kPa)',
+                width: '80px',
+                align: 'right'
+            }
+        ];
+    });
     // 电站 今日 时间 列表 列表
     $scope.stationDayTodayTime.getDataCallback = (success, res) => {
         if (!success) return;

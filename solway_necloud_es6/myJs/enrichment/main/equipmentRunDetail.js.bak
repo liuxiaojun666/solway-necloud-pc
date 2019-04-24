@@ -55,20 +55,31 @@ ajaxData(
         {
             title: '电站',
             dataIndex: 'stationName',
+            sort: true
         },
         {
             title: '设备',
             dataIndex: 'name',
+            sort: true
         },
         {
             title: '状态',
             dataIndex: 'statusDesc',
-            align: 'center'
+            align: 'center',
+            sort: true,
+            render(text, item) {
+                if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                else return `<span>${text}</span>`;
+            }
         },
         {
             title: '时间',
             dataIndex: 'utime',
             align: 'center',
+            sort: true,
             render(text) {
                 return text && new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss');
             }
