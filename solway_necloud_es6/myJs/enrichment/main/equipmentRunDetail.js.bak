@@ -1,0 +1,60 @@
+ajaxData(
+    {
+        getRunRealDataBInverter: {
+            name: 'GETDeviceStationGetRunRealDataBInverter',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+        realtimeWindTurbine: {
+            name: 'GETrealtimeWindTurbine2',
+            data: {},
+            onlyLatest: true,
+            sameTimeOnce: true,
+            later: true
+        },
+    }, 
+    {
+        __serviceName__: 'equipmentRunDetailService',
+    }
+)('equipmentRunDetailCtrl', ['$scope', 'equipmentRunDetailService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+
+    $scope.$on('equipmentRunDetail', (event, {state, stClass}) => {
+        if (stClass === '01') {
+            $scope.getRunRealDataBInverter.getData({
+                status: {
+                    '离线': '04',
+                    '维护': '',
+                    '故障': '02',
+                    '待机': '',
+                }[state],
+                pageIndex: 0,
+                pageSize: 999
+            });
+        } else if (stClass === '02') {
+            $scope.realtimeWindTurbine.getData({
+                status: {
+                    '离线': '04',
+                    '维护': '06',
+                    '故障': '02',
+                    '待机': '05',
+                }[state],
+                pageIndex: 0,
+                pageSize: 999
+            });
+        }
+    });
+
+    $scope.getRunRealDataBInverter.column = [
+        {
+            title: '电站',
+            dataIndex: '',
+        }
+    ];
+    
+    // 实例销毁 清除定时器 清除事件绑定
+    $scope.$on('$destroy', () => {
+        
+    });
+});

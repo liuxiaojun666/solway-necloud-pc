@@ -39,7 +39,7 @@ ajaxData(
         companyDayTodayTimeLineData: { xdata: [], line1: [], line2: [] },
         companyDayTodayTimeLineDataWp: { xdata: [], line1: [], line2: [] },
     }
-)('mainMonitoringCtrl', ['$scope', 'mainMonitoringService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+)('mainMonitoringCtrl', ['$scope', 'mainMonitoringService', 'actionRecord', '$interval', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $interval, $ocLazyLoad) => {
     myAjaxData.config.companyDayTodayTimeLineData = { xdata: [], line1: [], line2: [] };
     myAjaxData.config.companyDayTodayTimeLineDataWp = { xdata: [], line1: [], line2: [] };
     $('.themeMonitoring.ng-clock').removeClass('ng-clock');
@@ -232,6 +232,19 @@ ajaxData(
         myPieChart4.setOption(getOption('wait', '待机', ['#08436F', '#8ADCF7', '#08436F', '#fff']), true);
         myPieChart5.setOption(getOption('run', '运行', ['#08436F', '#D2E058', '#08436F', '#58C471']), true);
     });
+
+    $scope.openRunDetail = (state, stClass) => {
+        $scope.openRunDetail.isLoading = true;
+        $scope.openRunDetail.state = state;
+        $scope.openRunDetail.stClass = stClass || '01';
+        $ocLazyLoad.load([
+            'theme/js/dist/enrichment/main/equipmentRunDetail.js' + stamp, 
+            'theme/js/dist/components/myTable.js' + stamp,
+            'theme/js/dist/components/myPagin.js' + stamp,
+        ]).then(() => {
+            $scope.equipmentRunDetail = 'tpl/enrichment/main/equipmentRunDetail.html' + stamp;
+        });
+    };
 
     // 监听窗口改变，重绘图标
     window.addEventListener('resize', chartResize);

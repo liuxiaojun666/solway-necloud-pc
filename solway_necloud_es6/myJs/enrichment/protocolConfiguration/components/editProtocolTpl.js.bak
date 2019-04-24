@@ -371,7 +371,7 @@ ajaxData({
             } if (regWord.test(num)) {
                 return "请输入一个正确的数字";
             } else {
-                return num ? Number(num).toString(16) : '';
+                return num ? '0x'+Number(num).toString(16) : '';
             }
         }
 
@@ -397,6 +397,7 @@ ajaxData({
                 }
             }
             $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
+            $scope.formData['isdefault'] = $('input[name="isdefault"]:checked').val();
 
             $scope.updateProtocol.getData($scope.formData).then(res => {
                 if (res.id) {
