@@ -14,30 +14,6 @@ ajaxData({
         __serviceName__: 'horizonService'
     })('horizonIndexCtrl', ['$scope', 'horizonService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
-        //保存
-        $scope.save = () => {
-            if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
-
-            let formData = {
-                id: $scope.id,
-                dictType: $scope.formData.dictType,
-                dictName: $scope.formData.dictName,
-                dictCode: $scope.formData.dictCode,
-                dictEnName: $scope.formData.dictEnName,
-                description: $scope.formData.description,
-                dictValue: $scope.formData.dictValue
-            }
-
-            $scope.AddbaseDictionary.getData(formData).then(res => {
-                if (res.key == 0) {
-                    toaster.pop('success', '', '保存成功');
-                    $scope.$emit('addCallback');
-                } else {
-                    toaster.pop('error', '', '保存失败');
-                }
-            })
-        }
-
         //获取分析类型 发送的anlsType
         $scope.$on('anlsType', (item, v) => {
             $scope.anlsType = v;
@@ -49,7 +25,6 @@ ajaxData({
         //获取时间纬度 发送的dmsTime
         $scope.$on('dmsTime', (item, v) => {
             $scope.dmsTime = v;
-            // $scope.getHerizonData();
             $scope.HighAnalysis_selectFds.getData({
                 stationClass: "01",
                 anlsType: $scope.anlsType,
@@ -58,17 +33,12 @@ ajaxData({
             })
         })
 
-        //获取横轴指标的数据
-        // $scope.getHerizonData = () => {
-        //     $scope.HighAnalysis_selectFds.getData({
-        //         stationClass: "01",
-        //         anlsType: $scope.anlsType,
-        //         dmsType: $scope.dmsType,
-        //         dmsTime: $scope.dmsTime
-        //     })
-        // }
         $scope.HighAnalysis_selectFds.subscribe(res => {
             $scope.herizonData = res.body;
+            if (!res.body) {
+                toaster.pop('error', '', res.msg);
+                return;
+            }
             $scope.radioToSelect($scope.herizonData.ctg1, 0);
 
         });
@@ -92,13 +62,6 @@ ajaxData({
             $scope.herizonBottom.map((item) => {
                 item.show = true;
             })
-            // $scope.herizonData.ctg1.ll.map((item) => {
-            //     item.show = true;
-            // })
-            // $scope.herizonData.ctg2.ll.map((item) => {
-            //     item.show = true;
-            // })
-
             $scope.radioIndex = index;
             //处理fdStyle 字段
             fdStyleFun();
@@ -129,32 +92,49 @@ ajaxData({
         }
 
         $scope.horizonCheckData = [];
-        $scope.horizonPoint = [];
-        $scope.horizonKpi = [];
+        // $scope.horizonPoint = [];
+        // $scope.horizonKpi = [];
 
         const key = {
             0: 'horizonPoint',
             1: 'horizonKpi'
         }
+
         //左侧多选按钮-> 右侧 穿梭
-        $scope.shuttle = (item,$index) => {
-            // item.checked = true;
-            // $scope.herizonBottom.map((item,index)=>{
-            //     if(index != $index){
-            //         $scope.herizonBottom[index].checked = false;
-            //     }
-            // })
-            $scope.herizonBottom.map((item)=>{
+        $scope.shuttle = (item, $index) => {
+            //点击一个区域 让另一个区域的选中状态置空
+            if ($scope.radioIndex == 0) {
+                $scope.herizonData.ctg2.ll.map((item) => {
+                    item.checked = false;
+                })
+            } else {
+                $scope.herizonData.ctg1.ll.map((item) => {
+                    item.checked = false;
+                })
+            }
+            //实现单选 和 重复点击取消选中
+            if (!item.checked) {
                 item.checked = false;
-            })
-            item.checked = true;
-            $scope.herizonBottom.filter(item => item.checked && !item.checkedV).map((item, index) => {
-                item.checkedH = item.checked;
-                if ($scope.horizonCheckData.indexOf(item) == '-1') {
-                    $scope.horizonCheckData = [];
-                    $scope.horizonCheckData.push(item);
-                }
-            })
+            } else {
+                $scope.herizonBottom.map((item) => {
+                    item.checked = false;
+                })
+                item.checked = true;
+            }
+            //获取选中的数据
+            var filterBottom = $scope.herizonBottom.filter(item => item.checked && !item.checkedV);
+            if (filterBottom.length > 0) {
+                filterBottom.map((item) => {
+                    item.checkedH = item.checked;
+                    if ($scope.horizonCheckData.indexOf(item) == '-1') {
+                        $scope.horizonCheckData = [];
+                        $scope.horizonCheckData.push(item);
+                    }
+                })
+            } else {
+                $scope.horizonCheckData = [];
+            }
+
         }
 
         //右侧删除小按钮
@@ -222,6 +202,12 @@ ajaxData({
 
         //确定
         $scope.confirm = () => {
+            if ($scope.horizonCheckData.length == 0) {
+                toaster.pop('error', '', '所选数据不能为空');
+                return;
+            }
+            parentmyAjaxData.config.fdX.key = $scope.horizonCheckData[0].fdKey;
+            parentmyAjaxData.config.fdX.name = $scope.horizonCheckData[0].fdName;
             $scope.$emit('addCallback');
         }
     });

@@ -13,7 +13,18 @@
         'opWorkFittingsOutCreate',
         'opFittingsRebackCreate',
         'updateConfigDefaultRoleModule',
-        'POSTupdateConfigureRoleModule'
+        'POSTupdateConfigureRoleModule',
+        ...((() => {
+            const o = [];
+            ['1', '2', '3'].forEach(v => {
+                ['1', '2', '3', '401', '402', '403', '404', '405', '417', '418','11','12','13'].forEach(vv => {
+                    ['1', '2', '3', '4', '5'].forEach(vvv => {
+                        o.push('analysis_selectAnlsType'+ v + vv + vvv);
+                    })
+                })
+            });
+            return o;
+        })()),
     ];
     win.uploadFileApi = [
         'insertRptTpl', 
@@ -3085,6 +3096,30 @@
         // 电站委托服务  集团管理员  取消委托
         cancelEntrust: i + '/OpEntrust/cancelEntrust.htm',
         
+        //高级分析模块
+        //分析类型
+        GETHighAnalysis_selectAnlsType: i + '/opHighAnalysis/selectAnlsType.htm',
+        //获取指标
+        GETHighAnalysis_selectFds: i + '/opHighAnalysis/selectFds.htm',
+        //分析对象 - 设备列表
+        GETqueryStTreeWithDevices: i + '/pvwp/station/queryStTreeWithDevices.htm',
+        //分析对象 - 电站列表、区域（部门）列表、集团列表
+        GETqueryTreeWithSt: i + '/pvwp/station/queryTreeWithSt.htm',
+        //分析对象 - 机型列表
+        GETqueryStTreeWithProducts: i + '/pvwp/station/queryStTreeWithProducts.htm',
+        //分析对象 - 数据分析
+        ...((() => {
+            const o = {};
+            ['1', '2', '3'].forEach(v => {
+                ['1', '2', '3', '401', '402', '403', '404', '405', '417', '418','11','12','13'].forEach(vv => {
+                    ['1', '2', '3', '4', '5'].forEach(vvv => {
+                        o['analysis_selectAnlsType'+ v + vv + vvv] = i + `/pvwp/high/analysis/selectAnlsType/01-${v}-${vv}-${vvv}.htm`;
+                    })
+                })
+            });
+            return o;
+        })()),
         
     }; 
+
 })(window));

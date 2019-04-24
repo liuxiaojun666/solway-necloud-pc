@@ -8,30 +8,6 @@ AddbaseDictionary: {
     __serviceName__: 'verticalService'
 })('verticalIndexCtrl', ['$scope', 'verticalService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
-    //保存
-    $scope.save = () => {
-        if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
-
-        let formData = {
-            id: $scope.id,
-            dictType: $scope.formData.dictType,
-            dictName: $scope.formData.dictName,
-            dictCode: $scope.formData.dictCode,
-            dictEnName: $scope.formData.dictEnName,
-            description: $scope.formData.description,
-            dictValue: $scope.formData.dictValue
-        }
-
-        $scope.AddbaseDictionary.getData(formData).then(res => {
-            if (res.key == 0) {
-                toaster.pop('success', '', '保存成功');
-                $scope.$emit('addCallback');
-            } else {
-                toaster.pop('error', '', '保存失败');
-            }
-        })
-    }
-
     // 获取纵轴指标的数据
     $scope.$on('verticalData', () => {
         $scope.verticalData = parentmyAjaxData.config.herizonData;
@@ -63,7 +39,7 @@ AddbaseDictionary: {
         $scope.radioIndex = index;
     }
 
-
+    $scope.verticalCheckData = [];
     $scope.verticalPoint = [];
     $scope.verticalKpi = [];
 
@@ -72,33 +48,53 @@ AddbaseDictionary: {
         1: 'verticalKpi'
     }
     //左侧多选按钮-> 右侧 穿梭
-    $scope.shuttle = () => {
-        $scope[key[$scope.radioIndex]] = [];
-        $scope.verticalBottom.filter(item => item.checked && !item.checkedH).map((item, index) => {
+    $scope.shuttle = (item,) => {
+        $scope.verticalBottom.map((item)=>{
+            item.checked = false;
+        })
+        item.checked = true;
+        $scope.verticalBottom.filter(item => item.checked && !item.checkedH).map((item) => {
             item.checkedV = item.checked;
-            if ($scope[key[$scope.radioIndex]].indexOf(item) == '-1') {
-                $scope[key[$scope.radioIndex]].push(item);
+            if ($scope.verticalCheckData.indexOf(item) == '-1') {
+                $scope.verticalCheckData = [];
+                $scope.verticalCheckData.push(item);
             }
         })
     }
 
     //右侧删除小按钮
     $scope.delRight = (fdKey, index) => {
+        $scope.verticalData.ctg1.ll.forEach((item) => {
+            if (item.fdKey == fdKey) {
+                item.checked = false;
+            }
+        })
+        $scope.verticalData.ctg2.ll.forEach((item) => {
+            if (item.fdKey == fdKey) {
+                item.checked = false;
+            }
+        })
         $scope.verticalBottom.forEach((item) => {
             if (item.fdKey == fdKey) {
                 item.checked = false;
             }
         })
-        $scope[key[$scope.radioIndex]].splice(index, 1);
+        $scope.verticalCheckData.splice(index, 1);
     }
 
     //全部删除
     $scope.delRightAll = () => {
-        if ($scope[key[$scope.radioIndex]].length == 0) {
+        if ($scope.verticalCheckData.length == 0) {
             toaster.pop('error', '', '请至少选择一条');
         } else {
             $solway.confirm({ message: '确定全部删除吗？' }, () => {
-                $scope[key[$scope.radioIndex]] = [];
+                $scope.verticalCheckData = [];
+                $scope.verticalData.ctg1.ll.forEach((item) => {
+                    item.checked = false;
+                })
+                $scope.verticalData.ctg2.ll.forEach((item) => {
+                    item.checked = false;
+                })
                 $scope.verticalBottom.forEach((item) => {
                     item.checked = false;
                 })
@@ -132,6 +128,12 @@ AddbaseDictionary: {
 
     //确定
     $scope.confirm = () => {
+        if ($scope.verticalCheckData.length == 0) {
+            toaster.pop('error', '', '所选数据不能为空');
+            return;
+        }
+        parentmyAjaxData.config.fdY.key = $scope.verticalCheckData[0].fdKey;
+        parentmyAjaxData.config.fdY.name = $scope.verticalCheckData[0].fdName;
         $scope.$emit('addCallback');
     }
 });

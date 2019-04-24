@@ -23,63 +23,18 @@ ajaxData({
         //初始化树
         let zTree;
 
-        //保存
-        $scope.save = () => {
-            if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
-
-            let formData = {
-                id: $scope.id,
-                dictType: $scope.formData.dictType,
-                dictName: $scope.formData.dictName,
-                dictCode: $scope.formData.dictCode,
-                dictEnName: $scope.formData.dictEnName,
-                description: $scope.formData.description,
-                dictValue: $scope.formData.dictValue
-            }
-
-            $scope.AddbaseDictionary.getData(formData).then(res => {
-                if (res.key == 0) {
-                    toaster.pop('success', '', '保存成功');
-                    $scope.$emit('addCallback');
-                } else {
-                    toaster.pop('error', '', '保存失败');
-                }
-            })
-        }
-
         //获取父级发送的数据
         $scope.$on('analysObDataNew', (item, data) => {
             if (data.analysObDataNew) {
                 $scope.analysObDataNew = data.analysObDataNew;
                 $scope.analysObDataNewDevice = data.analysObDataNewDevice;
-                //默认获取第一项的数据
-                $scope.radioDevice();
             }
         })
 
-        //获取父级发送的横轴指标 选择的option
-        // $scope.$on('analysisObjectNum', (item, index) => {
-        //     $scope.selectIndex = index;
-        //     $scope.radioIndex = index;
-        //     treeData();
-        // })
-
-        //处理点击设备radio
-        $scope.radioDevice = () => {
-            $scope.analysisObjectK = 99;
-            $scope.zNodes = [];
-            // $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
-            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备' });
-            //默认获取第一项的数据
-            $scope.equipChoiceIndex = 0;
-            $scope.equipChoice($scope.analysObDataNewDevice[0], 0);
-        }
-        //处理点击机型radio
-        $scope.radioType = () => {
-            $scope.analysisObjectK = 100;
-            $scope.zNodes = [];
-            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 100, 'value': '机型' });
-        }
+        //默认获取第一项的数据
+        setTimeout(() => {
+            $scope.radioDevice();
+        }, 0)
 
         //点击单个设备
         $scope.equipChoice = (item, index) => {
@@ -87,6 +42,23 @@ ajaxData({
             treeData(item.k);
             $scope.equipChoiceIndex = index;
             $scope.$emit('deviceTimeLat', item.ll);
+        }
+
+        //处理点击设备radio
+        $scope.radioDevice = () => {
+            $scope.analysisObjectK = 99;
+            // $scope.zNodes = [];
+            // $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备' });
+            //默认获取第一项的数据
+            $scope.equipChoice($scope.analysObDataNewDevice[0], 0);
+        }
+
+        //处理点击机型radio
+        $scope.radioType = () => {
+            $scope.analysisObjectK = 100;
+            $scope.zNodes = [];
+            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 100, 'value': '机型' });
         }
 
         //单选框选中-> 更改父级的值
@@ -136,7 +108,9 @@ ajaxData({
 
                 $scope.queryStTreeWithDevices.subscribe(res => {
                     $scope.zNodes = res.body;
-                    $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                    // setTimeout(() => {
+                        $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                    // }, 0)
                     $scope[key[$scope.analysisObjectK]].map((item) => {
                         zTree.checkNode(zTree.getNodeByParam("id", item.id), true, true);
                     })
@@ -180,12 +154,18 @@ ajaxData({
         $scope.objectGroup = [];
 
         const key = {
-            99: 'objectDevice',
-            3: 'objectPower',
-            2: 'objectArea',
-            1: 'objectGroup'
+            99: 'objectDevice', //设备
+            3: 'objectPower', //电站
+            2: 'objectArea', //区域 (部门)
+            1: 'objectGroup' //集团 (公司)
         }
-
+        //映射 取busiType
+        const keyToType = {
+            99: 5,
+            3: 1,
+            2: 2,
+            1: 3
+        }
         //单击父节点展开 子节点
         function onNodeClick(e, treeId, treeNode) {
             zTree.expandNode(treeNode);
@@ -193,32 +173,97 @@ ajaxData({
         }
 
         //独立添加
+        $scope.checkedNode = [];
         $scope.oneAdd = () => {
-            $scope[key[$scope.analysisObjectK]] = $scope.middleArr;
+            if ($scope.checkedNode.length == 0) {
+                toaster.pop('error', '', '所选数据不能为空');
+                return;
+            }
+            var FTmiddleArr = $scope.middleArr.filter((item) => {
+                return keyToType[$scope.analysisObjectK] == item.busiType;
+            })
+            FTmiddleArr.map((item) => {
+                var arr = [];
+                arr.push(item);
+                $scope[key[$scope.analysisObjectK]].push(arr);
+            })
+            if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 2 || $scope.analysisObjectK == 3) {
+                //组装接口需要的数据 (电站|区域(部门)|集团)
+                $scope.oneRItem = {
+                    "isGroup": 0,
+                    "ids": []
+                }
+                FTmiddleArr.map((item) => {
+                    $scope.oneRItem.ids.push(item.busiId);
+                })
+            } else if ($scope.analysisObjectK == 99) {
+                //组装接口需要的数据 (设备)
+                $scope.oneRItem = {
+                    "isGroup": 0,
+                    "st_eqids": []
+                }
+                FTmiddleArr.map((item) => {
+                    $scope.oneRItem.st_eqids.push(`${item.stids}-${item.busiId}`);
+                })
+            }
+
         }
 
         //成组添加
+        $scope.groupResult = [];
         $scope.groupAdd = () => {
-            $scope[key[$scope.analysisObjectK]] = $scope.middleArr;
+            if ($scope.checkedNode.length == 0) {
+                toaster.pop('error', '', '所选数据不能为空');
+                return;
+            }
+            var FTmiddleArr = $scope.middleArr.filter((item) => {
+                return keyToType[$scope.analysisObjectK] == item.busiType;
+            })
+            $scope[key[$scope.analysisObjectK]].push(FTmiddleArr);
+            if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 2 || $scope.analysisObjectK == 3) {
+                //组装接口需要的数据 (电站|区域(部门)|集团)
+                var groupItem = {
+                    "isGroup": 1,
+                    'groupName': 'gp' + Math.random() * 10000,
+                    "ids": []
+                }
+                FTmiddleArr.map((item) => {
+                    groupItem.ids.push(item.busiId);
+                })
+                $scope.groupResult.push(groupItem);
+            } else if ($scope.analysisObjectK == 99) {
+                //组装接口需要的数据 (设备)
+                var groupItem = {
+                    "isGroup": 1,
+                    'groupName': 'gp' + Math.random() * 10000,
+                    "st_eqids": []
+                }
+                FTmiddleArr.map((item) => {
+                    groupItem.st_eqids.push(`${item.stids}-${item.busiId}`);
+                })
+                $scope.groupResult.push(groupItem);
+            }
+
         }
 
         //点击多选框 ->右侧穿梭
         function checkChangeFn(event, treeId, treeNode) {
-            var checkedNode = zTree.getCheckedNodes(true);
-            // $scope[key[$scope.radioIndex]] = [];
+            $scope.checkedNode = zTree.getCheckedNodes(true);
             $scope.middleArr = [];
-            checkedNode.map(item => {
+            $scope.checkedNode.map(item => {
                 if (!item.children) {
-                    // $scope[key[$scope.radioIndex]].push(item);
                     $scope.middleArr.push(item);
                 }
             })
         }
 
         //右侧删除小按钮
-        $scope.delRight = (id, index) => {
-            zTree.checkNode(zTree.getNodeByParam("id", id), false, true);
+        $scope.delRight = (item, index) => {
+            item.map((v) => {
+                zTree.checkNode(zTree.getNodeByParam("id", v.id), false, true);
+            })
             $scope[key[$scope.analysisObjectK]].splice(index, 1);
+            $scope.checkedNode = zTree.getCheckedNodes(true);
             checkChangeFn();
         }
 
@@ -228,9 +273,9 @@ ajaxData({
                 toaster.pop('error', '', '请至少选择一条');
             } else {
                 $solway.confirm({ message: '确定全部删除吗？' }, () => {
-                    $scope[key[$scope.analysisObjectK]].map((item) => {
-                        zTree.checkNode(zTree.getNodeByParam("id", item.id), false, true);
-                    })
+                    zTree.checkAllNodes(false);
+                    zTree.cancelSelectedNode();
+                    $scope.checkedNode = [];
                     $scope[key[$scope.analysisObjectK]] = [];
                     $scope.$apply();
                 });
@@ -254,17 +299,27 @@ ajaxData({
 
         //节点样式方法
         function getFontCss(treeId, treeNode) {
-            return treeNode.highlight ? { color: "red" } : { color: '#fff' }
+            return { color: '#fff' }
         }
-
 
         //取消
         $scope.cancel = () => {
             $scope.$emit('cancelCallback');
         }
 
-        //确定
+        //确定按钮
         $scope.confirm = () => {
+            if ($scope[key[$scope.analysisObjectK]].length == 0) {
+                toaster.pop('error', '', '所选数据不能为空');
+                return;
+            }
+            if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 2 || $scope.analysisObjectK == 3) {
+                parentmyAjaxData.config.dmsTypeAs = null;
+                parentmyAjaxData.config.dmsTypeBs = !$scope.oneRItem ? [...$scope.groupResult] : !$scope.groupResult ? [$scope.oneRItem] : [...$scope.groupResult, $scope.oneRItem];
+            } else if ($scope.analysisObjectK == 99) {
+                parentmyAjaxData.config.dmsTypeBs = null;
+                parentmyAjaxData.config.dmsTypeAs = !$scope.oneRItem ? [...$scope.groupResult] : !$scope.groupResult ? [$scope.oneRItem] : [...$scope.groupResult, $scope.oneRItem];
+            }
             $scope.$emit('addCallback');
         }
     });
