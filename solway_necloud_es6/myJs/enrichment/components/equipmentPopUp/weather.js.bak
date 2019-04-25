@@ -1,17 +1,17 @@
 ajaxData(
     {
-        meterCount: {
-            name: 'GETmeterCount',
+        weatherCount: {
+            name: 'GETweatherCount',
             data: {},
             later: true
         },
-        meterHours: {
-            name: 'GETmeterHours',
+        weatherHours: {
+            name: 'GETweatherHours',
             data: {},
             later: true
         },
-        singleRealDataMeter: {
-            name: 'GETsingleRealDataMeter',
+        singleRealDataWeather: {
+            name: 'GETsingleRealDataWeather',
             data: {},
             later: true,
             sameTimeOnce: true,
@@ -123,26 +123,26 @@ ajaxData(
     let charts;
 
     // 逆变器小时数信息获取
-    $scope.meterHours.beforGetData = () => {
-        if ($scope.meterHours.res) return;
-        $scope.meterHours.getData({ id: eqService.config.eqObj.deviceId });
+    $scope.weatherHours.beforGetData = () => {
+        if ($scope.weatherHours.res) return;
+        $scope.weatherHours.getData({ id: eqService.config.eqObj.deviceId });
     };
 
     // 逆变器基本信息获取
-    $scope.meterCount.getData({
+    $scope.weatherCount.getData({
         pageIndex: 0,
         param: eqService.config.eqObj.deviceId
-    }).then(res => $scope.deviceName = res.deviceInfo.name);
+    }).then(res => $scope.deviceName = res.otherDevice.name);
 
     // 实时数据获取
-    $scope.singleRealDataMeter.getData({
+    $scope.singleRealDataWeather.getData({
         id: eqService.config.eqObj.deviceId,
         serialnumber: eqService.config.eqObj.deviceSerialNnumber,
         pstationid: eqService.config.eqObj.pstationid
     });
 
     // 实时数据 处理
-    $scope.singleRealDataMeter.subscribe(res => {
+    $scope.singleRealDataWeather.subscribe(res => {
         // const { getOption, getAVWMaxValueData } = currentService.config;
         // const { acu, acc_kw, ia, ib, ic } = res.data;
         // const ucp = getAVWMaxValueData(acc_kw, acu);
@@ -156,7 +156,7 @@ ajaxData(
     const timer = $interval(() => {
         if ($scope.tabIndex !== 0) return;
         if ($scope.rtmSingleStationComm.res.comm === 1) return;
-        $scope.singleRealDataMeter.getData({});
+        $scope.singleRealDataWeather.getData({});
     }, 10 * 1000);
 
     // 历史数据 列表 接口请求
@@ -168,7 +168,7 @@ ajaxData(
         $scope.newHistoryData.getData({
             pageIndex: 1,
             pageSize: 10,
-            devicetype: 4,
+            devicetype: 5,
             begindate: eqHistoryDataStartDate.showDate,
             enddate: eqHistoryDataEndDate.showDate,
             stationid: pstationid,
@@ -183,142 +183,75 @@ ajaxData(
             {
                 dataIndex: 'dtime',
                 title: '时间',
-                width: '180px',
+                width: '130px',
                 align: 'center',
-                sort: true,
                 fixed: 'left',
+                sort: true,
                 render(text) {
-                    return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
+                    return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
                 }
             },
             {
-                dataIndex: 'w',
-                title: '总电能(度)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
+                dataIndex: 'lh',
+                title: '水平面光照强度瞬时值(W/㎡)',
+                width: '180px',
+                align: 'right'
             }, {
-                dataIndex: 'wp',
-                title: '正向总电能(度)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
+                dataIndex: 'ls',
+                title: '散射光照强度瞬时值(W/㎡)',
+                width: '180px',
+                align: 'right'
             }, {
-                dataIndex: 'wn',
-                title: '反向总电能(度)',
+                dataIndex: 'la',
+                title: '斜面光照强度瞬时值(W/㎡)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'lhd',
+                title: '水平面光照日累计(kWh)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'lsd',
+                title: '散射光照日累计(kWh)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'lad',
+                title: '斜面光照日累计(kWh)',
+                width: '180px',
+                align: 'right'
+            }, {
+                dataIndex: 'tm',
+                title: '组件温度(℃)',
+                width: '80px',
+                align: 'right'
+            }, {
+                dataIndex: 'ta',
+                title: '环境温度(℃)',
+                width: '80px',
+                align: 'right'
+            }, {
+                dataIndex: 'ws',
+                title: '风速(m/s)',
+                width: '80px',
+                align: 'right'
+            }, {
+                dataIndex: 'wd',
+                title: '风向(°)',
+                width: '80px',
+                align: 'right'
+            }, {
+                dataIndex: 'h2o',
+                title: '湿度(%)',
                 width: '80px',
                 align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
-                dataIndex: 'ua',
-                title: 'A相电压(V)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
-                dataIndex: 'ub',
-                title: 'B相电压(V)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
-                dataIndex: 'uc',
-                title: 'C相电压(V)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
-                dataIndex: 'ia',
-                title: 'A相电流(A)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
-                dataIndex: 'ib',
-                title: 'B相电流(A)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
-                dataIndex: 'ic',
-                title: 'C相电流(A)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
-                dataIndex: 'pa',
-                title: 'A相功率(kW)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
-                dataIndex: 'pb',
-                title: 'B相功率(kW)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
-                dataIndex: 'pc',
-                title: 'C相功率(kW)',
-                width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
-            {
+            }, {
                 dataIndex: 'p',
-                title: '总有功功率(kW)',
+                title: '气压(kPa)',
                 width: '80px',
-                align: 'right',
-                sort: true,
-                render(text) {
-                    return `<span>${text.toFixed(2)}</span>`
-                }
-            },
+                align: 'right'
+            }
 
         ];
 
@@ -328,9 +261,9 @@ ajaxData(
 
     // 销毁事件
     $scope.$on('includePageDesdroy', () => {
-        $scope.meterCount.res = null;
-        $scope.meterHours.res = null;
-        $scope.singleRealDataMeter.res = null;
+        $scope.weatherCount.res = null;
+        $scope.weatherHours.res = null;
+        $scope.singleRealDataWeather.res = null;
         $scope.newHistoryData.res = null;
         if (charts) {
             echarts.dispose(charts.chart1);
