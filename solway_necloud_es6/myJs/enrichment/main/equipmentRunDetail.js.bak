@@ -18,9 +18,11 @@ ajaxData(
     {
         __serviceName__: 'equipmentRunDetailService',
     }
-)('equipmentRunDetailCtrl', ['$scope', 'equipmentRunDetailService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+)('equipmentRunDetailCtrl', ['$scope', 'equipmentRunDetailService', 'actionRecord', '$ocLazyLoad', '$timeout'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad, $timeout) => {
 
     $scope.$on('equipmentRunDetail', (event, { state: statusText, stClass }) => {
+        if (stClass === '01') $scope.equipmentPopUpUrl = 'tpl/enrichment/components/equipmentPopUp/entrance.html' + stamp;
+        else if (stClass === '02') $scope.equipmentPopUpWpUrl = 'tpl/enrichment/components/equipmentPopUpWp/entrance.html' + stamp;
         $scope.stClass = stClass;
         $scope.status = {
             '离线': '04',
@@ -101,18 +103,10 @@ ajaxData(
     });
 
     $scope.showInformation = (item, index, event) => {
-        $scope.$broadcast(
-            {
-                '01': "equipmentPopUp",
-                '02': "equipmentPopUpWp"
-            }[$scope.stClass],
-            {
-                stid: item.sid,
-                eqid: item.did
-            }
-        );
-    };
+        const equipmentPopUp = { '01': "equipmentPopUp", '02': "equipmentPopUpWp" }[$scope.stClass];
 
+        $timeout(() => $scope.$broadcast(equipmentPopUp, { stid: item.sid, eqid: item.did }), 0);
+    };
 
     // 实例销毁 清除定时器 清除事件绑定
     $scope.$on('$destroy', () => {
