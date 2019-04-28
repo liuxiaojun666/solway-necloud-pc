@@ -268,7 +268,7 @@ ajaxData(
             {
                 dataIndex: 'statusDesc',
                 title: '状态',
-                width: '80px',
+                width: '100px',
                 sort: true,
                 fixed: 'left',
                 render(text, item, index) {
@@ -276,6 +276,7 @@ ajaxData(
                     else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
                     else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
                     else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else if (item.status == '-99') return `<span>初始化</span>`;
                     else return `<span>${text}</span>`;
                 }
             },
@@ -304,9 +305,10 @@ ajaxData(
                 fixed: 'left',
                 sort: true,
                 render(text) {
-                    return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
+                    return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
                 }
-            }, {
+            }, 
+            {
                 dataIndex: 'sh1',
                 title: '测点1高度',
                 width: '110px',
@@ -562,7 +564,7 @@ ajaxData(
                 fixed: 'left',
                 sort: true,
                 render(text) {
-                    return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
+                    return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
                 }
             }, {
                 dataIndex: 'wdspd',

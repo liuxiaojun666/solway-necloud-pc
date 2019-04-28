@@ -32,12 +32,12 @@ ajaxData({
             SvgUtils.Nbq.collectionFlag = true;
             SvgUtils.Xb.collectionFlag = true;
             $scope.drag && $scope.drag.destroy();
-            $scope.getDeviceLayoutSvg.getData({})
+            $scope.getDeviceLayoutSvg.getData({});
         });
 
         // 渲染svg 绑定id与名称 并 注册拖拽缩放功能
         $scope.getDeviceLayoutSvg.subscribe(res => {
-            const $svgView = $("#svgView").html(res.data)
+            const $svgView = $("#svgView").html(res.data);
             const $svg = $svgView.find('svg');
             res.allDevice.forEach(v => $svg.find("g[deviceid='" + v.serialNumber + "'][type!='videoImage']")
                 .attr('title', v.name)
@@ -71,7 +71,8 @@ ajaxData({
                 "hlxs": document.querySelectorAll('#svgView g[type="HLX"]'):: [].map(v => v.attributes.deviceid.value).join(),
                 "nbqs": document.querySelectorAll('#svgView g[type="NBQ"]'):: [].map(v => v.attributes.deviceid.value).join(),
                 "nbqhlxs": document.querySelectorAll('#svgView g[type="NBQHLX"]'):: [].map(v => v.attributes.deviceid.value).join(),
-                "xbs": document.querySelectorAll('#svgView g[type="XB"]'):: [].map(v => v.attributes.deviceid.value).join()
+                "xbs": document.querySelectorAll('#svgView g[type="XB"]'):: [].map(v => v.attributes.deviceid.value).join(),
+                "weathers": document.querySelectorAll('#svgView g[type="Meteorograph"]'):: [].map(v => v.attributes.deviceid.value).join()
             };
             $scope.getDeviceStatus.getData(ids);
         });
@@ -85,13 +86,25 @@ ajaxData({
                     .attr('data-toggle', 'tooltip')
                     .attr('data-placement', 'right')
                     .tooltip({ 'container': 'body' })
-                ))
+                ));
         });
 
         // 注册事件
         $scope.getDeviceLayoutSvg.subscribe(res => {
-            $("#svgView").find("g rect.rectLayout").on('dblclick', function () {
-                const $device = $(this).parents("g");
+            $("#svgView").find('g[type="HLX"]').on('dblclick', dblClickFun);
+            $("#svgView").find('g[type="NBQ"]').on('dblclick', dblClickFun);
+            $("#svgView").find('g[type="NBQHLX"]').on('dblclick', dblClickFun);
+            $("#svgView").find('g[type="XB"]').on('dblclick', dblClickFun);
+            $("#svgView").find('g[type="Meteorograph"]').on('dblclick', dblClickFun);
+            $scope.$on('$destroy', () => {
+                $("#svgView").find('g[type="HLX"]').off('dblclick', dblClickFun);
+                $("#svgView").find('g[type="NBQ"]').off('dblclick', dblClickFun);
+                $("#svgView").find('g[type="NBQHLX"]').off('dblclick', dblClickFun);
+                $("#svgView").find('g[type="XB"]').off('dblclick', dblClickFun);
+                $("#svgView").find('g[type="Meteorograph"]').off('dblclick', dblClickFun);
+            });
+            function dblClickFun () {
+                const $device = $(this); //$(this).parents("g");
                 const type = $device.attr("type");
                 const deviceId = $device.attr("deviceId");
                 const id = $device.attr("id");
@@ -109,11 +122,14 @@ ajaxData({
                     case "XB":
                         showHistoryData_byRTMDeviceLogId(stationId, id, deviceId, "3");
                         break;
+                    case "Meteorograph":
+                        showHistoryData_byRTMDeviceLogId(stationId, id, deviceId, "5");
+                        break;
                     case "videoImage":
                         videoHandle(id, deviceId);
                         break;
                 }
-            });
+            }
         });
 
         // 设备状态  刷新
@@ -123,6 +139,9 @@ ajaxData({
             res.nbq && SvgUtils.Nbq.flushNbq(res.nbq, null);
             res.nbqhlx && SvgUtils.NbqHlx.flushNbqHlx(res.nbqhlx, null);
             res.xb && SvgUtils.Xb.flushXb(res.xb, null);
+            res.weather && res.weather.forEach(v => {
+                $("#svgView").find('g[type="Meteorograph"][deviceid="' + v.deviceId + '"] [fill]').attr('fill', ["#3fad22", "#999", "#db412f", "#f90"][v.status])
+            });
             if ($scope.isDestroy) return;
             await myAjaxData.timeout(10 * 1000);
             $scope.getDeviceStatus.getData({});
@@ -132,18 +151,6 @@ ajaxData({
         function showHistoryData_byRTMDeviceLogId(pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
             var res = { deviceSerialNnumber: deviceSerialNnumber, deviceId: deviceid, pstationid: pstationid, deviceTypeNow: deviceType, hasJB};
             $scope.$broadcast("equipmentPopUp", res);
-            // $scope.deviceTypeNow = deviceType;
-            // $scope.inverterType = hasJB;
-            // if (deviceType == '3') {
-            //     $('#taskList_historyData3').modal({ backdrop: 'static', keyboard: false });
-            //     $scope.$broadcast("showDeviceDetail3broad", res);
-            // } else if (deviceType == '2') {
-            //     $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
-            //     $scope.$broadcast("showDeviceDetail2broad", res);
-            // } else if (deviceType == '1') {
-            //     $('#taskList_historyData1').modal({ backdrop: 'static', keyboard: false });
-            //     $scope.$broadcast("showDeviceDetail1broad", res);
-            // }
         };
 
         // 视频 处理  获取视频列表
