@@ -14,6 +14,20 @@ ajaxData({
             $scope.radioIndex = index;
         })
 
+        //日 下一个按钮
+        $scope.nextM = () => {
+            setTimeout(() => {
+                $('#cander1 .laydate-icon.laydate-next-m').click();
+            }, 0)
+        }
+
+        //日 上一个按钮
+        $scope.preM = () => {
+            setTimeout(() => {
+                $('#cander1 .laydate-icon.laydate-prev-m').click();
+            }, 0)
+        }
+
         var myDate = new Date();
         var maxYear = myDate.getFullYear();
         var Month = myDate.getMonth() + 1;
@@ -96,7 +110,6 @@ ajaxData({
         }
         $scope.radioToSelect('日', 3);
 
-        //独立添加按钮
         $scope.timeGroupDay = [];
         $scope.timeGroupMonth = [];
         $scope.timeGroupYear = [];
@@ -107,41 +120,65 @@ ajaxData({
             endDate: new Date
         }
 
-        //监听endDate数据的变化
+        //独立添加按钮
         var arr = [];
-        $scope.$watch('GroupUser', (newValue, oldValue) => {
-            console.log(oldValue)
+        $scope.oneAdd = () => {
             //页面显示用的json
             var groupJson = {
-                startDate: newValue.startDate.showDate,
-                endDate: newValue.endDate.showDate
+                startDate: $scope.GroupUser.startDate.showDate,
+                endDate: $scope.GroupUser.endDate.showDate
             }
-            //获取上次的startDate
-            var oldValueS = oldValue.startDate;
-            var oldValueShowS = oldValueS.getFullYear() + '-' + (("0" + (oldValueS.getMonth() + 1)).slice(-2)) + '-' + ("0" + oldValueS.getDate()).slice(-2);
-            //获取上次的endDate
-            var oldValueE = oldValue.endDate;
-            var oldValueShowE = oldValueE.getFullYear() + '-' + (("0" + (oldValueE.getMonth() + 1)).slice(-2)) + '-' + ("0" + oldValueE.getDate()).slice(-2);
-            //比较前后两次 的 endDate数据变化
-            if (newValue.endDate.showDate != oldValueShowE) {
-                $scope.timeGroupUser.push(groupJson);
-                // 自定义数组格式转换
-                var i = null;
-                arr = [];
-                $scope.timeGroupUser.map((item) => {
-                    i = `${item.startDate},${item.endDate}`;
-                    arr.push(i);
-                })
-                // 数组去重
-                $scope.newtimeGroupUser = [...new Set(arr)];
-                //整理 显示到页面的数据格式
-                $scope.timeGroupUser = []; 
-                $scope.newtimeGroupUser.map((item) => {
-                    var m = item.split(",");
-                    $scope.timeGroupUser.push({ 'startDate': m[0], 'endDate': m[1] });
-                })
-            }
-        }, true)
+            $scope.timeGroupUser.push(groupJson);
+            // 自定义数组格式转换
+            var i = null;
+            arr = [];
+            $scope.timeGroupUser.map((item) => {
+                i = `${item.startDate},${item.endDate}`;
+                arr.push(i);
+            })
+            // 数组去重
+            $scope.newtimeGroupUser = [...new Set(arr)];
+            //整理 显示到页面的数据格式
+            $scope.timeGroupUser = [];
+            $scope.newtimeGroupUser.map((item) => {
+                var m = item.split(",");
+                $scope.timeGroupUser.push({ 'startDate': m[0], 'endDate': m[1] });
+            })
+        }
+        //监听endDate数据的变化
+        // var arr = [];
+        // $scope.$watch('GroupUser', (newValue, oldValue) => {
+        //     //页面显示用的json
+        //     var groupJson = {
+        //         startDate: newValue.startDate.showDate,
+        //         endDate: newValue.endDate.showDate
+        //     }
+        //     //获取上次的startDate
+        //     var oldValueS = oldValue.startDate;
+        //     var oldValueShowS = oldValueS.getFullYear() + '-' + (("0" + (oldValueS.getMonth() + 1)).slice(-2)) + '-' + ("0" + oldValueS.getDate()).slice(-2);
+        //     //获取上次的endDate
+        //     var oldValueE = oldValue.endDate;
+        //     var oldValueShowE = oldValueE.getFullYear() + '-' + (("0" + (oldValueE.getMonth() + 1)).slice(-2)) + '-' + ("0" + oldValueE.getDate()).slice(-2);
+        //     //比较前后两次 的 endDate数据变化
+        //     if (newValue.endDate.showDate != oldValueShowE) {
+        //         $scope.timeGroupUser.push(groupJson);
+        //         // 自定义数组格式转换
+        //         var i = null;
+        //         arr = [];
+        //         $scope.timeGroupUser.map((item) => {
+        //             i = `${item.startDate},${item.endDate}`;
+        //             arr.push(i);
+        //         })
+        //         // 数组去重
+        //         $scope.newtimeGroupUser = [...new Set(arr)];
+        //         //整理 显示到页面的数据格式
+        //         $scope.timeGroupUser = []; 
+        //         $scope.newtimeGroupUser.map((item) => {
+        //             var m = item.split(",");
+        //             $scope.timeGroupUser.push({ 'startDate': m[0], 'endDate': m[1] });
+        //         })
+        //     }
+        // }, true)
 
         const key = {
             1: 'timeGroupDay',

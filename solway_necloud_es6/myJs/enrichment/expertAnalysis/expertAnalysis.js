@@ -34,7 +34,8 @@ ajaxData({
         fdY: {             //纵轴指标字段 参数
             key: '',
             name: ''
-        }
+        },
+        bIdToName: {}    //busiId 和 name的映射
 
     })('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', 'toaster'], ($scope, myAjaxData, historicalRecord, $interval, toaster) => {
 
@@ -84,11 +85,11 @@ ajaxData({
                 $scope.maxX = xArr.sort((a, b) => {
                     return b - a;
                 })[0];
-                
+
                 $scope.minX = xArr.sort((a, b) => {
                     return a - b;
                 })[0];
-                
+
                 $scope.maxY = yArr.sort((a, b) => {
                     return b - a;
                 })[0];
@@ -97,23 +98,27 @@ ajaxData({
                 })[0];
                 if ($scope.maxX > 0) {
                     $scope.maxX = $scope.maxX * 1.1;
+                    $scope.maxX = $scope.maxX.toFixed(2);
                 } else {
                     $scope.maxX = $scope.maxX * 0.8;
+                    $scope.maxX = $scope.maxX.toFixed(2);
                 }
                 if ($scope.minX > 0) {
-                    $scope.minX = $scope.minX * 1.1;
+                    $scope.minX = 0;
                 } else {
-                    $scope.minX = $scope.minX * 0.8;
+                    $scope.minX = $scope.minX * 1.1;
                 }
                 if ($scope.maxY > 0) {
                     $scope.maxY = $scope.maxY * 1.1;
+                    $scope.maxY = $scope.maxY.toFixed(2);
                 } else {
                     $scope.maxY = $scope.maxY * 0.8;
+                    $scope.maxY = $scope.maxY.toFixed(2);
                 }
                 if ($scope.minY > 0) {
-                    $scope.minY = $scope.minY * 1.1;
+                    $scope.minY = 0;
                 } else {
-                    $scope.minY = $scope.minY * 0.8;
+                    $scope.minY = $scope.minY * 1.1;
                 }
             } else {
                 $scope.minX = 0;
@@ -123,7 +128,7 @@ ajaxData({
             }
 
         }
-
+        
         // 最终的 查询按钮
         $scope.search = () => {
             //调接口前 判空
@@ -161,15 +166,99 @@ ajaxData({
                     return;
                 }
                 $scope.tableData = res.body;
+                //获取 x轴和 y轴的 名字和单位
                 indexName();
+                //处理 接口的数据 -> echarts需要的数据
                 var newArr = [];
                 var key;
+                var newArrKey = [];
+                var newArrVal = [];
                 for (key in $scope.tableData.data) {
                     newArr.push(...$scope.tableData.data[key]);
+                    newArrVal.push($scope.tableData.data[key]);
+                    newArrKey.push(myAjaxData.config.bIdToName[key]);
+                }
+                //获取 series
+                var series = [];
+                newArrKey.map((item, i) => {
+                    series.push(
+                        {
+                            name: item,
+                            data: newArrVal[i],
+                            type: 'scatter',
+                            symbolSize: 6,
+                            opacity: 1,
+                            shadowBlur: 2,
+                            shadowOffsetX: 0,
+                            shadowOffsetY: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    )
+                })
+                //获取 legend
+                var legend = {
+                    y: 'top',
+                    data: newArrKey,
+                    type: 'scroll',
+                    width: 450,
+                    itemWidth: 12,
+                    left: 'center',
+                    textStyle: {
+                        color: '#fff',
+                        fontSize: 12,
+                        height: 20,
+                        lineHeight: 20,
+                        padding: [3, 0, 0, 0]
+                    }
                 }
                 if ($scope.checkChart == 1) {
+                    //获取最大值 最小值
                     extreme(newArr);
+                    //图表的 setoption
                     myChart.setOption({
+                        legend: legend,
+                        tooltip: {
+                            trigger: 'axis',
+                            formatter: function (params) {
+                                var xunits = $scope.xunits ? $scope.xunits : '';
+                                var tooltipFormatter = `<div style="font-size: 12px;">${params[0].axisValue}${xunits}</div>`;
+                                params.map(item => {
+                                    var yunits = $scope.yunits ? `(${$scope.yunits})` : '';
+                                    tooltipFormatter += `<div style="font-size: 12px;">${params[0].seriesName} ${$scope.yname}${yunits}: ${item.data[1]} 时间:${item.data[2]}<br/></div>`;
+                                })
+                                return tooltipFormatter;
+                            },
+                            position: function (point, params, dom, rect, size) {
+                                // 鼠标坐标和提示框位置的参考坐标系是：以外层div的左上角那一点为原点，x轴向右，y轴向下
+                                // 提示框位置
+                                var x = 0; // x坐标位置
+                                var y = 0; // y坐标位置
+                               
+                                // 当前鼠标位置
+                                var pointX = point[0];
+                                var pointY = point[1];
+                               
+                                // 提示框大小
+                                var boxWidth = size.contentSize[0];
+                                var boxHeight = size.contentSize[1];
+                               
+                                // boxWidth > pointX 说明鼠标左边放不下提示框
+                                if (boxWidth > pointX) {
+                                  x = 5;
+                                } else { // 左边放的下
+                                  x = pointX - boxWidth;
+                                }
+                               
+                                // boxHeight > pointY 说明鼠标上边放不下提示框
+                                if (boxHeight > pointY) {
+                                  y = 5;
+                                } else { // 上边放得下
+                                  y = pointY - boxHeight;
+                                }
+                               
+                                return [x, y];
+                            }
+                        },
                         xAxis: {
                             name: $scope.xunits ? `${$scope.xname}(${$scope.xunits})` : `${$scope.xname}`,
                             min: $scope.minX,
@@ -180,14 +269,54 @@ ajaxData({
                             min: $scope.minY,
                             max: $scope.maxY
                         },
-                        series: [{
-                            // 根据名字对应到相应的系列
-                            data: newArr
-                        }]
+                        series: series
                     })
                 } else if ($scope.checkChart == 2) {
                     extreme(newArr);
                     myChart2.setOption({
+                        legend: legend,
+                        tooltip: {
+                            trigger: 'axis',
+                            formatter: function (params) {
+                                var xunits = $scope.xunits ? $scope.xunits : '';
+                                var tooltipFormatter = `<div style="font-size: 12px;">${params[0].axisValue}${xunits}</div>`;
+                                params.map(item => {
+                                    var yunits = $scope.yunits ? `(${$scope.yunits})` : '';
+                                    tooltipFormatter += `<div style="font-size: 12px;">${params[0].seriesName} ${$scope.yname}${yunits}: ${item.data[1]} 时间:${item.data[2]}<br/></div>`;
+                                })
+                                return tooltipFormatter;
+                            },
+                            position: function (point, params, dom, rect, size) {
+                                // 鼠标坐标和提示框位置的参考坐标系是：以外层div的左上角那一点为原点，x轴向右，y轴向下
+                                // 提示框位置
+                                var x = 0; // x坐标位置
+                                var y = 0; // y坐标位置
+                               
+                                // 当前鼠标位置
+                                var pointX = point[0];
+                                var pointY = point[1];
+                               
+                                // 提示框大小
+                                var boxWidth = size.contentSize[0];
+                                var boxHeight = size.contentSize[1];
+                               
+                                // boxWidth > pointX 说明鼠标左边放不下提示框
+                                if (boxWidth > pointX) {
+                                  x = 5;
+                                } else { // 左边放的下
+                                  x = pointX - boxWidth;
+                                }
+                               
+                                // boxHeight > pointY 说明鼠标上边放不下提示框
+                                if (boxHeight > pointY) {
+                                  y = 5;
+                                } else { // 上边放得下
+                                  y = pointY - boxHeight;
+                                }
+                               
+                                return [x, y];
+                            }
+                        },
                         xAxis: {
                             name: $scope.xunits ? `${$scope.xname}(${$scope.xunits})` : `${$scope.xname}`,
                             min: $scope.minX,
@@ -198,10 +327,7 @@ ajaxData({
                             min: $scope.minY,
                             max: $scope.maxY
                         },
-                        series: [{
-                            // 根据名字对应到相应的系列
-                            data: newArr
-                        }]
+                        series: series
                     })
                 }
             })
@@ -325,20 +451,10 @@ ajaxData({
                         show: false
                     }
                 },
-                series: [{
-                    type: 'scatter',
-                    symbolSize: 5,
-                    data: [],
-                    itemStyle: {
-                        normal: {
-                            color: 'rgb(255, 255, 255)'
-                        }
-                    }
-                }
-                ],
+                series: [],
                 grid: {
-                    top: "17%",
-                    left: "10%",
+                    top: "26%",
+                    // left: "10%",
                     right: "15%",
                     bottom: "18%"
                 }
@@ -410,20 +526,10 @@ ajaxData({
                         show: false
                     }
                 },
-                series: [{
-                    type: 'scatter',
-                    symbolSize: 5,
-                    data: [],
-                    itemStyle: {
-                        normal: {
-                            color: 'rgb(255, 255, 255)'
-                        }
-                    }
-                }
-                ],
+                series: [],
                 grid: {
-                    top: "17%",
-                    left: "10%",
+                    top: "26%",
+                    // left: "10%",
                     right: "15%",
                     bottom: "18%"
                 }
@@ -554,6 +660,8 @@ ajaxData({
         })
 
         //取消 新增后的回调
+        $scope.countTimeModel = true;
+
         $scope.analysisObjectModel = false;
         $scope.$on('cancelCallback', () => {
             $scope.analysisObjectModel = false;

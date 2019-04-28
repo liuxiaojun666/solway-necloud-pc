@@ -19,7 +19,7 @@
             ['1', '2', '3'].forEach(v => {
                 ['1', '2', '3', '401', '402', '403', '404', '405', '417', '418', '11', '12', '13'].forEach(vv => {
                     ['1', '2', '3', '4', '5'].forEach(vvv => {
-                        o.push(`pvwp/high/analysis/selectAnlsType/${v}/${vv}/${vvv}.htm`);
+                        o.push('analysis_selectAnlsType' + v + vv + vvv);
                     })
                 })
             });
@@ -3116,24 +3116,23 @@
         //获取指标
         GETHighAnalysis_selectFds: i + '/opHighAnalysis/selectFds.htm',
         //分析对象 - 设备列表
-        GETqueryStTreeWithDevices: i + 'pvwp/station/queryStTreeWithDevices.htm',
+        GETqueryStTreeWithDevices: i + '/pvwp/station/queryStTreeWithDevices.htm',
         //分析对象 - 电站列表、区域（部门）列表、集团列表
-        GETqueryTreeWithSt: i + 'pvwp/station/queryTreeWithSt.htm',
+        GETqueryTreeWithSt: i + '/pvwp/station/queryTreeWithSt.htm',
         //分析对象 - 机型列表
-        GETqueryStTreeWithProducts: i + 'pvwp/station/queryStTreeWithProducts.htm',
+        GETqueryStTreeWithProducts: i + '/pvwp/station/queryStTreeWithProducts.htm',
         //分析对象 - 数据分析
-        selectAnlsType: i + 'pvwp/high/analysis/selectAnlsType.htm',
-        ...() => {
+        selectAnlsType: i + '/pvwp/high/analysis/selectAnlsType.htm',
+        ...((() => {
             const o = {};
-            ['a', 'b'].forEach(v => {
-                ['a', 'b'].forEach(vv => {
-                    ['a', 'b'].forEach(vvv => {
-                        o[v + vv + vvv] = `pvwp/high/analysis/selectAnlsType/${v}/${vv}/${vvv}.htm`;
+            ['1', '2', '3'].forEach(v => {
+                ['1', '2', '3', '401', '402', '403', '404', '405', '417', '418', '11', '12', '13'].forEach(vv => {
+                    ['1', '2', '3', '4', '5'].forEach(vvv => {
+                        o['analysis_selectAnlsType' + v + vv + vvv] = `pvwp/high/analysis/selectAnlsType/01-${v}-${vv}-${vvv}.htm`;
                     })
                 })
             });
             return o;
-        },
-        
+        })())
     }; 
 })(window));
