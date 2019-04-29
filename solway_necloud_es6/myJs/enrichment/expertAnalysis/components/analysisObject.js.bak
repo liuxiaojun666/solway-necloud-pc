@@ -38,6 +38,10 @@ ajaxData({
 
         //点击单个设备
         $scope.equipChoice = (item, index) => {
+            //默认获取第一项的数据
+            item = item ? item : $scope.analysObDataNewDevice[0];
+            index = index ? index : 0;
+            $scope.equipChoiceItem = item;
             parentmyAjaxData.config.dmsType = item.k;
             treeData(item.k);
             $scope.equipChoiceIndex = index;
@@ -47,11 +51,10 @@ ajaxData({
         //处理点击设备radio
         $scope.radioDevice = () => {
             $scope.analysisObjectK = 99;
-            // $scope.zNodes = [];
-            // $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
             $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备' });
-            //默认获取第一项的数据
-            $scope.equipChoice($scope.analysObDataNewDevice[0], 0);
+            setTimeout(() => {
+                $scope.equipChoice($scope.equipChoiceItem, $scope.equipChoiceIndex);
+            }, 0)
         }
 
         //处理点击机型radio
@@ -98,7 +101,9 @@ ajaxData({
                     $scope.zNodes = res.body;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
                     $scope[key[$scope.analysisObjectK]].map((item) => {
-                        zTree.checkNode(zTree.getNodeByParam("id", item.id), true, true);
+                        item.map((son) => {
+                            zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
+                        })
                     })
                 });
             } else if (k.substr(0, 1) == "4") {
@@ -108,11 +113,11 @@ ajaxData({
 
                 $scope.queryStTreeWithDevices.subscribe(res => {
                     $scope.zNodes = res.body;
-                    // setTimeout(() => {
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
-                    // }, 0)
                     $scope[key[$scope.analysisObjectK]].map((item) => {
-                        zTree.checkNode(zTree.getNodeByParam("id", item.id), true, true);
+                        item.map((son) => {
+                            zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
+                        })
                     })
                 });
             }
@@ -183,9 +188,15 @@ ajaxData({
             }
             //根据busiType 筛选
             var newMiddle = JSON.parse(JSON.stringify($scope.middleArr));
+
             var FTmiddleArr = newMiddle.filter((item) => {
                 return keyToType[$scope.analysisObjectK] == item.busiType;
             })
+
+            if (FTmiddleArr.length == 0) {
+                return
+            }
+
             FTmiddleArr.map((item) => {
                 item.isgroup = false;
             })
@@ -257,6 +268,11 @@ ajaxData({
             var FTmiddleArr = newMiddle.filter((item) => {
                 return keyToType[$scope.analysisObjectK] == item.busiType;
             })
+
+            if (FTmiddleArr.length == 0) {
+                return
+            }
+
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 2 || $scope.analysisObjectK == 3) {
                 //组装接口需要的数据 (电站|区域(部门)|集团)
                 var groupItem = {
@@ -424,7 +440,6 @@ ajaxData({
                 parentmyAjaxData.config.dmsTypeAs = null;
                 parentmyAjaxData.config.dmsTypeBs = Object.keys($scope.oneRItemArea).length == 0 ? [...$scope.groupResultArea] : $scope.groupResultArea.length == 0 ? [$scope.oneRItemArea] : [...$scope.groupResultArea, $scope.oneRItemArea];
                 busiIdToName();
-
             } else if ($scope.analysisObjectK == 99) {
                 parentmyAjaxData.config.dmsTypeBs = null;
                 parentmyAjaxData.config.dmsTypeAs = Object.keys($scope.oneRItemDevice).length == 0 ? [...$scope.groupResultDevice] : $scope.groupResultDevice.length == 0 ? [$scope.oneRItemDevice] : [...$scope.groupResultDevice, $scope.oneRItemDevice];
