@@ -21,9 +21,8 @@ ajaxData(
 )('equipmentRunDetailCtrl', ['$scope', 'equipmentRunDetailService', 'actionRecord', '$ocLazyLoad', '$timeout'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad, $timeout) => {
 
     $scope.$on('equipmentRunDetail', (event, { state: statusText, stClass }) => {
-        if (stClass === '01') $scope.equipmentPopUpUrl = 'tpl/enrichment/components/equipmentPopUp/entrance.html' + stamp;
-        else if (stClass === '02') $scope.equipmentPopUpWpUrl = 'tpl/enrichment/components/equipmentPopUpWp/entrance.html' + stamp;
         $scope.stClass = stClass;
+        $scope.getUrl();
         $scope.status = {
             '离线': '04',
             '维护': '06',
@@ -33,6 +32,12 @@ ajaxData(
 
         $scope.diffGetData();
     });
+
+    $scope.getUrl = () => {
+        const { stClass } = $scope;
+        if (stClass === '01') $scope.equipmentPopUpUrl = 'tpl/enrichment/components/equipmentPopUp/entrance.html' + stamp;
+        else if (stClass === '02') $scope.equipmentPopUpWpUrl = 'tpl/enrichment/components/equipmentPopUpWp/entrance.html' + stamp;
+    };
 
     $scope.diffGetData = () => {
         $scope.datasource = null;
@@ -105,7 +110,7 @@ ajaxData(
     $scope.showInformation = (item, index, event) => {
         const equipmentPopUp = { '01': "equipmentPopUp", '02': "equipmentPopUpWp" }[$scope.stClass];
 
-        $timeout(() => $scope.$broadcast(equipmentPopUp, { stid: item.sid, eqid: item.did }), 0);
+        $scope.$broadcast(equipmentPopUp, { stid: item.sid, eqid: item.did })    
     };
 
     // 实例销毁 清除定时器 清除事件绑定
