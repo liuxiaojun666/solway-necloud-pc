@@ -85,7 +85,7 @@
 
         if ($scope.workedObj[index].grs.length !== 1) return;
 
-        const res = await $scope.opFittingsDictRoomSelectByFD.getData({ fdId });
+        const res = await $scope.opFittingsDictRoomSelectByFD.getData({ fdId, isMe: 1 });
         if (!res) return;
         $scope.workedObj[index].roomList = res.body;
         if (res.body.reduce((a, b) => a + b.num, 0) < num) $scope.workedObj[index].lack = true;
