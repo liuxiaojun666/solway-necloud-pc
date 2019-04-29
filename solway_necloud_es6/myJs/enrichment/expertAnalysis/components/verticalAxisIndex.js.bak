@@ -48,18 +48,41 @@ AddbaseDictionary: {
         1: 'verticalKpi'
     }
     //左侧多选按钮-> 右侧 穿梭
-    $scope.shuttle = (item,) => {
-        $scope.verticalBottom.map((item)=>{
+    $scope.shuttle = (item, $index) => {
+        //点击一个区域 让另一个区域的选中状态置空
+        if ($scope.radioIndex == 0) {
+            $scope.verticalData.ctg2.ll.map((item) => {
+                item.checked = false;
+            })
+        } else {
+            $scope.verticalData.ctg1.ll.map((item) => {
+                item.checked = false;
+            })
+        }
+        //实现单选 和 重复点击取消选中
+        if (!item.checked) {
             item.checked = false;
-        })
-        item.checked = true;
-        $scope.verticalBottom.filter(item => item.checked && !item.checkedH).map((item) => {
-            item.checkedV = item.checked;
-            if ($scope.verticalCheckData.indexOf(item) == '-1') {
-                $scope.verticalCheckData = [];
-                $scope.verticalCheckData.push(item);
-            }
-        })
+        } else {
+            $scope.verticalBottom.map((item) => {
+                item.checked = false;
+            })
+            item.checked = true;
+        }
+
+        //获取选中的数据
+        var filterBottom = $scope.verticalBottom.filter(item => item.checked && !item.checkedH);
+        if (filterBottom.length > 0) {
+            filterBottom.map((item) => {
+                item.checkedV = item.checked;
+                if ($scope.verticalCheckData.indexOf(item) == '-1') {
+                    $scope.verticalCheckData = [];
+                    $scope.verticalCheckData.push(item);
+                }
+            })
+        } else {
+            $scope.verticalCheckData = [];
+        }
+
     }
 
     //右侧删除小按钮
@@ -124,6 +147,10 @@ AddbaseDictionary: {
     //取消
     $scope.cancel = () => {
         $scope.$emit('cancelCallback');
+        if ($scope.verticalCheckData.length == 0) {
+            parentmyAjaxData.config.fdY.key = '';
+            parentmyAjaxData.config.fdY.name = '';
+        }
     }
 
     //确定
