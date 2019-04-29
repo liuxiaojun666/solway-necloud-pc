@@ -14,95 +14,130 @@ ajaxData({
             $scope.radioIndex = index;
         })
 
-        //日 下一个按钮
-        $scope.nextM = () => {
-            setTimeout(() => {
-                $('#cander1 .laydate-icon.laydate-next-m').click();
-            }, 0)
-        }
+        //重新设置 日历切换的按钮 
+        var btnFunction = () => {
+            //日 下一个按钮
+            $scope.nextD = () => {
+                setTimeout(() => {
+                    $('#cander1 .laydate-icon.laydate-next-m').click();
+                }, 0)
+            }
 
-        //日 上一个按钮
-        $scope.preM = () => {
-            setTimeout(() => {
-                $('#cander1 .laydate-icon.laydate-prev-m').click();
-            }, 0)
-        }
+            //日 上一个按钮
+            $scope.preD = () => {
+                setTimeout(() => {
+                    $('#cander1 .laydate-icon.laydate-prev-m').click();
+                }, 0)
+            }
 
+            //月 下一个按钮
+            $scope.nextM = () => {
+                setTimeout(() => {
+                    $('#cander2 .laydate-icon.laydate-next-y').click();
+                }, 0)
+            }
+
+            //月 上一个按钮
+            $scope.preM = () => {
+                setTimeout(() => {
+                    $('#cander2 .laydate-icon.laydate-prev-y').click();
+                }, 0)
+            }
+
+            //月 下一个按钮
+            $scope.nextY = () => {
+                setTimeout(() => {
+                    $('#cander3 .laydate-icon.laydate-next-y').click();
+                }, 0)
+            }
+
+            //月 上一个按钮
+            $scope.preY = () => {
+                setTimeout(() => {
+                    $('#cander3 .laydate-icon.laydate-prev-y').click();
+                }, 0)
+            }
+        }
+        btnFunction();
+
+        // layui日历
         var myDate = new Date();
         var maxYear = myDate.getFullYear();
         var Month = myDate.getMonth() + 1;
         var maxMonth = maxYear + '-' + Month;
         var maxDay = maxMonth + '-' + myDate.getDate();
 
-        // layui日历
-        layui.use(['laydate'], function () {
-            var laydate = layui.laydate;
-            //日
-            laydate.render({
-                elem: '#cander1', //指定元素
-                position: 'static',
-                showBottom: false,
-                theme: '#245182',
-                max: maxDay.toString(),
-                done: function (value, date) {
-                    if ($scope[key[$scope.radioIndex]].indexOf(value) == '-1') {
-                        $scope[key[$scope.radioIndex]].push(value);
-                    }
-                    $scope.$apply();
+        //日
+        laydate.render({
+            elem: '#cander1', //指定元素
+            position: 'static',
+            showBottom: true,
+            btns: ['now'],
+            theme: '#245182',
+            max: maxDay.toString(),
+            ready(date) {
+                $('#layui-laydate1 .laydate-btns-now').html('今日');
+            },
+            done: function (value, date) {
+                if ($scope[key[$scope.radioIndex]].indexOf(value) == '-1') {
+                    $scope[key[$scope.radioIndex]].push(value);
                 }
-            });
-            //月
-            laydate.render({
-                elem: '#cander2', //指定元素
-                position: 'static',
-                showBottom: true,
-                type: 'month',
-                theme: '#245182',
-                max: maxMonth.toString(),
-                btns: ['confirm'],
-                ready(date) {
-                    $('#layui-laydate2').on('click', 'ul.layui-laydate-list.laydate-month-list li', () => {
-                        setTimeout(() => {
-                            $('#layui-laydate2 .laydate-btns-confirm').click();
-                        }, 0)
-                    })
-                },
-                done: function (value, date) {
-                    if ($scope[key[$scope.radioIndex]].indexOf(value) == '-1') {
-                        $scope[key[$scope.radioIndex]].push(value);
-                    }
-                    $scope.$apply();
+                $scope.$apply();
+            }
+        });
+        
+        //月
+        laydate.render({
+            elem: '#cander2', //指定元素
+            position: 'static',
+            showBottom: true,
+            btns: ['now', 'confirm'],
+            type: 'month',
+            theme: '#245182',
+            max: maxMonth.toString(),
+            ready(date) {
+                $('#layui-laydate2 .laydate-btns-now').html('本月');
+                $('#layui-laydate2').on('click', 'ul.layui-laydate-list.laydate-month-list li', () => {
+                    setTimeout(() => {
+                        $('#layui-laydate2 .laydate-btns-confirm').click();
+                    }, 0)
+                })
+            },
+            done: function (value, date) {
+                if ($scope[key[$scope.radioIndex]].indexOf(value) == '-1') {
+                    $scope[key[$scope.radioIndex]].push(value);
                 }
-            });
-            //年
-            laydate.render({
-                elem: '#cander3', //指定元素
-                position: 'static',
-                showBottom: true,
-                type: 'year',
-                theme: '#245182',
-                max: maxYear.toString(),
-                btns: ['confirm'],
-                ready(date) {
-                    $('#layui-laydate3').on('click', 'ul.layui-laydate-list.laydate-year-list li', () => {
-                        setTimeout(() => {
-                            $('#layui-laydate3 .laydate-btns-confirm').click();
-                        }, 0)
-                    })
-                },
-                done: function (value, date) {
-                    if ($scope[key[$scope.radioIndex]].indexOf(value) == '-1') {
-                        $scope[key[$scope.radioIndex]].push(value);
-                    }
-                    $scope.$apply();
+                $scope.$apply();
+            }
+        });
+        
+        //年
+        laydate.render({
+            elem: '#cander3', //指定元素
+            position: 'static',
+            showBottom: true,
+            btns: ['now', 'confirm'],
+            type: 'year',
+            theme: '#245182',
+            max: maxYear.toString(),
+            ready(date) {
+                $('#layui-laydate3 .laydate-btns-now').html('今年');
+                $('#layui-laydate3').on('click', 'ul.layui-laydate-list.laydate-year-list li', () => {
+                    setTimeout(() => {
+                        $('#layui-laydate3 .laydate-btns-confirm').click();
+                    }, 0)
+                })
+            },
+            done: function (value, date) {
+                if ($scope[key[$scope.radioIndex]].indexOf(value) == '-1') {
+                    $scope[key[$scope.radioIndex]].push(value);
                 }
-            });
-
+                $scope.$apply();
+            }
         });
 
-
-        $scope.selectIndex = 1;
         //单选框选中-> 更改select的值
+        $scope.selectIndex = 1;
         $scope.radioToSelect = (name, dateType) => {
             var radioIndex = document.querySelectorAll('[name=cTime]'):: [].filter(item => item.checked).map(item => item.dataset.index);
             $scope.$emit('radioToFather', { 'name': name, 'type': 'countTime', 'dateType': dateType });
@@ -120,7 +155,7 @@ ajaxData({
             endDate: new Date
         }
 
-        //独立添加按钮
+        //确定按钮
         var arr = [];
         $scope.oneAdd = () => {
             //页面显示用的json
@@ -128,14 +163,11 @@ ajaxData({
                 startDate: $scope.GroupUser.startDate.showDate,
                 endDate: $scope.GroupUser.endDate.showDate
             }
+            // 未去重的数据
             $scope.timeGroupUser.push(groupJson);
-            // 自定义数组格式转换
-            var i = null;
-            arr = [];
-            $scope.timeGroupUser.map((item) => {
-                i = `${item.startDate},${item.endDate}`;
-                arr.push(i);
-            })
+            // 数组格式转换 (后台要的数据格式)
+            var i = `${groupJson.startDate},${groupJson.endDate}`;
+            arr.push(i);
             // 数组去重
             $scope.newtimeGroupUser = [...new Set(arr)];
             //整理 显示到页面的数据格式
@@ -145,40 +177,6 @@ ajaxData({
                 $scope.timeGroupUser.push({ 'startDate': m[0], 'endDate': m[1] });
             })
         }
-        //监听endDate数据的变化
-        // var arr = [];
-        // $scope.$watch('GroupUser', (newValue, oldValue) => {
-        //     //页面显示用的json
-        //     var groupJson = {
-        //         startDate: newValue.startDate.showDate,
-        //         endDate: newValue.endDate.showDate
-        //     }
-        //     //获取上次的startDate
-        //     var oldValueS = oldValue.startDate;
-        //     var oldValueShowS = oldValueS.getFullYear() + '-' + (("0" + (oldValueS.getMonth() + 1)).slice(-2)) + '-' + ("0" + oldValueS.getDate()).slice(-2);
-        //     //获取上次的endDate
-        //     var oldValueE = oldValue.endDate;
-        //     var oldValueShowE = oldValueE.getFullYear() + '-' + (("0" + (oldValueE.getMonth() + 1)).slice(-2)) + '-' + ("0" + oldValueE.getDate()).slice(-2);
-        //     //比较前后两次 的 endDate数据变化
-        //     if (newValue.endDate.showDate != oldValueShowE) {
-        //         $scope.timeGroupUser.push(groupJson);
-        //         // 自定义数组格式转换
-        //         var i = null;
-        //         arr = [];
-        //         $scope.timeGroupUser.map((item) => {
-        //             i = `${item.startDate},${item.endDate}`;
-        //             arr.push(i);
-        //         })
-        //         // 数组去重
-        //         $scope.newtimeGroupUser = [...new Set(arr)];
-        //         //整理 显示到页面的数据格式
-        //         $scope.timeGroupUser = []; 
-        //         $scope.newtimeGroupUser.map((item) => {
-        //             var m = item.split(",");
-        //             $scope.timeGroupUser.push({ 'startDate': m[0], 'endDate': m[1] });
-        //         })
-        //     }
-        // }, true)
 
         const key = {
             1: 'timeGroupDay',

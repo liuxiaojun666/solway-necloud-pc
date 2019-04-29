@@ -15,20 +15,20 @@ HighAnalysis_selectFds: {
 })('horizonIndexCtrl', ['$scope', 'horizonService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
     //获取分析类型 发送的anlsType
-    $scope.$on('anlsType', (item, v) => {
-        $scope.anlsType = v;
-    })
+    // $scope.$on('anlsType', (item, v) => {
+    //     $scope.anlsType = v;
+    // })
     //获取分析对象 发送的dmsType
-    $scope.$on('dmsType', () => {
-        $scope.dmsType = parentmyAjaxData.config.dmsType;
-    })
+    // $scope.$on('dmsType', () => {
+    //     $scope.dmsType = parentmyAjaxData.config.dmsType;
+    // })
     //获取时间纬度 发送的dmsTime
     $scope.$on('dmsTime', (item, v) => {
         $scope.dmsTime = v;
         $scope.HighAnalysis_selectFds.getData({
             stationClass: "01",
-            anlsType: $scope.anlsType,
-            dmsType: $scope.dmsType,
+            anlsType: parentmyAjaxData.config.anlsType,
+            dmsType: parentmyAjaxData.config.dmsType,
             dmsTime: $scope.dmsTime
         })
     })
@@ -40,7 +40,6 @@ HighAnalysis_selectFds: {
             return;
         }
         $scope.radioToSelect($scope.herizonData.ctg1, 0);
-
     });
 
     //搜索功能
@@ -135,7 +134,6 @@ HighAnalysis_selectFds: {
         } else {
             $scope.horizonCheckData = [];
         }
-
     }
 
     //右侧删除小按钮
@@ -143,16 +141,19 @@ HighAnalysis_selectFds: {
         $scope.herizonData.ctg1.ll.forEach((item) => {
             if (item.fdKey == fdKey) {
                 item.checked = false;
+                item.checkedH = false;
             }
         })
         $scope.herizonData.ctg2.ll.forEach((item) => {
             if (item.fdKey == fdKey) {
                 item.checked = false;
+                item.checkedH = false;
             }
         })
         $scope.herizonBottom.forEach((item) => {
             if (item.fdKey == fdKey) {
                 item.checked = false;
+                item.checkedH = false;
             }
         })
         $scope.horizonCheckData.splice(index, 1);
@@ -167,13 +168,16 @@ HighAnalysis_selectFds: {
                 $scope.horizonCheckData = [];
                 $scope.herizonData.ctg1.ll.forEach((item) => {
                     item.checked = false;
+                    item.checkedH = false;
                 })
                 $scope.herizonData.ctg2.ll.forEach((item) => {
                     item.checked = false;
+                    item.checkedH = false;
                 })
-                // $scope.herizonBottom.forEach((item) => {
-                //     item.checked = false;
-                // })
+                $scope.herizonBottom.forEach((item) => {
+                    item.checked = false;
+                    item.checkedH = false;
+                })
                 $scope.$apply();
             });
         }
