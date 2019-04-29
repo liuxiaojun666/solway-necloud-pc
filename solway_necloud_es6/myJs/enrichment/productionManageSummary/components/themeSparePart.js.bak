@@ -91,11 +91,12 @@ ajaxData(
         myAjaxData.config.publicObj = obj;
         const { tabIndex } = $scope;
         let fileName = '';
-        if (tabIndex === 0) fileName = 'spareParts';
-        else if (tabIndex === 1) fileName = 'putInStorage';
+        if (tabIndex === 0 && $scope.fittingManageAuth.res.body.enable) fileName = 'spareParts';
+        else if (tabIndex === 1 && $scope.fittingManageAuth.res.body.enable) fileName = 'putInStorage';
         else if (tabIndex === 2) fileName = 'picking';
         else if (tabIndex === 3) fileName = 'outStock';
-        else if (tabIndex === 4) fileName = 'returningLibrary';
+        else if (tabIndex === 4 && $scope.fittingManageAuth.res.body.enable) fileName = 'returningLibrary';
+        if (!fileName) return;
         $ocLazyLoad.load('theme/js/dist/enrichment/productionManageSummary/components/' + fileName + '.js').then(() => {
             $scope['tpl' + tabIndex] = 'tpl/enrichment/productionManageSummary/components/' + fileName + '.html';
             if (!$scope['tpl' + tabIndex + 'loaded']) {
@@ -172,21 +173,22 @@ ajaxData(
     $scope.diffGetData = () => {
         $scope.isDefaultList = true;
         $scope.column = [];
+        $scope.pagingGetData = void 0;
         $scope.datasource = null;
         const { tabIndex } = $scope;
         if (tabIndex === 0) {
             $scope.opFittingsRoomSelectByCondition.getData();
             $scope.opFittingsDictFdnumPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
-        } else if (tabIndex === 1) {
+        } else if (tabIndex === 1 && $scope.fittingManageAuth.res.body.enable) {
             $scope.opFittingsRoomSelectByCondition.getData();
             $scope.fittingsInPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         } else if (tabIndex === 2) {
             $scope.opFittingsRoomSelectByCondition.getData();
             $scope.opWorkFittingsReqPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
-        } else if (tabIndex === 3) {
+        } else if (tabIndex === 3 && $scope.fittingManageAuth.res.body.enable) {
             $scope.selectCurrComUsers.getData({ hasTel: 1 });
             $scope.opWorkFittingsOutPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
-        } else if (tabIndex === 4) {
+        } else if (tabIndex === 4 && $scope.fittingManageAuth.res.body.enable) {
             $scope.selectCurrComUsers.getData({ hasTel: 1 });
             $scope.opFittingsRebackPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
         }
