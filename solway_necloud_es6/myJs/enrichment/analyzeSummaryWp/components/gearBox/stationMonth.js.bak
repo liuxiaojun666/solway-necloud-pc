@@ -90,8 +90,8 @@ ajaxData(
         event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
         const idIndex = Object.keys($scope.turbineGearboxPoints.res.body.names).findIndex(v => v === item.eqid + '');
         const { colors } = $scope.turbineGearboxPoints.chart;
-        // colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
-        colors[0][colors[0].length - 1] = '#577BFF';
+        colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
+        // colors[0][colors[0].length - 1] = '#577BFF';
         const { display } = $scope.turbineGearboxPoints.chart;
         $scope.turbineGearboxPoints.chart.display = false;
         await myAjaxData.timeout(0);
@@ -101,12 +101,7 @@ ajaxData(
             ...$scope.turbineGearboxPoints.chart,
             colors,
             display,
-            ydatas: (() => {
-                const ydatas = [...$scope.turbineGearboxPoints.chart.ydatas];
-                const line = ydatas.splice(idIndex, 1);
-                ydatas.push(line);
-                return ydatas;
-            })(),
+            z: [new Array(colors[0].length).fill(2).map((v, i) => idIndex === i ? 3 : 2)],
             activeEqid: item.eqid
         };
         activeEqName = item.eq_name;
@@ -144,6 +139,7 @@ ajaxData(
             types: [(new Array(eq_keys.length)).fill('scatter')],
             linenames: [Object.values(equments)],
             colors,
+            z: [new Array(eq_keys.length).fill(2)],
             ydatas: [eq_keys.map((v) => res.body[v])]
         };
         $scope.$apply();
