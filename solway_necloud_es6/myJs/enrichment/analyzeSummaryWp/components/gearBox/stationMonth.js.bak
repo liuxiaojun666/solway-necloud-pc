@@ -85,11 +85,13 @@ ajaxData(
         ];
     });
 
+    let activeEqName = '';
     $scope.trClick = async (item, _index, event) => {
         event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
         const idIndex = Object.keys($scope.turbineGearboxPoints.res.body.names).findIndex(v => v === item.eqid + '');
         const { colors } = $scope.turbineGearboxPoints.chart;
-        colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
+        // colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
+        colors[0][colors[0].length - 1] = '#577BFF';
         const { display } = $scope.turbineGearboxPoints.chart;
         $scope.turbineGearboxPoints.chart.display = false;
         await myAjaxData.timeout(0);
@@ -99,8 +101,15 @@ ajaxData(
             ...$scope.turbineGearboxPoints.chart,
             colors,
             display,
+            ydatas: (() => {
+                const ydatas = [...$scope.turbineGearboxPoints.chart.ydatas];
+                const line = ydatas.splice(idIndex, 1);
+                ydatas.push(line);
+                return ydatas;
+            })(),
             activeEqid: item.eqid
         };
+        activeEqName = item.eq_name;
         $scope.$apply();
     };
 
@@ -164,7 +173,7 @@ ajaxData(
     };
 
     $scope.turbineGearboxPoints.tooltipFormatter = (params) => {
-        return params[0].value[0] + 'rpm<br/>' + params.map(v => v.seriesName + '油温(℃):    ' + v.value[1] + '<br/>').join('');
+        return params[0].value[0] + 'rpm<br/>' + params.map(v => `<span style="color:${v.seriesName === activeEqName ? '#577BFF' : '#fff'};">` + v.seriesName + '油温(℃):    ' + v.value[1] + '<span/><br/>').join('');
     };
 
     // 数据置空
