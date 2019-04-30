@@ -33,13 +33,12 @@ ajaxData(
             onlyLatest: true,
             sameTimeOnce: true,
         },
-        // 电站 今日 发电能力
-        query_station_day_dev_power_timelist_his: {
-            name: 'GETquery_station_day_dev_power_timelist_his',
+        // 电站 发电能力
+        turbineOPEList: {
+            name: 'GETturbineOPEList',
             data: {},
-            later: true,
             onlyLatest: true,
-            sameTimeOnce: true,
+            later: true,
         },
         // 测风塔列表
         realtimeWindTower: {
@@ -105,6 +104,10 @@ ajaxData(
         await myAjaxData.timeout(0);
         setDataNull();
         diffGetData();
+    };
+
+    $scope.switchDetailFullPage = () => {
+        myChart && myChart.resize();
     };
 
     // tab 切换
@@ -248,10 +251,11 @@ ajaxData(
             // $scope.currentDeviceType = '1';
             $scope.switchDeviceType();
         } else if (tabIndex === 3) {
-            $scope.query_station_day_dev_power_timelist_his.getData({
-                queryCode: 'query_station_day_dev_power_timelist_his',
+            if ($scope.turbineOPEList.res) return;
+            $scope.turbineOPEList.getData({
+                dataType: 2,
+                dateType: 2,
                 queryType: 3,
-                pgc: 0,
                 date: dateTime.showDate
             });
         } else if (tabIndex === 4) {
@@ -739,11 +743,117 @@ ajaxData(
 
 
     // 电站 今日 发电能力
-    $scope.query_station_day_dev_power_timelist_his.getDataCallback = (success, res) => {
-        $scope.equipmentDetailLoading = false;
-        if (!success) return;
-        $scope.xdata = res.body.data.map(v => v.dtime);
-        $scope.ydatas = [[res.body.data.map(v => v.pgc)], [res.body.data.map(v => v.pcpn)]];
+    let myChart;
+    $scope.turbineOPEList.getDataCallback = (success, res) => {
+        myChart = echarts.init(document.getElementById('scatterChart'));
+        const option = {
+            color: ['rgba(212, 165, 255, 1)'],
+            grid: {
+                left: '40',
+                right: '70',
+                bottom: '40',
+                containLabel: true
+            },
+            tooltip: {
+                showDelay: 0,
+                formatter: function (params) {
+                    if (!params.value.join) {
+                        return params.name + params.value + '以上';
+                    }
+                    return params.data[3] + '<br/>'
+                        + '运行状态：' + params.data[0]
+                        + '<br/>'
+                        + '效率：' + params.data[1]
+                },
+            },
+            xAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    // min: 0,
+                    max: 1,
+                    axisLabel: {
+                        // show:false,
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '运行状态',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    // min: 0,
+                    max: 1,
+                    axisLabel: {
+                        // show:false,
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '功率曲线',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: '',
+                    type: 'scatter',
+                    data: res.body,
+                    markLine: {
+                        lineStyle: {
+                            normal: {
+                                type: 'solid',
+                                color: 'rgba(255,255,255,0.4)'
+                            }
+                        },
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'end',
+                                color: 'rgba(255,255,255,1)',
+                            }
+                        },
+                        data: [
+                            { xAxis: 0.6, name: '正常标志线' },
+                            { xAxis: 0.9, name: '高效标志线' },
+                            { yAxis: 0.96, name: '正常标志线' },
+                            { yAxis: 0.99, name: '高效标志线' }
+                        ]
+                    }
+                }
+            ]
+        };
+        myChart.setOption(option, true);
+        const fun = myChart.resize;
+        myChart.resize = async () => {
+            await myAjaxData.timeout(16);
+            fun();
+        };
+        window.addEventListener('resize', myChart.resize);
     };
 
     //电站-故障列表
@@ -805,10 +915,12 @@ ajaxData(
         $scope.stationDayTodayTime.res = null;
         $scope.stationDayTodayTime2.res = null;
         $scope.getStationFaultAlarmRtData.res = null;
-        $scope.query_station_day_dev_power_timelist_his.res = null;
+        $scope.turbineOPEList.res = null;
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
         $scope.column = [];
+        myChart && window.removeEventListener('resize', myChart.resize);
+        myChart = null;
         stationDayTodayTimeLineData.xdata = [];
         stationDayTodayTimeLineData.line1 = [];
         stationDayTodayTimeLineData.line2 = [];
