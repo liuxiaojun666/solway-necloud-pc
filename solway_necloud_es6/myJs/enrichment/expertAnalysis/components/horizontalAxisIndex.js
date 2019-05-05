@@ -157,6 +157,8 @@ HighAnalysis_selectFds: {
             }
         })
         $scope.horizonCheckData.splice(index, 1);
+        parentmyAjaxData.config.fdX.key = '';
+        parentmyAjaxData.config.fdX.name = '';
     }
 
     //全部删除
@@ -178,6 +180,8 @@ HighAnalysis_selectFds: {
                     item.checked = false;
                     item.checkedH = false;
                 })
+                parentmyAjaxData.config.fdX.key = '';
+                parentmyAjaxData.config.fdX.name = '';
                 $scope.$apply();
             });
         }
@@ -203,10 +207,10 @@ HighAnalysis_selectFds: {
     //取消
     $scope.cancel = () => {
         $scope.$emit('cancelCallback');
-        if ($scope.horizonCheckData.length == 0) {
-            parentmyAjaxData.config.fdX.key = '';
-            parentmyAjaxData.config.fdX.name = '';
-        }
+        // if ($scope.horizonCheckData.length == 0) {
+        //     parentmyAjaxData.config.fdX.key = '';
+        //     parentmyAjaxData.config.fdX.name = '';
+        // }
     }
 
     //确定

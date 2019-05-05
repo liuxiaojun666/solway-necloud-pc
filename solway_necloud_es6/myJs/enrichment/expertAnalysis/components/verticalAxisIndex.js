@@ -106,6 +106,8 @@ AddbaseDictionary: {
             }
         })
         $scope.verticalCheckData.splice(index, 1);
+        parentmyAjaxData.config.fdY.key = '';
+        parentmyAjaxData.config.fdY.name = '';
     }
 
     //全部删除
@@ -127,6 +129,8 @@ AddbaseDictionary: {
                     item.checked = false;
                     item.checkedV = false;                    
                 })
+                parentmyAjaxData.config.fdY.key = '';
+                parentmyAjaxData.config.fdY.name = '';
                 $scope.$apply();
             });
         }
@@ -152,10 +156,6 @@ AddbaseDictionary: {
     //取消
     $scope.cancel = () => {
         $scope.$emit('cancelCallback');
-        if ($scope.verticalCheckData.length == 0) {
-            parentmyAjaxData.config.fdY.key = '';
-            parentmyAjaxData.config.fdY.name = '';
-        }
     }
 
     //确定

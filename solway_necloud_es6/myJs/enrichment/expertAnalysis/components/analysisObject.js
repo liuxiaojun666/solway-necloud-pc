@@ -58,11 +58,11 @@ ajaxData({
         }
 
         //处理点击机型radio
-        $scope.radioType = () => {
-            $scope.analysisObjectK = 100;
-            $scope.zNodes = [];
-            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 100, 'value': '机型' });
-        }
+        // $scope.radioType = () => {
+        //     $scope.analysisObjectK = 100;
+        //     $scope.zNodes = [];
+        //     $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 100, 'value': '机型' });
+        // }
 
         //单选框选中-> 更改父级的值
         $scope.radioIndex = 0;
@@ -178,10 +178,13 @@ ajaxData({
         }
 
         //独立添加
-        $scope.oneRItemArea = {};
-        $scope.oneRItemDevice = {};
+        $scope.oneRItem1 = {};  //电站
+        $scope.oneRItem2 = {};  //区域
+        $scope.oneRItem3 = {};  //集团
+        $scope.oneRItemDevice = {}; //设备
         $scope.checkedNode = [];
         $scope.oneAdd = () => {
+            checkChangeFn();
             if ($scope.checkedNode.length == 0) {
                 toaster.pop('error', '', '所选数据不能为空');
                 return;
@@ -236,12 +239,12 @@ ajaxData({
 
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 2 || $scope.analysisObjectK == 3) {
                 //组装接口需要的数据 (电站|区域(部门)|集团)
-                $scope.oneRItemArea = {
+                $scope['oneRItem' + $scope.analysisObjectK] = {
                     "isGroup": 0,
                     "ids": []
                 }
                 FTmiddleArr.map((item) => {
-                    $scope.oneRItemArea.ids.push(item.busiId);
+                    $scope['oneRItem' + $scope.analysisObjectK].ids.push(item.busiId);
                 })
             } else if ($scope.analysisObjectK == 99) {
                 //组装接口需要的数据 (设备)
@@ -253,13 +256,15 @@ ajaxData({
                     $scope.oneRItemDevice.st_eqids.push(`${item.stids}-${item.busiId}`);
                 })
             }
-
         }
 
         //成组添加
-        $scope.groupResultArea = [];
-        $scope.groupResultDevice = [];
+        $scope.groupResult1 = [];  //电站
+        $scope.groupResult2 = [];  //区域
+        $scope.groupResult3 = [];  //集团
+        $scope.groupResultDevice = []; //设备
         $scope.groupAdd = () => {
+            checkChangeFn();
             if ($scope.checkedNode.length == 0) {
                 toaster.pop('error', '', '所选数据不能为空');
                 return;
@@ -286,7 +291,7 @@ ajaxData({
                     groupItem.ids.push(item.busiId);
                 })
 
-                $scope.groupResultArea.push(groupItem);
+                $scope['groupResult' + $scope.analysisObjectK].push(groupItem);
                 $scope[key[$scope.analysisObjectK]].push(FTmiddleArr);
             } else if ($scope.analysisObjectK == 99) {
                 //组装接口需要的数据 (设备)
@@ -323,23 +328,26 @@ ajaxData({
             })
             //删除 页面显示的数据
             $scope[key[$scope.analysisObjectK]].splice(index, 1);
-            //根据index 删除 接口传的数据 (电站|区域(部门)|集团)
+            //根据index 删除 给接口传的数据 (电站|区域(部门)|集团)
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 2 || $scope.analysisObjectK == 3) {
                 item.map((v) => {
                     if (v.isgroup) {
-                        $scope.groupResultArea.map((son, i) => {
+                        $scope['groupResult' + $scope.analysisObjectK].map((son, i) => {
                             if (son.groupName == v.groupName) {
-                                $scope.groupResultArea.splice(i, 1);
+                                $scope['groupResult' + $scope.analysisObjectK].splice(i, 1);
                             }
                         })
                     } else {
-                        var index = $scope.oneRItemArea.ids.indexOf(v.busiId);
-                        if (index > -1) {
-                            $scope.oneRItemArea.ids.splice(index, 1);
+                        var index = $scope['oneRItem' + $scope.analysisObjectK].ids.indexOf(v.busiId);
+                        if (index != -1) {
+                            $scope['oneRItem' + $scope.analysisObjectK].ids.splice(index, 1);
                         }
                     }
                 })
-                //删除 接口传的数据 (设备)
+                if ($scope[key[$scope.analysisObjectK]].length == 0) {
+                    parentmyAjaxData.config.dmsTypeBs = [];
+                }
+                //删除 给接口传的数据 (设备)
             } else if ($scope.analysisObjectK == 99) {
                 item.map((v) => {
                     if (v.isgroup) {
@@ -350,16 +358,15 @@ ajaxData({
                         })
                     } else {
                         var index = $scope.oneRItemDevice.st_eqids.indexOf(v.busiId);
-                        if (index > -1) {
+                        if (index != -1) {
                             $scope.oneRItemDevice.st_eqids.splice(index, 1);
                         }
                     }
                 })
-
+                if ($scope[key[$scope.analysisObjectK]].length == 0) {
+                    parentmyAjaxData.config.dmsTypeAs = [];
+                }
             }
-
-            $scope.checkedNode = zTree.getCheckedNodes(true);
-            checkChangeFn();
         }
 
         //全部删除
@@ -373,11 +380,13 @@ ajaxData({
                     $scope.checkedNode = [];
                     $scope[key[$scope.analysisObjectK]] = [];
                     if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 2 || $scope.analysisObjectK == 3) {
-                        $scope.oneRItemArea = {};
-                        $scope.groupResultArea = [];
+                        $scope['oneRItem' + $scope.analysisObjectK] = {};
+                        $scope['groupResult' + $scope.analysisObjectK] = [];
+                        parentmyAjaxData.config.dmsTypeBs = [];
                     } else if ($scope.analysisObjectK == 99) {
                         $scope.oneRItemDevice = {};
                         $scope.groupResultDevice = [];
+                        parentmyAjaxData.config.dmsTypeAs = [];
                     }
                     $scope.$apply();
                 });
@@ -407,9 +416,6 @@ ajaxData({
         //取消
         $scope.cancel = () => {
             $scope.$emit('cancelCallback');
-            if ($scope[key[$scope.analysisObjectK]].length == 0) {
-                parentmyAjaxData.config.dmsTypeBs = [];
-            }
         }
 
         //获取到busiId 和 name 的映射(独立添加、成组添加)
@@ -438,7 +444,7 @@ ajaxData({
             }
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 2 || $scope.analysisObjectK == 3) {
                 parentmyAjaxData.config.dmsTypeAs = null;
-                parentmyAjaxData.config.dmsTypeBs = Object.keys($scope.oneRItemArea).length == 0 ? [...$scope.groupResultArea] : $scope.groupResultArea.length == 0 ? [$scope.oneRItemArea] : [...$scope.groupResultArea, $scope.oneRItemArea];
+                parentmyAjaxData.config.dmsTypeBs = Object.keys($scope['oneRItem' + $scope.analysisObjectK]).length == 0 ? [...$scope['groupResult' + $scope.analysisObjectK]] : $scope['groupResult' + $scope.analysisObjectK].length == 0 ? [$scope['oneRItem' + $scope.analysisObjectK]] : [...$scope['groupResult' + $scope.analysisObjectK], $scope['oneRItem' + $scope.analysisObjectK]];
                 busiIdToName();
             } else if ($scope.analysisObjectK == 99) {
                 parentmyAjaxData.config.dmsTypeBs = null;

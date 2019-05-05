@@ -49,12 +49,7 @@ ajaxData({
         // 当前页面行为记录初始化回调 获取行为记录
         async function historyInitCallback() {
             const historiData = historicalRecord.get();
-            const {
-                startDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
-                endDate = new Date(Date.now() - 1000 * 60 * 60 * 24),
-            } = historiData;
-            $scope.startDate = startDate;
-            $scope.endDate = endDate;
+            const {} = historiData;
             $scope.beforeLoading = false;
             await myAjaxData.timeout(0);
             $scope.$apply();
@@ -136,10 +131,13 @@ ajaxData({
                 tooltip: {
                     trigger: 'axis',
                     formatter: function (params) {
+                        var tooltipFormatter;
                         var xunits = $scope.xunits ? $scope.xunits : '';
-                        var tooltipFormatter = `<div style="font-size: 12px;">${params[0].axisValue}${xunits}</div>`;
+                        if(params[0].axisValue != null){
+                            tooltipFormatter = `<div style="font-size: 12px;">${params[0].axisValue}${xunits}</div>`;
+                        }
                         params.map(item => {
-                            if (item.data[1]) {
+                            if (item.data[1] != null) {
                                 var yunits = $scope.yunits ? `(${$scope.yunits})` : '';
                                 tooltipFormatter += `<div style="font-size: 12px;">${item.seriesName} ${$scope.yname}${yunits}: ${item.data[1]} 时间:${item.data[2]}<br/></div>`;
                             }
@@ -193,21 +191,25 @@ ajaxData({
 
         // 最终的 查询按钮
         $scope.search = () => {
+            if($scope.checkChart == 3 || $scope.checkChart == 4){
+                toaster.pop('error', '', '请选择图一和图二');
+                return;
+            }
             //调接口前 判空
             if ((($scope.queryData.analysisObjectK == 1 || $scope.queryData.analysisObjectK == 2 || $scope.queryData.analysisObjectK == 3) && myAjaxData.config.dmsTypeBs.length == 0) || ($scope.queryData.analysisObjectK == 99 && myAjaxData.config.dmsTypeAs.length == 0)) {
-                toaster.pop('error', '', '分析对象不能为空');
+                toaster.pop('error', '', '请选择分析对象');
                 return;
             } else if (!$scope.queryData.timeLat) {
-                toaster.pop('error', '', '时间纬度不能为空');
+                toaster.pop('error', '', '请选择时间纬度');
                 return;
             } else if (myAjaxData.config.dmsTimeDates.length == 0) {
-                toaster.pop('error', '', '统计时间不能为空');
+                toaster.pop('error', '', '请选择统计时间');
                 return;
             } else if (!myAjaxData.config.fdX.key) {
-                toaster.pop('error', '', '横轴指标不能为空');
+                toaster.pop('error', '', '请选择横轴指标');
                 return;
             } else if (!myAjaxData.config.fdY.key) {
-                toaster.pop('error', '', '纵轴指标不能为空');
+                toaster.pop('error', '', '请选择纵轴指标');
                 return;
             }
 
@@ -285,7 +287,6 @@ ajaxData({
                     chartOption(1, legend, series);
                 } else if ($scope.checkChart == 2) {
                     extreme(newArr);
-                    //图表的 setoption
                     chartOption(2, legend, series);
                 }
             })
@@ -414,7 +415,7 @@ ajaxData({
                 grid: {
                     top: "26%",
                     // left: "10%",
-                    right: "15%",
+                    right: "18%",
                     bottom: "18%"
                 }
             };
@@ -489,7 +490,7 @@ ajaxData({
                 grid: {
                     top: "26%",
                     // left: "10%",
-                    right: "15%",
+                    right: "18%",
                     bottom: "18%"
                 }
             };

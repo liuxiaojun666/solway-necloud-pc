@@ -14,7 +14,7 @@ ajaxData({
             $scope.radioIndex = index;
         })
 
-        //重新设置 日历切换的按钮 
+        //重新设置 日历切换的按钮
         var btnFunction = () => {
             //日 下一个按钮
             $scope.nextD = () => {
@@ -85,7 +85,7 @@ ajaxData({
                 $scope.$apply();
             }
         });
-        
+
         //月
         laydate.render({
             elem: '#cander2', //指定元素
@@ -110,7 +110,7 @@ ajaxData({
                 $scope.$apply();
             }
         });
-        
+
         //年
         laydate.render({
             elem: '#cander3', //指定元素
@@ -188,6 +188,9 @@ ajaxData({
         //右侧删除小按钮
         $scope.delRight = (id, index) => {
             $scope[key[$scope.radioIndex]].splice(index, 1);
+            if ($scope[key[$scope.radioIndex]].length == 0) {
+                parentmyAjaxData.config.dmsTimeDates = [];
+            }
         }
 
         //全部删除
@@ -197,6 +200,7 @@ ajaxData({
             } else {
                 $solway.confirm({ message: '确定全部删除吗？' }, () => {
                     $scope[key[$scope.radioIndex]] = [];
+                    parentmyAjaxData.config.dmsTimeDates = [];
                     $scope.$apply();
                 });
             }
