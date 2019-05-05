@@ -8,17 +8,27 @@ AddbaseDictionary: {
     __serviceName__: 'verticalService'
 })('verticalIndexCtrl', ['$scope', 'verticalService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
+    // 监测时间纬度的变化
+    $scope.$on('dmsTime', (item, v) => {
+        $scope.verticalCheckData = [];
+    })
+
     // 获取纵轴指标的数据
     $scope.$on('verticalData', () => {
         $scope.verticalData = parentmyAjaxData.config.herizonData;
+        //获取以前 checked 的数据 -> 重现到左侧列表
+        if($scope.verticalCheckData.length > 0){
+            var key;
+            for(key in $scope.verticalData){
+                $scope.verticalData[key].ll.map((son)=>{
+                    if(son.fdKey == $scope.verticalCheckData[0].fdKey){
+                        son.checked = true;
+                    }
+                })
+            }
+        }
         $scope.radioToSelect($scope.verticalData.ctg1, 0);
     })
-
-    //获取父级发送的横轴指标 选择的option
-    // $scope.$on('verticalIndexNum', (item, index) => {
-    //     $scope.selectIndex = index;
-    //     $scope.radioIndex = index;
-    // })
 
     //搜索功能
     $scope.getList = () => {
@@ -40,8 +50,8 @@ AddbaseDictionary: {
     }
 
     $scope.verticalCheckData = [];
-    $scope.verticalPoint = [];
-    $scope.verticalKpi = [];
+    // $scope.verticalPoint = [];
+    // $scope.verticalKpi = [];
 
     const key = {
         0: 'verticalPoint',
@@ -62,18 +72,21 @@ AddbaseDictionary: {
         //实现单选 和 重复点击取消选中
         if (!item.checked) {
             item.checked = false;
+            item.checkedV = item.checked;
         } else {
             $scope.verticalBottom.map((item) => {
                 item.checked = false;
+                item.checkedV = item.checked;
             })
             item.checked = true;
+            item.checkedV = item.checked;
         }
 
         //获取选中的数据
         var filterBottom = $scope.verticalBottom.filter(item => item.checked && !item.checkedH);
         if (filterBottom.length > 0) {
             filterBottom.map((item) => {
-                item.checkedV = item.checked;
+                // item.checkedV = item.checked;
                 if ($scope.verticalCheckData.indexOf(item) == '-1') {
                     $scope.verticalCheckData = [];
                     $scope.verticalCheckData.push(item);

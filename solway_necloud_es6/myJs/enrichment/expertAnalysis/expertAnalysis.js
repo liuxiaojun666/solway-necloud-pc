@@ -49,7 +49,7 @@ ajaxData({
         // 当前页面行为记录初始化回调 获取行为记录
         async function historyInitCallback() {
             const historiData = historicalRecord.get();
-            const {} = historiData;
+            const { } = historiData;
             $scope.beforeLoading = false;
             await myAjaxData.timeout(0);
             $scope.$apply();
@@ -133,7 +133,7 @@ ajaxData({
                     formatter: function (params) {
                         var tooltipFormatter;
                         var xunits = $scope.xunits ? $scope.xunits : '';
-                        if(params[0].axisValue != null){
+                        if (params[0].axisValue != null) {
                             tooltipFormatter = `<div style="font-size: 12px;">${params[0].axisValue}${xunits}</div>`;
                         }
                         params.map(item => {
@@ -177,8 +177,12 @@ ajaxData({
                 },
                 xAxis: {
                     name: $scope.xunits ? `${$scope.xname}(${$scope.xunits})` : `${$scope.xname}`,
+                    nameLocation: 'end',
                     min: $scope.minX,
-                    max: $scope.maxX
+                    max: $scope.maxX,
+                    nameTextStyle: {
+                        width: 4
+                    }
                 },
                 yAxis: {
                     name: $scope.yunits ? `${$scope.yname}(${$scope.yunits})` : `${$scope.yname}`,
@@ -191,7 +195,7 @@ ajaxData({
 
         // 最终的 查询按钮
         $scope.search = () => {
-            if($scope.checkChart == 3 || $scope.checkChart == 4){
+            if ($scope.checkChart == 3 || $scope.checkChart == 4) {
                 toaster.pop('error', '', '请选择图一和图二');
                 return;
             }
@@ -523,6 +527,8 @@ ajaxData({
             } else if (param == 2) {
                 // 横轴指标弹出
                 if ($scope.queryData.timeLat) {
+                    //监听横轴指标页面打开
+                    $scope.$broadcast('horizonOpen');
                     $scope.horizonIndexModel = true;
                 } else {
                     toaster.pop('error', '', '请选择时间纬度');
@@ -557,8 +563,10 @@ ajaxData({
 
                 // }
             } else if (param == 7) {
-                // 分析指标弹出
-                $scope.analysIndexModel = true;
+                if ($scope.queryData.timeLat) {
+                    // 分析指标弹出
+                    $scope.analysIndexModel = true;
+                }
             }
         }
 

@@ -1,9 +1,4 @@
 ajaxData({
-    AddbaseDictionary: {
-        name: 'AddbaseDictionary',
-        data: {},
-        later: true
-    },
     //分析对象 - 设备列表
     queryStTreeWithDevices: {
         name: 'GETqueryStTreeWithDevices',
@@ -450,6 +445,7 @@ ajaxData({
                 parentmyAjaxData.config.dmsTypeBs = null;
                 parentmyAjaxData.config.dmsTypeAs = Object.keys($scope.oneRItemDevice).length == 0 ? [...$scope.groupResultDevice] : $scope.groupResultDevice.length == 0 ? [$scope.oneRItemDevice] : [...$scope.groupResultDevice, $scope.oneRItemDevice];
                 busiIdToName();
+                console.log(parentmyAjaxData.config.bIdToName)
             }
             $scope.$emit('addCallback');
         }

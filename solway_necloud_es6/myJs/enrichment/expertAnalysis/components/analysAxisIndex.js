@@ -10,36 +10,38 @@ ajaxData({
     })('analysIndexCtrl', ['$scope', 'analysService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
         //获取分析类型 发送的anlsType
-        $scope.$on('anlsType', (item, v) => {
-            $scope.anlsType = v;
-        })
+        // $scope.$on('anlsType', (item, v) => {
+        //     $scope.anlsType = v;
+        // })
         //获取分析对象 发送的dmsType
-        $scope.$on('dmsType', () => {
-            $scope.dmsType = parentmyAjaxData.config.dmsType;
-        })
+        // $scope.$on('dmsType', () => {
+        //     $scope.dmsType = parentmyAjaxData.config.dmsType;
+        // })
         //获取时间纬度 发送的dmsTime
         $scope.$on('dmsTime', (item, v) => {
             $scope.dmsTime = v;
-            // $scope.getHerizonData();
-        })
-
-        //获取横轴指标的数据
-        $scope.HighAnalysis_selectFds.getData({
-            stationClass: "01",
-            anlsType: $scope.anlsType,
-            dmsType: $scope.dmsType,
-            dmsTime: $scope.dmsTime
+            //获取横轴指标的数据
+            $scope.HighAnalysis_selectFds.getData({
+                stationClass: "01",
+                anlsType: parentmyAjaxData.config.anlsType,
+                dmsType: parentmyAjaxData.config.dmsType,
+                dmsTime: $scope.dmsTime
+            })
         })
 
         $scope.HighAnalysis_selectFds.subscribe(res => {
-            $scope.herizonData = res.body;
-            $scope.radioToSelect($scope.herizonData.ctg1, 0);
+            if (!res.body) {
+                toaster.pop('error', '', res.msg);
+                return;
+            }
+            $scope.analysData = res.body;
+            $scope.radioToSelect($scope.analysData.ctg1, 0);
 
         });
 
         //搜索功能
         $scope.getList = () => {
-            $scope.herizonBottom.map((item) => {
+            $scope.analysBottom.map((item) => {
                 if (item.fdName.includes($scope.keyWords)) {
                     item.show = true;
                 } else {
@@ -52,9 +54,9 @@ ajaxData({
         $scope.radioIndex = 0;
         $scope.radioToSelect = (item, index) => {
             $scope.$emit('radioToFather', { 'type': 'analys', 'value': item.v });
-            $scope.herizonBottom = item.ll;
+            $scope.analysBottom = item.ll;
             //给数据赋初始show值
-            $scope.herizonBottom.map((item) => {
+            $scope.analysBottom.map((item) => {
                 item.show = true;
             })
             $scope.radioIndex = index;
@@ -70,7 +72,7 @@ ajaxData({
                 3: '柱状图',
                 4: '散点'
             }
-            $scope.herizonBottom.map((item) => {
+            $scope.analysBottom.map((item) => {
                 var result = item.fdStyle.split(",");
                 var newFdStyleCopy = [];
                 item.newFdStyle = [];
@@ -95,7 +97,7 @@ ajaxData({
         //左侧多选按钮-> 右侧 穿梭
         $scope.shuttle = () => {
             $scope[key[$scope.radioIndex]] = [];
-            $scope.herizonBottom.filter(item => item.checked && !item.checkedV).map((item, index) => {
+            $scope.analysBottom.filter(item => item.checked && !item.checkedV).map((item, index) => {
                 item.checkedH = item.checked;
                 if ($scope[key[$scope.radioIndex]].indexOf(item) == '-1') {
                     $scope[key[$scope.radioIndex]].push(item);
@@ -105,7 +107,7 @@ ajaxData({
 
         //右侧删除小按钮
         $scope.delRight = (fdKey, index) => {
-            $scope.herizonBottom.forEach((item) => {
+            $scope.analysBottom.forEach((item) => {
                 if (item.fdKey == fdKey) {
                     item.checked = false;
                 }
@@ -120,7 +122,7 @@ ajaxData({
             } else {
                 $solway.confirm({ message: '确定全部删除吗？' }, () => {
                     $scope[key[$scope.radioIndex]] = [];
-                    $scope.herizonBottom.forEach((item) => {
+                    $scope.analysBottom.forEach((item) => {
                         item.checked = false;
                     })
                     $scope.$apply();
@@ -131,7 +133,7 @@ ajaxData({
         //点击同比 环比
         $scope.tongBi = (fdKey, type) => {
             if (type == 'tong') {
-                $scope.herizonBottom.map((item) => {
+                $scope.analysBottom.map((item) => {
                     if (item.fdKey == fdKey) {
                         item.fdTb == 0 ? item.fdTb = 1 : item.fdTb = 0;
                     }
