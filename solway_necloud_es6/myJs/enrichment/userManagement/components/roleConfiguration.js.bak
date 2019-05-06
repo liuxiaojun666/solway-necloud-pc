@@ -97,6 +97,7 @@ ajaxData(
     // 库房管理员  人员查看 人员库房处理
     $scope.opUserBusiConfigMult02getCurrData.subscribe(res => {
         $scope.opUserBusiConfigMult02getCurrData.res.body = res.body.map(v => ({
+            edit: $scope.opUserBusiConfigMult02getCurrData.editUserId === v.id,
             ...v,
             ...(() => {
                 const o = {};
@@ -123,6 +124,7 @@ ajaxData(
     });
     // 库房管理员 库房配置  选中 取消
     $scope.opUserBusiConfigMult02getCurrData.updateDelete = (busi, user, checked) => {
+        $scope.opUserBusiConfigMult02getCurrData.editUserId = user.id;
         if (checked) $scope.opUserBusiConfigMult02RelDelBusiData.getData({
             id: user.id,
             busiId: busi.id
