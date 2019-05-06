@@ -1,0 +1,99 @@
+
+ajaxData({
+    windFirstSystem: {
+        name: 'GETwindFirstSystem',
+        data: {},
+        later: true,
+        saveParam: false,
+        onlyLatest: true
+    },
+    windSecondSystem: {
+        name: 'GETwindSecondSystem',
+        data: {},
+        later: true,
+        saveParam: false,
+        onlyLatest: true
+    },
+    updateMeasurePoint: {
+        name: 'POSTupdateMeasurePoint',
+        data: {},
+        later: true,
+        saveParam: false,
+        onlyLatest: true
+    },
+    
+}, {
+        __serviceName__: 'editMeasurePointService',
+    })('editMeasurePointTplModelCtrl', ['$scope', 'editMeasurePointService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
+
+        $scope.ptTypeMap = {1:'模拟量',2:'开关量',3:'状态量',4:'故障量'};
+        
+        const getFirstSystem = () =>{
+            $scope.windFirstSystem.getData({dictType:'WT_SYS_SUPER'}).then(res=>{
+                $scope.firstSystem = res;
+                getSecondSystem();
+            });
+        }
+
+        getFirstSystem();
+
+        const getSecondSystem = () =>{
+            $scope.windSecondSystem.getData({dictType:'WT_SYS'}).then(res=>{
+                $scope.secondSystemSource = res;
+            });
+        }
+        
+        //选择一级子系统，改变二级子系统数据源
+        $scope.changeFirstSystem = () =>{
+            $scope.secondSystem = [];
+            $scope.secondSystemSource.map(item =>{
+                if(item.dictCode.substr(0,1) == $scope.measureformData.sub1)  $scope.secondSystem.push(item);
+            });
+        }
+
+
+        $scope.$on("editMeasurePointBroad", async (e, v) => {
+            $scope.measureformData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+
+            if (v) {
+                $scope.measureformData = v;
+            } 
+
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        });
+
+ 
+       
+        //保存
+        $scope.save = () => {
+            // if (!$solway.formValidation($scope.faultformData, '.editFaultCodeTpl', toaster)) return;//校验非空
+
+            var measureformData = {
+                id:$scope.measureformData.id,
+                sub1:$scope.measureformData.sub1,
+                sub2:$scope.measureformData.sub2,
+                max:$scope.measureformData.max,
+                min:$scope.measureformData.min,
+                ratio:$scope.measureformData.ratio,
+                enable: $('input[name="enable"]:checked').val(),
+                desc:$scope.measureformData.desc
+            };
+            $scope.updateMeasurePoint.getData(measureformData).then(res => {
+                if (res.code == 0) {
+                    toaster.pop('success', '', '修改成功');
+                    $scope.$emit('editMeasurePointCallback');
+                } else {
+                    toaster.pop('error', '', '修改失败')
+                }
+            });
+        }
+
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('cancelMeasurePoint');
+        }
+
+    });
