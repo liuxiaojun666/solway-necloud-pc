@@ -1,58 +1,98 @@
-ajaxData({
-    // 电站日
-    stationDay: {
-        name: 'GETwpMonitorGetRunResDetail',
-        data: {
-            queryType: 3,
-            dateType: 3,
-            date: (new Date).Format('yyyy-MM-dd')
-        },
-        later: true,
-        onlyLatest: true,
-        sameTimeOnce: true,
-    },
-}, {
-
-        __serviceName__: 'themeResourceDayAgoService'
-    })('themeResourceDayAgoCtrl', ['$scope', 'themeResourceDayAgoService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
-        // 初始化 scope
-        $scope.initChildScope($scope, myAjaxData);
-
-        // 主页面初始化完成 回调
-        $scope.mainPageInitComplete = async () => {
-            const { dateType, dateTime } = historicalRecord.get();
-            $scope.dateType = dateType;
-            $scope.dateTime = dateTime;
-            await $scope.dateUpdated();
-            $('.ng-clock').removeClass('ng-clock');
-            $scope.initComplete = true;
-            await myAjaxData.timeout(0);
-            $scope.$apply();
-        };
-
-
-        // 日期改变
-        $scope.dateUpdated = async () => {
-            if ($scope.currentClass !== 'StationDayAgo') return;
-            await myAjaxData.timeout(0);
-            if ($scope.currentClass === 'StationDayAgo') $scope.stationDay.getData({
+ajaxData(
+    {
+        // 电站日
+        stationDay: {
+            name: 'GETwpMonitorGetRunResDetail',
+            data: {
                 queryType: 3,
                 dateType: 3,
-                date: $scope.dateTime.showDate
-            });
-        };
+                date: (new Date).Format('yyyy-MM-dd')
+            },
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+    }, {
+
+        __serviceName__: 'themeResourceDayAgoService'
+    }
+)('themeResourceDayAgoCtrl', ['$scope', 'themeResourceDayAgoService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+    };
 
 
-        // 切换电站 回调
-        $scope.switchPowerCallback = () => {
-            if ($scope.currentClass !== 'StationDayAgo') return;
-            if (!$scope.initComplete) return;
-            $scope.stationDay.res = null;
-            if ($scope.dateType === 0) return $scope.stationDay.getData({});
-        };
-
-        $scope.$on('$destroy', () => {
-            $scope.stationDay.res = null;
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        if ($scope.currentClass !== 'StationDayAgo') return;
+        await myAjaxData.timeout(0);
+        if ($scope.currentClass === 'StationDayAgo') $scope.stationDay.getData({
+            queryType: 3,
+            dateType: 3,
+            date: $scope.dateTime.showDate
         });
+    };
 
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'StationDayAgo') return;
+        if (!$scope.initComplete) return;
+        $scope.stationDay.res = null;
+        if ($scope.dateType === 0) return $scope.stationDay.getData({});
+    };
+
+    const option = {
+        tooltip: {
+            trigger: 'item'
+        },
+        radar: {
+            indicator: (function () {
+                var res = [];
+                for (var i = 1; i <= 16; i++) {
+                    res.push({ text: i + '', max: 100 });
+                }
+                return res;
+            })(),
+
+
+            center: ['50%', '50%'],
+            radius: 280,
+            splitNumber: 1,
+            splitArea: {
+                show: false
+            },
+        },
+        series: [
+            {
+                type: 'radar',
+                symbolSize: 1,
+                itemStyle: { normal: { areaStyle: { type: 'default' } } },
+                data: [
+                    {
+                        name: '风频',
+                        value: [2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 75.6, 82.2, 48.7, 18.8, 6.0, 2.3, 13, 14, 15, 16],
+                    }
+                ]
+            }
+        ]
+    };
+    const myChart = echarts.init(document.getElementById('roseMap'));
+    myChart.setOption(option, true);
+
+    $scope.$on('$destroy', () => {
+        $scope.stationDay.res = null;
     });
+
+});
