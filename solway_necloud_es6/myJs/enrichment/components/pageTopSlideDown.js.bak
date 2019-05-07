@@ -10,7 +10,8 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
         const wpPages = [
             'monitoringSummary',
             'analyzeSummary',
-            'actionPlanSummary'
+            'actionPlanSummary',
+            'expertAnalysis'
         ];
         $scope.goChildrenPage = (routerUrl, theme) => {
             const { stClass } = $scope;
@@ -36,8 +37,23 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
             }
         }
 
-        $scope.goBoughtModulePage = (routerUrl, theme) => {
+        $scope.goBoughtModulePage = async (routerUrl, theme) => {
+            const { stClass } = $scope;
+            $solway.setStore('systemInfo', { stClass: stClass });
+            if (stClass === '02' && wpPages.includes(routerUrl)) {
+                routerUrl += 'Wp';
+            }
             $solway.setStore('systemInfo', { 'systemTab': $scope.systemTab, 'module': [routerUrl, theme] });
+            if ($scope.currentSTinfo.currentSTClass !== stClass) {
+                await $http({
+                    method: "GET",
+                    url: window.interface['GETUserAuthHandleSetSTClass'],
+                    params: { stClass }
+                })
+                // .success(function (res) {
+                //     $state.go(routerUrl);
+                // });
+            }
             if (routerUrl == theme) {
                 const falsify = historicalRecord.falsify(routerUrl, {}, true);
                 if (falsify.redirect == 'failure') {
