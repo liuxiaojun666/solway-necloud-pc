@@ -23,6 +23,9 @@ ajaxData({
             if (data.analysObDataNew) {
                 $scope.analysObDataNew = data.analysObDataNew;
                 $scope.analysObDataNewDevice = data.analysObDataNewDevice;
+                // setTimeout(() => {
+                    $scope.radioDevice();
+                // }, 0)
             }
         })
 
@@ -418,7 +421,11 @@ ajaxData({
             var analyOjName = {};
             $scope[key[$scope.analysisObjectK]].map(item => {
                 if (!item[0].isgroup) {
-                    analyOjName[item[0].busiId] = item[0].name;
+                    if($scope.analysisObjectK == 99){
+                        analyOjName[item[0].stids + '-' + item[0].busiId] = item[0].name;
+                    } else {
+                        analyOjName[item[0].busiId] = item[0].name;
+                    }
                 } else {
                     item.map((son, i) => {
                         if (i == 0) {
@@ -438,15 +445,13 @@ ajaxData({
                 return;
             }
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 2 || $scope.analysisObjectK == 3) {
-                parentmyAjaxData.config.dmsTypeAs = null;
+                parentmyAjaxData.config.dmsTypeAs = [];
                 parentmyAjaxData.config.dmsTypeBs = Object.keys($scope['oneRItem' + $scope.analysisObjectK]).length == 0 ? [...$scope['groupResult' + $scope.analysisObjectK]] : $scope['groupResult' + $scope.analysisObjectK].length == 0 ? [$scope['oneRItem' + $scope.analysisObjectK]] : [...$scope['groupResult' + $scope.analysisObjectK], $scope['oneRItem' + $scope.analysisObjectK]];
-                busiIdToName();
             } else if ($scope.analysisObjectK == 99) {
-                parentmyAjaxData.config.dmsTypeBs = null;
+                parentmyAjaxData.config.dmsTypeBs = [];
                 parentmyAjaxData.config.dmsTypeAs = Object.keys($scope.oneRItemDevice).length == 0 ? [...$scope.groupResultDevice] : $scope.groupResultDevice.length == 0 ? [$scope.oneRItemDevice] : [...$scope.groupResultDevice, $scope.oneRItemDevice];
-                busiIdToName();
-                console.log(parentmyAjaxData.config.bIdToName)
             }
+            busiIdToName();
             $scope.$emit('addCallback');
         }
     });
