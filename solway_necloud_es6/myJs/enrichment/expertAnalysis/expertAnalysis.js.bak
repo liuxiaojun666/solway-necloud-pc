@@ -36,6 +36,8 @@ ajaxData({
             key: '',
             name: ''
         },
+        fds: [],          //横轴、纵轴指标 参数
+        analysFds: [],    //分析指标 参数
         bIdToName: {}     //busiId 和 name的映射
 
     })('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', 'toaster'], ($scope, myAjaxData, historicalRecord, $interval, toaster) => {
@@ -49,12 +51,50 @@ ajaxData({
         // 当前页面行为记录初始化回调 获取行为记录
         async function historyInitCallback() {
             const historiData = historicalRecord.get();
-            const {} = historiData;
+            const { } = historiData;
             $scope.beforeLoading = false;
             await myAjaxData.timeout(0);
             $scope.$apply();
         };
 
+        // 分析类型下拉框的数据获取
+        $scope.HighAnalysis_selectAnlsType.subscribe(res => {
+            $scope.selectData = res.body;
+            analysisObjFun();
+        });
+
+        // 选中第一个下拉框 动态改变其他的下拉框
+        $scope.queryData = {
+            'analysisType': 1
+        }
+
+        //获取分析对象的数据
+        function analysisObjFun() {
+            //获取不同分析类型的数据
+            var key;
+            for (key in $scope.selectData) {
+                if ($scope.queryData.analysisType == $scope.selectData[key].k) {
+                    $scope.analysObDataOld = $scope.selectData[key].ll;
+                }
+            }
+            //将设备 和 其他数据分离
+            $scope.analysObDataNew = $scope.analysObDataOld.filter((item) => {
+                return item.k.substr(0, 1) != "4";
+            })
+            
+            $scope.analysObDataNewDevice = $scope.analysObDataOld.filter((item) => {
+                return item.k.substr(0, 1) == "4";
+            })
+
+            //向分析对象发送数据
+            $scope.$broadcast('analysObDataNew', { 'analysObDataNew': $scope.analysObDataNew, 'analysObDataNewDevice': $scope.analysObDataNewDevice });
+
+            //向横轴指标发送anlsType
+            myAjaxData.config.anlsType = $scope.queryData.analysisType;
+            // $scope.$broadcast('anlsType', $scope.queryData.analysisType);
+        }
+
+        //---------------------------------关联分析 ->散点图方法组
         //获取 x轴和 y轴的 名字和单位
         function indexName() {
             $scope.xname = myAjaxData.config.fdX.name;
@@ -133,7 +173,7 @@ ajaxData({
                     formatter: function (params) {
                         var tooltipFormatter;
                         var xunits = $scope.xunits ? $scope.xunits : '';
-                        if(params[0].axisValue != null){
+                        if (params[0].axisValue != null) {
                             tooltipFormatter = `<div style="font-size: 12px;">${params[0].axisValue}${xunits}</div>`;
                         }
                         params.map(item => {
@@ -177,8 +217,12 @@ ajaxData({
                 },
                 xAxis: {
                     name: $scope.xunits ? `${$scope.xname}(${$scope.xunits})` : `${$scope.xname}`,
+                    nameLocation: 'end',
                     min: $scope.minX,
-                    max: $scope.maxX
+                    max: $scope.maxX,
+                    nameTextStyle: {
+                        width: 4
+                    }
                 },
                 yAxis: {
                     name: $scope.yunits ? `${$scope.yname}(${$scope.yunits})` : `${$scope.yname}`,
@@ -189,12 +233,21 @@ ajaxData({
             })
         }
 
+        //分析指标发送 faName
+        $scope.$on('analysFds_fdName', (event, data) => {
+            $scope.analysfdName = data.fdName;
+        })
+
+        var tableStyle = {
+            1: 'line',
+            3: 'bar'
+        }
         // 最终的 查询按钮
         $scope.search = () => {
-            if($scope.checkChart == 3 || $scope.checkChart == 4){
-                toaster.pop('error', '', '请选择图一和图二');
-                return;
-            }
+            // if ($scope.checkChart == 3 || $scope.checkChart == 4) {
+            //     toaster.pop('error', '', '请选择图一和图二');
+            //     return;
+            // }
             //调接口前 判空
             if ((($scope.queryData.analysisObjectK == 1 || $scope.queryData.analysisObjectK == 2 || $scope.queryData.analysisObjectK == 3) && myAjaxData.config.dmsTypeBs.length == 0) || ($scope.queryData.analysisObjectK == 99 && myAjaxData.config.dmsTypeAs.length == 0)) {
                 toaster.pop('error', '', '请选择分析对象');
@@ -205,27 +258,40 @@ ajaxData({
             } else if (myAjaxData.config.dmsTimeDates.length == 0) {
                 toaster.pop('error', '', '请选择统计时间');
                 return;
-            } else if (!myAjaxData.config.fdX.key) {
+            } else if (!myAjaxData.config.fdX.key && $scope.queryData.analysisType == 1) {
                 toaster.pop('error', '', '请选择横轴指标');
                 return;
-            } else if (!myAjaxData.config.fdY.key) {
+            } else if (!myAjaxData.config.fdY.key && $scope.queryData.analysisType == 1) {
                 toaster.pop('error', '', '请选择纵轴指标');
+                return;
+            } else if (myAjaxData.config.analysFds.length == 0 && $scope.queryData.analysisType == 2) {
+                toaster.pop('error', '', '请选择分析指标');
                 return;
             }
 
+            if ($scope.queryData.analysisType == 1) {
+                var dataJ = {
+                    dmsTypeAs: myAjaxData.config.dmsTypeAs.length > 0 ? myAjaxData.config.dmsTypeAs : null,
+                    dmsTypeBs: myAjaxData.config.dmsTypeBs.length > 0 ? myAjaxData.config.dmsTypeBs : null,
+                    dmsTime: {
+                        dateType: $scope.dmsTimeDateType,
+                        dates: myAjaxData.config.dmsTimeDates
+                    },
+                    fds: myAjaxData.config.fds
+                }
+            } else {
+                var dataJ = {
+                    dmsTypeAs: myAjaxData.config.dmsTypeAs.length > 0 ? myAjaxData.config.dmsTypeAs : null,
+                    dmsTypeBs: myAjaxData.config.dmsTypeBs.length > 0 ? myAjaxData.config.dmsTypeBs : null,
+                    dmsTime: {
+                        dateType: $scope.dmsTimeDateType,
+                        dates: myAjaxData.config.dmsTimeDates
+                    },
+                    fds: myAjaxData.config.analysFds
+                }
+            }
             //接口调用
-            $scope['analysis_selectAnlsType' + $scope.queryData.analysisType + myAjaxData.config.dmsType + $scope.queryData.timeLat].getData({
-                dmsTypeAs: myAjaxData.config.dmsTypeAs,
-                dmsTypeBs: myAjaxData.config.dmsTypeBs,
-                dmsTime: {
-                    dateType: $scope.dmsTimeDateType,
-                    dates: myAjaxData.config.dmsTimeDates
-                },
-                fds: [
-                    { fdKey: myAjaxData.config.fdX.key, isx: 1 },
-                    { fdKey: myAjaxData.config.fdY.key, isx: 0 }
-                ]
-            }).then((res) => {
+            $scope['analysis_selectAnlsType' + $scope.queryData.analysisType + myAjaxData.config.dmsType + $scope.queryData.timeLat].getData(dataJ).then((res) => {
                 if (!res.body || !res.body.data) {
                     toaster.pop('error', '', res.msg);
                     return;
@@ -235,97 +301,85 @@ ajaxData({
                     return;
                 }
                 $scope.tableData = res.body;
-                //获取 x轴和 y轴的 名字和单位
-                indexName();
-                //处理 接口的数据 -> echarts需要的数据
-                var newArr = [];
-                var key;
-                var newArrKey = [];
-                var newArrVal = [];
-                for (key in $scope.tableData.data) {
-                    newArr.push(...$scope.tableData.data[key]);
-                    newArrVal.push($scope.tableData.data[key]);
-                    newArrKey.push(myAjaxData.config.bIdToName[key]);
-                }
-                //获取 series
-                var series = [];
-                newArrKey.map((item, i) => {
-                    series.push(
-                        {
-                            name: item,
-                            data: newArrVal[i],
-                            type: 'scatter',
-                            symbolSize: 6,
-                            opacity: 1,
-                            shadowBlur: 2,
-                            shadowOffsetX: 0,
-                            shadowOffsetY: 0,
-                            shadowColor: 'rgba(0, 0, 0, 0.5)'
-                        }
-                    )
-                })
-                //获取 legend
-                var legend = {
-                    y: 'top',
-                    data: newArrKey,
-                    type: 'scroll',
-                    width: 450,
-                    itemWidth: 12,
-                    left: 'center',
-                    textStyle: {
-                        color: '#fff',
-                        fontSize: 12,
-                        height: 20,
-                        lineHeight: 20,
-                        padding: [3, 0, 0, 0]
+                if ($scope.queryData.analysisType == 1) {
+                    //获取 x轴和 y轴的 名字和单位
+                    indexName();
+                    //处理 接口的数据 -> echarts需要的数据
+                    var key;
+                    var newArr = [];
+                    var newArrKey = [];
+                    var newArrVal = [];
+                    for (key in $scope.tableData.data) {
+                        newArr.push(...$scope.tableData.data[key]);
+                        newArrVal.push($scope.tableData.data[key]);
+                        newArrKey.push(myAjaxData.config.bIdToName[key]);
                     }
-                }
-                if ($scope.checkChart == 1) {
+                    //获取 series
+                    var series = [];
+                    newArrKey.map((item, i) => {
+                        series.push(
+                            {
+                                name: item,
+                                data: newArrVal[i],
+                                type: 'scatter',
+                                symbolSize: 6,
+                                opacity: 1,
+                                shadowBlur: 2,
+                                shadowOffsetX: 0,
+                                shadowOffsetY: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        )
+                    })
+                    //获取 legend
+                    var legend = {
+                        y: 'top',
+                        data: newArrKey,
+                        type: 'scroll',
+                        width: 450,
+                        itemWidth: 12,
+                        left: 'center',
+                        textStyle: {
+                            color: '#fff',
+                            fontSize: 12,
+                            height: 20,
+                            lineHeight: 20,
+                            padding: [3, 0, 0, 0]
+                        }
+                    }
                     //获取最大值 最小值
                     extreme(newArr);
                     //图表的 setoption
-                    chartOption(1, legend, series);
-                } else if ($scope.checkChart == 2) {
-                    extreme(newArr);
-                    chartOption(2, legend, series);
+                    chartOption($scope.checkChart, legend, series);
+                } else if ($scope.queryData.analysisType == 2) {
+                    $scope.xdata = $scope.tableData.data.dtime;
+                    delete $scope.tableData.data.dtime;
+                    for (key in $scope.tableData.units) {
+                        if (key == myAjaxData.config.analysFds[0]['fdKey']) {
+                            $scope.yunits = $scope.tableData.units[key];
+                        }
+                    }
+                    $scope.yname = $scope.yunits ? $scope.analysfdName + '(' + $scope.yunits + ')' : $scope.analysfdName;
+                    var key;
+                    var key2;
+                    $scope.newArrName = [];
+                    $scope.tableType = [];
+                    $scope.colors = [];
+                    $scope.ydatas = [[]];
+                    var colorsAry = ['#D2E058', '#F29958', '#71cf53', '#35c4ee', '#FF7070', '#70C7FF', '#FF0072', '#3c763d', '#a94442', '#777', '#7266ba', '#fad733'];
+                    for (key in $scope.tableData.data) {
+                        $scope.newArrName.push(myAjaxData.config.bIdToName[key]);
+                        $scope.tableType.push(tableStyle[myAjaxData.config.analysFds[0].fdStyle]);
+                        for (key2 in $scope.tableData.data[key]) {
+                            $scope.ydatas[0].push($scope.tableData.data[key][key2]);
+                        }
+                    }
+                    $scope.tableType.map((item, i) => {
+                        $scope.colors.push(colorsAry[i]);
+                    })
                 }
+
             })
-        }
-
-        // 分析类型下拉框的数据获取
-        $scope.HighAnalysis_selectAnlsType.subscribe(res => {
-            $scope.selectData = res.body;
-            analysisObjFun();
-        });
-
-        // 选中第一个下拉框 动态改变其他的下拉框
-        $scope.queryData = {
-            'analysisType': 1
-        }
-
-        //获取分析对象的数据方法
-        function analysisObjFun() {
-            //获取不同分析类型的数据
-            var key;
-            for (key in $scope.selectData) {
-                if ($scope.queryData.analysisType == $scope.selectData[key].k) {
-                    $scope.analysObDataOld = $scope.selectData[key].ll;
-                }
-            }
-            //将设备 和 其他数据分离
-            $scope.analysObDataNew = $scope.analysObDataOld.filter((item) => {
-                return item.k.substr(0, 1) != "4";
-            })
-            $scope.analysObDataNewDevice = $scope.analysObDataOld.filter((item) => {
-                return item.k.substr(0, 1) == "4";
-            })
-
-            //向分析对象发送数据
-            $scope.$broadcast('analysObDataNew', { 'analysObDataNew': $scope.analysObDataNew, 'analysObDataNewDevice': $scope.analysObDataNewDevice });
-
-            //向横轴指标发送anlsType
-            myAjaxData.config.anlsType = $scope.queryData.analysisType;
-            // $scope.$broadcast('anlsType', $scope.queryData.analysisType);
         }
 
         // 切换图表排列方式
@@ -523,6 +577,8 @@ ajaxData({
             } else if (param == 2) {
                 // 横轴指标弹出
                 if ($scope.queryData.timeLat) {
+                    //监听横轴指标页面打开
+                    $scope.$broadcast('horizonOpen');
                     $scope.horizonIndexModel = true;
                 } else {
                     toaster.pop('error', '', '请选择时间纬度');
@@ -557,8 +613,10 @@ ajaxData({
 
                 // }
             } else if (param == 7) {
-                // 分析指标弹出
-                $scope.analysIndexModel = true;
+                if ($scope.queryData.timeLat) {
+                    // 分析指标弹出
+                    $scope.analysIndexModel = true;
+                }
             }
         }
 
@@ -615,6 +673,7 @@ ajaxData({
             $scope.countTimeModel = false;
             $scope.horizonIndexModel = false;
             $scope.verticalIndexModel = false;
+            $scope.analysIndexModel = false;
         });
 
         $scope.$on('addCallback', () => {
@@ -622,6 +681,7 @@ ajaxData({
             $scope.countTimeModel = false;
             $scope.horizonIndexModel = false;
             $scope.verticalIndexModel = false;
+            $scope.analysIndexModel = false;
         });
     });
 

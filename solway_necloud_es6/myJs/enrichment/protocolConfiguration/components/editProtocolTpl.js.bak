@@ -66,6 +66,25 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    measurePointTemplates: {
+        name: 'GETmeasurePointTemplates',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    measurePointsGenerate: {
+        name: 'POSTmeasurePointsGenerate',
+        data: {},
+        later: true,
+        saveParam: false,
+        onlyLatest: true
+    },
+    existMeasurePoints: {
+        name: 'GETexistMeasurePoints',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     
 }, {
         __serviceName__: 'editProtocolTplService',
@@ -310,6 +329,9 @@ ajaxData({
             $scope.tabActive = type;
             if (type == 'faultCode') {
                 $scope.getFaultCodeList();
+            }else if(type == 'measurePoint'){
+                getExistMeasurePoints();
+                getMeasurePointTemplateList();
             }
         }
 
@@ -482,6 +504,129 @@ ajaxData({
             $scope.editFaultCodeTpl = false;
         })
 
+        //配置好的测点列表
+        const getExistMeasurePoints = () =>{
+            $scope.existMeasurePoints.getData({protocalId:$scope.formData.id})
+        }
+        //测点模板列表
+        const getMeasurePointTemplateList = ()=>{
+            $scope.measurePointTemplates.getData({dictType:'PROTOCAL_TEMPLATE'}).then(res=>{
+                $scope.measurePointTemplatesData = res;
+                $scope.measureTempId = res[0].dictValue;
+            });
+        }
 
+        //测点批量生成
+        $scope.generateMeasurePoint = () =>{
+            $scope.measurePointsGenerate.getData({
+                protocalId:$scope.formData.id,
+                templateId:$scope.measureTempId
+            }).then(res=>{
+                if(res.code == 0){
+                    toaster.pop('success','',res.msg);
+                }else{
+                    toaster.pop('error','',res.msg);
+                }
+            });
+        }
+        const ptTypeMap = {1:'模拟量',2:'开关量',3:'状态量',4:'故障量'};
+        $scope.columnMeasurePoint = [
+            {
+                title: '测点类型',
+                dataIndex: 'ptType',
+                sort: !0,
+                align: 'center',
+                render(text, item, index) {
+                    return ptTypeMap[text];
+                }
+            },{
+                title: '测点名称',
+                dataIndex: 'name',
+                sort: !0,
+                align: 'center'
+            },{
+                title: '测点编码',
+                dataIndex: 'code',
+                sort: !0,
+                align: 'center'
+            }, {
+                title: '所属子系统一级分类',
+                dataIndex: 'sub1',
+                width:'17%',
+                align: 'center',
+
+            }, {
+                title: '所属子系统二级分类',
+                dataIndex: 'sub2',
+                width:'17%',
+                sort: !0,
+                align: 'center'
+            }, {
+                title: '最大值',
+                dataIndex: 'max',
+                sort: !0,
+                align: 'center'
+            }, {
+                title: '最小值',
+                dataIndex: 'min',
+                sort: !0,
+                align: 'center'
+            }, {
+                title: '系数',
+                dataIndex: 'ratio',
+                sort: !0,
+                align: 'center'
+            },
+            //  {
+            //     title: '是否启用',
+            //     dataIndex: 'faultHandle',
+            //     sort: !0,
+            //     align: 'center'
+            // }, 
+            {
+                title: '备注描述',
+                dataIndex: 'desc',
+                sort: !0,
+                align: 'center'
+            },{
+                title: '操作',
+                dataIndex: 'ptType',
+                align: 'center',
+                sort: !0,
+                render(text, item, index) {
+                    if(text == 1){
+                        return `
+                            <div class="clearfix">
+                                <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;" ></i>
+                            </div>
+                        `
+                    }
+                },
+            }
+        ]
+
+        $scope.trClickMeasurePoints = (item, index, event) => {
+            if(event.target.className.includes('icon-bianji-copy')) {
+                $scope.editMeasurePointTpl = true;
+                $scope.$broadcast('editMeasurePointBroad',item);
+            }else if(event.target.className.includes('icon-shanchu1')) {
+                // $solway.confirm({ message: '确定删除此条数据？' }, () => {
+                //     deleteBatch([item.id])
+                // });
+            }
+        };
+
+        
+        //编辑测点成功回调
+        $scope.$on('editMeasurePointCallback',function(){
+            $scope.editMeasurePointTpl = false;
+            getExistMeasurePoints();
+            getMeasurePointTemplateList();
+        })
+
+        //测点取消回调
+        $scope.$on("cancelMeasurePoint",function(){
+            $scope.editMeasurePointTpl = false;
+        })
 
     });

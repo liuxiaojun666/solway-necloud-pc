@@ -1,9 +1,4 @@
 ajaxData({
-AddbaseDictionary: {
-    name: 'AddbaseDictionary',
-    data: {},
-    later: true
-},
 // 获取指标
 HighAnalysis_selectFds: {
     name: 'GETHighAnalysis_selectFds',
@@ -13,15 +8,6 @@ HighAnalysis_selectFds: {
 }, {
     __serviceName__: 'horizonService'
 })('horizonIndexCtrl', ['$scope', 'horizonService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
-
-    //获取分析类型 发送的anlsType
-    // $scope.$on('anlsType', (item, v) => {
-    //     $scope.anlsType = v;
-    // })
-    //获取分析对象 发送的dmsType
-    // $scope.$on('dmsType', () => {
-    //     $scope.dmsType = parentmyAjaxData.config.dmsType;
-    // })
     //获取时间纬度 发送的dmsTime
     $scope.$on('dmsTime', (item, v) => {
         $scope.dmsTime = v;
@@ -34,13 +20,29 @@ HighAnalysis_selectFds: {
     })
 
     $scope.HighAnalysis_selectFds.subscribe(res => {
-        $scope.herizonData = res.body;
         if (!res.body) {
             toaster.pop('error', '', res.msg);
             return;
         }
+        $scope.herizonData = res.body;
+        $scope.horizonCheckData = [];
         $scope.radioToSelect($scope.herizonData.ctg1, 0);
     });
+    
+    //监听横轴指标页面打开
+    $scope.$on('horizonOpen', () => {
+        //获取以前 checked 的数据 -> 重现到左侧列表
+        if($scope.horizonCheckData.length > 0){
+            var key;
+            for(key in $scope.herizonData){
+                $scope.herizonData[key].ll.map((son)=>{
+                    if(son.fdKey == $scope.horizonCheckData[0].fdKey){
+                        son.checked = true;
+                    }
+                })
+            }
+        }
+    })
 
     //搜索功能
     $scope.getList = () => {
@@ -114,18 +116,21 @@ HighAnalysis_selectFds: {
         //实现单选 和 重复点击取消选中
         if (!item.checked) {
             item.checked = false;
+            item.checkedH = item.checked;
         } else {
             $scope.herizonBottom.map((item) => {
                 item.checked = false;
+                item.checkedH = item.checked;
             })
             item.checked = true;
+            item.checkedH = item.checked;
         }
 
         //获取选中的数据
         var filterBottom = $scope.herizonBottom.filter(item => item.checked && !item.checkedV);
         if (filterBottom.length > 0) {
             filterBottom.map((item) => {
-                item.checkedH = item.checked;
+                // item.checkedH = item.checked;
                 if ($scope.horizonCheckData.indexOf(item) == '-1') {
                     $scope.horizonCheckData = [];
                     $scope.horizonCheckData.push(item);
@@ -219,6 +224,12 @@ HighAnalysis_selectFds: {
             toaster.pop('error', '', '所选数据不能为空');
             return;
         }
+        var json = {
+            fdKey: $scope.horizonCheckData[0].fdKey,
+            isx: 1
+        }
+        parentmyAjaxData.config.fds[0] = json;
+
         parentmyAjaxData.config.fdX.key = $scope.horizonCheckData[0].fdKey;
         parentmyAjaxData.config.fdX.name = $scope.horizonCheckData[0].fdName;
         $scope.$emit('addCallback');
