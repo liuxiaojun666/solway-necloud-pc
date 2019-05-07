@@ -330,6 +330,7 @@ ajaxData({
             if (type == 'faultCode') {
                 $scope.getFaultCodeList();
             }else if(type == 'measurePoint'){
+                $scope.existMeasurePoints.res = null;
                 getExistMeasurePoints();
                 getMeasurePointTemplateList();
             }
@@ -506,7 +507,10 @@ ajaxData({
 
         //配置好的测点列表
         const getExistMeasurePoints = () =>{
-            $scope.existMeasurePoints.getData({protocalId:$scope.formData.id})
+            $scope.existFlag = 0;
+            $scope.existMeasurePoints.getData({protocalId:$scope.formData.id}).then(res=>{
+                if(res.body && res.body.total) $scope.existFlag = 1;
+            })
         }
         //测点模板列表
         const getMeasurePointTemplateList = ()=>{
@@ -518,15 +522,23 @@ ajaxData({
 
         //测点批量生成
         $scope.generateMeasurePoint = () =>{
-            $scope.measurePointsGenerate.getData({
-                protocalId:$scope.formData.id,
-                templateId:$scope.measureTempId
-            }).then(res=>{
-                if(res.code == 0){
-                    toaster.pop('success','',res.msg);
-                }else{
-                    toaster.pop('error','',res.msg);
-                }
+            let tip = "";
+            if($scope.existFlag){
+                tip = '确定生成新的数据？确定后，原有数据将被删除！！！'
+            }else{
+                tip = '确定采用此模板生成数据？'
+            }
+            $solway.confirm({ message: tip}, () => {
+                $scope.measurePointsGenerate.getData({
+                    protocalId:$scope.formData.id,
+                    templateId:$scope.measureTempId
+                }).then(res=>{
+                    if(res.code == 0){
+                        toaster.pop('success','',res.msg);
+                    }else{
+                        toaster.pop('error','',res.msg);
+                    }
+                });
             });
         }
         const ptTypeMap = {1:'模拟量',2:'开关量',3:'状态量',4:'故障量'};
