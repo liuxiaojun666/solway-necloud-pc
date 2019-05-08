@@ -100,7 +100,7 @@ ajaxData(
                 tabIndex
             }
         });
-        $scope.diffGetData();
+        $scope.diffGetData(true);
     };
 
     // 切换显示形式  图表 or 列表
@@ -123,7 +123,7 @@ ajaxData(
         const { showShape, dateTime, tabIndex, dateType, dataType, classTab } = $scope;
         if (dateType !== 1) return;
         if (dataType !== 0) return;
-        if (getInfo && classTab === 0) {
+        if (getInfo && classTab === 0 && tabIndex === 1) {
             $scope.analysis_wp_station_pitch_month_info.getData({
                 queryCode: 'analysis_wp_station_pitch_month_info',
                 queryType: 3,
@@ -302,6 +302,7 @@ ajaxData(
         ];
     });
 
+    let activeEqName = '';
     $scope.trClick = async (item, _index, event) => {
         event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
         const idIndex = Object.keys($scope.turbineClimbPoints.res.body.names).findIndex(v => v === item.eqid + '');
@@ -316,8 +317,10 @@ ajaxData(
             ...$scope.turbineClimbPoints.chart,
             colors,
             display,
+            z: [new Array(colors[0].length).fill(2).map((v, i) => idIndex === i ? 3 : 2)],
             activeEqid: item.eqid
         };
+        activeEqName = item.eq_name;
         $scope.$apply();
     };
 
@@ -353,13 +356,14 @@ ajaxData(
             types: [(new Array(eq_keys.length)).fill('scatter')],
             linenames: [Object.values(equments)],
             colors,
+            z: [new Array(eq_keys.length).fill(2)],
             ydatas: [eq_keys.map((v) => res.body[v])]
         };
         $scope.$apply();
     });
 
     $scope.turbineClimbPoints.tooltipFormatter = (params) => {
-        return params[0].value[0] + 'm/s<br/>' + params.map(v => v.seriesName + '功率(kW):    ' + v.value[1] + '<br/>').join('');
+        return params[0].value[0] + 'm/s<br/>' + params.sort((a,b) => b.value[1] -a.value[1]).map(v => `<span style="color:${v.seriesName === activeEqName ? '#577BFF' : '#fff'};">` + v.seriesName + '功率(kW):    ' + v.value[1] + '</span>' + '<br/>').join('');
     };
 
 
