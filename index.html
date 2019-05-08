@@ -15,7 +15,13 @@
     <link rel="stylesheet" href="theme/css/base.css" type="text/css" />
     <link type="image/x-icon" rel="shortcut icon" ng-href="{{currCompanyLogo}}">
     <script>
-        window.stamp = window.name = window.name || window.localStorage.stamp;
+        !function (e, t, n, g, i) { e[i] = e[i] || function () { (e[i].q = e[i].q || []).push(arguments) }, n = t.createElement("script"), tag = t.getElementsByTagName("script")[0], n.async = 1, n.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + g, tag.parentNode.insertBefore(n, tag) }(window, document, "script", "assets.growingio.com/2.1/gio.js", "gio");
+        gio('init', 'b0d4568c90610e27', {});
+        gio('config', { 'hashtag': true });
+        gio('send');
+    </script>
+    <script>
+        window.stamp = window.localStorage.stamp;
         if (!window.stamp) window.location.href = 'http://' + window.location.host + '/login.html';
 
         // 只允许打开一个窗口
@@ -89,10 +95,10 @@
     <script src="theme/js/config.js"></script>
     <script src="theme/js/config.lazyload.js"></script>
     <script>
-        document.write('<script src = "theme/js/dist/components/persist.js?_=' + window.name + '" ><\/script>');
-        document.write('<script src="theme/js/dist/enrichment/store.js?_=' + window.name + '"><\/script>');
-        document.write('<script id="routerJS" param="" src="theme/js/config.router.js?_=' + window.name + '"><\/script>');
-        document.write('<script src = "theme/js/dist/interface.js?_=' + window.name + '" ><\/script>');
+        document.write('<script src = "theme/js/dist/components/persist.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        document.write('<script src="theme/js/dist/enrichment/store.js?_=' + window.localStorage.stamp + '"><\/script>');
+        document.write('<script id="routerJS" param="" src="theme/js/config.router.js?_=' + window.localStorage.stamp + '"><\/script>');
+        document.write('<script src = "theme/js/dist/interface.js?_=' + window.localStorage.stamp + '" ><\/script>');
     </script>
     <script src="theme/js/main.js"></script>
     <script src="theme/js/services/ui-load.js"></script>
@@ -177,7 +183,7 @@
 <script>
     // 开发环境热更新
     if (location.host.split(':')[1]) {
-        window.name = window.stamp = '?_=' + Date.now();
+        window.stamp = '?_=' + Date.now();
         document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
     }
 </script>
