@@ -101,6 +101,12 @@ ajaxData({
         }else{
             $scope.ifDeviceDataModal = false;
         }
+
+        if(data.busitype =='00' && data.deviceType && data.deviceId){
+            $scope.ifFaultGuideModal = true;
+        }else{
+            $scope.ifFaultGuideModal = false;
+        }
     }
     //列表接口
     const getChatList = () =>{
@@ -297,7 +303,7 @@ ajaxData({
 
     //查看故障小助手
     $scope.showFaultGuideModal = ()=>{
-        if(!$scope.ifDeviceDataModal) return;
+        if(!$scope.ifFaultGuideModal) return;
         $scope.faultGuideData = true;
         $scope.$broadcast('faultAssistant',$scope.chatList[0].busino);
         $('#aaa').modal({ backdrop: 'static', keyboard: false });
