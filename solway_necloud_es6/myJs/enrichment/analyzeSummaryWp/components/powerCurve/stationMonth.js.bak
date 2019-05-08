@@ -157,7 +157,7 @@ ajaxData(
     });
 
     $scope.turbinePEList.tooltipFormatter = (params) => {
-        return '风速：' + params[0].name + 'm/s<br/>' + params.map(v => `<span style="color:${v.seriesName === activeEqName ? '#577BFF' : '#fff'};">` + v.seriesName + '-功率(kW):    ' + v.value + '</span>' + '<br/>').join('');
+        return '风速：' + params[0].name + 'm/s<br/>' + params.sort((a, b) => b.value - a.value).map(v => `<span style="color:${v.seriesName === activeEqName ? '#577BFF' : '#fff'};">` + v.seriesName + '-功率(kW):    ' + v.value + '</span>' + '<br/>').join('');
     };
 
     // 数据置空

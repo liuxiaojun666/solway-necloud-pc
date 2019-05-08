@@ -169,7 +169,7 @@ ajaxData(
     };
 
     $scope.turbineGearboxPoints.tooltipFormatter = (params) => {
-        return params[0].value[0] + 'rpm<br/>' + params.map(v => `<span style="color:${v.seriesName === activeEqName ? '#577BFF' : '#fff'};">` + v.seriesName + '油温(℃):    ' + v.value[1] + '<span/><br/>').join('');
+        return params[0].value[0] + 'rpm<br/>' + params.sort((a, b) => b.value[1] - a.value[1]).map(v => `<span style="color:${v.seriesName === activeEqName ? '#577BFF' : '#fff'};">` + v.seriesName + '油温(℃):    ' + v.value[1] + '<span/><br/>').join('');
     };
 
     // 数据置空
