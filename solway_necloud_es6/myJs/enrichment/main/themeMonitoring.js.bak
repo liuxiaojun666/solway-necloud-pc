@@ -263,8 +263,15 @@ ajaxData(
         $scope.deviceStatusFromRedis.getData();
 
         if ($scope.companyDayTodayTime.res) {
-            const variable = $scope.companyDayTodayTime.res.body.echarts_xaTime;
-            // $scope.companyDayTodayTime.getData({ stime: variable[variable.length - 1].split(':').join('') });
+            let variable;
+            if ($scope.stClassLIst.res.stClass01 && !$scope.stClassLIst.res.stClass02) {
+                variable = $scope.companyDayTodayTime.res.body.chart_pv.echarts_xaTime;
+            } else if (!$scope.stClassLIst.res.stClass01 && $scope.stClassLIst.res.stClass02) {
+                variable = $scope.companyDayTodayTime.res.body.chart_wp.echarts_xaxisTime;
+            } else if ($scope.stClassLIst.res.stClass01 && $scope.stClassLIst.res.stClass02) {
+                variable = $scope.companyDayTodayTime.res.body.chart_wp.echarts_xaxisTime;
+            }
+            if (variable) $scope.companyDayTodayTime.getData({ stime: variable[variable.length - 1].split(':').join('') });
         }
 
     }, 5000);
