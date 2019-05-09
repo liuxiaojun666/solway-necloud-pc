@@ -10,7 +10,16 @@ ajaxData(
             },
             later: true,
             onlyLatest: true,
-            sameTimeOnce: true,
+        },
+        stationWsfLine: {
+            name: 'GETstationWsfLine',
+            data: {
+                queryType: 3,
+                dateType: 3,
+                date: (new Date).Format('yyyy-MM-dd')
+            },
+            later: true,
+            onlyLatest: true,
         },
     }, {
 
@@ -37,11 +46,18 @@ ajaxData(
     $scope.dateUpdated = async () => {
         if ($scope.currentClass !== 'StationDayAgo') return;
         await myAjaxData.timeout(0);
-        if ($scope.currentClass === 'StationDayAgo') $scope.stationDay.getData({
-            queryType: 3,
-            dateType: 3,
-            date: $scope.dateTime.showDate
-        });
+        if ($scope.currentClass === 'StationDayAgo') {
+            $scope.stationDay.getData({
+                queryType: 3,
+                dateType: 3,
+                date: $scope.dateTime.showDate
+            });
+            $scope.stationWsfLine.getData({
+                queryType: 3,
+                dateType: 3,
+                date: $scope.dateTime.showDate
+            });
+        }
     };
 
 
@@ -53,70 +69,59 @@ ajaxData(
         if ($scope.dateType === 0) return $scope.stationDay.getData({});
     };
 
-    const option = {
-        tooltip: {
-            trigger: 'item',
-            position: ['0', '0']
-        },
-        radar: {
-            indicator: (function () {
-                var res = [];
-                for (var i = 1; i <= 16; i++) {
-                    res.push({ text: i + '', max: 100 });
-                }
-                return res;
-            })(),
+    // 风向玫瑰图
+    let myChart;
+    $scope.stationWsfLine.subscribe(res => {
+        const { x, wd_ws_curve, wd_wfreq_curve} = res.body;
+        // x.reverse();
+        // wd_ws_curve.reverse();
+        // wd_wfreq_curve.reverse();
 
-
-            center: ['50%', '50%'],
-            radius: 80,
-            splitNumber: 1,
-            splitArea: {
-                show: false
-            },
-            axisLine: {
-                lineStyle: {
-                    color: '#79A2CB'
-                }
-            },
-            lineStyle: {
-                normal: {
-                    color: [
-                        // 'rgba(238, 197, 102, 0.1)', 'rgba(238, 197, 102, 0.2)',
-                        // 'rgba(238, 197, 102, 0.4)', 'rgba(238, 197, 102, 0.6)',
-                        // 'rgba(238, 197, 102, 0.8)', 'rgba(238, 197, 102, 1)'
-                        '#79A2CB',
-                        '#79A2CB',
-                        '#79A2CB'
-                    ].reverse()
-                }
-            }
-        },
-        series: [
-            {
-                type: 'radar',
-                symbolSize: 1,
-                itemStyle: {
-                    normal: {
-                        color: '#2DE9FF'
+        myChart = myChart || echarts.init(document.getElementById('roseMap'));
+        const option = {
+            radar: {
+                indicator: x.map((v, i) => ({
+                    name: v + '(' + wd_wfreq_curve[i] + '/' + wd_ws_curve[i] + ')',
+                    max: 100
+                })),
+                center: ['50%', '50%'],
+                radius: 80,
+                splitNumber: 1,
+                splitArea: {
+                    show: false
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#79A2CB'
                     }
                 },
-                areaStyle: {
-                    normal: {
-                        opacity: 0.8
-                    }
-                },
-                data: [
-                    {
-                        name: '风频',
-                        value: [2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 75.6, 82.2, 48.7, 18.8, 6.0, 2.3, 13, 14, 15, 16],
-                    }
-                ]
-            }
-        ]
-    };
-    const myChart = echarts.init(document.getElementById('roseMap'));
-    myChart.setOption(option, true);
+            },
+            series: [
+                {
+                    type: 'radar',
+                    symbolSize: 1,
+                    itemStyle: {
+                        normal: {
+                            color: '#2DE9FF'
+                        }
+                    },
+                    areaStyle: {
+                        normal: {
+                            opacity: 0.8
+                        }
+                    },
+                    data: [
+                        {
+                            name: '风频',
+                            value: wd_wfreq_curve,
+                        }
+                    ]
+                }
+            ]
+        };
+        myChart.setOption(option, true);
+    });
+
 
     $scope.$on('$destroy', () => {
         $scope.stationDay.res = null;

@@ -29,7 +29,17 @@ ajaxData(
             name: 'GETopFittingsDictSelectManuf',
             data: {},
             later: true,
-        }
+        },
+        fileUploadUploadFile: {
+            name: 'fileUploadUploadFile',
+            data: {},
+            later: true
+        },
+        fileUploadSelectFiles: {
+            name: 'GETfileUploadSelectFiles',
+            data: {},
+            later: true
+        },
     }, {
         __serviceName__: 'themeSparePartsService'
     }
@@ -155,8 +165,11 @@ ajaxData(
             $scope.opFittingsDictDelete.beforReq(item.id);
         } else if (str.includes('icon-bianji-copy')) {
             $scope.opFittingsDictUpdate.edit = true;
-            const { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark } = item;
-            $scope.opFittingsDictUpdate.formData = { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark };
+            const { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark, attachments } = item;
+            attachments && $scope.fileUploadSelectFiles.getData({ ids: attachments, targetType: 'FITTING_FILE'}).then(res => {
+                $scope.fileUploadUploadFile.fileNames = res.body.map(v => v.originalFileName);
+            });
+            $scope.opFittingsDictUpdate.formData = { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark, attachments };
             $scope.opFittingsDictSelectManuf.getData();
         }
     };
@@ -170,6 +183,36 @@ ajaxData(
             if (!$solway.formValidation(formData, '.spareParts .partForm', toaster)) return;
             $scope.opFittingsDictUpdate.getData(formData);
         });
+    };
+
+    // 上传附件
+    $scope.importFile = e => {
+        $scope.fileUploadUploadFile.getData({
+            file: e.files[0],
+            targetType: 'FITTING_FILE'
+        }).then(res => {
+            const fileNames = ($scope.fileUploadUploadFile.fileNames || []);
+            fileNames.push(res.body.originalFileName);
+            $scope.fileUploadUploadFile.fileNames = [...fileNames];
+            const attachments =  $scope.opFittingsDictUpdate.formData.attachments;
+            $scope.opFittingsDictUpdate.formData.attachments = attachments ? attachments + ',' + res.body.id : res.body.id;
+        });
+    };
+
+    // 删除附件
+    $scope.fileUploadUploadFile.deleteFile = (event, index) => {
+        $scope.fileUploadUploadFile.fileNames.splice(index, 1);
+        $scope.opFittingsDictUpdate.formData.attachments = $scope.opFittingsDictUpdate.formData.attachments.split(',').splice(index, 1).join();
+        event.preventDefault();
+    };
+
+    // 下载附件
+    $scope.fileUploadUploadFile.downloadFile = (event, index) => {
+        $ocLazyLoad.load(['theme/js/dist/components/downloadFile.js' + stamp]).then(res => {
+            const { originalFileName: filename, filePath: url } = $scope.fileUploadSelectFiles.res.body[index];
+            $solway.download({ url, filename });
+        });
+        event.preventDefault();
     };
     
     // 保存 更新 处理结果
