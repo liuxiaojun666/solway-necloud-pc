@@ -73,24 +73,45 @@ ajaxData({
     // 切换电站 回调
     $scope.switchPowerCallback = () => $scope.diffGetData(true);
 
+    // 设备详情 弹出 处理 函数
+    $scope.equipmentDetail = (obj) => {
+        $scope.equipmentDetailShow = true;
+        $scope.$broadcast('equipmentDetails', obj);
+    };
+
+    // 图表 点击 事件 处理 函数
+    $scope.chartClick = (params) => {
+        if ($scope.tabIndex !== 2) return;
+        const { eqid, stid } = $scope.analysis_station_pgc_month_deviceline.res.body.data;
+        $scope.equipmentDetail({
+            eq_name: params.name,
+            eqid: eqid[params.dataIndex],
+            stid: stid[params.dataIndex]
+        });
+        $scope.$apply();
+    };
+
     // 点击电站名  跳转到电站页面
     $scope.trClick = (item, index, event) => {
-        if (!event.target.className.includes('clickable')) return;
         if (event.target.className.includes('eq')) {
             const { stid, eqid } = item;
             return $scope.$broadcast("equipmentPopUp", {
                 stid,
                 eqid
             });
-        };
-        $scope.reloadParentPage({
-            stationData: {
-                dataType: 0,
-                id: item.stid,
-                isGroup: "0",
-                stClass: '01'
-            }
-        });
+        } else if (event.target.className.includes('station')) {
+            return $scope.reloadParentPage({
+                stationData: {
+                    dataType: 0,
+                    id: item.stid,
+                    isGroup: "0",
+                    stClass: '01'
+                }
+            });
+        }
+        if ($scope.tabIndex !== 2) return;
+        const { eqid, eq_name, stid } = item;
+        $scope.equipmentDetail({ eqid, eq_name, stid });
     };
 
 
@@ -231,7 +252,7 @@ ajaxData({
                 width: '25%',
                 sort: true,
                 render(text) {
-                    return `<span class="clickable">${text}</span>`
+                    return `<span class="clickable station">${text}</span>`
                 }
             },
             {
@@ -274,7 +295,7 @@ ajaxData({
                 width: '20%',
                 sort: true,
                 render(text) {
-                    return `<span class="clickable">${text}</span>`
+                    return `<span class="clickable station">${text}</span>`
                 }
             },
             {

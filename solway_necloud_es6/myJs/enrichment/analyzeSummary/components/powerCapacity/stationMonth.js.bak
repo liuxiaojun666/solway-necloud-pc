@@ -171,6 +171,13 @@ ajaxData({
 
     // 设备 列表 点击行
     $scope.equipmentListTrClick = (item, index) => {
+        if (event.target.className.includes('clickable')) {
+            const { stid, eqid } = item;
+            return $scope.$broadcast("equipmentPopUp", {
+                stid,
+                eqid
+            });
+        };
         const { eqid, eq_name } = item;
         $scope.equipmentDetail({ eqid, eq_name });
     };
