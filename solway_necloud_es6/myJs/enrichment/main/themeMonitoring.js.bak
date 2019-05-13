@@ -183,20 +183,23 @@ ajaxData(
     const myPieChart3 = echarts.init(document.getElementById('pieChart3'));
     const myPieChart4 = echarts.init(document.getElementById('pieChart4'));
     const myPieChart5 = echarts.init(document.getElementById('pieChart5'));
+    const myPieChart6 = echarts.init(document.getElementById('pieChart6'));
     $scope.deviceStatusFromRedis.subscribe(res => {
         const class01 = res['01'] || {
             comm: 0,
             fault: 0,
             maintain: 0,
             run: 0,
-            wait: 0
+            wait: 0,
+            alarm: 0,
         };
         const class02 = res['02'] || {
             comm: 0,
             fault: 0,
             maintain: 0,
             run: 0,
-            wait: 0
+            wait: 0,
+            alarm: 0
         };
         const class01Total = Object.values(class01).reduce((a, b) => a + b, 0);
         const class02Total = Object.values(class02).reduce((a, b) => a + b, 0);
@@ -231,6 +234,7 @@ ajaxData(
         myPieChart3.setOption(getOption('fault', '故障', ['#08436F', '#F29958', '#08436F', '#FF6767']), true);
         myPieChart4.setOption(getOption('wait', '待机', ['#08436F', '#8ADCF7', '#08436F', '#fff']), true);
         myPieChart5.setOption(getOption('run', '运行', ['#08436F', '#D2E058', '#08436F', '#58C471']), true);
+        myPieChart6.setOption(getOption('alarm', '报警', ['#08436F', '#FF7474', '#08436F', '#FFCC51']), true);
     });
 
     $scope.openRunDetail = (state, stClass) => {
@@ -255,6 +259,7 @@ ajaxData(
         myPieChart3.resize();
         myPieChart4.resize();
         myPieChart5.resize();
+        myPieChart6.resize();
     }
 
     // 定时刷新数据
