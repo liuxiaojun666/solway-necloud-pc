@@ -14,6 +14,7 @@ HighAnalysis_selectFds: {
         $scope.HighAnalysis_selectFds.getData({
             stationClass: "01",
             anlsType: parentmyAjaxData.config.anlsType,
+            // dmsType: parentmyAjaxData.config.dmsType == 5 ? 11 : parentmyAjaxData.config.dmsType,
             dmsType: parentmyAjaxData.config.dmsType,
             dmsTime: $scope.dmsTime
         })
@@ -22,16 +23,19 @@ HighAnalysis_selectFds: {
     $scope.HighAnalysis_selectFds.subscribe(res => {
         if (!res.body) {
             toaster.pop('error', '', res.msg);
+            $scope.$emit('horizonNan', { data: 1});
             return;
         }
         $scope.herizonData = res.body;
         $scope.horizonCheckData = [];
+        parentmyAjaxData.config.fdX.key = '';
+        parentmyAjaxData.config.fdX.name = '';
         $scope.radioToSelect($scope.herizonData.ctg1, 0);
     });
     
     //监听横轴指标页面打开
     $scope.$on('horizonOpen', () => {
-        //获取以前 checked 的数据 -> 重现到左侧列表
+        //获取 checked 的数据 -> 重现到左侧列表
         if($scope.horizonCheckData.length > 0){
             var key;
             for(key in $scope.herizonData){
@@ -229,6 +233,7 @@ HighAnalysis_selectFds: {
             isx: 1
         }
         parentmyAjaxData.config.fds[0] = json;
+        parentmyAjaxData.config.fdStyle = 4;
 
         parentmyAjaxData.config.fdX.key = $scope.horizonCheckData[0].fdKey;
         parentmyAjaxData.config.fdX.name = $scope.horizonCheckData[0].fdName;

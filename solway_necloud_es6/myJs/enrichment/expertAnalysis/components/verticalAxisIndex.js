@@ -11,11 +11,16 @@ AddbaseDictionary: {
     // 监测时间纬度的变化
     $scope.$on('dmsTime', (item, v) => {
         $scope.verticalCheckData = [];
+        parentmyAjaxData.config.fdY.key = '';
+        parentmyAjaxData.config.fdY.name = '';
     })
 
     // 获取纵轴指标的数据
     $scope.$on('verticalData', () => {
         $scope.verticalData = parentmyAjaxData.config.herizonData;
+        if(Object.keys($scope.verticalData).length == 0){
+            $scope.$emit('horizonNan', { data: 1});
+        }
         //获取以前 checked 的数据 -> 重现到左侧列表
         if($scope.verticalCheckData.length > 0){
             var key;

@@ -13,14 +13,23 @@ HighAnalysis_selectFds: {
     // $scope.$on('anlsType', (item, v) => {
     //     $scope.anlsType = v;
     // })
-    //获取分析对象 发送的dmsType
-    // $scope.$on('dmsType', () => {
-    //     $scope.dmsType = parentmyAjaxData.config.dmsType;
-    // })
-    //获取时间纬度 发送的dmsTime
-    $scope.$on('dmsTime', (item, v) => {
+
+    //对标分析-> 获取分析对象 发送的dmsType
+    $scope.$on('bench_dmsType', () => {
+        $scope.dmsType = parentmyAjaxData.config.dmsType;
+        $scope.anlsType = parentmyAjaxData.config.anlsType;
+        //对标分析-> 获取分析指标的数据
+        $scope.HighAnalysis_selectFds.getData({
+            stationClass: "01",
+            anlsType: parentmyAjaxData.config.anlsType,
+            dmsType: parentmyAjaxData.config.dmsType
+        })
+    })
+    
+    //趋势分析-> 获取时间纬度 发送的dmsTime
+    $scope.$on('trend_dmsTime', (item, v) => {
         $scope.dmsTime = v;
-        //获取横轴指标的数据
+        //趋势分析-> 获取分析指标的数据
         $scope.HighAnalysis_selectFds.getData({
             stationClass: "01",
             anlsType: parentmyAjaxData.config.anlsType,
@@ -43,9 +52,22 @@ HighAnalysis_selectFds: {
             })
         }
         $scope.analysCheckData = [];
+        parentmyAjaxData.config.analysFds = [];
         $scope.radioToSelect($scope.analysData.ctg1, 0);
 
     });
+
+    //排序 源数据
+    $scope.sortArr = [
+        {
+            'key': 'asc',
+            'value': '升序'
+        },
+        {
+            'key': 'desc',
+            'value': '降序'
+        }
+    ]
 
     //搜索功能
     $scope.getList = () => {
@@ -72,7 +94,6 @@ HighAnalysis_selectFds: {
         fdStyleFun();
     }
 
-    $scope.tableType = 1;
     //处理fdStyle 字段
     const fdStyleFun = () => {
         var styleKey = {
@@ -87,7 +108,7 @@ HighAnalysis_selectFds: {
             item.newFdStyle = [];
             result.map((item) => {
                 var data = {};
-                data.key = item;
+                data.key = item - 0;
                 data.value = styleKey[item];
                 newFdStyleCopy.push(data);
             })
@@ -137,6 +158,10 @@ HighAnalysis_selectFds: {
         } else {
             $scope.analysCheckData = [];
         }
+
+        //获取同比 环比
+        $scope.actFdTb = item.actFdTb;
+        $scope.actFdHb = item.actFdHb;
     }
 
     //右侧删除小按钮
@@ -181,19 +206,23 @@ HighAnalysis_selectFds: {
     }
 
     //点击同比 环比
-    $scope.tongBi = (fdKey, type) => {
+    $scope.tongBi = (v, type) => {
         if (type == 'tong') {
             $scope.analysBottom.map((item) => {
-                if (item.fdKey == fdKey) {
+                if (item.fdKey == v.fdKey) {
                     item.actFdTb == 0 ? item.actFdTb = 1 : item.actFdTb = 0;
-                    $scope.actFdTb = item.actFdTb;
+                    if (v.checked) {
+                        $scope.actFdTb = item.actFdTb;
+                    }
                 }
             })
         } else {
             $scope.analysBottom.map((item) => {
-                if (item.fdKey == fdKey) {
+                if (item.fdKey == v.fdKey) {
                     item.actFdHb == 0 ? item.actFdHb = 1 : item.actFdHb = 0;
-                    $scope.actFdHb = item.actFdHb;
+                    if (v.checked) {
+                        $scope.actFdHb = item.actFdHb;
+                    }
                 }
             })
         }
@@ -204,15 +233,28 @@ HighAnalysis_selectFds: {
         $scope.$emit('cancelCallback');
     }
 
+    // 获取select 图表类型 (曲线、柱状图)
+    $scope.query = {
+        'tableType': 1,
+        'sortType': 'asc'
+    }
+    
     //确定
+    $scope.actFdTb = 0;
+    $scope.actFdHb = 0;
     $scope.confirm = () => {
+        if ($scope.analysCheckData.length == 0) {
+            toaster.pop('error', '', '所选数据不能为空');
+            return;
+        }
         var analysFds_y1 = {
             fdKey: $scope.analysCheckData[0].fdKey,
-            fdStyle: $scope.tableType,
             fdTb: $scope.actFdTb,
             fdHb: $scope.actFdHb
         }
+        parentmyAjaxData.config.benchSort = parentmyAjaxData.config.anlsType==3 ? $scope.analysCheckData[0].fdKey + ',' + $scope.query.sortType : null;
         parentmyAjaxData.config.analysFds[0] = analysFds_y1;
+        parentmyAjaxData.config.fdStyle = $scope.query.tableType;
         $scope.$emit('analysFds_fdName',{'fdName': $scope.analysCheckData[0].fdName});
         $scope.$emit('addCallback');
     }
