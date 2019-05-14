@@ -1,5 +1,12 @@
 ajaxData(
     {
+        
+        equipmentCount: {
+            name: 'GETrunStatusInfoList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
         // 矩阵视图
         getDeviceLayout: {
             name: 'GETdeviceLayoutV2',
@@ -242,10 +249,20 @@ ajaxData(
                 pageIndex: 0,
                 pageSize: 999
             });
+            $scope.equipmentCount.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate,
+            });
         } else if (tabIndex === 1 && showShape === 'list') {
             // $scope.getDeviceType.getData({});
             // $scope.currentDeviceType = '1';
             $scope.switchDeviceType();
+            $scope.equipmentCount.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate,
+            });
         } else if (tabIndex === 3) {
             if ($scope.turbineOPEList.res) return;
             $scope.turbineOPEList.getData({
