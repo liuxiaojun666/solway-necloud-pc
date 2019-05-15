@@ -184,14 +184,10 @@ ajaxData({
 
         // 刷新视频数据流
         function getVideoPull(res) {
-            $http({
-                method: "POST",
+            $.ajax({
+                type: 'POST',
                 url: res.VIDEO_URL,
-                timeout: 4000,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                data: {
+                data: JSON.stringify({
                     station_id: $scope.currentvideo.stId,
                     stream: [
                         {
@@ -200,8 +196,29 @@ ajaxData({
                             dest: $scope.currentvideo.monitorPointDest
                         }
                     ]
-                },
-            });
+                }),
+                beforeSend: function (xhr) {
+
+                }
+            })
+            // $http({
+            //     method: "POST",
+            //     url: res.VIDEO_URL,
+            //     timeout: 4000,
+            //     headers: {
+            //         'Content-Type': 'application/x-www-form-urlencoded',
+            //     },
+            //     data: {
+            //         station_id: $scope.currentvideo.stId,
+            //         stream: [
+            //             {
+            //                 name: $scope.currentvideo.monitorPointName,
+            //                 source: $scope.currentvideo.monitorPointSource,
+            //                 dest: $scope.currentvideo.monitorPointDest
+            //             }
+            //         ]
+            //     },
+            // });
             if (!$scope.videoContinue) return;
             setTimeout(() => getVideoPull(res), 30 * 1000);
         }

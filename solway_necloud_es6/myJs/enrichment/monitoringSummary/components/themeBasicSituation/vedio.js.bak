@@ -83,15 +83,28 @@ ajaxData({
 
         async function timer() {
             $scope.params.forEach(item => {
-                $http({
-                    method: "POST",
+                // $http({
+                //     method: "POST",
+                //     url: $scope.selectVideos.res.VIDEO_URL,
+                //     timeout: 4000,
+                //     headers: {
+                //         'Content-Type': 'application/x-www-form-urlencoded',
+                //     },
+                //     data: item,
+                // });
+
+                $.ajax({
+                    type: 'POST',
                     url: $scope.selectVideos.res.VIDEO_URL,
-                    timeout: 4000,
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    data: item,
-                });
+                    data: JSON.stringify(item), 
+                    beforeSend: function (xhr) {
+                        
+                    }
+                })
+                // $.post(
+                //     $scope.selectVideos.res.VIDEO_URL,
+                //     JSON.stringify(item)
+                // );
             });
             if ($scope.isDestroy) return;
             await myAjaxData.timeout(30 * 1000);
