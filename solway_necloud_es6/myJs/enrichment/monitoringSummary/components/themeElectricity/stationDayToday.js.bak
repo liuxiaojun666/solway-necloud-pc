@@ -1,5 +1,11 @@
 ajaxData(
     {
+        equipmentCount: {
+            name: 'GETequipmentDetailCompanyToday',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
         stationDayTodayData: {
             name: 'GETpvMonitorDataGetRunKWPowerList',
             data: {},
@@ -50,12 +56,19 @@ ajaxData(
     };
 
     function getData() {
+        $scope.equipmentCount.getData({
+            queryType: 3,
+            dateType: 3,
+            date: $scope.dateTime.showDate,
+        });
         $scope.stationDayTodayData.getData({
             queryType: 3,
             dateType: 3,
             date: (new Date).Format('yyyy-MM-dd'),
             search: $scope.searchKey || '',
-            status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
+            status: $scope.checkboxStatus.map((v, i) => v ? (
+                '0' + (i > 2 ? i - 1 : i === 2 ? 7 : i)
+            ) : v).filter(v => v !== false).join()
         });
     }
 
