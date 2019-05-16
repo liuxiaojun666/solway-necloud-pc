@@ -73,19 +73,16 @@ ajaxData(
     let myChart;
     $scope.stationWsfLine.subscribe(res => {
         const { x, wd_ws_curve, wd_wfreq_curve} = res.body;
-        // x.reverse();
-        // wd_ws_curve.reverse();
-        // wd_wfreq_curve.reverse();
-
+        if (!x) return myChart && myChart.clear();
         myChart = myChart || echarts.init(document.getElementById('roseMap'));
         const option = {
             radar: {
                 indicator: x.map((v, i) => ({
-                    name: (i === 0 ? 'N' : '') + '(' + wd_wfreq_curve[i] + '/' + wd_ws_curve[i] + ')',
+                    name: '(' + wd_wfreq_curve[i] + '/' + wd_ws_curve[i] + ')' + (i === 0 ? '\nN' : ''),
                     max: 100
                 })),
-                center: ['50%', '50%'],
-                radius: 80,
+                center: ['50%', '52%'],
+                radius: 70,
                 splitNumber: 1,
                 splitArea: {
                     show: false
