@@ -1,41 +1,119 @@
-ajaxData({
-    //累计详情---集团---列表
-    query_wp_company_accum_timelist: {
-        name: 'GETquery_wp_company_accum_timelist',
-        data: {},
-        later: true,
-        onlyLatest: true
-    },
-    //累计详情---集团---柱状图
-    query_wp_company_accum_timeline: {
-        name: 'GETquery_wp_company_accum_timeline',
-        data: {},
-        later: true,
-        onlyLatest: true
-    },
-    //累计详情---电站---列表
-    query_wp_station_accum_timelist: {
-        name: 'GETquery_wp_station_accum_timelist',
-        data: {},
-        later: true,
-        onlyLatest: true
-    },
-    //累计详情---电站---柱状图
-    query_wp_station_accum_timeline: {
-        name: 'GETquery_wp_station_accum_timeline',
-        data: {},
-        later: true,
-        onlyLatest: true
+ajaxData(
+    {
+        //累计详情---集团---时间---年---列表
+        query_wp_company_accum_timelist: {
+            name: 'GETquery_wp_company_accum_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---集团---时间---年---柱状图
+        query_wp_company_accum_timeline: {
+            name: 'GETquery_wp_company_accum_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---集团---时间---月--列表
+        query_wp_company_accum_month_timelist: {
+            name: 'GETquery_wp_company_accum_month_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---集团---时间---月--柱状图
+        query_wp_company_accum_month_timeline: {
+            name: 'GETquery_wp_company_accum_month_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---集团---时间---日--列表
+        query_wp_company_accum_day_timelist: {
+            name: 'GETquery_wp_company_accum_day_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---集团---时间---日--柱状图
+        query_wp_company_accum_day_timeline: {
+            name: 'GETquery_wp_company_accum_day_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---集团---电站--柱状图
+        query_wp_company_accum_elec_stationline: {
+            name: 'GETquery_wp_company_accum_elec_stationline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---集团---电站--列表
+        query_wp_company_accum_elec_stationlist: {
+            name: 'GETquery_wp_company_accum_elec_stationlist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---电站---年---列表
+        query_wp_station_accum_timelist: {
+            name: 'GETquery_wp_station_accum_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---电站---年---柱状图
+        query_wp_station_accum_timeline: {
+            name: 'GETquery_wp_station_accum_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---电站---月---列表
+        query_wp_station_accum_month_timelist: {
+            name: 'GETquery_wp_station_accum_month_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---电站---月---柱状图
+        query_wp_station_accum_month_timeline: {
+            name: 'GETquery_wp_station_accum_month_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---电站---日---列表
+        query_wp_station_accum_day_timelist: {
+            name: 'GETquery_wp_station_accum_day_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        //累计详情---电站---日---柱状图
+        query_wp_station_accum_day_timeline: {
+            name: 'GETquery_wp_station_accum_day_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+    }, {
+        __serviceName__: 'themeAccumulativeDetailService'
     }
-}, {
-    __serviceName__: 'themeAccumulativeDetailService'
-    })('themeAccumulativeDetailCtrl', ['$scope', 'themeAccumulativeDetailService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+)('themeAccumulativeDetailCtrl', ['$scope', 'themeAccumulativeDetailService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     $scope.initChildScope($scope, myAjaxData);
     $scope.mainPageInitComplete = async () => {
-        let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeAccumulative || {};
+        let { showShape, select1, select2, tabIndex = 0, timeRange = 'year' } = historicalRecord.get().themeAccumulative || {};
         $scope.changeShowShape(showShape || 'list');
         $scope.select1 = select1;
         $scope.select2 = select2;
+        $scope.tabIndex = tabIndex;
+        $scope.timeRange = timeRange;
+        $scope.startDate = new Date;
+        $scope.startDate.showDate = '';
+        $scope.endDate = new Date;
+        $scope.endDate.showDate = '';
         if (select1) await $scope.selectChange('select1');
         if (select2) await $scope.selectChange('select2');
         $('.ng-clock').removeClass('ng-clock');
@@ -48,6 +126,18 @@ ajaxData({
 
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
+        diffGetData();
+    };
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeAccumulative: {
+                ...historicalRecord.get().themeAccumulative || {},
+                tabIndex
+            }
+        });
         diffGetData();
     };
 
@@ -64,6 +154,23 @@ ajaxData({
         diffGetData();
     };
 
+    // 切换时间维度
+    $scope.changeTimeRange = timeRange => {
+        if (timeRange === $scope.timeRange) return;
+        $scope.timeRange = timeRange;
+        historicalRecord.set({
+            themeAccumulative: {
+                ...historicalRecord.get().themeAccumulative || {},
+                timeRange
+            }
+        });
+        diffGetData();
+    };
+
+    $scope.timeRangeChange = () => {
+        diffGetData();
+    };
+
     // 图标轴线切换
     $scope.selectChange = async (arg) => {
         await myAjaxData.timeout(0);
@@ -73,7 +180,7 @@ ajaxData({
                 [arg]: $scope[arg]
             }
         });
-        
+
         diffChartLineData();
         $scope.$apply();
     };
@@ -86,36 +193,120 @@ ajaxData({
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         $scope.accumulativeDetailLoading = true;
-        if ($scope.dataType && $scope.showShape == 'list'){ //集团列表
+        const { dataType, showShape, tabIndex, timeRange, startDate, endDate } = $scope;
+
+        if (dataType && tabIndex === 0 && timeRange === 'year' && showShape == 'list') { //集团列表
             $scope.query_wp_company_accum_timelist.getData({
-                'queryCode': 'query_wp_company_accum_timelist',
-                'queryType': 1
+                queryCode: 'query_wp_company_accum_timelist',
+                queryType: 1,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
             });
-        } else if ($scope.dataType && $scope.showShape == 'chart') { //集团柱状图
+        } else if (dataType && tabIndex === 0 && timeRange === 'year' && showShape == 'chart') { //集团柱状图
             $scope.query_wp_company_accum_timeline.getData({
-                'queryCode': 'query_wp_company_accum_timeline',
-                'queryType': 1
+                queryCode: 'query_wp_company_accum_timeline',
+                queryType: 1,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
             });
-        } else if (!$scope.dataType && $scope.showShape == 'list') { //电站列表
+        } else if (dataType && tabIndex === 0 && timeRange === 'month' && showShape == 'list') { //集团时间月列表
+            $scope.query_wp_company_accum_month_timelist.getData({
+                queryCode: 'query_wp_company_accum_month_timelist',
+                queryType: 1,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (dataType && tabIndex === 0 && timeRange === 'month' && showShape == 'chart') { //集团时间月柱状图
+            $scope.query_wp_company_accum_month_timeline.getData({
+                queryCode: 'query_wp_company_accum_month_timeline',
+                queryType: 1,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (dataType && tabIndex === 0 && timeRange === 'day' && showShape == 'list') { //集团时间月列表
+            $scope.query_wp_company_accum_day_timelist.getData({
+                queryCode: 'query_wp_company_accum_day_timelist',
+                queryType: 1,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (dataType && tabIndex === 0 && timeRange === 'day' && showShape == 'chart') { //集团时间月柱状图
+            $scope.query_wp_company_accum_day_timeline.getData({
+                queryCode: 'query_wp_company_accum_day_timeline',
+                queryType: 1,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (dataType && tabIndex === 1 && showShape === 'list') {
+            $scope.query_wp_company_accum_elec_stationlist.getData({
+                queryCode: 'query_wp_company_accum_elec_stationlist',
+                queryType: 1,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (dataType && tabIndex === 1 && showShape === 'chart') {
+            $scope.query_wp_company_accum_elec_stationline.getData({
+                queryCode: 'query_wp_company_accum_elec_stationline',
+                queryType: 1,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (!dataType && timeRange === 'year' && showShape == 'list') { //电站列表
             $scope.query_wp_station_accum_timelist.getData({
-                'queryCode': 'query_wp_station_accum_timelist',
-                'queryType': 3
+                queryCode: 'query_wp_station_accum_timelist',
+                queryType: 3,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
             });
-        } else if (!$scope.dataType && $scope.showShape == 'chart') { //电站柱状图
+        } else if (!dataType && timeRange === 'year' && showShape == 'chart') { //电站柱状图
             $scope.query_wp_station_accum_timeline.getData({
-                'queryCode': 'query_wp_station_accum_timeline',
-                'queryType': 3
+                queryCode: 'query_wp_station_accum_timeline',
+                queryType: 3,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (!dataType && showShape == 'list' && timeRange === 'month') { //电站时间月列表
+            $scope.query_wp_station_accum_month_timelist.getData({
+                queryCode: 'query_wp_station_accum_month_timelist',
+                queryType: 3,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (!dataType && showShape == 'chart' && timeRange === 'month') { //电站时间月柱状图
+            $scope.query_wp_station_accum_month_timeline.getData({
+                queryCode: 'query_wp_station_accum_month_timeline',
+                queryType: 3,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (!dataType && showShape == 'list' && timeRange === 'day') { //电站时间日列表
+            $scope.query_wp_station_accum_day_timelist.getData({
+                queryCode: 'query_wp_station_accum_day_timelist',
+                queryType: 3,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
+            });
+        } else if (!dataType && showShape == 'chart' && timeRange === 'day') { //电站时间日柱状图
+            $scope.query_wp_station_accum_day_timeline.getData({
+                queryCode: 'query_wp_station_accum_day_timeline',
+                queryType: 3,
+                start_date: startDate.showDate,
+                end_date: endDate.showDate,
             });
         }
     };
 
     // 集团列表--接口处理
-    $scope.query_wp_company_accum_timelist.getDataCallback = (success, res) => {
+    $scope.query_wp_company_accum_timelist.getDataCallback = 
+    $scope.query_wp_company_accum_month_timelist.getDataCallback = 
+    $scope.query_wp_company_accum_day_timelist.getDataCallback = 
+    (success, res) => {
         $scope.accumulativeDetailLoading = false;
         if (!success) return;
+        $scope.companyDatasource = res.body.data;
         $scope.column = [
             {
-                title: '年份',
+                title: '日期',
                 dataIndex: 'dtime',
                 sort: 'true',
                 align: 'center',
@@ -178,25 +369,123 @@ ajaxData({
     };
 
     // 集团柱状图--接口处理
-    $scope.query_wp_company_accum_timeline.getDataCallback = (success, res) => {
-        $scope.accumulativeDetailLoading = false;    
+    $scope.query_wp_company_accum_timeline.getDataCallback = 
+    $scope.query_wp_company_accum_month_timeline.getDataCallback = 
+    $scope.query_wp_company_accum_day_timeline.getDataCallback = 
+    (success, res) => {
+        if (!success) return;
+        $scope.accumulativeDetailLoading = false;
         diffSelectOptions(res.body.units);//图表设置selectOptions  
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
+    };
 
-       
+    // $scope.trClick = (item, index, event) => {
+    //     if (!event.target.className.includes('clickable')) return;
+    //     $scope.reloadParentPage({
+    //         stationData: {
+    //             dataType: 0,
+    //             id: item.stid,
+    //             isGroup: "0",
+    //             stClass: '01'
+    //         }
+    //     })
+    // };
 
-    }
-
-    // 电站列表--接口处理
-    $scope.query_wp_station_accum_timelist.getDataCallback = (success, res) => {
+    // 集团 电站 列表
+    $scope.query_wp_company_accum_elec_stationlist.subscribe(res => {
         $scope.accumulativeDetailLoading = false;
-        if (!success) return;
+        $scope.companyDatasource = res.body.data;
         $scope.column = [
             {
-                title: '年份',
+                title: '电站',
+                dataIndex: 'st_name',
+                sort: 'true',
+                width: '250px',
+                // render(text, item) {
+                //     return text && `<span class="clickable">${text}</sapn>`
+                // }
+            },
+            {
+                title: '应发电量(' + res.body.units.shd_kwh + ')',
+                dataIndex: 'shd_kwh',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '实发电量(' + res.body.units.real_kwh + ')',
+                dataIndex: 'real_kwh',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '上网电量(' + res.body.units.send_kwh + ')',
+                dataIndex: 'send_kwh',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '损失电量(' + res.body.units.we + ')',
+                dataIndex: 'we',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '发电小时数(' + res.body.units.real_hours + ')',
+                dataIndex: 'real_hours',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '平均风速(' + res.body.units.ws_avg + ')',
+                dataIndex: 'ws_avg',
+                sort: 'true',
+                align: 'right'
+            },
+            // {
+            //     title: '辐射总量(' + res.body.units.rad_chk + ')',
+            //     dataIndex: 'rad_chk',
+            //     sort: 'true',
+            //     align: 'right'
+            // },
+            {
+                title: 'pba',
+                dataIndex: 'pba',
+                sort: 'true',
+                align: 'right'
+            },
+            // {
+            //     title: 'pr',
+            //     dataIndex: 'pr',
+            //     sort: 'true',
+            //     align: 'right'
+            // }
+        ];
+    });
+
+    // 集团电站曲线
+    $scope.query_wp_company_accum_elec_stationline.subscribe(res => {
+        $scope.accumulativeDetailLoading = false;
+        diffSelectOptions(res.body.units);//图表设置selectOptions  
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh';
+        $scope.xdata = res.body.data.st_name;
+        $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
+    });
+
+    // 电站列表--接口处理
+    $scope.query_wp_station_accum_timelist.getDataCallback = 
+    $scope.query_wp_station_accum_month_timelist.getDataCallback = 
+    $scope.query_wp_station_accum_day_timelist.getDataCallback = 
+    (success, res) => {
+        $scope.accumulativeDetailLoading = false;
+        if (!success) return;
+        $scope.stationDatasource = res.body.data;
+        $scope.column = [
+            {
+                title: '日期',
                 dataIndex: 'dtime',
                 sort: 'true',
                 align: 'center',
@@ -257,29 +546,36 @@ ajaxData({
             //     align: 'right'
             // }
         ];
-    }
+    };
 
     // 电站柱状图--接口处理
-    $scope.query_wp_station_accum_timeline.getDataCallback = (success, res) => {
+    $scope.query_wp_station_accum_timeline.getDataCallback = 
+    $scope.query_wp_station_accum_month_timeline.getDataCallback = 
+    $scope.query_wp_station_accum_day_timeline.getDataCallback = 
+    (success, res) => {
+        if(!success) return;
         $scope.accumulativeDetailLoading = false;
         diffSelectOptions(res.body.units);
         $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh';
         $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh';
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data[$scope.select1]], [res.body.data[$scope.select2]]];
-    }
+    };
 
     // 计算 图表 显示对应 轴
     function diffChartLineData() {
         if (!$scope.initComplete) return;
-        const { select1, select2 } = $scope;
-        
-        if ($scope.dataType){//集团
-            $scope.xdata = $scope.query_wp_company_accum_timeline.res.body.data.dtime;
-            $scope.ydatas = [[$scope.query_wp_company_accum_timeline.res.body.data[select1]], [$scope.query_wp_company_accum_timeline.res.body.data[select2]]];
-        } else if (!$scope.dataType){//电站
-            $scope.xdata = $scope.query_wp_station_accum_timeline.res.body.data.dtime;
-            $scope.ydatas = [[$scope.query_wp_station_accum_timeline.res.body.data[select1]], [$scope.query_wp_station_accum_timeline.res.body.data[select2]]]
+        const { select1, select2, tabIndex, timeRange } = $scope;
+
+        if ($scope.dataType && tabIndex === 0) {//集团
+            $scope.xdata = $scope['query_wp_company_accum_' + { year: '', month: 'month_', day: 'day_' }[timeRange] + 'timeline'].res.body.data.dtime;
+            $scope.ydatas = [[$scope['query_wp_company_accum_' + { year: '', month: 'month_', day: 'day_' }[timeRange] + 'timeline'].res.body.data[select1]], [$scope['query_wp_company_accum_' + { year: '', month: 'month_', day: 'day_' }[timeRange] + 'timeline'].res.body.data[select2]]];
+        } else if ($scope.dataType && tabIndex === 1) {//集团
+            $scope.xdata = $scope.query_wp_company_accum_elec_stationline.res.body.data.st_name;
+            $scope.ydatas = [[$scope.query_wp_company_accum_elec_stationline.res.body.data[select1]], [$scope.query_wp_company_accum_elec_stationline.res.body.data[select2]]];
+        } else if (!$scope.dataType) {//电站
+            $scope.xdata = $scope['query_wp_station_accum' + { year: '', month: '_month', day: '_day' }[timeRange] + '_timeline'].res.body.data.dtime;
+            $scope.ydatas = [[$scope['query_wp_station_accum' + { year: '', month: '_month', day: '_day' }[timeRange] + '_timeline'].res.body.data[select1]], [$scope['query_wp_station_accum' + { year: '', month: '_month', day: '_day' }[timeRange] + '_timeline'].res.body.data[select2]]]
         }
     }
 
@@ -293,7 +589,7 @@ ajaxData({
             real_hours: '发电小时数' + units.real_hours,
             // rad_chk: '辐射总量' + units.rad_chk,
             pba: 'pba',
-            pr: 'pr'
+            // pr: 'pr'
         };
     }
 });

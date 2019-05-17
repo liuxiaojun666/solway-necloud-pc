@@ -1,5 +1,12 @@
 ajaxData(
     {
+        
+        equipmentCount: {
+            name: 'GETrunStatusInfoList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
         // 矩阵视图
         getDeviceLayout: {
             name: 'GETdeviceLayoutV2',
@@ -75,7 +82,7 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, currentDeviceType = '2', tabIndex = 0, checkboxStatus = [true, true, true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
+        let { showShape, currentDeviceType = '2', tabIndex = 0, checkboxStatus = [true, true, true, true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
         $scope.changeShowShape((tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'chart'));
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -182,9 +189,7 @@ ajaxData(
                     status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
                                                 .filter(v => v !== false)
                                                 .join()
-                                                .replace('06', '099')
-                                                .replace('05', '06')
-                                                .replace('01', '01,05')
+                                                .replace('07', '099')
                 });
                 break;
 
@@ -194,9 +199,7 @@ ajaxData(
                     status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
                                                 .filter(v => v !== false)
                                                 .join()
-                                                .replace('06', '099')
-                                                .replace('05', '06')
-                                                .replace('01', '01,05')
+                                                .replace('07', '099')
                     // status: '00,01,02,03,04,099'
                 });
                 break;
@@ -246,10 +249,20 @@ ajaxData(
                 pageIndex: 0,
                 pageSize: 999
             });
+            $scope.equipmentCount.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate,
+            });
         } else if (tabIndex === 1 && showShape === 'list') {
             // $scope.getDeviceType.getData({});
             // $scope.currentDeviceType = '1';
             $scope.switchDeviceType();
+            $scope.equipmentCount.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate,
+            });
         } else if (tabIndex === 3) {
             if ($scope.turbineOPEList.res) return;
             $scope.turbineOPEList.getData({

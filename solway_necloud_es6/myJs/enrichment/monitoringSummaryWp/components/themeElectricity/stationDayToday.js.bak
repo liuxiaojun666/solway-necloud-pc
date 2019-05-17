@@ -1,5 +1,11 @@
 ajaxData(
     {
+        equipmentCount: {
+            name: 'GETrunStatusInfoList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
         stationDayTodayData: {
             name: 'GETrunKWPowerList',
             data: {},
@@ -17,7 +23,7 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { searchKey = '', checkboxStatus = [true, true, true, true, true,true, true] } = historicalRecord.get().themeElectricityStationDayToday || {};
+        let { searchKey = '', checkboxStatus = [true, true, true, true, true,true, true, true] } = historicalRecord.get().themeElectricityStationDayToday || {};
 
         $scope.checkboxStatus = checkboxStatus;
         $scope.searchKey = searchKey;
@@ -50,18 +56,21 @@ ajaxData(
     };
 
     function getData() {
+        $scope.equipmentCount.getData({
+            queryType: 3,
+            dateType: 3,
+            date: $scope.dateTime.showDate,
+        });
         $scope.stationDayTodayData.getData({
             queryType: 3,
             dateType: 3,
             date: (new Date).Format('yyyy-MM-dd'),
             search: $scope.searchKey || '',
             // status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
-            status:$scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
-                    .filter(v => v !== false)
-                    .join()
-                    .replace('06', '099')
-                    .replace('05', '06')
-                    .replace('01', '01,05')
+            status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
+                .filter(v => v !== false)
+                .join()
+                .replace('07', '099')
         });
     }
 

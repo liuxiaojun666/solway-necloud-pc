@@ -32,6 +32,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
         beforeDestroy: '=',
         destroyed: '=',
         clearable: '=',
+        inputStyle: '=',
     },
     template: `
     <div class="calendar" style="position:relative;">
@@ -71,9 +72,9 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
             opacity: 1;
         }
     </style>
-        <span title="清空" ng-if="clearable" ng-click="clearUp();" class="clearable">x</span>
+        <span title="清空" ng-if="clearable && dateTime.showDate" ng-click="clearUp();" class="clearable">x</span>
         <span ng-show="showArrow" ng-click="changeDateTime(-1)"><i class="fa fa-angle-left"></i></span>
-        <input type="text" style="min-width: {{week ? '155' : '100'}}px;">
+        <input type="text" style="min-width: {{week ? '155' : '100'}}px;{{inputStyle}}">
         <span ng-show="showArrow" ng-click="changeDateTime(1)"><i class="fa fa-angle-right"></i></span>
         <p ng-if="week" style="position:absolute;left: 40px;right: 40px;top: 0;bottom: 0;margin: 0;text-align: center;background-color: #fff;pointer-events: none;">
             {{weekStart + '至' + weekEnd}}
@@ -164,6 +165,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
         $scope.clearUp = () => {
             $('#' + $scope.randomId).val('')
             $scope.dateTime.showDate = ''
+            $scope.updated && $scope.updated($scope, $element)
         }
         let changeCount = 0
         $scope.$watch('dateTime', (newValue, oldValue) => {
@@ -187,10 +189,10 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
             $scope.updated && $scope.updated($scope, $element)
         })
         $scope.$watch('startDate', (newValue, oldValue) => {
-            if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setStartDate', newValue.Format($scope.calendarType))
+            if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setStartDate', newValue && newValue.Format($scope.calendarType))
         })
         $scope.$watch('endDate', (newValue, oldValue) => {
-            if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setEndDate', newValue.Format($scope.calendarType))
+            if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setEndDate', newValue && newValue.Format($scope.calendarType))
         })
         $scope.changeDateTime = async num => {
             if ([num, 0].includes($scope.disabled(!0))) return

@@ -65,13 +65,13 @@ ajaxData({
         // $scope._dateTime = dateTime;
         // $scope._dateType = dateType;
         historicalRecord.set({ dateType: $scope.dateType, dateTime: $scope.dateTime });
-        $scope.theme = theme;
+        $scope.theme = theme === 'Accumulative' ? 'EquipmentOperation' : theme;
         $scope.detailFullPage = detailFullPage;
-        if (!stationData) historicalRecord.set({ theme });
+        if (!stationData) historicalRecord.set({ theme: $scope.theme });
         await diffStationInfo(stationData);
         $scope.beforeLoading = false;
         computeClass();
-        $scope.changeTheme(theme);
+        $scope.changeTheme($scope.theme);
         $scope.mainPageInitComplete && $scope.mainPageInitComplete($scope.currentClass);
         $scope.$apply();
     };

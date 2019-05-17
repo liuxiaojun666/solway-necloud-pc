@@ -96,12 +96,14 @@ ajaxData({
             $("#svgView").find('g[type="NBQHLX"]').on('dblclick', dblClickFun);
             $("#svgView").find('g[type="XB"]').on('dblclick', dblClickFun);
             $("#svgView").find('g[type="Meteorograph"]').on('dblclick', dblClickFun);
+            $("#svgView").find('g[type="videoImage"]').on('dblclick', dblClickFun);
             $scope.$on('$destroy', () => {
                 $("#svgView").find('g[type="HLX"]').off('dblclick', dblClickFun);
                 $("#svgView").find('g[type="NBQ"]').off('dblclick', dblClickFun);
                 $("#svgView").find('g[type="NBQHLX"]').off('dblclick', dblClickFun);
                 $("#svgView").find('g[type="XB"]').off('dblclick', dblClickFun);
                 $("#svgView").find('g[type="Meteorograph"]').off('dblclick', dblClickFun);
+                $("#svgView").find('g[type="videoImage"]').off('dblclick', dblClickFun);
             });
             function dblClickFun () {
                 const $device = $(this); //$(this).parents("g");
@@ -184,14 +186,10 @@ ajaxData({
 
         // 刷新视频数据流
         function getVideoPull(res) {
-            $http({
-                method: "POST",
+            $.ajax({
+                type: 'POST',
                 url: res.VIDEO_URL,
-                timeout: 4000,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                data: {
+                data: JSON.stringify({
                     station_id: $scope.currentvideo.stId,
                     stream: [
                         {
@@ -200,8 +198,29 @@ ajaxData({
                             dest: $scope.currentvideo.monitorPointDest
                         }
                     ]
-                },
-            });
+                }),
+                beforeSend: function (xhr) {
+
+                }
+            })
+            // $http({
+            //     method: "POST",
+            //     url: res.VIDEO_URL,
+            //     timeout: 4000,
+            //     headers: {
+            //         'Content-Type': 'application/x-www-form-urlencoded',
+            //     },
+            //     data: {
+            //         station_id: $scope.currentvideo.stId,
+            //         stream: [
+            //             {
+            //                 name: $scope.currentvideo.monitorPointName,
+            //                 source: $scope.currentvideo.monitorPointSource,
+            //                 dest: $scope.currentvideo.monitorPointDest
+            //             }
+            //         ]
+            //     },
+            // });
             if (!$scope.videoContinue) return;
             setTimeout(() => getVideoPull(res), 30 * 1000);
         }

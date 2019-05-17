@@ -1,5 +1,11 @@
 ajaxData(
     {
+        equipmentCount: {
+            name: 'GETequipmentDetailCompanyToday',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
         // 公司今日 时间 列表
         companyDayTodayTime: {
             name: 'GETPowerCompanyDayTodayTime',
@@ -58,7 +64,7 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape = 'chart', currentDeviceType = '2', tabIndex = 0, checkboxStatus = [true, true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationCompanyDayToday || {};
+        let { showShape = 'chart', currentDeviceType = '2', tabIndex = 0, checkboxStatus = [true, true, true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationCompanyDayToday || {};
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
@@ -160,7 +166,9 @@ ajaxData(
                 if ($scope.runRealDataBInverter.isLoding) return
                 $scope.runRealDataBInverter.getData({
                     search: $scope.searchKey,
-                    status: $scope.checkboxStatus[0] ? '00' : $scope.checkboxStatus.map((v, i) => v ? '0' + i : v).filter(v => v !== false).join()
+                    status: $scope.checkboxStatus.map((v, i) => v ? (
+                                '0' + (i > 2 ? i - 1 : i === 2 ? 7 : i)
+                            ) : v).filter(v => v !== false).join()
                 });
                 break;
 
@@ -245,6 +253,11 @@ ajaxData(
             });
         } else if (tabIndex === 2) {
             $scope.getDeviceType.getData({});
+            $scope.equipmentCount.getData({
+                queryType: 1,
+                dateType: 3,
+                date: dateTime.showDate,
+            });
         }
     }
 
