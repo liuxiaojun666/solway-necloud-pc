@@ -602,7 +602,6 @@ ajaxData({
             } else {
                 $scope[key[$scope.analysisObjectK]] = [...arrfilter, ...groupArr];
             }
-
             //组装接口需要的数据
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5) {
                 //组装接口需要的数据 (电站|区域(部门)|集团)
@@ -878,7 +877,7 @@ ajaxData({
         //获取到busiId 和 name 的映射(独立添加、成组添加)
         function busiIdToName() {
             var analyOjName = {};
-            if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5) {
+            if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5 || $scope.analysisObjectK == 100 || $scope.analysisObjectK == 101) {
                 $scope[key[$scope.analysisObjectK]].map(item => {
                     if (!item[0].isgroup) {
                         analyOjName[item[0].busiId] = item[0].name;
@@ -907,6 +906,7 @@ ajaxData({
             }
 
             parentmyAjaxData.config.bIdToName[parentmyAjaxData.config.checkChart] = analyOjName;
+            
         }
 
         //确定按钮
