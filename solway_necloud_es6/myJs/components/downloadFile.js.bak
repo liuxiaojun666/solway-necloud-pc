@@ -12,7 +12,7 @@
         progress = () => {}
     }) => {
         const oReq = new XMLHttpRequest();
-        oReq.open("GET", url, true);
+        oReq.open("GET", url, true); //'/minio/download.htm?id=25'
         oReq.responseType = "blob";
         oReq.addEventListener("progress", ({ total, loaded }) => progress(total, loaded), false);
         oReq.onload = function (oEvent) {
@@ -26,7 +26,8 @@
                 const _blob = new Blob([oReq.response]);
                 if (download) {
                     const elink = document.createElement('a');
-                    elink.download = filename || decodeURI(oReq.getResponseHeader('content-disposition').split('UTF-8')[1]);
+                    const hasFileName = oReq.getResponseHeader('content-disposition');
+                    elink.download = filename || (hasFileName && decodeURI(hasFileName.split('UTF-8')[1])) || '未命名.你想要的扩展名';
                     elink.style.display = 'none';
                     elink.href = URL.createObjectURL(_blob);
                     elink.target = '_blank';
