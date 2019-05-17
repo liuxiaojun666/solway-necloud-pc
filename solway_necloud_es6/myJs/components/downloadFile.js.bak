@@ -5,7 +5,7 @@
 }(window, ((exports) => {
     const download = ({
         url,
-        filename = '未命名.你想要的后缀',
+        filename,
         callback = () => {},
         blob = false,
         download = true,
@@ -26,7 +26,7 @@
                 const _blob = new Blob([oReq.response]);
                 if (download) {
                     const elink = document.createElement('a');
-                    if (filename) elink.download = filename;
+                    elink.download = filename || decodeURI(oReq.getResponseHeader('content-disposition').split('UTF-8')[1]);
                     elink.style.display = 'none';
                     elink.href = URL.createObjectURL(_blob);
                     elink.target = '_blank';
