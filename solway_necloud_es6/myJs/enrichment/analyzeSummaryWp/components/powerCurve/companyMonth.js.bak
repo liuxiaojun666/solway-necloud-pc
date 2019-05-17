@@ -47,6 +47,13 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 查设备型号
+    queryProducts: {
+        name: 'GETqueryProducts',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
 }, {
     __serviceName__: 'powerCurveCompanyMonthService',
 })('powerCurveCompanyMonthCtrl', ['$scope', 'powerCurveCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -164,18 +171,20 @@ ajaxData({
                 date: dateTime.showDate
             });
         } else if (tabIndex === 2 && showShape === 'list') {
-            $scope.analysis_wp_company_power_exp_month_devicelist.getData({
-                queryCode: 'analysis_wp_company_power_exp_month_devicelist',
-                queryType: 1,
-                date: dateTime.showDate,
-                shade_status: 1
+            $scope.queryProducts.getData({
+                deviceType: 18
+            }).then(res => {
+                $scope.analysis_wp_company_power_exp_month_devicelist.getData({
+                    queryCode: 'analysis_wp_company_power_exp_month_devicelist',
+                    queryType: 1,
+                    date: dateTime.showDate
+                });
             });
         } else if (tabIndex === 2 && showShape === 'chart') {
             $scope.analysis_wp_company_power_exp_month_deviceline.getData({
                 queryCode: 'analysis_wp_company_power_exp_month_deviceline',
                 queryType: 1,
-                date: dateTime.showDate,
-                shade_status: 1
+                date: dateTime.showDate
             });
         }
     };
@@ -297,8 +306,11 @@ ajaxData({
                 align: 'center',
                 width: '50px',
                 checkboxName: 'batchprocessing',
-                render(text) {
-                    return '<label class="i-checks m-b-none"><input data-identifies="' + text + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                render(text, item) {
+                    return `<label class="i-checks m-b-none">
+                                <input data-identifies="${item.stid + '-' + text}" name="batchprocessing" type="checkbox" />
+                                <i style="background:transparent;"></i>
+                            </label>`;
                 }
             },
             {
@@ -359,6 +371,11 @@ ajaxData({
         if (!success) return;
         $scope.xdata = res.body.data.st_name.map((v, i) => v + '\n' + res.body.data.eq_name[i]);
         $scope.ydatas = [[res.body.data.power_exp_avg], [res.body.data.ta_avg]];
+    };
+
+    // 对比
+    $scope.analysis_wp_company_power_exp_month_devicelist.comparison = () => {
+        document.getElementsByName('batchprocessing')
     };
 
     // 数据置空

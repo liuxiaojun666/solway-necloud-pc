@@ -58,7 +58,6 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         const drawing = () => {
             const { 
                 stack = [[''], []], 
-                width, 
                 toFixed = 1,
                 interval = void 0, 
                 lineWidth = 1, 
@@ -98,6 +97,9 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     containLabel: true
                 }
             } = $scope;
+            let { width, height } = $scope;
+            width = width === '100%' ? $element[0].clientWidth : width;
+            height = height === '100%' ? $element[0].clientWidth : height;
             const option = {
                 backgroundColor,
                 tooltip: {
