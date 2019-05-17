@@ -32,7 +32,9 @@ AddbaseDictionary: {
                 })
             }
         }
-        $scope.radioToSelect($scope.verticalData.ctg1, 0);
+        if(!$scope['historyData' + parentmyAjaxData.config.checkChart]){
+            $scope.radioToSelect($scope.verticalData.ctg1, 0);
+        }
     })
 
     //搜索功能
@@ -47,10 +49,11 @@ AddbaseDictionary: {
     }
 
     //单选框选中-> 更改select的值
-    $scope.radioIndex = 0;
     $scope.radioToSelect = (item, index) => {
+        $scope.verticAxisK = item.k;
         $scope.$emit('radioToFather', { 'type': 'vertical', 'k': item.k, 'value': item.v });
         $scope.verticalBottom = item.ll;
+        $scope.verticItem = item;
         $scope.radioIndex = index;
     }
 
@@ -176,6 +179,26 @@ AddbaseDictionary: {
         $scope.$emit('cancelCallback');
     }
 
+    //获取历史数据
+    $scope.$on('alsObjHdata', () => {
+        if(parentmyAjaxData.config.anlsType == 1){
+            $scope.verticAxisK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.verticAxisK;
+            $scope['historyData' + parentmyAjaxData.config.checkChart] = true;
+            $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.verticItem,parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.radioIndex);
+            $scope.verticalCheckData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.checkData;
+            if (parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.radioIndex == 0) {
+                $scope.verticalData.ctg2.ll.map((item) => {
+                    item.checked = false;
+                })
+            } else {
+                $scope.verticalData.ctg1.ll.map((item) => {
+                    item.checked = false;
+                })
+            }
+        }
+        
+    })
+
     //确定
     $scope.confirm = () => {
         if ($scope.verticalCheckData.length == 0) {
@@ -186,9 +209,14 @@ AddbaseDictionary: {
             fdKey: $scope.verticalCheckData[0].fdKey,
             isx: 0
         }
-        parentmyAjaxData.config.fds[1] = json;
+        parentmyAjaxData.config.fds[parentmyAjaxData.config.checkChart][1] = json;
         parentmyAjaxData.config.fdY.key = $scope.verticalCheckData[0].fdKey;
         parentmyAjaxData.config.fdY.name = $scope.verticalCheckData[0].fdName;
+        //存储历史数据
+        parentmyAjaxData.config.verticHdata.verticAxisK = $scope.verticAxisK;
+        parentmyAjaxData.config.verticHdata.verticItem = $scope.verticItem;
+        parentmyAjaxData.config.verticHdata.radioIndex = $scope.radioIndex;
+        parentmyAjaxData.config.verticHdata.checkData = JSON.parse(JSON.stringify($scope.verticalCheckData));
         $scope.$emit('addCallback');
     }
 });
