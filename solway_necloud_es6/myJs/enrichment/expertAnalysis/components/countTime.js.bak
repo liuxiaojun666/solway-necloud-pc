@@ -17,6 +17,11 @@ ajaxData({
             }
         })
 
+        //获取时间纬度 发送的dmsTime
+        $scope.$on('dmsTime', (item, v) => {
+            $scope.dmsTime = v;
+        })
+
         //重新设置 日历切换的按钮
         var btnFunction = () => {
             //日 下一个按钮
@@ -228,6 +233,9 @@ ajaxData({
         $scope.confirm = () => {
             if ($scope[key[$scope.radioIndex]].length == 0) {
                 toaster.pop('error', '', '所选数据不能为空');
+                return;
+            } else if ($scope.dateType == 3 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData.analysisObjectK == 99 && $scope[key[$scope.radioIndex]].length*parentmyAjaxData.config.analysObjData.checkData[parentmyAjaxData.config.analysObjData.equipChoiceIndex].length >= 31){
+                toaster.pop('error', '', '1分钟级数据设备数与天数之积应小于31');
                 return;
             }
             if ($scope.radioIndex == 4) {

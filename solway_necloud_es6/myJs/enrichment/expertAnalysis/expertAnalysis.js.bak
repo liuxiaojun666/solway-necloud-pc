@@ -537,11 +537,11 @@ HighAnalysis_selectAnlsType: {
                             break;
                     }
                     //柱状图的 stack
-                    if (tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle] == 3) {
-                        $scope['stack' + $scope.checkChart] = $scope['tableType' + $scope.checkChart];
-                    } else {
-                        $scope['stack' + $scope.checkChart] = [];
-                    }
+                    // if (tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle] == 3) {
+                    //     $scope['stack' + $scope.checkChart] = $scope['tableType' + $scope.checkChart];
+                    // } else {
+                    //     $scope['stack' + $scope.checkChart] = [];
+                    // }
                     //曲线或者柱状图 颜色 的获取
                     $scope['tableType' + $scope.checkChart].map((item, i) => {
                         if (colorsAry[i]) {
@@ -576,7 +576,9 @@ HighAnalysis_selectAnlsType: {
         myAjaxData.config.checkChart = $scope.checkChart = index;
         if ($scope['tableData' + $scope.checkChart] == 1) {
             $scope.queryData.analysisType = myAjaxData.config.tableData[$scope.checkChart].analysisType;
-            analysisObjFun();
+            setTimeout(() => {
+                analysisObjFun();
+            }, 1000)
             if ($scope.queryData.analysisType != 3) {
                 $scope.changeTime = 2;
                 $scope.queryData.timeLat = myAjaxData.config.tableData[$scope.checkChart].timeLat;

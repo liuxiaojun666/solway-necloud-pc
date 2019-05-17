@@ -98,6 +98,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     containLabel: true
                 }
             } = $scope;
+            // debugger
             const option = {
                 backgroundColor,
                 tooltip: {
