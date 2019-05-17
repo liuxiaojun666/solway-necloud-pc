@@ -575,7 +575,7 @@ HighAnalysis_selectAnlsType: {
     $scope.checkChartFun = (index) => {
         myAjaxData.config.checkChart = $scope.checkChart = index;
         if ($scope['tableData' + $scope.checkChart] == 1) {
-            $scope.queryData.analysisType = myAjaxData.config.tableData[$scope.checkChart].analysisType;
+            myAjaxData.config.anlsType = $scope.queryData.analysisType = myAjaxData.config.tableData[$scope.checkChart].analysisType;
             setTimeout(() => {
                 analysisObjFun();
             }, 1000)
@@ -723,6 +723,7 @@ HighAnalysis_selectAnlsType: {
                 $scope.queryData.horizonIndexV = '请选择';
                 $scope.queryData.verticalIndexV = '请选择';
             } else {
+                // debugger
                 //向横轴指标发送数据
                 if ($scope.queryData.analysisType == 1) {
                     $scope.$broadcast('dmsTime', $scope.queryData.timeLat);
