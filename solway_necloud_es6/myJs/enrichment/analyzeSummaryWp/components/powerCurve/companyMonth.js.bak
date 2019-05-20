@@ -53,8 +53,22 @@ ajaxData(
         selectTurbineWSPMonthLine: {
             name: 'GETselectTurbineWSPMonthLine',
             data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 单个风机--列表
+        analysis_wp_device_power_exp_month_timelist: {
+            name: 'GETanalysis_wp_device_power_exp_month_timelist',
+            data: {},
             later: true
-        }
+        },
+        // 单个风机--风速-功率-月-每天曲线
+        getTurbineWSPDayLine: {
+            name: 'GETgetTurbineWSPDayLine',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
     }, {
         __serviceName__: 'powerCurveCompanyMonthService',
     }
@@ -98,7 +112,8 @@ ajaxData(
             });
         }
         else if (tabIndex === 2) {
-            if ($scope.selectTurbineWSPMonthLine.pageShow) return event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
+            if ($scope.selectTurbineWSPMonthLine.pageShow) return $scope.selectTurbineWSPMonthLine.trClick(item, index, event);
+            
             if (event.target.className.includes('eq')) {
                 const { stid, eqid } = item;
                 return $scope.$broadcast("equipmentPopUpWp", { stid, eqid });
@@ -383,15 +398,11 @@ ajaxData(
         $scope.ydatas = [[res.body.data.power_exp_avg], [res.body.data.ta_avg]];
     };
 
-    // 对比
+    // 不同设备对比
     $scope.analysis_wp_company_power_exp_month_devicelist.comparison = () => {
-
         const ids = document.getElementsByName('batchprocessing'):: [].filter(v => v.checked).map(v => v.value);
-        
         if (ids.length === 0) return toaster.pop('info', '', '请勾选要对比的数据。');
-
         $scope.selectTurbineWSPMonthLine.pageShow = true;
-
         $scope.selectTurbineWSPMonthLine.getData({
             st_eqids: ids.join(';'),
             queryType: 1,
@@ -400,7 +411,88 @@ ajaxData(
         });
     };
 
+    // 不同设备对比图
     $scope.selectTurbineWSPMonthLine.subscribe(res => {
+        const keys = Object.keys(res.body.names);
+        const names = Object.values(res.body.names);
+        $scope.selectTurbineWSPMonthLine.chart = {
+            types: [new Array(keys.length).fill('line')],
+            xdata: res.body.x,
+            linenames: [names],
+            ydatas: [keys.map(v => res.body[v].slice(0, res.body.x.length))],
+            z: [keys.map(v => 2)],
+            colors: [keys.map(v => '#fff')]
+        };
+    });
+
+    // 不同设备对比图 点击行
+    $scope.selectTurbineWSPMonthLine.trClick = (item, index, event) => {
+        event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
+        const ids = Object.keys($scope.selectTurbineWSPMonthLine.res.body.names);
+        const idIndex = ids.findIndex(v => v === (item.stid + '-' + item.eqid));
+        $scope.selectTurbineWSPMonthLine.chart = {
+            ...$scope.selectTurbineWSPMonthLine.chart,
+            z: [ids.map((v, i) => i === idIndex ? 3 : 2)],
+            colors: [ids.map((v, i) => i === idIndex ? '#FF6060' : '#fff')],
+        };
+        $scope.selectTurbineWSPMonthLine.activeEqName = item.st_name + '-' + item.eq_name;
+    };
+
+    // 不同设备对比图 tooltip
+    $scope.selectTurbineWSPMonthLine.tooltipFormatter = (params) => {
+        const { activeEqName } = $scope.selectTurbineWSPMonthLine;
+        return '风速：' + params[0].name + 'm/s<br/>' + params.sort((a, b) => b.value - a.value).map(v => `<span style="color:${v.seriesName === activeEqName ? '#FF6060' : '#fff'};">` + v.seriesName + '-功率(kW):    ' + v.value + '</span>' + '<br/>').join('');
+    };
+
+    // 同一设备 对比
+    $scope.analysis_wp_company_power_exp_month_devicelist.trDblclick = (item, index, event) => {
+        if ($scope.tabIndex !== 2) return;
+        if ($scope.selectTurbineWSPMonthLine.pageShow) return;
+        $scope.getTurbineWSPDayLine.pageShow = true;
+        const {stid, eqid} = item;
+        $scope.analysis_wp_device_power_exp_month_timelist.getData({
+            queryCode: 'analysis_wp_device_power_exp_month_timelist',
+            queryType: 3,
+            date: $scope.dateTime.showDate,
+            stid,
+            eqid
+        });
+        $scope.getTurbineWSPDayLine.getData({
+            stid,
+            eqid,
+            queryType: 3,
+            date: $scope.dateTime.showDate,
+            dateType: 2
+        });
+    };
+
+    $scope.analysis_wp_device_power_exp_month_timelist.subscribe(res => {
+        $scope.analysis_wp_device_power_exp_month_timelist.datasource = res.body.data;
+        $scope.analysis_wp_device_power_exp_month_timelist.column = [
+            {
+                title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
+                dataIndex: 'eqid',
+                align: 'center',
+                width: '50px',
+                checkboxName: 'batchprocessing',
+                render(text, item) {
+                    return `<label class="i-checks m-b-none">
+                                <input value="${item.stid + '-' + text}" data-identifies="${item.stid + '-' + text}" name="batchprocessing" type="checkbox" />
+                                <i style="background:transparent;"></i>
+                            </label>`;
+                }
+            },
+            {
+                title: '日期',
+                dataIndex: 'dtime',
+                align: 'center',
+            },
+            {
+                title: '平均指数',
+                dataIndex: 'power_exp_avg',
+                align: 'right'
+            }
+        ];
     });
 
     // 数据置空
@@ -414,6 +506,7 @@ ajaxData(
         $scope.analysis_wp_company_power_exp_month_stationline.res = null;
         $scope.analysis_wp_company_power_exp_month_devicelist.res = null;
         $scope.analysis_wp_company_power_exp_month_deviceline.res = null;
+        $scope.selectTurbineWSPMonthLine.pageShow = false;
     }
 
     // 销毁 事件
