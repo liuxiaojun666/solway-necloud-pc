@@ -98,9 +98,10 @@ ajaxData(
             });
         }
         else if (tabIndex === 2) {
+            if ($scope.selectTurbineWSPMonthLine.pageShow) return event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
             if (event.target.className.includes('eq')) {
                 const { stid, eqid } = item;
-                return $scope.$broadcast("equipmentPopUp", { stid, eqid });
+                return $scope.$broadcast("equipmentPopUpWp", { stid, eqid });
             } else if (event.target.className.includes('station')) return $scope.reloadParentPage({
                 stationData: { dataType: 0, id: item.stid, isGroup: "0", stClass: '02' }
             });
@@ -333,7 +334,7 @@ ajaxData(
                 dataIndex: 'eq_name',
                 align: 'left',
                 width: '20%',
-                sort: true,
+                // sort: true,
                 render(text, item) {
                     return `<span class="clickable station">${item.st_name}</span>` 
                             +
@@ -384,8 +385,13 @@ ajaxData(
 
     // 对比
     $scope.analysis_wp_company_power_exp_month_devicelist.comparison = () => {
+
         const ids = document.getElementsByName('batchprocessing'):: [].filter(v => v.checked).map(v => v.value);
+        
         if (ids.length === 0) return toaster.pop('info', '', '请勾选要对比的数据。');
+
+        $scope.selectTurbineWSPMonthLine.pageShow = true;
+
         $scope.selectTurbineWSPMonthLine.getData({
             st_eqids: ids.join(';'),
             queryType: 1,
@@ -395,7 +401,6 @@ ajaxData(
     };
 
     $scope.selectTurbineWSPMonthLine.subscribe(res => {
-        $scope.selectTurbineWSPMonthLine.pageShow = true;
     });
 
     // 数据置空
