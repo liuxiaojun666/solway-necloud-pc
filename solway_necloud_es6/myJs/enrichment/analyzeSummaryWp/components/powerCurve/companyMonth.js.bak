@@ -445,11 +445,18 @@ ajaxData(
     };
 
     // 同一设备 对比
-    $scope.analysis_wp_company_power_exp_month_devicelist.trDblclick = (item, index, event) => {
+    $scope.analysis_wp_company_power_exp_month_devicelist.trDblclick = async (item, index, event) => {
         if ($scope.tabIndex !== 2) return;
         if ($scope.selectTurbineWSPMonthLine.pageShow) return;
         $scope.getTurbineWSPDayLine.pageShow = true;
         const {stid, eqid} = item;
+        await $scope.getTurbineWSPDayLine.getData({
+            stid,
+            eqid,
+            queryType: 3,
+            date: $scope.dateTime.showDate,
+            dateType: 2
+        });
         $scope.analysis_wp_device_power_exp_month_timelist.getData({
             queryCode: 'analysis_wp_device_power_exp_month_timelist',
             queryType: 3,
@@ -457,27 +464,20 @@ ajaxData(
             stid,
             eqid
         });
-        $scope.getTurbineWSPDayLine.getData({
-            stid,
-            eqid,
-            queryType: 3,
-            date: $scope.dateTime.showDate,
-            dateType: 2
-        });
     };
 
     $scope.analysis_wp_device_power_exp_month_timelist.subscribe(res => {
         $scope.analysis_wp_device_power_exp_month_timelist.datasource = res.body.data;
         $scope.analysis_wp_device_power_exp_month_timelist.column = [
             {
-                title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
+                title: '<label class="i-checks m-b-none"><input checked type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
                 dataIndex: 'eqid',
                 align: 'center',
                 width: '50px',
-                checkboxName: 'batchprocessing',
+                checkboxName: 'batchprocessing2',
                 render(text, item) {
                     return `<label class="i-checks m-b-none">
-                                <input value="${item.stid + '-' + text}" data-identifies="${item.stid + '-' + text}" name="batchprocessing" type="checkbox" />
+                                <input checked value="${item.dtime}" data-identifies="${item.dtime}" name="batchprocessing2" type="checkbox" />
                                 <i style="background:transparent;"></i>
                             </label>`;
                 }
@@ -494,6 +494,35 @@ ajaxData(
             }
         ];
     });
+
+    $scope.analysis_wp_device_power_exp_month_timelist.subscribe(res => {
+        const { body } = $scope.getTurbineWSPDayLine.res;
+        $scope.getTurbineWSPDayLine.chart = {
+            types: [res.body.data.map(v => 'line')],
+            xdata: body.x,
+            linenames: [res.body.data.map(v => v.dtime)],
+            ydatas: [res.body.data.map(v => body[v.dtime])],
+            colors: [res.body.data.map(v => '#fff')],
+            z: [res.body.data.map(v => 2)],
+        };
+    });
+
+    $scope.analysis_wp_device_power_exp_month_timelist.checkboxOnchange = async (_all, elements) => {
+        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies);
+        if (!eqids.length) {
+            $scope.turbinePEList.chart.display = false;
+            return $scope.$apply();
+        }
+        $scope.turbinePEList.res.body.ll.forEach(v => {
+            if (eqids.includes(v.eqid + '')) $scope.turbinePEList.res.body.names[v.eqid + ''] = v.eq_name;
+            else delete $scope.turbinePEList.res.body.names[v.eqid];
+        });
+        const { activeEqid } = $scope.turbinePEList.chart;
+        await $scope.turbinePEList.subscribeArr[1].s($scope.turbinePEList.res);
+        if (!activeEqid) return $scope.$apply();
+        await $scope.trClick({ eqid: activeEqid });
+        $scope.$apply();
+    };
 
     // 数据置空
     function setDataNull() {
