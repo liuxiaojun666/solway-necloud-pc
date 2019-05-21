@@ -18,13 +18,14 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         barWidth: '=',
         splitLine: '=',
         datazoom: '=',
+        datazoomLine: '=',
         linezoom: '=',
         symbolSize: '=',
         splitNumber: '=',
         imagesymboloptions: '=',
         stack: '=',
         itemClick: '=',
-        interval: '=', 
+        interval: '=',
         tooltipFormatter: '=', // 自定义 tooltip
         lineWidth: '=', // 线宽
         toFixed: '=', // 保留小数位数  精度
@@ -56,36 +57,36 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         }, 0);
 
         const drawing = () => {
-            const { 
-                stack = [[''], []], 
-                width, 
+            const {
+                stack = [[''], []],
                 toFixed = 1,
-                interval = void 0, 
-                lineWidth = 1, 
+                interval = void 0,
+                lineWidth = 1,
                 tooltipFormatter = (params, ticket, callback) => {
                     if (imagesymboloptions && imagesymboloptions.show) params.pop();
                     return params[0].name + '<br/>' + params.map(v => v.seriesName + ':    ' + v.value + '<br/>').join('');
-                }, 
-                backgroundColor, 
-                imagesymboloptions, 
-                symbolSize, 
-                splitNumber, 
-                splitLine, 
-                barWidth = 20, 
-                axisColor, 
-                fontColor, 
-                linenames = [], 
-                ynames = [], 
-                xname = '', 
-                xdata = [], 
-                ydatas = [[[]]], 
+                },
+                backgroundColor,
+                imagesymboloptions,
+                symbolSize,
+                splitNumber,
+                splitLine,
+                barWidth = 20,
+                axisColor,
+                fontColor,
+                linenames = [],
+                ynames = [],
+                xname = '',
+                xdata = [],
+                ydatas = [[[]]],
                 yMin = [],
                 yMax = [],
-                types = [], 
-                colors = [], 
+                types = [],
+                colors = [],
                 datazoom,
                 linezoom,
-                areaFill, 
+                datazoomLine,
+                areaFill,
                 markLine,
                 datazoomEnd,
                 legend = {},
@@ -98,6 +99,9 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     containLabel: true
                 }
             } = $scope;
+            let { width, height } = $scope;
+            width = width === '100%' ? $element[0].clientWidth : width;
+            height = height === '100%' ? $element[0].clientWidth : height;
             const option = {
                 backgroundColor,
                 tooltip: {
@@ -188,6 +192,19 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     end: datazoomEnd || (width - 100) / ydatas[0][0].length * 2
                     // handleSize: $scope.width
                 }],
+                ...(() => {
+                    if (!datazoomLine) return {};
+                    return {
+                        dataZoom: [
+                            {
+                                type: 'slider',
+                                xAxisIndex: 0,
+                                filterMode: 'empty',
+                                end: datazoomEnd || (width - 100) / ydatas[0][0].length * 2
+                            }
+                        ]
+                    }
+                })(),
                 series: ydatas.map((v, i) => (v.map((data, xi) => ({
                     name: linenames[i][xi],
                     type: types[i][xi],
@@ -237,7 +254,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         }
                     },
                     markLine: markLine && markLine[i][xi]
-                })))).reduce((a, b) => a.concat(b), []).concat(imagesymboloptions && imagesymboloptions.show &&  {
+                })))).reduce((a, b) => a.concat(b), []).concat(imagesymboloptions && imagesymboloptions.show && {
                     type: 'pictorialBar',
                     yAxisIndex: imagesymboloptions.yAxisIndex,
                     symbolPosition: 'end',

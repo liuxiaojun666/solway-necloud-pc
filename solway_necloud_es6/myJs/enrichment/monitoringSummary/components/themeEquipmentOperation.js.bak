@@ -123,8 +123,8 @@ ajaxData({
     }
 
     let pieChart = echarts.init(document.getElementById('themeEquipmentPieEchart'))
-    const initPieEchart = (fault, comm, maintain, run, wait) => {
-        if($scope.currentClass != 'StationDayToday' && $scope.currentClass != 'CompanyDayToday' && !fault && !comm && !maintain){
+    const initPieEchart = (fault, comm, alarm, run, wait) => {
+        if($scope.currentClass != 'StationDayToday' && $scope.currentClass != 'CompanyDayToday' && !fault && !comm && !alarm){
             run = $scope.devTotal;
         }
         const option = {
@@ -168,7 +168,7 @@ ajaxData({
                     data: [
                         {
                             value:fault,
-                            name: '故障台数',
+                            name: ($scope.currentClass != 'StationDayToday' && $scope.currentClass != 'CompanyDayToday') ? '故障台次' : '故障台数',
                             itemStyle: {
                                 normal: {
                                     color: '#e57d70'
@@ -177,7 +177,7 @@ ajaxData({
                         },
                         {
                             value: comm,
-                            name: '离线台数',
+                            name: ($scope.currentClass != 'StationDayToday' && $scope.currentClass != 'CompanyDayToday') ? '离线台次' : '离线台数',
                             itemStyle: {
                                 normal: {
                                     color: '#9d9d9d'
@@ -185,7 +185,7 @@ ajaxData({
                             }
                         },
                         {
-                            value: maintain,
+                            value: alarm,
                             name: $scope.pieThirdItemName,//第三个参数，不同情况显示名称不一样
                             itemStyle: {
                                 normal: {
@@ -204,7 +204,7 @@ ajaxData({
                         },
                         {
                             value: run,
-                            name: '运行台数',
+                            name: '正常台数',
                             itemStyle: {
                                 normal: {
                                     color: '#57c894'
@@ -292,12 +292,12 @@ ajaxData({
 
                     let acpStatusInfo =  res.body.acpStatusInfo;
                     
-                    $scope.devTotal = acpStatusInfo.fault + acpStatusInfo.comm + acpStatusInfo.maintain + acpStatusInfo.run + acpStatusInfo.wait ;
+                    $scope.devTotal = acpStatusInfo.fault + acpStatusInfo.comm + acpStatusInfo.alarm + acpStatusInfo.run + acpStatusInfo.wait ;
                     $scope.fail_count = acpStatusInfo.fault;
 
-                    $scope.pieThirdItemName = '维护台数';
+                    $scope.pieThirdItemName = '报警台数';
                     $scope.pieThirdItemColor = '#b896e0';
-                    initPieEchart(acpStatusInfo.fault, acpStatusInfo.comm, acpStatusInfo.maintain, acpStatusInfo.run, acpStatusInfo.wait);//故障、离线、维护、运行、待机
+                    initPieEchart(acpStatusInfo.fault, acpStatusInfo.comm, acpStatusInfo.alarm, acpStatusInfo.run, acpStatusInfo.wait);//故障、离线、报警、运行、待机
                     
                 }else{
                     $scope.data = {};
@@ -347,7 +347,7 @@ ajaxData({
                 $scope.devTotal = data.eqcount;//总台数
                 $scope.fail_count = data.fail_count;//故障台数
                 
-                $scope.pieThirdItemName = '告警台数';
+                $scope.pieThirdItemName = '报警台次';
                 $scope.pieThirdItemColor = '#e4b86f';
                 initPieEchart(data.fail_count, data.inter_count, data.alarm_count);//故障、离线、告警
                 if(data.max_p_rate){

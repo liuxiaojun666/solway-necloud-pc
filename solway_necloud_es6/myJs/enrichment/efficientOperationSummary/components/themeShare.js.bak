@@ -82,10 +82,17 @@ ajaxData({
                 searchKey = '',
                 isDefaultList = true
             } = historicalRecord.get().themeShare || {};
+
             $scope.startDate = new Date(__sdate);
             $scope.startDate.showDate = '';
             $scope.endDate = new Date(__edate);
             $scope.endDate.showDate = '';
+
+            $scope.bounsTimeStart = new Date(__sdate);
+            $scope.bounsTimeStart.showDate = '';
+            $scope.bounsTimeEnd = new Date(__edate);
+            $scope.bounsTimeEnd.showDate = '';
+
             $scope.isHis = isHis;
             $scope.handStatus = handStatus;
             $scope.searchKey = searchKey;
@@ -133,12 +140,14 @@ ajaxData({
 
         // 消息列表 接口 请求
         function getBaseMessageList() {
-            const { startDate, endDate, searchKey, isHis, handStatus, pStationId } = $scope;
+            const { startDate, endDate, searchKey, isHis, handStatus, pStationId, bounsTimeEnd, bounsTimeStart } = $scope;
             $scope.column = [];
             $scope.taskList.getData({
                 stationId: pStationId,
                 distDateStartStr: startDate.showDate,
                 distDateEndStr: endDate.showDate,
+                bounsTimeStartStr: bounsTimeStart.showDate,
+                bounsTimeEndStr: bounsTimeEnd.showDate,
                 ss: isHis || Object.keys(handStatus).filter(v => handStatus[v]).join(),
                 keywords: searchKey || '',
                 pageIndex: 0,
@@ -150,6 +159,8 @@ ajaxData({
         $scope.resetList = () => {
             $scope.startDate.showDate = '';
             $scope.endDate.showDate = '';
+            $scope.bounsTimeStart.showDate = '';
+            $scope.bounsTimeEnd.showDate = '';
             $scope.pStationId = '';
             $scope.searchKey = '';
             $scope.isHis = '';
@@ -201,7 +212,7 @@ ajaxData({
                     dataIndex: 'distDate',
                     align: 'center',
                     // sort: true,
-                    width: '15%',
+                    width: '14%',
                     render(text) {
                         return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm')}</span>`
                     }
@@ -220,13 +231,23 @@ ajaxData({
                     title: '内容',
                     dataIndex: 'taskContent',
                     // sort: true,
-                    width: '25%',
+                    width: '20%',
                 },
                 {
                     title: '红包金额',
                     dataIndex: 'bounsFinal',
                     // sort: true,
                     align: 'right'
+                },
+                {
+                    title: '发红包时间',
+                    dataIndex: 'bounsTime',
+                    // sort: true,
+                    align: 'center',
+                    width: '14%',
+                    render(text) {
+                        return text && new Date(text).Format('yyyy-MM-dd hh:mm:ss');
+                    }
                 },
                 {
                     title: '状态',

@@ -9,9 +9,17 @@ ajaxData({
     })('countTimeCtrl', ['$scope', 'countTimeService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
         //获取父级发送的横轴指标 选择的option
-        $scope.$on('countTimeNum', (item, index) => {
-            $scope.selectIndex = index;
-            $scope.radioIndex = index;
+        $scope.$on('countTime_open', () => {
+            if(parentmyAjaxData.config.tableDataTrue[$scope.checkChart]){
+                $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioName, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.dateType);
+            } else {
+                $scope.radioToSelect('日', 3);
+            }
+        })
+
+        //获取时间纬度 发送的dmsTime
+        $scope.$on('dmsTime', (item, v) => {
+            $scope.dmsTime = v;
         })
 
         //重新设置 日历切换的按钮
@@ -136,10 +144,25 @@ ajaxData({
             }
         });
 
+        //获取历史数据
+        $scope.$on('ctimeHdata', (event,v) => {
+            if(!v){
+                $scope.radioToSelect('日', 3);
+                $scope[key[$scope.radioIndex]] = [];
+                return;
+            }
+            $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioName, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.dateType);
+            $scope.radioIndex = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioIndex;
+            $scope[key[$scope.radioIndex]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.checkData;
+
+        })
+
         //单选框选中-> 更改select的值
-        $scope.selectIndex = 1;
+        // $scope.selectIndex = 1;
         $scope.radioToSelect = (name, dateType) => {
             var radioIndex = document.querySelectorAll('[name=cTime]'):: [].filter(item => item.checked).map(item => item.dataset.index);
+            $scope.radioName = name;
+            $scope.dateType = dateType;
             $scope.$emit('radioToFather', { 'name': name, 'type': 'countTime', 'dateType': dateType });
             $scope.radioIndex = radioIndex.length > 0 ? radioIndex[0] : 1;
         }
@@ -189,7 +212,7 @@ ajaxData({
         $scope.delRight = (id, index) => {
             $scope[key[$scope.radioIndex]].splice(index, 1);
             if ($scope[key[$scope.radioIndex]].length == 0) {
-                parentmyAjaxData.config.dmsTimeDates = [];
+                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
             }
         }
 
@@ -200,7 +223,7 @@ ajaxData({
             } else {
                 $solway.confirm({ message: '确定全部删除吗？' }, () => {
                     $scope[key[$scope.radioIndex]] = [];
-                    parentmyAjaxData.config.dmsTimeDates = [];
+                    parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
                     $scope.$apply();
                 });
             }
@@ -216,12 +239,20 @@ ajaxData({
             if ($scope[key[$scope.radioIndex]].length == 0) {
                 toaster.pop('error', '', '所选数据不能为空');
                 return;
+            } else if ($scope.dateType == 3 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData.analysisObjectK == 99 && $scope[key[$scope.radioIndex]].length*parentmyAjaxData.config.analysObjData.checkData[parentmyAjaxData.config.analysObjData.equipChoiceIndex].length >= 31){
+                toaster.pop('error', '', '1分钟级数据设备数与天数之积应小于31');
+                return;
             }
             if ($scope.radioIndex == 4) {
-                parentmyAjaxData.config.dmsTimeDates = $scope.newtimeGroupUser;
+                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify($scope.newtimeGroupUser));
             } else {
-                parentmyAjaxData.config.dmsTimeDates = $scope[key[$scope.radioIndex]];
+                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify($scope[key[$scope.radioIndex]]));
             }
+            //历史数据的set
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].radioName = $scope.radioName;
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].dateType = $scope.dateType;
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope[key[$scope.radioIndex]]));
             $scope.$emit('addCallback');
         }
     });
