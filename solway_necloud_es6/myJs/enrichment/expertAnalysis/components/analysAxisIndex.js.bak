@@ -34,7 +34,6 @@ HighAnalysis_selectFds: {
         $scope.dmsTime = v;
         //趋势分析-> 获取分析指标的数据
         if($scope.anlsType == 2){
-            // debugger
             $scope.HighAnalysis_selectFds.getData({
                 stationClass: "01",
                 anlsType: parentmyAjaxData.config.anlsType,
@@ -47,9 +46,11 @@ HighAnalysis_selectFds: {
     $scope.HighAnalysis_selectFds.subscribe(res => {
         if (!res.body) {
             toaster.pop('error', '', res.msg);
+            $scope.$emit('analysNan', { data: 1});
             return;
         }
         $scope.analysData = res.body;
+        $scope.$emit('analysNan', { data: 0});
         var key;
         for(key in $scope.analysData){
             $scope.analysData[key].ll.map((item)=>{
@@ -57,12 +58,10 @@ HighAnalysis_selectFds: {
                 item.actFdHb = 0;
             })
         }
-        if(!$scope['historyData' + parentmyAjaxData.config.checkChart]){
-            $scope.analysCheckData = [];
-            parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
-            $scope.radioToSelect($scope.analysData.ctg1, 0);
-        }
-        
+        $scope.analysCheckData = [];
+        $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart] =  parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart];
+        parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
+        $scope.radioToSelect($scope.analysData.ctg1, 0);
     });
 
     //监听 分析指标页面打开
@@ -105,9 +104,8 @@ HighAnalysis_selectFds: {
 
     //单选框选中-> 更改select的值
     $scope.radioToSelect = (item, index) => {
-        // debugger
         $scope.alysIndexK = item.k;
-        $scope.$emit('radioToFather', { 'type': 'analys', 'value': item.v });
+        $scope.$emit('radioToFather', { 'type': 'analys', 'value': item.v});
         $scope.analysBottom = item.ll;
         //给数据赋初始show值
         $scope.analysBottom.map((item) => {
@@ -278,9 +276,14 @@ HighAnalysis_selectFds: {
                     $scope.actFdHb = item.actFdHb = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.actFdHb;
                 }
             })
-            $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysItem,parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.radioIndex);
 
-            $scope.analysCheckData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.checkData;
+            setTimeout(()=>{
+                $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysItem,parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.radioIndex, 1);
+                $scope.analysCheckData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.checkData;
+                parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart];
+                console.log(parentmyAjaxData.config.analysFds)
+            },300)
+            
             $scope.query.sortType = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.sortType;
             $scope.query.tableType = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.tableType;
             
@@ -304,25 +307,34 @@ HighAnalysis_selectFds: {
             toaster.pop('error', '', '所选数据不能为空');
             return;
         }
-        var analysFds_y1 = {
-            fdKey: $scope.analysCheckData[0].fdKey,
-            fdTb: $scope.actFdTb,
-            fdHb: $scope.actFdHb
+        var analysFds_y1 = {};
+        if(parentmyAjaxData.config.anlsType==3){
+            analysFds_y1 = {
+                fdKey: $scope.analysCheckData[0].fdKey
+            }
+        } else {
+            analysFds_y1 = {
+                fdKey: $scope.analysCheckData[0].fdKey,
+                fdTb: $scope.actFdTb,
+                fdHb: $scope.actFdHb
+            }
         }
         parentmyAjaxData.config.benchSort[parentmyAjaxData.config.checkChart] = parentmyAjaxData.config.anlsType==3 ? $scope.analysCheckData[0].fdKey + ',' + $scope.query.sortType : null;
         parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart][0] = analysFds_y1;
+        $scope.analysFdsArr =  parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart];
+
         parentmyAjaxData.config.fdStyle = $scope.query.tableType;
         parentmyAjaxData.config.fdStyleArr[parentmyAjaxData.config.checkChart] = $scope.query.tableType;
         //存储历史数据
-        parentmyAjaxData.config.alysHdata.alysIndexK = $scope.alysIndexK;
-        parentmyAjaxData.config.alysHdata.analysData = $scope.analysData;
-        parentmyAjaxData.config.alysHdata.alysItem = $scope.alysItem;
-        parentmyAjaxData.config.alysHdata.radioIndex = $scope.radioIndex;
-        parentmyAjaxData.config.alysHdata.checkData = JSON.parse(JSON.stringify($scope.analysCheckData));
-        parentmyAjaxData.config.alysHdata.sortType = $scope.query.sortType;
-        parentmyAjaxData.config.alysHdata.tableType = $scope.query.tableType;
-        parentmyAjaxData.config.alysHdata.actFdTb = $scope.actFdTb;
-        parentmyAjaxData.config.alysHdata.actFdHb = $scope.actFdHb;
+        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].alysIndexK = $scope.alysIndexK;
+        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].analysData = $scope.analysData;
+        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].alysItem = $scope.alysItem;
+        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
+        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope.analysCheckData));
+        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].sortType = $scope.query.sortType;
+        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].tableType = $scope.query.tableType;
+        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].actFdTb = $scope.actFdTb;
+        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].actFdHb = $scope.actFdHb;
         
 
         $scope.$emit('analysFds_fdName',{'fdName': $scope.analysCheckData[0].fdName});
