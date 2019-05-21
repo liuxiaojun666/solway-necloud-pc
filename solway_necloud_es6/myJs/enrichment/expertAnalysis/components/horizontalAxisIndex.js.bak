@@ -199,21 +199,21 @@ HighAnalysis_selectFds: {
     }
 
     //点击同比 环比
-    $scope.tongBi = (fdKey, type) => {
-        if (type == 'tong') {
-            $scope.herizonBottom.map((item) => {
-                if (item.fdKey == fdKey) {
-                    item.fdTb == 0 ? item.fdTb = 1 : item.fdTb = 0;
-                }
-            })
-        } else {
-            $scope.herizonBottom.map((item) => {
-                if (item.fdKey == fdKey) {
-                    item.fdHb == 0 ? item.fdHb = 1 : item.fdHb = 0;
-                }
-            })
-        }
-    }
+    // $scope.tongBi = (fdKey, type) => {
+    //     if (type == 'tong') {
+    //         $scope.herizonBottom.map((item) => {
+    //             if (item.fdKey == fdKey) {
+    //                 item.fdTb == 0 ? item.fdTb = 1 : item.fdTb = 0;
+    //             }
+    //         })
+    //     } else {
+    //         $scope.herizonBottom.map((item) => {
+    //             if (item.fdKey == fdKey) {
+    //                 item.fdHb == 0 ? item.fdHb = 1 : item.fdHb = 0;
+    //             }
+    //         })
+    //     }
+    // }
 
     //取消
     $scope.cancel = () => {
@@ -256,10 +256,10 @@ HighAnalysis_selectFds: {
         parentmyAjaxData.config.fdX.key = $scope.horizonCheckData[0].fdKey;
         parentmyAjaxData.config.fdX.name = $scope.horizonCheckData[0].fdName;
         //存储历史数据
-        parentmyAjaxData.config.horizonHdata.hrizonAxisK = $scope.hrizonAxisK;
-        parentmyAjaxData.config.horizonHdata.hrizonItem = $scope.hrizonItem;
-        parentmyAjaxData.config.horizonHdata.radioIndex = $scope.radioIndex;
-        parentmyAjaxData.config.horizonHdata.checkData = JSON.parse(JSON.stringify($scope.horizonCheckData));
+        parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].hrizonAxisK = $scope.hrizonAxisK;
+        parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].hrizonItem = $scope.hrizonItem;
+        parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
+        parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope.horizonCheckData));
         $scope.$emit('addCallback');
     }
 });

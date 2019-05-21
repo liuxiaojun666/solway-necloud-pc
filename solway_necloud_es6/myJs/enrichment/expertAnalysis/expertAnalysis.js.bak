@@ -49,11 +49,11 @@ HighAnalysis_selectAnlsType: {
     tableData: [      //图表的历史数据
         {}, {}, {}, {}
     ],
-    analysObjData: {}, //选择的分析对象 历史数据
-    countTime: {},     //选择的统计时间 历史数据
-    horizonHdata: {},  //选择的横轴指标 历史数据
-    verticHdata: {},   //选择的纵轴指标 历史数据
-    alysHdata: {},     //选择的分析指标 历史数据
+    analysObjData: [{},{},{},{}], //选择的分析对象 历史数据
+    countTime: [{},{},{},{}],     //选择的统计时间 历史数据
+    horizonHdata: [{},{},{},{}],  //选择的横轴指标 历史数据
+    verticHdata: [{},{},{},{}],   //选择的纵轴指标 历史数据
+    alysHdata: [{},{},{},{}],     //选择的分析指标 历史数据
     checkChart: null,  //选中第几个图表
     tableDataTrue: []   //第几个图表 是否有历史数据
 })('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', 'toaster'], ($scope, myAjaxData, historicalRecord, $interval, toaster) => {
@@ -87,6 +87,7 @@ HighAnalysis_selectAnlsType: {
     //获取分析对象的数据
     function analysisObjFun() {
         //获取不同分析类型的数据
+        if (!$scope.selectData) return;
         var key;
         for (key in $scope.selectData) {
             if ($scope.queryData.analysisType == $scope.selectData[key].k) {
@@ -252,7 +253,7 @@ HighAnalysis_selectAnlsType: {
 
     //分析指标发送 fdName
     $scope.$on('analysFds_fdName', (event, data) => {
-        $scope.analysfdName = data.fdName;
+        $scope['analysfdName'+ $scope.checkChart] = data.fdName;
     })
 
     var tableStyle = {
@@ -267,7 +268,7 @@ HighAnalysis_selectAnlsType: {
 
     //调接口前 判空
     function judgeBeforeAjax() {
-        if ((($scope.queryData.analysisObjectK == 1 || $scope.queryData.analysisObjectK == 2 || $scope.queryData.analysisObjectK == 3 || $scope.queryData.analysisObjectK == 5) && myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart].length == 0) || ($scope.queryData.analysisObjectK == 99 && myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart].length == 0) || ($scope.queryData.analysisObjectK == 100 && (myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart].length == 0 && myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart].length == 0))) {
+        if ((($scope.queryData.analysisObjectK == 1 || $scope.queryData.analysisObjectK == 2 || $scope.queryData.analysisObjectK == 3 || $scope.queryData.analysisObjectK == 5) && myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart].length == 0) || ($scope.queryData.analysisObjectK == 99 && myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart].length == 0) || (($scope.queryData.analysisObjectK == 100 || $scope.queryData.analysisObjectK == 101) && (myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart].length == 0 && myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart].length == 0) )   ) {
             toaster.pop('error', '', '请选择分析对象');
             return false;
         } else
@@ -301,11 +302,12 @@ HighAnalysis_selectAnlsType: {
                 dateType: $scope['dmsTimeDateType'+ $scope.checkChart],
                 dates: myAjaxData.config.dmsTimeDates[myAjaxData.config.checkChart]
             },
-            fds: $scope.queryData.analysisType == 1 ? myAjaxData.config.fds[myAjaxData.config.checkChart] : $scope.queryData.analysisType != 1 ? myAjaxData.config.analysFds[myAjaxData.config.checkChart] : '',
+            fds: $scope.queryData.analysisType == 1 ? myAjaxData.config.fds[myAjaxData.config.checkChart] : myAjaxData.config.analysFds[myAjaxData.config.checkChart],
             sort: $scope.queryData.analysisType == 3 ? myAjaxData.config.benchSort[myAjaxData.config.checkChart] : null
         }
+        // console.log(myAjaxData.config.analysFds)
         return dataJ;
-        $scope.ajaxParams[$scope.checkChart] = JSON.parse(JSON.stringify(dataJ));
+        // $scope.ajaxParams[$scope.checkChart] = JSON.parse(JSON.stringify(dataJ));
     }
 
     // 最终的 查询按钮
@@ -340,46 +342,46 @@ HighAnalysis_selectAnlsType: {
             }
 
             myAjaxData.config.tableData[$scope.checkChart].alsObj = {
-                'alsObjk': myAjaxData.config.analysObjData.analysisObjectK,
-                'equipCItem': myAjaxData.config.analysObjData.equipChoiceItem,
-                'equipCIndex': myAjaxData.config.analysObjData.equipChoiceIndex,
-                'checkData': myAjaxData.config.analysObjData.checkData,
-                'radioItem': myAjaxData.config.analysObjData.radioItem
+                'alsObjk': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].analysisObjectK,
+                'dmsType': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].dmsType,
+                'equipCItem': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].equipChoiceItem,
+                'equipCIndex': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].equipChoiceIndex,
+                'checkData': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].checkData,
+                'radioItem': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].radioItem
             }
 
             myAjaxData.config.tableData[$scope.checkChart].ctime = {
-                'radioIndex': myAjaxData.config.countTime.radioIndex,
-                'radioName': myAjaxData.config.countTime.radioName,
-                'dateType': myAjaxData.config.countTime.dateType,
-                'checkData': myAjaxData.config.countTime.checkData
+                'radioIndex': myAjaxData.config.countTime[myAjaxData.config.checkChart].radioIndex,
+                'radioName': myAjaxData.config.countTime[myAjaxData.config.checkChart].radioName,
+                'dateType': myAjaxData.config.countTime[myAjaxData.config.checkChart].dateType,
+                'checkData': myAjaxData.config.countTime[myAjaxData.config.checkChart].checkData
             };
 
             myAjaxData.config.tableData[$scope.checkChart].horizon = {
-                'hrizonAxisK': myAjaxData.config.horizonHdata.hrizonAxisK,
-                'hrizonItem': myAjaxData.config.horizonHdata.hrizonItem,
-                'radioIndex': myAjaxData.config.horizonHdata.radioIndex,
-                'checkData': myAjaxData.config.horizonHdata.checkData
+                'hrizonAxisK': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].hrizonAxisK,
+                'hrizonItem': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].hrizonItem,
+                'radioIndex': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].radioIndex,
+                'checkData': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].checkData
             };
 
             myAjaxData.config.tableData[$scope.checkChart].vertical = {
-                'verticAxisK': myAjaxData.config.verticHdata.verticAxisK,
-                'verticItem': myAjaxData.config.verticHdata.verticItem,
-                'radioIndex': myAjaxData.config.verticHdata.radioIndex,
-                'checkData': myAjaxData.config.verticHdata.checkData
+                'verticAxisK': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].verticAxisK,
+                'verticItem': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].verticItem,
+                'radioIndex': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].radioIndex,
+                'checkData': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].checkData
             };
 
             myAjaxData.config.tableData[$scope.checkChart].alys = {
-                'alysIndexK': myAjaxData.config.alysHdata.alysIndexK,
-                'analysData': myAjaxData.config.alysHdata.analysData,
-                'alysItem': myAjaxData.config.alysHdata.alysItem,
-                'radioIndex': myAjaxData.config.alysHdata.radioIndex,
-                'checkData': myAjaxData.config.alysHdata.checkData,
-                'sortType': myAjaxData.config.alysHdata.sortType,
-                'tableType': myAjaxData.config.alysHdata.tableType,
-                'actFdTb': myAjaxData.config.alysHdata.actFdTb,
-                'actFdHb': myAjaxData.config.alysHdata.actFdHb
+                'alysIndexK': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].alysIndexK,
+                'analysData': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].analysData,
+                'alysItem': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].alysItem,
+                'radioIndex': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].radioIndex,
+                'checkData': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].checkData,
+                'sortType': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].sortType,
+                'tableType': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].tableType,
+                'actFdTb': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].actFdTb,
+                'actFdHb': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].actFdHb
             };
-
             $scope.tableData = res.body;
             if (myAjaxData.config.tableData[$scope.checkChart].fdStyle == 4) {
                 //获取 x轴和 y轴的 名字和单位
@@ -433,7 +435,7 @@ HighAnalysis_selectAnlsType: {
                 chartOption($scope.checkChart, legend, series);
             } else {
                 // 获取y轴的名字
-                $scope['yname' + $scope.checkChart] = $scope['yunits' + $scope.checkChart] ? $scope.analysfdName + '(' + $scope['yunits' + $scope.checkChart] + ')' : $scope.analysfdName;
+                $scope['yname' + $scope.checkChart] = $scope['yunits' + $scope.checkChart] ? $scope['analysfdName'+ $scope.checkChart] + '(' + $scope['yunits' + $scope.checkChart] + ')' : $scope['analysfdName'+ $scope.checkChart];
                 // 获取各项数据
                 var key;
                 var key2;
@@ -572,114 +574,122 @@ HighAnalysis_selectAnlsType: {
     }
 
     // 图表的点击
-    $scope.checkChartFun = (index) => {
+    $scope.checkChartFun = async (index) => {
         myAjaxData.config.checkChart = $scope.checkChart = index;
         if ($scope['tableData' + $scope.checkChart] == 1) {
             myAjaxData.config.anlsType = $scope.queryData.analysisType = myAjaxData.config.tableData[$scope.checkChart].analysisType;
-            setTimeout(() => {
-                analysisObjFun();
-            }, 1000)
-            if ($scope.queryData.analysisType != 3) {
-                $scope.changeTime = 2;
-                $scope.queryData.timeLat = myAjaxData.config.tableData[$scope.checkChart].timeLat;
-            }
+            await myAjaxData.timeout(100);
+            analysisObjFun();
+            // if ($scope.queryData.analysisType != 3) {
+                // $scope.changeTime = 2;
+                // $scope.queryData.timeLat = myAjaxData.config.tableData[$scope.checkChart].timeLat;
+            // }
             $scope.$broadcast('alsObjHdata');
+            $scope.$broadcast('ctimeHdata',true);
+            await myAjaxData.timeout(200);
+            $scope.$broadcast('trend_dmsTime', $scope.queryData.timeLat);
+
         } else {
             $scope.queryData.analysisType = 1;
-            setTimeout(() => {
-                analysisObjFun();
-            }, 1000)
+            await myAjaxData.timeout(100);
+            analysisObjFun();
+            $scope.$broadcast('ctimeHdata',false);
         }
     }
     $scope.checkChartFun(0);
 
     //图表函数组
     function chartsInit() {
-        var myChart0 = echarts.init(document.getElementById("container0"));
-        var myChart1 = echarts.init(document.getElementById("container1"));
-        var myChart2 = echarts.init(document.getElementById("container2"));
-        var myChart3 = echarts.init(document.getElementById("container3"));
-        var option = null;
-        option = {
-            xAxis: {
-                name: '',
-                min: 0,
-                max: 100,
-                nameTextStyle: {
-                    color: '#fff',
-                    fontSize: 12
-                },
-                //改变x轴字体颜色为白色
-                axisLabel: {
-                    show: true,
-                    textStyle: {
-                        color: '#fff'
+        setTimeout(()=>{
+            var myChart0 = echarts.init(document.getElementById("container0"));
+            var myChart1 = echarts.init(document.getElementById("container1"));
+            var myChart2 = echarts.init(document.getElementById("container2"));
+            var myChart3 = echarts.init(document.getElementById("container3"));
+            var option = null;
+            option = {
+                xAxis: {
+                    name: '',
+                    min: 0,
+                    max: 100,
+                    nameTextStyle: {
+                        color: '#fff',
+                        fontSize: 12
+                    },
+                    //改变x轴字体颜色为白色
+                    axisLabel: {
+                        show: true,
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    //去掉x轴分隔线
+                    splitLine: {
+                        show: false
+                    },
+                    //设置轴线的属性
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(68, 150, 255, 1)'
+                        }
                     }
                 },
-                //去掉x轴分隔线
-                splitLine: {
-                    show: false
-                },
-                //设置轴线的属性
-                axisLine: {
-                    lineStyle: {
-                        color: 'rgba(68, 150, 255, 1)'
+                yAxis: {
+                    name: '',
+                    min: 0,
+                    max: 100,
+                    nameTextStyle: {
+                        color: '#fff',
+                        fontSize: 12
+                    },
+                    //改变y轴字体颜色为白色
+                    axisLabel: {
+                        show: true,
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    //设置y轴分隔线
+                    splitLine: {
+                        lineStyle: {
+                            color: 'rgba(68, 150, 255, 1)'
+                        }
+                    },
+                    //设置轴线的属性
+                    axisLine: {
+                        show: false
+                    },
+                    //去掉刻度线
+                    axisTick: {
+                        show: false
                     }
+                },
+                series: [],
+                grid: {
+                    top: "26%",
+                    right: "18%",
+                    bottom: "18%"
                 }
-            },
-            yAxis: {
-                name: '',
-                min: 0,
-                max: 100,
-                nameTextStyle: {
-                    color: '#fff',
-                    fontSize: 12
-                },
-                //改变y轴字体颜色为白色
-                axisLabel: {
-                    show: true,
-                    textStyle: {
-                        color: '#fff'
-                    }
-                },
-                //设置y轴分隔线
-                splitLine: {
-                    lineStyle: {
-                        color: 'rgba(68, 150, 255, 1)'
-                    }
-                },
-                //设置轴线的属性
-                axisLine: {
-                    show: false
-                },
-                //去掉刻度线
-                axisTick: {
-                    show: false
-                }
-            },
-            series: [],
-            grid: {
-                top: "26%",
-                right: "18%",
-                bottom: "18%"
+            };
+            if (option && typeof option === "object") {
+                myChart0.setOption(option, true);
+                myChart1.setOption(option, true);
+                myChart2.setOption(option, true);
+                myChart3.setOption(option, true);
             }
-        };
-        if (option && typeof option === "object") {
-            myChart0.setOption(option, true);
-            myChart1.setOption(option, true);
-            myChart2.setOption(option, true);
-            myChart3.setOption(option, true);
-        }
+        },0)
+        
     }
     chartsInit();
 
-    //resize图表
+    
+
+    $('.table1').resize(function () {
+        //resize图表
     var myChart0 = echarts.getInstanceByDom(document.getElementById("container0"));
     var myChart1 = echarts.getInstanceByDom(document.getElementById("container1"));
     var myChart2 = echarts.getInstanceByDom(document.getElementById("container2"));
     var myChart3 = echarts.getInstanceByDom(document.getElementById("container3"));
 
-    $('.table1').resize(function () {
         myChart0.resize();
         myChart1.resize();
         myChart2.resize();
@@ -739,24 +749,19 @@ HighAnalysis_selectAnlsType: {
         } else if (param == 6) {
             // 分析类型下拉框 选中处理数据
             analysisObjFun();
-            // if (!$scope.queryData.analysisType) {
-            //     $scope.analysObDataNew = null;
-            //     $scope.analysObDataNewDevice = null;
-            //     $scope.queryData.analysisObjectV = '请选择';
-            //     $scope.timeLat = null;
-            //     $scope.queryData.timeLat = '';
-            //     $scope.queryData.horizonIndexV = '请选择';
-            // } else {
-
-            // }
         } else if (param == 7) {
-            if ($scope.queryData.timeLat && myAjaxData.config.anlsType == 2) {
+            if (myAjaxData.config.anlsType == 2 && $scope.queryData.timeLat && $scope.analysNan != 1) {
                 // 分析指标弹出
                 $scope.analysIndexModel = true;
-            } else if (myAjaxData.config.anlsType == 3) {
+                $scope.$broadcast('analysOpen');
+            } else if (myAjaxData.config.anlsType == 3 && $scope.analysNan != 1) {
                 $scope.analysIndexModel = true;
+                $scope.$broadcast('analysOpen');
+            } else if (!$scope.queryData.timeLat) {
+                toaster.pop('error', '', '请选择时间纬度');
+            } else if ($scope.analysNan == 1) {
+                toaster.pop('error', '', '分析指标无数据');
             }
-            $scope.$broadcast('analysOpen');
         }
     }
 
@@ -781,18 +786,25 @@ HighAnalysis_selectAnlsType: {
             $scope.queryData.analysisObjectK = data.k;
             $scope.queryData.analysisObjectV = data.value;
             //对标分析-> 取dmsType
-            if ($scope.queryData.analysisType == 3) {
-                $scope.$broadcast('bench_dmsType', 1);
+            if ($scope.queryData.analysisType == 3 && data.k != 99) {
+                $scope.$broadcast('bench_dmsType', $scope.queryData.analysisType);
             }
             // 取时间纬度的数据
             if (data.isHistory) {
-                if ($scope.analysObDataNew) {
-                    $scope.analysObDataNew.map((item) => {
-                        if (item.k == $scope.queryData.analysisObjectK) {
-                            $scope.timeLat = item.ll;
-                        }
-                    })
-                }
+                setTimeout(()=>{
+                    if ($scope.queryData.analysisType != 3) {
+                        $scope.changeTime = 2;
+                        $scope.queryData.timeLat = myAjaxData.config.tableData[$scope.checkChart].timeLat;
+                    }
+                    if ($scope.analysObDataNew) {
+                        $scope.analysObDataNew.map((item) => {
+                            if (item.k == $scope.queryData.analysisObjectK) {
+                                $scope.timeLat = item.ll;
+                            }
+                        })
+                    }
+                },0)
+                
             } else {
                 $scope.queryData.timeLat = '';
                 if ($scope.analysObDataNew) {
@@ -822,7 +834,8 @@ HighAnalysis_selectAnlsType: {
         $scope.timeLat = v;
         //对标分析-> 取dmsType
         if ($scope.queryData.analysisType == 3) {
-            $scope.$broadcast('bench_dmsType', 2);
+            // debugger
+            $scope.$broadcast('bench_dmsType', $scope.queryData.analysisType);
         }
     })
 
@@ -830,6 +843,11 @@ HighAnalysis_selectAnlsType: {
     $scope.$on('horizonNan', (event, v) => {
         $scope.horizonNan = v.data;
     })
+    //分析指标没有数据的 标志符
+    $scope.$on('analysNan', (event, v) => {
+        $scope.analysNan = v.data;
+    })
+    
 
     //取消 新增后的回调
     $scope.analysisObjectModel = false;

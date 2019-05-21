@@ -145,7 +145,12 @@ ajaxData({
         });
 
         //获取历史数据
-        $scope.$on('alsObjHdata', () => {
+        $scope.$on('ctimeHdata', (event,v) => {
+            if(!v){
+                $scope.radioToSelect('日', 3);
+                $scope[key[$scope.radioIndex]] = [];
+                return;
+            }
             $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioName, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.dateType);
             $scope.radioIndex = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioIndex;
             $scope[key[$scope.radioIndex]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.checkData;
@@ -239,15 +244,15 @@ ajaxData({
                 return;
             }
             if ($scope.radioIndex == 4) {
-                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = $scope.newtimeGroupUser;
+                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify($scope.newtimeGroupUser));
             } else {
-                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = $scope[key[$scope.radioIndex]];
+                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify($scope[key[$scope.radioIndex]]));
             }
             //历史数据的set
-            parentmyAjaxData.config.countTime.radioIndex = JSON.parse(JSON.stringify($scope.radioIndex));
-            parentmyAjaxData.config.countTime.radioName = JSON.parse(JSON.stringify($scope.radioName));
-            parentmyAjaxData.config.countTime.dateType = JSON.parse(JSON.stringify($scope.dateType));
-            parentmyAjaxData.config.countTime.checkData = JSON.parse(JSON.stringify($scope[key[$scope.radioIndex]]));
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].radioName = $scope.radioName;
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].dateType = $scope.dateType;
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope[key[$scope.radioIndex]]));
             $scope.$emit('addCallback');
         }
     });
