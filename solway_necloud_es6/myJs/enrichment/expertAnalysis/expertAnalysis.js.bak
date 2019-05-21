@@ -76,9 +76,7 @@ HighAnalysis_selectAnlsType: {
     // 分析类型下拉框的数据获取
     $scope.HighAnalysis_selectAnlsType.subscribe(res => {
         $scope.selectData = res.body;
-        setTimeout(()=>{
-            analysisObjFun();
-        },1200)
+        analysisObjFun();
     });
 
     // 选中第一个下拉框 动态改变其他的下拉框
@@ -89,6 +87,7 @@ HighAnalysis_selectAnlsType: {
     //获取分析对象的数据
     function analysisObjFun() {
         //获取不同分析类型的数据
+        if (!$scope.selectData) return;
         var key;
         for (key in $scope.selectData) {
             if ($scope.queryData.analysisType == $scope.selectData[key].k) {
@@ -96,7 +95,6 @@ HighAnalysis_selectAnlsType: {
             }
         }
         //将设备 和 其他数据分离
-        // debugger
         $scope.analysObDataNew = $scope.analysObDataOld.filter((item) => {
             return item.k.substr(0, 1) != "4";
         })
@@ -255,7 +253,7 @@ HighAnalysis_selectAnlsType: {
 
     //分析指标发送 fdName
     $scope.$on('analysFds_fdName', (event, data) => {
-        $scope['analysfdName'+ $scope.checkChart]= data.fdName;
+        $scope['analysfdName'+ $scope.checkChart] = data.fdName;
     })
 
     var tableStyle = {
@@ -307,7 +305,7 @@ HighAnalysis_selectAnlsType: {
             fds: $scope.queryData.analysisType == 1 ? myAjaxData.config.fds[myAjaxData.config.checkChart] : myAjaxData.config.analysFds[myAjaxData.config.checkChart],
             sort: $scope.queryData.analysisType == 3 ? myAjaxData.config.benchSort[myAjaxData.config.checkChart] : null
         }
-        console.log(myAjaxData.config.analysFds)
+        // console.log(myAjaxData.config.analysFds)
         return dataJ;
         // $scope.ajaxParams[$scope.checkChart] = JSON.parse(JSON.stringify(dataJ));
     }
@@ -345,6 +343,7 @@ HighAnalysis_selectAnlsType: {
 
             myAjaxData.config.tableData[$scope.checkChart].alsObj = {
                 'alsObjk': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].analysisObjectK,
+                'dmsType': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].dmsType,
                 'equipCItem': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].equipChoiceItem,
                 'equipCIndex': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].equipChoiceIndex,
                 'checkData': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].checkData,
@@ -601,91 +600,96 @@ HighAnalysis_selectAnlsType: {
 
     //图表函数组
     function chartsInit() {
-        var myChart0 = echarts.init(document.getElementById("container0"));
-        var myChart1 = echarts.init(document.getElementById("container1"));
-        var myChart2 = echarts.init(document.getElementById("container2"));
-        var myChart3 = echarts.init(document.getElementById("container3"));
-        var option = null;
-        option = {
-            xAxis: {
-                name: '',
-                min: 0,
-                max: 100,
-                nameTextStyle: {
-                    color: '#fff',
-                    fontSize: 12
-                },
-                //改变x轴字体颜色为白色
-                axisLabel: {
-                    show: true,
-                    textStyle: {
-                        color: '#fff'
+        setTimeout(()=>{
+            var myChart0 = echarts.init(document.getElementById("container0"));
+            var myChart1 = echarts.init(document.getElementById("container1"));
+            var myChart2 = echarts.init(document.getElementById("container2"));
+            var myChart3 = echarts.init(document.getElementById("container3"));
+            var option = null;
+            option = {
+                xAxis: {
+                    name: '',
+                    min: 0,
+                    max: 100,
+                    nameTextStyle: {
+                        color: '#fff',
+                        fontSize: 12
+                    },
+                    //改变x轴字体颜色为白色
+                    axisLabel: {
+                        show: true,
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    //去掉x轴分隔线
+                    splitLine: {
+                        show: false
+                    },
+                    //设置轴线的属性
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(68, 150, 255, 1)'
+                        }
                     }
                 },
-                //去掉x轴分隔线
-                splitLine: {
-                    show: false
-                },
-                //设置轴线的属性
-                axisLine: {
-                    lineStyle: {
-                        color: 'rgba(68, 150, 255, 1)'
+                yAxis: {
+                    name: '',
+                    min: 0,
+                    max: 100,
+                    nameTextStyle: {
+                        color: '#fff',
+                        fontSize: 12
+                    },
+                    //改变y轴字体颜色为白色
+                    axisLabel: {
+                        show: true,
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    //设置y轴分隔线
+                    splitLine: {
+                        lineStyle: {
+                            color: 'rgba(68, 150, 255, 1)'
+                        }
+                    },
+                    //设置轴线的属性
+                    axisLine: {
+                        show: false
+                    },
+                    //去掉刻度线
+                    axisTick: {
+                        show: false
                     }
+                },
+                series: [],
+                grid: {
+                    top: "26%",
+                    right: "18%",
+                    bottom: "18%"
                 }
-            },
-            yAxis: {
-                name: '',
-                min: 0,
-                max: 100,
-                nameTextStyle: {
-                    color: '#fff',
-                    fontSize: 12
-                },
-                //改变y轴字体颜色为白色
-                axisLabel: {
-                    show: true,
-                    textStyle: {
-                        color: '#fff'
-                    }
-                },
-                //设置y轴分隔线
-                splitLine: {
-                    lineStyle: {
-                        color: 'rgba(68, 150, 255, 1)'
-                    }
-                },
-                //设置轴线的属性
-                axisLine: {
-                    show: false
-                },
-                //去掉刻度线
-                axisTick: {
-                    show: false
-                }
-            },
-            series: [],
-            grid: {
-                top: "26%",
-                right: "18%",
-                bottom: "18%"
+            };
+            if (option && typeof option === "object") {
+                myChart0.setOption(option, true);
+                myChart1.setOption(option, true);
+                myChart2.setOption(option, true);
+                myChart3.setOption(option, true);
             }
-        };
-        if (option && typeof option === "object") {
-            myChart0.setOption(option, true);
-            myChart1.setOption(option, true);
-            myChart2.setOption(option, true);
-            myChart3.setOption(option, true);
-        }
+        },0)
+        
     }
     chartsInit();
 
-    //resize图表
+    
+
+    $('.table1').resize(function () {
+        //resize图表
     var myChart0 = echarts.getInstanceByDom(document.getElementById("container0"));
     var myChart1 = echarts.getInstanceByDom(document.getElementById("container1"));
     var myChart2 = echarts.getInstanceByDom(document.getElementById("container2"));
     var myChart3 = echarts.getInstanceByDom(document.getElementById("container3"));
 
-    $('.table1').resize(function () {
         myChart0.resize();
         myChart1.resize();
         myChart2.resize();
@@ -745,28 +749,19 @@ HighAnalysis_selectAnlsType: {
         } else if (param == 6) {
             // 分析类型下拉框 选中处理数据
             analysisObjFun();
-            // if (!$scope.queryData.analysisType) {
-            //     $scope.analysObDataNew = null;
-            //     $scope.analysObDataNewDevice = null;
-            //     $scope.queryData.analysisObjectV = '请选择';
-            //     $scope.timeLat = null;
-            //     $scope.queryData.timeLat = '';
-            //     $scope.queryData.horizonIndexV = '请选择';
-            // } else {
-
-            // }
         } else if (param == 7) {
-            if ($scope.queryData.timeLat && $scope.analysNan != 1 && myAjaxData.config.anlsType == 2) {
+            if (myAjaxData.config.anlsType == 2 && $scope.queryData.timeLat && $scope.analysNan != 1) {
                 // 分析指标弹出
                 $scope.analysIndexModel = true;
+                $scope.$broadcast('analysOpen');
             } else if (myAjaxData.config.anlsType == 3 && $scope.analysNan != 1) {
                 $scope.analysIndexModel = true;
+                $scope.$broadcast('analysOpen');
             } else if (!$scope.queryData.timeLat) {
                 toaster.pop('error', '', '请选择时间纬度');
             } else if ($scope.analysNan == 1) {
                 toaster.pop('error', '', '分析指标无数据');
             }
-            $scope.$broadcast('analysOpen');
         }
     }
 
@@ -791,8 +786,8 @@ HighAnalysis_selectAnlsType: {
             $scope.queryData.analysisObjectK = data.k;
             $scope.queryData.analysisObjectV = data.value;
             //对标分析-> 取dmsType
-            if ($scope.queryData.analysisType == 3) {
-                $scope.$broadcast('bench_dmsType', 1);
+            if ($scope.queryData.analysisType == 3 && data.k != 99) {
+                $scope.$broadcast('bench_dmsType', $scope.queryData.analysisType);
             }
             // 取时间纬度的数据
             if (data.isHistory) {
@@ -839,7 +834,8 @@ HighAnalysis_selectAnlsType: {
         $scope.timeLat = v;
         //对标分析-> 取dmsType
         if ($scope.queryData.analysisType == 3) {
-            $scope.$broadcast('bench_dmsType', 2);
+            // debugger
+            $scope.$broadcast('bench_dmsType', $scope.queryData.analysisType);
         }
     })
 
