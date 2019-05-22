@@ -65,17 +65,27 @@ ajaxData({
                 $scope.analysObDataNew = arr;
                 $scope.analysObDataNewDevice = data.analysObDataNewDevice;
                 if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
-                    data.analysObDataNewDevice.forEach((item, i) => {
-                        $scope.objectDevice[i] = [];
-                    })
+                    // data.analysObDataNewDevice.forEach((item, i) => {
+                    //     $scope.objectDevice[i] = [];
+                    // })
                     $scope.radioDevice();
                 } else if (parentmyAjaxData.config.tableDataTrue[$scope.checkChart]&&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)){
-                    data.analysObDataNewDevice.forEach((item, i) => {
-                        $scope.objectDevice[i] = [];
-                    })
+                    // data.analysObDataNewDevice.forEach((item, i) => {
+                    //     $scope.objectDevice[i] = [];
+                    // })
                     $scope.radioDevice();
                 }
                 
+            }
+        })
+
+        //获取历史数据
+        $scope.$on('ctimeHdata', (event,v) => {
+            if(!v){
+                $scope[key[$scope.analysisObjectK]] = [];
+                $scope.analysObDataNewDevice.forEach((item, i) => {
+                    $scope.objectDevice[i] = [];
+                })
             }
         })
 
@@ -92,7 +102,7 @@ ajaxData({
 
             $scope.analysisObjectK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.alsObjk;
             $scope[key[$scope.analysisObjectK]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.checkData;
-            debugger
+            // debugger
             console.log($scope[key[$scope.analysisObjectK]])
 
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5) {
@@ -450,6 +460,13 @@ ajaxData({
         $scope.objectGroup = [];
         $scope.objectType = [];
         $scope.objectFault = [];
+        setTimeout(()=>{
+            // debugger
+            $scope.analysObDataNewDevice.forEach((item, i) => {
+                $scope.objectDevice[i] = [];
+            })
+        },0)
+        
 
         const key = {
             101: 'objectFault',  //故障类型
@@ -960,9 +977,9 @@ ajaxData({
             parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].radioItem = $scope.radioItem;
             parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex = $scope.equipChoiceIndex;
 
-            parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope[key[$scope.analysisObjectK]]));
-            console.log($scope[key[$scope.analysisObjectK]] === parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData)
-            // parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData = $scope[key[$scope.analysisObjectK]].concat();
+            // parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope[key[$scope.analysisObjectK]]));
+            parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData = [...new Set($scope[key[$scope.analysisObjectK]])]
+
             busiIdToName();
             $scope.$emit('addCallback');
         }
