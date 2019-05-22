@@ -110,12 +110,12 @@ ajaxData(
     $scope.freeRptPage.beforGetData = () => {
         if (!$scope.initComplete) return;
         $scope.column = [];
-        const { _dateType, _dateTime, keywords } = $scope;
+        const { _dateType, _dateTime = {}, keywords } = $scope;
         $scope.freeRptPage.getData({
             pageIndex: 0,
             pageSize: 10,
-            dateType: [3, 2, 1][_dateType],
-            queryDate: _dateTime.showDate,
+            dateType: [3, 2, 1, 0, 4][_dateType],
+            queryDate: _dateType === 4 ? '' : _dateTime.showDate,
             keywords
         });
     };
@@ -171,6 +171,8 @@ ajaxData(
                 }
             },
         ];
+    }, res => {
+        $scope.column = [];
     });
 
     // 订阅报表列表 接口返回

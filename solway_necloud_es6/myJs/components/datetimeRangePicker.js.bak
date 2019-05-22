@@ -1,28 +1,12 @@
-
-/**
- * [日历时间]    input样式手动设置
- * dateTime: '=',       初始显示时间   dateTime 添加shouDate属性（显示在页面的字符串）
-    endDate: '=',       结束时间
-    startDate: '=',     开始时间
-    calendarType: '@'   日历类型   (yyyy-MM-dd   yyyy-MM  yyyy等)
-    showArrow           是否显示左右箭头
-    week                周  需设  calendar-type 为  yyyy-MM-dd
-    callback            dateTime改变之后的回调函数(oldValue, newValue)
-    input               是否可手动输入   默认false （不可手动输入）
- */
-
 app.directive('datetimeRange', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeout, $q) => ({
     restrict: 'E',
     transclude: !0,
     replace: !0,
     scope: {
-        dateTime: '=',
+        dateRange: '=',
         endDate: '=',
         startDate: '=',
-        calendarType: '@',
         showArrow: '=',
-        week: '@',
-        input: '=',
         beforeCreate: '=',
         created: '=',
         beforeMount: '=',
@@ -35,105 +19,33 @@ app.directive('datetimeRange', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $
         inputStyle: '=',
     },
     template: `
-    <div class="calendar" style="position:relative;">
-    <style>
-        .calendar span {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            line-height: 30px;
-            text-align: center;
-            background-color: #1cb09a;
-            vertical-align: middle;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .calendar span.disabled {
-            opacity: 0.5;
-        }
-        .calendar span i {
-            font-size: 30px;
-            color: #fff;
-        }
-        .calendar span.clearable {
-            position:absolute;
-            font-size:20px;
-            right:0;
-            top:0;
-            width:30px;
-            height:100%;
-            line-height:1;
-            opacity:0;
-            color:red;
-            background:rgba(255,255,255,.5);
-            border-radius: 0px;
-        }
-        .calendar:hover span.clearable{
-            opacity: 1;
-        }
-    </style>
-        <span title="清空" ng-if="clearable && dateTime.showDate" ng-click="clearUp();" class="clearable">x</span>
-        <span ng-show="showArrow" ng-click="changeDateTime(-1)"><i class="fa fa-angle-left"></i></span>
-        <input type="text" style="min-width: {{week ? '155' : '100'}}px;{{inputStyle}}">
-        <span ng-show="showArrow" ng-click="changeDateTime(1)"><i class="fa fa-angle-right"></i></span>
-        <p ng-if="week" style="position:absolute;left: 40px;right: 40px;top: 0;bottom: 0;margin: 0;text-align: center;background-color: #fff;pointer-events: none;">
-            {{weekStart + '至' + weekEnd}}
-        </p>
+    <div class="datetimeRange" style="position:relative;display:inline-block;">
+        <span ng-show="showArrow" ng-click="changeDateTime(-1)" class="dateArrow" style="cursor:pointer;"><i class="fa fa-angle-left"></i></span>
+        <calendar 
+            style="display:inline-block;"
+            calendar-type="yyyy-MM-dd" 
+            end-date="endDate"
+            show-arrow="false"
+            updated="myUpdated"
+            input-style="inputStyle"
+            date-time="startDate"></calendar>
+        <span>至</span>
+        <calendar 
+            style="display:inline-block;"
+            calendar-type="yyyy-MM-dd" 
+            start-date="startDate"
+            show-arrow="false"
+            updated="myUpdated"
+            input-style="inputStyle"
+            date-time="endDate"></calendar>
+        <span ng-show="showArrow" ng-click="changeDateTime(1)" class="dateArrow" style="cursor:pointer;"><i class="fa fa-angle-right"></i></span>
     </div>`,
     link($scope, $element) {
         $scope.beforeMount && $scope.beforeMount($scope, $element)
-        const calendarMap = {
-            'yyyy-MM-dd hh:mm:ss': {},
-            'yyyy-MM-dd hh:mm': {},
-            'yyyy-MM-dd hh': {
-                minView: 1,
-            },
-            'yyyy-MM-dd': {
-                minView: 2,
-            },
-            'yyyy-MM': {
-                minView: 3,
-                startView: 3,
-            },
-            'yyyy': {
-                minView: 4,
-                startView: 4,
-            }
-        }
-        $scope.randomId = (Math.random() + '').substr(2, 10)
-        const $input = $($element).find('input').attr('id', $scope.randomId)
-        $scope.input || $input.on('focus', () => $input.blur())
-        $ocLazyLoad.load([
-            'vendor/bootstrap/css/bootstrap-datetimepicker.min.css',
-            'vendor/bootstrap/js/bootstrap-datetimepicker.js'
-        ]).then(() => $ocLazyLoad.load([
-            'vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
-            'vendor/libs/moment.min.js'
-        ])).then(() => {
-            const showDate = Object.is($scope.dateTime.showDate, '') ? '' : $scope.dateTime.Format($scope.calendarType)
-            $input.val(showDate)
-            $scope.dateTime = new Date($scope.dateTime)
-            $scope.dateTime.showDate = showDate
-            $('#' + $scope.randomId).datetimepicker({
-                format: 'yyyy-mm-dd hh:ii:ss'.substr(0, $scope.calendarType.length),
-                language: 'zh-CN',
-                todayHighlight: !0,
-                todayBtn: !0,
-                autoclose: !0,
-                endDate: $scope.endDate || new Date,
-                startDate: $scope.startDate || new Date('1970', '01', '01'),
-                ...calendarMap[$scope.calendarType],
-                initialDate: $scope.dateTime,
-                pickerPosition: "bottom-left"
-            }).on('hide', ev => {
-                $scope.dateTime = new Date(ev.date.valueOf() - 28800000)
-                $scope.dateTime.showDate = $scope.dateTime.Format($scope.calendarType)
-                $scope.showArrow && $scope.disabled()
-                $scope.$apply()
-            })
-            $scope.showArrow && $scope.disabled()
+        
+        $timeout(() => {
             $scope.mounted && $scope.mounted($scope, $element)
-        })
+        },0)
     },
     controller($scope, $element) {
         $scope.beforeCreate && $scope.beforeCreate($scope, $element)
@@ -142,68 +54,19 @@ app.directive('datetimeRange', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $
             $timeout(() => d.resolve(), t)
             return d.promise
         }
-        if ($scope.week) $scope.calendarType = 'yyyy-MM-dd'
-        if ($scope.calendarType.length > 10) $scope.showArrow = false
-        if (Object.is(void 0, $scope.dateTime.showDate)) $scope.dateTime.showDate = $scope.dateTime.Format($scope.calendarType)
-        let showDate = $scope.dateTime.showDate
-        $scope.disabled = (noChange) => {
-            const startDate = $scope.startDate || new Date('1970', '01', '01'),
-                endDate = $scope.endDate || new Date,
-                startDisabled = $scope.week ? (+moment($scope.dateTime).add(-$scope.dateTime.getDay() + 1, 'd')._d <= +startDate) : (+moment([$scope.dateTime.getFullYear(), $scope.dateTime.getMonth(), $scope.dateTime.getDate()].slice(0, $scope.calendarType.split('-').length))._d <= +moment([startDate.getFullYear(), startDate.getMonth(), startDate.getDate()].slice(0, $scope.calendarType.split('-').length))._d),
-                nextDisabled = $scope.week ? (+moment($scope.dateTime).add(7 - $scope.dateTime.getDay(), 'd')._d >= +endDate) : (+$scope.dateTime >= +moment([endDate.getFullYear(), endDate.getMonth(), endDate.getDate()].slice(0, $scope.calendarType.split('-').length))._d)
-            let num
-            if (startDisabled) {
-                if (noChange) num = -1
-                else $element.find('.fa-angle-left').parent().addClass('disabled')
-            } else if (!noChange) $element.find('.fa-angle-left').parent().removeClass('disabled')
-            if (nextDisabled) {
-                if (noChange) num = Object.is(num, -1) ? 0 : 1
-                else $element.find('.fa-angle-right').parent().addClass('disabled')
-            } else if (!noChange) $element.find('.fa-angle-right').parent().removeClass('disabled')
-            return num
-        }
-        $scope.clearUp = () => {
-            $('#' + $scope.randomId).val('')
-            $scope.dateTime.showDate = ''
-            $scope.updated && $scope.updated($scope, $element)
-        }
-        let changeCount = 0
-        $scope.$watch('dateTime', (newValue, oldValue) => {
-            if (Object.is(+oldValue, +newValue) && !Object.is(1, ++changeCount) && (!$scope.week)) return
+        
+        $scope.myUpdated = () => {
             $scope.beforeUpdate && $scope.beforeUpdate($scope, $element)
-            if ($scope.week && window.moment) {
-                if (+newValue > +($scope.endDate || new Date)) $scope.dateTime = oldValue
-                $scope.showArrow && showDate && $scope.disabled()
-                const weekNum = moment($scope.dateTime).day() || 7
-                $scope.weekStart = moment($scope.dateTime).add(-weekNum + 1, 'd').format('YYYY-MM-DD')
-                const weekEndDate = moment($scope.dateTime).add(6 - weekNum + 1, 'd')._d
-                $scope.weekEnd = (+weekEndDate > +($scope.endDate || new Date) ? ($scope.endDate || new Date) : weekEndDate).Format('yyyy-MM-dd')
-                $scope.dateTime.weekStart = $scope.weekStart
-                $scope.dateTime.weekEnd = $scope.weekEnd
-            }
-            showDate = showDate && $scope.dateTime.Format($scope.calendarType)
-            $element.find('input').val(showDate)
-            $scope.dateTime.showDate = showDate
-            showDate = $scope.dateTime.Format($scope.calendarType)
-            window.moment && $scope.showArrow && $scope.disabled()
+            
+            
             $scope.updated && $scope.updated($scope, $element)
-        })
-        $scope.$watch('startDate', (newValue, oldValue) => {
-            if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setStartDate', newValue && newValue.Format($scope.calendarType))
-        })
-        $scope.$watch('endDate', (newValue, oldValue) => {
-            if (!Object.is(+newValue, +oldValue)) $('#' + $scope.randomId).datetimepicker('setEndDate', newValue && newValue.Format($scope.calendarType))
-        })
+        };
+        
         $scope.changeDateTime = async num => {
-            if ([num, 0].includes($scope.disabled(!0))) return
-            if ($scope.week) num *= Object.is($scope.dateTime.getDay(), 0) ? 1 : 8 - $scope.dateTime.getDay()
-            $scope.dateTime = moment($scope.dateTime).add(num, $scope.calendarType.substr(-1, 1))._d
-            await $scope.timeout(0)
-            $scope.disabled()
+            
         }
         $element.on('$destroy', async () => {
             $scope.beforeDestroy && $scope.beforeDestroy($scope, $element)
-            $('#' + $scope.randomId).datetimepicker('remove')
             await $scope.timeout(0)
             $scope.destroyed && $scope.destroyed($scope, $element)
         })
