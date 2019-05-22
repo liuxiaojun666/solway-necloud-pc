@@ -58,7 +58,8 @@ ajaxData({
                 return `
                 <div class="clearfix">
                     <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" ></i>
-                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                    <i class="iconfont copy icon-copy" style="font-size:20px;color:#1ddabe;margin-right: 15px;"></i>
+                    <i class="iconfont delete icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
                 </div>
                 `
             },
@@ -81,6 +82,9 @@ ajaxData({
         if(event.target.className.includes('icon-bianji-copy')) {
             $scope.editProtocol = true;
             $scope.$broadcast('editProtocolBroad',{'item':item});
+        }else if(event.target.className.includes('icon-copy')) {
+            $scope.editProtocol = true;
+            $scope.$broadcast('editProtocolBroad',{'item':item,'copyId':item.id});
         }else if(event.target.className.includes('icon-shanchu1')) {
             $solway.confirm({ message: '确定删除此条数据？' }, () => {
                 deleteData([item.id])
