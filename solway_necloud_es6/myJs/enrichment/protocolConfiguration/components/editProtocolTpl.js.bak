@@ -92,13 +92,14 @@ ajaxData({
 
         let reg = /^0[x,X][0-9a-fA-F]{0,}$/;
         let regWord = /[a-z,A-Z,\uFF00-\uFFEF,\u4E00-\u9FA5\uF900-\uFA2D]+/;
+        let integerReg1 = /^-?[0-9]\d*$/; //整数
 
         $scope.setTitleFault = () =>{
             const setTitleMap = {'1':'故障代码','2':'故障索引'}
             $scope.faultTitle = setTitleMap[$scope.formData['faultdiagnosistype']]
             $scope.columnFaultCode.splice(1,1,{
                 title: $scope.faultTitle,
-                dataIndex: 'faultCode',
+                dataIndex: ($scope.formData['faultdiagnosistype'] == '1')?'faultCode':'faultCodeIndex',
                 sort: !0,
                 align: 'center'
             })
@@ -286,12 +287,7 @@ ajaxData({
             $scope.tabActive = 'statusCode';//tab默认显示状态码
             if (item) {
                 $scope.deviceType = item.deviceType;
-                $scope.showFaultTab = true;//编辑时，可现实故障码tab
-                if (data.copyId) {
-                    $scope.formData['copyId'] = data.copyId;
-                } else {
-                    $scope.editDisabled = true;
-                }
+                $scope.showFaultTab = true;//编辑时，可显示故障码tab等
                 $scope.formData = {
                     id: item.id,
                     faultdiagnosistype: item.faultdiagnosistype,
@@ -303,6 +299,16 @@ ajaxData({
                     prostr: item.prostr,
                     statusdiagnosistype: item.statusdiagnosistype
                 }
+
+                if (data.copyId) {
+                    $scope.formData['copyId'] = data.copyId;
+                    $scope.formData['id'] = '';
+                    $scope.formData['name'] = '';
+                    $scope.showFaultTab = false;
+                } else {
+                    $scope.editDisabled = true;
+                }
+                
                 getStatusCodeList(item.id);
                 $scope.changemanufacturer();
                 await myAjaxData.timeout(0);
@@ -317,7 +323,7 @@ ajaxData({
                 
                 $scope.statusdata = [];
                 $scope.count = 0;
-                $scope.statusdata.push({ 'serNum': $scope.count, "faultcodeindex": "0", "faultcode": "", "faultlevel": "", "faultdesc": "" });
+                $scope.statusdata.push({ 'serNum': $scope.count, "faultcodeindex": "", "faultcode": "", "faultlevel": "", "faultdesc": "" });
                 $scope.count++;
             }
 
@@ -360,6 +366,7 @@ ajaxData({
                         deleteExistFaultData();
                         $scope.formData.faultdiagnosistype = type;
 					} else {
+                        if($scope.formData.faultdiagnosistype == type) return;
                         $scope.formData.faultdiagnosistype = (type=='1'?'2':'1');
                         $("input[name='faultdiagnosistype']").eq($scope.formData.faultdiagnosistype-1).prop("checked",true);
 					}
@@ -374,7 +381,7 @@ ajaxData({
 
         //增加一行
         $scope.addLine = () => {
-            $scope.statusdata.push({ 'serNum': $scope.count, "faultcodeindex": "0", "faultcode": "", "faultlevel": "", "faultdesc": "" });
+            $scope.statusdata.push({ 'serNum': $scope.count, "faultcodeindex": "", "faultcode": "", "faultlevel": "", "faultdesc": "" });
             $scope.count++;
         }
 
@@ -408,15 +415,28 @@ ajaxData({
             }
 
             for(let i=0;i<$scope.statusdata.length;i++){
-                if(!$scope.statusdata[i].faultcode || !$scope.statusdata[i].faultlevel) {
-                    toaster.pop('error', '', '状态码和状态分类均不能为空')
-                    return;
-                }
-                if(reg.test($scope.statusdata[i].faultcode)){//16进制
-                    $scope.statusdata[i].faultcode = parseInt($scope.statusdata[i].faultcode,16)
-                }else if(regWord.test($scope.statusdata[i].faultcode)){
-                    toaster.pop('error','','状态码必须是一个数字');
-                    return;
+                if($scope.formData['statusdiagnosistype'] == '1'){
+                    if(!$scope.statusdata[i].faultcode || !$scope.statusdata[i].faultlevel) {
+                        toaster.pop('error', '', '状态码和状态分类均不能为空')
+                        return;
+                    }
+                    if(reg.test($scope.statusdata[i].faultcode)){//16进制
+                        $scope.statusdata[i].faultcode = parseInt($scope.statusdata[i].faultcode,16)
+                    }else if(regWord.test($scope.statusdata[i].faultcode)){
+                        toaster.pop('error','','状态码必须是一个数字');
+                        return;
+                    }
+                    $scope.statusdata[i].faultcodeindex = '0';
+                }else if($scope.formData['statusdiagnosistype'] == '2'){
+                    if(!$scope.statusdata[i].faultlevel) {
+                        toaster.pop('error', '', '状态分类均不能为空')
+                        return;
+                    }
+                    if(!integerReg1.test(Number($scope.statusdata[i].faultcodeindex))){
+                        toaster.pop('error','','索引位置必须是一个整数');
+                        return;
+                    }
+                    $scope.statusdata[i].faultcode = '1';
                 }
             }
             $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
