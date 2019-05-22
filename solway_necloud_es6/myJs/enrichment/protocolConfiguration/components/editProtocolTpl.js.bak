@@ -92,6 +92,7 @@ ajaxData({
 
         let reg = /^0[x,X][0-9a-fA-F]{0,}$/;
         let regWord = /[a-z,A-Z,\uFF00-\uFFEF,\u4E00-\u9FA5\uF900-\uFA2D]+/;
+        let integerReg1 = /^-?[0-9]\d*$/; //整数
 
         $scope.setTitleFault = () =>{
             const setTitleMap = {'1':'故障代码','2':'故障索引'}
@@ -427,12 +428,12 @@ ajaxData({
                     }
                     $scope.statusdata[i].faultcodeindex = '0';
                 }else if($scope.formData['statusdiagnosistype'] == '2'){
-                    if(!$scope.statusdata[i].faultcodeindex || !$scope.statusdata[i].faultlevel) {
-                        toaster.pop('error', '', '索引位置和状态分类均不能为空')
+                    if(!$scope.statusdata[i].faultlevel) {
+                        toaster.pop('error', '', '状态分类均不能为空')
                         return;
                     }
-                    if(regWord.test($scope.statusdata[i].faultcodeindex)){
-                        toaster.pop('error','','索引位置必须是一个数字');
+                    if(!integerReg1.test(Number($scope.statusdata[i].faultcodeindex))){
+                        toaster.pop('error','','索引位置必须是一个整数');
                         return;
                     }
                     $scope.statusdata[i].faultcode = '1';
