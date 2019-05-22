@@ -17,10 +17,13 @@ app.directive('datetimeRange', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $
         destroyed: '=',
         clearable: '=',
         inputStyle: '=',
+        step: '=',
+        start: '=',
+        stop: '=',
     },
     template: `
     <div class="datetimeRange" style="position:relative;display:inline-block;">
-        <span ng-show="showArrow" ng-click="changeDateTime(-1)" class="dateArrow" style="cursor:pointer;"><i class="fa fa-angle-left"></i></span>
+        <span ng-show="showArrow" ng-click="!startDisabled && changeDateTime(-1)" ng-class="{'disabled': startDisabled}" class="dateArrow" style="cursor:pointer;"><i class="fa fa-angle-left"></i></span>
         <calendar 
             style="display:inline-block;"
             calendar-type="yyyy-MM-dd" 
@@ -38,38 +41,51 @@ app.directive('datetimeRange', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $
             updated="myUpdated"
             input-style="inputStyle"
             date-time="endDate"></calendar>
-        <span ng-show="showArrow" ng-click="changeDateTime(1)" class="dateArrow" style="cursor:pointer;"><i class="fa fa-angle-right"></i></span>
+        <span ng-show="showArrow" ng-click="!endDisabled && changeDateTime(1)" ng-class="{'disabled': endDisabled}" class="dateArrow" style="cursor:pointer;"><i class="fa fa-angle-right"></i></span>
     </div>`,
     link($scope, $element) {
-        $scope.beforeMount && $scope.beforeMount($scope, $element)
+        $scope.beforeMount && $scope.beforeMount($scope, $element);
         
         $timeout(() => {
-            $scope.mounted && $scope.mounted($scope, $element)
-        },0)
+            $scope.mounted && $scope.mounted($scope, $element);
+        },0);
     },
     controller($scope, $element) {
-        $scope.beforeCreate && $scope.beforeCreate($scope, $element)
+        $scope.beforeCreate && $scope.beforeCreate($scope, $element);
         $scope.timeout = t => {
-            const d = $q.defer()
-            $timeout(() => d.resolve(), t)
-            return d.promise
-        }
+            const d = $q.defer();
+            $timeout(() => d.resolve(), t);
+            return d.promise;
+        };
         
         $scope.myUpdated = () => {
-            $scope.beforeUpdate && $scope.beforeUpdate($scope, $element)
+            $scope.beforeUpdate && $scope.beforeUpdate($scope, $element);
+
+            const {start = '1970-01-01', stop = (new Date).Format('yyyy-MM-dd'), startDate, endDate} = $scope;
+            $scope.startDisabled = startDate.showDate <= start;
+            $scope.endDisabled = endDate.showDate >= stop;
             
-            
-            $scope.updated && $scope.updated($scope, $element)
+            $scope.updated && $scope.updated($scope, $element);
         };
         
         $scope.changeDateTime = async num => {
-            
-        }
+            $scope.startDate = moment($scope.startDate).add(num * $scope.step, 'd')._d;
+
+            const endDate = moment($scope.endDate).add(num * $scope.step, 'd')._d;
+            // if (endDate.Format('yyyy-MM-dd') < $scope.endDate.showDate) {
+            //     $scope.endDate = new Date(($scope.stop || (new Date).Format('yyyy-MM-dd')).split('-'))
+            // }else {
+            //     $scope.endDate = endDate;
+            // }
+            $scope.endDate = endDate;
+
+        };
+
         $element.on('$destroy', async () => {
-            $scope.beforeDestroy && $scope.beforeDestroy($scope, $element)
-            await $scope.timeout(0)
-            $scope.destroyed && $scope.destroyed($scope, $element)
-        })
-        $scope.created && $scope.created($scope, $element)
+            $scope.beforeDestroy && $scope.beforeDestroy($scope, $element);
+            await $scope.timeout(0);
+            $scope.destroyed && $scope.destroyed($scope, $element);
+        });
+        $scope.created && $scope.created($scope, $element);
     }
 })])
