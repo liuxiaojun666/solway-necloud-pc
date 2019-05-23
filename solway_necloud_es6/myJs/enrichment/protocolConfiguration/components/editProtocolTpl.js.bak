@@ -159,8 +159,10 @@ ajaxData({
             });
 
             if ($scope.deviceType == '17' || $scope.deviceType == '18') {//风电状态列表
+                $scope.changeJudgeType('1')
                 getStatusTypeList('wind');
             } else {//光伏
+                $scope.changeJudgeType('2')
                 getStatusTypeList('solar');
             }
         }
@@ -316,7 +318,7 @@ ajaxData({
                 $scope.changeProduct();
             } else {
                 $scope.showFaultTab = false;
-
+                $scope.stationType = '';
                 $scope.formData.isdefault = '1';
                 $scope.formData.statusdiagnosistype = '2';
                 $scope.formData.faultdiagnosistype = '2';//新增时，不操作故障码，默认传2
@@ -441,12 +443,19 @@ ajaxData({
             }
             $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
             $scope.formData['isdefault'] = $('input[name="isdefault"]:checked').val();
-
             $scope.updateProtocol.getData($scope.formData).then(res => {
                 if (res.id) {
                     if(noCallback) return;
                     toaster.pop('success', '', '保存成功');
-                    $scope.$emit('editCallback');
+                    if($scope.formData.id){
+                        getStatusCodeList($scope.formData.id);
+                    }else{
+                        getStatusCodeList(res.protocalId);
+                    }
+                    
+                    $scope.showFaultTab = true;
+                    $scope.editDisabled = true;
+                    // $scope.$emit('editCallback');
                 } else {
                     toaster.pop('error', '', '保存失败')
                 }
@@ -554,6 +563,7 @@ ajaxData({
                     templateId:$scope.measureTempId
                 }).then(res=>{
                     if(res.code == 0){
+                        getExistMeasurePoints();
                         toaster.pop('success','',res.msg);
                     }else{
                         toaster.pop('error','',res.msg);
