@@ -110,12 +110,12 @@ ajaxData(
     $scope.freeRptPage.beforGetData = () => {
         if (!$scope.initComplete) return;
         $scope.column = [];
-        const { _dateType, _dateTime = {}, keywords } = $scope;
+        const { _dateType, _dateTime = {}, keywords, _weekTimeStart, _weekTimeEnd } = $scope;
         $scope.freeRptPage.getData({
             pageIndex: 0,
             pageSize: 10,
-            dateType: [3, 2, 1, 0, 4][_dateType],
-            queryDate: _dateType === 4 ? '' : _dateTime.showDate,
+            dateType: [4, 2, 1, 0, 3][_dateType],
+            queryDate: _dateType === 4 ? _weekTimeStart.showDate + ',' + _weekTimeEnd.showDate : _dateTime.showDate,
             keywords
         });
     };
@@ -171,7 +171,7 @@ ajaxData(
                 }
             },
         ];
-    }, res => {
+    }, () => {
         $scope.column = [];
     });
 
@@ -244,6 +244,7 @@ ajaxData(
         await myAjaxData.timeout(0);
         $scope.rptTplList.res.body = res.body.map(v => ({
             ...v,
+            weekDateArr: v.startDate.split(':').join().split(','),
             dateArr: myAjaxData.config.getDateArr(v.reportType, v.startDate),
         }));
         $scope.$apply();
@@ -367,10 +368,15 @@ ajaxData(
 
     // 新增模板
     $scope.uploadFile = () => {
+        const { week, weekTimeHour, weekTimeMinute, reportType } = $scope.newTempleteObj;
+        if (reportType == 3) $scope.newTempleteObj.startDate = (weekTimeHour || '08') + ':' + (weekTimeMinute || '00') + ',' + (week || 1)
         $scope.insertRptTpl.getData({
             ...$scope.newTempleteObj,
             dateArr: null,
             nullExcelFile: null,
+            week: null,
+            weekTimeHour: null,
+            weekTimeMinute: null,
             comid: $scope.powerStations.res.comList.filter(obj => obj.id == $scope.newTempleteObj.sid)[0].comId
         }).then(res => {
             if (res.code !== 0) return;

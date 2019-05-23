@@ -91,13 +91,13 @@ ajaxData(
         $scope.tabIndex = index;
         historicalRecord.set({ tab2Index: index });
         $scope.timeType = [null, 1, 2, 3, 4][$scope.tab.res.body[$scope.timeRange].reportType];
-        const { timeType, _dateTime, dataType, weekTimeStart } = $scope;
+        const { timeType, _dateTime, dataType, _weekTimeStart, _weekTimeEnd } = $scope;
         return $scope.view.getData({
             dateType: timeType,
             subTabId: $scope.tab.res.body[$scope.timeRange].subTabs[index].id,
             style: 0,
             useSt: dataType === 0 ? 1 : 0,
-            date: timeType === 3 ? weekTimeStart.showDate + ',' + _dateTime.showDate : _dateTime.showDate
+            date: timeType === 3 ? _weekTimeStart.showDate + ',' + _weekTimeEnd.showDate : _dateTime.showDate
         });
     };
 

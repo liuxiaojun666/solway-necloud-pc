@@ -45,7 +45,8 @@ ajaxData({
         $scope._dateTime = dateTime;
         $scope._dateType = dateType;
         $scope.timeRange = timeRange;
-        $scope.weekTimeStart = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
+        $scope.weekTimeStart = new Date(dateTime.getTime() - 1000 * 60 * 60 * 24 * 7);
+        $scope.weekTimeEnd = new Date(dateTime.getTime());
         $scope.theme = theme;
         $scope.themeDetail = `tpl/enrichment/dataReportSummary/components/theme${theme}.html${$scope.stamp}`;
         if (!stationData) historicalRecord.set({ dateType, dateTime });
@@ -82,7 +83,10 @@ ajaxData({
         $scope._dateTime = dateTime;
     };
 
-    $scope.weekUpdated = () => {
+    $scope.weekUpdated = (scope) => {
+        if (!scope.startDate.showDate || !scope.endDate.showDate) return;
+        $scope._weekTimeStart = scope.startDate;
+        $scope._weekTimeEnd = scope.endDate;
         $scope.dateUpdated($scope._dateType, $scope._dateTime);
     };
 
