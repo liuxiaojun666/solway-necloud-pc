@@ -179,6 +179,13 @@
     if ((location.host.split(':')[1] + '').indexOf('88') >= 0) {
         window.stamp = '?_=' + Date.now();
         document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
+        setTimeout(() => {
+            window.LiveReload.close = function () {
+                LiveReload.reloader.reloadPage = function () {
+                    return;
+                };
+            };
+        }, 1000);
     }
 </script>
 
