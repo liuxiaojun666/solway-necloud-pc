@@ -1,11 +1,5 @@
 ajaxData(
     {
-        // info
-        analysis_wp_station_st_month_info: {
-            name: 'GETanalysis_wp_station_st_month_info',
-            data: {},
-            later: true
-        },
         // 时间 列表
         analysis_wp_station_st_month_timelist: {
             name: 'GETanalysis_wp_station_st_month_timelist',
@@ -34,11 +28,17 @@ ajaxData(
             later: true,
             onlyLatest: true
         },
+        // 查设备型号
+        queryProducts: {
+            name: 'GETqueryProducts',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
     }, {
         __serviceName__: 'runningStateStationMonthService',
     }
 )('runningStateStationMonthCtrl', ['$scope', 'runningStateStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
-    $('#timeRange > span').hide();
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -95,20 +95,13 @@ ajaxData(
     };
 
     // 接口请求
-    $scope.diffGetData = async (getInfo) => {
+    $scope.diffGetData = async () => {
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
-        setDataNull(getInfo);
+        setDataNull();
         const { showShape, dateTime, tabIndex, dateType, dataType } = $scope;
         if (dateType !== 1) return;
         if (dataType !== 0) return;
-        if (getInfo) {
-            $scope.analysis_wp_station_st_month_info.getData({
-                queryCode: 'analysis_wp_station_st_month_info',
-                queryType: 3,
-                date: dateTime.showDate
-            });
-        }
         if (tabIndex === 0 && showShape === 'list') {
             $scope.analysis_wp_station_st_month_timelist.getData({
                 queryCode: 'analysis_wp_station_st_month_timelist',
@@ -122,16 +115,32 @@ ajaxData(
                 date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'list') {
+            if (!$scope.queryProducts.res) {
+                const res = await $scope.queryProducts.getData({
+                    deviceType: 18
+                });
+                $scope.analysis_wp_station_st_month_devicelist.productId = res.body[0].productId;
+                $scope.$apply();
+            }
             $scope.analysis_wp_station_st_month_devicelist.getData({
                 queryCode: 'analysis_wp_station_st_month_devicelist',
                 queryType: 3,
-                date: dateTime.showDate
+                date: dateTime.showDate,
+                productid: $scope.analysis_wp_station_st_month_devicelist.productId
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
+            if (!$scope.queryProducts.res) {
+                const res = await $scope.queryProducts.getData({
+                    deviceType: 18
+                });
+                $scope.analysis_wp_station_st_month_devicelist.productId = res.body[0].productId;
+                $scope.$apply();
+            }
             $scope.analysis_wp_station_st_month_deviceline.getData({
                 queryCode: 'analysis_wp_station_st_month_deviceline',
                 queryType: 3,
-                date: dateTime.showDate
+                date: dateTime.showDate,
+                productid: $scope.analysis_wp_station_st_month_devicelist.productId
             });
         }
     };
@@ -177,20 +186,38 @@ ajaxData(
                 }
             },
             {
-                title: '高效设备' + '(台)',
-                dataIndex: 'high_count',
+                title: '停待机' + '(' + res.body.units.stop_st_r + ')',
+                dataIndex: 'stop_st_r',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '正常设备' + '(台)',
-                dataIndex: 'middle_count',
+                title: '爬坡' + '(' + res.body.units.climb_st_r + ')',
+                dataIndex: 'climb_st_r',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '低效设备' + '(台)',
-                dataIndex: 'low_count',
+                title: '转矩控制' + '(' + res.body.units.torque_st_r + ')',
+                dataIndex: 'torque_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '满发变桨' + '(' + res.body.units.full_st_r + ')',
+                dataIndex: 'full_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '限负荷' + '(' + res.body.units.limit_st_r + ')',
+                dataIndex: 'limit_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '状态指数' + (res.body.units.ope_score ? '(' + res.body.units.ope_score + ')' : ''),
+                dataIndex: 'ope_score',
                 align: 'right',
                 sort: true,
             },
@@ -201,7 +228,7 @@ ajaxData(
     $scope.analysis_wp_station_st_month_timeline.subscribe((res) => {
         if ($scope.showShape !== 'chart') return;
         $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.high_count, res.body.data.middle_count, res.body.data.low_count]];
+        $scope.ydatas = [[res.body.data.stop_st_r, res.body.data.climb_st_r, res.body.data.torque_st_r, res.body.data.full_st_r, res.body.data.limit_st_r]];
     });
 
     // 查看设备详情
@@ -263,13 +290,10 @@ ajaxData(
                 sort: true,
             },
             {
-                title: '运行效率',
-                dataIndex: 'ope',
-                align: 'center',
+                title: '状态指数' + (res.body.units.ope_score ? '(' + res.body.units.ope_score + ')' : ''),
+                dataIndex: 'ope_score',
+                align: 'right',
                 sort: true,
-                render(text) {
-                    return ['', '高效', '正常', '低效'][text];
-                }
             },
         ];
     };
@@ -290,12 +314,10 @@ ajaxData(
         $scope.analysis_wp_station_st_month_timeline.res = null;
         $scope.analysis_wp_station_st_month_devicelist.res = null;
         $scope.analysis_wp_station_st_month_deviceline.res = null;
-        if (getInfo) $scope.analysis_wp_station_st_month_info.res = null;
     }
 
     // 销毁 事件
     $scope.$on('$destroy', () => {
         setDataNull();
-        $('#timeRange > span').show();
     });
 });

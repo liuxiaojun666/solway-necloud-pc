@@ -15,18 +15,27 @@ ajaxData(
     }
 )('runningStateEquipmentDetailsCtrl', ['$scope', 'runningStateEquipmentDetailsService'], ($scope) => {
     let myChart;
-    $scope.$on('equipmentDetails', (_e, { eqid, eq_name }) => {
+    $scope.$on('equipmentDetails', (_e, { eqid, eq_name, stid }) => {
         $scope.eq_name = eq_name;
         $scope.turbineVPPoints.res = null;
         $scope.turbineVPList.res = null;
         myChart && echarts.dispose(myChart);
         myChart = null;
-        ['turbineVPPoints', 'turbineVPList'].forEach(v => $scope[v].getData({
-            dateType: 2,
-            date: $scope.dateTime.showDate,
+        const {dateTime, dateType} = $scope;
+        $scope.turbineVPList.getData({
+            dateType: ['', 2, 1, 0][dateType],
+            date: (dateTime || {}).showDate,
             queryType: 3,
-            eqid
-        }));
+            eqid,
+            stid
+        });
+        $scope.turbineVPPoints.getData({
+            dateType: ['', 2, 1, 0][dateType],
+            date: (dateTime || {}).showDate,
+            queryType: 3,
+            eqid,
+            stid
+        });
     });
 
     $scope.turbineVPList.tooltipFormatter = (params, _ticket, _callback) => {
