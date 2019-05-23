@@ -45,6 +45,7 @@ ajaxData({
         $scope._dateTime = dateTime;
         $scope._dateType = dateType;
         $scope.timeRange = timeRange;
+        $scope.weekTimeStart = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
         $scope.theme = theme;
         $scope.themeDetail = `tpl/enrichment/dataReportSummary/components/theme${theme}.html${$scope.stamp}`;
         if (!stationData) historicalRecord.set({ dateType, dateTime });
@@ -79,6 +80,10 @@ ajaxData({
         if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM-dd');
         $scope._dateType = dateType;
         $scope._dateTime = dateTime;
+    };
+
+    $scope.weekUpdated = () => {
+        $scope.dateUpdated($scope._dateType, $scope._dateTime);
     };
 
     // 切换电站 回调

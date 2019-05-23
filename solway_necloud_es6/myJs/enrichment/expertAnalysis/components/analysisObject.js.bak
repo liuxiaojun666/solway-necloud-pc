@@ -82,10 +82,12 @@ ajaxData({
         //获取历史数据
         $scope.$on('ctimeHdata', (event,v) => {
             if(!v){
-                $scope[key[$scope.analysisObjectK]] = [];
-                $scope.analysObDataNewDevice.forEach((item, i) => {
-                    $scope.objectDevice[i] = [];
-                })
+                setTimeout(()=>{
+                    $scope[key[$scope.analysisObjectK]] = [];
+                    $scope.analysObDataNewDevice.forEach((item, i) => {
+                        $scope.objectDevice[i] = [];
+                    })
+                },500)
             }
         })
 
@@ -103,7 +105,6 @@ ajaxData({
             $scope.analysisObjectK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.alsObjk;
             $scope[key[$scope.analysisObjectK]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.checkData;
             // debugger
-            console.log($scope[key[$scope.analysisObjectK]])
 
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5) {
                 $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.radioItem, true);
@@ -461,7 +462,6 @@ ajaxData({
         $scope.objectType = [];
         $scope.objectFault = [];
         setTimeout(()=>{
-            // debugger
             $scope.analysObDataNewDevice.forEach((item, i) => {
                 $scope.objectDevice[i] = [];
             })
