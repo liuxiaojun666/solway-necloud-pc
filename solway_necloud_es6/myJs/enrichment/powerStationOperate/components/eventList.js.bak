@@ -1,0 +1,54 @@
+ajaxData({
+
+}, {})('eventListCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
+    // 返回按钮
+    $scope.back = ()=>{
+        $scope.$emit('eventListHide');
+    }
+    
+    //表格的表头设置
+    $scope.column = [
+        {
+            title: '事件标题',
+            dataIndex: 'id',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '事件详情',
+            width: '25%',
+            dataIndex: 'dictType',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '开始时间',
+            dataIndex: 'dictName',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '结束时间',
+            dataIndex: 'dictCode',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '前端显示',
+            dataIndex: 'dictEnName',
+            align: 'center'
+        }, {
+            title: '事件状态',
+            dataIndex: 'description',
+            align: 'center'
+        },
+        {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render: function () {
+                function render(text, item, index) {
+                    return `<div class="clearfix"><i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="\u6388\u6743"></i><i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i></div>`;
+                }
+
+                return render;
+            }()
+        }];
+});
