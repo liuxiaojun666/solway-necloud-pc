@@ -53,7 +53,6 @@ HighAnalysis_selectFds: {
         $scope.$emit('analysNan', { data: 0});
         var key;
         if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
-            // debugger
             for(key in $scope.analysData){
                 $scope.analysData[key].ll.map((item)=>{
                     item.actFdTb = 0;
@@ -61,15 +60,14 @@ HighAnalysis_selectFds: {
                 })
             }
             $scope.analysCheckData = [];
+            $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart]));
             parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
             $scope.radioToSelect($scope.analysData.ctg1, 0);
         }
         else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart]&&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].dmsType)){
-            // debugger
             return;
         }
         else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].dmsType)&&($scope.dmsTime==parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)){
-            // debugger
             return;
         } else {
             for(key in $scope.analysData){
@@ -79,11 +77,10 @@ HighAnalysis_selectFds: {
                 })
             }
             $scope.analysCheckData = [];
+            $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart]));
             parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
             $scope.radioToSelect($scope.analysData.ctg1, 0);
         }
-       
-        // $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart]));   
     });
 
     //监听 分析指标页面打开
@@ -300,10 +297,13 @@ HighAnalysis_selectFds: {
             })
 
             // debugger
+            setTimeout(()=>{
                 $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysItem,parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.radioIndex, 1);
                 $scope.analysCheckData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.checkData;
-            
-            // parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart];
+                
+                parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart];
+            },0)
+               
             
             $scope.query.sortType = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.sortType;
             $scope.query.tableType = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.tableType;
