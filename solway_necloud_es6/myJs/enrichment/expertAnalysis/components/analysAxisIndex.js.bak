@@ -60,8 +60,6 @@ HighAnalysis_selectFds: {
                 })
             }
             $scope.analysCheckData = [];
-            $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart]));
-            parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
             $scope.radioToSelect($scope.analysData.ctg1, 0);
         }
         else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart]&&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].dmsType)){
@@ -77,7 +75,6 @@ HighAnalysis_selectFds: {
                 })
             }
             $scope.analysCheckData = [];
-            $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart]));
             parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
             $scope.radioToSelect($scope.analysData.ctg1, 0);
         }
@@ -342,7 +339,8 @@ HighAnalysis_selectFds: {
         }
         parentmyAjaxData.config.benchSort[parentmyAjaxData.config.checkChart] = parentmyAjaxData.config.anlsType==3 ? $scope.analysCheckData[0].fdKey + ',' + $scope.query.sortType : null;
         parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart][0] = analysFds_y1;
-        // $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart]));
+
+        $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart]));
 
         parentmyAjaxData.config.fdStyle = $scope.query.tableType;
         parentmyAjaxData.config.fdStyleArr[parentmyAjaxData.config.checkChart] = $scope.query.tableType;

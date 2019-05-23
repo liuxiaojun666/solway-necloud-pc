@@ -1,5 +1,14 @@
 ajaxData({
-    
-}, {})('addEventCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster','$interval'], ($scope, myAjaxData, historicalRecord, $timeout,toaster,$interval) => {
 
+}, {})('addEventCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
+    $scope.formData = {};
+    $scope.GroupUser = {
+        date: new Date,
+        startDate: new Date,
+        endDate: new Date
+    }
+    // 保存按钮
+    $scope.save = () => {
+        if (!$solway.formValidation($scope.formData, '.addEvent', toaster)) return;//校验非空
+    }
 });
