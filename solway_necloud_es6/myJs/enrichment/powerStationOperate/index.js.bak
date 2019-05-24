@@ -1,6 +1,6 @@
 ajaxData({
-    
-}, {})('powerStationOperateCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster','$interval'], ($scope, myAjaxData, historicalRecord, $timeout,toaster,$interval) => {
+
+}, {})('powerStationOperateCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
     $scope.moduleName = '电站运行';//当前页面名称；
 
     //头部折叠框 显示
@@ -10,25 +10,32 @@ ajaxData({
 
     //切换 按照集团显示
     $scope.isGroupShow = true;
-    $scope.changeInputAbsent = ()=>{
+    $scope.changeInputAbsent = () => {
         $scope.isGroupShow = !$scope.isGroupShow;
     }
 
-    $scope.addEvent = false;
     //点击电站方块 - 弹出添加事件组件
-    $scope.addEventFun = ()=>{
+    $scope.addEvent = false;
+    $scope.addEventFun = () => {
         $scope.addEvent = true;
     }
 
-    $scope.eventListShow = false;
     //点击电站运行事件 - 弹出电站运行事件表格
-    $scope.openList = ()=>{
+    $scope.eventListShow = false;
+    $scope.openList = () => {
         $scope.eventListShow = true;
     }
-    
+
     // 接收事件列表的返回按钮
     $scope.$on('eventListHide', (event, v) => {
         $scope.eventListShow = false;
     })
-    
+
+    // 搜索按钮
+    $scope.searchShow = false;
+    $scope.showSearchModel = () => {
+        $scope.searchShow = !$scope.searchShow;
+    }
+
+
 });

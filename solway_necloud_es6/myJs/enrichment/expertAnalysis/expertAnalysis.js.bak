@@ -27,6 +27,7 @@ HighAnalysis_selectAnlsType: {
     anlsType: null,   //分析类型
     herizonData: {},  //横轴数据 纵轴数据
     dmsType: null,    //分析对象参数
+    dmsTime: null,    //时间纬度参数
     dmsTypeAs: [[],[],[],[]],    //设备 参数
     dmsTypeBs: [[],[],[],[]],    //电站|区域(部门)|集团  接口需要的数据
     dmsTypeCs: [[],[],[],[]],    //机型/故障类型 参数
@@ -55,7 +56,7 @@ HighAnalysis_selectAnlsType: {
     verticHdata: [{},{},{},{}],   //选择的纵轴指标 历史数据
     alysHdata: [{},{},{},{}],     //选择的分析指标 历史数据
     checkChart: null,  //选中第几个图表
-    tableDataTrue: []   //第几个图表 是否有历史数据
+    tableDataTrue: [false,false,false,false]   //第几个图表 是否有历史数据
 })('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', 'toaster'], ($scope, myAjaxData, historicalRecord, $interval, toaster) => {
 
     historicalRecord.init();// 历史记录 初始化
@@ -677,8 +678,6 @@ HighAnalysis_selectAnlsType: {
     }
     chartsInit();
 
-    
-
     $('.table1').resize(function () {
         //resize图表
     var myChart0 = echarts.getInstanceByDom(document.getElementById("container0"));
@@ -729,7 +728,6 @@ HighAnalysis_selectAnlsType: {
                 $scope.queryData.horizonIndexV = '请选择';
                 $scope.queryData.verticalIndexV = '请选择';
             } else {
-                // debugger
                 //向横轴指标发送数据
                 if ($scope.queryData.analysisType == 1) {
                     $scope.$broadcast('dmsTime', $scope.queryData.timeLat);
@@ -803,12 +801,12 @@ HighAnalysis_selectAnlsType: {
                 
             } else {
                 $scope.queryData.timeLat = '';
+                $scope.queryData.horizonIndexV = '请选择';
+                $scope.queryData.verticalIndexV = '请选择';
                 if ($scope.analysObDataNew) {
                     $scope.analysObDataNew.map((item) => {
                         if (item.k == $scope.queryData.analysisObjectK) {
                             $scope.timeLat = item.ll;
-                            $scope.queryData.horizonIndexV = '请选择';
-                            $scope.queryData.verticalIndexV = '请选择';
                             myAjaxData.config.fdX.key = null;
                             myAjaxData.config.fdY.key = null;
                         }

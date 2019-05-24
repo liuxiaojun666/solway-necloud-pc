@@ -10,12 +10,12 @@ HighAnalysis_selectFds: {
 })('horizonIndexCtrl', ['$scope', 'horizonService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
     //获取时间纬度 发送的dmsTime
     $scope.$on('dmsTime', (item, v) => {
-        $scope.dmsTime = v;
+        parentmyAjaxData.config.dmsTime = $scope.dmsTime = v;
         $scope.HighAnalysis_selectFds.getData({
             stationClass: "01",
             anlsType: parentmyAjaxData.config.anlsType,
             dmsType: parentmyAjaxData.config.dmsType,
-            dmsTime: $scope.dmsTime
+            dmsTime: parentmyAjaxData.config.dmsTime
         })
     })
 

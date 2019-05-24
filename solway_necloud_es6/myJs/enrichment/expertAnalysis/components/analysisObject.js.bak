@@ -104,7 +104,6 @@ ajaxData({
 
             $scope.analysisObjectK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.alsObjk;
             $scope[key[$scope.analysisObjectK]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.checkData;
-            // debugger
 
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5) {
                 $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.radioItem, true);
@@ -124,14 +123,15 @@ ajaxData({
         //点击单个设备
         $scope.equipChoice = (item, index) => {
             //默认获取第一项的数据
-            item = item ? item : $scope.analysObDataNewDevice[0];
-            index = index ? index : 0;
+            var item = item ? item : $scope.analysObDataNewDevice[0];
+            var index = index ? index : 0;
             $scope.equipChoiceItem = item;
             parentmyAjaxData.config.dmsType = item.k;
             $scope.deviceK = item.k;
             treeData(item.k);
             $scope.equipChoiceIndex = index;
             $scope.$emit('deviceTimeLat', item.ll);
+
         }
 
         //处理点击设备radio
@@ -171,7 +171,7 @@ ajaxData({
         //多级联动 - 电站
         function selectPowerStation() {
             $scope.multiLevel.powerStation = '';
-            if (!$scope.multiLevel.area) {
+            if (!$scope.multiLevel.area||!JSON.parse($scope.multiLevel.area).busiId) {
                 $scope.selectPowerStation = [];
                 return
             }
@@ -239,21 +239,23 @@ ajaxData({
                         }
                     }
                 })
-                setTimeout(()=>{
+                // setTimeout(()=>{
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
                     $scope[key[$scope.analysisObjectK]].map((item) => {
                         item.map((son) => {
                             zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
                         })
                     })
-                },0)
+                // },0)
                 
             } else if (k == 1) {
                 selectMachineType();
                 selectDevice();
-                $scope.zNodes.map((item) => {
+                $scope.zNodes.forEach((item) => {
                     if (!$scope.multiLevel.powerStation) {
-                        item.isHidden = false;
+                        if (item.busiType == 1) {
+                            item.isHidden = false;
+                        }
                     } else {
                         if (item.busiType == JSON.parse($scope.multiLevel.powerStation).busiType) {
                             item.isHidden = true;
@@ -273,7 +275,9 @@ ajaxData({
                 selectDevice();
                 $scope.zNodes.map((item) => {
                     if (!$scope.multiLevel.machineType) {
-                        item.isHidden = false;
+                        if (item.busiType == 6) {
+                            item.isHidden = false;
+                        }
                     } else {
                         if (item.busiType == 6) {
                             item.isHidden = true;
@@ -293,7 +297,9 @@ ajaxData({
             else if (k == 3) {
                 $scope.zNodes.map((item) => {
                     if (!$scope.multiLevel.device) {
-                        item.isHidden = false;
+                        if (item.busiType == 5) {
+                            item.isHidden = false;
+                        }
                     } else {
                         if (item.busiType == 5) {
                             item.isHidden = true;
@@ -321,9 +327,18 @@ ajaxData({
             treeData(devicek);
             $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 100, 'value': '机型', 'isHistory': isHistory });
             selectArea();
-            selectPowerStation();
-            selectMachineType();
-            selectDevice();
+            $scope.selectPowerStation = [];
+            $scope.selectMachineType = [];
+            $scope.selectDevice = [];
+            $scope.multiLevel = {
+                'area': null,
+                'powerStation': '',
+                'machineType': '',
+                'device': ''
+            }
+            // selectPowerStation();
+            // selectMachineType();
+            // selectDevice();
         }
 
         //处理点击故障类型radio
@@ -334,9 +349,15 @@ ajaxData({
             treeData('101');
             $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 101, 'value': '故障类型', 'isHistory': isHistory });
             selectArea();
-            selectPowerStation();
-            selectMachineType();
-            selectDevice();
+            $scope.selectPowerStation = [];
+            $scope.selectMachineType = [];
+            $scope.selectDevice = [];
+            $scope.multiLevel = {
+                'area': null,
+                'powerStation': '',
+                'machineType': '',
+                'device': ''
+            }
         }
 
         //单选框选中-> 更改父级的值
@@ -366,6 +387,7 @@ ajaxData({
                 418: 18
             }
             if (k == 1 || k == 3 || k == 5) {
+                $.fn.zTree.init($("#tree"), $scope.setting, []);
                 $scope.queryTreeWithSt.getData({
                     busiType: st[k]
                 })
@@ -387,19 +409,25 @@ ajaxData({
                 $scope.queryStTreeWithDevices.subscribe(res => {
                     $scope.zNodes = res.body;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
-                    $scope.objectDevice[$scope.equipChoiceIndex].map((item) => {
-                        item.map((son) => {
-                            zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
+                    setTimeout(()=>{
+                        $scope.objectDevice[$scope.equipChoiceIndex].map((item) => {
+                            item.map((son) => {
+                                zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
+                            })
                         })
-                    })
+                    },600)
+                   
                 });
             } else if ($scope.analysisObjectK == 100) {
+                $.fn.zTree.init($("#tree"), $scope.setting, []);
                 $scope.queryStTreeWithProducts.getData({
                     // deviceType: devices[k]
                     deviceType: 2
                 })
 
                 $scope.queryStTreeWithProducts.subscribe(res => {
+                    var treeObj = $.fn.zTree.getZTreeObj("tree");
+                    treeObj.refresh();
                     $scope.zNodes = res.body;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
                     $scope[key[$scope.analysisObjectK]].map((item) => {
@@ -409,13 +437,17 @@ ajaxData({
                     })
                 });
             } else if ($scope.analysisObjectK == 101) {
+                $.fn.zTree.init($("#tree"), $scope.setting, []);
                 $scope.queryStTreeWithFaultTypes.getData({
                     type : '01'
                 })
 
                 $scope.queryStTreeWithFaultTypes.subscribe(res => {
+                    var treeObj = $.fn.zTree.getZTreeObj("tree");
+                    treeObj.refresh();
                     $scope.zNodes = res.body;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                    
                     $scope[key[$scope.analysisObjectK]].map((item) => {
                         item.map((son) => {
                             zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
@@ -461,11 +493,12 @@ ajaxData({
         $scope.objectGroup = [];
         $scope.objectType = [];
         $scope.objectFault = [];
-        setTimeout(()=>{
-            $scope.analysObDataNewDevice.forEach((item, i) => {
-                $scope.objectDevice[i] = [];
-            })
-        },0)
+        // setTimeout(()=>{
+        //     // debugger
+        //     $scope.analysObDataNewDevice.forEach((item, i) => {
+        //         $scope.objectDevice[i] = [];
+        //     })
+        // },1000)
         
 
         const key = {
