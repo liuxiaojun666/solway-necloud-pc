@@ -16,7 +16,9 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
             $scope.maxUpdateTime = 0;
             $scope.initColumns();
             $scope.pendding = false;
-            $scope.initData();
+            $timeout(()=>{
+                $scope.initData();
+            },0)
         })
 
         $scope.$on('broadcastSwitchStation',(e,v)=>{
@@ -130,11 +132,11 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 $scope.datalist = [];
             }
 
-            $scope.stClassAlarm = $solway.getStore().systemInfo.stClass;
-
-            const checkedCondition = [];
+            let checkedCondition = [];
+     
             $("input[name='conditionType']:checked").map((index,v)=>{
                 checkedCondition.push(v.dataset.status)
+                if($rootScope.stationCurrentClass == '02' && v.dataset.status == '1') checkedCondition.push('13')
             })
 
             if(!checkedCondition.length){
