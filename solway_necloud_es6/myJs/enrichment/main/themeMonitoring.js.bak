@@ -163,15 +163,17 @@ ajaxData(
         const { companyDayTodayTimeLineDataWp } = myAjaxData.config;
         const { line1: pline1, line2: pline2 } = companyDayTodayTimeLineData;
         const { xdata, line1: wline1, line2: wline2 } = companyDayTodayTimeLineDataWp;
-        const length = xdata.length;
-        $scope.xdata = companyDayTodayTimeLineDataWp.xdata = xdata.slice(0, length - 1).concat(res.body.chart_wp.echarts_xaxisTime);
-        const arrLength = res.body.chart_wp.echarts_power_o.length - res.body.chart_pv.echarts_p.length;
+        $scope.xdata = companyDayTodayTimeLineDataWp.xdata = xdata.slice(0, -1).concat(res.body.chart_wp.echarts_xaxisTime);
+        let arrLength = res.body.chart_wp.echarts_power_o.length - res.body.chart_pv.echarts_p.length;
+        if (companyDayTodayTimeLineData.line1.length) {
+            arrLength = 0;
+        }
         $scope.ydatas = [[
-            companyDayTodayTimeLineData.line1 = new Array(arrLength).fill('-').concat(pline1.slice(0, length - 1).concat(res.body.chart_pv.echarts_p)),
-            companyDayTodayTimeLineData.line2 = new Array(arrLength).fill('-').concat(pline2.slice(0, length - 1).concat(res.body.chart_pv.echarts_shd_p))
+            companyDayTodayTimeLineData.line1 = new Array(arrLength).fill('-').concat(pline1.slice(0, -1).concat(res.body.chart_pv.echarts_p)),
+            companyDayTodayTimeLineData.line2 = new Array(arrLength).fill('-').concat(pline2.slice(0, -1).concat(res.body.chart_pv.echarts_shd_p))
         ],[
-            companyDayTodayTimeLineDataWp.line1 = wline1.slice(0, length - 1).concat(res.body.chart_wp.echarts_power_o),
-            companyDayTodayTimeLineDataWp.line2 = wline2.slice(0, length - 1).concat(res.body.chart_wp.echarts_predictPower_o)
+            companyDayTodayTimeLineDataWp.line1 = wline1.slice(0, -1).concat(res.body.chart_wp.echarts_power_o),
+            companyDayTodayTimeLineDataWp.line2 = wline2.slice(0, -1).concat(res.body.chart_wp.echarts_predictPower_o)
         ]];
         myAjaxData.config.companyDayTodayTimeLineDataWp = companyDayTodayTimeLineDataWp;
     });
