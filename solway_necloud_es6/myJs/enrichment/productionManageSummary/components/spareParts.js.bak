@@ -202,7 +202,9 @@ ajaxData(
     // 删除附件
     $scope.fileUploadUploadFile.deleteFile = (event, index) => {
         $scope.fileUploadUploadFile.fileNames.splice(index, 1);
-        $scope.opFittingsDictUpdate.formData.attachments = $scope.opFittingsDictUpdate.formData.attachments.split(',').splice(index, 1).join();
+        const ids = $scope.opFittingsDictUpdate.formData.attachments.split(',');
+        ids.splice(index, 1);
+        $scope.opFittingsDictUpdate.formData.attachments = ids.join();
         event.preventDefault();
     };
 
