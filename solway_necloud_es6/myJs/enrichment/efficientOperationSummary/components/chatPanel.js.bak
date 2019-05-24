@@ -313,15 +313,25 @@ ajaxData({
     //查看设备运行数据
     $scope.showDeviceDataModal = () =>{
         if(!$scope.ifDeviceDataModal) return;
-
         $scope.deviceOperationData = true;
 
         const chatList = $scope.chatList[0];
-        let deviceTypeNow = chatList.deviceType;
-        let pstationid = chatList.pStationId;
-        const {deviceSerialNnumber, deviceId,hasJB} = chatList;
-        const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, defaultShowPage: '1', hasJB };
-        $scope.$broadcast("equipmentPopUp", res);
+        const stationType = chatList.stationType;
+
+        if(stationType == '01'){  //solar
+            let deviceTypeNow = chatList.deviceType;
+            let pstationid = chatList.pStationId;
+            const {deviceSerialNnumber, deviceId,hasJB} = chatList;
+            const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, defaultShowPage: '1', hasJB };
+            $scope.$broadcast("equipmentPopUp", res);
+        }else if(stationType == '02'){  //wind
+            let stid = chatList.pStationId;
+            let eqid = chatList.deviceSerialNnumber;
+            $scope.$broadcast("equipmentPopUpWp", {
+                stid,
+                eqid
+            });
+        }
     }
 
     //发布共享任务回调
