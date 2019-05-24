@@ -377,17 +377,24 @@ ajaxData(
         };
 
 
-    // $scope.trClick = (item, index, event) => {
-    //     if (!event.target.className.includes('clickable')) return;
-    //     $scope.reloadParentPage({
-    //         stationData: {
-    //             dataType: 0,
-    //             id: item.stid,
-    //             isGroup: "0",
-    //             stClass: '01'
-    //         }
-    //     })
-    // };
+    $scope.trClick = async (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        await $scope.changeStation.getData({
+            dataType: 0,
+            id: item.stid,
+            isGroup: "0",
+            stClass: '01'
+        });
+        window.location.reload();
+        // $scope.reloadParentPage({
+        //     stationData: {
+        //         dataType: 0,
+        //         id: item.stid,
+        //         isGroup: "0",
+        //         stClass: '01'
+        //     }
+        // })
+    };
     // 集团 电站 列表
     $scope.query_company_accum_elec_detail_stationlist_his.subscribe(res => {
         $scope.accumulativeDetailLoading = false;
@@ -398,9 +405,9 @@ ajaxData(
                 dataIndex: 'st_name',
                 sort: 'true',
                 width: '250px',
-                // render(text, item) {
-                //     return text && `<span class="clickable">${text}</sapn>`
-                // }
+                render(text, item) {
+                    return text && `<span class="clickable">${text}</sapn>`
+                }
             },
             {
                 title: '应发电量(' + res.body.units.shd_kwh_chk + ')',
