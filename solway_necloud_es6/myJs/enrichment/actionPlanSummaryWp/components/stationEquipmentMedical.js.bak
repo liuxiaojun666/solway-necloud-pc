@@ -5,18 +5,18 @@ ajaxData(
             data: {},
             later: true,
         },
-        action_station_clean_suggest_dev_shade_list: {
-            name: 'GETaction_station_clean_suggest_dev_shade_list',
+        wp_station_pitch_month_ratelist: {
+            name: 'GETwp_station_pitch_month_ratelist',
             data: {},
             later: true
         },
-        invPrBottom10: {
-            name: 'GETinvPrBottom10',
+        wp_station_power_month_curvelist: {
+            name: 'GETwp_station_power_month_curvelist',
             data: {},
             later: true
         },
-        action_station_clean_suggest_dev_decay_list: {
-            name: 'GETaction_station_clean_suggest_dev_decay_list',
+        wp_station_PBA_month_PBAlist: {
+            name: 'GETwp_station_PBA_month_PBAlist',
             data: {},
             later: true
         },
@@ -87,23 +87,20 @@ ajaxData(
                     pageSize: 2000
                 });
             } else if (tabIndex === 1) {
-                $scope.action_station_clean_suggest_dev_shade_list.getData({
-                    queryCode: 'action_station_clean_suggest_dev_shade_list',
+                $scope.wp_station_pitch_month_ratelist.getData({
+                    queryCode: 'wp_station_pitch_month_ratelist',
                     queryType: 3,
-                    // start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
-                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                    date: (new Date).Format('yyyy-MM')
                 });
-                $scope.invPrBottom10.getData({
+                $scope.wp_station_power_month_curvelist.getData({
+                    queryCode: 'wp_station_power_month_curvelist',
                     queryType: 3,
-                    dateType: 3,
-                    start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
-                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                    date: (new Date).Format('yyyy-MM')
                 });
-                $scope.action_station_clean_suggest_dev_decay_list.getData({
-                    queryCode: 'action_station_clean_suggest_dev_decay_list',
+                $scope.wp_station_PBA_month_PBAlist.getData({
+                    queryCode: 'wp_station_PBA_month_PBAlist',
                     queryType: 3,
-                    // start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
-                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+                    date: (new Date).Format('yyyy-MM')
                 });
             }
         };
@@ -158,10 +155,10 @@ ajaxData(
 
         });
 
-        $scope.action_station_clean_suggest_dev_shade_list.subscribe(res => {
+        $scope.wp_station_pitch_month_ratelist.subscribe(res => {
             $scope.column1 = [
                 {
-                    title: '设备名称',
+                    title: '风机',
                     dataIndex: 'eq_name',
                     sort: true,
                     render(text) {
@@ -169,15 +166,21 @@ ajaxData(
                     }
                 },
                 {
-                    title: '持续偏小组串数',
-                    dataIndex: 'all_shade_count',
+                    title: '机型',
+                    dataIndex: 'product_name',
                     sort: true,
-                    align: 'right'
+                },
+                {
+                    title: '异常变桨率(%)',
+                    dataIndex: '',
+                    sort: true,
+                    align: 'right',
+                    width: '40%'
                 },
             ]
         });
 
-        $scope.invPrBottom10.subscribe(res => {
+        $scope.wp_station_power_month_curvelist.subscribe(res => {
             $scope.column2 = [
                 {
                     title: '设备名称',
@@ -188,15 +191,21 @@ ajaxData(
                     }
                 },
                 {
-                    title: 'PR(%)',
-                    dataIndex: 'pr',
+                    title: '机型',
+                    dataIndex: 'product_name',
                     sort: true,
-                    align: 'right'
+                },
+                {
+                    title: '功率曲线指数(%)',
+                    dataIndex: '',
+                    sort: true,
+                    align: 'right',
+                    width: '40%'
                 },
             ]
         });
 
-        $scope.action_station_clean_suggest_dev_decay_list.subscribe(res => {
+        $scope.wp_station_PBA_month_PBAlist.subscribe(res => {
             $scope.column3 = [
                 {
                     title: '设备名称',
@@ -207,10 +216,16 @@ ajaxData(
                     }
                 },
                 {
-                    title: '累计衰减率' + '(' + res.body.units.decay_r_all + ')',
-                    dataIndex: 'decay_r_all',
+                    title: '机型',
+                    dataIndex: 'product_name',
                     sort: true,
-                    align: 'right'
+                },
+                {
+                    title: 'PBA(%)',
+                    dataIndex: 'pba',
+                    sort: true,
+                    align: 'right',
+                    width: '40%'
                 },
             ]
         });
@@ -222,9 +237,9 @@ ajaxData(
             $scope.column1 = [];
             $scope.column2 = [];
             $scope.column3 = [];
-            $scope.action_station_clean_suggest_dev_shade_list.res = null;
-            $scope.invPrBottom10.res = null;
-            $scope.action_station_clean_suggest_dev_decay_list.res = null;
+            $scope.wp_station_pitch_month_ratelist.res = null;
+            $scope.wp_station_power_month_curvelist.res = null;
+            $scope.wp_station_PBA_month_PBAlist.res = null;
         }
 
 

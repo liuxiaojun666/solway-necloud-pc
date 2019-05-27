@@ -1,6 +1,20 @@
 ajaxData({
-
+    // 电站事件列表
+    StationRunStatusDetail: {
+        name: 'GETStationRunStatusDetail',
+        data: {},
+        later: true
+    },
 }, {})('eventListCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
+    // $scope.StationRunStatusDetail.getData({
+    //     stid: v.stid,
+    //     stClass: v.stClass
+    // })
+
+    $scope.StationRunStatusDetail.subscribe(res => {
+        $scope.powerStInfo = res.body;
+    });
+
     // 返回按钮
     $scope.back = ()=>{
         $scope.$emit('eventListHide');

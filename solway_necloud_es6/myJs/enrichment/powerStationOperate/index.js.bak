@@ -1,7 +1,86 @@
 ajaxData({
-
+    // 显示所有电站详情的（按照集团分组）
+    StationRunStatusNew: {
+        name: 'GETStationRunStatusNew',
+        data: {},
+        later: true
+    },
+    // 获取集团列表
+    selectAllByAdmin: {
+        name: 'selectAllByAdmin',
+        data: {}
+    },
 }, {})('powerStationOperateCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
-    $scope.moduleName = '电站运行';//当前页面名称；
+    $scope.moduleName = '电站运行';//当前页面名称
+
+    //点击全选
+    $scope.allChecked = false;
+    $scope.getAllGroup = (e) => {
+        e.stopPropagation();
+        $scope.groupList.forEach(item => {
+            item.checked = $scope.allChecked ? true : false;
+        });
+    }
+
+    //点击单个集团的 多选框
+    $scope.aaa = '';
+    $scope.getGroup = (item) => {
+        // console.log(item)
+    }
+
+    //获取选中的集团
+    $scope.getCheckedGroup = () => {
+        $scope.comIds = null;
+        $scope.comIds = $scope.groupList.filter(item => item.checked).map(item => item.comId);
+        $scope.StationRunStatusNew.getData({
+            comIds: $scope.comIds,
+            status: '0,1,2,3,4'
+        })
+        $scope.searchShow = false;
+    }
+
+    //获取集团列表
+    $scope.selectAllByAdmin.subscribe(res => {
+        $scope.groupList = res;
+        $scope.groupList.forEach(item => {
+            item.checked = false;
+        });
+    });
+
+    //刷新按钮
+    $scope.refresh = ()=>{
+        $scope.StationRunStatusNew.getData({
+            status: '0,1,2,3,4'
+        })
+    }
+
+    //获取电站详情 (默认获取全部)
+    $scope.StationRunStatusNew.getData({
+        status: '0,1,2,3,4'
+    })
+
+    $scope.StationRunStatusNew.subscribe(res => {
+        $scope.powerSt = res.body;
+        $scope.powerStAll = [];
+        $scope.powerSt.date.forEach(item => {
+            $scope.powerStAll.push(...item.srs);
+        })
+    });
+
+    // setInterval(()=>{
+    //     $scope.StationRunStatusNew.getData({
+    //         status: '0,1,2,3,4'
+    //     })
+    // },10000)
+
+
+
+
+
+
+
+
+
 
     //头部折叠框 显示
     $timeout(() => {
@@ -16,8 +95,9 @@ ajaxData({
 
     //点击电站方块 - 弹出添加事件组件
     $scope.addEvent = false;
-    $scope.addEventFun = () => {
+    $scope.addEventFun = (item) => {
         $scope.addEvent = true;
+        $scope.$broadcast('powerStInfo', item);
     }
 
     //点击电站运行事件 - 弹出电站运行事件表格
@@ -33,9 +113,19 @@ ajaxData({
 
     // 搜索按钮
     $scope.searchShow = false;
-    $scope.showSearchModel = () => {
-        $scope.searchShow = !$scope.searchShow;
+    $scope.showSearchModel = (e) => {
+        e.stopPropagation();
+        $scope.searchShow = true;
     }
 
+    $scope.keep = (e) => {
+        e.stopPropagation();
+    }
+
+    document.addEventListener('click', eventListen);
+    function eventListen() {
+        $scope.searchShow = false;
+        $scope.$apply();
+    }
 
 });

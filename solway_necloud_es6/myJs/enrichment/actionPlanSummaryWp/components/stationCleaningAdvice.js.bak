@@ -1,47 +1,20 @@
 ajaxData(
     {
-        resourceDetailStationDay: {
-            name: 'GETresourceDetailStationDay',
-            data: { },
-            later: true,
-        },
-        action_station_clean_suggest_mark_30day_line: {
-            name: 'GETaction_station_clean_suggest_mark_30day_line',
-            data: { },
-            later: true
-        },
-        action_station_clean_suggest_subject: {
-            name: 'GETaction_station_clean_suggest_subject',
+        // 风向标
+        wp_station_vane_month_deviceline: {
+            name: 'GETwp_station_vane_month_deviceline',
             data: {},
             later: true
         },
-        action_station_clean_suggest_dust_30day_dust_we: {
-            name: 'GETaction_station_clean_suggest_dust_30day_dust_we',
+        // 风速计
+        wp_station_wsm_month_abnormalrateline: {
+            name: 'GETwp_station_wsm_month_abnormalrateline',
             data: {},
             later: true
         },
-        action_station_clean_suggest_dust_top5_line: {
-            name: 'GETaction_station_clean_suggest_dust_top5_line',
-            data: {},
-            later: true
-        },
-        action_station_clean_suggest_dust_bottom5_line: {
-            name: 'GETaction_station_clean_suggest_dust_bottom5_line',
-            data: {},
-            later: true
-        },
-        stationLastDayCleanData: {
-            name: 'GETstationLastDayCleanData',
-            data: {},
-            later: true
-        },
-        stationCleanCost: {
-            name: 'GETstationCleanCost',
-            data: {},
-            later: true
-        },
-        stationPreBestCleanDataLine: {
-            name: 'GETstationPreBestCleanDataLine',
+        // 齿轮箱
+        wp_station_gearbox_month_oilline: {
+            name: 'GETwp_station_gearbox_month_oilline',
             data: {},
             later: true
         },
@@ -50,6 +23,8 @@ ajaxData(
         __serviceName__: 'actionPlanSummaryStationCleaningAdviceService',
     }
 )('actionPlanSummaryStationCleaningAdviceCtrl', ['$scope', 'actionPlanSummaryStationCleaningAdviceService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    $scope.tablePlaceholder = '<img style="margin: 15px 0;" src="theme/images/enrichment/notFound.png" alt="未发现异常设备插画"/>'
+
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
@@ -98,137 +73,120 @@ ajaxData(
         const { tabIndex, dataType } = $scope;
         if (dataType !== 0) return;
         if (tabIndex === 0) {
-            $scope.resourceDetailStationDay.getData({
-                date: (new Date).Format('yyyy-MM-dd'),
-                dateType: 3,
-                queryType: 3
-            });
-            $scope.action_station_clean_suggest_mark_30day_line.getData({
-                queryCode: 'action_station_clean_suggest_mark_30day_line',
+            $scope.wp_station_vane_month_deviceline.getData({
+                queryCode: 'wp_station_vane_month_deviceline',
                 queryType: 3,
-                start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 365).Format('yyyy-MM-dd'),
-                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
-            });
-            $scope.action_station_clean_suggest_subject.getData({
-                queryCode: 'action_station_clean_suggest_subject',
-                queryType: 3,
-                start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
-                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
-            }).then((res) => {
-                if (res.body.data.pre_clean_status !== 1) return;
-                $scope.action_station_clean_suggest_dust_30day_dust_we.getData({
-                    queryCode: 'action_station_clean_suggest_dust_30day_dust_we',
-                    queryType: 3,
-                    start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
-                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
-                });
+                date: (new Date).Format('yyyy-MM')
             });
         } else if (tabIndex === 1) {
-            const date = (new Date(Date.now() - 24 * 60 * 60 * 1000)).Format('yyyy-MM-dd');
-            $scope.stationPreBestCleanDataLine.getData({
-                date,
-                dateType: 3,
-                queryType: 3
-            });
-            $scope.stationCleanCost.getData().then(res => {
-                $scope.cost = res.body.totalCost;
-                $scope.price = res.body.price || 1;
-                const { price, cost } = $scope;
-                $scope.stationLastDayCleanData.getData({
-                    date,
-                    dateType: 3,
-                    queryType: 3,
-                    price,
-                    cost
-                });
+            $scope.wp_station_wsm_month_abnormalrateline.getData({
+                queryCode: 'wp_station_wsm_month_abnormalrateline',
+                queryType: 3,
+                date: (new Date).Format('yyyy-MM')
             });
         } else if (tabIndex === 2) {
-            $scope.action_station_clean_suggest_subject.getData({
-                queryCode: 'action_station_clean_suggest_subject',
+            $scope.wp_station_gearbox_month_oilline.getData({
+                queryCode: 'wp_station_gearbox_month_oilline',
                 queryType: 3,
-                start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
-                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
-            }).then(() => {
-                $scope.action_station_clean_suggest_dust_top5_line.getData({
-                    queryCode: 'action_station_clean_suggest_dust_top5_line',
-                    queryType: 3,
-                    start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
-                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
-                });
-                $scope.action_station_clean_suggest_dust_bottom5_line.getData({
-                    queryCode: 'action_station_clean_suggest_dust_bottom5_line',
-                    queryType: 3,
-                    start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
-                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
-                });
+                date: (new Date).Format('yyyy-MM')
             });
         }
     };
 
-    $scope.action_station_clean_suggest_mark_30day_line.subscribe(res => {
-        $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.clean_mark.map(v => v || 0)], [res.body.data.pcpn]];
-        $scope.tooltipFormatter = a => `${a[0].name}<br/>${a[0].seriesName}：${a[0].value || '-'}<br/>${a[1].seriesName}：${a[1].value}`;
-    });
+    // 设备故障， 查看设备详情
+    $scope.equipmentDetail = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const { stid, eqid } = item;
+        $scope.$broadcast("equipmentPopUpWp", {
+            stid: stid,
+            eqid: eqid
+        });
+    };
 
-    $scope.action_station_clean_suggest_subject.subscribe(res => {
-        $scope.markLine = res.body.data.clean_th && [[void 0, {
-            label: {
-                normal: {
-                    formatter: '{b}: {c}%',
-                    position: 'middle'
-                }
-            },
-            lineStyle: {
-                normal: {
-                    type: 'solid',
-                    color: '#f0cd81'
-                }
-            },
-            data: [
-                {
-                    name: '平均清洁指数(%)',
-                    yAxis: res.body.data.clean_mark
+    // 风向标
+    $scope.wp_station_vane_month_deviceline.subscribe(res => {
+        $scope.wp_station_vane_month_deviceline.column = [
+            {
+                title: '风机',
+                dataIndex: 'eq_name',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
                 },
-            ]
-        }]];
+            },
+            {
+                title: '机型',
+                dataIndex: 'product_name',
+                sort: true,
+            },
+            {
+                title: '偏航误差',
+                dataIndex: 'vane_yaw_error',
+                sort: true,
+            },
+            {
+                title: '校正后预计提升爬坡效率(%)',
+                dataIndex: '',
+                width: '40%',
+                sort: true,
+            },
+        ];
     });
 
-    $scope.stationPreBestCleanDataLine.subscribe(res => {
-        $scope.xdata = res.body.x;
-        $scope.ydatas = [[res.body.fut_bcl_kwh_curve]]
+    // 风速计
+    $scope.wp_station_wsm_month_abnormalrateline.subscribe(res => {
+        $scope.wp_station_wsm_month_abnormalrateline.column = [
+            {
+                title: '风机',
+                dataIndex: 'eq_name',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                },
+            },
+            {
+                title: '机型',
+                dataIndex: 'product_name',
+                sort: true,
+            },
+            {
+                title: '风速数据异常率(%)',
+                dataIndex: '',
+                sort: true,
+            },
+        ];
     });
 
-    $scope.action_station_clean_suggest_dust_top5_line.subscribe(res => {
-        if (!$scope.action_station_clean_suggest_dust_bottom5_line.res) return;
-        topBottomMerge();
+    // 齿轮箱
+    $scope.wp_station_gearbox_month_oilline.subscribe(res => {
+        $scope.wp_station_gearbox_month_oilline.column = [
+            {
+                title: '风机',
+                dataIndex: 'eq_name',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                },
+            },
+            {
+                title: '机型',
+                dataIndex: 'product_name',
+                sort: true,
+            },
+            {
+                title: '满发油温',
+                dataIndex: '',
+                sort: true,
+            },
+        ];
     });
-    
-    $scope.action_station_clean_suggest_dust_bottom5_line.subscribe(res => {
-        if (!$scope.action_station_clean_suggest_dust_top5_line.res) return;
-        topBottomMerge();
-    });
-
-    function topBottomMerge() {
-        const topRes = $scope.action_station_clean_suggest_dust_top5_line.res;
-        const bottomRes = $scope.action_station_clean_suggest_dust_bottom5_line.res;
-        $scope.xdata = [...bottomRes.body.data.eq_name, ...topRes.body.data.eq_name.reverse()];
-        $scope.ydatas = [[bottomRes.body.data.clean_mark, [...new Array(bottomRes.body.data.clean_mark.length).fill(null), ...topRes.body.data.clean_mark.reverse()]]];
-        $scope.tooltipFormatter = '{a}<br/>{b0}: {c0}'
-    }
 
 
     // 数据置空
     function setDataNull() {
-        $scope.xdata = void 0;
-        $scope.ydatas = void 0;
-        $scope.tooltipFormatter = void 0;
-        $scope.action_station_clean_suggest_mark_30day_line.res = null;
-        $scope.action_station_clean_suggest_subject.res = null;
-        $scope.action_station_clean_suggest_dust_top5_line.res = null;
-        $scope.action_station_clean_suggest_dust_bottom5_line.res = null;
-        $scope.stationLastDayCleanData.res = null;
-        $scope.stationPreBestCleanDataLine.res = null;
+        $scope.wp_station_vane_month_deviceline.res = null;
+        $scope.wp_station_wsm_month_abnormalrateline.res = null;
+        $scope.wp_station_gearbox_month_oilline.res = null;
     }
 
 

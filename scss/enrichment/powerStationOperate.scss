@@ -5,16 +5,66 @@
     .m-b-25 {
       margin-bottom: 25px;
     }
-    .chose-group-wrap {
+    .search-wrap {
       position: absolute;
-      top: 25px;
-      width: 100px;
-      height: 100px;
-      background: #396FAA;
+      top: 0px;
+      width: 62px;
+      height: 31px;
+      background: #396faa;
+      opacity: 0.8;
       z-index: 1111;
     }
+    .chose-group-wrap {
+      position: absolute;
+      top: 31px;
+      width: 1200px;
+      // height: 100px;
+      background: #396faa;
+      z-index: 1111;
+      padding: 20px;
+      .groupCheck-con {
+        padding: 20px 0;
+        // display: flex;
+        // flex-direction: row;
+        // justify-content: space-between;
+        .group-checks {
+          margin-bottom: 20px;
+        }
+      }
+      .group-btn-wrap {
+        overflow: hidden;
+        .group-cancel-btn {
+          width: 60px;
+          height: 28px;
+          line-height: 28px;
+          background: rgba(46, 85, 136, 1);
+          border: 1px solid rgba(20, 54, 98, 1);
+          border-radius: 2px;
+          float: right;
+          text-align: center;
+          margin-right: 15px;
+          cursor: pointer;
+        }
+        .group-search-btn {
+          width: 60px;
+          height: 28px;
+          line-height: 28px;
+          background: rgba(41, 189, 180, 1);
+          border-radius: 2px;
+          float: right;
+          text-align: center;
+          cursor: pointer;
+        }
+      }
+    }
+    // 多选框样式
     .group-checks {
       cursor: pointer;
+      line-height: 20px;
+    }
+    .group-checks span {
+      vertical-align: text-top;
+      margin-left: 4px;
     }
     .group-checks input {
       opacity: 0;
@@ -24,7 +74,9 @@
       display: inline-block;
       width: 20px;
       height: 20px;
-      border: 1px solid red;
+      background: rgba(22, 54, 95, 0.27);
+      border: 1px solid rgba(20, 54, 98, 1);
+      border-radius: 2px;
       position: relative;
       vertical-align: middle;
     }
@@ -93,7 +145,7 @@
     .status-con {
       display: inline-block;
       margin-right: 20px;
-      font-size:14px;
+      font-size: 14px;
       .tag {
         display: inline-block;
         width: 13px;
@@ -109,40 +161,52 @@
       .status-num {
       }
     }
-    .tag-normal{
-        color: #57C794;
+    .tag-normal {
+      color: #57c794;
     }
-    .tag-normal .tag{
-        background: #57C794;
+    .tag-normal .tag {
+      background: #57c794;
     }
-    .tag-fault{
-        color: #E57E70;
+    .tag-fault {
+      color: #e57e70;
     }
-    .tag-fault .tag{
-        background: #E57E70;
+    .tag-fault .tag {
+      background: #e57e70;
     }
-    .tag-alarm{
-        color: #E5B870;
+    .tag-alarm {
+      color: #e5b870;
     }
-    .tag-alarm .tag{
-        background: #E5B870;
+    .tag-alarm .tag {
+      background: #e5b870;
     }
-    .tag-break{
-        color: #9D9D9D;
+    .tag-break {
+      color: #9d9d9d;
     }
-    .tag-break .tag{
-        background: #9D9D9D;
+    .tag-break .tag {
+      background: #9d9d9d;
     }
-    .tag-init{
-        color: #6DDAF5;
+    .tag-init {
+      color: #6ddaf5;
     }
-    .tag-init .tag{
-        background: #6DDAF5;
+    .tag-init .tag {
+      background: #6ddaf5;
+    }
+    .tag-insert {
+      color: #a34aff;
+    }
+    .tag-insert .tag {
+      background: #a34aff;
+    }
+    .tag-unknown {
+      color: #4c76ff;
+    }
+    .tag-unknown .tag {
+      background: #4c76ff;
     }
   }
   .group-con {
     display: inline-block;
-    margin-left: 200px;
+    margin-left: 65px;
     .i-switch-lg {
       width: 40px;
       height: 20px;
@@ -156,7 +220,7 @@
     float: right;
     margin-top: 4px;
     cursor: pointer;
-    color: #19D9C8;
+    color: #19d9c8;
   }
 
   .power-station {
@@ -170,47 +234,78 @@
       width: 100.5%;
       max-height: 500px;
       overflow-y: scroll;
+      .normal {
+        background: #57c794;
+      }
+      .fault {
+        background: #e57e70;
+      }
+      .alarm {
+        background: #e5b870;
+      }
+      .break {
+        background: #9d9d9d;
+      }
+      .init {
+        background: #6ddaf5;
+      }
+      .insert {
+        background: #a34aff;
+      }
+      .unknown {
+        background: #4c76ff;
+      }
+      //不按照集团
       .ps-con {
         width: 99.7%;
         height: 100%;
-        background: #0D3463;
+        background: #0d3463;
         padding: 10px;
+        padding-bottom: 5px;
         overflow: hidden;
         .ps-item {
           display: inline-block;
-          width:24px;
-          height:16px;
-          background: #1caf9a;
+          width: 24px;
+          height: 16px;
           border-radius: 3px;
           margin-right: 5px;
+          margin-bottom: 5px;
           cursor: pointer;
           float: left;
           position: relative;
           &:hover:after {
             content: attr(data-title);
             position: absolute;
-            right: 0px;
-            bottom: 10px;
+            left: 10px;
+            bottom: 8px;
             padding: 5px;
             background: #fff;
             font-size: 18px;
-            color: #0D3463;
+            color: #0d3463;
             z-index: 111;
+            width: 200px;
+          }
+        }
+        .ps-item.first-line{
+          &:hover:after {
+            left: 10px;
+            bottom: -30px;
           }
         }
       }
+      //按照集团分组
       .ps-con-group {
         width: 99.7%;
         height: 100%;
         .group {
           margin-bottom: 3px;
           // overflow: hidden;
-          height: 100%;
+          // height: 100%;
           position: relative;
           .group-name {
             margin-right: 2px;
             float: left;
-            background: #0D3463;
+            background: #0d3463;
             width: 19.8%;
             height: 100%;
             position: absolute;
@@ -219,16 +314,17 @@
           }
           .group-station {
             float: right;
-            background: #0D3463;
+            background: #0d3463;
             width: 80%;
             padding: 10px;
+            padding-bottom: 5px;
             display: flex;
             flex-direction: row;
             position: relative;
             .fold-con {
-              width:25px;
-              height:25px;
-              background:rgba(3,33,68,1);
+              width: 25px;
+              height: 25px;
+              background: rgba(3, 33, 68, 1);
               opacity: 0.5;
               position: absolute;
               right: 10px;
@@ -238,11 +334,11 @@
             }
             .ps-item {
               display: inline-block;
-              width:24px;
-              height:16px;
-              background: #1caf9a;
+              width: 24px;
+              height: 16px;
               border-radius: 3px;
               margin-right: 5px;
+              margin-bottom: 5px;
               position: relative;
               cursor: pointer;
               float: left;
@@ -250,12 +346,19 @@
                 content: attr(data-title);
                 position: absolute;
                 left: 10px;
-                bottom: 0px;
+                bottom: 8px;
                 padding: 5px;
                 background: #fff;
                 font-size: 18px;
-                color: #0D3463;
-                z-index: 111111;
+                color: #0d3463;
+                z-index: 111;
+                width: 200px;
+              }
+            }
+            .ps-item.first-line{
+              &:hover:after {
+                left: 10px;
+                bottom: -30px;
               }
             }
           }
@@ -271,8 +374,8 @@
     .ps-wrap::-webkit-scrollbar-thumb {
       /*滚动条里面小方块*/
       -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-      background:rgba(33,80,136,1);
-      border-radius:5px;
+      background: rgba(33, 80, 136, 1);
+      border-radius: 5px;
     }
     .ps-wrap::-webkit-scrollbar-track {
       display: none;
