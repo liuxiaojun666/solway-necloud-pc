@@ -148,7 +148,9 @@ ajaxData({
             $scope.query_station_month_res_timeline_his.res.body.data.nullBlock2 = [];
             await $scope.selectChange('select1');
             await $scope.selectChange('select2');
-            const day = new Date($scope.dateTime.showDate.split('-')).getDay() - 1;
+            const showDateArr = $scope.dateTime.showDate.split('-');
+            showDateArr[2] = ['01'];
+            const day = new Date(showDateArr).getDay() - 1;
             $scope.query_station_month_res_timeline_his.res.body.data.nullBlock = new Array(day < 0 ? 6 : day).fill('');
             if ($scope.dateTime.showDate === (new Date).Format('yyyy-MM')) {
                 const date = new Date();

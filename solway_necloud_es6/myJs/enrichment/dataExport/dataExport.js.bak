@@ -70,6 +70,21 @@ ajaxData({
         $scope.$apply();
     };
 
+    // 限制日分钟级导出日期范围
+    $scope.dateUpdate1 = async () => {
+        await myAjaxData.timeout(0);
+        if (!window.moment) return;
+        $scope.rangeEndDate = $scope.formData.qcLevel == 1 ? moment($scope.startDate).add(30, 'd')._d : new Date(Date.now() - 1000 * 60 * 60 * 24);;
+        if ($scope.rangeEndDate && $scope.rangeEndDate.getTime() > (Date.now() - 1000 * 60 * 60 * 24)) $scope.rangeEndDate = new Date(Date.now() - 1000 * 60 * 60 * 24);
+        $scope.$apply();
+    };
+    $scope.dateUpdate2 = async () => {
+        await myAjaxData.timeout(0);
+        if (!window.moment) return;
+        $scope.rangeStartDate = $scope.formData.qcLevel == 1 ? moment($scope.endDate).add(-30, 'd')._d : null;
+        $scope.$apply();
+    };
+
     // 级别 接口 处理
     $scope.bigDataExportLevel.subscribe(res => {
         $scope.formData.qcLevel = res[1] && res[1].dictValue;
