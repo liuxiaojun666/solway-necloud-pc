@@ -5,8 +5,8 @@ ajaxData(
             data: {},
             later: true
         },
-        action_station_clean_suggest_subject: {
-            name: 'GETaction_station_clean_suggest_subject',
+        wp_station_action_month_detail: {
+            name: 'GETwp_station_action_month_detail',
             data: { },
             later: true
         },
@@ -27,6 +27,11 @@ ajaxData(
         },
         actionCompanyRunningTaskNum: {
             name: 'GETactionCompanyRunningTaskNum',
+            data: {},
+            later: true
+        },
+        wp_company_recondition_month_faultlist: {
+            name: 'GETwp_company_recondition_month_faultlist',
             data: {},
             later: true
         },
@@ -57,10 +62,9 @@ ajaxData(
         const { dataType } = $scope;
         if (dataType === 0) {
             $scope.pvAlarmGetRunFaultInfo.getData({});
-            $scope.action_station_clean_suggest_subject.getData({
-                queryCode: 'action_station_clean_suggest_subject',
+            $scope.wp_station_action_month_detail.getData({
+                queryCode: 'wp_station_action_month_detail',
                 queryType: 3,
-                start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
                 date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
             });
             $scope.action_station_clean_suggest_people_effic_name_list.getData({
@@ -70,6 +74,11 @@ ajaxData(
                 date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
             });
         } else {
+            $scope.wp_company_recondition_month_faultlist.getData({
+                queryCode: 'wp_company_recondition_month_faultlist',
+                queryType: 1,
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            })
             $scope.actionCompanyCleanSuggestNum.getData({
                 dateType: 3,
                 queryType: 1,

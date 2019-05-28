@@ -1,7 +1,7 @@
 ajaxData(
     {
-        actionCompanyCleanSuggest: {
-            name: 'GETactionCompanyCleanSuggest',
+        wp_company_recondition_month_faultlist: {
+            name: 'GETwp_company_recondition_month_faultlist',
             data: {},
             later: true
         },
@@ -43,15 +43,14 @@ ajaxData(
     async function diffGetData() {
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
-        $scope.actionCompanyCleanSuggest.getData({
-            dateType: 3,
+        $scope.wp_company_recondition_month_faultlist.getData({
+            queryCode: 'wp_company_recondition_month_faultlist',
             queryType: 1,
-            start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
             date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
         });
     }
 
-    $scope.actionCompanyCleanSuggest.subscribe(res => {
+    $scope.wp_company_recondition_month_faultlist.subscribe(res => {
         $scope.column = [
             {
                 title: '电站名称',
@@ -64,21 +63,20 @@ ajaxData(
             },
             {
                 title: '风向标异常（台）',
-                dataIndex: 'clean_mark',
+                dataIndex: 'evane_count',
                 align: 'right',
                 sort: true,
             },
             {
                 title: '风速计异常（台）',
-                dataIndex: 'clean_level',
-                align: 'center',
+                dataIndex: 'ewsm_count',
+                align: 'right',
                 sort: true,
             },
             {
                 title: '齿轮箱异常（台）',
-                dataIndex: 'pre_clean_status',
-                align: 'left',
-                width: '30%',
+                dataIndex: 'egearbox_count',
+                align: 'right',
                 sort: true,
             },
         ];
