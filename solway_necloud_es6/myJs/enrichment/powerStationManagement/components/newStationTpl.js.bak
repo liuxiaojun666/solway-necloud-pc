@@ -79,31 +79,60 @@ ajaxData({
 
     getChargePersonList();
 
-    const getStationDetailData = () =>{
-        $scope.powerStationDetail.getData({
-            id:$scope.id
-        }).then(res=>{
-            $scope.formData = res;
-            $scope.getDepListByCompany(res.companyid);//获取当前公司的部门列表
-            $scope.startProductTime = res.productiondate? new Date(res.productiondate):new Date();
-            $scope.endProductTime = res.closedate? new Date(res.closedate):new Date((new Date).setDate((new Date).getDate() + 7));
+    $scope.$on('broadAddStation',async(index,data)=>{
+
+        $scope.formData = {};
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+
+        if(data){
+            $scope.formData = {
+                'id':data.id,
+                'depid':data.depid,
+                'companyid':data.companyid,
+                'stationcode':data.stationcode,
+                'stationname':data.stationname,
+                'stationfullname':data.stationfullname,
+                'stationClass':data.stationClass,
+                'stationType':data.stationType,
+                'managerid':data.managerid,
+                'buildcapacity':data.buildcapacity,
+                'closedate':data.closedate,
+                'provinceid':data.provinceid,
+                'cityid':data.cityid,
+                'countyid':data.countyid,
+                'address':data.address,
+                'longitude':data.longitude,
+                'latitude':data.latitude,
+                'stationtel':data.stationtel,
+                'stationzip':data.stationzip
+            };
+            $scope.getDepListByCompany(data.companyid);//获取当前公司的部门列表
+
+            $scope.formData['productiondate'] = data.productiondate?new Date(data.productiondate):new Date();
+            $scope.formData['closedate'] = data.closedate?new Date(data.closedate):new Date();
+            if(!data.productiondate) $scope.formData['productiondate'].showDate = '';
+            if(!data.closedate) $scope.formData['closedate'].showDate = '';
 
             getProvence();
-        });
-    }
-    $scope.$on('broadAddStation',(index,v)=>{
-        clearDateTime();
-        $scope.id = v.id;
-        if($scope.id){
-            getStationDetailData()
+
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+
         }else{
             $scope.formData = {};
-            $scope.startProductTime = new Date();
-            $scope.endProductTime = new Date((new Date).setDate((new Date).getDate() + 7));
+           
+            $scope.formData['productiondate'] = new Date();
+            $scope.formData['closedate'] = new Date();
+            $scope.formData['productiondate'].showDate = '';
+            $scope.formData['closedate'].showDate = '';
 
             $scope.getDepListByCompany('');
             getProvence();
             createStationCode();
+
+            await myAjaxData.timeout(0);
+            $scope.$apply();
         }
     });
 
@@ -204,18 +233,19 @@ ajaxData({
     $scope.save = () =>{
         if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
 
-        let  paramsArr = ['id','depid','companyid','stationcode','stationname','stationfullname','stationClass','stationType','managerid','buildcapacity',
-            'closedate','provinceid','cityid','countyid','address','longitude','latitude','stationtel','stationzip'];
-        let formData = {}
-        for(let key in $scope.formData){
-           if(paramsArr.includes(key)){
-                formData[key] = $scope.formData[key]
-           }
-        }
+        // let  paramsArr = ['id','depid','companyid','stationcode','stationname','stationfullname','stationClass','stationType','managerid','buildcapacity',
+        //     'closedate','provinceid','cityid','countyid','address','longitude','latitude','stationtel','stationzip'];
+        // let formData = {}
+        // for(let key in $scope.formData){
+        //    if(paramsArr.includes(key)){
+        //         formData[key] = $scope.formData[key]
+        //    }
+        // }
 
-        formData['startProductTime'] = $scope.formData['startProductTime']?new Date($scope.formData['startProductTime']).Format("yyyy-MM-dd"):'';
-        formData['productiondate'] =  $scope.formData['productiondate']?new Date($scope.formData['productiondate']).Format("yyyy-MM-dd"):'';
-        
+        let formData = $scope.formData;
+        formData['productiondate'] = $scope.formData['productiondate']?$scope.formData['productiondate'].showDate:'';
+        formData['closedate']   = $scope.formData['closedate']?$scope.formData['closedate'].showDate:'';
+
         $scope.saveStation.getData(formData).then(res=>{
             if(res.type == 'success'){
                 toaster.pop('success','','保存成功');

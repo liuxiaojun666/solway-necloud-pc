@@ -72,7 +72,7 @@ ajaxData({
     //新增
     $scope.newStation = () =>{
         $scope.newStationModel = true;
-        $scope.$broadcast('broadAddStation', { 'id': '' });
+        $scope.$broadcast('broadAddStation', '');
     }
 
     //删除电站
@@ -90,7 +90,7 @@ ajaxData({
     $scope.trClick = (item, index, event) => {
         if(event.target.className.includes('icon-bianji-copy')) {
             $scope.newStationModel = true;
-            $scope.$broadcast('broadAddStation', { 'id': item.id});
+            $scope.$broadcast('broadAddStation', item);
         }else if(event.target.className.includes('icon-shanchu1')) {
             $solway.confirm({ message: '确定删除此电站？删除电站，相关配置信息将一起被删除,请谨慎操作 ! ! !' }, () => {
                 deleteStationFun(item.id)
