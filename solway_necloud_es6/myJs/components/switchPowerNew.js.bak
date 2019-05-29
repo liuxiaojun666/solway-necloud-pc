@@ -110,18 +110,19 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
 
     function getAllGroup (){
         $scope.stationList = [];
+        $scope.stationListInCompanyLevel = [];;
         let storage = JSON.parse(localStorage.getItem("switchStationData"));
         if($scope.currentSTClass == '01'){//光伏
             if(storage && storage.solarDepGroup){
                 let data = storage.solarDepGroup;
-                dealwithGroupData(data);
+                $scope.dealwithGroupData(data);
             }else{
                 groupData();
             }
         }else if($scope.currentSTClass == '02'){//风电 
             if(storage && storage.windDepGroup){
                 let data = storage.windDepGroup;
-                dealwithGroupData(data);
+                $scope.dealwithGroupData(data);
             }else{
                 groupData();
             }
@@ -148,32 +149,57 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                 }else if($scope.currentSTClass == '02'){//风电
                     setStorageFun("switchStationData",'windDepGroup',{'windDepGroup':data});
                 }
-                dealwithGroupData(data)
+                $scope.dealwithGroupData(data)
             }
         });
     }
 
     //处理，组合集团公司数据
-    function dealwithGroupData(data){
+    $scope.dealwithGroupData = async(data) =>{
         $scope.parentIdArr = [],$scope.hasChildStation = [];
         for(let i = 0;i<data.length;i++){
-            if(data[i].stFlag == 2 && data[i].parentId){
+            if(data[i].stFlag == 2 && data[i].parentId){ //将子公司中parentId不为空的情况记录下来，parentId为该子公司的上级子公司，控制上级子公司的箭头不显示
                 $scope.parentIdArr.push(data[i].parentId)
             }
-            if(data[i].stFlag == 2 && !$scope.hasChildStation.includes(data[i].comId)){
+            if(data[i].stFlag == 2 && !$scope.hasChildStation.includes(data[i].comId)){ //将含有子公司的公司ID记录下来
                 $scope.hasChildStation.push(data[i].comId);
             }
-            if($scope.currentSTID == data[i].id){
+            if($scope.currentSTID == data[i].id){  //当前选中的是什么主公司
                 $scope.currentComId = data[i].comId;
             }
         }
 
-        //若当前是在电站级别，去展开电站
-        if($scope.currentSTID && $scope.currentType == 0){
-            $scope.currentParentId = $scope.currentInfoData.currentParentId; //箭头active控制
-            getStationList($scope.currentParentId);
+        //若当前是在----主公司/子公司----级别，并且他们的主公司包含子公司时，请求与子公司同级的电站列表
+        if($scope.currentSTID && ($scope.currentType == 1 ||$scope.currentType == 2)){
+            if($scope.hasChildStation.includes($scope.currentComId)){ 
+                $scope.inCompanyLevelId = $scope.currentComId;
+                $scope.stationInCompanyLeveInterface($scope.currentComId);
+            }
         }
+
+        //若当前是在----电站----级别，并且他们的主公司包含子公司时，请求与子公司同级的电站列表
+        if($scope.currentSTID && $scope.currentType == 0){
+            if($scope.hasChildStation.includes($scope.currentComId)){ 
+                $scope.inCompanyLevelId = $scope.currentComId;
+                await $scope.stationInCompanyLeveInterface($scope.currentComId);
+                $scope.$apply();
+            }
+
+            let a = $scope.stationListInCompanyLevel.some(function(item,index,arr){
+                return item.id == $scope.currentSTID
+            }); 
+            
+            if(!a && ($scope.currentInfoData.currentSTClass == $scope.currentSTClass)){
+                //若当前是在电站级别且 没切换tab（风电、光伏），去展开电站
+                $scope.currentParentId = $scope.currentInfoData.currentParentId; //箭头active控制
+                getStationList($scope.currentParentId);
+            }
+        }
+
         $scope.groupAndCompanyList = data;
+        if($scope.currentSTID && $scope.currentType == 0 && $scope.hasChildStation.includes($scope.currentComId)){ 
+            $scope.$apply();
+        }
     }
 
     //风电、光伏tab列表
@@ -203,9 +229,14 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
     //公司所属电站列表
     $scope.getStationData = (belongId,level,comId) =>{
         $scope.stationList = [];
-        if(belongId == $scope.currentComId && $scope.stationList.length){
+        if($scope.currentComId != comId){  //获取电站列表时，不属于一个总集团，则清空与子公司同级的电站列表
+            $scope.inCompanyLevelId = '';
+        }
+        
+        if(belongId == $scope.currentComId && ($scope.currentInfoData.currentSTClass == $scope.currentSTClass)){
             $scope.currentComId = '';
             $scope.currentParentId = '';
+            $scope.inCompanyLevelId = '';
             return;
         }
         if($scope.currentParentId == belongId){
@@ -221,6 +252,9 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
         
         if($scope.ifHasChildStations(belongId) && level != -1){  
             getStationList(belongId)
+        }else{
+            $scope.inCompanyLevelId = belongId;
+            $scope.stationInCompanyLeveInterface(belongId);
         }
     }
 
@@ -276,6 +310,27 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
         }
     }
 
+    $scope.stationInCompanyLeveInterface  = async(belongId) =>{
+        $scope.stationListInCompanyLevel = [];
+        await $http({
+            method: 'GET',
+            url: window.interface['GETsTListByLevel'],
+            params: {
+                isGroup: $rootScope.isGroup,
+                currentView: $rootScope.currentView,
+                isPart:$scope.stType,
+                type:1,
+                levelId:belongId,
+                stClass: $scope.currentSTClass
+            }
+        }).success(function (res) {
+            if(res.code == 0){
+                $scope.stationListInCompanyLevel = res.body;
+            }
+        });
+        $scope.$apply();
+    }
+
     //获取点击公司的电站接口
     function stationDataInterface (belongId){
         $http({
@@ -310,6 +365,7 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
                     localStorage.setItem('switchStationData',JSON.stringify(Object.assign(storage,{'windDefineStation':concatArr})));
                 }
         
+                
                 $scope.stationList = res.body;
             }
         });

@@ -1,66 +1,130 @@
 ajaxData({
     // 电站事件列表
-    StationRunStatusDetail: {
-        name: 'GETStationRunStatusDetail',
+    DeviceEventDetail: {
+        name: 'GETDeviceEventDetail',
         data: {},
         later: true
     },
-}, {})('eventListCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
-    // $scope.StationRunStatusDetail.getData({
-    //     stid: v.stid,
-    //     stClass: v.stClass
-    // })
+    // 删除事件
+    deleteDeviceEventDetail: {
+        name: 'GETdeleteDeviceEventDetail',
+        data: {},
+        later: true
+    },
+}, {
+        __serviceName__: 'eventListService'
+    })('eventListCtrl', ['$scope', 'eventListService', 'actionRecord', '$timeout', 'toaster', '$interval', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, $interval, parentmyAjaxData) => {
+        // Unix时间戳转换
+        function FormatDateTime(UnixTime) {
+            var a = UnixTime.replace("/Date(", "").replace(")/", "");
+            var date = new Date(parseInt(a));
+            var y = date.getFullYear();
+            var m = date.getMonth() + 1;
+            m = m < 10 ? ('0' + m) : m;
+            var d = date.getDate();
+            d = d < 10 ? ('0' + d) : d;
+            return y + '-' + m + '-' + d;
+        };
 
-    $scope.StationRunStatusDetail.subscribe(res => {
-        $scope.powerStInfo = res.body;
+        const showKey = {
+            0: '不显示',
+            1: '显示'
+        }
+
+        const statusKey = {
+            0: '关闭',
+            1: '未关闭'
+        }
+
+        //获取事件列表
+        $scope.$on('eventList', (event, v) => {
+            getList();
+        })
+
+        var getList = () => {
+            $scope.DeviceEventDetail.getData({
+                stid: null
+            })
+
+            $scope.DeviceEventDetail.subscribe(res => {
+                $scope.powerStList = res.body;
+                $scope.powerStList.forEach(item => {
+                    item.startDateFormat = item.startDate ? FormatDateTime(item.startDate.toString()) : '';
+                    item.endDateFormat = item.endDate ? FormatDateTime(item.endDate.toString()) : '';
+                    item.showFormat = showKey[item.show];
+                    item.statusFormat = statusKey[item.status];
+                });
+            });
+        }
+
+        //删除按钮
+        $scope.trClick = (item, index, event) => {
+            if (event.target.className.includes('icon-bianji-copy')) {
+                
+            } else if (event.target.className.includes('icon-shanchu1')) {
+                $solway.confirm({ message: '确定删除此事件吗？' }, () => {
+                    $scope.deleteDeviceEventDetail.getData({
+                        id: item.id
+                    })
+
+                    $scope.deleteDeviceEventDetail.subscribe(res => {
+                        if (res.code == 0) {
+                            toaster.pop('success', '', '删除成功');
+                            getList();
+                        } else {
+                            toaster.pop('error', '', '删除失败');
+                        }
+                    });
+                });
+            }
+        }
+
+        // 返回按钮
+        $scope.back = () => {
+            $scope.$emit('eventListHide');
+        }
+
+        //表格的表头设置
+        $scope.column = [
+            {
+                title: '事件标题',
+                dataIndex: 'title',
+                align: 'center'
+            }, {
+                title: '事件详情',
+                width: '25%',
+                dataIndex: 'detail',
+                align: 'center'
+            }, {
+                title: '开始时间',
+                dataIndex: 'startDateFormat',
+                align: 'center',
+                sort: !0
+            }, {
+                title: '结束时间',
+                dataIndex: 'endDateFormat',
+                align: 'center',
+                sort: !0
+            }, {
+                title: '前端显示',
+                dataIndex: 'showFormat',
+                align: 'center'
+            }, {
+                title: '事件状态',
+                dataIndex: 'statusFormat',
+                align: 'center'
+            },
+            {
+                title: '操作',
+                dataIndex: '',
+                align: 'center',
+                sort: !0,
+                render: function () {
+                    function render(text, item, index) {
+                        return `<div class="clearfix"><i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i></div>`;
+                    }
+
+                    return render;
+                }()
+            }];
     });
-
-    // 返回按钮
-    $scope.back = ()=>{
-        $scope.$emit('eventListHide');
-    }
-    
-    //表格的表头设置
-    $scope.column = [
-        {
-            title: '事件标题',
-            dataIndex: 'id',
-            align: 'center'
-        }, {
-            title: '事件详情',
-            width: '25%',
-            dataIndex: 'dictType',
-            align: 'center'
-        }, {
-            title: '开始时间',
-            dataIndex: 'dictName',
-            align: 'center',
-            sort: !0
-        }, {
-            title: '结束时间',
-            dataIndex: 'dictCode',
-            align: 'center',
-            sort: !0
-        }, {
-            title: '前端显示',
-            dataIndex: 'dictEnName',
-            align: 'center'
-        }, {
-            title: '事件状态',
-            dataIndex: 'description',
-            align: 'center'
-        },
-        {
-            title: '操作',
-            dataIndex: '',
-            align: 'center',
-            sort: !0,
-            render: function () {
-                function render(text, item, index) {
-                    return `<div class="clearfix"><i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="\u6388\u6743"></i><i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i></div>`;
-                }
-
-                return render;
-            }()
-        }];
-});

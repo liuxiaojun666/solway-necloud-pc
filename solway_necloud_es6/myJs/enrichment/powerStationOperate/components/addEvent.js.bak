@@ -7,7 +7,13 @@ ajaxData({
     },
     // 添加事件
     insertDeviceEventDetail: {
-        name: 'GETinsertDeviceEventDetail',
+        name: 'insertDeviceEventDetail',
+        data: {},
+        later: true
+    },
+    // 电站事件列表
+    DeviceEventDetail: {
+        name: 'GETDeviceEventDetail',
         data: {},
         later: true
     },
@@ -37,7 +43,17 @@ ajaxData({
         '-99': '未知',
         '99': '正常'
     }
+    const evShowKey = {
+        0: '不显示',
+        1: '显示'
+    }
+    const evStatusKey = {
+        0: '关闭',
+        1: '未关闭'
+    }
+    
     $scope.$on('powerStInfo', (event, v) => {
+        $scope.formData = {};
         $scope.stid = v.stid;
         $scope.StationRunStatusDetail.getData({
             stid: v.stid,
@@ -46,12 +62,31 @@ ajaxData({
 
         $scope.StationRunStatusDetail.subscribe(res => {
             $scope.powerStInfo = res.body;
-            $scope.powerStInfo.updateTime = FormatDateTime($scope.powerStInfo.updateTime.toString());
-            $scope.powerStInfo.status = statusKey[$scope.powerStInfo.status];
-            $scope.powerStInfo.Comm = commKey[$scope.powerStInfo.Comm];
-            $scope.powerStInfo.real_power = $scope.powerStInfo.real_power == 0 ? $scope.powerStInfo.real_power : $scope.powerStInfo.real_power.toFixed(10);
+            $scope.powerStInfo.updateTimeFormat = FormatDateTime($scope.powerStInfo.updateTime.toString());
+            $scope.powerStInfo.statusFormat = $scope.powerStInfo.Comm == 0 ? statusKey[$scope.powerStInfo.status] : '';
+            $scope.powerStInfo.CommFormat = commKey[$scope.powerStInfo.Comm];
+            $scope.powerStInfo.real_powerFormat = $scope.powerStInfo.real_power == 0 || !$scope.powerStInfo.real_power ? $scope.powerStInfo.real_power : $scope.powerStInfo.real_power.toFixed(10);
         });
+        // 获取事件列表
+        getList();
     })
+
+    // 获取事件列表
+    var getList = () => {
+        $scope.DeviceEventDetail.getData({
+            stid: $scope.stid
+        })
+
+        $scope.DeviceEventDetail.subscribe(res => {
+            $scope.powerStList = res.body;
+            $scope.powerStList.forEach(item => {
+                item.startDateFormat = item.startDate ? FormatDateTime(item.startDate.toString()) : '';
+                item.endDateFormat = item.endDate ? FormatDateTime(item.endDate.toString()) : '';
+                item.showFormat = evShowKey[item.show];
+                item.statusFormat = evStatusKey[item.status];
+            });
+        });
+    }
 
     // 时间范围选择
     $scope.GroupUser = {
@@ -82,6 +117,7 @@ ajaxData({
         }
     ]
 
+    //输入事件 确定按钮
     $scope.save = () => {
         if (!$solway.formValidation($scope.formData, '.addEvent', toaster)) return; //校验非空
         $scope.insertDeviceEventDetail.getData({
@@ -97,5 +133,11 @@ ajaxData({
         $scope.insertDeviceEventDetail.subscribe(res => {
             // $scope.powerStInfo = res.body;
         });
+    }
+
+    //取消按钮
+    $scope.cancel = () => {
+
+        $scope.$emit('eventListHide');
     }
 });

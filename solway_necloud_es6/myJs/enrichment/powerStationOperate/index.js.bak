@@ -1,5 +1,5 @@
 ajaxData({
-    // 显示所有电站详情的（按照集团分组）
+    // 显示所有电站详情（按照集团分组）
     StationRunStatusNew: {
         name: 'GETStationRunStatusNew',
         data: {},
@@ -10,122 +10,195 @@ ajaxData({
         name: 'selectAllByAdmin',
         data: {}
     },
-}, {})('powerStationOperateCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
-    $scope.moduleName = '电站运行';//当前页面名称
+}, {
+        stid: null
+    })('powerStationOperateCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
+        $scope.moduleName = '电站运行';//当前页面名称
 
-    //点击全选
-    $scope.allChecked = false;
-    $scope.getAllGroup = (e) => {
-        e.stopPropagation();
-        $scope.groupList.forEach(item => {
-            item.checked = $scope.allChecked ? true : false;
+        //点击全选
+        $scope.allChecked = false;
+        $scope.getAllGroup = (e) => {
+            e.stopPropagation();
+            $scope.groupList.forEach(item => {
+                item.checked = $scope.allChecked ? true : false;
+            });
+        }
+
+        //获取选中的集团
+        $scope.comIds = [];
+        $scope.getCheckedGroup = () => {
+            $scope.comIds = $scope.groupList.filter(item => item.checked).map(item => item.comId);
+            $scope.getList();
+            $scope.searchShow = false;
+        }
+
+        //取消选中按钮
+        $scope.cancelChecked = (e) => {
+            e.stopPropagation();
+            $scope.allChecked = false;
+            $scope.groupList.forEach(item => {
+                item.checked = false;
+            });
+            $scope.searchShow = false;
+        }
+
+        //获取集团列表
+        $scope.selectAllByAdmin.subscribe(res => {
+            $scope.groupList = res;
+            $scope.groupList.forEach(item => {
+                item.checked = false;
+            });
         });
-    }
 
-    //点击单个集团的 多选框
-    $scope.aaa = '';
-    $scope.getGroup = (item) => {
-        // console.log(item)
-    }
+        //刷新按钮
+        $scope.refresh = () => {
+            $scope.getList();
+        }
 
-    //获取选中的集团
-    $scope.getCheckedGroup = () => {
-        $scope.comIds = null;
-        $scope.comIds = $scope.groupList.filter(item => item.checked).map(item => item.comId);
-        $scope.StationRunStatusNew.getData({
-            comIds: $scope.comIds,
-            status: '0,1,2,3,4'
-        })
-        $scope.searchShow = false;
-    }
+        $scope.statusArr = [
+            {
+                'checked': true,
+                'value': 0
+            },
+            {
+                'checked': true,
+                'value': 1
+            },
+            {
+                'checked': true,
+                'value': 2
+            },
+            {
+                'checked': true,
+                'value': 3
+            },
+            {
+                'checked': true,
+                'value': 4
+            },
+            {
+                'checked': true,
+                'value': 5
+            },
+            {
+                'checked': true,
+                'value': 6
+            },
+        ]
 
-    //获取集团列表
-    $scope.selectAllByAdmin.subscribe(res => {
-        $scope.groupList = res;
-        $scope.groupList.forEach(item => {
-            item.checked = false;
-        });
-    });
+        //-----------------------------------获取电站详情 (默认获取全部)
+        //状态的全选按钮
+        $scope.powerStatusCheckAll = true;
+        $scope.statusCheckAll = () => {
+            $scope.statusArr.forEach(item => {
+                item.checked = $scope.powerStatusCheckAll ? true : false;
+            })
+        }
 
-    //刷新按钮
-    $scope.refresh = ()=>{
-        $scope.StationRunStatusNew.getData({
-            status: '0,1,2,3,4'
-        })
-    }
+        //获取电站
+        $scope.getList = () => {
+            $scope.loading = true;
 
-    //获取电站详情 (默认获取全部)
-    $scope.StationRunStatusNew.getData({
-        status: '0,1,2,3,4'
-    })
+            var checkedStatus = [];
+            $scope.statusArr.forEach(item => {
+                if (item.checked) {
+                    checkedStatus.push(item.value)
+                }
+            })
 
-    $scope.StationRunStatusNew.subscribe(res => {
-        $scope.powerSt = res.body;
-        $scope.powerStAll = [];
-        $scope.powerSt.date.forEach(item => {
-            $scope.powerStAll.push(...item.srs);
-        })
-    });
+            $scope.StationRunStatusNew.getData({
+                comIds: $scope.comIds.join(),
+                status: checkedStatus.join()
+            })
 
-    // setInterval(()=>{
-    //     $scope.StationRunStatusNew.getData({
-    //         status: '0,1,2,3,4'
-    //     })
-    // },10000)
+            $scope.StationRunStatusNew.subscribe(res => {
+                $scope.loading = false;
+                $scope.powerSt = res.body;
+                $scope.powerStAll = [];
+                $scope.powerSt.date.forEach(item => {
+                    $scope.powerStAll.push(...item.srs);
+                })
+                $scope.powerSt.date.forEach(item => {
+                    if (item.srs.length > 102) {
+                        item.srs.forEach((son, i) => {
+                            if (i > 102) {
+                                son.show = false;
+                            }
+                        })
+                    }
+                })
+            });
+        }
+        $scope.getList();
 
 
+        //切换 按照集团显示
+        $scope.isGroupShow = true;
+        $scope.changeInputAbsent = () => {
+            $scope.isGroupShow = !$scope.isGroupShow;
+        }
 
+        //点击电站方块 - 弹出添加事件组件
+        $scope.addEvent = false;
+        $scope.addEventFun = (item) => {
+            $scope.addEvent = true;
+            $scope.$broadcast('powerStInfo', item);
+            // myAjaxData.stid = item.stid;
+        }
 
-
-
-
-
-
-
-    //头部折叠框 显示
-    $timeout(() => {
-        $('.ng-clock').removeClass('ng-clock');
-    }, 2000);
-
-    //切换 按照集团显示
-    $scope.isGroupShow = true;
-    $scope.changeInputAbsent = () => {
-        $scope.isGroupShow = !$scope.isGroupShow;
-    }
-
-    //点击电站方块 - 弹出添加事件组件
-    $scope.addEvent = false;
-    $scope.addEventFun = (item) => {
-        $scope.addEvent = true;
-        $scope.$broadcast('powerStInfo', item);
-    }
-
-    //点击电站运行事件 - 弹出电站运行事件表格
-    $scope.eventListShow = false;
-    $scope.openList = () => {
-        $scope.eventListShow = true;
-    }
-
-    // 接收事件列表的返回按钮
-    $scope.$on('eventListHide', (event, v) => {
+        //点击电站运行事件 - 弹出电站运行事件表格
         $scope.eventListShow = false;
-    })
+        $scope.openList = () => {
+            $scope.eventListShow = true;
+            $scope.$broadcast('eventList');
+        }
 
-    // 搜索按钮
-    $scope.searchShow = false;
-    $scope.showSearchModel = (e) => {
-        e.stopPropagation();
-        $scope.searchShow = true;
-    }
-
-    $scope.keep = (e) => {
-        e.stopPropagation();
-    }
-
-    document.addEventListener('click', eventListen);
-    function eventListen() {
+        // 搜索按钮
         $scope.searchShow = false;
-        $scope.$apply();
-    }
+        $scope.showSearchModel = (e) => {
+            e.stopPropagation();
+            $scope.searchShow = true;
+        }
 
-});
+        $scope.keep = (e) => {
+            e.stopPropagation();
+        }
+
+        document.addEventListener('click', eventListen);
+        function eventListen() {
+            $scope.searchShow = false;
+            $scope.$apply();
+        }
+
+        //折叠电站方块
+        $scope.foldFlag = false;
+        $scope.fold = (item) => {
+            item.srs.forEach((v, i) => {
+                if (i > 101) {
+                    v.show = !v.show;
+                }
+            })
+            $scope.foldFlag = !$scope.foldFlag;
+        }
+
+        // 接收事件列表的返回按钮   电站详情子组件 取消按钮
+        $scope.$on('eventListHide', (event, v) => {
+            $scope.eventListShow = false;
+            $scope.addEvent = false;
+        })
+
+        //定时刷新
+        const interval = $interval(() => {
+            $scope.getList();
+        }, 10000);
+
+        $scope.$on('$destroy', () => {
+            $interval.cancel(interval);
+        });
+
+        //头部折叠框 显示
+        $timeout(() => {
+            $('.ng-clock').removeClass('ng-clock');
+        }, 2000);
+
+    });
