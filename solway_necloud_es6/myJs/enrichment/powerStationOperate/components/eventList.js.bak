@@ -57,27 +57,53 @@ ajaxData({
             });
         }
 
-        //删除按钮
-        $scope.trClick = (item, index, event) => {
-            if (event.target.className.includes('icon-bianji-copy')) {
-                
-            } else if (event.target.className.includes('icon-shanchu1')) {
-                $solway.confirm({ message: '确定删除此事件吗？' }, () => {
-                    $scope.deleteDeviceEventDetail.getData({
-                        id: item.id
-                    })
+        //删除按钮  编辑按钮
+        $scope.delListItem = (item)=>{
+            $solway.confirm({ message: '确定删除此事件吗？' }, () => {
+                $scope.deleteDeviceEventDetail.getData({
+                    id: item.id
+                })
 
-                    $scope.deleteDeviceEventDetail.subscribe(res => {
-                        if (res.code == 0) {
-                            toaster.pop('success', '', '删除成功');
-                            getList();
-                        } else {
-                            toaster.pop('error', '', '删除失败');
-                        }
-                    });
+                $scope.deleteDeviceEventDetail.subscribe(res => {
+                    if (res.code == 0) {
+                        toaster.pop('success', '', '删除成功');
+                        getList();
+                    } else {
+                        toaster.pop('error', '', '删除失败');
+                    }
                 });
-            }
+            });
         }
+
+        //编辑按钮
+        $scope.edit = false;
+        $scope.editListItem = (item)=>{
+            item.edit = !item.edit;
+            $scope.edit = !$scope.edit;
+        }
+
+        // $scope.trClick = (item, index, event) => {
+        //     if (event.target.className.includes('icon-bianji-copy')) {
+        //         $(event.target).parent().parent().siblings('td').find('input').removeClass('disable-input').addClass('able-input').attr('disabled',false);
+        //         $('.able-input').parent().parent().css('background','#28527B');
+                
+        //     } else if (event.target.className.includes('icon-shanchu1')) {
+        //         $solway.confirm({ message: '确定删除此事件吗？' }, () => {
+        //             $scope.deleteDeviceEventDetail.getData({
+        //                 id: item.id
+        //             })
+
+        //             $scope.deleteDeviceEventDetail.subscribe(res => {
+        //                 if (res.code == 0) {
+        //                     toaster.pop('success', '', '删除成功');
+        //                     getList();
+        //                 } else {
+        //                     toaster.pop('error', '', '删除失败');
+        //                 }
+        //             });
+        //         });
+        //     }
+        // }
 
         // 返回按钮
         $scope.back = () => {
@@ -89,17 +115,26 @@ ajaxData({
             {
                 title: '事件标题',
                 dataIndex: 'title',
-                align: 'center'
+                align: 'left'
             }, {
                 title: '事件详情',
                 width: '25%',
                 dataIndex: 'detail',
-                align: 'center'
+                align: 'left',
+                render(text,item,index) {
+                    return `<div style="position:relative;">
+                        <input value="${text?text:''}" class="disable-input" disabled="disabled">
+                    </div>`
+                },
             }, {
                 title: '开始时间',
                 dataIndex: 'startDateFormat',
                 align: 'center',
-                sort: !0
+                sort: !0,
+                render(text,item,index) {
+                    return `<calendar style="display: inline-block;" calendar-type="yyyy-MM-dd HH:mm"
+                    show-arrow="false" clearable="false" date-time="text"></calendar>`
+                },
             }, {
                 title: '结束时间',
                 dataIndex: 'endDateFormat',
@@ -121,9 +156,8 @@ ajaxData({
                 sort: !0,
                 render: function () {
                     function render(text, item, index) {
-                        return `<div class="clearfix"><i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i></div>`;
+                        return `<div class="clearfix"><i class="iconfont icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="编辑"></i><i class="iconfont icon-shanchu1" style="font-size: 18px;color:#ff8080;" title="删除"></i></div>`;
                     }
-
                     return render;
                 }()
             }];

@@ -28,11 +28,17 @@ ajaxData(
             name: 'GETdeviceStatusFromRedis',
             data: {},
             later: true
-        }
+        },
+        // 切换电站
+        changeStation: {
+            name: 'GETUserAuthHandleChangeDataType',
+            data: {},
+            later: true
+        },
     }, {
         __serviceName__: 'mainEquipmentService',
     }
-)('mainEquipmentCtrl', ['$scope', 'mainEquipmentService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+)('mainEquipmentCtrl', ['$scope', 'mainEquipmentService', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
     $('.themeEquipment.ng-clock').removeClass('ng-clock');
     let od, od2;
     // 电站类型列表
@@ -40,6 +46,20 @@ ajaxData(
         $scope.stClassLIst.res.stClass01 = res.data.some(v => v.id === '01');
         $scope.stClassLIst.res.stClass02 = res.data.some(v => v.id === '02');
     });
+
+    $scope.goThisStation = async ({ stid, stClass, router, pageData }) => {
+        const falsify = historicalRecord.falsify(router, pageData, (!stid || !stClass));
+        if (falsify && (falsify.redirect === 'failure')) return;
+        if (!stid || !stClass) return;
+        await $scope.changeStation.getData({
+            dataType: 0,
+            id: stid,
+            isGroup: "0",
+            stClass
+        });
+        $state.go(router);
+    };
+
     $scope.stClassLIst.subscribe(res => {
         const date = new Date().Format('yyyy-MM-dd').substr(0, 7);
         [

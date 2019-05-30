@@ -15,14 +15,33 @@ ajaxData(
                 queryType: 1
             }
         },
+        // 切换电站
+        changeStation: {
+            name: 'GETUserAuthHandleChangeDataType',
+            data: {},
+            later: true
+        },
     }, {
         __serviceName__: 'mainPeopleService',
     }
-)('mainPeopleCtrl', ['$scope', 'mainPeopleService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+)('mainPeopleCtrl', ['$scope', 'mainPeopleService', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
     $('.themePeople.ng-clock').removeClass('ng-clock');
     // 滚动数字
     const od = new Odometer({ el: document.getElementById('odometer'), value: 10000 });
     $scope.safeRunDayCount.promise.then(res => od.update(10000 + res.body + ''));
+
+    $scope.goThisStation = async ({ stid, stClass, router, pageData }) => {
+        const falsify = historicalRecord.falsify(router, pageData, (!stid || !stClass));
+        if (falsify && (falsify.redirect === 'failure')) return;
+        if (!stid || !stClass) return;
+        await $scope.changeStation.getData({
+            dataType: 0,
+            id: stid,
+            isGroup: "0",
+            stClass
+        });
+        $state.go(router);
+    };
 
     // 运维效率响应处理
     $scope.analysis_company_operation_station_accum_list.promise.then(res => {

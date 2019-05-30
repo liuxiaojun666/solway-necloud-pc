@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="theme/css/app.css" type="text/css" />
     <link rel="stylesheet" href="theme/css/base.css" type="text/css" />
     <link type="image/x-icon" rel="shortcut icon" ng-href="{{currCompanyLogo}}">
+    <script async type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"></script>
     <script>
         window.stamp = window.localStorage.stamp;
         if (!window.stamp) window.location.href = 'http://' + window.location.host + '/login.html';
@@ -166,7 +167,7 @@
             '05:00',
             '06:00',
         ];
-        setInterval(() => {
+        setInterval(function (params) {
             var dateTimeStr = (new Date).Format('yyyy-MM-dd hh:mm').substr(-5);
             if (reloadTime.indexOf(dateTimeStr) > -1) window.location.reload();
             dateTimeStr = null;
@@ -179,7 +180,7 @@
     if ((location.host.split(':')[1] + '').indexOf('88') >= 0) {
         window.stamp = '?_=' + Date.now();
         document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
-        setTimeout(() => {
+        setTimeout(function (params){
             window.LiveReload.close = function () {
                 LiveReload.reloader.reloadPage = function () {
                     return;

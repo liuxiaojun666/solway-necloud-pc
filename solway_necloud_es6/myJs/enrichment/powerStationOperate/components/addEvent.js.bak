@@ -94,7 +94,9 @@ ajaxData({
         startDate: new Date,
         endDate: new Date
     }
-
+    $scope.GroupUser.startDate.showDate = '';
+    $scope.GroupUser.endDate.showDate = '';
+    
     // 保存按钮
     $scope.formData = {
         show: '',
@@ -121,7 +123,7 @@ ajaxData({
     $scope.save = () => {
         if (!$solway.formValidation($scope.formData, '.addEvent', toaster)) return; //校验非空
         $scope.insertDeviceEventDetail.getData({
-            sitd: $scope.stid,
+            stid: $scope.stid,
             title: $scope.formData.title,
             detail: $scope.formData.detail,
             startDate: $scope.GroupUser.startDate.showDate,
@@ -131,13 +133,18 @@ ajaxData({
         })
 
         $scope.insertDeviceEventDetail.subscribe(res => {
-            // $scope.powerStInfo = res.body;
+            if(res.code == 0){
+                toaster.pop('success', '', '添加成功');
+                $scope.formData = {};
+                getList();
+            } else {
+                toaster.pop('error', '', '添加失败');
+            }
         });
     }
 
     //取消按钮
     $scope.cancel = () => {
-
         $scope.$emit('eventListHide');
     }
 });

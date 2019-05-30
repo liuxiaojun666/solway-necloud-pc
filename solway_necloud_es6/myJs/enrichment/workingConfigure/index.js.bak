@@ -438,13 +438,21 @@ ajaxData({
     /****************************************  初始电量   *********************************************** */
 
     $scope.endDate = new Date('2099');
-    $scope.expiryDate = new Date();
 
     //初始电量详情
-    const getInitialPowerDetailData = () =>{
-        $scope.initialPowerDetail.getData({pstationid:$scope.pstationid}).then(res=>{
-            $scope.initialPowerData = res;
-            $scope.expiryDate = new Date(res.expirydate);
+    const getInitialPowerDetailData = async() =>{
+        $scope.formData = {};
+        $scope.temporaryObj = {};
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+
+        $scope.initialPowerDetail.getData({pstationid:$scope.pstationid}).then(data=>{
+            $scope.initialPowerData = data;
+            
+            $scope.temporaryObj['expirydate'] = data.expirydate?new Date(data.expirydate):new Date();
+            $scope.temporaryObj['endDate'] = data.endDate?new Date(data.endDate):new Date();
+            if(!data.expirydate) $scope.temporaryObj['expirydate'].showDate = '';
+            if(!data.endDate) $scope.temporaryObj['endDate'].showDate = '';
         });
     }
     $scope.initialPowerEditShow = () =>{
@@ -460,13 +468,14 @@ ajaxData({
     //保存
     $scope.saveInitialPower = () =>{
         if($scope.saveInitPowerLoading) return;
-
-        $scope.saveInitPowerLoading = true;
-
         if (!$solway.formValidation($scope.initialPowerData, '.initial-power', toaster)) return;//校验非空
 
-        $scope.initialPowerData['expirydate'] = new Date($scope.expiryDate).Format("yyyy-MM-dd");
+        $scope.initialPowerData['expirydate'] = $scope.temporaryObj['expirydate']?$scope.temporaryObj['expirydate'].showDate:'';
+        $scope.initialPowerData['endDate'] = $scope.temporaryObj['endDate']?$scope.temporaryObj['endDate'].showDate:'';
         $scope.initialPowerData['flag'] = $("input[name='ifFlag']:checked").val();
+        
+        $scope.saveInitPowerLoading = true;
+
         $scope.initialPowerSave.getData($scope.initialPowerData).then(res=>{
             $scope.saveInitPowerLoading = false;
 

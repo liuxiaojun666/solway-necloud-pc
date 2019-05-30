@@ -28,10 +28,16 @@ ajaxData(
             data: {},
             later: true
         },
+        // 切换电站
+        changeStation: {
+            name: 'GETUserAuthHandleChangeDataType',
+            data: {},
+            later: true
+        },
     }, {
         __serviceName__: 'mainResourcesService',
     }
-)('mainResourcesCtrl', ['$scope', 'mainResourcesService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+)('mainResourcesCtrl', ['$scope', 'mainResourcesService', 'actionRecord', '$interval', '$state'], ($scope, myAjaxData, historicalRecord, $interval, $state) => {
     $('.themeResources.ng-clock').removeClass('ng-clock');
     let od;
     // 电站类型列表
@@ -52,6 +58,18 @@ ajaxData(
             date
         }));
     });
+
+    $scope.goThisStation = async ({stid, stClass, router, pageData}) => {
+        const falsify = historicalRecord.falsify(router, pageData, false);
+        if (falsify && (falsify.redirect === 'failure')) return;
+        await $scope.changeStation.getData({
+            dataType: 0,
+            id: stid,
+            isGroup: "0",
+            stClass
+        });
+        $state.go(router);
+    };
 
     $scope.home_pv_company_rad_month_stationlist.subscribe(res => {
         $scope.home_pv_company_rad_month_stationlist.res.body.data = res.body.data.sort((a, b) => b.rad_chk - a.rad_chk);
