@@ -105,7 +105,6 @@ ajaxData({
         //获取电站
         $scope.getList = () => {
             $scope.loading = true;
-
             var checkedStatus = [];
             $scope.statusArr.forEach(item => {
                 if (item.checked) {
@@ -122,21 +121,22 @@ ajaxData({
                 $scope.loading = false;
                 $scope.powerSt = res.body;
                 $scope.powerStAll = [];
+                $scope.foldFlag = false;
                 $scope.powerSt.date.forEach(item => {
                     item.srs.forEach(son=>{
                         son.shortName = son.stationName.substr(0,4);
                     })
                     $scope.powerStAll.push(...item.srs);
                 })
-                $scope.powerSt.date.forEach(item => {
-                    if (item.srs.length > 102) {
-                        item.srs.forEach((son, i) => {
-                            if (i > 102) {
-                                son.show = false;
-                            }
-                        })
-                    }
-                })
+                // $scope.powerSt.date.forEach(item => {
+                //     if (item.srs.length > 102) {
+                //         item.srs.forEach((son, i) => {
+                //             if (i > 102) {
+                //                 son.show = false;
+                //             }
+                //         })
+                //     }
+                // })
             });
         }
         $scope.getList();
@@ -151,6 +151,7 @@ ajaxData({
         $scope.showPowerName = true;
         $scope.showNameAbsent = () => {
             $scope.showPowerName = !$scope.showPowerName;
+            $scope.foldFlag = false;
         }
         
         //点击电站方块 - 弹出添加事件组件
@@ -187,11 +188,20 @@ ajaxData({
         //折叠电站方块
         $scope.foldFlag = false;
         $scope.fold = (item) => {
-            item.srs.forEach((v, i) => {
-                if (i > 101) {
-                    v.show = !v.show;
-                }
-            })
+            if(!$scope.showPowerName){
+                item.srs.forEach((v, i) => {
+                    if (i > 101) {
+                        v.show = !v.show;
+                    }
+                })
+            } else {
+                item.srs.forEach((v, i) => {
+                    if (i > 50) {
+                        v.show = !v.show;
+                    }
+                })
+            }
+            
             $scope.foldFlag = !$scope.foldFlag;
         }
 

@@ -28,7 +28,13 @@ ajaxData({
         m = m < 10 ? ('0' + m) : m;
         var d = date.getDate();
         d = d < 10 ? ('0' + d) : d;
-        return y + '-' + m + '-' + d;
+        var h = date.getHours();
+        h = h < 10 ? ('0' + h) : h;
+        var minute = date.getMinutes();
+        var second = date.getSeconds();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        second = second < 10 ? ('0' + second) : second;
+        return y + '-' + m + '-' + d + ' ' + h + ':' + minute;
     };
 
     //获取电站的item
@@ -51,7 +57,7 @@ ajaxData({
         0: '关闭',
         1: '未关闭'
     }
-    
+
     $scope.$on('powerStInfo', (event, v) => {
         $scope.formData = {};
         $scope.stid = v.stid;
@@ -74,11 +80,13 @@ ajaxData({
     // 获取事件列表
     var getList = () => {
         $scope.DeviceEventDetail.getData({
-            stid: $scope.stid
+            stid: $scope.stid,
+            pageIndex: 0,
+            pageSize: 10
         })
 
         $scope.DeviceEventDetail.subscribe(res => {
-            $scope.powerStList = res.body;
+            $scope.powerStList = res.body.data;
             $scope.powerStList.forEach(item => {
                 item.startDateFormat = item.startDate ? FormatDateTime(item.startDate.toString()) : '';
                 item.endDateFormat = item.endDate ? FormatDateTime(item.endDate.toString()) : '';
@@ -96,7 +104,7 @@ ajaxData({
     }
     $scope.GroupUser.startDate.showDate = '';
     $scope.GroupUser.endDate.showDate = '';
-    
+
     // 保存按钮
     $scope.formData = {
         show: '',
@@ -130,17 +138,17 @@ ajaxData({
             endDate: $scope.GroupUser.endDate.showDate,
             show: $scope.formData.show,
             status: $scope.formData.status
-        })
-
-        $scope.insertDeviceEventDetail.subscribe(res => {
-            if(res.code == 0){
+        }).then(res => {
+            if (res.code == 0) {
                 toaster.pop('success', '', '添加成功');
                 $scope.formData = {};
+                $scope.GroupUser.startDate.showDate = '';
+                $scope.GroupUser.endDate.showDate = '';
                 getList();
             } else {
                 toaster.pop('error', '', '添加失败');
             }
-        });
+        })
     }
 
     //取消按钮

@@ -11,6 +11,12 @@ ajaxData({
         data: {},
         later: true
     },
+    // 编辑事件
+    insertDeviceEventDetail: {
+        name: 'insertDeviceEventDetail',
+        data: {},
+        later: true
+    },
 }, {
         __serviceName__: 'eventListService'
     })('eventListCtrl', ['$scope', 'eventListService', 'actionRecord', '$timeout', 'toaster', '$interval', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, $interval, parentmyAjaxData) => {
@@ -23,7 +29,13 @@ ajaxData({
             m = m < 10 ? ('0' + m) : m;
             var d = date.getDate();
             d = d < 10 ? ('0' + d) : d;
-            return y + '-' + m + '-' + d;
+            var h = date.getHours();
+            h = h < 10 ? ('0' + h) : h;
+            var minute = date.getMinutes();
+            var second = date.getSeconds();
+            minute = minute < 10 ? ('0' + minute) : minute;
+            second = second < 10 ? ('0' + second) : second;
+            return y + '-' + m + '-' + d + ' ' + h + ':' + minute;
         };
 
         const showKey = {
@@ -42,23 +54,42 @@ ajaxData({
         })
 
         var getList = () => {
+            $scope.loading = true;
             $scope.DeviceEventDetail.getData({
-                stid: null
+                pageIndex: 0,
+                pageSize: 10
             })
 
             $scope.DeviceEventDetail.subscribe(res => {
-                $scope.powerStList = res.body;
-                $scope.powerStList.forEach(item => {
+                $scope.powerStList = res.body.data;
+                $scope.loading = false;
+                $scope.GroupUser = [];
+                $scope.edit = [];
+                $scope.powerStList.forEach((item, i) => {
                     item.startDateFormat = item.startDate ? FormatDateTime(item.startDate.toString()) : '';
                     item.endDateFormat = item.endDate ? FormatDateTime(item.endDate.toString()) : '';
                     item.showFormat = showKey[item.show];
                     item.statusFormat = statusKey[item.status];
+                    $scope.GroupUser.push(
+                        {
+                            startDate: new Date,
+                            endDate: new Date
+                        }
+                    )
+                    $scope.GroupUser[i].startDate.showDate = item.startDateFormat;
+                    $scope.GroupUser[i].endDate.showDate = item.endDateFormat;
+                    $scope.edit.push(
+                        {
+                            show: '',
+                            status: ''
+                        }
+                    )
                 });
             });
         }
 
-        //删除按钮  编辑按钮
-        $scope.delListItem = (item)=>{
+        //删除按钮
+        $scope.delListItem = (item) => {
             $solway.confirm({ message: '确定删除此事件吗？' }, () => {
                 $scope.deleteDeviceEventDetail.getData({
                     id: item.id
@@ -75,18 +106,74 @@ ajaxData({
             });
         }
 
-        //编辑按钮
-        $scope.edit = false;
-        $scope.editListItem = (item)=>{
-            item.edit = !item.edit;
-            $scope.edit = !$scope.edit;
+        //切换到编辑状态
+        var flag = false;
+        $scope.showEdit = (item, i) => {
+            $scope.powerStList.forEach(item => {
+                if (item.edit) {
+                    toaster.pop('error', '', '每次只能编辑一条');
+                    flag = true;
+                    return;
+                }
+            })
+            if (!flag) {
+                item.edit = true;
+                $scope.edit[i].show = item.show;
+                $scope.edit[i].status = item.status;
+            }
         }
+
+        //取消编辑按钮
+        $scope.cancelEdit = (item) => {
+            item.edit = false;
+            flag = false;
+        }
+
+        //编辑 的 确定按钮
+        $scope.editItem = (item, i) => {
+            if (item.detail.length == 0) {
+                toaster.pop('error', '', '事件详情不能为空');
+                return;
+            }
+            item.startDate = $scope.GroupUser[i].startDate.showDate;
+            item.endDate = $scope.GroupUser[i].endDate.showDate;
+            item.show = $scope.edit[i].show;
+            item.status = $scope.edit[i].status;
+
+            $scope.insertDeviceEventDetail.getData(item).then(res => {
+                if (res.code == 0) {
+                    item.edit = false;
+                    flag = false;
+                    toaster.pop('success', '', '编辑成功');
+                    getList();
+                } else {
+                    toaster.pop('error', '', '编辑失败');
+                }
+            })
+        }
+
+        $scope.showData = [
+            {
+                k: 0, v: '不显示'
+            },
+            {
+                k: 1, v: '显示'
+            }
+        ]
+        $scope.statusData = [
+            {
+                k: 0, v: '关闭'
+            },
+            {
+                k: 1, v: '未关闭'
+            }
+        ]
 
         // $scope.trClick = (item, index, event) => {
         //     if (event.target.className.includes('icon-bianji-copy')) {
         //         $(event.target).parent().parent().siblings('td').find('input').removeClass('disable-input').addClass('able-input').attr('disabled',false);
         //         $('.able-input').parent().parent().css('background','#28527B');
-                
+
         //     } else if (event.target.className.includes('icon-shanchu1')) {
         //         $solway.confirm({ message: '确定删除此事件吗？' }, () => {
         //             $scope.deleteDeviceEventDetail.getData({
@@ -121,9 +208,9 @@ ajaxData({
                 width: '25%',
                 dataIndex: 'detail',
                 align: 'left',
-                render(text,item,index) {
+                render(text, item, index) {
                     return `<div style="position:relative;">
-                        <input value="${text?text:''}" class="disable-input" disabled="disabled">
+                        <input value="${text ? text : ''}" class="disable-input" disabled="disabled">
                     </div>`
                 },
             }, {
@@ -131,7 +218,7 @@ ajaxData({
                 dataIndex: 'startDateFormat',
                 align: 'center',
                 sort: !0,
-                render(text,item,index) {
+                render(text, item, index) {
                     return `<calendar style="display: inline-block;" calendar-type="yyyy-MM-dd HH:mm"
                     show-arrow="false" clearable="false" date-time="text"></calendar>`
                 },
