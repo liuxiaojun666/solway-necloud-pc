@@ -43,7 +43,7 @@ ajaxData({
         later: true
     },
 
-}, {})('dataExportCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+}, {})('dataExportCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', 'toaster'], ($scope, myAjaxData, historicalRecord, $interval, toaster) => {
     historicalRecord.init();// 历史记录 初始化
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '数据导出';//当前页面名称；
@@ -207,6 +207,13 @@ ajaxData({
         const { qcColumnid, qcEqid, qcType, qcColumnidAll, qcEqidAll } = $scope.formData;
         if (qcColumnid.length === 0) return;
         if (qcType != 0 && qcEqid.length === 0) return;
+
+        if ($scope.formData.qcLevel == 1) {
+            if ($scope.endDate.getTime() - $scope.startDate.getTime() > 1000 * 60 * 60 * 24 * 31) {
+                return toaster.pop('error', '', '导出数据量太大, 分钟级一次最多导出31天数据。');
+            }
+        }
+
         $scope.bigdataExportUpdate.getData({
             ...$scope.formData,
             qcColumnid: qcColumnidAll ? '' : qcColumnid.filter(v => v.checked).map(v => v.field).join(','),

@@ -19,7 +19,7 @@ ajaxData({
     },
 }, {
         __serviceName__: 'sharedTaskReleaseService'
-    })('sharedTaskReleaseCtrl', ['$scope', 'sharedTaskReleaseService', 'toaster'], ($scope, maAjaxData, toaster) => {
+    })('sharedTaskReleaseCtrl', ['$scope', 'sharedTaskReleaseService', 'toaster'], ($scope, myAjaxData, toaster) => {
         $scope.$on('releaseTask', (e, obj = {}) => {
             const { taskId = null, stationId } = obj;
             if (stationId) {
@@ -35,6 +35,18 @@ ajaxData({
                 stationId: stationId || ($scope.releaseTaskParame || {}).stationId
             };
         });
+
+        $scope.allSTListForPCBySession.blur = async () => {
+            await myAjaxData.timeout(200);
+            $scope.allSTListForPCBySession.slideDown = false;
+            $scope.allSTListForPCBySession.stationnameFilter = $scope.allSTListForPCBySession._stationname || '';
+            $scope.$apply();
+        };
+
+        $scope.allSTListForPCBySession.filter = (text = '', str = '') => str && str.includes(text);
+
+
+
         // 发布任务 提交
         $scope.releaseTaskSubmit = () => {
             const { taskImgs, timerType, timerDate, userIds, taskId } = $scope.releaseTaskParame;

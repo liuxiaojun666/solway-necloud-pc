@@ -167,6 +167,166 @@ ajaxData({
             };
         }
 
+        // 风向玫瑰图
+        function roseMap(params) {
+            const option = {
+                backgroundColor: '#163E67',
+                color: ['#37E2A4', '#6893FF'],
+                tooltip: {
+                    formatter: function (params, ticket, callback) {
+                        return params.seriesName + ': ' + params.value[0];
+                    }
+                },
+                legend: {
+                    icon: 'rect',
+                    top: 20,
+                    itemWidth: 24,
+                    itemHeight: 12,
+                    data: ['风频', '风速'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                radar: [
+                    {
+                        indicator: new Array(32).fill({
+                            text: '', max: 100
+                        }).map(function (v, i) {
+                            if (i === 1) return { text: 'N', max: 100 };
+                            return v
+                        }),
+                        name: {
+                            textStyle: {
+                                color: '#fff',
+                                fontSize: 20
+                            }
+                        },
+                        splitArea: {
+                            areaStyle: {
+                                color: 'transparent',
+                            }
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: 'transparent'
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: 'transparent'
+                            }
+                        },
+                        radius: 220,
+                        startAngle: 78.75,
+                        splitNumber: 4,
+                    },
+                    {
+                        indicator: new Array(32).fill({
+                            text: '', max: 30
+                        }),
+                        splitArea: {
+                            areaStyle: {
+                                color: 'transparent',
+                            }
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: 'transparent'
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: 'transparent'
+                            }
+                        },
+                        radius: 220,
+                        startAngle: 90,
+                        splitNumber: 4,
+                    },
+                    {
+                        indicator: new Array(16).fill({
+                            text: '', max: 30
+                        }),
+                        splitArea: {
+                            areaStyle: {
+                                color: 'transparent',
+                            }
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#677889'
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: '#677889'
+                            }
+                        },
+                        radius: 220,
+                        startAngle: 78.75,
+                        splitNumber: 4,
+                        shape: 'circle',
+                    }
+                ],
+                series: [
+                    {
+                        name: '风频',
+                        type: 'radar',
+                        radarIndex: 0,
+                        symbolSize: 0,
+                        areaStyle: {
+                            normal: {
+                                color: '#37E2A4',
+                            }
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 0
+                            }
+                        },
+                        data: [
+                            {
+                                value: new Array(32).fill(0).map((v, i) => {
+                                    if (i < 2) {
+                                        return 80;
+                                    }
+                                    return 0;
+                                }),
+                                name: '风频',
+                            },
+                        ]
+                    },
+                    {
+                        name: '风速',
+                        type: 'radar',
+                        radarIndex: 1,
+                        symbolSize: 0,
+                        areaStyle: {
+                            normal: {
+                                color: '#6893FF'
+                            }
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 0
+                            }
+                        },
+                        data: [
+                            {
+                                value: new Array(32).fill(0).map((v, i) => {
+                                    if (i < 2) {
+                                        return 8;
+                                    }
+                                    return 0;
+                                }),
+                                name: '风速',
+                            },
+                        ]
+                    },
+                ]
+            }
+        }
+
         // 判断 调用  对应 接口
         async function diffGetData() {
             if (!$scope.initComplete) return;
