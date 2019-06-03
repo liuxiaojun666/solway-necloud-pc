@@ -69,36 +69,29 @@ ajaxData({
                     //     $scope.objectDevice[i] = [];
                     // })
                     $scope.radioDevice();
-                } else if (parentmyAjaxData.config.tableDataTrue[$scope.checkChart]&&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)){
+                } else if (parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)) {
                     // data.analysObDataNewDevice.forEach((item, i) => {
                     //     $scope.objectDevice[i] = [];
                     // })
                     $scope.radioDevice();
                 }
-                
+
             }
         })
 
         //获取历史数据
-        $scope.$on('ctimeHdata', (event,v) => {
-            if(!v){
-                setTimeout(()=>{
+        $scope.$on('ctimeHdata', (event, v) => {
+            if (!v) {
+                setTimeout(() => {
                     $scope[key[$scope.analysisObjectK]] = [];
                     $scope.objectDevice[0] = [];
                     $scope.objectDevice[1] = [];
                     // $scope.analysObDataNewDevice.forEach((item, i) => {
                     //     $scope.objectDevice[i] = [];
                     // })
-                },500)
+                }, 500)
             }
         })
-
-        //默认获取第一项的数据
-        // setTimeout(() => {
-        //     if (!$scope['historyData' + parentmyAjaxData.config.checkChart]) {
-        //         $scope.radioDevice();
-        //     }
-        // }, 0)
 
         //获取历史数据
         $scope.$on('alsObjHdata', () => {
@@ -111,9 +104,9 @@ ajaxData({
                 $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.radioItem, true);
             } else if ($scope.analysisObjectK == 99) {
                 // setTimeout(()=>{
-                    $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备','isHistory':true });
-                    $scope.equipChoice(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCIndex);
-                    $scope.equipChoiceIndex = parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex;
+                $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备', 'isHistory': true });
+                $scope.equipChoice(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCIndex);
+                $scope.equipChoiceIndex = parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex;
                 // },100)
             } else if ($scope.analysisObjectK == 100) {
                 $scope.radioType(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem.k, true);
@@ -167,13 +160,13 @@ ajaxData({
             })
             $scope.queryTreeWithSt.subscribe(res => {
                 $scope.selectArea = res.body;
-                $scope.multiLevel.area = JSON.stringify($scope.selectArea[0]) ;
+                $scope.multiLevel.area = JSON.stringify($scope.selectArea[0]);
             });
         }
         //多级联动 - 电站
         function selectPowerStation() {
             $scope.multiLevel.powerStation = '';
-            if (!$scope.multiLevel.area||!JSON.parse($scope.multiLevel.area).busiId) {
+            if (!$scope.multiLevel.area || !JSON.parse($scope.multiLevel.area).busiId) {
                 $scope.selectPowerStation = [];
                 return
             }
@@ -206,7 +199,7 @@ ajaxData({
         //多级联动 - 设备
         function selectDevice() {
             $scope.multiLevel.device = '';
-            if (!$scope.multiLevel.machineType||!$scope.multiLevel.powerStation) {
+            if (!$scope.multiLevel.machineType || !$scope.multiLevel.powerStation) {
                 $scope.selectDevice = [];
                 return
             }
@@ -228,32 +221,88 @@ ajaxData({
                 selectPowerStation();
                 selectMachineType();
                 selectDevice();
-                $scope.zNodes.map((item) => {
-                    if (!JSON.parse($scope.multiLevel.area).busiId) {
-                        item.isHidden = false;
-                    } else {
-                        // JSON.parse($scope.multiLevel.area).busiType && item.name!='全部'
-                        if (item.busiType == JSON.parse($scope.multiLevel.area).busiType && item.name!='全部') {
-                            item.isHidden = true;
-                        }
-                        if (item.busiId == JSON.parse($scope.multiLevel.area).busiId) {
+                $scope.zNodes.forEach((item) => {
+                    // 电站、机型和设备 被隐藏的恢复
+                    if (!$scope.multiLevel.powerStation) {
+                        if (item.busiType == 1) {
                             item.isHidden = false;
                         }
                     }
+                    if (!$scope.multiLevel.machineType) {
+                        if (item.busiType == 6) {
+                            item.isHidden = false;
+                        }
+                    }
+                    if (!$scope.multiLevel.device) {
+                        if (item.busiType == 5) {
+                            item.isHidden = false;
+                        }
+                    }
+                    // 选择完区域后 隐藏其他区域
+                    if (!JSON.parse($scope.multiLevel.area).busiId) {
+                        item.isHidden = false;
+                    } else {
+                        // 根据busiType隐藏 层级
+                        if ((item.busiType == 3 && 3 == JSON.parse($scope.multiLevel.area).busiType && item.name != '全部') || ((item.busiType == 1 || item.busiType == 2) && JSON.parse($scope.multiLevel.area).busiType == 2)) {
+                            item.isHidden = !item.forbidden ? true : false;
+                        }
+
+                        // 找到有 选中区域的层级 并且隐藏同一级别的其他区域
+                        if (JSON.parse($scope.multiLevel.area).name == item.name) {
+                            $scope.zNodes.forEach(son => {
+                                if (item.pid == son.pid) {
+                                    son.isHidden = true;
+                                }
+                            })
+                        }
+                        // 打开选中区域 的子级（选中区域的子级有可能被隐藏）
+                        if (JSON.parse($scope.multiLevel.area).busiId == item.busiId) {
+                            item.isHidden = false;
+                            $scope.zNodes.forEach(function (son) {
+                                if (son.pid == item.id) {
+                                    son.isHidden = false;
+                                    son.forbidden = true;
+                                }
+                            })
+                        }
+
+                        // if ((item.busiType == 3 && 3 == JSON.parse($scope.multiLevel.area).busiType && item.name != '全部') || ((item.busiType == 1 || item.busiType == 2) && 2 == JSON.parse($scope.multiLevel.area).busiType)) {
+                        //     item.isHidden = !item.forbidden ? true : false;
+                        // }
+                        // if (item.name == JSON.parse($scope.multiLevel.area).name) {
+                        //     item.isHidden = false;
+                        //     $scope.zNodes.forEach(function (son) {
+                        //         if (son.pid == item.id) {
+                        //             son.isHidden = false;
+                        //             son.forbidden = true;
+                        //         }
+                        //     })
+                        // }
+                    }
                 })
-                // setTimeout(()=>{
-                    $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
-                    $scope[key[$scope.analysisObjectK]].map((item) => {
-                        item.map((son) => {
-                            zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
-                        })
+                $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                $scope[key[$scope.analysisObjectK]].map((item) => {
+                    item.map((son) => {
+                        zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
                     })
-                // },0)
-                
+                })
+
             } else if (k == 1) {
                 selectMachineType();
                 selectDevice();
                 $scope.zNodes.forEach((item) => {
+                    // 机型和设备 被隐藏的恢复
+                    if (!$scope.multiLevel.machineType) {
+                        if (item.busiType == 6) {
+                            item.isHidden = false;
+                        }
+                    }
+                    if (!$scope.multiLevel.device) {
+                        if (item.busiType == 5) {
+                            item.isHidden = false;
+                        }
+                    }
+
                     if (!$scope.multiLevel.powerStation) {
                         if (item.busiType == 1) {
                             item.isHidden = false;
@@ -276,6 +325,12 @@ ajaxData({
             } else if (k == 2) {
                 selectDevice();
                 $scope.zNodes.map((item) => {
+                    // 设备 被隐藏的恢复
+                    if (!$scope.multiLevel.device) {
+                        if (item.busiType == 5) {
+                            item.isHidden = false;
+                        }
+                    }
                     if (!$scope.multiLevel.machineType) {
                         if (item.busiType == 6) {
                             item.isHidden = false;
@@ -295,8 +350,7 @@ ajaxData({
                         zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
                     })
                 })
-            }
-            else if (k == 3) {
+            } else if (k == 3) {
                 $scope.zNodes.map((item) => {
                     if (!$scope.multiLevel.device) {
                         if (item.busiType == 5) {
@@ -415,14 +469,14 @@ ajaxData({
                     $scope.zNodes = res.body;
                     $scope.loading = false;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
-                    setTimeout(()=>{
+                    setTimeout(() => {
                         $scope.objectDevice[$scope.equipChoiceIndex].map((item) => {
                             item.map((son) => {
                                 zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
                             })
                         })
-                    },600)
-                   
+                    }, 600)
+
                 });
             } else if ($scope.analysisObjectK == 100) {
                 $scope.loading = true;
@@ -448,7 +502,7 @@ ajaxData({
                 $scope.loading = true;
                 $.fn.zTree.init($("#tree"), $scope.setting, []);
                 $scope.queryStTreeWithFaultTypes.getData({
-                    type : '01'
+                    type: '01'
                 })
 
                 $scope.queryStTreeWithFaultTypes.subscribe(res => {
@@ -457,7 +511,7 @@ ajaxData({
                     $scope.zNodes = res.body;
                     $scope.loading = false;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
-                    
+
                     $scope[key[$scope.analysisObjectK]].map((item) => {
                         item.map((son) => {
                             zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
@@ -512,7 +566,7 @@ ajaxData({
         //         $scope.objectDevice[i] = [];
         //     })
         // },1000)
-        
+
 
         const key = {
             101: 'objectFault',  //故障类型
@@ -815,11 +869,11 @@ ajaxData({
 
         //右侧删除小按钮
         $scope.delRight = (item, index) => {
-            if($scope.loading){
+            if ($scope.loading) {
                 toaster.pop('error', '', '稍等树结构加载完毕再行删除');
                 return;
             }
-            
+
             item.map((v) => {
                 zTree.checkNode(zTree.getNodeByParam("id", v.id), false, true);
             })
@@ -893,7 +947,7 @@ ajaxData({
 
         //全部删除
         $scope.delRightAll = () => {
-            if($scope.loading){
+            if ($scope.loading) {
                 toaster.pop('error', '', '稍等树结构加载完毕再行删除');
                 return;
             }
@@ -979,7 +1033,7 @@ ajaxData({
             }
 
             parentmyAjaxData.config.bIdToName[parentmyAjaxData.config.checkChart] = analyOjName;
-            
+
         }
 
         //确定按钮
@@ -988,7 +1042,7 @@ ajaxData({
                 if ($scope[key[$scope.analysisObjectK]].length == 0) {
                     toaster.pop('error', '', '所选数据不能为空');
                     return;
-                } else if (parentmyAjaxData.config.anlsType == 1 && $scope[key[$scope.analysisObjectK]].length > 10){
+                } else if (parentmyAjaxData.config.anlsType == 1 && $scope[key[$scope.analysisObjectK]].length > 10) {
                     toaster.pop('error', '', '分析对象不能超过十个');
                     return;
                 }
@@ -1002,7 +1056,7 @@ ajaxData({
                 if ($scope.objectDevice[$scope.equipChoiceIndex].length == 0) {
                     toaster.pop('error', '', '所选数据不能为空');
                     return;
-                } else if (parentmyAjaxData.config.anlsType == 1 && $scope.objectDevice[$scope.equipChoiceIndex].length > 10){
+                } else if (parentmyAjaxData.config.anlsType == 1 && $scope.objectDevice[$scope.equipChoiceIndex].length > 10) {
                     toaster.pop('error', '', '分析对象不能超过十个');
                     return;
                 }
@@ -1016,7 +1070,7 @@ ajaxData({
                 if ($scope[key[$scope.analysisObjectK]].length == 0) {
                     toaster.pop('error', '', '所选数据不能为空');
                     return;
-                } else if (parentmyAjaxData.config.anlsType == 1 && $scope[key[$scope.analysisObjectK]].length > 10){
+                } else if (parentmyAjaxData.config.anlsType == 1 && $scope[key[$scope.analysisObjectK]].length > 10) {
                     toaster.pop('error', '', '分析对象不能超过十个');
                     return;
                 }
