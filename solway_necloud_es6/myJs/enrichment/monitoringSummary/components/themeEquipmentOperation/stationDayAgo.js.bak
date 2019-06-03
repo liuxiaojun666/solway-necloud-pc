@@ -14,6 +14,33 @@ ajaxData(
             later: true,
             onlyLatest: true,
         },
+        // 设备类型
+        getDeviceType: {
+            name: 'GETgetDeviceType',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备列表
+        queryDeviceWithType: {
+            name: 'GETqueryDeviceWithType',
+            data: {},
+            later: true
+        },
+        // 事件类型
+        eventType: {
+            name: 'GETBasedictionarySelectAll',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备日志
+        deviceRunList: {
+            name: 'GETdeviceRunList',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
     },
     {
         __serviceName__: 'themeEquipmentOperationStationDayAgoService'
@@ -42,6 +69,7 @@ ajaxData(
     $scope.switchPowerCallback = () => {
         if ($scope.currentClass !== 'StationDayAgo') return;
         $scope.column = [];
+        $scope.getDeviceType.res = null;
         diffGetData();
     };
 
@@ -101,6 +129,12 @@ ajaxData(
                 date: dateTime.showDate
             });
         }
+        else if (tabIndex === 1) {
+            if (!$scope.getDeviceType.res) await $scope.getDeviceType.getData();
+            if (!$scope.eventType.res) $scope.eventType.getData({ dictType: 'EVENT_TYPE' });
+            $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+
+        }
     };
     // 电站  历史日   时间   列表
     $scope.stationDayAgoTimeList.getDataCallback = (success, res) => {
@@ -141,6 +175,84 @@ ajaxData(
         if (!success) return;
         $scope.xdata = res.body.x;
         $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.sun_curve]]
+    };
+
+    // 设备类型
+    $scope.getDeviceType.subscribe(res => {
+        $scope.deviceRunList.deviceType = res.data[0].devid;
+        $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+    });
+    // 设备列表
+    $scope.queryDeviceWithType.subscribe(res => {
+        $scope.deviceRunList.deviceId = '';
+        const {dateTime} = $scope;
+        $scope.deviceRunList.getData({
+            deviceId: '',
+            deviceType: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid,
+            eventType: '',
+            pageIndex: 0,
+            pageSize: 10,
+            sEndTime: dateTime.showDate + ' 23:59',
+            sStartTime: dateTime.showDate + ' 00:00'
+        });
+    });
+    // 设备日志
+    $scope.deviceRunList.subscribe(res => {
+        $scope.deviceRunList.column = [
+            {
+                title: '开始时间',
+                dataIndex: 'sStartTime',
+                sort: true,
+                align: 'center',
+                width: '100px',
+                render(text) {
+                    return text && new Date(text).Format('yyyy-MM-dd hh:mm').substr(10)
+                }
+            },
+            {
+                title: '结束时间',
+                dataIndex: 'sEndTime',
+                sort: true,
+                align: 'center',
+                width: '100px',
+                render(text) {
+                    return text && new Date(text).Format('yyyy-MM-dd hh:mm').substr(10)
+                }
+            },
+            {
+                title: '设备名称',
+                dataIndex: 'devicename',
+                sort: true,
+                align: 'left',
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '事件类型',
+                dataIndex: 'faultlevelStr',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '事件内容',
+                dataIndex: 'eventDesc',
+                sort: true,
+                align: 'left',
+                width: '400px'
+            },
+            {
+                title: '状态',
+                dataIndex: 'sysstatusStr',
+                sort: true,
+                align: 'center'
+            },
+        ];
+    });
+    // 查看设备详情
+    $scope.deviceRunList.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.$broadcast('equipmentPopUp', { stid: item.pstationid, eqid: item.deviceSerialNnumber})
     };
 
 });

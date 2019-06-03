@@ -18,7 +18,26 @@ ajaxData({
         later: true
     },
 
-}, {})('addEventCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
+}, {})('addEventCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval, $ocLazyLoad) => {
+
+    $ocLazyLoad.load([
+        'vendor/bootstrap/css/bootstrap-datetimepicker.min.css',
+        'vendor/bootstrap/js/bootstrap-datetimepicker.js'
+    ]).then(() => $ocLazyLoad.load([
+        'vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
+        'vendor/libs/moment.min.js'
+    ])).then(() => {
+        // var a= $(".form-wrap input").attr('id');
+        // debugger
+        // $("#"+a).datetimepicker({
+        //     pickerPosition: "top-left"
+        // })
+    })
+
+    // $(".datetimepicker").datetimepicker({
+    //     pickerPosition : "top-left"
+    // })
+
     // Unix时间戳转换
     function FormatDateTime(UnixTime) {
         var a = UnixTime.replace("/Date(", "").replace(")/", "");
@@ -57,9 +76,28 @@ ajaxData({
         0: '关闭',
         1: '未关闭'
     }
+    // 时间范围选择
+    var date1 = new Date();
+    var date2 = new Date(date1);
+    date2.setDate(date1.getDate() + 365 * 10);
+    $scope.GroupUser = {
+        date: new Date,
+        startDate: new Date,
+        endDate: new Date,
+        limitEndDate: date2
+    }
+
+    $scope.pageOpen = false;
 
     $scope.$on('powerStInfo', (event, v) => {
-        $scope.formData = {};
+        $scope.formData = {
+            show: 2,
+            status: 2
+        };
+        $scope.pageOpen = true;
+        $scope.GroupUser.startDate.showDate = '';
+        $scope.GroupUser.endDate.showDate = '';
+
         $scope.stid = v.stid;
         $scope.StationRunStatusDetail.getData({
             stid: v.stid,
@@ -82,7 +120,7 @@ ajaxData({
         $scope.DeviceEventDetail.getData({
             stid: $scope.stid,
             pageIndex: 0,
-            pageSize: 10
+            pageSize: 50
         })
 
         $scope.DeviceEventDetail.subscribe(res => {
@@ -96,21 +134,16 @@ ajaxData({
         });
     }
 
-    // 时间范围选择
-    $scope.GroupUser = {
-        date: new Date,
-        startDate: new Date,
-        endDate: new Date
-    }
-    $scope.GroupUser.startDate.showDate = '';
-    $scope.GroupUser.endDate.showDate = '';
-
     // 保存按钮
     $scope.formData = {
-        show: '',
-        status: ''
+        show: 2,
+        status: 2
     }
+
     $scope.showData = [
+        {
+            k: 2, v: '请选择'
+        },
         {
             k: 0, v: '不显示'
         },
@@ -118,7 +151,11 @@ ajaxData({
             k: 1, v: '显示'
         }
     ]
+
     $scope.statusData = [
+        {
+            k: 2, v: '请选择'
+        },
         {
             k: 0, v: '关闭'
         },
@@ -141,9 +178,16 @@ ajaxData({
         }).then(res => {
             if (res.code == 0) {
                 toaster.pop('success', '', '添加成功');
-                $scope.formData = {};
-                $scope.GroupUser.startDate.showDate = '';
-                $scope.GroupUser.endDate.showDate = '';
+                $scope.formData = {
+                    show: 2,
+                    status: 2
+                }
+                $scope.pageOpen = false;
+                setTimeout(() => {
+                    $scope.pageOpen = true;
+                    $scope.GroupUser.startDate.showDate = '';
+                    $scope.GroupUser.endDate.showDate = '';
+                }, 0)
                 getList();
             } else {
                 toaster.pop('error', '', '添加失败');
@@ -154,5 +198,11 @@ ajaxData({
     //取消按钮
     $scope.cancel = () => {
         $scope.$emit('eventListHide');
+        $scope.pageOpen = false;
     }
+
+    //点击空白 - 关闭添加事件组件
+    $scope.$on('closeAddEvent', (event, v) => {
+        $scope.pageOpen = false;
+    })
 });

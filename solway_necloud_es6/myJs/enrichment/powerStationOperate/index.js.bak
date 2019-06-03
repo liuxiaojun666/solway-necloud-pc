@@ -23,6 +23,16 @@ ajaxData({
             });
         }
 
+        //点击单个集团的多选框
+        $scope.itemGroup = () => {
+            var checkArr = $scope.groupList.filter(item => item.checked);
+            if(checkArr.length < $scope.groupList.length){
+                $scope.allChecked = false;
+            } else {
+                $scope.allChecked = true;
+            }
+        }
+
         //查询按钮  获取选中的集团
         $scope.comIds = [];
         $scope.getCheckedGroup = () => {
@@ -99,6 +109,13 @@ ajaxData({
 
         //单个的状态多选按钮
         $scope.statusCheck = () => {
+            var checkedStatus = [];
+            $scope.statusArr.forEach(item => {
+                if (item.checked) {
+                    checkedStatus.push(item.value)
+                }
+            })
+            $scope.powerStatusCheckAll = checkedStatus.length < 7 ? false : true;
             $scope.getList();
         }
 
@@ -115,29 +132,22 @@ ajaxData({
             $scope.StationRunStatusNew.getData({
                 comIds: $scope.comIds.join(),
                 status: checkedStatus.join()
-            })
-
-            $scope.StationRunStatusNew.subscribe(res => {
+            }).then(res => {
                 $scope.loading = false;
                 $scope.powerSt = res.body;
+                if (checkedStatus.join() == '0,1,2,3,4,5,6') {
+                    var { date,...pStatusArr } = res.body;
+                    $scope.pStatusArr = pStatusArr;
+                }
                 $scope.powerStAll = [];
                 $scope.foldFlag = false;
                 $scope.powerSt.date.forEach(item => {
-                    item.srs.forEach(son=>{
-                        son.shortName = son.stationName.substr(0,4);
+                    item.srs.forEach(son => {
+                        son.shortName = son.stationName.substr(0, 4);
                     })
                     $scope.powerStAll.push(...item.srs);
                 })
-                // $scope.powerSt.date.forEach(item => {
-                //     if (item.srs.length > 102) {
-                //         item.srs.forEach((son, i) => {
-                //             if (i > 102) {
-                //                 son.show = false;
-                //             }
-                //         })
-                //     }
-                // })
-            });
+            })
         }
         $scope.getList();
 
@@ -153,12 +163,18 @@ ajaxData({
             $scope.showPowerName = !$scope.showPowerName;
             $scope.foldFlag = false;
         }
-        
+
         //点击电站方块 - 弹出添加事件组件
         $scope.addEvent = false;
         $scope.addEventFun = (item) => {
             $scope.addEvent = true;
             $scope.$broadcast('powerStInfo', item);
+        }
+        
+        //点击空白 - 关闭添加事件组件
+        $scope.closeAddEvent = (item) => {
+            $scope.addEvent = false;
+            $scope.$broadcast('closeAddEvent');
         }
 
         //点击电站运行事件 - 弹出电站运行事件表格
@@ -188,7 +204,7 @@ ajaxData({
         //折叠电站方块
         $scope.foldFlag = false;
         $scope.fold = (item) => {
-            if(!$scope.showPowerName){
+            if (!$scope.showPowerName) {
                 item.srs.forEach((v, i) => {
                     if (i > 101) {
                         v.show = !v.show;
@@ -201,7 +217,7 @@ ajaxData({
                     }
                 })
             }
-            
+
             $scope.foldFlag = !$scope.foldFlag;
         }
 
@@ -224,5 +240,4 @@ ajaxData({
         $timeout(() => {
             $('.ng-clock').removeClass('ng-clock');
         }, 2000);
-
     });

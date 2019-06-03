@@ -96,6 +96,7 @@ ajaxData({
     async function diffStationInfo(stationData) {
         while (!$scope._getStationInfo) await myAjaxData.timeout(100);
         const currentStationData = await $scope._getStationInfo;
+        if (currentStationData.currentSTClass === '02') return $state.go('analyzeSummaryWp');
         if (myAjaxData.currentStationData.isMan === 1) return;
         if (!myAjaxData.currentStationData.currentSTID && myAjaxData.currentStationData.currentSTID !== 0) { // 没有选择过电站
             const res = await $scope.getuserAuthHandleSetSTClass.getData({});

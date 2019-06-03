@@ -80,9 +80,9 @@ ajaxData({
         })
 
         //获取历史数据
-        $scope.$on('ctimeHdata', (event, v) => {
-            if (!v) {
-                setTimeout(() => {
+        $scope.$on('ctimeHdata', (event,v) => {
+            if(!v){
+                setTimeout(()=>{
                     $scope[key[$scope.analysisObjectK]] = [];
                     $scope.objectDevice[0] = [];
                     $scope.objectDevice[1] = [];
@@ -103,11 +103,9 @@ ajaxData({
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5) {
                 $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.radioItem, true);
             } else if ($scope.analysisObjectK == 99) {
-                // setTimeout(()=>{
                 $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备', 'isHistory': true });
                 $scope.equipChoice(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCIndex);
                 $scope.equipChoiceIndex = parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex;
-                // },100)
             } else if ($scope.analysisObjectK == 100) {
                 $scope.radioType(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem.k, true);
             } else if ($scope.analysisObjectK == 101) {
@@ -126,7 +124,6 @@ ajaxData({
             treeData(item.k);
             $scope.equipChoiceIndex = index;
             $scope.$emit('deviceTimeLat', item.ll);
-
         }
 
         //处理点击设备radio
@@ -447,9 +444,7 @@ ajaxData({
                 $.fn.zTree.init($("#tree"), $scope.setting, []);
                 $scope.queryTreeWithSt.getData({
                     busiType: st[k]
-                })
-
-                $scope.queryTreeWithSt.subscribe(res => {
+                }).then(res=>{
                     $scope.zNodes = res.body;
                     $scope.loading = false;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
@@ -458,7 +453,7 @@ ajaxData({
                             zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
                         })
                     })
-                });
+                })
             } else if (k.substr(0, 1) == "4" && $scope.analysisObjectK == 99) {
                 $scope.loading = true;
                 $scope.queryStTreeWithDevices.getData({
@@ -468,13 +463,15 @@ ajaxData({
                 $scope.queryStTreeWithDevices.subscribe(res => {
                     $scope.zNodes = res.body;
                     $scope.loading = false;
-                    $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
                     setTimeout(() => {
-                        $scope.objectDevice[$scope.equipChoiceIndex].map((item) => {
-                            item.map((son) => {
-                                zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
+                        $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                        if($scope.objectDevice[$scope.equipChoiceIndex].length > 0){
+                            $scope.objectDevice[$scope.equipChoiceIndex].map((item) => {
+                                item.map((son) => {
+                                    zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
+                                })
                             })
-                        })
+                        }
                     }, 600)
 
                 });
@@ -503,11 +500,7 @@ ajaxData({
                 $.fn.zTree.init($("#tree"), $scope.setting, []);
                 $scope.queryStTreeWithFaultTypes.getData({
                     type: '01'
-                })
-
-                $scope.queryStTreeWithFaultTypes.subscribe(res => {
-                    var treeObj = $.fn.zTree.getZTreeObj("tree");
-                    treeObj.refresh();
+                }).then(res => {
                     $scope.zNodes = res.body;
                     $scope.loading = false;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
@@ -517,7 +510,7 @@ ajaxData({
                             zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
                         })
                     })
-                });
+                })
             }
         }
 
@@ -561,7 +554,6 @@ ajaxData({
         $scope.objectDevice[1] = [];
 
         // setTimeout(()=>{
-        //     // debugger
         //     $scope.analysObDataNewDevice.forEach((item, i) => {
         //         $scope.objectDevice[i] = [];
         //     })
@@ -869,7 +861,7 @@ ajaxData({
 
         //右侧删除小按钮
         $scope.delRight = (item, index) => {
-            if ($scope.loading) {
+            if($scope.loading){
                 toaster.pop('error', '', '稍等树结构加载完毕再行删除');
                 return;
             }
@@ -947,7 +939,7 @@ ajaxData({
 
         //全部删除
         $scope.delRightAll = () => {
-            if ($scope.loading) {
+            if($scope.loading){
                 toaster.pop('error', '', '稍等树结构加载完毕再行删除');
                 return;
             }

@@ -28,11 +28,11 @@ HighAnalysis_selectAnlsType: {
     herizonData: {},  //横轴数据 纵轴数据
     dmsType: null,    //分析对象参数
     dmsTime: null,    //时间纬度参数
-    dmsTypeAs: [[],[],[],[]],    //设备 参数
-    dmsTypeBs: [[],[],[],[]],    //电站|区域(部门)|集团  接口需要的数据
-    dmsTypeCs: [[],[],[],[]],    //机型/故障类型 参数
-    dmsTypeDs: [[],[],[],[]],    //机型/故障类型 参数
-    dmsTimeDates: [[],[],[],[]], //时间 参数 时间数据
+    dmsTypeAs: [[], [], [], []],    //设备 参数
+    dmsTypeBs: [[], [], [], []],    //电站|区域(部门)|集团  接口需要的数据
+    dmsTypeCs: [[], [], [], []],    //机型/故障类型 参数
+    dmsTypeDs: [[], [], [], []],    //机型/故障类型 参数
+    dmsTimeDates: [[], [], [], []], //时间 参数 时间数据
     fdX: {            //横轴指标字段 参数
         key: '',
         name: ''
@@ -41,22 +41,22 @@ HighAnalysis_selectAnlsType: {
         key: '',
         name: ''
     },
-    fds: [[],[],[],[]],          //横轴、纵轴指标 参数
-    analysFds: [[],[],[],[]],    //分析指标 参数
-    benchSort: [[],[],[],[]],  //对标分析 分析指标 排序
+    fds: [[], [], [], []],          //横轴、纵轴指标 参数
+    analysFds: [[], [], [], []],    //分析指标 参数
+    benchSort: [[], [], [], []],  //对标分析 分析指标 排序
     fdStyle: null,    //图表的类型(曲线、柱状、散点)
     fdStyleArr: [],   //图表的类型(数组)
-    bIdToName: [{},{},{},{}],    //busiId 和 name的映射
+    bIdToName: [{}, {}, {}, {}],    //busiId 和 name的映射
     tableData: [      //图表的历史数据
         {}, {}, {}, {}
     ],
-    analysObjData: [{},{},{},{}], //选择的分析对象 历史数据
-    countTime: [{},{},{},{}],     //选择的统计时间 历史数据
-    horizonHdata: [{},{},{},{}],  //选择的横轴指标 历史数据
-    verticHdata: [{},{},{},{}],   //选择的纵轴指标 历史数据
-    alysHdata: [{},{},{},{}],     //选择的分析指标 历史数据
+    analysObjData: [{}, {}, {}, {}], //选择的分析对象 历史数据
+    countTime: [{}, {}, {}, {}],     //选择的统计时间 历史数据
+    horizonHdata: [{}, {}, {}, {}],  //选择的横轴指标 历史数据
+    verticHdata: [{}, {}, {}, {}],   //选择的纵轴指标 历史数据
+    alysHdata: [{}, {}, {}, {}],     //选择的分析指标 历史数据
     checkChart: null,  //选中第几个图表
-    tableDataTrue: [false,false,false,false]   //第几个图表 是否有历史数据
+    tableDataTrue: [false, false, false, false]   //第几个图表 是否有历史数据
 })('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', 'toaster'], ($scope, myAjaxData, historicalRecord, $interval, toaster) => {
 
     historicalRecord.init();// 历史记录 初始化
@@ -254,7 +254,7 @@ HighAnalysis_selectAnlsType: {
 
     //分析指标发送 fdName
     $scope.$on('analysFds_fdName', (event, data) => {
-        $scope['analysfdName'+ $scope.checkChart] = data.fdName;
+        $scope['analysfdName' + $scope.checkChart] = data.fdName;
     })
 
     var tableStyle = {
@@ -269,7 +269,7 @@ HighAnalysis_selectAnlsType: {
 
     //调接口前 判空
     function judgeBeforeAjax() {
-        if ((($scope.queryData.analysisObjectK == 1 || $scope.queryData.analysisObjectK == 2 || $scope.queryData.analysisObjectK == 3 || $scope.queryData.analysisObjectK == 5) && myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart].length == 0) || ($scope.queryData.analysisObjectK == 99 && myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart].length == 0) || (($scope.queryData.analysisObjectK == 100 || $scope.queryData.analysisObjectK == 101) && (myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart].length == 0 && myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart].length == 0) )   ) {
+        if ((($scope.queryData.analysisObjectK == 1 || $scope.queryData.analysisObjectK == 2 || $scope.queryData.analysisObjectK == 3 || $scope.queryData.analysisObjectK == 5) && myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart].length == 0) || ($scope.queryData.analysisObjectK == 99 && myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart].length == 0) || (($scope.queryData.analysisObjectK == 100 || $scope.queryData.analysisObjectK == 101) && (myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart].length == 0 && myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart].length == 0))) {
             toaster.pop('error', '', '请选择分析对象');
             return false;
         } else
@@ -300,13 +300,12 @@ HighAnalysis_selectAnlsType: {
             dmsTypeCs: myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart].length > 0 ? myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart] : null,
             dmsTypeDs: myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart].length > 0 ? myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart] : null,
             dmsTime: {
-                dateType: $scope['dmsTimeDateType'+ $scope.checkChart],
+                dateType: $scope['dmsTimeDateType' + $scope.checkChart],
                 dates: myAjaxData.config.dmsTimeDates[myAjaxData.config.checkChart]
             },
             fds: $scope.queryData.analysisType == 1 ? myAjaxData.config.fds[myAjaxData.config.checkChart] : myAjaxData.config.analysFds[myAjaxData.config.checkChart],
             sort: $scope.queryData.analysisType == 3 ? myAjaxData.config.benchSort[myAjaxData.config.checkChart] : null
         }
-        // console.log(myAjaxData.config.analysFds)
         return dataJ;
         // $scope.ajaxParams[$scope.checkChart] = JSON.parse(JSON.stringify(dataJ));
     }
@@ -436,7 +435,7 @@ HighAnalysis_selectAnlsType: {
                 chartOption($scope.checkChart, legend, series);
             } else {
                 // 获取y轴的名字
-                $scope['yname' + $scope.checkChart] = $scope['yunits' + $scope.checkChart] ? $scope['analysfdName'+ $scope.checkChart] + '(' + $scope['yunits' + $scope.checkChart] + ')' : $scope['analysfdName'+ $scope.checkChart];
+                $scope['yname' + $scope.checkChart] = $scope['yunits' + $scope.checkChart] ? $scope['analysfdName' + $scope.checkChart] + '(' + $scope['yunits' + $scope.checkChart] + ')' : $scope['analysfdName' + $scope.checkChart];
                 // 获取各项数据
                 var key;
                 var key2;
@@ -582,7 +581,7 @@ HighAnalysis_selectAnlsType: {
             await myAjaxData.timeout(100);
             analysisObjFun();
             $scope.$broadcast('alsObjHdata');
-            $scope.$broadcast('ctimeHdata',true);
+            $scope.$broadcast('ctimeHdata', true);
             await myAjaxData.timeout(200);
             $scope.$broadcast('trend_dmsTime', $scope.queryData.timeLat);
 
@@ -590,14 +589,14 @@ HighAnalysis_selectAnlsType: {
             $scope.queryData.analysisType = 1;
             await myAjaxData.timeout(100);
             analysisObjFun();
-            $scope.$broadcast('ctimeHdata',false);            
+            $scope.$broadcast('ctimeHdata', false);
         }
     }
     $scope.checkChartFun(0);
 
     //图表函数组
     function chartsInit() {
-        setTimeout(()=>{
+        setTimeout(() => {
             var myChart0 = echarts.init(document.getElementById("container0"));
             var myChart1 = echarts.init(document.getElementById("container1"));
             var myChart2 = echarts.init(document.getElementById("container2"));
@@ -673,18 +672,17 @@ HighAnalysis_selectAnlsType: {
                 myChart2.setOption(option, true);
                 myChart3.setOption(option, true);
             }
-        },0)
-        
+        }, 0)
+
     }
     chartsInit();
 
+    //resize图表
     $('.table1').resize(function () {
-        //resize图表
-    var myChart0 = echarts.getInstanceByDom(document.getElementById("container0"));
-    var myChart1 = echarts.getInstanceByDom(document.getElementById("container1"));
-    var myChart2 = echarts.getInstanceByDom(document.getElementById("container2"));
-    var myChart3 = echarts.getInstanceByDom(document.getElementById("container3"));
-
+        var myChart0 = echarts.getInstanceByDom(document.getElementById("container0"));
+        var myChart1 = echarts.getInstanceByDom(document.getElementById("container1"));
+        var myChart2 = echarts.getInstanceByDom(document.getElementById("container2"));
+        var myChart3 = echarts.getInstanceByDom(document.getElementById("container3"));
         myChart0.resize();
         myChart1.resize();
         myChart2.resize();
@@ -722,7 +720,7 @@ HighAnalysis_selectAnlsType: {
         } else if (param == 3) {
             // 统计时间弹出
             $scope.countTimeModel = true;
-            $scope.$broadcast('countTime_open');
+            // $scope.$broadcast('countTime_open');
         } else if (param == 4) {  //时间纬度 弹出
             if (!$scope.queryData.timeLat) {
                 $scope.queryData.horizonIndexV = '请选择';
@@ -775,7 +773,7 @@ HighAnalysis_selectAnlsType: {
             $scope.queryData.horizonIndexV = data.value;
         } else if (data.type == 'countTime') {
             $scope.queryData.countTimeV = data.name;
-            $scope['dmsTimeDateType'+ $scope.checkChart] = data.dateType;
+            $scope['dmsTimeDateType' + $scope.checkChart] = data.dateType;
         } else if (data.type == 'analysisObject') {
             $scope.queryData.analysisObjectK = data.k;
             $scope.queryData.analysisObjectV = data.value;
@@ -785,7 +783,7 @@ HighAnalysis_selectAnlsType: {
             }
             // 取时间纬度的数据
             if (data.isHistory) {
-                setTimeout(()=>{
+                setTimeout(() => {
                     if ($scope.queryData.analysisType != 3) {
                         $scope.changeTime = 2;
                         $scope.queryData.timeLat = myAjaxData.config.tableData[$scope.checkChart].timeLat;
@@ -797,8 +795,8 @@ HighAnalysis_selectAnlsType: {
                             }
                         })
                     }
-                },0)
-                
+                }, 0)
+
             } else {
                 $scope.queryData.timeLat = '';
                 $scope.queryData.horizonIndexV = '请选择';
@@ -828,7 +826,6 @@ HighAnalysis_selectAnlsType: {
         $scope.timeLat = v;
         //对标分析-> 取dmsType
         if ($scope.queryData.analysisType == 3) {
-            // debugger
             $scope.$broadcast('bench_dmsType', $scope.queryData.analysisType);
         }
     })
@@ -841,7 +838,7 @@ HighAnalysis_selectAnlsType: {
     $scope.$on('analysNan', (event, v) => {
         $scope.analysNan = v.data;
     })
-    
+
 
     //取消 新增后的回调
     $scope.analysisObjectModel = false;

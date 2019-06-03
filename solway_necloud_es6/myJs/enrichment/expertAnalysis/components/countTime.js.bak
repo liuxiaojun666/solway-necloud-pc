@@ -9,14 +9,14 @@ ajaxData({
     })('countTimeCtrl', ['$scope', 'countTimeService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
         //获取父级发送的横轴指标 选择的option
-        $scope.$on('countTime_open', () => {
-            if(parentmyAjaxData.config.tableDataTrue[$scope.checkChart]){
-                $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioName, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.dateType);
-            } else {
-                $scope.radioToSelect('日', 3);
-                $scope.radioIndex = 1;
-            }
-        })
+        // $scope.$on('countTime_open', () => {
+        //     if(parentmyAjaxData.config.tableDataTrue[$scope.checkChart]){
+        //         $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioName, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.dateType);
+        //     } else {
+        //         $scope.radioToSelect('日', 3);
+        //         $scope.radioIndex = 1;
+        //     }
+        // })
 
         //获取时间纬度 发送的dmsTime
         $scope.$on('dmsTime', (item, v) => {
@@ -146,17 +146,19 @@ ajaxData({
         });
 
         //获取历史数据
-        $scope.$on('ctimeHdata', (event,v) => {
-            if(!v){
+        $scope.$on('ctimeHdata', (event, v) => {
+            if (!v) {
                 $scope.radioToSelect('日', 3);
                 $scope.radioIndex = 1;
-                $scope[key[$scope.radioIndex]] = [];
+                $scope.timeGroupDay = [];
+                $scope.timeGroupMonth = [];
+                $scope.timeGroupYear = [];
+                $scope.timeGroupUser = [];
                 return;
             }
             $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioName, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.dateType);
             $scope.radioIndex = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioIndex;
             $scope[key[$scope.radioIndex]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.checkData;
-
         })
 
         //单选框选中-> 更改select的值
@@ -241,7 +243,7 @@ ajaxData({
             if ($scope[key[$scope.radioIndex]].length == 0) {
                 toaster.pop('error', '', '所选数据不能为空');
                 return;
-            } else if ($scope.dateType == 3 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData.analysisObjectK == 99 && $scope[key[$scope.radioIndex]].length*parentmyAjaxData.config.analysObjData.checkData[parentmyAjaxData.config.analysObjData.equipChoiceIndex].length >= 31){
+            } else if ($scope.dateType == 3 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData.analysisObjectK == 99 && $scope[key[$scope.radioIndex]].length * parentmyAjaxData.config.analysObjData.checkData[parentmyAjaxData.config.analysObjData.equipChoiceIndex].length >= 31) {
                 toaster.pop('error', '', '1分钟级数据设备数与天数之积应小于31');
                 return;
             }
