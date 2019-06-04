@@ -26,7 +26,7 @@ ajaxData({
         //点击单个集团的多选框
         $scope.itemGroup = () => {
             var checkArr = $scope.groupList.filter(item => item.checked);
-            if(checkArr.length < $scope.groupList.length){
+            if (checkArr.length < $scope.groupList.length) {
                 $scope.allChecked = false;
             } else {
                 $scope.allChecked = true;
@@ -119,6 +119,17 @@ ajaxData({
             $scope.getList();
         }
 
+        //电站状态映射
+        var psMap = {
+            0: '正常',
+            1: '故障',
+            2: '报警',
+            3: '中断',
+            4: '初始化',
+            5: '未知',
+            6: '未接入'
+        }
+
         //获取电站
         $scope.getList = () => {
             $scope.loading = true;
@@ -136,7 +147,7 @@ ajaxData({
                 $scope.loading = false;
                 $scope.powerSt = res.body;
                 if (checkedStatus.join() == '0,1,2,3,4,5,6') {
-                    var { date,...pStatusArr } = res.body;
+                    var { date, ...pStatusArr } = res.body;
                     $scope.pStatusArr = pStatusArr;
                 }
                 $scope.powerStAll = [];
@@ -144,6 +155,7 @@ ajaxData({
                 $scope.powerSt.date.forEach(item => {
                     item.srs.forEach(son => {
                         son.shortName = son.stationName.substr(0, 4);
+                        son.statusName = '\xa0' + psMap[son.status];
                     })
                     $scope.powerStAll.push(...item.srs);
                 })
@@ -170,7 +182,7 @@ ajaxData({
             $scope.addEvent = true;
             $scope.$broadcast('powerStInfo', item);
         }
-        
+
         //点击空白 - 关闭添加事件组件
         $scope.closeAddEvent = (item) => {
             $scope.addEvent = false;
