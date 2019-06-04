@@ -62,16 +62,14 @@ ajaxData(
 
     $scope.stClassLIst.subscribe(res => {
         const date = new Date().Format('yyyy-MM-dd').substr(0, 7);
-        [
-            'home_pv_company_pgc_month_stationlist',
-            'home_pv_company_pr_month_stationlist',
-            'home_wp_company_pgc_month_stationlist',
-            'home_wp_company_pba_month_stationlist',
-        ].forEach(element => $scope[element].getData({
-            queryCode: [element],
-            queryType: 1,
-            date
-        }));
+        [ 'pgc', 'pr', 'pgc', 'pba'].forEach((element, i) => {
+            $scope['home_'+['pv', 'pv', 'wp', 'wp'][i]+'_company_' + element + '_month_stationlist'].getData({
+                queryCode: ['home_' + ['pv', 'pv', 'wp', 'wp'][i] +'_company_' + element + '_month_stationlist'],
+                queryType: 1,
+                date,
+                sort: element + ',asc'
+            })
+        });
     });
 
     $scope.stClassLIst.subscribe(async res => {
