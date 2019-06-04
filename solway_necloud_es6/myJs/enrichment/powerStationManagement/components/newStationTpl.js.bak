@@ -36,6 +36,11 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
+    },
+    rightListForPCNew:{
+        name:'GETrightListForPCNew',
+        data: {},
+        later:true
     }
 }, {
     __serviceName__: 'newStationTplService',
@@ -55,7 +60,14 @@ ajaxData({
         {"typeId":"01", "typeName":"地面电站"},
         {"typeId":"02", "typeName":"分布式电站"},
         {"typeId":"03", "typeName":"用户电站"}];
-    
+
+    //电站状态
+    $scope.stationStatus = [
+        {"status":"00", "statusName":"投产使用"},
+        {"status":"01", "statusName":"在建"},
+        {"status":"02", "statusName":"规划中"},
+        {"status":"03", "statusName":"停用"}];
+
     const clearDateTime = () =>{
         $scope.startProductTime = null;
         $scope.endProductTime = null;
@@ -79,7 +91,15 @@ ajaxData({
 
     getChargePersonList();
 
+    const getCurrentRole = () =>{
+        $scope.rightListForPCNew.getData().then(res=>{
+            if (!res.result) return;
+            if(res.roleType == 99) $scope.ifShowStatus = true;
+        });
+    }
+
     $scope.$on('broadAddStation',async(index,data)=>{
+        getCurrentRole();
 
         $scope.formData = {};
         await myAjaxData.timeout(0);
@@ -105,7 +125,8 @@ ajaxData({
                 'longitude':data.longitude,
                 'latitude':data.latitude,
                 'stationtel':data.stationtel,
-                'stationzip':data.stationzip
+                'stationzip':data.stationzip,
+                'status':data.status
             };
             $scope.getDepListByCompany(data.companyid);//获取当前公司的部门列表
 
@@ -228,6 +249,7 @@ ajaxData({
             $scope.formData['latitude'] = res[1]
         })
     }
+
 
     //保存
     $scope.save = () =>{

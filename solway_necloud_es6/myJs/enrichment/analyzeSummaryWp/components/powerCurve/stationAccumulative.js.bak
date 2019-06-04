@@ -470,6 +470,30 @@ ajaxData(
         return '风速：' + params[0].name + 'm/s<br/>' + params.sort((a, b) => b.value - a.value).map(v => `<span style="color:${v.seriesName === activeEqName ? '#FF6060' : '#fff'};">` + v.seriesName + '-功率(kW):    ' + v.value + '</span>' + '<br/>').join('');
     };
 
+    // 同一设备对比按日期播放
+    let timer = null;
+    $scope.getTurbineWSPDayLine.palyer = () => {
+        $scope.getTurbineWSPDayLine.inPlay = !$scope.getTurbineWSPDayLine.inPlay;
+        if (!$scope.getTurbineWSPDayLine.inPlay) return $interval.cancel(timer);
+        const playDateTimes = $scope.getTurbineWSPDayLine.res.body.names;
+        let index = 0;
+        $scope.getTurbineWSPDayLine.playDateTime = playDateTimes[index];
+        while ($scope.getTurbineWSPDayLine.res.body[$scope.getTurbineWSPDayLine.playDateTime].length === 0) {
+            $scope.getTurbineWSPDayLine.playDateTime = playDateTimes[++index];
+        }
+        $scope.getTurbineWSPDayLine.palyerYdatas = $scope.getTurbineWSPDayLine.res.body[$scope.getTurbineWSPDayLine.playDateTime];
+        timer = $interval(() => {
+            do {
+                index++;
+                if (index === playDateTimes.length) index = 0;
+                $scope.getTurbineWSPDayLine.playDateTime = playDateTimes[index];
+            } while ($scope.getTurbineWSPDayLine.res.body[$scope.getTurbineWSPDayLine.playDateTime].length === 0);
+
+            $scope.getTurbineWSPDayLine.palyerYdatas = $scope.getTurbineWSPDayLine.res.body[$scope.getTurbineWSPDayLine.playDateTime];
+
+        }, 3 * 1000);
+    };
+
     // 数据置空
     function setDataNull() {
         $scope.column = [];

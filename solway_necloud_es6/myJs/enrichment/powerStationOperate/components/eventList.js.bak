@@ -70,10 +70,14 @@ ajaxData({
                     item.endDateFormat = item.endDate ? FormatDateTime(item.endDate.toString()) : '';
                     item.showFormat = showKey[item.show];
                     item.statusFormat = statusKey[item.status];
+                    var date1 = new Date();
+                    var date2 = new Date(date1);
+                    date2.setDate(date1.getDate() + 365 * 10);
                     $scope.GroupUser.push(
                         {
                             startDate: new Date,
-                            endDate: new Date
+                            endDate: new Date,
+                            limitEndDate: date2
                         }
                     )
                     $scope.GroupUser[i].startDate.showDate = item.startDateFormat;
@@ -163,7 +167,7 @@ ajaxData({
                 k: 1, v: '显示'
             }
         ]
-    
+
         $scope.statusData = [
             {
                 k: 2, v: '请选择'

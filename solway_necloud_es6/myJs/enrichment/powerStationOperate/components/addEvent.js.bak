@@ -20,24 +20,6 @@ ajaxData({
 
 }, {})('addEventCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval, $ocLazyLoad) => {
 
-    $ocLazyLoad.load([
-        'vendor/bootstrap/css/bootstrap-datetimepicker.min.css',
-        'vendor/bootstrap/js/bootstrap-datetimepicker.js'
-    ]).then(() => $ocLazyLoad.load([
-        'vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js',
-        'vendor/libs/moment.min.js'
-    ])).then(() => {
-        // var a= $(".form-wrap input").attr('id');
-        // debugger
-        // $("#"+a).datetimepicker({
-        //     pickerPosition: "top-left"
-        // })
-    })
-
-    // $(".datetimepicker").datetimepicker({
-    //     pickerPosition : "top-left"
-    // })
-
     // Unix时间戳转换
     function FormatDateTime(UnixTime) {
         var a = UnixTime.replace("/Date(", "").replace(")/", "");
@@ -109,7 +91,7 @@ ajaxData({
             $scope.powerStInfo.updateTimeFormat = FormatDateTime($scope.powerStInfo.updateTime.toString());
             $scope.powerStInfo.statusFormat = $scope.powerStInfo.Comm == 0 ? statusKey[$scope.powerStInfo.status] : '';
             $scope.powerStInfo.CommFormat = commKey[$scope.powerStInfo.Comm];
-            $scope.powerStInfo.real_powerFormat = $scope.powerStInfo.real_power == 0 || !$scope.powerStInfo.real_power ? $scope.powerStInfo.real_power : $scope.powerStInfo.real_power.toFixed(10);
+            $scope.powerStInfo.real_powerFormat = $scope.powerStInfo.real_power == 0 || !$scope.powerStInfo.real_power ? $scope.powerStInfo.real_power : $scope.powerStInfo.real_power.toFixed(2);
         });
         // 获取事件列表
         getList();

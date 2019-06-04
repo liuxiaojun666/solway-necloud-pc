@@ -333,7 +333,7 @@ HighAnalysis_selectAnlsType: {
             //获取图表的类型(曲线、柱状、散点)
             $scope['fdStyle' + $scope.checkChart] = myAjaxData.config.tableData[$scope.checkChart].fdStyle = myAjaxData.config.fdStyleArr[$scope.checkChart];
             //获取图表的历史数据
-            $scope['tableData' + $scope.checkChart] = 1;
+            // $scope['tableData' + $scope.checkChart] = 1;
             myAjaxData.config.tableDataTrue[$scope.checkChart] = true;
 
             myAjaxData.config.tableData[$scope.checkChart].analysisType = $scope.queryData.analysisType;
@@ -397,9 +397,9 @@ HighAnalysis_selectAnlsType: {
                     newArrKey.push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key]);
                 }
                 //获取 series
-                var series = [];
+                $scope['series' + myAjaxData.config.checkChart] = [];
                 newArrKey.map((item, i) => {
-                    series.push(
+                    $scope['series' + myAjaxData.config.checkChart].push(
                         {
                             name: item,
                             data: newArrVal[i],
@@ -432,7 +432,7 @@ HighAnalysis_selectAnlsType: {
                 //获取最大值 最小值
                 extreme(newArr);
                 //图表的 setoption
-                chartOption($scope.checkChart, legend, series);
+                chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart]);
             } else {
                 // 获取y轴的名字
                 $scope['yname' + $scope.checkChart] = $scope['yunits' + $scope.checkChart] ? $scope['analysfdName' + $scope.checkChart] + '(' + $scope['yunits' + $scope.checkChart] + ')' : $scope['analysfdName' + $scope.checkChart];
@@ -576,7 +576,7 @@ HighAnalysis_selectAnlsType: {
     // 图表的点击
     $scope.checkChartFun = async (index) => {
         myAjaxData.config.checkChart = $scope.checkChart = index;
-        if ($scope['tableData' + $scope.checkChart] == 1) {
+        if (myAjaxData.config.tableDataTrue[$scope.checkChart]) {
             myAjaxData.config.anlsType = $scope.queryData.analysisType = myAjaxData.config.tableData[$scope.checkChart].analysisType;
             await myAjaxData.timeout(100);
             analysisObjFun();

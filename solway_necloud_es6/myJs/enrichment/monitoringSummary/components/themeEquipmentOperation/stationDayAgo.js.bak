@@ -69,7 +69,6 @@ ajaxData(
     $scope.switchPowerCallback = () => {
         if ($scope.currentClass !== 'StationDayAgo') return;
         $scope.column = [];
-        $scope.getDeviceType.res = null;
         diffGetData();
     };
 
@@ -130,10 +129,10 @@ ajaxData(
             });
         }
         else if (tabIndex === 1) {
-            if (!$scope.getDeviceType.res) await $scope.getDeviceType.getData();
-            if (!$scope.eventType.res) $scope.eventType.getData({ dictType: 'EVENT_TYPE' });
+            $scope.eventType.getData({ dictType: 'EVENT_TYPE' });
+            const res = await $scope.getDeviceType.getData();
+            $scope.deviceRunList.deviceType = res.data[0].devid;
             $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
-
         }
     };
     // 电站  历史日   时间   列表
@@ -177,11 +176,6 @@ ajaxData(
         $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.sun_curve]]
     };
 
-    // 设备类型
-    $scope.getDeviceType.subscribe(res => {
-        $scope.deviceRunList.deviceType = res.data[0].devid;
-        $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
-    });
     // 设备列表
     $scope.queryDeviceWithType.subscribe(res => {
         $scope.deviceRunList.deviceId = '';
@@ -189,9 +183,9 @@ ajaxData(
         $scope.deviceRunList.getData({
             deviceId: '',
             deviceType: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid,
-            eventType: '',
+            eventType: $scope.deviceRunList.eventType,
             pageIndex: 0,
-            pageSize: 10,
+            // pageSize: 10,
             sEndTime: dateTime.showDate + ' 23:59',
             sStartTime: dateTime.showDate + ' 00:00'
         });

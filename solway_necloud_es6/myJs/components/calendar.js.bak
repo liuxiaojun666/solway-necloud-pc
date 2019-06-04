@@ -33,6 +33,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
         destroyed: '=',
         clearable: '=',
         inputStyle: '=',
+        pickerPosition: '='
     },
     template: `
     <div class="calendar" style="position:relative;">
@@ -125,7 +126,7 @@ app.directive('calendar', ['$ocLazyLoad', '$timeout', '$q', ($ocLazyLoad, $timeo
                 startDate: $scope.startDate || new Date('1970', '01', '01'),
                 ...calendarMap[$scope.calendarType],
                 initialDate: $scope.dateTime,
-                pickerPosition: "bottom-left"
+                pickerPosition: $scope.pickerPosition || "bottom-left"
             }).on('hide', ev => {
                 $scope.dateTime = new Date(ev.date.valueOf() - 28800000)
                 $scope.dateTime.showDate = $scope.dateTime.Format($scope.calendarType)
