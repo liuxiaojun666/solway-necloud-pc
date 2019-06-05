@@ -29,7 +29,7 @@ HighAnalysis_selectFds: {
     })
     
     //趋势分析-> 获取时间纬度 发送的dmsTime
-    $scope.$on('trend_dmsTime', (item, v) => {
+    $scope.$on('trend_dmsTime', (e, v) => {
         $scope.anlsType = parentmyAjaxData.config.anlsType;
         $scope.dmsTime = v;
         //趋势分析-> 获取分析指标的数据
@@ -53,6 +53,7 @@ HighAnalysis_selectFds: {
         $scope.$emit('analysNan', { data: 0});
         var key;
         if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
+            //图表没有数据
             for(key in $scope.analysData){
                 $scope.analysData[key].ll.map((item)=>{
                     item.actFdTb = 0;
@@ -62,10 +63,12 @@ HighAnalysis_selectFds: {
             $scope.analysCheckData = [];
             $scope.radioToSelect($scope.analysData.ctg1, 0);
         }
-        else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart]&&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].dmsType)){
+        else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].dmsType)){
+            //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
             return;
         }
         else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].dmsType)&&($scope.dmsTime==parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)){
+            //趋势分析 图表有数据 分析类型不重新选 分析对象不重新选 时间纬度不重新选
             return;
         } else {
             for(key in $scope.analysData){
@@ -156,13 +159,7 @@ HighAnalysis_selectFds: {
     }
 
     $scope.analysCheckData = [];
-    // $scope.horizonPoint = [];
-    // $scope.horizonKpi = [];
 
-    // const key = {
-    //     0: 'horizonPoint',
-    //     1: 'horizonKpi'
-    // }
     //左侧多选按钮-> 右侧 穿梭
     $scope.shuttle = (item, $index) => {
         //点击一个区域 让另一个区域的选中状态置空
@@ -279,7 +276,10 @@ HighAnalysis_selectFds: {
     }
     
     //获取历史数据
-    $scope.$on('alsObjHdata', () => {
+    $scope.$on('haveData', (e,v) => {
+        if(!v){
+            return;
+        }
         if(parentmyAjaxData.config.anlsType != 1){
             $scope.analysData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.analysData;
             $scope.anlsType = parentmyAjaxData.config.tableData[$scope.checkChart].analysisType;
@@ -296,7 +296,7 @@ HighAnalysis_selectFds: {
             setTimeout(()=>{
                 $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysItem,parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.radioIndex, 1);
                 $scope.analysCheckData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.checkData;
-                
+                //恢复被删除的 analysFds 参数
                 parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart];
             },0)
                

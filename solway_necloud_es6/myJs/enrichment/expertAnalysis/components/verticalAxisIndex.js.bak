@@ -180,7 +180,10 @@ AddbaseDictionary: {
     }
 
     //获取历史数据
-    $scope.$on('alsObjHdata', () => {
+    $scope.$on('haveData', (e,v) => {
+        if(!v){
+            return;
+        }
         if(parentmyAjaxData.config.anlsType == 1){
             $scope.verticAxisK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.verticAxisK;
             $scope['historyData' + parentmyAjaxData.config.checkChart] = true;

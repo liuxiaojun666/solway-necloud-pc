@@ -112,11 +112,12 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        const { tabIndex = 0, guidePage = true, notCombined = false, maximize = false, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
+        const { tabIndex = 0, dtype = '2', guidePage = true, notCombined = false, maximize = false, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
         $scope.tabIndex = tabIndex;
         $scope.guidePage = guidePage;
         $scope.maximize = maximize;
         $scope.notCombined = notCombined;
+        $scope.dtype = dtype;
         $scope.activeStatus = guidePage ? [false, false, false, false, false, false] : activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -229,6 +230,7 @@ ajaxData(
             queryCode: apiStr,
             queryType: 1,
             queryStType: 1,
+            dtype: $scope.dtype,
             date: ($scope.dateTime || {showDate: null}).showDate,
             GROUPBY: $scope.activeStatus.map((v, i) => v && ['provinceid', 'manufid', 'ftid', 'dtime,' + ['', '', 'MONTH', 'YEAR'][$scope._dateType], 'stid', 'productid'][i]).filter(v => v).join(';')
         }).then(async res => {
@@ -256,6 +258,7 @@ ajaxData(
     };
 
     const getListData = () => {
+        if (!$scope.initComplete) return;
         if ($scope._dateType < 2) return;
         const apiStr = `analysis_sun_dev_falt_${['', '', 'year', 'accum'][$scope._dateType]}_common_list`;
         ['provinceid', 'manufid', 'ftid', 'dtime,' + ['', '', 'MONTH', 'YEAR'][$scope._dateType], 'stid', 'productid'].forEach((v, i, arr) => {
@@ -264,7 +267,8 @@ ajaxData(
                 queryType: 1,
                 queryStType: 1,
                 date: ($scope.dateTime || {showDate: null}).showDate,
-                GROUPBY: v
+                GROUPBY: v,
+                dtype: $scope.dtype
             }).then(res => {
                 $scope['datasource' + (i + 1)] = res.body.data;
                 $scope['column' + (i + 1)] = [

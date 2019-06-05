@@ -41,6 +41,11 @@ ajaxData({
         name:'GETrightListForPCNew',
         data: {},
         later:true
+    },
+    stationInType:{
+        name:'GETstationInType',
+        data: {},
+        later:true
     }
 }, {
     __serviceName__: 'newStationTplService',
@@ -68,6 +73,12 @@ ajaxData({
         {"status":"02", "statusName":"规划中"},
         {"status":"03", "statusName":"停用"}];
 
+    //电站接入方式
+    const getStationInTypeList = () =>{
+        $scope.stationInType.getData({dictType:'STATION_LINEIN_TYPE'}).then(res=>{
+            $scope.stationInTypeList = res;
+        });
+    }
     const clearDateTime = () =>{
         $scope.startProductTime = null;
         $scope.endProductTime = null;
@@ -100,6 +111,7 @@ ajaxData({
 
     $scope.$on('broadAddStation',async(index,data)=>{
         getCurrentRole();
+        getStationInTypeList();
 
         $scope.formData = {};
         await myAjaxData.timeout(0);
@@ -126,7 +138,8 @@ ajaxData({
                 'latitude':data.latitude,
                 'stationtel':data.stationtel,
                 'stationzip':data.stationzip,
-                'status':data.status
+                'status':data.status,
+                'lineInType':data.lineInType
             };
             $scope.getDepListByCompany(data.companyid);//获取当前公司的部门列表
 

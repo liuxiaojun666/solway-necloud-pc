@@ -198,30 +198,16 @@ HighAnalysis_selectFds: {
         }
     }
 
-    //点击同比 环比
-    // $scope.tongBi = (fdKey, type) => {
-    //     if (type == 'tong') {
-    //         $scope.herizonBottom.map((item) => {
-    //             if (item.fdKey == fdKey) {
-    //                 item.fdTb == 0 ? item.fdTb = 1 : item.fdTb = 0;
-    //             }
-    //         })
-    //     } else {
-    //         $scope.herizonBottom.map((item) => {
-    //             if (item.fdKey == fdKey) {
-    //                 item.fdHb == 0 ? item.fdHb = 1 : item.fdHb = 0;
-    //             }
-    //         })
-    //     }
-    // }
-
     //取消
     $scope.cancel = () => {
         $scope.$emit('cancelCallback');
     }
 
     //获取历史数据
-    $scope.$on('alsObjHdata', () => {
+    $scope.$on('haveData', (e,v) => {
+        if(!v){
+            return;
+        }
         if(parentmyAjaxData.config.anlsType == 1){
             $scope.hrizonAxisK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].horizon.hrizonAxisK;
             $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].horizon.hrizonItem,parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].horizon.radioIndex);

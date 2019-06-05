@@ -8,16 +8,6 @@ ajaxData({
         __serviceName__: 'countTimeService'
     })('countTimeCtrl', ['$scope', 'countTimeService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
 
-        //获取父级发送的横轴指标 选择的option
-        // $scope.$on('countTime_open', () => {
-        //     if(parentmyAjaxData.config.tableDataTrue[$scope.checkChart]){
-        //         $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioName, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.dateType);
-        //     } else {
-        //         $scope.radioToSelect('日', 3);
-        //         $scope.radioIndex = 1;
-        //     }
-        // })
-
         //获取时间纬度 发送的dmsTime
         $scope.$on('dmsTime', (item, v) => {
             $scope.dmsTime = v;
@@ -146,7 +136,7 @@ ajaxData({
         });
 
         //获取历史数据
-        $scope.$on('ctimeHdata', (event, v) => {
+        $scope.$on('haveData', (event, v) => {
             if (!v) {
                 $scope.radioToSelect('日', 3);
                 $scope.radioIndex = 1;
@@ -162,7 +152,6 @@ ajaxData({
         })
 
         //单选框选中-> 更改select的值
-        // $scope.selectIndex = 1;
         $scope.radioToSelect = (name, dateType) => {
             var radioIndex = document.querySelectorAll('[name=cTime]'):: [].filter(item => item.checked).map(item => item.dataset.index);
             $scope.radioName = name;

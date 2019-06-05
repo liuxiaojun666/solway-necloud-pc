@@ -112,11 +112,12 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        const { tabIndex = 0, guidePage = true, notCombined = false, maximize = false, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
+        const { tabIndex = 0, dtype = '18', guidePage = true, notCombined = false, maximize = false, activeStatus = [false, false, false, false, false, false] } = historicalRecord.get().themeEquipmentFailure || {};
         $scope.tabIndex = tabIndex;
         $scope.guidePage = guidePage;
         $scope.maximize = maximize;
         $scope.notCombined = notCombined;
+        $scope.dtype = dtype;
         $scope.activeStatus = guidePage ? [false, false, false, false, false, false] : activeStatus;
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -229,6 +230,7 @@ ajaxData(
             queryCode: apiStr,
             queryType: 1,
             queryStType: 2,
+            dtype: $scope.dtype,
             date: ($scope.dateTime || {showDate: null}).showDate,
             GROUPBY: $scope.activeStatus.map((v, i) => v && ['provinceid', 'manufid', 'ftid', 'dtime,' + ['', '', 'MONTH', 'YEAR'][$scope._dateType], 'stid', 'productid'][i]).filter(v => v).join(';')
         }).then(async res => {
@@ -263,6 +265,7 @@ ajaxData(
                 queryCode: apiStr,
                 queryType: 1,
                 queryStType: 2,
+                dtype: $scope.dtype,
                 date: ($scope.dateTime || {showDate: null}).showDate,
                 GROUPBY: v
             }).then(res => {

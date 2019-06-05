@@ -261,11 +261,6 @@ HighAnalysis_selectAnlsType: {
         1: 'line',
         3: 'bar'
     }
-    $scope.ajaxParams0 = {};
-    $scope.ajaxParams1 = {};
-    $scope.ajaxParams2 = {};
-    $scope.ajaxParams3 = {};
-    $scope.ajaxParams = [];
 
     //调接口前 判空
     function judgeBeforeAjax() {
@@ -307,10 +302,9 @@ HighAnalysis_selectAnlsType: {
             sort: $scope.queryData.analysisType == 3 ? myAjaxData.config.benchSort[myAjaxData.config.checkChart] : null
         }
         return dataJ;
-        // $scope.ajaxParams[$scope.checkChart] = JSON.parse(JSON.stringify(dataJ));
     }
 
-    // 最终的 查询按钮
+    //最终的 查询按钮
     $scope.search = () => {
         var judge = judgeBeforeAjax();
         if (!judge) {
@@ -333,7 +327,6 @@ HighAnalysis_selectAnlsType: {
             //获取图表的类型(曲线、柱状、散点)
             $scope['fdStyle' + $scope.checkChart] = myAjaxData.config.tableData[$scope.checkChart].fdStyle = myAjaxData.config.fdStyleArr[$scope.checkChart];
             //获取图表的历史数据
-            // $scope['tableData' + $scope.checkChart] = 1;
             myAjaxData.config.tableDataTrue[$scope.checkChart] = true;
 
             myAjaxData.config.tableData[$scope.checkChart].analysisType = $scope.queryData.analysisType;
@@ -558,7 +551,7 @@ HighAnalysis_selectAnlsType: {
         })
     }
 
-    // 切换图表排列方式
+    //切换图表排列方式
     $scope.chartSortIndex = 4;
     $scope.chartSort = (index) => {
         $scope.chartSortIndex = index;
@@ -573,23 +566,22 @@ HighAnalysis_selectAnlsType: {
         }
     }
 
-    // 图表的点击
+    //图表的点击
     $scope.checkChartFun = async (index) => {
         myAjaxData.config.checkChart = $scope.checkChart = index;
         if (myAjaxData.config.tableDataTrue[$scope.checkChart]) {
             myAjaxData.config.anlsType = $scope.queryData.analysisType = myAjaxData.config.tableData[$scope.checkChart].analysisType;
-            await myAjaxData.timeout(100);
+            await myAjaxData.timeout(200);
             analysisObjFun();
-            $scope.$broadcast('alsObjHdata');
-            $scope.$broadcast('ctimeHdata', true);
+            $scope.$broadcast('haveData',true);
             await myAjaxData.timeout(200);
             $scope.$broadcast('trend_dmsTime', $scope.queryData.timeLat);
 
         } else {
             $scope.queryData.analysisType = 1;
-            await myAjaxData.timeout(100);
+            await myAjaxData.timeout(200);
             analysisObjFun();
-            $scope.$broadcast('ctimeHdata', false);
+            $scope.$broadcast('haveData',false);
         }
     }
     $scope.checkChartFun(0);
@@ -720,7 +712,6 @@ HighAnalysis_selectAnlsType: {
         } else if (param == 3) {
             // 统计时间弹出
             $scope.countTimeModel = true;
-            // $scope.$broadcast('countTime_open');
         } else if (param == 4) {  //时间纬度 弹出
             if (!$scope.queryData.timeLat) {
                 $scope.queryData.horizonIndexV = '请选择';
@@ -742,8 +733,8 @@ HighAnalysis_selectAnlsType: {
             // 分析类型下拉框 选中处理数据
             analysisObjFun();
         } else if (param == 7) {
+            // 分析指标弹出
             if (myAjaxData.config.anlsType == 2 && $scope.queryData.timeLat && $scope.analysNan != 1) {
-                // 分析指标弹出
                 $scope.analysIndexModel = true;
                 $scope.$broadcast('analysOpen');
             } else if (myAjaxData.config.anlsType == 3 && $scope.analysNan != 1) {
