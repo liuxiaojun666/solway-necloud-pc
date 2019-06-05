@@ -448,9 +448,15 @@ HighAnalysis_selectAnlsType: {
                         if (key == myAjaxData.config.analysFds[myAjaxData.config.checkChart][0].fdKey) {
                             $scope['ydatas' + $scope.checkChart][0].push($scope.tableData.data[key]);
                         } else {
-                            $scope.tableData.data[key].map((item) => {
-                                $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
-                            })
+                            if (myAjaxData.config.dmsType == 5) {
+                                $scope.tableData.data['deptid'].map((item) => {
+                                    $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
+                                })
+                            } else {
+                                $scope.tableData.data[key].map((item) => {
+                                    $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
+                                })
+                            }
                         }
                     }
                     $scope['tableType' + $scope.checkChart].push(tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle]);
@@ -573,7 +579,7 @@ HighAnalysis_selectAnlsType: {
             myAjaxData.config.anlsType = $scope.queryData.analysisType = myAjaxData.config.tableData[$scope.checkChart].analysisType;
             await myAjaxData.timeout(200);
             analysisObjFun();
-            $scope.$broadcast('haveData',true);
+            $scope.$broadcast('haveData', true);
             await myAjaxData.timeout(200);
             $scope.$broadcast('trend_dmsTime', $scope.queryData.timeLat);
 
@@ -581,7 +587,7 @@ HighAnalysis_selectAnlsType: {
             $scope.queryData.analysisType = 1;
             await myAjaxData.timeout(200);
             analysisObjFun();
-            $scope.$broadcast('haveData',false);
+            $scope.$broadcast('haveData', false);
         }
     }
     $scope.checkChartFun(0);

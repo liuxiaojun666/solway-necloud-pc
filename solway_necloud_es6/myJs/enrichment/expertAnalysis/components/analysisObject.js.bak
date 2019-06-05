@@ -49,8 +49,8 @@ ajaxData({
         let zTree;
 
         //获取父级发送的数据
-        $scope.$on('analysObDataNew', (item, data) => {
-            // if (data.analysObDataNewDevice.length > 0) {
+        $scope.$on('analysObDataNew', (e, data) => {
+            if (data.analysObDataNewDevice) {
                 $scope.analysObDataNew = data.analysObDataNew;
                 var arr = [];
                 $scope.analysObDataNew.map((item) => {
@@ -79,7 +79,7 @@ ajaxData({
                     // })
                     $scope.radioDevice();
                 }
-            // }
+            }
         })
 
         //获取历史数据
@@ -134,7 +134,7 @@ ajaxData({
             $scope.equipChoice($scope.equipChoiceItem, $scope.equipChoiceIndex);
         }
 
-        //多级联动函数组 
+        //多级联动函数组
         $scope.multiLevel = {
             'area': null,
             'powerStation': '',
@@ -390,9 +390,6 @@ ajaxData({
                 'machineType': '',
                 'device': ''
             }
-            // selectPowerStation();
-            // selectMachineType();
-            // selectDevice();
         }
 
         //处理点击故障类型radio
