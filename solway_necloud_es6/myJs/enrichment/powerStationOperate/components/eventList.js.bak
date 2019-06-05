@@ -143,8 +143,9 @@ ajaxData({
             item.endDate = $scope.GroupUser[i].endDate.showDate;
             item.show = $scope.edit[i].show;
             item.status = $scope.edit[i].status;
+            var { creatUserId, creatDate, updateTime, ...params } = item;
 
-            $scope.insertDeviceEventDetail.getData(item).then(res => {
+            $scope.insertDeviceEventDetail.getData(params).then(res => {
                 if (res.code == 0) {
                     item.edit = false;
                     flag = false;
