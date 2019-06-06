@@ -1,5 +1,15 @@
-ajaxData({
-}, {})('efficientOperationSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+ajaxData(
+    {
+        checkModuleAuth: {
+            name: 'GETcheckModuleAuth',
+            data: {
+                codes: 618
+            }
+        }
+    }, {
+
+    }
+)('efficientOperationSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
     historicalRecord.init();
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '高效运维';//当前页面名称；
@@ -23,9 +33,15 @@ ajaxData({
     $scope.reloadParentPage = async (data = {}) => {
         historicalRecord.set(data);
         $scope.beforeLoading = true;
-        
+
         return historyInitCallback();
     };
+
+    $scope.checkModuleAuth.subscribe(res => {
+        if (res.body['618'].userStatus === '00' && $scope.theme === 'Share') {
+            $scope.changeTheme('Profession');
+        }
+    });
 
 
     // 切换主题模块

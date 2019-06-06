@@ -141,6 +141,7 @@ ajaxData({
         if (!$scope.bigDataExportType.res) return;
         if (!$scope.allSTListForPCBySession.res) return;
         if ($scope.formData.qcType == 0) return;
+        if ($scope.formData.qcType == 19) return;
         $scope.selectDevicesByStation.getData({
             stid: $scope.formData.qcStid,
             deviceType: $scope.formData.qcType,
@@ -205,8 +206,12 @@ ajaxData({
     // 创建 提交
     $scope.formDataSubmit = () => {
         const { qcColumnid, qcEqid, qcType, qcColumnidAll, qcEqidAll } = $scope.formData;
-        if (qcColumnid.length === 0) return;
-        if (qcType != 0 && qcEqid.length === 0) return;
+
+        const _qcColumnid = qcColumnidAll ? '' : qcColumnid.filter(v => v.checked).map(v => v.field).join(',');
+        const _qcEqid = qcEqidAll ? '' : qcEqid.filter(v => v.checked).map(v => v.serialNumber).join(',');
+
+        if (!qcColumnidAll && _qcColumnid.length === 0) return toaster.pop('error', '', '请选择列');
+        if (!qcEqidAll && qcType != 0 && qcType != 19 && _qcEqid.length === 0) return toaster.pop('error', '', '请选择设备');
 
         if ($scope.formData.qcLevel == 1) {
             if ($scope.endDate.getTime() - $scope.startDate.getTime() > 1000 * 60 * 60 * 24 * 31) {
@@ -216,8 +221,8 @@ ajaxData({
 
         $scope.bigdataExportUpdate.getData({
             ...$scope.formData,
-            qcColumnid: qcColumnidAll ? '' : qcColumnid.filter(v => v.checked).map(v => v.field).join(','),
-            qcEqid: qcEqidAll ? '' : qcEqid.filter(v => v.checked).map(v => v.serialNumber).join(','),
+            qcColumnid: _qcColumnid,
+            qcEqid: _qcEqid,
             qcEqidAll: null,
             qcEqidOnlyShowChecked: null,
             qcEqidKeyWords: null,

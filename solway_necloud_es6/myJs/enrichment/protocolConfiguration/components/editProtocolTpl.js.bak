@@ -179,13 +179,24 @@ ajaxData({
             $scope.statusCodeListByProduct.getData({ protocolid: id }).then(res => {
                 res.map((item,index) =>{
                     item.faultlevel = Number(item.faultlevel)
-                    $scope.statusdata.push({
-                        serNum:index,
-                        faultcodeindex:item.faultcodeindex,
-                        faultcode:item.faultcode,
-                        faultlevel:item.faultlevel,
-                        faultdesc:item.faultdesc
-                    });
+                    if(item.faultcode == 0 && item.faultcodeindex == 0){
+                        $scope.statusdata.push({
+                            serNum:index,
+                            faultcodeindex:'-1',
+                            faultcode:item.faultcode,
+                            faultlevel:item.faultlevel,
+                            faultdesc:item.faultdesc
+                        });
+                    }else{
+                        $scope.statusdata.push({
+                            serNum:index,
+                            faultcodeindex:item.faultcodeindex,
+                            faultcode:item.faultcode,
+                            faultlevel:item.faultlevel,
+                            faultdesc:item.faultdesc
+                        });
+                    }
+                    
                 })
                 $scope.count = res.length;
             });
@@ -416,7 +427,7 @@ ajaxData({
             }
 
             for(let i=0;i<$scope.statusdata.length;i++){
-                if($scope.formData['statusdiagnosistype'] == '1'){
+                if($scope.formData['statusdiagnosistype'] == '1'){  //整型
                     if(!$scope.statusdata[i].faultcode || !$scope.statusdata[i].faultlevel) {
                         toaster.pop('error', '', '状态码和状态分类均不能为空')
                         return;
@@ -428,7 +439,7 @@ ajaxData({
                         return;
                     }
                     $scope.statusdata[i].faultcodeindex = '0';
-                }else if($scope.formData['statusdiagnosistype'] == '2'){
+                }else if($scope.formData['statusdiagnosistype'] == '2'){ //按位
                     if(!$scope.statusdata[i].faultlevel) {
                         toaster.pop('error', '', '状态分类均不能为空')
                         return;
@@ -437,7 +448,13 @@ ajaxData({
                         toaster.pop('error','','索引位置必须是一个整数');
                         return;
                     }
-                    $scope.statusdata[i].faultcode = '1';
+                    if($scope.statusdata[i].faultcodeindex == '-1'){
+                        $scope.statusdata[i].faultcodeindex = '0';
+                        $scope.statusdata[i].faultcode = '0';
+                    }else{
+                        $scope.statusdata[i].faultcode = '1';
+                    }
+                    
                 }
             }
             $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
@@ -466,7 +483,6 @@ ajaxData({
         $scope.getFaultCodeList = () => {
             $scope.faultCodeList.getData({
                 pageIndex: 0,
-                pageSize: 10,
                 protocolID: $scope.formData.id,
                 keyWords: $scope.keyWordsFaultcode
             })

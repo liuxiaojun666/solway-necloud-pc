@@ -12,6 +12,18 @@ ajaxData({
         data: {},
         later: true,
         onlyLatest: true
+    }, 
+    stationWsfLine: {
+        name: 'GETstationWsfLine',
+        data: { },
+        later: true,
+        onlyLatest: true,
+    },
+    stationVPList: {
+        name: 'GETstationVPList',
+        data: { },
+        later: true,
+        onlyLatest: true,
     },
 }, {
 
@@ -67,6 +79,8 @@ ajaxData({
                     showShape
                 }
             });
+            myChart && myChart.dispose();
+            myChart = null;
             diffGetData();
         };
 
@@ -171,21 +185,31 @@ ajaxData({
         }
 
         // 风向玫瑰图
-        function roseMap(params) {
+        let myChart;
+        $scope.stationWsfLine.subscribe(res => {
+            if ($scope.showShape !== 'chart3') return;
+            const { x, wd_ws_curve, wd_wfreq_curve } = res.body;
+            const maxWs = Math.max.apply(null, wd_ws_curve);
+            const maxWf = Math.max.apply(null, wd_wfreq_curve);
+            if (!x) return myChart && myChart.clear();
+            myChart = myChart || echarts.init(document.getElementById('roseMap'));
             const option = {
-                backgroundColor: '#163E67',
+                // backgroundColor: '#163E67',
                 color: ['#37E2A4', '#6893FF'],
                 tooltip: {
                     formatter: function (params, ticket, callback) {
-                        return params.seriesName + ': ' + params.value[0];
+                        const {name, value, seriesName} = params;
+                        return name + ': ' + value[seriesName.split('--')[1] * 2];
                     }
                 },
                 legend: {
                     icon: 'rect',
                     top: 20,
+                    right: 50,
                     itemWidth: 24,
                     itemHeight: 12,
-                    data: ['风频', '风速'],
+                    data: ['风频(%)', '风速(m/s)'],
+                    orient: 'vertical',
                     textStyle: {
                         color: '#fff'
                     }
@@ -193,15 +217,15 @@ ajaxData({
                 radar: [
                     {
                         indicator: new Array(32).fill({
-                            text: '', max: 100
+                            text: '', max: maxWf
                         }).map(function (v, i) {
-                            if (i === 1) return { text: 'N', max: 100 };
+                            if (i === 1) return { text: 'N', max: maxWf };
                             return v
                         }),
                         name: {
                             textStyle: {
                                 color: '#fff',
-                                fontSize: 20
+                                fontSize: $scope.winHeight > 700 ? 20 : 12
                             }
                         },
                         splitArea: {
@@ -219,13 +243,13 @@ ajaxData({
                                 color: 'transparent'
                             }
                         },
-                        radius: 220,
+                        radius: '70%',
                         startAngle: 78.75,
                         splitNumber: 4,
                     },
                     {
                         indicator: new Array(32).fill({
-                            text: '', max: 30
+                            text: '', max: maxWs
                         }),
                         splitArea: {
                             areaStyle: {
@@ -242,13 +266,13 @@ ajaxData({
                                 color: 'transparent'
                             }
                         },
-                        radius: 220,
+                        radius: '70%',
                         startAngle: 90,
                         splitNumber: 4,
                     },
                     {
                         indicator: new Array(16).fill({
-                            text: '', max: 30
+                            text: ''
                         }),
                         splitArea: {
                             areaStyle: {
@@ -265,15 +289,15 @@ ajaxData({
                                 color: '#677889'
                             }
                         },
-                        radius: 220,
+                        radius: '70%',
                         startAngle: 78.75,
                         splitNumber: 4,
                         shape: 'circle',
                     }
                 ],
                 series: [
-                    {
-                        name: '风频',
+                    ...wd_wfreq_curve.map((v, i) => ({
+                        name: '风频--' + i,
                         type: 'radar',
                         radarIndex: 0,
                         symbolSize: 0,
@@ -289,18 +313,15 @@ ajaxData({
                         },
                         data: [
                             {
-                                value: new Array(32).fill(0).map((v, i) => {
-                                    if (i < 2) {
-                                        return 80;
-                                    }
-                                    return 0;
+                                value: new Array(32).fill(0).map((xv, xi) => {
+                                    return xi <= i * 2 + 1 && xi >= i * 2 ? v : 0;
                                 }),
-                                name: '风频',
+                                name: '风频(%)',
                             },
                         ]
-                    },
-                    {
-                        name: '风速',
+                    })),
+                    ...wd_ws_curve.map((v, i) => ({
+                        name: '风速--' + i,
                         type: 'radar',
                         radarIndex: 1,
                         symbolSize: 0,
@@ -316,19 +337,22 @@ ajaxData({
                         },
                         data: [
                             {
-                                value: new Array(32).fill(0).map((v, i) => {
-                                    if (i < 2) {
-                                        return 8;
-                                    }
-                                    return 0;
+                                value: new Array(32).fill(0).map((xv, xi) => {
+                                    return xi <= i * 2 + 1 && xi >= i * 2 ? v : 0;
                                 }),
-                                name: '风速',
+                                name: '风速(m/s)',
                             },
                         ]
-                    },
+                    })),
                 ]
-            }
-        }
+            };
+            window.addEventListener('resize', $scope.switchDetailFullPage);
+            myChart.setOption(option, true);
+        });
+        $scope.switchDetailFullPage = async () => {
+            await myAjaxData.timeout(0);
+            myChart && myChart.resize();
+        };
 
         // 判断 调用  对应 接口
         async function diffGetData() {
@@ -341,6 +365,17 @@ ajaxData({
                     queryCode: 'query_wp_station_month_res_timelist',
                     queryType: 3,
                     date: dateTime.showDate
+                });
+            } else if (showShape === 'chart3') {
+                $scope.stationWsfLine.getData({
+                    queryType: 3,
+                    dateType: 2,
+                    date: $scope.dateTime.showDate
+                });
+                $scope.stationVPList.getData({
+                    queryType: 3,
+                    dateType: 2,
+                    date: $scope.dateTime.showDate
                 });
             } else {
                 $scope.query_wp_station_month_res_timeline.getData({
@@ -359,6 +394,11 @@ ajaxData({
             $scope.column = [];
         }
 
-        $scope.$on('$destroy', () => setDataNull());
+        $scope.$on('$destroy', () => {
+            setDataNull();
+            window.removeEventListener('resize', $scope.switchDetailFullPage);
+            myChart && myChart.dispose();
+            myChart = null;
+        });
 
     });
