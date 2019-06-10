@@ -96,9 +96,15 @@ ajaxData(
     $scope.settlePowerList.subscribe(res => {
         $scope.column = [
             {
+                title: '年',
+                dataIndex: 'year',
+                sort: true,
+                align: 'center'
+            },
+            {
                 title: '期数',
                 dataIndex: 'num',
-                sort: true,
+                // sort: true,
                 align: 'center'
             },
             {
@@ -181,6 +187,8 @@ ajaxData(
                     endTime: endTime.showDate,
                     imgs: imgs.join()
                 }).then(res => {
+                    if (res.code === 0) toaster.pop('success', '', res.msg || '成功');
+                    else return toaster.pop('error', '', res.msg || '失败');
                     $scope.newForm = false;
                     $scope.settlePowerList.getData();
                 });
