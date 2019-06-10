@@ -69,27 +69,36 @@ ajaxData({
         }else{
             $scope.tplTitle = '新增';
         }
+
+        let categoryList = [{value:'1',name:'普通用户'},{value:'2',name:'集团管理员'},{value:'-9',name:'系统管理员'}];
+
+        for(let i =0;i<categoryList.length;i++){
+            if($scope.serviceType == categoryList[i].value)  categoryList.splice(i,1)
+        }
+        
+        $scope.categoryList = categoryList;
     });
 
     //保存
     $scope.save = () =>{
         if (!$solway.formValidation($scope.formData, '.addModuleTpl', toaster)) return;//校验非空
 
-        if($scope.id){
-            //编辑无需校验编码
-            save();
-        }else{
-            //校验编码是否存在编码
-            $scope.checkCodeExist.getData({
-                code:$scope.formData.code
-            }).then(res=>{
-                if(res.code == 0){
-                    save();
-                }else{
-                    toaster.pop('error', '',res.msg)
-                }
-            });
-        }
+        save();
+        // if($scope.id){
+        //     //编辑无需校验编码
+        //     save();
+        // }else{
+        //     //校验编码是否存在编码
+        //     $scope.checkCodeExist.getData({
+        //         code:$scope.formData.code
+        //     }).then(res=>{
+        //         if(res.code == 0){
+        //             save();
+        //         }else{
+        //             toaster.pop('error', '',res.msg)
+        //         }
+        //     });
+        // }
     }
 
     //删除成功

@@ -34,7 +34,8 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         legend: '=',
         grid: '=',
         datazoomEnd: '=',
-        z: '='
+        z: '=',
+        animation: '=',
     },
     link($scope, $element) {
         let myChart;
@@ -67,6 +68,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     return params[0].name + '<br/>' + params.map(v => v.seriesName + ':    ' + v.value + '<br/>').join('');
                 },
                 backgroundColor,
+                animation = true,
                 imagesymboloptions,
                 symbolSize,
                 splitNumber,
@@ -104,6 +106,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
             height = height === '100%' ? $element[0].clientWidth : height;
             const option = {
                 backgroundColor,
+                animation,
                 tooltip: {
                     trigger: 'axis', //触发类型。[ default: 'item' ] :数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用;'axis'坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用
                     axisPointer: {

@@ -189,7 +189,7 @@ ajaxData(
             // sStartTime: dateTime.showDate + ' 00:00'
 
             deviceId: '',
-            deviceType: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid,
+            deviceType: { '1': '18', '2': '17' }[$scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid],
             eventType: $scope.deviceRunList.eventType,
             pageIndex: 0,
             date: dateTime.showDate,
@@ -226,12 +226,12 @@ ajaxData(
                 sort: true,
                 align: 'left',
                 render(text) {
-                    return text || '-'
+                    return `<span class="clickable">${text}</span>`;
                 }
             },
             {
                 title: '事件类型',
-                dataIndex: 'eventType',
+                dataIndex: 'faultclassStr',
                 width: '100px',
                 sort: true,
                 render(text, item, index) {
@@ -256,7 +256,7 @@ ajaxData(
             },
             {
                 title: '状态',
-                dataIndex: 'sureStatus',
+                dataIndex: 'handstatusStr',
                 sort: true,
                 align: 'center'
             },
