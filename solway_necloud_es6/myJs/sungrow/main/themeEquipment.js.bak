@@ -1,0 +1,108 @@
+ajaxData(
+    {
+        stClassLIst: {
+            name: 'GETstClassLIst',
+            data: {}
+        },
+        home_pv_company_pgc_month_stationlist: {
+            name: 'GEThome_pv_company_pgc_month_stationlist',
+            data: {},
+            later: true
+        },
+        home_pv_company_pr_month_stationlist: {
+            name: 'GEThome_pv_company_pr_month_stationlist',
+            data: {},
+            later: true
+        },
+        home_wp_company_pgc_month_stationlist: {
+            name: 'GEThome_wp_company_pgc_month_stationlist',
+            data: {},
+            later: true
+        },
+        home_wp_company_pba_month_stationlist: {
+            name: 'GEThome_wp_company_pba_month_stationlist',
+            data: {},
+            later: true
+        },
+        deviceStatusFromRedis: {
+            name: 'GETdeviceStatusFromRedis',
+            data: {},
+            later: true
+        },
+        // 切换电站
+        changeStation: {
+            name: 'GETUserAuthHandleChangeDataType',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'mainEquipmentService',
+    }
+)('mainEquipmentCtrl', ['$scope', 'mainEquipmentService', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
+    $('.themeEquipment.ng-clock').removeClass('ng-clock');
+    let od, od2;
+    // 电站类型列表
+    $scope.stClassLIst.subscribe(res => {
+        $scope.stClassLIst.res.stClass01 = res.data.some(v => v.id === '01');
+        $scope.stClassLIst.res.stClass02 = res.data.some(v => v.id === '02');
+    });
+
+    $scope.goThisStation = async ({ stid, stClass, router, pageData }) => {
+        const falsify = historicalRecord.falsify(router, pageData, (!stid || !stClass));
+        if (falsify && (falsify.redirect === 'failure')) return;
+        if (!stid || !stClass) return;
+        await $scope.changeStation.getData({
+            dataType: 0,
+            id: stid,
+            isGroup: "0",
+            stClass
+        });
+        $state.go(router);
+    };
+
+    $scope.stClassLIst.subscribe(res => {
+        const date = new Date().Format('yyyy-MM-dd').substr(0, 7);
+        [ 'pgc', 'pr', 'pgc', 'pba'].forEach((element, i) => {
+            $scope['home_'+['pv', 'pv', 'wp', 'wp'][i]+'_company_' + element + '_month_stationlist'].getData({
+                queryCode: ['home_' + ['pv', 'pv', 'wp', 'wp'][i] +'_company_' + element + '_month_stationlist'],
+                queryType: 1,
+                date,
+                // sort: element + ',asc'
+            })
+        });
+    });
+
+    $scope.stClassLIst.subscribe(async res => {
+        await myAjaxData.timeout(0);
+        if ($scope.stClassLIst.res.stClass01) {
+            od = new Odometer({ el: document.getElementById('odometer'), value: 100 });
+        }
+        if ($scope.stClassLIst.res.stClass02) {
+            od2 = new Odometer({ el: document.getElementById('odometer2'), value: 100 });
+        }
+        $scope.deviceStatusFromRedis.getData();
+    });
+
+    $scope.deviceStatusFromRedis.subscribe(res => {
+        const class01 = res['01'] || {
+            comm: 0,
+            fault: 0,
+            maintain: 0,
+            run: 0,
+            wait: 0
+        };
+        const class02 = res['02'] || {
+            comm: 0,
+            fault: 0,
+            maintain: 0,
+            run: 0,
+            wait: 0
+        };
+        const class01RunRate = class01.run / Object.values(class01).reduce((a, b) => a + b, 0) * 100;
+        const class02RunRate = class02.run / Object.values(class02).reduce((a, b) => a + b, 0) * 100;
+        od && od.update('1' + ('00000000' + (class02RunRate || 100).toFixed()).substr(-2));
+        od2 && od2.update('1' + ('00000000' + class01RunRate.toFixed()).substr(-2));
+        if (class02RunRate === 100) od && $(od.el).find('.odometer-digit').eq(0).find('.odometer-value').text(1);
+        if (class01RunRate === 100) od2 && $(od2.el).find('.odometer-digit').eq(0).find('.odometer-value').text(1);
+    });
+});

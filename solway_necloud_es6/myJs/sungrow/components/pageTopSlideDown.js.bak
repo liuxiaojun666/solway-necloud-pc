@@ -1,0 +1,192 @@
+app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams', '$timeout', '$rootScope', 'actionRecord', ($ocLazyLoad, $http, $state, $stateParams, $timeout, $rootScope, historicalRecord) => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: {
+
+    },
+    templateUrl: 'tpl/enrichment/components/pageSlideDown.html' + window.stamp,
+    link($scope, $element) {
+        const wpPages = [
+            'monitoringSummary',
+            'analyzeSummary',
+            'actionPlanSummary',
+            'expertAnalysis'
+        ];
+        $scope.goChildrenPage = (routerUrl, theme) => {
+            const { stClass } = $scope;
+            $solway.setStore('systemInfo', { stClass: stClass });
+            if (stClass === '02' && wpPages.includes(routerUrl)) {
+                routerUrl += 'Wp';
+            }
+            $solway.setStore('systemInfo', { 'systemTab': $scope.systemTab, 'module': [routerUrl, theme] });
+            if ($scope.currentState == routerUrl) {
+                $(".systems-page").slideUp();
+                return false;
+            }
+            if ($scope.currentSTinfo.currentSTClass !== stClass) {
+                $http({
+                    method: "GET",
+                    url: window.interface['GETUserAuthHandleSetSTClass'],
+                    params: { stClass }
+                }).success(function (res) {
+                    $state.go(routerUrl);
+                });
+            } else {
+                $state.go(routerUrl);
+            }
+        }
+
+        $scope.goBoughtModulePage = async (routerUrl, theme) => {
+            const { stClass } = $scope;
+            $solway.setStore('systemInfo', { stClass: stClass });
+            if (stClass === '02' && wpPages.includes(routerUrl)) {
+                routerUrl += 'Wp';
+            }
+            $solway.setStore('systemInfo', { 'systemTab': $scope.systemTab, 'module': [routerUrl, theme] });
+            if ($scope.currentSTinfo.currentSTClass !== stClass) {
+                await $http({
+                    method: "GET",
+                    url: window.interface['GETUserAuthHandleSetSTClass'],
+                    params: { stClass }
+                })
+                // .success(function (res) {
+                //     $state.go(routerUrl);
+                // });
+            }
+            if (routerUrl == theme) {
+                const falsify = historicalRecord.falsify(routerUrl, {}, true);
+                if (falsify.redirect == 'failure') {
+                    $(".systems-page").slideUp();
+                }
+            } else {
+                const falsify = historicalRecord.falsify(routerUrl, { 'theme': theme }, true);
+                $scope.currentFun = theme;
+                if (falsify.redirect == 'failure') {
+                    $scope.$parent.reloadParentPage({});
+                    $(".systems-page").slideUp();
+                }
+            }
+        }
+
+
+        //到不同首页
+        $scope.goMainPage = (theme) => {
+            historicalRecord.falsify($rootScope.mainPageUrl, { theme }, true);
+            $(".systems-page").slideUp();
+            if ($scope.currentState === 'main') $scope.$parent.reloadParentPage();
+            // $state.go($rootScope.mainPageUrl);
+        };
+
+        //切换不同体系
+        $scope.changeSystemTab = type => {
+            $scope.systemTab = type;
+            $scope.setActiveClass();
+        }
+
+        //鼠标悬浮0.5s页面头部，出现下拉页面
+        let timer = null;
+        const setMainHeight = () => {
+            let wHeight = $(window).height();
+            let muduleHeight = 500;
+            $(".module-list").css('marginTop', (wHeight - muduleHeight) / 2)
+            $(".function-list").css('marginTop', (wHeight - 660) / 2)
+        }
+
+        setMainHeight()
+
+        window.addEventListener('resize', setMainHeight);
+        $scope.$on('$destroy', () => {
+            window.removeEventListener('resize', setMainHeight);
+        });
+
+        $timeout(() => {
+            $element.removeClass('ng-clock');
+            $('body').on('mouseover', '.hover-header-con', () => {
+                $scope.setActiveClass();
+                timer = setTimeout(() => {
+                    $(".systems-page").slideDown();
+                }, 500);
+            })
+            $('body').on('mouseout', '.hover-header-con', () => {
+                if (timer) clearTimeout(timer);
+            })
+        }, 0)
+
+        $('body').on('click', '.hover-header-con-click', () => {
+            $(".systems-page").slideDown();
+            $scope.setActiveClass();
+        })
+
+        $(".close_btn_slide").click(() => {
+            $(".systems-page").slideUp();
+        });
+
+        $(".square-common").hover(function () {
+            $(this).addClass('active');
+        }, function () {
+            if ($(this).hasClass($scope.currentState)) return;
+            $(this).removeClass('active');
+        })
+
+
+    },
+    controller($scope, $element) {
+        historicalRecord.init();
+
+        $scope.stamp = window.stamp;
+
+        $http({
+            method: "GET",
+            url: window.interface['GETstClassLIst'],
+            params: {}
+        }).success(res => {
+            if (res.data.length === 1) {
+                $scope.stClass = res.data[0].id;
+            } else if (res.data.length === 2) {
+                $scope.switchStClassDisplay = true;
+            }
+        });
+
+        $scope.setActiveClass = () => {
+            $scope.currentState = $state.current.name;
+
+            getCurrentSTInfo();
+
+            if ($scope.currentState == 'analyzeSummary') {
+                $scope.currentFun = historicalRecord.get().theme ? historicalRecord.get().theme : 'default';
+                // $scope.$apply();
+            } else if ($scope.currentState == 'efficientOperationSummary') {
+                $scope.currentFun = historicalRecord.get().theme ? historicalRecord.get().theme : 'Profession';
+                // $scope.$apply();
+            } else {
+                $scope.currentFun = $scope.currentState;
+            }
+
+        }
+
+        function getCurrentSTInfo() {
+            $http({
+                method: "GET",
+                url: window.interface['GETgetCurrentInfoNew'],
+                params: {}
+            }).success(function (res) {
+                $scope.stClass = res.currentSTClass || $scope.stClass;
+                $scope.currentSTinfo = res;
+                $solway.setStore('systemInfo', { stClass: $scope.stClass });
+            });
+        }
+
+        historyInitCallback();
+
+        // 获取记录
+        function historyInitCallback() {
+            const record = $solway.getStore().systemInfo;
+            const { systemTab = 'concept', stClass = '01' } = record;
+            $scope.systemTab = systemTab;
+            $scope.stClass = stClass;
+
+            $scope.setActiveClass();
+        };
+    }
+})])

@@ -18,28 +18,46 @@ AddbaseDictionary: {
     // 获取纵轴指标的数据
     $scope.$on('verticalData', () => {
         $scope.verticalData = parentmyAjaxData.config.herizonData;
-        if(Object.keys($scope.verticalData).length == 0){
-            $scope.$emit('horizonNan', { data: 1});
+        if (Object.keys($scope.verticalData).length == 0) {
+            $scope.$emit('horizonNan', { data: 1 });
         }
         //获取以前 checked 的数据 -> 重现到左侧列表
-        if($scope.verticalCheckData.length > 0){
+        if ($scope.verticalCheckData.length > 0) {
             var key;
-            for(key in $scope.verticalData){
-                $scope.verticalData[key].ll.map((son)=>{
-                    if(son.fdKey == $scope.verticalCheckData[0].fdKey){
+            for (key in $scope.verticalData) {
+                $scope.verticalData[key].ll.map((son) => {
+                    if (son.fdKey == $scope.verticalCheckData[0].fdKey) {
+                        son.checked = true;
+                    }
+                })
+                $scope.verticalBottom.map((son) => {
+                    if (son.fdKey == $scope.verticalCheckData[0].fdKey) {
                         son.checked = true;
                     }
                 })
             }
+        } 
+        else {
+            var key;
+            for (key in $scope.verticalData) {
+                $scope.verticalData[key].ll.map((son) => {
+                    son.checked = false;
+                })
+                if($scope.verticalBottom){
+                    $scope.verticalBottom.map((son) => {
+                        son.checked = false;
+                    })
+                }
+            }
         }
-        if(!$scope['historyData' + parentmyAjaxData.config.checkChart]){
+        if (!$scope['historyData' + parentmyAjaxData.config.checkChart]) {
             $scope.radioToSelect($scope.verticalData.ctg1, 0);
         }
     })
 
     //搜索功能
     $scope.getList = () => {
-        $scope.herizonBottom.map((item) => {
+        $scope.verticalBottom.map((item) => {
             if (item.fdName.includes($scope.keyWords)) {
                 item.show = true;
             } else {
@@ -148,7 +166,7 @@ AddbaseDictionary: {
                 })
                 $scope.verticalBottom.forEach((item) => {
                     item.checked = false;
-                    item.checkedV = false;                    
+                    item.checkedV = false;
                 })
                 parentmyAjaxData.config.fdY.key = '';
                 parentmyAjaxData.config.fdY.name = '';
@@ -180,15 +198,17 @@ AddbaseDictionary: {
     }
 
     //获取历史数据
-    $scope.$on('haveData', (e,v) => {
-        if(!v){
+    $scope.$on('haveData', (e, v) => {
+        if (!v) {
             return;
         }
-        if(parentmyAjaxData.config.anlsType == 1){
+        if (parentmyAjaxData.config.anlsType == 1) {
             $scope.verticAxisK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.verticAxisK;
             $scope['historyData' + parentmyAjaxData.config.checkChart] = true;
-            $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.verticItem,parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.radioIndex);
+            $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.verticItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.radioIndex);
             $scope.verticalCheckData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.checkData;
+            parentmyAjaxData.config.fdY.key = $scope.verticalCheckData[0].fdKey;
+            parentmyAjaxData.config.fdY.name = $scope.verticalCheckData[0].fdName;
             if (parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].vertical.radioIndex == 0) {
                 $scope.verticalData.ctg2.ll.map((item) => {
                     item.checked = false;
@@ -199,7 +219,6 @@ AddbaseDictionary: {
                 })
             }
         }
-        
     })
 
     //确定

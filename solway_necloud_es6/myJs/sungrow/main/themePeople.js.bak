@@ -1,0 +1,60 @@
+ajaxData(
+    {
+        safeRunDayCount: {
+            name: 'GETsafeRunDayCount',
+            data: {}
+        },
+        completerate: {
+            name: 'GETcompleterate',
+            data: {}
+        },
+        analysis_company_operation_station_accum_list: {
+            name: 'GETanalysis_company_operation_station_accum_list',
+            data: {
+                queryCode: 'analysis_company_operation_station_accum_list',
+                queryType: 1
+            }
+        },
+        // 切换电站
+        changeStation: {
+            name: 'GETUserAuthHandleChangeDataType',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'mainPeopleService',
+    }
+)('mainPeopleCtrl', ['$scope', 'mainPeopleService', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
+    $('.themePeople.ng-clock').removeClass('ng-clock');
+    // 滚动数字
+    const od = new Odometer({ el: document.getElementById('odometer'), value: 10000 });
+    $scope.safeRunDayCount.promise.then(res => od.update(10000 + res.body + ''));
+
+    $scope.goThisStation = async ({ stid, stClass, router, pageData }) => {
+        const falsify = historicalRecord.falsify(router, pageData, (!stid || !stClass));
+        if (falsify && (falsify.redirect === 'failure')) return;
+        if (!stid || !stClass) return;
+        await $scope.changeStation.getData({
+            dataType: 0,
+            id: stid,
+            isGroup: "0",
+            stClass
+        });
+        $state.go(router);
+    };
+
+    // 运维效率响应处理
+    $scope.analysis_company_operation_station_accum_list.promise.then(res => {
+        $scope.analysis_company_operation_station_accum_list.res.body.data = res.body.data.sort((a, b) => (b.res_hours_avg + b.repair_hours_avg) - (a.res_hours_avg + a.repair_hours_avg))
+        $scope.analysis_company_operation_station_accum_list.res.body.data.maxNum = $scope.analysis_company_operation_station_accum_list.res.body.data[0].res_hours_avg + $scope.analysis_company_operation_station_accum_list.res.body.data[0].repair_hours_avg;
+        // res.body.data.reduce((a, b) => {
+        //     const newNum = b.res_hours_avg + b.repair_hours_avg;
+        //     return a > newNum ? a : newNum;
+        // }, 0);
+    });
+
+    $scope.completerate.subscribe(res => {
+        $scope.completerate.res.body.CompleteRateDetail = res.body.CompleteRateDetail.sort((a, b) => b.okPctChk - a.okPctChk);
+    });
+
+});

@@ -42,6 +42,8 @@ ajaxData({
 
     const save = () =>{
         $scope.formData['id'] = $scope.id;
+        $scope.formData['category'] = $scope.serviceType;
+        
         $scope.update.getData($scope.formData).then(res=>{
             if(res.code == 0 && res.body.id){
                 toaster.pop('success', '',res.msg)
@@ -70,13 +72,13 @@ ajaxData({
             $scope.tplTitle = '新增';
         }
 
-        let categoryList = [{value:'1',name:'普通用户'},{value:'2',name:'集团管理员'},{value:'-9',name:'系统管理员'}];
+        // let categoryList = [{value:'1',name:'普通用户'},{value:'2',name:'集团管理员'},{value:'-9',name:'系统管理员'}];
 
-        for(let i =0;i<categoryList.length;i++){
-            if($scope.serviceType == categoryList[i].value)  categoryList.splice(i,1)
-        }
+        // for(let i =0;i<categoryList.length;i++){
+        //     if($scope.serviceType == categoryList[i].value)  categoryList.splice(i,1)
+        // }
         
-        $scope.categoryList = categoryList;
+        // $scope.categoryList = categoryList;
     });
 
     //保存

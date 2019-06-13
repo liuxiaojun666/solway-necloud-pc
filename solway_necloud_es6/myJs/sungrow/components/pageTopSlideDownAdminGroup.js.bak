@@ -1,0 +1,113 @@
+app.directive('pageSlideDownAdminGroup', ['$ocLazyLoad', '$http', '$state', '$stateParams', '$timeout', '$rootScope', 'actionRecord', 'myAjaxData', ($ocLazyLoad, $http, $state, $stateParams, $timeout, $rootScope, historicalRecord, myAjaxData) => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: {
+
+    },
+    templateUrl: 'tpl/enrichment/components/pageSlideDownAdminGroup.html' + window.stamp,
+    link($scope, $element) {
+
+        //鼠标悬浮0.5s页面头部，出现下拉页面
+        let timer = null;
+        const setMainHeight = () => {
+            let wHeight = $(window).height();
+            let muduleHeight = 500;
+            $(".module-list").css('marginTop', (wHeight - muduleHeight) / 2)
+            $(".function-list").css('marginTop', (wHeight - 660) / 2)
+        }
+
+        setMainHeight()
+
+        window.addEventListener('resize', setMainHeight);
+        $scope.$on('$destroy', () => {
+            window.removeEventListener('resize', setMainHeight);
+        });
+
+        $timeout(() => {
+            $('body').on('mouseover', '.hover-header-con', () => {
+                // $scope.setActiveClass();
+                timer = setTimeout(() => {
+                    $(".systems-page").slideDown();
+                }, 500);
+            })
+            $('body').on('mouseout', '.hover-header-con', () => {
+                if (timer) clearTimeout(timer);
+            })
+        }, 0)
+
+        $('body').on('click', '.hover-header-con-click', () => {
+            $(".systems-page").slideDown();
+            // $scope.setActiveClass();
+        })
+
+        $(".close_btn_slide").click(() => {
+            $(".systems-page").slideUp();
+        });
+
+        $(".square-common").hover(function () {
+            $(this).addClass('active');
+        }, function () {
+            if ($(this).hasClass($scope.currentState)) return;
+            $(this).removeClass('active');
+        })
+
+
+    },
+    controller($scope, $element) {
+        $scope.currentState = $state.current.name;
+        myAjaxData.getData({
+            name: 'GETuiStates',
+            data: {}
+        }).then(res => {
+            $scope.adminPages = res.body[0].children.map(v => ({ state: v.uiState, name: v.name }));
+            if (!res.body[1]) return;
+            $scope.productLibrary = res.body[1].children.map(v => ({ state: v.uiState, name: v.name }));
+        });
+
+        $scope.adminPages = [
+            {
+                state: 'app.companyDepartmentInfo',
+                name: '企业信息管理'
+            },
+            {
+                state: 'apps.companyDepartment',
+                name: '部门管理'
+            },
+            {
+                state: 'app.powerStation',
+                name: '电站管理'
+            },
+            {
+                state: 'app.userInformation',
+                name: '用户管理'
+            },
+            {
+                state: 'apps.roleInformation',
+                name: '角色管理'
+            },
+            {
+                state: 'apps.powerStationGroup',
+                name: '电站分组管理'
+            },
+            {
+                state: 'app.knowledge',
+                name: '知识库'
+            },
+            {
+                state: 'app.svgManager',
+                name: '布局视图管理'
+            },
+            {
+                state: 'app.settleDataList',
+                name: '结算电量'
+            },
+            {
+                state: 'authorityManagement',
+                name: '权限管理'
+            },
+        ];
+
+        $scope.productLibrary = [];
+    }
+})])

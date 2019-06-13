@@ -105,7 +105,7 @@ ajaxData({
                 $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.radioItem, true);
             } else if ($scope.analysisObjectK == 99) {
                 $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备', 'isHistory': true });
-                $scope.equipChoice(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCIndex);
+                $scope.equipChoice(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCIndex, true);
                 $scope.equipChoiceIndex = parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex;
             } else if ($scope.analysisObjectK == 100) {
                 $scope.radioType(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem.k, true);
@@ -115,7 +115,7 @@ ajaxData({
         })
 
         //点击单个设备
-        $scope.equipChoice = (item, index) => {
+        $scope.equipChoice = (item, index, isHistory) => {
             //默认获取第一项的数据
             var item = item ? item : $scope.analysObDataNewDevice[0];
             var index = index ? index : 0;
@@ -124,7 +124,7 @@ ajaxData({
             $scope.deviceK = item.k;
             treeData(item.k);
             $scope.equipChoiceIndex = index;
-            $scope.$emit('deviceTimeLat', item.ll);
+            $scope.$emit('deviceTimeLat', {'ll':item.ll,'isHistory':isHistory});
         }
 
         //处理点击设备radio
@@ -421,7 +421,7 @@ ajaxData({
         }
 
         //tree数据的获取
-        function treeData(k) {
+        async function treeData(k) {
             // 调 集团 电站 区域接口
             const st = {
                 1: 3,
@@ -455,6 +455,9 @@ ajaxData({
                 })
             } else if (k.substr(0, 1) == "4" && $scope.analysisObjectK == 99) {
                 $scope.loading = true;
+                if($scope.zNodes && $scope.zNodes.length > 0){
+                    $.fn.zTree.init($("#tree"), $scope.setting, []);
+                }
                 $scope.queryStTreeWithDevices.getData({
                     deviceType: devices[k]
                 })
@@ -463,7 +466,7 @@ ajaxData({
                     $scope.zNodes = res.body;
                     $scope.loading = false;
                     setTimeout(() => {
-                        $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                    $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
                         if ($scope.objectDevice[$scope.equipChoiceIndex].length > 0) {
                             $scope.objectDevice[$scope.equipChoiceIndex].map((item) => {
                                 item.map((son) => {
@@ -472,7 +475,6 @@ ajaxData({
                             })
                         }
                     }, 600)
-
                 });
             } else if ($scope.analysisObjectK == 100) {
                 $scope.loading = true;
@@ -1026,7 +1028,7 @@ ajaxData({
                 if ($scope[key[$scope.analysisObjectK]].length == 0) {
                     toaster.pop('error', '', '所选数据不能为空');
                     return;
-                } else if (parentmyAjaxData.config.anlsType == 1 && $scope[key[$scope.analysisObjectK]].length > 10) {
+                } else if ((parentmyAjaxData.config.anlsType == 1||parentmyAjaxData.config.anlsType == 2) && $scope[key[$scope.analysisObjectK]].length > 10) {
                     toaster.pop('error', '', '分析对象不能超过十个');
                     return;
                 }
@@ -1040,7 +1042,7 @@ ajaxData({
                 if ($scope.objectDevice[$scope.equipChoiceIndex].length == 0) {
                     toaster.pop('error', '', '所选数据不能为空');
                     return;
-                } else if (parentmyAjaxData.config.anlsType == 1 && $scope.objectDevice[$scope.equipChoiceIndex].length > 10) {
+                } else if ((parentmyAjaxData.config.anlsType == 1||parentmyAjaxData.config.anlsType == 2) && $scope.objectDevice[$scope.equipChoiceIndex].length > 10) {
                     toaster.pop('error', '', '分析对象不能超过十个');
                     return;
                 }
@@ -1054,7 +1056,7 @@ ajaxData({
                 if ($scope[key[$scope.analysisObjectK]].length == 0) {
                     toaster.pop('error', '', '所选数据不能为空');
                     return;
-                } else if (parentmyAjaxData.config.anlsType == 1 && $scope[key[$scope.analysisObjectK]].length > 10) {
+                } else if ((parentmyAjaxData.config.anlsType == 1||parentmyAjaxData.config.anlsType == 2) && $scope[key[$scope.analysisObjectK]].length > 10) {
                     toaster.pop('error', '', '分析对象不能超过十个');
                     return;
                 }

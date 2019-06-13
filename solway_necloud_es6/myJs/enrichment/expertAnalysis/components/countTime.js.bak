@@ -173,12 +173,16 @@ ajaxData({
 
         //确定按钮
         var arr = [];
+        $scope.allDate = 0;
         $scope.oneAdd = () => {
             //页面显示用的json
             var groupJson = {
                 startDate: $scope.GroupUser.startDate.showDate,
                 endDate: $scope.GroupUser.endDate.showDate
             }
+            var date = ($scope.GroupUser.endDate.getTime() - $scope.GroupUser.startDate.getTime()) / (1000 * 60 * 60 * 24);
+            date = Math.ceil(date);
+            $scope.allDate += date;
             // 未去重的数据
             $scope.timeGroupUser.push(groupJson);
             // 数组格式转换 (后台要的数据格式)
@@ -232,10 +236,18 @@ ajaxData({
             if ($scope[key[$scope.radioIndex]].length == 0) {
                 toaster.pop('error', '', '所选数据不能为空');
                 return;
-            } else if ($scope.dateType == 3 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData.analysisObjectK == 99 && $scope[key[$scope.radioIndex]].length * parentmyAjaxData.config.analysObjData.checkData[parentmyAjaxData.config.analysObjData.equipChoiceIndex].length >= 31) {
+            } else if (parentmyAjaxData.config.anlsType == 1 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].analysisObjectK == 99 && $scope.radioIndex == 1 && $scope[key[$scope.radioIndex]].length * parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData[parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex].length >= 31) {
+                toaster.pop('error', '', '1分钟级数据设备数与天数之积应小于31');
+                return;
+            } else if (parentmyAjaxData.config.anlsType == 1 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].analysisObjectK == 99 && (($scope.radioIndex == 2 && $scope[key[$scope.radioIndex]].length > 1) || ($scope.radioIndex == 3 && $scope[key[$scope.radioIndex]].length >= 1))) {
+                toaster.pop('error', '', '1分钟级数据设备数与天数之积应小于31');
+                return;
+            } 
+            else if (parentmyAjaxData.config.anlsType == 1 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].analysisObjectK == 99 && $scope.radioIndex == 4 && $scope.allDate * parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData[parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex].length >= 31) {
                 toaster.pop('error', '', '1分钟级数据设备数与天数之积应小于31');
                 return;
             }
+
             if ($scope.radioIndex == 4) {
                 parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify($scope.newtimeGroupUser));
             } else {
