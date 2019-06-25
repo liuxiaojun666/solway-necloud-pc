@@ -73,10 +73,14 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
+        for(let name in $scope.formData){
+            if($scope.formData[name] == '-') $scope.formData[name] = null;
+        }
+        if(!$scope.formData['parentid']) $scope.formData['parentid'] = 0;
         $scope.update.getData({
             data:JSON.stringify($scope.formData),
         }).then(res=>{
-            if(res.key==2){
+            if(res.key==2 || res.key == 4){
                 toaster.pop('success','','保存成功');
                 $scope.disabled = true;
                 initDepartmentList();

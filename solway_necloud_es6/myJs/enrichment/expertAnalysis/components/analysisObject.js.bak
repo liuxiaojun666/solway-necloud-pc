@@ -49,7 +49,7 @@ ajaxData({
         let zTree;
 
         //获取父级发送的数据
-        $scope.$on('analysObDataNew', (e, data) => {
+        $scope.$on('analysObDataNew', async (e, data) => {
             if (data.analysObDataNewDevice) {
                 $scope.analysObDataNew = data.analysObDataNew;
                 var arr = [];
@@ -60,24 +60,38 @@ ajaxData({
                         arr[1] = item;
                     } else if (item.k == 1) {
                         arr[2] = item;
+                    } else if (item.k == 101) {
+                        arr[3] = item;
                     }
                 })
                 $scope.analysObDataNew = arr;
                 $scope.analysObDataNewDevice = data.analysObDataNewDevice;
+                // await parentmyAjaxData.timeout(2000);
+                // debugger
+                // $scope.analysObDataNewDevice.forEach((item, i) => {
+                //     $scope.object[i] = [];
+                // })
                 if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
                     //图表没有数据
-
                     // data.analysObDataNewDevice.forEach((item, i) => {
                     //     $scope.objectDevice[i] = [];
                     // })
                     $scope.radioDevice();
                 } else if (parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)) {
                     //选中有数据的图表，切换分析指标，再次默认选中设备 
-
-                    // data.analysObDataNewDevice.forEach((item, i) => {
-                    //     $scope.objectDevice[i] = [];
-                    // })
                     $scope.radioDevice();
+                    $scope.objectDevice = [];
+                    $scope.objectPower = [];
+                    $scope.objectArea = [];
+                    $scope.objectGroup = [];
+                    $scope.objectType = [];
+                    $scope.objectFault = [];
+                    $scope.objectDevice[0] = [];
+                    $scope.objectDevice[1] = [];
+                    parentmyAjaxData.config.dmsTypeAs[parentmyAjaxData.config.checkChart] = [];
+                    parentmyAjaxData.config.dmsTypeBs[parentmyAjaxData.config.checkChart] = [];
+                    parentmyAjaxData.config.dmsTypeCs[parentmyAjaxData.config.checkChart] = [];
+                    parentmyAjaxData.config.dmsTypeDs[parentmyAjaxData.config.checkChart] = [];
                 }
             }
         })
@@ -101,15 +115,17 @@ ajaxData({
             $scope.analysisObjectK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.alsObjk;
             $scope[key[$scope.analysisObjectK]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.checkData;
 
-            if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5) {
+            if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5 || $scope.analysisObjectK == 101) {
                 $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.radioItem, true);
             } else if ($scope.analysisObjectK == 99) {
                 $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备', 'isHistory': true });
                 $scope.equipChoice(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCIndex, true);
                 $scope.equipChoiceIndex = parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex;
-            } else if ($scope.analysisObjectK == 100) {
-                $scope.radioType(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem.k, true);
-            } else if ($scope.analysisObjectK == 101) {
+            }
+            // else if ($scope.analysisObjectK == 101) {
+            //     $scope.radioType(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem.k, true);
+            // }
+            else if ($scope.analysisObjectK == 102) {
                 $scope.radioFault(true);
             }
         })
@@ -124,7 +140,8 @@ ajaxData({
             $scope.deviceK = item.k;
             treeData(item.k);
             $scope.equipChoiceIndex = index;
-            $scope.$emit('deviceTimeLat', {'ll':item.ll,'isHistory':isHistory});
+            $scope.$emit('deviceTimeLat', { 'll': item.ll, 'isHistory': isHistory });
+            parentmyAjaxData.config.alsRlist = $scope.objectDevice[$scope.equipChoiceIndex].length;
         }
 
         //处理点击设备radio
@@ -151,7 +168,7 @@ ajaxData({
             417: 17,
             418: 18
         }
-        
+
         //多级联动 - 区域
         function selectArea() {
             $scope.queryTreeWithSt.getData({
@@ -374,32 +391,32 @@ ajaxData({
         }
 
         //处理点击机型radio
-        $scope.radioType = (k, isHistory) => {
-            $scope.analysisObjectK = 100;
-            parentmyAjaxData.config.dmsType = 101;
-            $scope.zNodes = [];
-            var devicek = k ? k : $scope.deviceK;
-            treeData(devicek);
-            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 100, 'value': '机型', 'isHistory': isHistory });
-            selectArea();
-            $scope.selectPowerStation = [];
-            $scope.selectMachineType = [];
-            $scope.selectDevice = [];
-            $scope.multiLevel = {
-                'area': null,
-                'powerStation': '',
-                'machineType': '',
-                'device': ''
-            }
-        }
+        // $scope.radioType = (k, isHistory) => {
+        //     $scope.analysisObjectK = 100;
+        //     parentmyAjaxData.config.dmsType = 101;
+        //     $scope.zNodes = [];
+        //     var devicek = k ? k : $scope.deviceK;
+        //     treeData(devicek);
+        //     $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 100, 'value': '机型', 'isHistory': isHistory });
+        //     selectArea();
+        //     $scope.selectPowerStation = [];
+        //     $scope.selectMachineType = [];
+        //     $scope.selectDevice = [];
+        //     $scope.multiLevel = {
+        //         'area': null,
+        //         'powerStation': '',
+        //         'machineType': '',
+        //         'device': ''
+        //     }
+        // }
 
         //处理点击故障类型radio
         $scope.radioFault = (isHistory) => {
-            $scope.analysisObjectK = 101;
+            $scope.analysisObjectK = 102;
             parentmyAjaxData.config.dmsType = 102;
             $scope.zNodes = [];
-            treeData('101');
-            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 101, 'value': '故障类型', 'isHistory': isHistory });
+            treeData('102');
+            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 102, 'value': '故障类型', 'isHistory': isHistory });
             selectArea();
             $scope.selectPowerStation = [];
             $scope.selectMachineType = [];
@@ -415,9 +432,22 @@ ajaxData({
         //单选框选中-> 更改父级的值
         $scope.radioToSelect = (item, isHistory) => {
             parentmyAjaxData.config.dmsType = $scope.analysisObjectK = item.k;
+            parentmyAjaxData.config.alsRlist = $scope[key[$scope.analysisObjectK]].length;
             $scope.radioItem = item;
             $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': item.k, 'value': item.v, 'isHistory': isHistory });
             treeData(item.k);
+            if (item.k == 101) {
+                selectArea();
+                $scope.selectPowerStation = [];
+                $scope.selectMachineType = [];
+                $scope.selectDevice = [];
+                $scope.multiLevel = {
+                    'area': null,
+                    'powerStation': '',
+                    'machineType': '',
+                    'device': ''
+                }
+            }
         }
 
         //tree数据的获取
@@ -455,7 +485,7 @@ ajaxData({
                 })
             } else if (k.substr(0, 1) == "4" && $scope.analysisObjectK == 99) {
                 $scope.loading = true;
-                if($scope.zNodes && $scope.zNodes.length > 0){
+                if ($scope.zNodes && $scope.zNodes.length > 0) {
                     $.fn.zTree.init($("#tree"), $scope.setting, []);
                 }
                 $scope.queryStTreeWithDevices.getData({
@@ -466,7 +496,7 @@ ajaxData({
                     $scope.zNodes = res.body;
                     $scope.loading = false;
                     setTimeout(() => {
-                    $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+                        $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
                         if ($scope.objectDevice[$scope.equipChoiceIndex].length > 0) {
                             $scope.objectDevice[$scope.equipChoiceIndex].map((item) => {
                                 item.map((son) => {
@@ -476,7 +506,7 @@ ajaxData({
                         }
                     }, 600)
                 });
-            } else if ($scope.analysisObjectK == 100) {
+            } else if (k == 101) {
                 $scope.loading = true;
                 $.fn.zTree.init($("#tree"), $scope.setting, []);
                 $scope.queryStTreeWithProducts.getData({
@@ -496,7 +526,7 @@ ajaxData({
                         })
                     })
                 });
-            } else if ($scope.analysisObjectK == 101) {
+            } else if (k == 102) {
                 $scope.loading = true;
                 $.fn.zTree.init($("#tree"), $scope.setting, []);
                 $scope.queryStTreeWithFaultTypes.getData({
@@ -555,8 +585,8 @@ ajaxData({
         $scope.objectDevice[1] = [];
 
         const key = {
-            101: 'objectFault',  //故障类型
-            100: 'objectType',  //机型
+            102: 'objectFault',  //故障类型
+            101: 'objectType',  //机型
             99: 'objectDevice', //设备
             3: 'objectPower', //电站
             5: 'objectArea', //区域 (部门)
@@ -564,8 +594,8 @@ ajaxData({
         }
         //映射 取busiType  busiType：1 电站、2 区域、3 集团、5 设备
         const keyToType = {
+            102: 5,
             101: 5,
-            100: 5,
             99: 5,
             3: 1,
             5: 2,
@@ -576,8 +606,8 @@ ajaxData({
         $scope.oneRItem1 = {};    //电站
         $scope.oneRItem5 = {};    //区域
         $scope.oneRItem3 = {};    //集团
-        $scope.oneRItem100 = [];  //机型
-        $scope.oneRItem101 = [];  //故障类型
+        $scope.oneRItem101 = [];  //机型
+        $scope.oneRItem102 = [];  //故障类型
         $scope.oneRItemDevice = {}; //设备
         $scope.checkedNode = [];
         $scope.oneAdd = () => {
@@ -602,7 +632,7 @@ ajaxData({
             })
 
             //把过滤后的 数据放到 对应的数组中
-            if ($scope.analysisObjectK == 100 || $scope.analysisObjectK == 101) {
+            if ($scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) {
                 //机型/故障类型  获取根节点
                 var typeArr = [];
                 function rootNode(item) {
@@ -720,7 +750,7 @@ ajaxData({
                 FTmiddleArr.map((item) => {
                     $scope.oneRItemDevice.st_eqids.push(`${item.stids}-${item.busiId}`);
                 })
-            } else if ($scope.analysisObjectK == 100 || $scope.analysisObjectK == 101) {
+            } else if ($scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) {
                 //组装接口需要的数据 (机型、故障类型)
                 $scope['oneRItem' + $scope.analysisObjectK] = [];
                 typeArr.map((item) => {
@@ -741,8 +771,8 @@ ajaxData({
         $scope.groupResult1 = [];    //电站
         $scope.groupResult5 = [];    //区域
         $scope.groupResult3 = [];    //集团
-        $scope.groupResult100 = [];  //机型
-        $scope.groupResult101 = [];  //故障类型
+        $scope.groupResult101 = [];  //机型
+        $scope.groupResult102 = [];  //故障类型
         $scope.groupResultDevice = []; //设备
         $scope.groupAdd = () => {
             checkChangeFn();
@@ -789,7 +819,7 @@ ajaxData({
                 })
                 $scope.groupResultDevice.push(groupItem);
                 $scope.objectDevice[$scope.equipChoiceIndex].push(FTmiddleArr);
-            } else if ($scope.analysisObjectK == 100 || $scope.analysisObjectK == 101) {
+            } else if ($scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) {
                 //机型/故障类型  获取根节点
                 var typeArr = [];
                 function rootNode(item) {
@@ -890,7 +920,7 @@ ajaxData({
                     parentmyAjaxData.config.dmsTypeAs[parentmyAjaxData.config.checkChart] = [];
                 }
                 //删除 给接口传的数据 (机型/故障类型)
-            } else if ($scope.analysisObjectK == 100 || $scope.analysisObjectK == 101) {
+            } else if ($scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) {
                 //删除 页面显示的数据
                 $scope[key[$scope.analysisObjectK]].splice(index, 1);
                 item.map((v) => {
@@ -921,16 +951,16 @@ ajaxData({
                 toaster.pop('error', '', '稍等树结构加载完毕再行删除');
                 return;
             }
-            if (($scope.analysisObjectK == 99 && $scope.objectDevice[$scope.equipChoiceIndex].length == 0) || (($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5 || $scope.analysisObjectK == 100 || $scope.analysisObjectK == 101) && $scope[key[$scope.analysisObjectK]].length == 0)) {
+            if (($scope.analysisObjectK == 99 && $scope.objectDevice[$scope.equipChoiceIndex].length == 0) || (($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5 || $scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) && $scope[key[$scope.analysisObjectK]].length == 0)) {
                 toaster.pop('error', '', '请至少选择一条');
             } else {
                 $solway.confirm({ message: '确定全部删除吗？' }, () => {
                     zTree.checkAllNodes(false);
                     zTree.cancelSelectedNode();
                     $scope.checkedNode = [];
-                    if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5 || $scope.analysisObjectK == 100 || $scope.analysisObjectK == 101) {
+                    if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5 || $scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) {
                         $scope[key[$scope.analysisObjectK]] = [];
-                        $scope['oneRItem' + $scope.analysisObjectK] = $scope.analysisObjectK == 100 ? [] : {};
+                        $scope['oneRItem' + $scope.analysisObjectK] = $scope.analysisObjectK == 101 ? [] : {};
                         $scope['groupResult' + $scope.analysisObjectK] = [];
                         parentmyAjaxData.config.dmsTypeBs[parentmyAjaxData.config.checkChart] = [];
                         parentmyAjaxData.config.dmsTypeCs[parentmyAjaxData.config.checkChart] = [];
@@ -948,12 +978,12 @@ ajaxData({
 
         //按需加载ztree文件
         $ocLazyLoad.load([
-            'vendor/jquery/ztree/js/jquery.ztree.core.js', //ztree
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.core.js', //ztree
         ]).then(() => $ocLazyLoad.load([
-            'vendor/jquery/ztree/js/jquery.ztree.exhide.js', //ztree
-            'vendor/jquery/ztree/js/jquery.ztree.excheck.js', //ztree        
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.exhide.js', //ztree
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.excheck.js', //ztree        
         ])).then(() => $ocLazyLoad.load([
-            'vendor/jquery/ztree/js/fuzzysearch.js', //ztree
+            'vendor/jquery/ztree/jsCopy/fuzzysearch.js', //ztree
         ])).then(() => {
             $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
             zTree = $.fn.zTree.getZTreeObj("tree");
@@ -1028,7 +1058,7 @@ ajaxData({
                 if ($scope[key[$scope.analysisObjectK]].length == 0) {
                     toaster.pop('error', '', '所选数据不能为空');
                     return;
-                } else if ((parentmyAjaxData.config.anlsType == 1||parentmyAjaxData.config.anlsType == 2) && $scope[key[$scope.analysisObjectK]].length > 10) {
+                } else if ((parentmyAjaxData.config.anlsType == 1 || parentmyAjaxData.config.anlsType == 2) && $scope[key[$scope.analysisObjectK]].length > 10) {
                     toaster.pop('error', '', '分析对象不能超过十个');
                     return;
                 }
@@ -1038,11 +1068,12 @@ ajaxData({
                 var Bs;
                 Bs = Object.keys($scope['oneRItem' + $scope.analysisObjectK]).length == 0 ? [...$scope['groupResult' + $scope.analysisObjectK]] : $scope['groupResult' + $scope.analysisObjectK].length == 0 ? [$scope['oneRItem' + $scope.analysisObjectK]] : [...$scope['groupResult' + $scope.analysisObjectK], $scope['oneRItem' + $scope.analysisObjectK]];
                 parentmyAjaxData.config.dmsTypeBs[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(Bs));
+                parentmyAjaxData.config.alsRlist = $scope[key[$scope.analysisObjectK]].length;
             } else if ($scope.analysisObjectK == 99) {
                 if ($scope.objectDevice[$scope.equipChoiceIndex].length == 0) {
                     toaster.pop('error', '', '所选数据不能为空');
                     return;
-                } else if ((parentmyAjaxData.config.anlsType == 1||parentmyAjaxData.config.anlsType == 2) && $scope.objectDevice[$scope.equipChoiceIndex].length > 10) {
+                } else if ((parentmyAjaxData.config.anlsType == 1 || parentmyAjaxData.config.anlsType == 2) && $scope.objectDevice[$scope.equipChoiceIndex].length > 10) {
                     toaster.pop('error', '', '分析对象不能超过十个');
                     return;
                 }
@@ -1052,11 +1083,12 @@ ajaxData({
                 var Ds;
                 Ds = Object.keys($scope.oneRItemDevice).length == 0 ? [...$scope.groupResultDevice] : $scope.groupResultDevice.length == 0 ? [$scope.oneRItemDevice] : [...$scope.groupResultDevice, $scope.oneRItemDevice];
                 parentmyAjaxData.config.dmsTypeAs[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(Ds));
-            } else if ($scope.analysisObjectK == 100 || $scope.analysisObjectK == 101) {
+                parentmyAjaxData.config.alsRlist = $scope.objectDevice[$scope.equipChoiceIndex].length;
+            } else if ($scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) {
                 if ($scope[key[$scope.analysisObjectK]].length == 0) {
                     toaster.pop('error', '', '所选数据不能为空');
                     return;
-                } else if ((parentmyAjaxData.config.anlsType == 1||parentmyAjaxData.config.anlsType == 2) && $scope[key[$scope.analysisObjectK]].length > 10) {
+                } else if ((parentmyAjaxData.config.anlsType == 1 || parentmyAjaxData.config.anlsType == 2) && $scope[key[$scope.analysisObjectK]].length > 10) {
                     toaster.pop('error', '', '分析对象不能超过十个');
                     return;
                 }
@@ -1064,6 +1096,7 @@ ajaxData({
                 parentmyAjaxData.config.dmsTypeBs[parentmyAjaxData.config.checkChart] = [];
                 parentmyAjaxData.config.dmsTypeCs[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify($scope['oneRItem' + $scope.analysisObjectK]));
                 parentmyAjaxData.config.dmsTypeDs[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify($scope['groupResult' + $scope.analysisObjectK]));
+                parentmyAjaxData.config.alsRlist = $scope[key[$scope.analysisObjectK]].length;
             }
             //存储历史数据
             parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].dmsType = parentmyAjaxData.config.dmsType;

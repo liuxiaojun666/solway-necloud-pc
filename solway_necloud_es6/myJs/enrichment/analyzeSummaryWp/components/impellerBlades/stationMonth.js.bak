@@ -7,15 +7,15 @@ ajaxData(
             later: true
         },
         // 时间 列表
-        analysis_wp_station_pitch_month_timelist: {
-            name: 'GETanalysis_wp_station_pitch_month_timelist',
+        analysis_wp_station_impeller_month_timelist: {
+            name: 'GETanalysis_wp_station_impeller_month_timelist',
             data: {},
             later: true,
             onlyLatest: true
         },
         // 时间 曲线
-        analysis_wp_station_pitch_month_timeline: {
-            name: 'GETanalysis_wp_station_pitch_month_timeline',
+        analysis_wp_station_impeller_month_timeline: {
+            name: 'GETanalysis_wp_station_impeller_month_timeline',
             data: {},
             later: true,
             onlyLatest: true
@@ -131,14 +131,14 @@ ajaxData(
             });
         }
         if (classTab === 0 && tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_wp_station_pitch_month_timelist.getData({
-                queryCode: 'analysis_wp_station_pitch_month_timelist',
+            $scope.analysis_wp_station_impeller_month_timelist.getData({
+                queryCode: 'analysis_wp_station_impeller_month_timelist',
                 queryType: 3,
                 date: dateTime.showDate
             });
         } else if (classTab === 0 && tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_wp_station_pitch_month_timeline.getData({
-                queryCode: 'analysis_wp_station_pitch_month_timeline',
+            $scope.analysis_wp_station_impeller_month_timeline.getData({
+                queryCode: 'analysis_wp_station_impeller_month_timeline',
                 queryType: 3,
                 date: dateTime.showDate
             });
@@ -182,7 +182,7 @@ ajaxData(
     };
 
     // 时间 列表
-    $scope.analysis_wp_station_pitch_month_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_wp_station_impeller_month_timelist.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -214,7 +214,7 @@ ajaxData(
     };
 
     // 时间 曲线
-    $scope.analysis_wp_station_pitch_month_timeline.subscribe((res) => {
+    $scope.analysis_wp_station_impeller_month_timeline.subscribe((res) => {
         if ($scope.showShape !== 'chart') return;
         $scope.xdata = res.body.data.dtime;
         $scope.ydatas = [[res.body.data.epitch_count, res.body.data.opitch_count]];
@@ -372,8 +372,8 @@ ajaxData(
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_wp_station_pitch_month_timelist.res = null;
-        $scope.analysis_wp_station_pitch_month_timeline.res = null;
+        $scope.analysis_wp_station_impeller_month_timelist.res = null;
+        $scope.analysis_wp_station_impeller_month_timeline.res = null;
         $scope.analysis_wp_station_pitch_month_devicelist.res = null;
         $scope.analysis_wp_station_pitch_month_deviceline.res = null;
         $scope.turbineClimbPoints.res = null;

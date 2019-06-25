@@ -135,6 +135,17 @@ ajaxData({
             }
         });
 
+        //切换分析类型 -> 清空统计时间弹框
+        $scope.$on('clearTime',()=>{
+            $scope.radioToSelect('日', 3);
+            $scope.radioIndex = 1;
+            $scope.timeGroupDay = [];
+            $scope.timeGroupMonth = [];
+            $scope.timeGroupYear = [];
+            $scope.timeGroupUser = [];
+            parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
+        })
+
         //获取历史数据
         $scope.$on('haveData', (event, v) => {
             if (!v) {

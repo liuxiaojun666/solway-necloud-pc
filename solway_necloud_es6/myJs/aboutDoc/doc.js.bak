@@ -1,14 +1,96 @@
 $(function () {
+
+    const download = (url, callback = () => { }) => {
+        const oReq = new XMLHttpRequest();
+        oReq.open("GET", url, true);
+        oReq.responseType = "blob";
+        oReq.onload = function (oEvent) {
+            if (oReq.response.size === 0 || oReq.status === 404) {
+                if (confirm(' 文件为空或不存在，确定继续执行吗？')) __fun();
+                return callback();
+            } else __fun();
+
+
+            function __fun() {
+                const _blob = new Blob([oReq.response]);
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const content = reader.result;
+                    callback(content);
+                };
+                reader.readAsText(_blob);
+            }
+        };
+        oReq.send();
+    };
+
+
     const container = document.getElementById('aboutDoc');
-    container.getElementsByClassName('close')[0].addEventListener('click', function () {
-        container.style.display = 'none';
+    const iframe = container.getElementsByTagName('iframe')[0];
+    const ul = container.getElementsByTagName('ul')[0];
+    let obj = [];
+
+    download('/aboutDoc/about.json', function (str) {
+        obj = JSON.parse(str);
+        ul_render(obj);
     });
 
-    container.addEventListener('click', function(event) {
+    iframe.onload = function () {
+        const laji = iframe.contentWindow.document.querySelectorAll('.docpe')[0];
+        laji && (laji.style.display = 'none');
+    };
+
+    container.addEventListener('click', function (event) {
+
         if (event.target.className.includes('clickable')) {
-            $(container).find('li.active').removeClass('active');
+            $(ul).find('li.active').removeClass('active');
             event.target.className = event.target.className + ' active';
-            container.getElementsByTagName('iframe')[0].src = "/tpl/publicComponent/aboutDoc/" + event.target.dataset.filename + ".html";
+            iframe.src = event.target.dataset.src;
+            window.location.hash = event.target.dataset.hash;
         }
-    })
+    });
+
+    function ul_render(json = obj) {
+
+        let isActive = false;
+        let pageActive = false;
+        let themeActive = false;
+
+        const page_hash = window.location.hash;
+        const page_theme = (((JSON.parse(window.localStorage.persist)).actionRecord[page_hash.substr(2)] || {}).data || {}).theme;
+
+        function getStr(sourse) {
+            return sourse.map(v => {
+                let activeClass = '';
+                if (v.src && !isActive) {
+                    iframe.src = v.src + '?_=' + v.update_time;
+                    isActive = true;
+                    activeClass = ' active';
+                    if (v.page_hash === page_hash) pageActive = true;
+                    if (pageActive && page_theme === v.page_theme) themeActive = true;
+                }
+                if (v.src && (v.page_hash === page_hash) && isActive && !pageActive) {
+                    iframe.src = v.src + '?_=' + v.update_time;
+                    pageActive = true;
+                    activeClass = ' active';
+                    if (page_theme === v.page_theme) themeActive = true;
+                }
+                if (v.src && pageActive && !themeActive && (page_theme === v.page_theme)) {
+                    iframe.src = v.src + '?_=' + v.update_time;
+                    themeActive = true;
+                    activeClass = ' active';
+                }
+                return `<li data-theme="${v.page_theme || ''}" class="${v.src ? ('clickable' + activeClass) : ''}" data-hash="${v.page_hash || ''}" data-src="${v.src + '?_=' + v.update_time || ''}">${v.name || '---'}</li>` + (v.children ? `<li><ul>${getStr(v.children)}</ul></li>` : '');
+            }).join('');
+        }
+
+        ul.innerHTML = getStr(json);
+
+        const $li = $(ul).find('li.active');
+
+        if (pageActive && $li.length > 1) {
+            $li.removeClass('active');
+            $li.eq($li.length - 1).addClass('active');
+        }
+    }
 });

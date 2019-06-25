@@ -1,7 +1,7 @@
 'use strict';
 
 ((function (win) {
-    var i = location.host.split(':')[1] ? '' : document.getElementById('routerJS').getAttribute('param');
+    var i = '';
     win.noFormSubmit = [
         'opReportLayUpdateByCom',
         'POSTupdateBuyModule',
@@ -20,8 +20,8 @@
                 ['1', '2', '3', '401', '402', '403', '404', '405', '417', '418', '5', '101', '102'].forEach(vv => {
                     ['0', '1', '2', '3', '4', '5'].forEach(vvv => {
                         o.push('analysis_selectAnlsType' + v + vv + vvv);
-                    })
-                })
+                    });
+                });
             });
             return o;
         })()),
@@ -424,7 +424,8 @@
 
         //主题2---资源主题
         GETResourceInfo: i + '/pv/monitor/getRunRes.htm',
-
+        GETWeatherDistance: i + 'pvwp/device/getWeatherDistance.htm',
+        
         //主题3---功率主题（当日）
         GETPowerCurrentInfo: i + '/pv/monitor/getRunAcp.htm',
         //主题3---功率主题（历史日）
@@ -3014,9 +3015,11 @@
         // analysis_wp_station_pitch_month_deviceline	电站 - 风电 - 风机叶轮叶片变桨 - 月 - 设备曲线
         GETanalysis_wp_station_pitch_month_deviceline: i + '/his/query.htm',
         // analysis_wp_station_pitch_month_timelist	电站 - 风电 - 风机叶轮叶片变桨 - 月 - 时间列表
-        GETanalysis_wp_station_pitch_month_timelist: i + '/his/query.htm',
+        // GETanalysis_wp_station_pitch_month_timelist: i + '/his/query.htm',
+        GETanalysis_wp_station_impeller_month_timelist: i + '/his/query.htm',
         // analysis_wp_station_pitch_month_timeline	电站 - 风电 - 风机叶轮叶片变桨 - 月 - 时间曲线
-        GETanalysis_wp_station_pitch_month_timeline: i + '/his/query.htm',
+        // GETanalysis_wp_station_pitch_month_timeline: i + '/his/query.htm',
+        GETanalysis_wp_station_impeller_month_timeline: i + '/his/query.htm',
         // 叶轮叶片： wp/analysis/getTurbineClimbPoints.htm?dataType=2&date=2019-03-18&dateType=2&queryType=3
         GETturbineClimbPoints: i + '/wp/analysis/getTurbineClimbPoints.htm',
         // 变桨(风速-功率|角度)： wp/analysis/getTurbinePitchPoints.htm?dataType=2&date=2019-03-18&dateType=2&queryType=3&eqid=1
@@ -3280,8 +3283,8 @@
                     ['1', '2', '3', '401', '402', '403', '404', '405', '417', '418', '5', '101', '102'].forEach(vv => {
                         ['0', '1', '2', '3', '4', '5'].forEach(vvv => {
                             o['analysis_selectAnlsType' + v + vv + vvv] = `/pvwp/high/analysis/selectAnlsType/01-${v}-${vv}-${vvv}.htm`;
-                        })
-                    })
+                        });
+                    });
                 });
                 return o;
             })()
@@ -3405,5 +3408,8 @@
 
         // 模块权限查询
         GETcheckModuleAuth: i + 'UserAuthHandle/checkModuleAuth.htm',
+
+        // 视频监控
+        GETselectVideosByCom: i + '/pvwp/station/selectVideoConfigByCom.htm',
     };
 })(window));

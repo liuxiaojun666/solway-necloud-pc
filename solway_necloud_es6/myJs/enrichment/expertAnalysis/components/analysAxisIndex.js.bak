@@ -8,12 +8,6 @@ HighAnalysis_selectFds: {
 }, {
     __serviceName__: 'analysService'
 })('analysIndexCtrl', ['$scope', 'analysService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
-
-    //获取分析类型 发送的anlsType
-    // $scope.$on('anlsType', (item, v) => {
-    //     $scope.anlsType = v;
-    // })
-
     //对标分析-> 获取分析对象 发送的dmsType
     $scope.$on('bench_dmsType', (e,v) => {
         $scope.anlsType = v;
@@ -63,11 +57,11 @@ HighAnalysis_selectFds: {
             $scope.analysCheckData = [];
             $scope.radioToSelect($scope.analysData.ctg1, 0);
         }
-        else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].dmsType)){
+        else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)){
             //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
             return;
         }
-        else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].dmsType)&&($scope.dmsTime==parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)){
+        else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)&&($scope.dmsTime==parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)){
             //趋势分析 图表有数据 分析类型不重新选 分析对象不重新选 时间纬度不重新选
             return;
         } else {
