@@ -17,10 +17,10 @@ ajaxData(
     const maxVideoView = $scope.maxVideoView = 12;
     historyInitCallback();
     const createImg = createCanvas();
+    $ocLazyLoad.load(['vendor/videojs/videojs.hotkeys.min.js']);
     const settings = {
         check: {
             enable: true,
-            // chkStyle: 'checkbox'
         },
         view: {
             showLine: false,
@@ -87,20 +87,33 @@ ajaxData(
 
                         ; (async (_id, _name, _index, req_data, _stationName) => {
                             await myAjaxData.timeout(0);
-                            $scope.checked_videos[_index].video = videojs('video_' + _id, { /* autoplay: true, */ poster: await createImg(_stationName + '：' + _name, null) }, function () {
-                                this.on('play', function () {
-                                    $scope.checked_videos[_index].isPlay = true;
-                                    $.ajax({
-                                        type: 'POST',
-                                        url: 'http://netest.solway.cn:50125',
-                                        data: JSON.stringify(req_data),
-                                        beforeSend() { }
+                            $scope.checked_videos[_index].video = videojs(
+                                'video_' + _id,
+                                {
+                                    // autoplay: true,
+                                    poster: await createImg(_stationName + '：' + _name, null)
+                                },
+                                function () {
+                                    this.hotkeys({
+                                        volumeStep: 0.1,
+                                        seekStep: 5,
+                                        enableVolumeScroll: false, //禁用鼠标滚轮调节问音量大小
+                                        enableModifiersForNumbers: false
                                     });
-                                });
-                                this.on('pause', function () {
-                                    $scope.checked_videos[_index].isPlay = false;
-                                });
-                            });
+                                    this.on('play', function () {
+                                        $scope.checked_videos[_index].isPlay = true;
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: 'http://netest.solway.cn:50125',
+                                            data: JSON.stringify(req_data),
+                                            beforeSend() { }
+                                        });
+                                    });
+                                    this.on('pause', function () {
+                                        $scope.checked_videos[_index].isPlay = false;
+                                    });
+                                }
+                            );
                         })(id, name, index, $scope.checked_videos[index].req_data, stationName);
                     }
                 }
@@ -111,9 +124,11 @@ ajaxData(
     $scope.selectVideosByCom.subscribe(res => {
         if (res.code !== 0) return;
         $ocLazyLoad.load([
-            'vendor/jquery/ztree/jsCopy/jquery.ztree.exhide.js',
-            'vendor/jquery/ztree/jsCopy/jquery.ztree.excheck.js'
-        ]).then(() => {
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.core.js', //ztree
+        ]).then(() => $ocLazyLoad.load([
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.exhide.js', //ztree
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.excheck.js', //ztree        
+        ])).then(() => {
             res.body.pv && $.fn.zTree.init($("#tree_pv"), settings, res.body.pv).expandAll(true);
             res.body.wp && $.fn.zTree.init($("#tree_wp"), settings, res.body.wp).expandAll(true);
         });
@@ -152,7 +167,7 @@ ajaxData(
                 type: 'POST',
                 url: 'http://netest.solway.cn:50125',
                 data: JSON.stringify(v.req_data),
-                beforeSend(){ }
+                beforeSend() { }
             });
         });
     }, 50 * 1000);

@@ -48,6 +48,37 @@ ajaxData({
         //初始化树
         let zTree;
 
+        //------------------------------------------------ztree 树形控件
+        //ztree插件配置
+        $scope.setting = {
+            check: {
+                enable: true,
+                nocheckInherit: false
+            },
+            view: {
+                showLine: false,
+                showIcon: true,
+                fontCss: getFontCss,
+                dblClickExpand: false,
+                nameIsHTML: false,
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                    idKey: "id",
+                    pIdKey: "pid",
+                    rootPId: 0
+                },
+                key: {
+                    name: "name"
+                }
+            },
+            callback: {
+                onClick: onNodeClick,
+                onCheck: checkChangeFn
+            }
+        };
+
         //获取父级发送的数据
         $scope.$on('analysObDataNew', async (e, data) => {
             if (data.analysObDataNewDevice) {
@@ -477,6 +508,7 @@ ajaxData({
                     $scope.zNodes = res.body;
                     $scope.loading = false;
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes);
+
                     $scope[key[$scope.analysisObjectK]].map((item) => {
                         item.map((son) => {
                             zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
@@ -544,36 +576,6 @@ ajaxData({
                 })
             }
         }
-
-        //------------------------------------------------ztree 树形控件
-        //ztree插件配置
-        $scope.setting = {
-            check: {
-                enable: true
-            },
-            view: {
-                showLine: false,
-                showIcon: true,
-                fontCss: getFontCss,
-                dblClickExpand: false,
-                nameIsHTML: false,
-            },
-            data: {
-                simpleData: {
-                    enable: true,
-                    idKey: "id",
-                    pIdKey: "pid",
-                    rootPId: 0
-                },
-                key: {
-                    name: "name"
-                }
-            },
-            callback: {
-                onClick: onNodeClick,
-                onCheck: checkChangeFn
-            }
-        };
 
         $scope.objectDevice = [];
         $scope.objectPower = [];
