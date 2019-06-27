@@ -184,8 +184,9 @@
     // 开发环境热更新
     if ((location.host.split(':')[1] + '').indexOf('88') >= 0) {
         window.stamp = '?_=' + Date.now();
-        document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
+        document.write('<script async src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
         setTimeout(function (params){
+            if (!window.LiveReload) return;
             window.LiveReload.close = function () {
                 LiveReload.reloader.reloadPage = function () {
                     return;
