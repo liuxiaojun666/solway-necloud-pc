@@ -191,7 +191,7 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
                     const aData = a[dataIndex] || 0;
                     const bData = b[dataIndex] || 0;
                     return $scope.orderBy ? aData - bData : bData - aData;
-                })
+                });
             } else {
                 $scope.orderBy && $scope.__datasource.sort((a, b) => {
                     const aData = (a[dataIndex] || '').toString();
@@ -206,11 +206,12 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
             }
             $scope.gen.next($scope.orderByDataIndex);
             $scope.orderBy = !$scope.orderBy;
-        }
+        };
 
         $scope.$watch('datasource', (newValue, oldValue) => {
             copyDatasource(newValue || []);
             $scope.gen = (function* () {
+                $scope.__orderByDataIndex__ = $scope.orderByDataIndex;
                 $scope.orderByDataIndex = void 0;
                 $scope.orderByDataIndex = yield;
             })();
@@ -272,6 +273,13 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
                 $scope.pushData();
                 if ($scope.datasource && $scope.__datasource.length < $scope.datasource.length) {
                     tbodySubstepTimingLoad();
+                } else {
+                    if ($scope.__orderByDataIndex__) {
+                        $scope.orderByDataIndex = $scope.__orderByDataIndex__;
+                        $scope.orderBy = !$scope.orderBy;
+                        $scope.sort(!0, $scope.__orderByDataIndex__);
+                        $scope.$apply();
+                    }
                 }
                 // isLoading = false;
             }, 500);

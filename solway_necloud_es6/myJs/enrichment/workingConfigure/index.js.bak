@@ -387,8 +387,8 @@ ajaxData({
         $solway.confirm({ message: '该设置将改变中断消息的生成延时配置，确定要进行设置保存吗？确定保存后将于第二日生效。' }, (e) => {
             $scope.interruptNoteSave.getData({
                 pstationid: $scope.pstationid,
-                isrectip: isrectip.join(","),
-                leadvalue: $scope.timeOffset,
+                isrectip: $scope.stClass == '02' ? null : isrectip.join(","),
+                leadvalue: $scope.stClass == '02'? null : $scope.timeOffset,
                 deviceTimeoutValue: $scope.deviceTimeoutValue,
                 stationTimeoutValue: $scope.stationTimeoutValue
             }).then(res => {
