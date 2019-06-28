@@ -1,7 +1,19 @@
 ajaxData(
     {
+        // 查设备型号
+        queryProducts: {
+            name: 'GETqueryProducts',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
         turbineDynamoPoints: {
-            name: 'GETturbineDynamoPoints',
+            name: 'GETturbineDynamoPointsNew',
+            data: {},
+            later: true
+        },
+        turbineDynamoPoints2: {
+            name: 'GETturbineDynamoPointsNew2',
             data: {},
             later: true
         },
@@ -46,11 +58,19 @@ ajaxData(
         const { dateTime, dateType, dataType } = $scope;
         if (dateType !== 1) return;
         if (dataType !== 0) return;
+
+        if (!$scope.queryProducts.res) {
+            const res = await $scope.queryProducts.getData({
+                deviceType: 18
+            });
+            $scope.turbineDynamoPoints.productId = res.body[0].productId;
+        }
         $scope.turbineDynamoPoints.getData({
             dataType: 2,
             date: dateTime.showDate,
             dateType: 2,
             queryType: 3,
+            productid: $scope.turbineDynamoPoints.productId
         });
     };
 
@@ -58,13 +78,13 @@ ajaxData(
     $scope.turbineDynamoPoints.subscribe(() => {
         $scope.column = [
             {
-                title: '<label class="i-checks m-b-none"><input checked type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
+                title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;margin-right:0;"></i></label>',
                 dataIndex: 'eqid',
                 align: 'center',
                 width: '50px',
                 checkboxName: 'batchprocessing',
                 render(text) {
-                    return '<label class="i-checks m-b-none"><input checked data-identifies="' + text + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    return '<label class="i-checks m-b-none"><input value="' + text + '" data-identifies="' + text + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
                 }
             },
             {
@@ -79,74 +99,56 @@ ajaxData(
                 align: 'center',
                 sort: true,
                 render(text) {
-                    return text && text.toFixed(2);
+                    return (text && text.toFixed(2)) + '';
                 }
             }
         ];
     });
 
-    $scope.trClick = async (item, _index, event) => {
-        event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
-        const idIndex = Object.keys($scope.turbineDynamoPoints.res.body.names).findIndex(v => v === item.eqid + '');
-        const { colors } = $scope.turbineDynamoPoints.chart;
-        colors[0] = colors[0].map((_v, i) => i === idIndex ? '#577BFF' : '#fff');
-        const { display } = $scope.turbineDynamoPoints.chart;
-        $scope.turbineDynamoPoints.chart.display = false;
-        await myAjaxData.timeout(0);
-        $scope.$apply();
-        await myAjaxData.timeout(0);
-        $scope.turbineDynamoPoints.chart = {
-            ...$scope.turbineDynamoPoints.chart,
-            colors,
-            display,
-            activeEqid: item.eqid
-        };
-        $scope.$apply();
-    };
 
-    $scope.checkboxOnchange = async(_all ,elements) => {
-        const eqids = Array.from(elements).filter(v => v.checked).map(v => v.dataset.identifies);
-        if (!eqids.length) {
-            $scope.turbineDynamoPoints.chart.display = false;
-            return $scope.$apply();
-        }
-        $scope.turbineDynamoPoints.res.body.ll.forEach(v => {
-            if (eqids.includes(v.eqid + '')) $scope.turbineDynamoPoints.res.body.names[v.eqid + ''] = v.eq_name;
-            else delete $scope.turbineDynamoPoints.res.body.names[v.eqid];
+    // 不同设备对比
+    $scope.turbineDynamoPoints.comparison = () => {
+        const ids = document.getElementsByName('batchprocessing'):: [].filter(v => v.checked).map(v => v.value);
+        if (ids.length === 0) return toaster.pop('info', '', '请勾选要对比的数据。');
+        $scope.turbineDynamoPoints2.pageShow = true;
+        $scope.turbineDynamoPoints2.getData({
+            eqids: ids.join(),
+            queryType: 3,
+            date: $scope.dateTime.showDate,
+            dataType: 2,
+            dateType: 2
         });
-        const { activeEqid } = $scope.turbineDynamoPoints.chart;
-        await $scope.turbineDynamoPoints.subscribeArr[1].s($scope.turbineDynamoPoints.res);
-        if (!activeEqid) return $scope.$apply();
-        await $scope.trClick({ eqid: activeEqid });
-        $scope.$apply();
     };
 
-    $scope.turbineDynamoPoints.subscribe(async res => {
-        await myAjaxData.timeout(0);
-        const equments = res.body.names;
-        const eq_keys = Object.keys(equments);
-        if (eq_keys.length === 0) {
-            $scope.turbineDynamoPoints.chart.display = false;
-            return $scope.$apply();
-        }
-        const colors = [(new Array(eq_keys.length)).fill('#fff')];
-        $scope.turbineDynamoPoints.chart = {
-            display: true,
-            types: [(new Array(eq_keys.length)).fill('scatter')],
-            linenames: [Object.values(equments)],
-            linedatas: [{
-                data: res.body.dynamo_rs_torque_curve,
-                name: '中位数转速转矩曲线',
-                color: 'rgba(255, 113, 113, 1)'
-            }],
-            colors,
-            ydatas: [eq_keys.map((v) => res.body[v])]
+    // 不同设备对比图
+    $scope.turbineDynamoPoints2.subscribe(res => {
+        const keys = Object.keys(res.body.names);
+        const names = Object.values(res.body.names);
+        const idIndex = names.findIndex(v => v === $scope.turbineDynamoPoints2.activeEqName);
+        $scope.turbineDynamoPoints2.chart = {
+            types: [new Array(keys.length).fill('line')],
+            xdata: res.body.x,
+            linenames: [names],
+            // ydatas: [keys.map(v => res.body[v])],
+            ydatas: [keys.map(v => res.body[v].slice(0, keys.length))],
+            z: [keys.map((v, i) => i === idIndex ? 3 : 2)],
+            colors: [keys.map((v, i) => i === idIndex ? '#FF6C6C' : '#fff')]
         };
-        $scope.$apply();
     });
 
-    $scope.turbineDynamoPoints.tooltipFormatter = (params) => {
-        return params[0].name + '<br/>' + params.map(v => v.seriesName + '　　' + v.value[0] + 'rpm　　' + v.value[1] + 'N·m<br/>').join('');
+    // 不同设备对比图 点击行
+    $scope.turbineDynamoPoints2.trClick = (item, index, event) => {
+        if (!$scope.turbineDynamoPoints2.pageShow) return;
+        const ids = Object.keys($scope.turbineDynamoPoints2.res.body.names);
+        const idIndex = ids.findIndex(v => v === ('' + item.eqid));
+        if (idIndex < 0) return;
+        event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
+        $scope.turbineDynamoPoints2.chart = {
+            ...$scope.turbineDynamoPoints2.chart,
+            z: [ids.map((v, i) => i === idIndex ? 3 : 2)],
+            colors: [ids.map((v, i) => i === idIndex ? '#FF6C6C' : '#fff')],
+        };
+        $scope.turbineDynamoPoints2.activeEqName = item.eq_name;
     };
 
     // 数据置空

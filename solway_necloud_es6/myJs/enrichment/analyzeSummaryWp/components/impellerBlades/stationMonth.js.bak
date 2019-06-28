@@ -42,10 +42,17 @@ ajaxData(
             data: {},
             later: true
         },
+        // 叶片零度
+        turbineClimbPoints2: {
+            name: 'GETturbineClimbPointsListNew2',
+            // name: 'GETturbineClimbPoints',
+            data: {},
+            later: true
+        },
     }, {
         __serviceName__: 'impellerBladesStationMonthService',
     }
-)('impellerBladesStationMonthCtrl', ['$scope', 'impellerBladesStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+)('impellerBladesStationMonthCtrl', ['$scope', 'impellerBladesStationMonthService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
     $('#timeRange > span').hide();
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
@@ -311,7 +318,7 @@ ajaxData(
                 width: '50px',
                 checkboxName: 'batchprocessing',
                 render(text) {
-                    return '<label class="i-checks m-b-none"><input data-identifies="' + text + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    return '<label class="i-checks m-b-none"><input value="'+text+'" data-identifies="' + text + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
                 }
             },
             {
@@ -338,6 +345,56 @@ ajaxData(
         ];
     });
 
+    // 不同设备对比
+    $scope.turbineClimbPoints.comparison = () => {
+        const ids = document.getElementsByName('batchprocessing'):: [].filter(v => v.checked).map(v => v.value);
+        if (ids.length === 0) return toaster.pop('info', '', '请勾选要对比的数据。');
+        $scope.turbineClimbPoints2.pageShow = true;
+        $scope.turbineClimbPoints2.getData({
+            eqids: ids.join(),
+            queryType: 3,
+            dataType: 2,
+            dateType: 2,
+            date: $scope.dateTime.showDate,
+            productid: $scope.turbineClimbPoints.productId
+        });
+    };
+
+    // 不同设备对比图
+    $scope.turbineClimbPoints2.subscribe(res => {
+        const keys = Object.keys(res.body.names);
+        const names = Object.values(res.body.names);
+        const idIndex = names.findIndex(v => v === $scope.turbineClimbPoints2.activeEqName);
+        $scope.turbineClimbPoints2.chart = {
+            types: [new Array(keys.length).fill('scatter')],
+            // xdata: res.body.x,
+            linenames: [names],
+            ydatas: [keys.map(v => res.body[v])],
+            z: [keys.map((v, i) => i === idIndex ? 3 : 2)],
+            colors: [keys.map((v, i) => i === idIndex ? '#FF6060' : '#fff')]
+        };
+    });
+
+    // 不同设备对比图 点击行
+    $scope.turbineClimbPoints2.trClick = (item, index, event) => {
+        if (!$scope.turbineClimbPoints2.res) return;
+        const ids = Object.keys($scope.turbineClimbPoints2.res.body.names);
+        const idIndex = ids.findIndex(v => v == item.eqid);
+        if (idIndex < 0) return;
+        event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
+        $scope.turbineClimbPoints2.chart = {
+            ...$scope.turbineClimbPoints2.chart,
+            z: [ids.map((v, i) => i === idIndex ? 3 : 2)],
+            colors: [ids.map((v, i) => i === idIndex ? '#FF6060' : '#fff')],
+        };
+        $scope.turbineClimbPoints2.activeEqName = item.eq_name;
+    };
+
+    // 不同设备对比图 tooltip
+    // $scope.turbineClimbPoints2.tooltipFormatter = (params) => {
+    //     const { activeEqName } = $scope.turbineClimbPoints2;
+    //     return '风速：' + params[0].name + 'm/s<br/>' + params.sort((a, b) => b.value - a.value).map(v => `<span style="color:${v.seriesName === activeEqName ? '#FF6060' : '#fff'};">` + v.seriesName + '-功率(kW):    ' + v.value + '</span>' + '<br/>').join('');
+    // };
     // 数据置空
     function setDataNull() {
         $scope.column = [];
@@ -348,6 +405,7 @@ ajaxData(
         $scope.analysis_wp_station_impeller_month_devicelist.res = null;
         $scope.analysis_wp_station_impeller_month_deviceline.res = null;
         $scope.turbineClimbPoints.res = null;
+        $scope.turbineClimbPoints2.res = null;
     }
 
     // 销毁 事件

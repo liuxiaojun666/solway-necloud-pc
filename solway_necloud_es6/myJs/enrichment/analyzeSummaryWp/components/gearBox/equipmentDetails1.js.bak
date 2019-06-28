@@ -1,0 +1,79 @@
+ajaxData(
+    {
+        // 时间 弹窗 列表
+        analysis_wp_station_gear_month_devicelist: {
+            name: 'GETanalysis_wp_station_gear_month_devicelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 时间 弹窗 曲线
+        analysis_wp_station_gear_month_deviceline: {
+            name: 'GETanalysis_wp_station_gear_month_deviceline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+    }, {
+        __serviceName__: 'runningStateEquipmentDetailsService',
+    }
+)('runningStateEquipment1DetailsCtrl', ['$scope', 'runningStateEquipmentDetailsService'], ($scope) => {
+    $scope.$on('equipmentDetails1', (_e, { eqid, eq_name }) => {
+        $scope.dtime = eq_name;
+        $scope.eqid = eqid;
+        $scope.shape = 'list';
+        $scope.analysis_wp_station_gear_month_devicelist.res = null;
+        $scope.analysis_wp_station_gear_month_deviceline.res = null;
+
+        $scope.analysis_wp_station_gear_month_devicelist.getData({
+            queryCode: 'analysis_wp_station_gear_month_devicelist',
+            queryType: 3,
+            date: $scope.dateTime.showDate,
+            eqid: $scope.eqid
+        });
+    });
+
+    $scope.analysis_wp_station_gear_month_deviceline.beforGetData = () => {
+        if ($scope.analysis_wp_station_gear_month_deviceline.res) return;
+        $scope.analysis_wp_station_gear_month_deviceline.getData({ 
+            queryCode: 'analysis_wp_station_gear_month_deviceline', 
+            date: $scope.dateTime.showDate, 
+            queryType: 3,
+            eqid: $scope.eqid
+        });
+    };
+
+    $scope.analysis_wp_station_gear_month_deviceline.subscribe(res => {
+        $scope.cxdata = res.body.data.dtime;
+        $scope.cydatas = [[res.body.data.gearbox_temp_max, res.body.data.gearbox_temp_full]];
+    });
+
+    $scope.analysis_wp_station_gear_month_devicelist.subscribe(res => {
+        $scope.analysis_wp_station_gear_month_devicelist.column = [
+            {
+                title: '时间',
+                dataIndex: 'dtime',
+                align: 'center',
+                width: '20%',
+                sort: true,
+            },
+            {
+                title: '满发温度' + '(' + res.body.units.gearbox_temp_full + ')',
+                dataIndex: 'gearbox_temp_full',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '最高油温' + '(' + res.body.units.gearbox_temp_max + ')',
+                dataIndex: 'gearbox_temp_max',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    });
+
+    $scope.$on('$destroy', () => {
+        
+    });
+
+});

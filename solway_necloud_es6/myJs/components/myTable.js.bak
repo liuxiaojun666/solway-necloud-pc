@@ -126,8 +126,10 @@ app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLaz
             function eventHand(e) {
                 const $this = $(this);
                 const $table = $this.find('table').eq(0);
-                $element.find('.my-table-head.main-head table').css('margin-left', $table.offset().left - $this.offset().left + 'px');
-                $element.find('.my-table-body.fixed-left table').css('margin-top', $table.offset().top - $this.offset().top + 'px');
+                const tableOffset = $table.offset();
+                if (!tableOffset) return;
+                $element.find('.my-table-head.main-head table').css('margin-left', tableOffset.left - $this.offset().left + 'px');
+                $element.find('.my-table-body.fixed-left table').css('margin-top', tableOffset.top - $this.offset().top + 'px');
             }
         }
 

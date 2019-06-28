@@ -63,10 +63,7 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                 toFixed = 1,
                 interval = void 0,
                 lineWidth = 1,
-                tooltipFormatter = (params, ticket, callback) => {
-                    if (imagesymboloptions && imagesymboloptions.show) params.pop();
-                    return params[0].name + '<br/>' + params.map(v => v.seriesName + ':    ' + v.value + '<br/>').join('');
-                },
+                tooltipFormatter = '{a}:({c})',
                 backgroundColor,
                 imagesymboloptions,
                 symbolSize,
@@ -124,7 +121,6 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                 grid,
                 xAxis: [{
                     type: 'value',
-                    // boundaryGap: false, //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样
                     axisLine: {
                         lineStyle: {
                             color: axisColor //坐标轴线线的颜色。
