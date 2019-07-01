@@ -238,8 +238,8 @@ ajaxData({
         }).then(res => {
             $scope.aerographData = res;
             $scope.aerographEditId = res.id;
-            $scope.weatherdetail = res.weatherdetail;
-            $scope.isld = res.isld;
+            $scope.weatherdetail = res.weatherdetail == ''? 0 : res.weatherdetail;
+            $scope.isld = res.isld == null ? 1 : res.isld;
 
             $scope.isborrow = res.isborrow;
             if ($scope.isborrow == 1) { //是否引用
@@ -261,6 +261,7 @@ ajaxData({
             devicetype: 5
         }).then(res => {
             $scope.aerographListData = res;
+            if($scope.aerographListData.length == 1) $scope.aerographSelfId = res[0].serialnumber;
         });
     }
 

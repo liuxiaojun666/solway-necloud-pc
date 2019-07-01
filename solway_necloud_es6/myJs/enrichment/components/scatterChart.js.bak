@@ -101,6 +101,7 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
             const option = {
                 backgroundColor,
                 tooltip: {
+                    trigger: types[0][0] === 'line' ? 'axis' : 'item',
                     formatter: tooltipFormatter
                 },
                 legend: {
@@ -184,8 +185,8 @@ app.directive('scatter', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
                 })),
                 series: ydatas.map((v, i) => (v.map((data, xi) => ({
                     name: linenames[i][xi],
-                    // type: types[i][xi],
-                    type: 'scatter',
+                    type: types[i][xi],
+                    // type: 'scatter',
                     barWidth: barWidth,
                     yAxisIndex: i,
                     smooth: true,

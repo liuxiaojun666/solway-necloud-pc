@@ -129,8 +129,8 @@ ajaxData(
             types: [new Array(keys.length).fill('line')],
             xdata: res.body.x,
             linenames: [names],
-            // ydatas: [keys.map(v => res.body[v])],
-            ydatas: [keys.map(v => res.body[v].slice(0, keys.length))],
+            ydatas: [keys.map(v => res.body[v])],
+            // ydatas: [keys.map(v => res.body[v].slice(0, keys.length))],
             z: [keys.map((v, i) => i === idIndex ? 3 : 2)],
             colors: [keys.map((v, i) => i === idIndex ? '#FF6C6C' : '#fff')]
         };
@@ -149,6 +149,13 @@ ajaxData(
             colors: [ids.map((v, i) => i === idIndex ? '#FF6C6C' : '#fff')],
         };
         $scope.turbineDynamoPoints2.activeEqName = item.eq_name;
+    };
+
+    $scope.turbineDynamoPoints2.tooltipFormatter = (obj) => {
+        return '叶轮转速(rpm)：' + obj[0].axisValue + '<br/>' + 
+        obj.map(v => {
+            return v.seriesName + ' - 转矩N·m：' + v.data[1] + '<br/>';
+        }).join('');
     };
 
     // 数据置空
