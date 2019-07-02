@@ -42,6 +42,8 @@ ajaxData({
         const {
             dateType = 1,
             dateTime = new Date(+$scope.endDate),
+            chartType = 0,
+            chartName = '地图'
         } = historiData;
         if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM');
         $scope.dateTime = dateTime;
@@ -49,6 +51,8 @@ ajaxData({
         $scope.weekTimeStart = new Date(dateTime.getTime() - 1000 * 60 * 60 * 24 * 6);
         $scope.weekTimeEnd = new Date(dateTime.getTime());
         $scope.beforeLoading = false;
+        await myAjaxData.timeout(0);
+        $scope.showCharts(chartType, chartName);
     };
 
     // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
@@ -68,10 +72,15 @@ ajaxData({
     //     $scope.dateUpdated($scope._dateType, $scope._dateTime);
     // };
 
+
     //点击圆球 -> 右侧切换图表
     $scope.showCharts = (type, name) => {
         $scope.chartType = type;
         $scope.chartName = name;
+        historicalRecord.set({
+            chartType: $scope.chartType,
+            chartName: $scope.chartName
+        });
         $scope.loading = true;
         $scope.esquery.getData({
             date: $scope.dateTime.showDate,
@@ -99,6 +108,9 @@ ajaxData({
         $scope.xdata = [];
         $scope.ydatas = [[]];
 
+        if (!$scope.chartData.cityid) {
+            return;
+        }
         $scope.chartData.cityid.forEach(item => {
             $scope.tableType.push('bar');
             $scope.colors.push('rgb(240,193,103)');
@@ -229,9 +241,6 @@ ajaxData({
     map.setOption(option, true);
 
     $scope.showCharts(0, '地图');
-
-
-
 
 
 

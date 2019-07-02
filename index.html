@@ -16,27 +16,63 @@
     <link type="image/x-icon" rel="shortcut icon" ng-href="{{currCompanyLogo}}">
     <script async type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"></script>
     <script>
-        window.stamp = window.localStorage.stamp;
-        if (!window.stamp) window.location.href = 'http://' + window.location.host + '/login.html';
+        ;(function () {
+            function download(url, callback) {
+                var oReq = new XMLHttpRequest();
+                oReq.open("GET", url, true);
+                oReq.responseType = "blob";
+                oReq.onload = function (oEvent) {
+                    if (oReq.response.size === 0 || oReq.status === 404) {
+                        if (confirm(' 文件为空或不存在，确定继续执行吗？')) __fun();
+                        return callback && callback();
+                    } else __fun();
 
-        // 只允许打开一个窗口
-        var xx = function () {
-            window.opener = null;
-            window.open("", "_self", "");
-            window.close();
-            location.href = "about:blank";
-        };
-        if (window.localStorage.hasWindow) {
-            alert('为防止未知错误，建议使用一个窗口访问系统，您已打开窗口。');
-            if (confirm('确定继续访问将重新登录系统')) window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
-            else xx();
-        }
-        else {
-            window.addEventListener('beforeunload', function (e) {
-                window.localStorage.hasWindow = '';
+                    function __fun() {
+                        var _blob = new Blob([oReq.response]);
+                        var reader = new FileReader();
+                        reader.onload = function (event) {
+                            var content = reader.result;
+                            callback && callback(content);
+                        };
+                        reader.readAsText(_blob);
+                    }
+                };
+                oReq.send();
+            };
+            if (!window.localStorage.stamp) {
+                window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+            }
+            download('/stamp.txt', function (str) {
+                var stamp = str;
+                if (stamp !== window.localStorage.stamp) {
+                    if ((location.host.split(':')[1] + '')) return;
+                    alert('页面缓存或受非正常访问，请刷新登录页后重新登录！');
+                    return window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+                }
             });
-            window.localStorage.hasWindow = 'true';
-        }
+        })();
+    </script>
+    <script>
+        // 只允许打开一个窗口
+        ;(function () {
+            var xx = function () {
+                window.opener = null;
+                window.open("", "_self", "");
+                window.close();
+                location.href = "about:blank";
+            };
+            if (window.localStorage.hasWindow) {
+                alert('为防止未知错误，建议使用一个窗口访问系统，您已打开窗口。');
+                if (confirm('确定继续访问将重新登录系统')) window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+                else xx();
+            }
+            else {
+                window.addEventListener('beforeunload', function (e) {
+                    window.localStorage.hasWindow = '';
+                });
+                window.localStorage.hasWindow = 'true';
+            }
+        })();
     </script>
 </head>
 
@@ -120,7 +156,7 @@
     <!-- root权限 -->
     <script src="theme/js/dist/tools/root.js"></script>
 
-    
+
     <script type="text/javascript">
         window.BMap_loadScriptTime = (new Date).getTime();
         window.UEDITOR_HOME_URL = "vendor/ueditor/";
@@ -128,7 +164,7 @@
     <script type="text/javascript" src="vendor/echarts/getscript.js"></script>
     <script type="text/javascript" src="vendor/echarts/echarts-all-3new.min.js"></script>
 
-    
+
 </body>
 
 <script>
@@ -187,7 +223,7 @@
     if ((location.host.split(':')[1] + '').indexOf('88') >= 0) {
         window.stamp = '?_=' + Date.now();
         document.write('<script async src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
-        setTimeout(function (params){
+        setTimeout(function (params) {
             if (!window.LiveReload) return;
             window.LiveReload.close = function () {
                 LiveReload.reloader.reloadPage = function () {

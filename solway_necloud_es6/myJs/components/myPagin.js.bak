@@ -14,13 +14,15 @@ app.directive('myPaging', ['myAjaxData', (myAjaxData) => ({
         paging: '=',
         pageSize: '@',
         defaultPageSize: '=',
+        pageSizeList: '=',
         firstPageIndex: '='
     },
     controller($scope, $element) {
+        $scope._pageSizeList = $scope.pageSizeList || [6, 9, 10, 20, 30, 50, 100, 500, 1000];
         $scope.lcalFirstPageIndex = $scope.firstPageIndex || 0;
         $scope.mygetData = (obj, arg2) => {
-            if (arg2) return
-            $scope.getData(obj)
-        }
+            if (arg2) return;
+            $scope.getData(obj);
+        };
     }
-})])
+})]);

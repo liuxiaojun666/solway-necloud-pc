@@ -11,6 +11,13 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    // 任务详情
+    taskDetailPC: {
+        name: 'GETBaseMessageDetailById',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     // 标记选中为已读
     readBaseMessages: {
         name: 'readBaseMessages',
@@ -189,8 +196,39 @@ ajaxData({
             });
         }
 
+        function editListDom() {
+            const { data: { mid: id }, index } = $scope.listActiveItem;
+
+            /**
+             case '00':
+                                return '待确认'
+                            case '01':
+                                return '待受理'
+                            case '02':
+                                return '待处理'
+                            case '03':
+                                return '已关闭'
+                            case '04':
+                                return '被确认'
+                            case '05':
+                                return '验收中'
+             */
+            $scope.taskDetailPC.getData({ id }).then(res => {
+                const str = {
+                    '00': "待确认",
+                    '01': "待受理",
+                    '02': "待处理",
+                    '03': "已关闭",
+                    '04': "被确认",
+                    '05': "验收中"
+                }[res.handstatus];
+                $('#professionTaskList .my-table-body').eq(1).find('tr').eq(index + 1).find('td span.status').text(str);
+            });
+        }
+
         // 消息列表 缺省 参数
-        $scope.resetList = () => {
+        $scope.resetList = (reloadList) => {
+            if (!reloadList) return editListDom();
             $scope.startDate.showDate = '';
             $scope.endDate.showDate = '';
             $scope.pStationId = '';
@@ -283,17 +321,17 @@ ajaxData({
                     render(text) {
                         switch (text) {
                             case '00':
-                                return '待确认'
+                                return '<span class="status">待确认</span>'
                             case '01':
-                                return '待受理'
+                                return '<span class="status">待受理</span>'
                             case '02':
-                                return '待处理'
+                                return '<span class="status">待处理</span>'
                             case '03':
-                                return '已关闭'
+                                return '<span class="status">已关闭</span>'
                             case '04':
-                                return '被确认'
+                                return '<span class="status">被确认</span>'
                             case '05':
-                                return '验收中'
+                                return '<span class="status">验收中</span>'
 
                             default:
                                 break;
@@ -358,6 +396,10 @@ ajaxData({
         // 点击行
         $scope.trClick = async (item, index, e) => {
             e.stopPropagation();
+            $scope.listActiveItem = {
+                data: item,
+                index
+            };
             $scope.searchActive = false;
             $scope.batchCloseActive = false;
             $scope.closeMessagePopUp();
