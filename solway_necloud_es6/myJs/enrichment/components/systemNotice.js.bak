@@ -1,0 +1,188 @@
+app.directive('publicNotice', ['$ocLazyLoad', '$http', '$state', '$stateParams', '$timeout', '$rootScope', 'actionRecord', '$interval',
+    ($ocLazyLoad, $http, $state, $stateParams, $timeout, $rootScope, historicalRecord, $interval) => ({
+        restrict: 'E',
+        transclude: !0,
+        replace: !0,
+        scope: {
+
+        },
+        templateUrl: 'tpl/enrichment/components/publicNotice.html' + window.stamp,
+        link($scope, $element) {
+
+            const setPageHeight = () => {
+                $scope.pageH = $(window).height();
+            }
+            setPageHeight()
+
+            window.addEventListener('resize', setPageHeight);
+            $scope.$on('$destroy', () => {
+                window.removeEventListener('resize', setPageHeight);
+            });
+
+            $scope.showNoticeModal = false; //默认公告弹框不显示
+
+            $scope.getCurrentRoleComId = async () => {
+                await $http({
+                    method: "GET",
+                    url: window.interface['GETroleListForPC']
+                }).success(function (res) {
+                    let rolelist = res.rolelist;
+                    $scope.comId = '';
+                    for (let i = 0; i < rolelist.length; i++) {
+                        if (rolelist[i].roleId == res.currentRole) {
+                            $scope.comId = rolelist[i].comId;
+                            break;
+                        }
+                    }
+                })
+            }
+
+            //公告列表
+            $scope.noticeListData = async () => {
+                await $scope.getCurrentRoleComId();
+                $http({
+                    method: "GET",
+                    url: window.interface['GETsystemNoticeList'],
+                    params: { comIds: $scope.comId ,appOrPc:'01' }
+                }).success(function (res) {
+                    if (res.code == 0) {
+                        $scope.noticeList = res.body.data;
+                    } else {
+                        $scope.noticeList = [];
+                    }
+                });
+            }
+
+            //显示或关闭公告列表
+            $scope.toggleNoticeModal = ifOpen => {
+                $scope.showNoticeModal = ifOpen;
+                if (ifOpen) $scope.noticeListData();
+            }
+
+            //未读公告条数
+            $scope.getUnReadNoticeNumber = async () => {
+                await $scope.getCurrentRoleComId();
+                $http({
+                    method: "GET",
+                    url: window.interface['GETsystemNoticeUnReadNumber'],
+                    params: { comIds: $scope.comId,appOrPc:'01' } //'01':pc专用
+                }).success(function (res) {
+                    $scope.unreadNumber = res.body;
+                });
+            }
+
+            $scope.getUnReadNoticeNumber();
+
+            //未读的弹框公告
+            $scope.getUnReadNoticeAlert = async () => {
+                $scope.showAlertNoticeModal = false;
+                await $scope.getCurrentRoleComId();
+                $http({
+                    method: "GET",
+                    url: window.interface['GETsystemNoticeAlertList'],
+                    params: {
+                        comIds: $scope.comId,
+                        type: '01',
+                        appOrPc:'01' 
+                    }
+                }).success(function (res) {
+                    if (res.code == 0) {
+                        $scope.unreadNoticeAlertList = res.body;
+                        if(res.body.length) {
+                            $scope.showAlertNoticeModal = true;
+                            $scope.markReadSingle(res.body[0].id); 
+                        }
+                    }else{
+                        $scope.unreadNoticeAlertList = []
+                    }
+                });
+            }
+
+            $scope.getUnReadNoticeAlert();
+
+            //从弹框公告，跳转至历史所有公告
+            $scope.toPublicNotice = () =>{
+                $scope.showAlertNoticeModal = false;
+                $scope.showNoticeModal = true;
+                $scope.noticeListData();
+            }
+
+            //单条--标记已读
+            $scope.markReadSingle = async(id) =>{
+                await $http({
+                    method: "GET",
+                    url: window.interface['GETmarkReadFlagSingle'],
+                    params: {id}
+                }).success(function (res) {
+                    if (res.code == 0 && res.body == 1) {
+                        //标记成功
+                        $scope.getUnReadNoticeNumber();
+                    }
+                });
+            }
+
+            //多条--标记已读
+            $scope.markReadMultiple = () =>{
+                $http({
+                    method: "GET",
+                    url: window.interface['GETmarkReadFlagMultiple'],
+                    params: {comIds:$scope.comId,appOrPc:'01'}
+                }).success(function (res) {
+                    if (res.code == 0) {
+                        //标记成功
+                        $scope.getUnReadNoticeNumber();
+                        for(let i = 0;i<$scope.noticeList.length;i++){
+                            $scope.noticeList[i]['isread'] = 1;
+                        }
+                    }
+                });
+            }
+
+            $scope.markClick = async(item) =>{
+                if(item.isread == 1) return; 
+                await $scope.markReadSingle(item.id);
+                for(let i = 0;i<$scope.noticeList.length;i++){
+                    if(item.id == $scope.noticeList[i].id){
+                        $scope.noticeList[i]['isread'] = 1;
+                        break;
+                    }
+                }
+            }
+
+            $scope.perNoteWidth = 100; //每条弹框公告的宽度
+            $scope.currentIndex = 0;
+            $scope.toNoteIndex = function (type) {
+                let distance = 0;
+                if(type == 'next'){
+                    $scope.currentIndex++;
+                    distance = -$scope.currentIndex * $scope.perNoteWidth;
+                    if($scope.currentIndex < $scope.unreadNoticeAlertList.length){
+                        $scope.markReadSingle($scope.unreadNoticeAlertList[$scope.currentIndex].id);
+                    }
+                }else if(type == 'prev'){
+                    $scope.currentIndex--;
+                    distance = -$scope.currentIndex * $scope.perNoteWidth;
+                }
+                if ($scope.currentIndex >= $scope.unreadNoticeAlertList.length) {
+                    $scope.currentIndex = $scope.unreadNoticeAlertList.length-1;
+                    return
+                }
+                if ($scope.currentIndex < 0) {
+                    $scope.currentIndex = 0;
+                    return
+                }
+                $(".notice-list").animate({ left: distance+'%' }, 100);
+            }
+
+            //每五分钟获取一次最新公告信息
+            const interval = $interval(() => {
+                $scope.getUnReadNoticeNumber();
+            }, 300000);
+
+            $scope.$on('$destroy', () => {
+                window.removeEventListener('resize', setPageHeight);
+                $interval.cancel(interval);
+            });
+
+        }
+    })])

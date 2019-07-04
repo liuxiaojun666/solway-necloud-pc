@@ -45,7 +45,13 @@ ajaxData({
             chartType = 0,
             chartName = '地图'
         } = historiData;
-        if (!dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM');
+        if (dateType == 0) {
+            dateTime.showDate = dateTime.Format('yyyy-MM-dd');
+        } else if (dateType == 1) {
+            dateTime.showDate = dateTime.Format('yyyy-MM');
+        } else if (dateType == 2) {
+            dateTime.showDate = dateTime.Format('yyyy');
+        }
         $scope.dateTime = dateTime;
         $scope.dateType = dateType;
         $scope.weekTimeStart = new Date(dateTime.getTime() - 1000 * 60 * 60 * 24 * 6);
@@ -58,9 +64,19 @@ ajaxData({
     // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
     $scope.dateUpdated = async (dateType, dateTime) => {
         historicalRecord.set({ dateType, dateTime });
-        if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM');
+        // if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM');
+        if (!dateTime.showDate) {
+            if (dateType == 0) {
+                dateTime.showDate = dateTime.Format('yyyy-MM-dd');
+            } else if (dateType == 1) {
+                dateTime.showDate = dateTime.Format('yyyy-MM');
+            } else if (dateType == 2) {
+                dateTime.showDate = dateTime.Format('yyyy');
+            }
+        }
         $scope.dateType = dateType;
         $scope.dateTime = dateTime;
+        await myAjaxData.timeout(0);
         $scope.showCharts($scope.chartType, $scope.chartName);
     };
 
@@ -85,8 +101,7 @@ ajaxData({
         $scope.esquery.getData({
             date: $scope.dateTime.showDate,
             queryCode: `pv_station_city_${dateKey[$scope.dateType]}_${chartKey[$scope.chartType]}`
-        })
-        $scope.esquery.subscribe(res => {
+        }).then((res) => {
             $scope.chartData = res.body;
             if ($scope.chartType != 0) {
                 fillChart();
@@ -95,7 +110,7 @@ ajaxData({
                 fillMap();
             }
             $scope.loading = false;
-        });
+        })
     }
 
     // 给图表填充数据
@@ -108,7 +123,7 @@ ajaxData({
         $scope.xdata = [];
         $scope.ydatas = [[]];
 
-        if (!$scope.chartData.cityid) {
+        if (!$scope.chartData) {
             return;
         }
         $scope.chartData.cityid.forEach(item => {
@@ -213,7 +228,7 @@ ajaxData({
         },
         series: [
             {
-                name: 'pm2.5',
+                name: '',
                 type: 'scatter',
                 coordinateSystem: 'geo',
                 data: [],
@@ -240,7 +255,7 @@ ajaxData({
     }
     map.setOption(option, true);
 
-    $scope.showCharts(0, '地图');
+    // $scope.showCharts(0, '地图');
 
 
 
@@ -416,7 +431,7 @@ ajaxData({
             circles[circle.index].style.left = circle.x + 'px';//小球位置重定位
             circles[circle.index].style.top = circle.y + 'px';
             crash(circle.index);
-        }, 15);
+        }, 14);
     }
 
     //对每一个小球绑定计时器，让小球动起来
@@ -425,11 +440,15 @@ ajaxData({
     }
 
     //鼠标移入 移出
+    var hoverTime, hoverIndex;
     $('#main div').hover(function () {
-        var index = $(this).index();
-        clearInterval(json[index].timer);
+        hoverIndex = $(this).index();
+        clearInterval(json[hoverIndex].timer);
+        hoverTime = setInterval(()=>{
+            crash(hoverIndex);
+        },10);
     }, function () {
-        var index = $(this).index();
-        move(json[index]);
+        move(json[hoverIndex]);
+        clearInterval(hoverTime);
     })
 });

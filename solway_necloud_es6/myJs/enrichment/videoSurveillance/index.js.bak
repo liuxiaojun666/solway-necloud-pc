@@ -109,9 +109,11 @@ ajaxData(
                                             data: JSON.stringify(req_data),
                                             beforeSend() { }
                                         });
+                                        $scope.$apply();
                                     });
                                     this.on('pause', function () {
                                         $scope.checked_videos[_index].isPlay = false;
+                                        $scope.$apply();
                                     });
                                 }
                             );
@@ -171,7 +173,7 @@ ajaxData(
                 beforeSend() { }
             });
         });
-    }, 10 * 1000);
+    }, 30 * 1000);
 
     function createCanvas() {
         const c = document.createElement('canvas');
