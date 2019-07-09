@@ -56,6 +56,7 @@ HighAnalysis_selectFds: {
             }
             $scope.analysCheckData = [];
             $scope.radioToSelect($scope.analysData.ctg1, 0);
+            $scope.$emit('noChecked', 'analysAxisIndex');
         }
         else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)){
             //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
@@ -74,6 +75,7 @@ HighAnalysis_selectFds: {
             $scope.analysCheckData = [];
             parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
             $scope.radioToSelect($scope.analysData.ctg1, 0);
+            $scope.$emit('noChecked', 'analysAxisIndex');
         }
     });
 
@@ -212,6 +214,10 @@ HighAnalysis_selectFds: {
             }
         })
         $scope.analysCheckData.splice(index, 1);
+        if ($scope.analysCheckData.length == 0) {
+            parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
+        }
+        $scope.$emit('noChecked', 'analysAxisIndex');
     }
 
     //全部删除
@@ -221,6 +227,8 @@ HighAnalysis_selectFds: {
         } else {
             $solway.confirm({ message: '确定全部删除吗？' }, () => {
                 $scope.analysCheckData = [];
+                parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
+                $scope.$emit('noChecked', 'analysAxisIndex');
                 $scope.analysData.ctg1.ll.forEach((item) => {
                     item.checked = false;
                 })
@@ -272,6 +280,7 @@ HighAnalysis_selectFds: {
     //获取历史数据
     $scope.$on('haveData', (e,v) => {
         if(!v){
+            $scope.$emit('noChecked', 'analysAxisIndex');
             return;
         }
         if(parentmyAjaxData.config.anlsType != 1){
@@ -306,6 +315,7 @@ HighAnalysis_selectFds: {
                     item.checked = false;
                 })
             }
+            $scope.$emit('addCallback','analysAxisIndex');
         }
     })
 
@@ -347,8 +357,7 @@ HighAnalysis_selectFds: {
         parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].actFdTb = $scope.actFdTb;
         parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].actFdHb = $scope.actFdHb;
         
-
         $scope.$emit('analysFds_fdName',{'fdName': $scope.analysCheckData[0].fdName});
-        $scope.$emit('addCallback');
+        $scope.$emit('addCallback','analysAxisIndex');
     }
 });

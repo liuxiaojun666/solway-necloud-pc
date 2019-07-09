@@ -155,8 +155,10 @@ ajaxData({
                 $scope.timeGroupMonth = [];
                 $scope.timeGroupYear = [];
                 $scope.timeGroupUser = [];
+                $scope.$emit('noChecked', 'countTime');
                 return;
             }
+            $scope.$emit('addCallback','countTime');
             $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioName, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.dateType);
             $scope.radioIndex = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioIndex;
             $scope[key[$scope.radioIndex]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.checkData;
@@ -221,6 +223,7 @@ ajaxData({
             $scope[key[$scope.radioIndex]].splice(index, 1);
             if ($scope[key[$scope.radioIndex]].length == 0) {
                 parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
+                $scope.$emit('noChecked', 'countTime');
             }
         }
 
@@ -232,6 +235,7 @@ ajaxData({
                 $solway.confirm({ message: '确定全部删除吗？' }, () => {
                     $scope[key[$scope.radioIndex]] = [];
                     parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
+                    $scope.$emit('noChecked', 'countTime');
                     $scope.$apply();
                 });
             }
@@ -269,6 +273,6 @@ ajaxData({
             parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].radioName = $scope.radioName;
             parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].dateType = $scope.dateType;
             parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope[key[$scope.radioIndex]]));
-            $scope.$emit('addCallback');
+            $scope.$emit('addCallback','countTime');
         }
     });

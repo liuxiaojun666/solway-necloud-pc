@@ -31,6 +31,7 @@ HighAnalysis_selectFds: {
         parentmyAjaxData.config.fdX.key = '';
         parentmyAjaxData.config.fdX.name = '';
         $scope.radioToSelect($scope.herizonData.ctg1, 0);
+        $scope.$emit('noChecked', 'horizontalAxisIndex');
     });
     
     //监听横轴指标页面打开
@@ -175,6 +176,7 @@ HighAnalysis_selectFds: {
         $scope.horizonCheckData.splice(index, 1);
         parentmyAjaxData.config.fdX.key = '';
         parentmyAjaxData.config.fdX.name = '';
+        $scope.$emit('noChecked', 'horizontalAxisIndex');
     }
 
     //全部删除
@@ -198,6 +200,7 @@ HighAnalysis_selectFds: {
                 })
                 parentmyAjaxData.config.fdX.key = '';
                 parentmyAjaxData.config.fdX.name = '';
+                $scope.$emit('noChecked', 'horizontalAxisIndex');
                 $scope.$apply();
             });
         }
@@ -211,6 +214,7 @@ HighAnalysis_selectFds: {
     //获取历史数据
     $scope.$on('haveData', (e,v) => {
         if(!v){
+            $scope.$emit('noChecked', 'horizontalAxisIndex');
             return;
         }
         if(parentmyAjaxData.config.anlsType == 1){
@@ -228,6 +232,7 @@ HighAnalysis_selectFds: {
                     item.checked = false;
                 })
             }
+            $scope.$emit('addCallback','horizontalAxisIndex');
         }
         
     })
@@ -253,6 +258,6 @@ HighAnalysis_selectFds: {
         parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].hrizonItem = $scope.hrizonItem;
         parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
         parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope.horizonCheckData));
-        $scope.$emit('addCallback');
+        $scope.$emit('addCallback','horizontalAxisIndex');
     }
 });

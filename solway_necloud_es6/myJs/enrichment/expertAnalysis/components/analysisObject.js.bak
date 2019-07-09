@@ -79,6 +79,22 @@ ajaxData({
             }
         };
 
+        //清空数据
+        function clearData() {
+            $scope.objectDevice = [];
+            $scope.objectPower = [];
+            $scope.objectArea = [];
+            $scope.objectGroup = [];
+            $scope.objectType = [];
+            $scope.objectFault = [];
+            $scope.objectDevice[0] = [];
+            $scope.objectDevice[1] = [];
+            parentmyAjaxData.config.dmsTypeAs[parentmyAjaxData.config.checkChart] = [];
+            parentmyAjaxData.config.dmsTypeBs[parentmyAjaxData.config.checkChart] = [];
+            parentmyAjaxData.config.dmsTypeCs[parentmyAjaxData.config.checkChart] = [];
+            parentmyAjaxData.config.dmsTypeDs[parentmyAjaxData.config.checkChart] = [];
+        }
+
         //获取父级发送的数据
         $scope.$on('analysObDataNew', async (e, data) => {
             if (data.analysObDataNewDevice) {
@@ -108,21 +124,13 @@ ajaxData({
                     //     $scope.objectDevice[i] = [];
                     // })
                     $scope.radioDevice();
+                    clearData();
+                    $scope.$emit('noChecked', 'analysisObj');
                 } else if (parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)) {
                     //选中有数据的图表，切换分析指标，再次默认选中设备 
                     $scope.radioDevice();
-                    $scope.objectDevice = [];
-                    $scope.objectPower = [];
-                    $scope.objectArea = [];
-                    $scope.objectGroup = [];
-                    $scope.objectType = [];
-                    $scope.objectFault = [];
-                    $scope.objectDevice[0] = [];
-                    $scope.objectDevice[1] = [];
-                    parentmyAjaxData.config.dmsTypeAs[parentmyAjaxData.config.checkChart] = [];
-                    parentmyAjaxData.config.dmsTypeBs[parentmyAjaxData.config.checkChart] = [];
-                    parentmyAjaxData.config.dmsTypeCs[parentmyAjaxData.config.checkChart] = [];
-                    parentmyAjaxData.config.dmsTypeDs[parentmyAjaxData.config.checkChart] = [];
+                    clearData();
+                    $scope.$emit('noChecked', 'analysisObj');
                 }
             }
         })
@@ -139,10 +147,12 @@ ajaxData({
                 $scope.objectFault = [];
                 $scope.objectDevice[0] = [];
                 $scope.objectDevice[1] = [];
+                $scope.$emit('noChecked', 'analysisObj');
                 // }, 500)
                 return;
             }
 
+            $scope.$emit('addCallback', 'analysisObj');
             $scope.analysisObjectK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.alsObjk;
             $scope[key[$scope.analysisObjectK]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.checkData;
 
@@ -899,6 +909,7 @@ ajaxData({
                 })
                 if ($scope[key[$scope.analysisObjectK]].length == 0) {
                     parentmyAjaxData.config.dmsTypeBs[parentmyAjaxData.config.checkChart] = [];
+                    $scope.$emit('noChecked', 'analysisObj');
                 }
                 //删除 给接口传的数据 (设备)
             } else if ($scope.analysisObjectK == 99) {
@@ -920,6 +931,7 @@ ajaxData({
                 })
                 if ($scope.objectDevice[$scope.equipChoiceIndex].length == 0) {
                     parentmyAjaxData.config.dmsTypeAs[parentmyAjaxData.config.checkChart] = [];
+                    $scope.$emit('noChecked', 'analysisObj');
                 }
                 //删除 给接口传的数据 (机型/故障类型)
             } else if ($scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) {
@@ -943,6 +955,7 @@ ajaxData({
                 if ($scope[key[$scope.analysisObjectK]].length == 0) {
                     parentmyAjaxData.config.dmsTypeCs[parentmyAjaxData.config.checkChart] = [];
                     parentmyAjaxData.config.dmsTypeDs[parentmyAjaxData.config.checkChart] = [];
+                    $scope.$emit('noChecked', 'analysisObj');
                 }
             }
         }
@@ -973,6 +986,7 @@ ajaxData({
                         $scope.groupResultDevice = [];
                         parentmyAjaxData.config.dmsTypeAs[parentmyAjaxData.config.checkChart] = [];
                     }
+                    $scope.$emit('noChecked', 'analysisObj');
                     $scope.$apply();
                 });
             }
@@ -1110,6 +1124,6 @@ ajaxData({
             parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData = [...new Set($scope[key[$scope.analysisObjectK]])]
 
             busiIdToName();
-            $scope.$emit('addCallback');
+            $scope.$emit('addCallback', 'analysisObj');
         }
     });

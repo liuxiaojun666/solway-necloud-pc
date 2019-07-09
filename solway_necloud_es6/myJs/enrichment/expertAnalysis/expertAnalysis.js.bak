@@ -23,7 +23,7 @@ ajaxData({
         return o;
     })()),
 },
- {
+    {
         anlsType: null,   //分析类型
         herizonData: {},  //横轴数据 纵轴数据
         dmsType: null,    //分析对象参数
@@ -50,7 +50,7 @@ ajaxData({
         tableData: [      //图表的历史数据
             {}, {}, {}, {}
         ],
-        paramsData:[      //参数的历史数据
+        paramsData: [      //参数的历史数据
             {}, {}, {}, {}
         ],
         analysObjData: [{}, {}, {}, {}], //选择的分析对象 历史数据
@@ -65,34 +65,34 @@ ajaxData({
 
         $scope.$on('$destroy', () => {
             myAjaxData.config.tableData = [{}, {}, {}, {}],
-            myAjaxData.config.dmsTypeAs = [[], [], [], []],    //设备 参数
-            myAjaxData.config.dmsTypeBs = [[], [], [], []],    //电站|区域(部门)|集团  接口需要的数据
-            myAjaxData.config.dmsTypeCs = [[], [], [], []],    //机型/故障类型 参数
-            myAjaxData.config.dmsTypeDs = [[], [], [], []],    //机型/故障类型 参数
-            myAjaxData.config.dmsTimeDates = [[], [], [], []],
-            myAjaxData.config.fds = [[], [], [], []],          //横轴、纵轴指标 参数
-            myAjaxData.config.analysFds = [[], [], [], []],    //分析指标 参数
-            myAjaxData.config.benchSort = [[], [], [], []],
-            myAjaxData.config.bIdToName = [{}, {}, {}, {}],
-            myAjaxData.config.analysObjData = [{}, {}, {}, {}], //选择的分析对象 历史数据
-            myAjaxData.config.countTime = [{}, {}, {}, {}],     //选择的统计时间 历史数据
-            myAjaxData.config.horizonHdata = [{}, {}, {}, {}],  //选择的横轴指标 历史数据
-            myAjaxData.config.verticHdata = [{}, {}, {}, {}],   //选择的纵轴指标 历史数据
-            myAjaxData.config.alysHdata = [{}, {}, {}, {}],
-            myAjaxData.config.tableDataTrue = [false, false, false, false],
-            myAjaxData.config.checkChart = null,
-            myAjaxData.config.fdX= {            //横轴指标字段 参数
-                key: '',
-                name: ''
-            },
-            myAjaxData.config.fdY= {            //纵轴指标字段 参数
-                key: '',
-                name: ''
-            },
-            myAjaxData.config.paramsData = [      //参数的历史数据
-                {}, {}, {}, {}
-            ],
-            myAjaxData.config.alsRlist == 0
+                myAjaxData.config.dmsTypeAs = [[], [], [], []],    //设备 参数
+                myAjaxData.config.dmsTypeBs = [[], [], [], []],    //电站|区域(部门)|集团  接口需要的数据
+                myAjaxData.config.dmsTypeCs = [[], [], [], []],    //机型/故障类型 参数
+                myAjaxData.config.dmsTypeDs = [[], [], [], []],    //机型/故障类型 参数
+                myAjaxData.config.dmsTimeDates = [[], [], [], []],
+                myAjaxData.config.fds = [[], [], [], []],          //横轴、纵轴指标 参数
+                myAjaxData.config.analysFds = [[], [], [], []],    //分析指标 参数
+                myAjaxData.config.benchSort = [[], [], [], []],
+                myAjaxData.config.bIdToName = [{}, {}, {}, {}],
+                myAjaxData.config.analysObjData = [{}, {}, {}, {}], //选择的分析对象 历史数据
+                myAjaxData.config.countTime = [{}, {}, {}, {}],     //选择的统计时间 历史数据
+                myAjaxData.config.horizonHdata = [{}, {}, {}, {}],  //选择的横轴指标 历史数据
+                myAjaxData.config.verticHdata = [{}, {}, {}, {}],   //选择的纵轴指标 历史数据
+                myAjaxData.config.alysHdata = [{}, {}, {}, {}],
+                myAjaxData.config.tableDataTrue = [false, false, false, false],
+                myAjaxData.config.checkChart = null,
+                myAjaxData.config.fdX = {            //横轴指标字段 参数
+                    key: '',
+                    name: ''
+                },
+                myAjaxData.config.fdY = {            //纵轴指标字段 参数
+                    key: '',
+                    name: ''
+                },
+                myAjaxData.config.paramsData = [      //参数的历史数据
+                    {}, {}, {}, {}
+                ],
+                myAjaxData.config.alsRlist == 0
         });
 
         historicalRecord.init();// 历史记录 初始化
@@ -240,7 +240,7 @@ ajaxData({
                                 newName = newName.substring(0, 15) + "...";
                             }
                             var str = `${newName} ${$scope['yname' + i]}${yunits}: ${params['data'][1]} 时间:${params['data'][2]}`;
-                            
+
                             tooltipFormatter += `<div style="font-size: 12px;">${str}</div>`;
                         }
                         return tooltipFormatter;
@@ -304,16 +304,16 @@ ajaxData({
         }
 
         //找回参数
-        function backParams(){
-            if(!myAjaxData.config.paramsData[$scope.checkChart].dmsTypeAs){
+        function backParams() {
+            if (!myAjaxData.config.paramsData[$scope.checkChart].dmsTypeAs) {
                 return;
             }
-            myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart]  = myAjaxData.config.paramsData[$scope.checkChart].dmsTypeAs;
-            myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart]  = myAjaxData.config.paramsData[$scope.checkChart].dmsTypeBs;
-            myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart]  = myAjaxData.config.paramsData[$scope.checkChart].dmsTypeCs;
-            myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart]  = myAjaxData.config.paramsData[$scope.checkChart].dmsTypeDs;
-            myAjaxData.config.dmsTimeDates[myAjaxData.config.checkChart]  = myAjaxData.config.paramsData[$scope.checkChart].dmsTime;
-            myAjaxData.config.fds[myAjaxData.config.checkChart]  = myAjaxData.config.paramsData[$scope.checkChart].fds;
+            myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart] = myAjaxData.config.paramsData[$scope.checkChart].dmsTypeAs;
+            myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart] = myAjaxData.config.paramsData[$scope.checkChart].dmsTypeBs;
+            myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart] = myAjaxData.config.paramsData[$scope.checkChart].dmsTypeCs;
+            myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart] = myAjaxData.config.paramsData[$scope.checkChart].dmsTypeDs;
+            myAjaxData.config.dmsTimeDates[myAjaxData.config.checkChart] = myAjaxData.config.paramsData[$scope.checkChart].dmsTime;
+            myAjaxData.config.fds[myAjaxData.config.checkChart] = myAjaxData.config.paramsData[$scope.checkChart].fds;
         }
 
         //调接口前 判空
@@ -324,8 +324,8 @@ ajaxData({
             } else if (myAjaxData.config.alsRlist == 0) {
                 toaster.pop('error', '', '请选择分析对象');
                 return false;
-            } else 
-            if (!$scope.queryData.timeLat && $scope.queryData.analysisType != 3) {
+            } else
+                if (!$scope.queryData.timeLat && $scope.queryData.analysisType != 3) {
                     toaster.pop('error', '', '请选择时间纬度');
                     return false;
                 } else if (myAjaxData.config.dmsTimeDates[myAjaxData.config.checkChart].length == 0) {
@@ -400,7 +400,7 @@ ajaxData({
                 myAjaxData.config.paramsData[$scope.checkChart].dmsTypeDs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart]));
                 myAjaxData.config.paramsData[$scope.checkChart].dmsTime = JSON.parse(JSON.stringify(myAjaxData.config.dmsTimeDates[myAjaxData.config.checkChart]));
                 myAjaxData.config.paramsData[$scope.checkChart].fds = JSON.parse(JSON.stringify(myAjaxData.config.fds[myAjaxData.config.checkChart]));
-               
+
                 //获取图表的类型(曲线、柱状、散点)
                 $scope['fdStyle' + $scope.checkChart] = myAjaxData.config.tableData[$scope.checkChart].fdStyle = myAjaxData.config.fdStyleArr[$scope.checkChart];
                 //获取图表的历史数据
@@ -644,18 +644,72 @@ ajaxData({
             })
         }
 
+        //双击图表 全屏
+        var dblFlag = false;
+        $scope.fullscreen = (i) => {
+            if (!dblFlag) {
+                $scope.chartSortIndex = 1;
+                $('.table1').each((index, item) => {
+                    if (i == index) {
+                        $(item).css({
+                            'width': '100%',
+                            'height': '100%'
+                        })
+                    } else {
+                        $(item).css({
+                            'width': '0',
+                            'height': '0'
+                        })
+                    }
+                })
+                dblFlag = true;
+            } else {
+                $scope.chartSortIndex = $scope.chartSortCopy;
+                if ($scope.chartSortCopy == 1) {
+                    $('.table1').each((index, item) => {
+                        $(item).css({
+                            'width': '100%',
+                            'height': '100%'
+                        })
+                    })
+                } else if ($scope.chartSortCopy == 2) {
+                    $('.table1').each((index, item) => {
+                        $(item).css({
+                            'width': '100%',
+                            'height': '49%'
+                        })
+                    })
+                } else if ($scope.chartSortCopy == 3) {
+                    $('.table1').each((index, item) => {
+                        $(item).css({
+                            'width': '49.6%',
+                            'height': '100%'
+                        })
+                    })
+                } else if ($scope.chartSortCopy == 4) {
+                    $('.table1').each((index, item) => {
+                        $(item).css({
+                            'width': '49.6%',
+                            'height': '49%'
+                        })
+                    })
+                }
+                dblFlag = false;
+            }
+        }
+
         //切换图表排列方式
-        $scope.chartSortIndex = 4;
+        $scope.chartSortCopy = $scope.chartSortIndex = 4;
         $scope.chartSort = (index) => {
-            $scope.chartSortIndex = index;
+            $scope.chartSortCopy = $scope.chartSortIndex = index;
             if ($scope.chartSortIndex == 1) {
                 $scope.chartStyle = { 'width': '100%', 'height': '100%' }
             } else if ($scope.chartSortIndex == 2) {
                 $scope.chartStyle = { 'width': '100%', 'height': '49%' }
             } else if ($scope.chartSortIndex == 3) {
-                $scope.chartStyle = { 'width': '50%-6px', 'height': '100%' }
+                $scope.chartStyle = { 'width': '49.6%', 'height': '100%' }
             } else if ($scope.chartSortIndex == 4) {
-                $scope.chartStyle = { 'width': '50%-6px' }
+                $scope.chartStyle = { 'width': '49.6%', 'height': '49%' }
             }
         }
 
@@ -808,9 +862,11 @@ ajaxData({
                 $scope.countTimeModel = true;
             } else if (param == 4) {  //时间纬度 弹出
                 if (!$scope.queryData.timeLat) {
+                    $scope.haveData2 = false;
                     $scope.queryData.horizonIndexV = '请选择';
                     $scope.queryData.verticalIndexV = '请选择';
                 } else {
+                    $scope.haveData2 = true;
                     //向横轴指标发送数据
                     if ($scope.queryData.analysisType == 1) {
                         $scope.$broadcast('dmsTime', $scope.queryData.timeLat);
@@ -818,6 +874,7 @@ ajaxData({
                         $scope.$broadcast('trend_dmsTime', $scope.queryData.timeLat);
                     }
                     $scope.$broadcast('clearTime');
+                    $scope.haveData3 = false;
                 }
             } else if (param == 5) {
                 // 分析对象弹出
@@ -828,6 +885,7 @@ ajaxData({
                 // 分析类型下拉框 选中处理数据
                 analysisObjFun();
                 $scope.$broadcast('clearTime');
+                $scope.haveData3 = false;
             } else if (param == 7) {
                 // 分析指标弹出
                 if (myAjaxData.config.anlsType == 2 && $scope.queryData.timeLat && $scope.analysNan != 1) {
@@ -865,6 +923,7 @@ ajaxData({
                 $scope.queryData.analysisObjectK = data.k;
                 $scope.queryData.analysisObjectV = data.value;
                 $scope.$broadcast('clearTime');
+                $scope.haveData3 = false;
                 //对标分析-> 取dmsType
                 if ($scope.queryData.analysisType == 3 && data.k != 99) {
                     $scope.$broadcast('bench_dmsType', $scope.queryData.analysisType);
@@ -883,9 +942,11 @@ ajaxData({
                                 }
                             })
                         }
+                        $scope.haveData2 = true;
                     }, 0)
                 } else {
                     $scope.queryData.timeLat = '';
+                    $scope.haveData2 = false;
                     $scope.queryData.horizonIndexV = '请选择';
                     $scope.queryData.verticalIndexV = '请选择';
                     $scope.queryData.analysIndexV = '请选择';
@@ -919,6 +980,7 @@ ajaxData({
             }
             $scope.timeLat = v.ll;
             $scope.$broadcast('clearTime');
+            $scope.haveData3 = false;
             //对标分析-> 取dmsType
             if ($scope.queryData.analysisType == 3) {
                 $scope.$broadcast('bench_dmsType', $scope.queryData.analysisType);
@@ -934,7 +996,7 @@ ajaxData({
             $scope.analysNan = v.data;
         })
 
-        //取消 新增后的回调
+        //取消后的回调
         $scope.analysisObjectModel = false;
         $scope.$on('cancelCallback', () => {
             $scope.analysisObjectModel = false;
@@ -944,12 +1006,40 @@ ajaxData({
             $scope.analysIndexModel = false;
         });
 
-        $scope.$on('addCallback', () => {
+        //新增后的回调
+        $scope.$on('addCallback', (event, v) => {
+            if (v == 'analysisObj') {
+                $scope.haveData1 = true;
+            } else if (v == 'countTime') {
+                $scope.haveData3 = true;
+            } else if (v == 'analysAxisIndex') {
+                $scope.haveData4 = true;
+            } else if (v == 'horizontalAxisIndex') {
+                $scope.haveData5 = true;
+            } else if (v == 'verticalAxisIndex') {
+                $scope.haveData6 = true;
+            }
             $scope.analysisObjectModel = false;
             $scope.countTimeModel = false;
             $scope.horizonIndexModel = false;
             $scope.verticalIndexModel = false;
             $scope.analysIndexModel = false;
         });
+
+        //没有选数据的标志符
+        $scope.$on('noChecked', (event, v) => {
+            if (v == 'analysisObj') {
+                $scope.haveData1 = false;
+            } else if (v == 'countTime') {
+                $scope.haveData3 = false;
+            } else if (v == 'analysAxisIndex') {
+                $scope.haveData4 = false;
+            } else if (v == 'horizontalAxisIndex') {
+                $scope.haveData5 = false;
+            } else if (v == 'verticalAxisIndex') {
+                $scope.haveData6 = false;
+            }
+        });
+
     });
 

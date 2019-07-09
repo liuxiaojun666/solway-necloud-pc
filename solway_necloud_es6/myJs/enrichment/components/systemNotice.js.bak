@@ -8,6 +8,7 @@ app.directive('publicNotice', ['$ocLazyLoad', '$http', '$state', '$stateParams',
         },
         templateUrl: 'tpl/enrichment/components/publicNotice.html' + window.stamp,
         link($scope, $element) {
+            const allowAlertRouterList = ['main','companyManagement','businessManagement']; //允许公告弹框的路由配置
 
             const setPageHeight = () => {
                 $scope.pageH = $(window).height();
@@ -98,7 +99,10 @@ app.directive('publicNotice', ['$ocLazyLoad', '$http', '$state', '$stateParams',
                 });
             }
 
-            $scope.getUnReadNoticeAlert();
+            let currentRouter = $state.current.name;
+            if(allowAlertRouterList.includes(currentRouter)){
+                $scope.getUnReadNoticeAlert();
+            }
 
             //从弹框公告，跳转至历史所有公告
             $scope.toPublicNotice = () =>{

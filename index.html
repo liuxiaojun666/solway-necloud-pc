@@ -22,27 +22,20 @@
                 oReq.open("GET", url, true);
                 oReq.responseType = "blob";
                 oReq.onload = function (oEvent) {
-                    if (oReq.response.size === 0 || oReq.status === 404) {
-                        if (confirm(' 文件为空或不存在，确定继续执行吗？')) __fun();
-                        return callback && callback();
-                    } else __fun();
-
-                    function __fun() {
-                        var _blob = new Blob([oReq.response]);
-                        var reader = new FileReader();
-                        reader.onload = function (event) {
-                            var content = reader.result;
-                            callback && callback(content);
-                        };
-                        reader.readAsText(_blob);
-                    }
+                    var _blob = new Blob([oReq.response]);
+                    var reader = new FileReader();
+                    reader.onload = function (event) {
+                        var content = reader.result;
+                        callback && callback(content);
+                    };
+                    reader.readAsText(_blob);
                 };
                 oReq.send();
             };
             if (!window.localStorage.stamp) {
                 window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
             }
-            download('/stamp.txt', function (str) {
+            download('/stamp.txt?_=' + Math.random(), function (str) {
                 var stamp = str;
                 if (stamp !== window.localStorage.stamp) {
                     if ((location.host.split(':')[1] + '')) return;

@@ -13,6 +13,7 @@ AddbaseDictionary: {
         $scope.verticalCheckData = [];
         parentmyAjaxData.config.fdY.key = '';
         parentmyAjaxData.config.fdY.name = '';
+        $scope.$emit('noChecked', 'verticalAxisIndex');
     })
 
     // 获取纵轴指标的数据
@@ -147,6 +148,7 @@ AddbaseDictionary: {
         $scope.verticalCheckData.splice(index, 1);
         parentmyAjaxData.config.fdY.key = '';
         parentmyAjaxData.config.fdY.name = '';
+        $scope.$emit('noChecked', 'verticalAxisIndex');
     }
 
     //全部删除
@@ -170,6 +172,7 @@ AddbaseDictionary: {
                 })
                 parentmyAjaxData.config.fdY.key = '';
                 parentmyAjaxData.config.fdY.name = '';
+                $scope.$emit('noChecked', 'verticalAxisIndex');
                 $scope.$apply();
             });
         }
@@ -200,6 +203,7 @@ AddbaseDictionary: {
     //获取历史数据
     $scope.$on('haveData', (e, v) => {
         if (!v) {
+            $scope.$emit('noChecked', 'verticalAxisIndex');
             return;
         }
         if (parentmyAjaxData.config.anlsType == 1) {
@@ -218,6 +222,7 @@ AddbaseDictionary: {
                     item.checked = false;
                 })
             }
+            $scope.$emit('addCallback','verticalAxisIndex');
         }
     })
 
@@ -239,6 +244,6 @@ AddbaseDictionary: {
         parentmyAjaxData.config.verticHdata[parentmyAjaxData.config.checkChart].verticItem = $scope.verticItem;
         parentmyAjaxData.config.verticHdata[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
         parentmyAjaxData.config.verticHdata[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope.verticalCheckData));
-        $scope.$emit('addCallback');
+        $scope.$emit('addCallback','verticalAxisIndex');
     }
 });
