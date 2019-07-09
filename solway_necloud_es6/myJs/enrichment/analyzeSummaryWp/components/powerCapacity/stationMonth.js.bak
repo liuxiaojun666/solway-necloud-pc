@@ -1,0 +1,207 @@
+ajaxData(
+    {
+        turbineOPEList: {
+            name: 'GETturbineOPEList',
+            data: {},
+            later: true
+        }
+    }, {
+        __serviceName__: 'powerCapacityStationMonthService',
+    }
+)('powerCapacityStationMonthCtrl', ['$scope', 'powerCapacityStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    $('#timeRange > span').hide();
+    let myChart;
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let {  } = historicalRecord.get().themePowerCapacityStationMonth || {};
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+    // 接口请求
+    $scope.diffGetData = async () => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull();
+        const { dateTime, dateType, dataType } = $scope;
+        if (dateType !== 1) return;
+        if (dataType !== 0) return;
+        $scope.turbineOPEList.getData({
+            dataType: 2,
+            dateType: 2,
+            queryType: 3,
+            date: dateTime.showDate
+        });
+    };
+
+    $scope.turbineOPEList.subscribe(res => {
+        myChart = echarts.init(document.getElementById('scatterChart'));
+        const option = {
+            color: ['rgba(212, 165, 255, 1)'],
+            grid: {
+                left: '40',
+                right: '70',
+                bottom: '40',
+                containLabel: true
+            },
+            tooltip: {
+                showDelay: 0,
+                formatter: function (params) {
+                    if (!params.value.join) {
+                        return params.name + params.value + '以上';
+                    }
+                    return params.data[3] + '<br/>' 
+                            + '运行状态：' + params.data[0] 
+                            + '<br/>'
+                            + '效率：' + params.data[1]
+                },
+            },
+            xAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    // min: 0,
+                    max: 1,
+                    axisLabel: {
+                        // show:false,
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '运行状态',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    // min: 0,
+                    max: 1,
+                    axisLabel: {
+                        // show:false,
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '功率曲线',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: '',
+                    type: 'scatter',
+                    data: res.body,
+                    markLine: {
+                        lineStyle: {
+                            normal: {
+                                type: 'solid',
+                                color:'rgba(255,255,255,0.4)'
+                            }
+                        },
+                        label:{
+                            normal: {
+                                show:true,
+                                position:'end',
+                                color:'rgba(255,255,255,1)',
+                            }
+                        },
+                        data : [
+                            { xAxis: 0.6, name: '正常标志线'},
+                            { xAxis: 0.9, name: '高效标志线'},
+                            {yAxis:0.96, name: '正常标志线'},
+                            {yAxis:0.99, name: '高效标志线'}
+                        ]
+                    }
+                    // markLine: {
+                    //     lineStyle: {
+                    //         normal: {
+                    //             type: 'solid',
+                    //             color:'rgba(255,255,255,0.4)'
+                    //         }
+                    //     },
+                    //     label:{
+                    //         normal: {
+                    //             show:true,
+                    //             position:'start',
+                    //             color:'rgba(255,255,255,1)',
+                    //             formatter: function(params) {
+                    //                 return params.name
+                    //             }
+                    //         }
+                    //     },
+                    //     data : [
+                    //         { xAxis: 0.6,name:'　　　　　　正常'},
+                    //         { xAxis: 0.9,name:'　　　　　　高效'},
+                    //         {yAxis:0.96,name:'正常\n\n\n'},
+                    //         {yAxis:0.99,name:'高效\n'}
+                    //     ]
+                    // }
+                    
+                }
+            ]
+        };
+        myChart.setOption(option, true);
+        const fun = myChart.resize;
+        myChart.resize = async () => {
+            await myAjaxData.timeout(16);
+            fun();
+        };
+        window.addEventListener('resize', myChart.resize);
+    });
+
+    // 数据置空
+    function setDataNull() {
+        $scope.turbineOPEList.res = null;
+    }
+
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+        window.removeEventListener('resize', myChart.resize);
+        $('#timeRange > span').show();
+    });
+});

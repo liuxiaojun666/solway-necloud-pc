@@ -1,0 +1,199 @@
+
+ajaxData({
+    roleList:{
+        name:'GETroleList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    stationData:{
+        name:'GETstationData',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    authorityDetail:{
+        name:'GETauthorityDetail',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    authoritySave:{
+        name:'POSTauthoritySave',
+        data: {},
+        later: true,
+        saveParam:false,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'authorizeModelService',
+})('authorizeModelCtrl', ['$scope', 'authorizeModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    //角色信息
+    const getRoleData = () =>{
+        $scope.roleList.getData({
+            depId: 0
+        }).then(res => {
+            if (res.key == "1") {
+                $scope.roles = res.data;
+            }
+            getStationData();
+        });
+    }
+
+    //电站分组，电站信息
+    const getStationData = () =>{
+        $scope.stationData.getData({
+        }).then(res => {
+            if (res.key == "1") {
+                $scope.groupList = res.data.groupStations;
+                $scope.stations = res.data.stations;
+            }
+            getDetailInfo();
+        });
+    }
+    //获取详情信息
+    const getDetailInfo = () =>{
+        $scope.newList = {};
+        $scope.authorityDetail.getData({
+            id:$scope.id
+        }).then(res=>{
+            if(res.key == 1){
+                $scope.data = res.data;
+                if(res.data.aursrRoles){
+                    $scope.aursrRoles = res.data.aursrRoles;
+                    for(let i=0;i<$scope.aursrRoles.length;i++){
+                        let curItem = $scope.aursrRoles[i].roleIdList;
+                        $scope.aursrRoles[i].serNum = i;
+                        for(let j=0;j<curItem.length;j++){
+                            if(curItem[j].checked == '1'){
+                                $scope.aursrRoles[i].roleId = Number(curItem[j].roleId);
+                            }
+                        }
+                    }
+                    $scope.count = $scope.aursrRoles.length;
+    
+                    $scope.newList = angular.copy($scope.aursrRoles[0]) ;
+                    $scope.newList.aursrs.map(v=>(v.checked = 0));
+                    $scope.newList.authUserRoleGroupStationRels.map(v=>(v.checked = 0))
+                    $scope.newList.roleIdList.map(v=>(v.checked = 0))
+                    
+                }else{
+                    $scope.count = 0;
+                    $scope.newList.aursrs = angular.copy($scope.stations);
+                    $scope.newList.authUserRoleGroupStationRels = angular.copy($scope.groupList)
+                    $scope.newList.authUserRoleGroupStationRels.map(v=>(v.checked = 0))
+                    $scope.newList.roleIdList = angular.copy($scope.roles);
+                }
+            }
+        })
+    }
+
+    //初始
+    $scope.$on('broadAuthorizeModel',function(e,data){
+        $scope.depId = data.depId;
+        $scope.id = data.id;
+        $scope.aursrRoles = [];
+        getRoleData();
+    });
+
+    //增加一行
+    $scope.addLine = () =>{
+        $scope.aursrRoles.push({'roleId':106,'roleIdList':angular.copy($scope.newList.roleIdList),'aursrs':angular.copy($scope.newList.aursrs),'authUserRoleGroupStationRels':angular.copy($scope.newList.authUserRoleGroupStationRels),'serNum':$scope.count});
+        $scope.count++;
+    }
+
+    //删除一行
+    $scope.deleteLine = serNum =>{
+        for(let i=0,list=$scope.aursrRoles;i<list.length;i++){
+            if(list[i].serNum == serNum){
+                $scope.aursrRoles.splice(i,1)
+            }
+        }
+    }
+
+    // //选择电站组
+    $scope.checkGroup = serNum =>{
+        const currentChecked = [];
+        $("input[name=group"+serNum+"]:checked").map((index,v)=>{
+            currentChecked.push(Number(v.value))
+        })
+        for(let i=0;i<$scope.aursrRoles.length;i++){
+            if($scope.aursrRoles[i].serNum == serNum){
+                let currentGroup = $scope.aursrRoles[i].authUserRoleGroupStationRels;
+                for(let j=0;j<currentGroup.length;j++){
+                    if(currentChecked.includes(currentGroup[j].id)){
+                        $scope.aursrRoles[i].authUserRoleGroupStationRels[j].checked = 1;
+                    }else{
+                        $scope.aursrRoles[i].authUserRoleGroupStationRels[j].checked = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    // //选择电站
+    $scope.checkStation = serNum =>{
+        const currentChecked = [];
+        $("input[name=station"+serNum+"]:checked").map((index,v)=>{
+            currentChecked.push(Number(v.value))
+        })
+        for(let i=0;i<$scope.aursrRoles.length;i++){
+            if($scope.aursrRoles[i].serNum == serNum){
+                let currentGroup = $scope.aursrRoles[i].aursrs;
+                for(let j=0;j<currentGroup.length;j++){
+                    if(currentChecked.includes(currentGroup[j].id)){
+                        $scope.aursrRoles[i].aursrs[j].checked = 1;
+                    }else{
+                        $scope.aursrRoles[i].aursrs[j].checked = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    //保存
+    $scope.save = () =>{
+        let aursrRoles = [];
+        for(let i=0;i<$scope.aursrRoles.length;i++){
+            let roleid = $scope.aursrRoles[i].roleId+'';
+            let groupArr = [],stationArr = [];
+            $scope.aursrRoles[i].authUserRoleGroupStationRels.map((v,i)=>{
+                if(v.checked == 1) groupArr.push({'groupId':v.id+''})
+            })
+            $scope.aursrRoles[i].aursrs.map((v,i)=>{
+                if(v.checked == 1) stationArr.push({'pstationId':v.id+'','flag':'0'})
+            })
+            aursrRoles.push({'roleid':roleid+'','aursrs':stationArr,'authUserRoleGroupStationRels':groupArr})
+        }
+        const data = $scope.data;
+        let formData = {'id':data.id+'','phone':data.phone,'realname':data.realname,'aursrRoles':aursrRoles};
+
+        $scope.authoritySave.getData({data: JSON.stringify(formData)}).then(res=>{
+            if(res.key==2){
+                toaster.pop('success', '', '保存成功');
+                $scope.$emit('addCallback');
+            } else{
+                toaster.pop('error', '', '保存失败');
+            }
+        });
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+        $('.dropdown-one').hide();
+    }
+
+    $timeout(()=>{
+        $('.authorizeModelTpl').on('click', '.toggle-one', function(event) {
+            let displayFlag = $(this).next('.dropdown-one').css('display')
+            if(displayFlag === 'none'){
+                $('.dropdown-one').hide();
+                $(this).next('.dropdown-one').show();
+            }else{
+                $(this).next('.dropdown-one').hide();
+            }
+        });
+    },0);
+});

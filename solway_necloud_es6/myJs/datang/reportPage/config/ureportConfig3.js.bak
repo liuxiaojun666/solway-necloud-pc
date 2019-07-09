@@ -1,0 +1,74 @@
+ajaxData({
+    pageList1: {
+        name: 'GETopReportLaySelectByCom',
+        data: {
+            useSt: 0
+        }
+    },
+    update: {
+        name: 'opReportLayUpdateByCom',
+        data: {},
+        later: true
+    }
+}, {})('ureportConfig3Ctrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+
+    // 编辑对应tab 的 内容
+    $scope.edit = index => $scope.pageList1.getData({ useSt: index });
+
+    // 列表处理
+    $scope.pageList1.getDataCallback = async (success, res) => {
+        if (!success) return;
+        await myAjaxData.timeout(0);
+        $scope.pageList1.res.body = res.body.map(v => ({
+            ...v,
+            week: v.reportType == '3' ? v.sendDate ? v.sendDate.substr(-1) : v.startDate.substr(-1) : null,
+            dateArr: getDateArr(v.reportType, v.sendDate || v.startDate),
+            __bj: v.sendDate
+        }));
+        $scope.$apply();
+    };
+
+    // 日期组件 更新回调
+    $scope.dateUpdated = async (dateStr, dateArr, attrs) => {
+        await myAjaxData.timeout(0);
+        $scope.pageList1.res.body[attrs.index].sendDate = dateStr;
+        const obj = $scope.pageList1.res.body[attrs.index];
+        const tempArr = dateArr.reverse();
+        tempArr[5] = obj.reportType === 3 ? obj.week : '?';
+        $scope.pageList1.res.body[attrs.index].mailCron = tempArr.map(v => v === '' ? '*' : v).join(' ');
+    };
+
+    // 更新 保存
+    $scope.saveOrSubmit = () => {
+        $scope.update.getData($scope.pageList1.res.body.map(v => ({ 
+            id: v.id, 
+            reportType: v.reportType, 
+            sendDate: (v.reportType === 3 ? v.sendDate + ',' + v.week : v.sendDate), 
+            mailAble: v.mailAble ? 1 : 0
+        }))).then(res => {
+            if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
+            promptObj("success", "", res.msg);
+            $scope.pageList1.getData({});
+        });
+    };
+
+    // 日期组件 传入格式处理
+    function getDateArr(reportType, startDate) {
+        const func = str => str.split('-').join().split(' ').join().split(':').join().split(',');
+        if (reportType == '1') {
+            if (startDate) return [null, ...func(startDate), null];
+            else return [null, '01', '01', '00', '00', null];
+        } else if (reportType == '2') {
+            if (startDate) return [null, null, ...func(startDate), null];
+            else return [null, null, '01', '00', '00', null];
+        } else if (reportType == '4') {
+            if (startDate) return [null, null, null, ...func(startDate), null];
+            else return [null, null, null, '00', '00', null];
+        } else if (reportType == '3') {
+            if (startDate) return [null, null, null, ...func(startDate.substr(0, startDate.length - 2)), null];
+            else return [null, null, null, '00', '00', null];
+        }
+    }
+
+
+});

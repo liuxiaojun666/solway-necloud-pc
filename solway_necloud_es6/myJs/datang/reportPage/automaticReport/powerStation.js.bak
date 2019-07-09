@@ -1,0 +1,87 @@
+ajaxData({
+    tab: {
+        name: 'GETreportShowTab',
+        data: {},
+        later: true
+    },
+    view: {
+        name: 'GETreportShowView',
+        data: {},
+        later: true
+    },
+    checkSubscribe: {
+        name: 'GETreportShowUserCheckSubscribe',
+        data: {},
+        later: true
+    },
+    subscribe: {
+        name: 'reportShowUserDoSubscribe',
+        data: {},
+        later: true
+    }
+}, {})('automaticReport2Ctrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    $scope.dateTime1 = new Date; // 年 日历
+    $scope.dateTime2 = new Date; // 月 日历
+    $scope.dateTime3 = new Date; // 周 日历
+    $scope.dateTime4 = new Date(+new Date - 1000 * 60 * 60 * 24); // 日 日历
+
+    // 切换电站 刷新数据
+    $scope.switchPowerCallback = () => $scope.tab.getData({ useSt: 1 });
+
+    // 默认操作 选择第一个tab 第一个子tab
+    $scope.tab.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.changeTab1(0);
+    };
+
+    // 切换 第一层 tab
+    $scope.changeTab1 = index => {
+        $scope.timeRange = index;
+        $scope.checkSubscribe.getData({ tabId: $scope.tab.res.body[index].id});
+        $scope.changeTab2(0);
+    };
+
+    // 切换 第二次 tab
+    $scope.changeTab2 = index => {
+        if (index === void 0) return;
+        $scope.tabIndex = index;
+        $scope.timeType = ['ACCUM', 'YEAR', 'MONTH', 'WEEK', 'DAY'][$scope.tab.res.body[$scope.timeRange].reportType];
+        $scope.dateStr = getDateStr();
+        const {timeType, dateStr} = $scope;
+        $scope.view.getData({
+            timeType,
+            subTabId: $scope.tab.res.body[$scope.timeRange].subTabs[index].id,
+            style: 0,
+            useSt: 1,
+            dateStr
+        });
+    };
+
+    // 日期更新后
+    $scope.dateUpdated = () => {
+        if (!$scope.dateStr) return;
+        $scope.changeTab2($scope.tabIndex);
+    };
+
+    // view 处理
+    $scope.view.getDataCallback = (success, res) => {
+        if (!success) return;
+        document.getElementById('automaticReportView').innerHTML = res;
+    };
+
+    // 订阅操作 后处理
+    $scope.subscribe.getDataCallback = (success, res) => {
+        if (!success) return;
+        if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
+        promptObj("success", "", res.msg);
+        $scope.checkSubscribe.getData({});
+    };
+
+    function getDateStr() {
+        const {timeType} = $scope;
+        if (timeType === 'YEAR') return $scope.dateTime1.showDate;
+        if (timeType === 'MONTH') return $scope.dateTime2.showDate;
+        if (timeType === 'WEEK') return $scope.dateTime3.weekStart + ',' + $scope.dateTime3.weekEnd;
+        if (timeType === 'DAY') return $scope.dateTime4.showDate;
+    }
+});

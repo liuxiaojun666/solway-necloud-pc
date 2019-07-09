@@ -1,0 +1,1068 @@
+ajaxData({
+    // 给默认选中电站
+    getuserAuthHandleSetSTClass: {
+        name: 'GETUserAuthHandleSetSTClass',
+        data: {},
+        later: true
+    },
+    getCurrentInfoNew: {
+        name: 'GETgetCurrentInfoNew',
+        data: {},
+        later: true
+    },
+    aerographDetail: {
+        name: 'GETaerographDetail',
+        data: {},
+        later: true
+    },
+    aerographList: {
+        name: 'GETaerographList',
+        data: {},
+        later: true
+    },
+    aerographListAround: {
+        name: 'GETaerographListAround',
+        data: {},
+        later: true
+    },
+    updateAerograph: {
+        name: 'POSTupdateAerograph',
+        data: {},
+        later: true
+    },
+    interruptNoteDetail: {
+        name: 'GETinterruptNoteDetail',
+        data: {},
+        later: true
+    },
+    interruptNoteSave: {
+        name: 'POSTinterruptNoteSave',
+        data: {},
+        later: true
+    },
+    powerStationDetail: {
+        name: 'GETpowerStationDetail',
+        data: {},
+        later: true
+    },
+    updateNoteSave: {
+        name: 'POSTupdateNoteSave',
+        data: {},
+        later: true
+    },
+    initialPowerDetail: {
+        name: 'GETinitialPowerDetail',
+        data: {},
+        later: true
+    },
+    initialPowerSave: {
+        name: 'POSTinitialPowerSave',
+        data: {},
+        later: true
+    },
+    videoConfigureList: {
+        name: 'GETvideoConfigureList',
+        data: {},
+        later: true
+    },
+    videoConfigureDelete: {
+        name: 'POSTvideoConfigureDelete',
+        data: {},
+        later: true
+    },
+    restrictPowerList: {
+        name: 'GETrestrictPowerList',
+        data: {},
+        later: true
+    },
+    selectDevicesByStation: {
+        name: 'GETselectDevicesByStation',
+        data: {},
+        later: true
+    },
+    restrictPowerSave: {
+        name: 'POSTrestrictPowerSave',
+        data: {},
+        later: true
+    },
+    restrictPowerDelete: {
+        name: 'POSTrestrictPowerDelete',
+        data: {},
+        later: true
+    },
+    overhaulList: {
+        name: 'GEToverhaulList',
+        data: {},
+        later: true
+    },
+    overhaulSave: {
+        name: 'POSToverhaulSave',
+        data: {},
+        later: true
+    },
+    overhaulDelete: {
+        name: 'POSToverhaulDelete',
+        data: {},
+        later: true
+    },
+    cleanTimeList: {
+        name: 'GETcleanTimeList',
+        data: {},
+        later: true
+    },
+    cleanTimeSave: {
+        name: 'POSTcleanTimeSave',
+        data: {},
+        later: true
+    },
+    cleanTimeDelete: {
+        name: 'POSTcleanTimeDelete',
+        data: {},
+        later: true
+    },
+    assessmentList: {
+        name: 'GETassessmentList',
+        data: {},
+        later: true
+    },
+    assessmentUpdate: {
+        name: 'POSTassessmentUpdate',
+        data: {},
+        later: true
+    },
+    planPowerList: {
+        name: 'GETplanPowerList',
+        data: {},
+        later: true
+    },
+    planPowerDelete: {
+        name: 'POSTplanPowerDelete',
+        data: {},
+        later: true
+    }
+
+
+}, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, toaster, $http) => {
+
+    $scope.moduleName = '运行配置';
+
+    $scope.$on('broadcastSwitchStation', (e, data) => {
+        $scope.initPageParams();
+    })
+
+    $scope.menuActive = id => {
+        $scope.activeMenuBtn = id;
+        document.getElementById(id).scrollIntoView()
+    }
+
+    $scope.menuActive('a')
+
+    // 电站 信息  对比
+    async function diffStationInfo() {
+        if (!myAjaxData.currentStationData.currentSTID && myAjaxData.currentStationData.currentSTID !== 0) { // 没有选择过电站
+            const res = await $scope.getuserAuthHandleSetSTClass.getData({});
+            if (res.result === false) {
+                alert('没有选择任何 公司 或 电站，请联系管理员');
+                return window.location.href = '/index.html';
+            }
+
+            const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '00', isGroup: 1 });
+            myAjaxData.setCurrentStationData(stationInfo);
+
+            return window.location.reload();
+        }
+    }
+
+
+    $scope.initPageParams = async () => {
+        $scope.ifStationFlag = true;
+
+        const stationInfo = await $scope.getCurrentInfoNew.getData({ currentView: '03', isGroup: 0 });
+        $scope.stClass = stationInfo.currentSTClass;
+        if (stationInfo.currentType === null) {
+            await diffStationInfo();
+        } else if (stationInfo.currentType === 1 || stationInfo.currentType === 2) {
+            $scope.ifStationFlag = false;
+            return false;
+        }
+
+        $scope.pstationid = stationInfo.currentSTID;
+        $scope.currentStationName = stationInfo.currentDataName;
+        getAerographDetail();
+        getInterruptDetailData();
+        getNoteDetailData();
+        getInitialPowerDetailData();
+        $scope.searchVideo();
+        $scope.getRestrictPowerData();
+
+        $scope.changeDeviceType(2);
+
+        getOverhaulList();
+        getCleanTimeList();
+        getAssessmentList();
+        getPlanPowerList();
+
+        //状态均未编辑
+        $scope.aerographEdit = false;
+        $scope.interruptEditDisabled = true;
+        $scope.noteDisabled = true;
+        $scope.initialPowerEditDisabled = true;
+        $scope.EditVideoModel = false;
+        $scope.addLineRestrict = false;
+        $scope.addLineOverhaul = false;
+        $scope.assessmentDisabled = true;
+
+    }
+
+    $scope.initPageParams();
+
+    // $('.workingConfigure').on('click','.menu-btn',function(){
+    //     $(this).siblings().removeClass('active-btn');
+    //     $(this).addClass('active-btn');
+    //     let offsetTop = $(this).offset().top;
+    //     document.getElementById("e1").scrollIntoView()
+    // });
+
+    /****************************************  气象仪   *********************************************** */
+
+    //气象仪 编辑
+    $scope.aerographEditShow = () => {
+        $scope.aerographEdit = true;
+        getAerographDetail();
+    }
+
+    //气象仪详情
+    const getAerographDetail = () => {
+        $scope.aerographDetail.getData({
+            pstationid: $scope.pstationid
+        }).then(res => {
+            $scope.aerographData = res;
+            $scope.aerographEditId = res.id;
+            $scope.weatherdetail = res.weatherdetail == ''? 0 : res.weatherdetail;
+            $scope.isld = res.isld == null ? 1 : res.isld;
+
+            $scope.isborrow = res.isborrow;
+            if ($scope.isborrow == 1) { //是否引用
+                $scope.borrowpstationid = res.borrowpstationid;
+                $scope.aerographId = res.borrowdeviceid;
+                getAeroGraphAroundData();
+            } else {
+                $scope.aerographSelfId = res.borrowdeviceid;
+                getCurrentAerographList();
+            }
+
+        });
+    }
+
+    //当前电站的气象仪列表
+    const getCurrentAerographList = () => {
+        $scope.aerographList.getData({
+            pstationid: $scope.pstationid,
+            devicetype: 5
+        }).then(res => {
+            $scope.aerographListData = res;
+            if($scope.aerographListData.length == 1) $scope.aerographSelfId = res[0].serialnumber;
+        });
+    }
+
+    //radio 是否引用
+    $scope.checkQuoteRadio = type => {
+        $scope.isborrow = type;
+        if (type == 1) {
+            getAeroGraphAroundData();
+        } else {
+            getCurrentAerographList();
+        }
+    }
+
+    //查看周边可引用的气象仪列表
+    const getAeroGraphAroundData = () => {
+        $scope.aerographListAround.getData({
+            'powerStationId': $scope.pstationid
+        }).then(res => {
+            if (res && res.list) {
+                $scope.aroundData = res.list;
+            } else {
+                $scope.aroundData = [];
+            }
+        });
+    }
+
+    //radio 选择气象仪类型
+    $scope.aerographTypeRadio = type => {
+        $scope.weatherdetail = type;
+    }
+
+    //radio 是否有累积辐射量
+    $scope.ifTotalRadiationRadio = type => {
+        $scope.isld = type;
+    }
+
+    //radio 选择周边可引用气象仪
+    $scope.aerographQuoteWhich = item => {
+        $scope.borrowpstationid = item.psId;
+        $scope.aerographId = item.aerographId;
+    }
+
+    //保存气象仪配置信息
+    $scope.saveAerograph = () => {
+        if ($scope.saveAerographLoading) return;
+        $scope.saveAerographLoading = true;
+        let formData = {
+            isborrow: $scope.isborrow,
+            weatherdetail: $scope.weatherdetail,
+            pstationid: $scope.pstationid,
+            id: $scope.aerographEditId,
+            isld: $scope.isld
+        }
+        if ($scope.isborrow == 1) {
+            formData['aroundid'] = 'on';
+            if (!$scope.aerographId) {
+                toaster.pop('error', '', '请选择要引用的气象仪');
+                $scope.saveAerographLoading = false;
+                return;
+            }
+            formData['borrowpstationid'] = $scope.borrowpstationid;
+            formData['borrowdeviceid'] = $scope.aerographId;
+        } else {
+            formData['borrowpstationid'] = $scope.pstationid;
+            formData['borrowdeviceid'] = $scope.aerographSelfId;
+        }
+        $scope.updateAerograph.getData(formData).then(res => {
+            $scope.saveAerographLoading = false;
+
+            if (res.type == 'success') {
+                toaster.pop('success', '', '保存成功');
+                $scope.aerographEdit = false;
+                getAerographDetail();
+            } else {
+                toaster.pop('error', '', '保存失败')
+            }
+        });
+    }
+
+    /****************************************  消息及日志   *********************************************** */
+
+    //中断详情
+    const getInterruptDetailData = () => {
+        let arr = $("input[name='interruptNoteCheckbox']");
+        $scope.interruptNoteDetail.getData({ pstationid: $scope.pstationid }).then(res => {
+            if (res.key == 0 && res.data) {
+                const data = res.data;
+                $scope.timeOffset = data.leadvalue;
+                $scope.deviceTimeoutValue = data.deviceTimeoutValue ? data.deviceTimeoutValue : 380;
+                $scope.stationTimeoutValue = data.stationTimeoutValue ? data.stationTimeoutValue : 250;
+                $scope.isrectip = data.isrectip;
+                for (let i = 0; i < arr.length; i++) {
+                    if ($scope.isrectip.includes(arr[i].value)) {
+                        arr[i].checked = true;
+                    } else {
+                        arr[i].checked = false;
+                    }
+                }
+            }
+        });
+    }
+    //通讯中断消息  编辑
+    $scope.interruptEditShow = () => {
+        $scope.interruptEditDisabled = false;
+    }
+
+    //取消
+    $scope.interruptEditCancel = () => {
+        getInterruptDetailData();
+        $scope.interruptEditDisabled = true;
+    }
+
+    //通讯中断消息  保存
+    $scope.saveInterruptNote = () => {
+        if ($scope.saveInterruptLoading) return;
+        // $scope.saveInterruptLoading = true;
+
+        let isrectip = [];
+        $("input[name='interruptNoteCheckbox']").each(function (i) {
+            if ($(this).prop('checked')) {
+                isrectip.push($(this).val())
+            }
+        });
+        $solway.confirm({ message: '该设置将改变中断消息的生成延时配置，确定要进行设置保存吗？确定保存后将于第二日生效。' }, (e) => {
+            $scope.interruptNoteSave.getData({
+                pstationid: $scope.pstationid,
+                isrectip: $scope.stClass == '02' ? null : isrectip.join(","),
+                leadvalue: $scope.stClass == '02'? null : $scope.timeOffset,
+                deviceTimeoutValue: $scope.deviceTimeoutValue,
+                stationTimeoutValue: $scope.stationTimeoutValue
+            }).then(res => {
+                // $scope.saveInterruptLoading = false;
+                if (res.key == 0) {
+                    toaster.pop('success', '', '保存成功');
+                    $scope.interruptEditCancel();
+                } else {
+                    toaster.pop('error', '', res.msg)
+                }
+            });
+        });
+    }
+
+    //消息详情
+    const getNoteDetailData = () => {
+        $scope.powerStationDetail.getData({ id: $scope.pstationid }).then(res => {
+            $("input[name='noteConfigure'][value='" + res.ismessage + "']").prop("checked", true);
+        });
+    }
+    //消息配置
+    $scope.noteEditShow = () => {
+        $scope.noteDisabled = false;
+    }
+
+    //消息配置 取消
+    $scope.noteEditCancel = () => {
+        $scope.noteDisabled = true;
+        getNoteDetailData();
+    }
+
+    //消息配置  保存
+    $scope.saveNote = () => {
+        if ($scope.saveNoteLoading) return;
+
+        $scope.saveNoteLoading = true;
+        let ismessage = $("input[name='noteConfigure']:checked").val();
+        $scope.updateNoteSave.getData({
+            id: $scope.pstationid,
+            ismessage: ismessage
+        }).then(res => {
+            $scope.saveNoteLoading = false;
+
+            if (res == 1) {
+                toaster.pop('success', '', '保存成功');
+                $scope.noteEditCancel();
+            } else {
+                toaster.pop('error', '', '保存失败')
+            }
+        });
+    }
+
+    /****************************************  初始电量   *********************************************** */
+
+    $scope.endDate = new Date('2099');
+
+    //初始电量详情
+    const getInitialPowerDetailData = async () => {
+        $scope.formData = {};
+        $scope.temporaryObj = {};
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+
+        $scope.initialPowerDetail.getData({ pstationid: $scope.pstationid }).then(data => {
+            $scope.initialPowerData = data;
+
+            $scope.temporaryObj['expirydate'] = data.expirydate ? new Date(data.expirydate) : new Date();
+            $scope.temporaryObj['endDate'] = data.endDate ? new Date(data.endDate) : new Date();
+            if (!data.expirydate) $scope.temporaryObj['expirydate'].showDate = '';
+            if (!data.endDate) $scope.temporaryObj['endDate'].showDate = '';
+        });
+    }
+    $scope.initialPowerEditShow = () => {
+        $scope.initialPowerEditDisabled = false;
+    }
+
+    //取消
+    $scope.cancelInitialPower = () => {
+        $scope.initialPowerEditDisabled = true;
+        getInitialPowerDetailData();
+    }
+
+    //保存
+    $scope.saveInitialPower = () => {
+        if ($scope.saveInitPowerLoading) return;
+        if (!$solway.formValidation($scope.initialPowerData, '.initial-power', toaster)) return;//校验非空
+
+        $scope.initialPowerData['expirydate'] = $scope.temporaryObj['expirydate'] ? $scope.temporaryObj['expirydate'].showDate : '';
+        $scope.initialPowerData['endDate'] = $scope.temporaryObj['endDate'] ? $scope.temporaryObj['endDate'].showDate : '';
+        $scope.initialPowerData['flag'] = $("input[name='ifFlag']:checked").val();
+
+        $scope.saveInitPowerLoading = true;
+
+        $scope.initialPowerSave.getData($scope.initialPowerData).then(res => {
+            $scope.saveInitPowerLoading = false;
+
+            if (res.type == 'success') {
+                toaster.pop('success', '', '保存成功');
+                $scope.cancelInitialPower();
+            } else {
+                toaster.pop('error', '', '保存失败')
+            }
+        });
+    }
+
+    /****************************************  视频监控点   *********************************************** */
+
+    $scope.columnVideo = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'videoCheckboxName',
+            render(text, record, index) {
+                return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="videoCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+            }
+        }, {
+            title: '电站名称',
+            // width:'25%',
+            dataIndex: 'stName',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '监控点名称',
+            dataIndex: 'monitorPointName',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '监控点编号',
+            dataIndex: 'monitorPointNum',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '监控点IP',
+            dataIndex: 'monitorPointIP',
+            align: 'center'
+        }, {
+            title: '监控点源地址',
+            dataIndex: '',
+            align: 'center',
+            render(text, record, index) {
+                return '<span style="display: block;text-overflow: ellipsis;overflow: hidden;" title="' + record.monitorPointSource + '">' + record.monitorPointSource + '</span>';
+            }
+        }, {
+            title: '监控点目标地址',
+            dataIndex: '',
+            align: 'center',
+            render(text, record, index) {
+                return '<span style="display: block;text-overflow: ellipsis;overflow: hidden;" title="' + record.monitorPointDest + '">' + record.monitorPointDest + '</span>';
+            }
+        }, {
+            title: '监控点排序',
+            dataIndex: 'monitorPointSeq',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
+    $scope.searchVideo = () => {
+        $scope.videoConfigureList.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            stId: $scope.pstationid,
+            monitorPointName: $scope.monitorPointName,
+            monitorPointIP: $scope.monitorPointIP
+        })
+    }
+
+    //新增
+    $scope.newVideo = () => {
+        $scope.EditVideoModel = true;
+        $scope.$broadcast('broadAddVideo', { 'id': '' });
+    }
+
+    const deleteVideo = ids => {
+        $http({
+            method: "POST",
+            url: "PVideoConfig/deleteVideoConfig.htm",
+            params: {
+                stId: $scope.pstationid,
+                ids: ids
+            }
+        }).success(function (res) {
+            if (res.key == 0) {
+                toaster.pop('success', '', '删除成功');
+                $scope.searchVideo();
+            } else {
+                toaster.pop('error', '', '删除失败')
+            }
+        });
+    }
+
+    $scope.trClickVideo = (item, index, event) => {
+        if (event.target.className.includes('icon-bianji-copy')) {
+            $scope.EditVideoModel = true;
+            $scope.$broadcast('broadAddVideo', { 'id': item.id, 'detail': item });
+        } else if (event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此视频配置？' }, () => {
+                deleteVideo([item.id])
+            });
+        }
+    };
+
+
+    //批量删除
+    $scope.delBatch = () => {
+        let ids = [];
+        $("input[name='videoCheckboxName']:checked").each(function () {
+            ids.push(this.dataset.id);
+        });
+        if (ids.length == 0) {
+            alert("请选择删除的数据");
+            return;
+        }
+        $solway.confirm({ message: '确定删除所选的视频配置？' }, () => {
+            deleteVideo(ids)
+        });
+
+    }
+
+    //配置编辑成功回调
+    $scope.$on('saveVideoCallback', () => {
+        $scope.EditVideoModel = false;
+        $scope.searchVideo();
+    });
+
+
+    /****************************************  限电配置   *********************************************** */
+
+    $scope.getDeviceTypeName = { 2: '逆变器' };
+    $scope.deviceTypeList = [{ name: '', deviceType: '', id: 1 }, { name: '逆变器', deviceType: '2', id: 2 }]
+
+    $scope.changeDeviceType = deviceType => {
+        $scope.selectDevicesByStation.getData({
+            stid: $scope.pstationid,
+            deviceType: deviceType,
+        }).then(res => {
+            const selectAllArr = [{ deviceType: "", id: '0', name: "", serialNumber: '' }]
+            $scope.currentDeviceList = selectAllArr.concat(res);
+        });
+    }
+
+    // $scope.restrictEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
+    $scope.restrictStartDate = new Date();
+    $scope.restrictEndDate = new Date();
+    $scope.restrictEndDate.showDate = ''
+    $scope.getRestrictPowerData = () => {
+        $scope.restrictPowerList.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            stid: $scope.pstationid
+        }).then(res => {
+            if (res.code == 0 && res.body && res.body.data) {
+                $scope.restrictPowerListData = res.body.data;
+
+                for (let i = 0; i < $scope.restrictPowerListData.length; i++) {
+                    $scope.restrictPowerListData[i]['disabled'] = true;
+                    $scope.restrictPowerListData[i]['startDate'] = new Date($scope.restrictPowerListData[i]['startDate']);
+                    if ($scope.restrictPowerListData[i]['endDate']) {
+                        $scope.restrictPowerListData[i]['endDate'] = new Date($scope.restrictPowerListData[i]['endDate']);
+                    } else {
+                        $scope.restrictPowerListData[i]['noEndDate'] = new Date();
+                        $scope.restrictPowerListData[i]['noEndDate'].showDate = '';
+                    }
+                }
+            }
+
+        });
+    }
+
+    //编辑
+    $scope.editRestrict = item => {
+        if ($scope.restrictEditActive) {//若当前清洗为编辑状态，先操作完，再进行下一个
+            toaster.pop('error', '', '当前仍有编辑状态，请先处理，再进行下一个！');
+            return;
+        }
+        $scope.restrictEditActive = true;
+        for (let i = 0; i < $scope.restrictPowerListData.length; i++) {
+            if ($scope.restrictPowerListData[i].id == item.id) {
+                $scope.restrictPowerListData[i]['disabled'] = false;
+            }
+        }
+    }
+
+    //取消
+    $scope.cancleRestrict = item => {
+        $scope.restrictEditActive = false;
+        for (let i = 0; i < $scope.restrictPowerListData.length; i++) {
+            if ($scope.restrictPowerListData[i].id == item.id) {
+                $scope.restrictPowerListData[i]['disabled'] = true;
+            }
+        }
+    }
+
+    //编辑保存
+    $scope.saveRestrict = (item, type) => {
+        if ($scope.saveTimeLoading) return;
+        $scope.saveTimeLoading = true;
+        let formData = {}
+        if (type == 'add') {
+            formData['id'] = null;
+            formData['stid'] = $scope.pstationid;
+            formData['eqid'] = $scope.restrictDeviceId;
+            formData['dtype'] = $scope.restrictDeviceType;
+            formData['startDate'] = $scope.restrictStartDate.showDate;
+            formData['endDate'] = $scope.restrictEndDate.showDate;
+        } else {
+            delete item.createUser;
+            delete item.createTime;
+            delete item.disabled;
+            delete item.modifyTime;
+            item.startDate = item.startDate.showDate;
+            item.endDate = item.endDate ? item.endDate.showDate : (item.noEndDate.showDate);
+            delete item.noEndDate;
+            formData = item;
+        }
+
+        if (!formData.startDate) {
+            toaster.pop('error', '', '限电开始时间必填！');
+            $scope.saveTimeLoading = false;
+            return;
+        }
+        $scope.restrictPowerSave.getData(formData).then(res => {
+            $scope.saveTimeLoading = false;
+
+            if (res.code == 0) {
+                $scope.restrictEditActive = false;
+                toaster.pop('success', '', '保存成功');
+                $scope.addLineRestrict = false;
+                $scope.getRestrictPowerData();
+            } else {
+                toaster.pop('error', '', '保存失败');
+            }
+        });
+    }
+
+    //删除
+    $scope.deleteRestrict = id => {
+        $solway.confirm({ message: '确定删除此限电配置？' }, () => {
+            $scope.restrictPowerDelete.getData({ id: id }).then(res => {
+                if (res.code == 0) {
+                    toaster.pop('success', '', '删除成功');
+                    $scope.getRestrictPowerData();
+                } else {
+                    toaster.pop('error', '', '删除失败');
+                }
+            });
+        });
+    }
+
+    /****************************************  检修配置   *********************************************** */
+
+    $scope.overhaulStartDate = new Date();
+    $scope.overhaulEndDate = new Date();
+    $scope.overhaulEndDate.showDate = '';
+    const getOverhaulList = () => {
+        $scope.overhaulList.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            stid: $scope.pstationid
+        }).then(res => {
+            if (res.code == 0 && res.body && res.body.data) {
+                $scope.overhaulListData = res.body.data;
+                for (let i = 0; i < $scope.overhaulListData.length; i++) {
+                    $scope.overhaulListData[i]['disabled'] = true;
+                    $scope.overhaulListData[i]['startDate'] = new Date($scope.overhaulListData[i]['startDate']);
+                    if ($scope.overhaulListData[i]['endDate']) {
+                        $scope.overhaulListData[i]['endDate'] = new Date($scope.overhaulListData[i]['endDate']);
+                    } else {
+                        $scope.overhaulListData[i]['noEndDate'] = new Date();
+                        $scope.overhaulListData[i]['noEndDate'].showDate = '';
+                    }
+                }
+            }
+
+        });
+    }
+
+    //编辑
+    $scope.editOverhaul = item => {
+        if ($scope.overhaulEditActive) {//若当前清洗为编辑状态，先操作完，再进行下一个
+            toaster.pop('error', '', '当前仍有编辑状态，请先处理，再进行下一个！');
+            return;
+        }
+        $scope.overhaulEditActive = true;
+        for (let i = 0; i < $scope.overhaulListData.length; i++) {
+            if ($scope.overhaulListData[i].id == item.id) {
+                $scope.overhaulListData[i]['disabled'] = false;
+            }
+        }
+    }
+
+    //取消
+    $scope.cancleOverhaul = item => {
+        $scope.overhaulEditActive = false;
+        for (let i = 0; i < $scope.overhaulListData.length; i++) {
+            if ($scope.overhaulListData[i].id == item.id) {
+                $scope.overhaulListData[i]['disabled'] = true;
+            }
+        }
+    }
+
+    //编辑保存
+    $scope.saveOverhaul = (item, type) => {
+        if ($scope.saveOverhaulLoading) return;
+
+        $scope.saveOverhaulLoading = true;
+        let formData = {}
+        if (type == 'add') {
+            formData['id'] = null;
+            formData['stid'] = $scope.pstationid;
+            formData['eqid'] = $scope.overhaulDeviceId;
+            formData['dtype'] = $scope.overhaulDeviceType;
+            formData['startDate'] = $scope.overhaulStartDate.showDate;
+            formData['endDate'] = $scope.overhaulEndDate.showDate;
+        } else {
+            delete item.createUser;
+            delete item.createTime;
+            delete item.disabled;
+            delete item.modifyTime;
+            item.startDate = item.startDate.showDate;
+            item.endDate = item.endDate ? item.endDate.showDate : (item.noEndDate.showDate);
+            delete item.noEndDate;
+            formData = item;
+        }
+
+        if (!formData.startDate) {
+            toaster.pop('error', '', '检修开始时间必填！');
+            $scope.saveOverhaulLoading = false;
+            return;
+        }
+        $scope.overhaulSave.getData(formData).then(res => {
+            $scope.saveOverhaulLoading = false;
+
+            if (res.code == 0) {
+                $scope.overhaulEditActive = false;
+                toaster.pop('success', '', '保存成功');
+                $scope.addLineOverhaul = false;
+                getOverhaulList();
+            } else {
+                toaster.pop('error', '', '保存失败');
+            }
+        });
+    }
+
+    //删除
+    $scope.deleteOverhaul = id => {
+        $solway.confirm({ message: '确定删除此检修配置？' }, () => {
+            $scope.overhaulDelete.getData({ id: id }).then(res => {
+                if (res.code == 0) {
+                    toaster.pop('success', '', '删除成功');
+                    getOverhaulList();
+                } else {
+                    toaster.pop('error', '', '删除失败');
+                }
+            });
+        });
+    }
+
+
+    /****************************************  清洗时间配置   *********************************************** */
+
+    $scope.cleanStartDate = new Date();
+    // $scope.cleanEndDate = new Date(new Date().setDate(new Date().getDate() + 7));
+    $scope.cleanEndDate = new Date();
+    $scope.cleanEndDate.showDate = ''
+    const getCleanTimeList = () => {
+        $scope.cleanTimeList.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            stid: $scope.pstationid
+        }).then(res => {
+            if (res.code == 0 && res.body && res.body.data) {
+                $scope.cleanListData = res.body.data;
+
+                for (let i = 0; i < $scope.cleanListData.length; i++) {
+                    $scope.cleanListData[i]['disabled'] = true;
+                    $scope.cleanListData[i]['startDate'] = new Date($scope.cleanListData[i]['startDate']);
+                    if ($scope.cleanListData[i]['endDate']) {
+                        $scope.cleanListData[i]['endDate'] = new Date($scope.cleanListData[i]['endDate']);
+                    } else {
+                        $scope.cleanListData[i]['noEndDate'] = new Date();
+                        $scope.cleanListData[i]['noEndDate'].showDate = '';
+                    }
+                }
+            }
+
+        });
+    }
+
+    //编辑
+    $scope.editClean = item => {
+        if ($scope.cleanEditActive) {//若当前清洗为编辑状态，先操作完，再进行下一个
+            toaster.pop('error', '', '当前仍有编辑状态，请先处理，再进行下一个！');
+            return;
+        }
+        $scope.cleanEditActive = true;
+        for (let i = 0; i < $scope.cleanListData.length; i++) {
+            if ($scope.cleanListData[i].id == item.id) {
+                $scope.cleanListData[i]['disabled'] = false;
+            }
+        }
+    }
+
+    //取消
+    $scope.cancleClean = item => {
+        $scope.cleanEditActive = false;
+        for (let i = 0; i < $scope.cleanListData.length; i++) {
+            if ($scope.cleanListData[i].id == item.id) {
+                $scope.cleanListData[i]['disabled'] = true;
+            }
+        }
+    }
+
+    //编辑保存
+    $scope.saveClean = (item, type) => {
+        if ($scope.saveCleanLoading) return;
+        $scope.saveCleanLoading = true;
+        let formData = {}
+        if (type == 'add') {
+            formData['id'] = null;
+            formData['stid'] = $scope.pstationid;
+            formData['startDate'] = $scope.cleanStartDate.showDate;
+            formData['endDate'] = $scope.cleanEndDate.showDate;
+        } else {
+            delete item.createUser;
+            delete item.createTime;
+            delete item.disabled;
+            delete item.reportSite;
+            item.startDate = item.startDate.showDate;
+            item.endDate = item.endDate ? item.endDate.showDate : (item.noEndDate.showDate);
+            delete item.modifyTime;
+            delete item.noEndDate;
+            formData = item;
+        }
+
+        if (!formData.startDate) {
+            toaster.pop('error', '', '清洗开始时间必填！');
+            $scope.saveCleanLoading = false;
+            return;
+        }
+        $scope.cleanTimeSave.getData(formData).then(res => {
+            $scope.saveCleanLoading = false;
+
+            if (res.code == 0) {
+                $scope.cleanEditActive = false;
+                toaster.pop('success', '', '保存成功');
+                $scope.addLineClean = false;
+                getCleanTimeList();
+            } else {
+                toaster.pop('error', '', '保存失败');
+            }
+        });
+    }
+
+    //删除
+    $scope.deleteClean = id => {
+        $solway.confirm({ message: '确定删除此清洗配置？' }, () => {
+            $scope.cleanTimeDelete.getData({ id: id }).then(res => {
+                if (res.code == 0) {
+                    toaster.pop('success', '', '删除成功');
+                    getCleanTimeList();
+                } else {
+                    toaster.pop('error', '', '删除失败');
+                }
+            });
+        });
+    }
+
+
+    /****************************************  可研电量配置   *********************************************** */
+
+    const getAssessmentList = () => {
+        $scope.assessmentList.getData({ stid: $scope.pstationid }).then(res => {
+            if (res.code == 0) {
+                $scope.assessmentListData = res.body;
+            }
+        });
+    }
+
+    //编辑
+    $scope.assessmentEditShow = () => {
+        $scope.assessmentDisabled = false;
+    }
+
+    //取消
+    $scope.assessmentEditCancel = () => {
+        $scope.assessmentDisabled = true;
+    }
+
+    //保存
+    $scope.saveAssessment = () => {
+        // for(let i=0;i<$scope.assessmentListData.length;i++){
+        //     if(!$scope.assessmentListData[i].hour || !$scope.assessmentListData[i].rad){
+        //         toaster.pop('error','','每个月的发电小时数和辐射量均不能为空');
+        //         return;
+        //     }
+        // }
+        if ($scope.saveAssessmentLoading) return;
+        $scope.saveAssessmentLoading = true;
+        $scope.assessmentUpdate.getData($scope.assessmentListData).then(res => {
+            $scope.saveAssessmentLoading = false;
+
+            if (res.code == 0) {
+                $scope.assessmentDisabled = true;
+                toaster.pop('success', '', '保存成功');
+                getAssessmentList();
+            } else {
+                toaster.pop('error', '', '保存失败');
+            }
+        });
+    }
+
+
+    /****************************************  计划电量配置   *********************************************** */
+
+    const getPlanPowerList = () => {
+        $scope.planPowerList.getData({ stid: $scope.pstationid }).then(res => {
+            if (res.code == 0) {
+                $scope.planPowerListData = res.body;
+            }
+        });
+    }
+
+    //新增
+    $scope.addPlanPowerShow = () => {
+        $scope.editPlanPowerModel = true;
+        $scope.$broadcast('addPlanPowerBroad', { 'year': '' });
+    }
+
+    //编辑
+    $scope.editPlanPower = item => {
+        $scope.editPlanPowerModel = true;
+        $scope.$broadcast('addPlanPowerBroad', { 'year': item.year });
+    }
+
+    //编辑成功回调
+    $scope.$on('savePlanPowerCallback', () => {
+        $scope.editPlanPowerModel = false;
+        getPlanPowerList();
+    });
+
+    //删除
+    $scope.deletePlanPower = year => {
+        $solway.confirm({ message: '确定删除此年计划电量？' }, () => {
+            $scope.planPowerDelete.getData({ stid: $scope.pstationid, year: year }).then(res => {
+                if (res.code == 0) {
+                    toaster.pop('success', '', '删除成功');
+                    getPlanPowerList();
+                } else {
+                    toaster.pop('error', '', '删除失败')
+                }
+            });
+        });
+    }
+
+
+    //公共取消
+    $scope.$on('cancelCallback', () => {
+        $scope.editPlanPowerModel = false;
+        $scope.EditVideoModel = false;
+    });
+
+});

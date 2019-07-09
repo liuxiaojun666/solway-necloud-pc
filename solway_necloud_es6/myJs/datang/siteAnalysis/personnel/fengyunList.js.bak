@@ -1,0 +1,188 @@
+ajaxData({
+    ...[
+        {
+            name: 'repairCount',
+            apiName: 'GETRankingRepairCount',
+            later: true
+        },
+        {
+            name: 'repairHours',
+            apiName: 'GETRankingRepairHours',
+            later: true
+        },
+        {
+            name: 'repairSuccessRate',
+            apiName: 'GETRankingRepairSuccessRate',
+            later: true
+        },
+        {
+            name: 'repairRespHours',
+            apiName: 'GETRankingRepairResHours',
+            later: true
+        },
+        {
+            name: 'repairNum',
+            apiName: 'GETRankingRepairNum',
+            later: true
+        }
+    ].map(v => ({
+        [v.name]: {
+            name: v.apiName,
+            data: { },
+            later: v.later
+        }
+    })).reduce((obj, cur) => ({ ...obj, ...cur })),
+    province: {
+        name: 'GETprovinces',
+        data: {}
+    },
+}, {
+    })('fengyunListCtrl', ['$scope', 'myAjaxData', '$state'], ($scope, myAjaxData, $state) => {
+        $scope.dateTime1 = new Date; //选择月日期
+        $scope.dateTime1.setMonth((new Date).getMonth() - 1);
+        $scope.time1EndDate = new Date($scope.dateTime1);
+        $scope.dateTime2 = new Date; //选择年日期
+        $scope.timeType = 'MONTH';   //默认查累计
+
+        $scope.idType = 1;           //默认范围 集团  1:集团|2:省份|3:电站
+        $scope.ids = null;           //默认集团 不传ids 
+
+        $scope.currDataType = 'repairCount'; //默认查询检修台次
+        $scope.allDataType = {       //所有查询类型
+            repairCount: '检修台次',
+            repairHours: '检修时间',
+            repairSuccessRate: '检修成功率',
+            repairRespHours: '检修响应时间',
+            repairNum: '检修台数',
+        };
+
+        // 所有省份  + 集团
+        $scope.province.promise.then(res => $scope.allIds = res.body.map(v => ({ [v.provinceId]: v.provinceName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
+        // 默认加载
+        $scope.repairCount.getData({
+            powerType: ($state.current.name.includes('pv') ? 'PV' : 'WP'),
+            idType: 1,
+            timeType: $scope.timeType,
+            dateStr: (new Date).Format('yyyy-MM-dd'),
+            pageIndex: 0,
+            pageSize: 10
+        });
+
+        // 改变查询时间 
+        $scope.changeDateTime = async () => {
+            await myAjaxData.timeout(0);
+            const dateStr = getDateStr();
+            if (dateStr === $scope.dateStr) return;
+            $scope.dateStr = dateStr;
+            const timeType = $scope.timeType;
+            $scope[$scope.currDataType].getData({ timeType, dateStr, pageIndex: 0 });
+        };
+
+        // 改变时间维度 执行 func update all data
+        $scope.changeTimeType = value => {
+            if ($scope.timeType === value) return;
+            const timeType = $scope.timeType = value;
+            const dateStr = getDateStr();
+            $scope.dateStr = dateStr;
+            $scope[$scope.currDataType].getData({ timeType, dateStr, pageIndex: 0 });
+        };
+
+        // 改变 查询类型  执行 函数 重新请求  类型 排名
+        $scope.changeDataType = value => {
+            if (value === $scope.currDataType) return;
+            $scope.currDataType = value;
+            const { idType, ids, timeType, currDataType } = $scope;
+            $scope[currDataType].getData({
+                powerType: ($state.current.name.includes('pv') ? 'PV' : 'WP'),
+                idType,
+                ids,
+                timeType,
+                dateStr: getDateStr(),
+                pageIndex: 0,
+                pageSize: 10
+            }).then(res => {
+                document.getElementById('dynamicTitle').firstChild.data = $scope.allDataType[$scope.currDataType];
+            });
+        };
+
+        // 改变  范围 执行 函数  重新请求 数据 汇总
+        $scope.changeIds = value => {
+            if (value === $scope.ids) return;
+            const isJT = value == 1; // 选择的是否是集团
+            const idType = $scope.idType = isJT ? 1 : 2;
+            const ids = $scope.ids = isJT ? null : value;
+            $scope[$scope.currDataType].getData({ idType, ids, pageIndex: 0 });
+        };
+
+        // 给每个接口 添加 接口完成回调
+        Object.keys($scope.allDataType).forEach(str => {
+            $scope[str].getDataCallback = async(success, res) => {
+                if (!success) return;
+                await myAjaxData.timeout(0);
+                $scope.datasource = res.body;
+                $scope.currentPageList = $scope[$scope.currDataType].getData;
+                $scope.$apply();
+            };
+        });
+        
+        // 根据时间维度  判断 需要 使用的 时间 字符串
+        function getDateStr() {
+            if ($scope.timeType === 'MONTH') return $scope.dateTime1.Format('yyyy-MM');
+            if ($scope.timeType === 'YEAR') return $scope.dateTime2.Format('yyyy');
+            return (new Date).Format('yyyy-MM-dd');
+        }
+
+        $scope.column = [
+            {
+                title: '排名',
+                dataIndex: "",
+                width: '50px',
+                align: 'center',
+                render(text, item, index) {
+                    return `<span class="jiangbei jiangbei-${[1, 2, 3][index]}">${index > 2 ? index + 1 : ''}</span>`
+                }
+            }, {
+                title: '姓名',
+                dataIndex: 'realName',
+                width: '150px',
+                align: 'left',
+                render(text) {
+                    return '<span class="icon-user"></span> ' + (text || '')
+                }
+            }, {
+                title: '公司名称',
+                dataIndex: 'companyName',
+                width: '200px',
+                align: 'left',
+                render(text) {
+                    return '<span class="fa fa-building-o"></span> ' + (text || '')
+                }
+            }, {
+                title: '电话',
+                dataIndex: 'tel',
+                width: '150px',
+                align: 'left',
+                render(text) {
+                    return '<span class="fa fa-phone"></span> ' + (text || '')
+                }
+            }, {
+                title: '邮箱',
+                dataIndex: 'email',
+                width: '150px',
+                align: 'left',
+                render(text) {
+                    return '<span class="fa fa-envelope-o"></span> ' + (text || '')
+                }
+            }, {
+                title: `<span style="padding-right:30px;" id="dynamicTitle">${$scope.allDataType[$scope.currDataType]}</span>`,
+                dataIndex: "count",
+                width: '100px',
+                align: 'right',
+                render(text, item, index) {
+                    const isNone = text === null
+                    return `<span style="padding-right:30px;">${isNone ? '' : (text + item.unit)}</span>`
+                }
+            }
+        ];
+
+    });

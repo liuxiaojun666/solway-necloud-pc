@@ -1,0 +1,165 @@
+ajaxData({
+    departmentList: {
+        name: 'GETdepartmentList',
+        data: {},
+        later: true
+    },
+    userList:{
+        name: 'GETuserList',
+        data: {},
+        later: true
+    },
+    deleteAuthority: {
+        name: 'POSTdeleteAuthority',
+        data: {},
+        later: true
+    }
+}, {})('userManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '用户管理';//当前页面名称；
+    
+    $scope.column = [
+        {
+            title: '姓名',
+            dataIndex: 'realname',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '账号',
+            dataIndex: 'phone',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '邀请时间',
+            dataIndex: 'invitetime',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '邀请状态',
+            dataIndex: 'invitestatus',
+            align: 'center'
+        }, {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-shouquan" style="visibility:${item.istautsNum=='01'?'visible':'hidden'};font-size: 18px;color:#1ddabe;margin-right:15px;" title="授权"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
+
+    //删除
+    const deletePerson = id =>{
+        $scope.deleteAuthority.getData({
+            id: id
+        }).then(res=>{
+            if (res.key==2) {
+                toaster.pop('success','','删除成功');
+                $scope.getUserList();
+            } else if (res.key==1) {
+                toaster.pop('error', '','删除失败')
+            }
+        })
+    }
+
+    $scope.trClick = (item, index, event) => {
+        if(event.target.className.includes('icon-shouquan')) {
+            $scope.showAuthorizeModel = true;
+            $scope.$broadcast('broadAuthorizeModel', { 'id': item.id,'depId': $scope.depid });
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此人？' }, () => {
+                deletePerson(item.id)
+            });
+        };
+    };
+    
+    $scope.getUserList = () =>{
+        $scope.userList.getData({
+            pageIndex :0,
+            pageSize : 10,
+            depid: $scope.depid,
+            keyWords:$scope.keyWords
+        })
+    }
+
+    function onClick(event, treeId, treeNode, clickFlag) {
+        $scope.depid = treeNode.id;
+        $scope.depName = treeNode.name;
+        $scope.getUserList();
+    };
+
+    let zTreeObj;
+    const setting = {
+        check: {
+            enable: true,
+            chkStyle: "radio",
+            radioType: "all"
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                idKey: "id",
+                pIdKey: "pId",
+                rootPId: 0
+            }
+        },
+        callback: {
+            onClick: onClick
+        }
+    };
+
+    const initDepartmentList = () => {
+        $scope.departmentList.getData({
+        }).then(res => {
+            if (res.key == 1) {
+                let zNodes = res.data;
+                $.fn.zTree.init($("#departmentTree"), setting, zNodes);
+                zTreeObj = $.fn.zTree.getZTreeObj("departmentTree")
+                $('#departmentTree li:first > a').trigger('click');
+                $('#departmentTree li:first > a').trigger('dblclick');
+            }
+        })
+    }
+
+    initDepartmentList();
+
+    //邀请人员
+    $scope.invitation = () =>{
+        $scope.showInvitationModel = true;
+        $scope.$broadcast('broadInvitation', { 'depId': $scope.depid });
+    }
+
+    //移交管理员
+    $scope.changeAdministrator = () =>{
+        $scope.changeAdministratorModel = true;
+        $scope.$broadcast('broadAdministrator', { 'depId': $scope.depid });
+    }
+
+    // 角色配置
+    $scope.roleConfiguration = () => {
+        $scope.roleConfigurationModel = true;
+        $scope.$broadcast('roleConfiguration');
+    };
+
+    $scope.$on('cancelCallback',()=>{
+        $scope.showInvitationModel = false;
+        $scope.showAuthorizeModel = false;
+        $scope.changeAdministratorModel = false;
+    });
+
+    $scope.$on('addCallback',()=>{
+        $scope.showInvitationModel = false;
+        $scope.showAuthorizeModel = false;
+        $scope.changeAdministratorModel = false;
+        $scope.getUserList();
+    });
+
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});

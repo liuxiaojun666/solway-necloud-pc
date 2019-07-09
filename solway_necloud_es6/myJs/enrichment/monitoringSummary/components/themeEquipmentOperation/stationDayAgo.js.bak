@@ -1,0 +1,271 @@
+ajaxData(
+    {
+        //电站日功率时间列表（历史日
+        stationDayAgoTimeList: {
+            name: 'GETPowerStationDayAgoTimeList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
+        //电站日功率时间曲线（历史日
+        stationDayAgoTimeLine: {
+            name: 'GETPowerStationDayAgoTimeLine',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
+        // 设备类型
+        getDeviceType: {
+            name: 'GETgetDeviceType',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备列表
+        queryDeviceWithType: {
+            name: 'GETqueryDeviceWithType',
+            data: {},
+            later: true
+        },
+        // 事件类型
+        eventType: {
+            name: 'GETBasedictionarySelectAll',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备日志
+        deviceRunList: {
+            name: 'GETdeviceRunList',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+    },
+    {
+        __serviceName__: 'themeEquipmentOperationStationDayAgoService'
+    }
+)('themeEquipmentOperationStationDayAgoCtrl', ['$scope', 'themeEquipmentOperationStationDayAgoService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape = 'chart', tabIndex = 0 } = historicalRecord.get().themeEquipmentOperationStationDayAgo || {};
+        $scope.changeShowShape(showShape);
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await diffGetData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'StationDayAgo') return;
+        $scope.column = [];
+        diffGetData();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        if ($scope.currentClass !== 'StationDayAgo') return;
+        await myAjaxData.timeout(0);
+        if ($scope.dateType !== 0) return;
+        diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        if (showShape === $scope.showShape) return;
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeEquipmentOperationStationDayAgo: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayAgo || {},
+                showShape
+            }
+        });
+        diffGetData();
+    };
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeEquipmentOperationStationDayAgo: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayAgo || {},
+                tabIndex
+            }
+        });
+        diffGetData();
+    };
+
+    // 判断 调用  对应 接口
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.column = [];
+        $scope.stationDayAgoTimeList.res = null;
+        $scope.stationDayAgoTimeLine.res = null;
+        const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+        if (showShape === 'list' && tabIndex === 0) {
+            $scope.stationDayAgoTimeList.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate
+            });
+        } else if (showShape === 'chart' && tabIndex === 0) {
+            $scope.stationDayAgoTimeLine.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate
+            });
+        }
+        else if (tabIndex === 1) {
+            $scope.eventType.getData({ dictType: 'EVENT_TYPE' });
+            const res = await $scope.getDeviceType.getData();
+            $scope.deviceRunList.deviceType = res.data[0].devid;
+            $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+        }
+    };
+    // 电站  历史日   时间   列表
+    $scope.stationDayAgoTimeList.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'time',
+                sort: true,
+                width: '',
+                align: 'center'
+            },
+            {
+                title: '实发功率(kW)',
+                dataIndex: 'real_curve',
+                sort: true,
+                width: '',
+                align: 'right',
+            },
+            {
+                title: '理论功率(kW)',
+                dataIndex: 'shd_curve',
+                sort: true,
+                width: '',
+                align: 'right',
+            },
+            {
+                title: '光照强度(W/㎡)',
+                dataIndex: 'sun_curve',
+                sort: true,
+                width: '',
+                align: 'right',
+            }
+        ];
+    };
+    // 电站  历史日   时间   曲线
+    $scope.stationDayAgoTimeLine.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.x;
+        $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.sun_curve]]
+    };
+
+    // 设备列表
+    $scope.queryDeviceWithType.subscribe(res => {
+        $scope.deviceRunList.deviceId = '';
+        const {dateTime} = $scope;
+        $scope.deviceRunList.getData({
+            // deviceId: '',
+            // deviceType: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid,
+            // eventType: $scope.deviceRunList.eventType,
+            // pageIndex: 0,
+            // sEndTime: dateTime.showDate + ' 23:59',
+            // sStartTime: dateTime.showDate + ' 00:00',
+
+            deviceId: '',
+            deviceType: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid,
+            eventType: $scope.deviceRunList.eventType,
+            pageIndex: 0,
+            date: dateTime.showDate,
+            // startTime: '23:59',
+            // endTime: '00:00'
+        });
+    });
+    // 设备日志
+    $scope.deviceRunList.subscribe(res => {
+        $scope.deviceRunList.column = [
+            {
+                title: '发生时间',
+                dataIndex: 'sStartTime',
+                sort: true,
+                align: 'center',
+                width: '150px',
+                render(text) {
+                    return text && new Date(text).Format('yyyy-MM-dd hh:mm')
+                }
+            },
+            {
+                title: '消缺时间',
+                dataIndex: 'sEndTime',
+                sort: true,
+                align: 'center',
+                width: '150px',
+                render(text) {
+                    return text && new Date(text).Format('yyyy-MM-dd hh:mm')
+                }
+            },
+            {
+                title: '设备名称',
+                dataIndex: 'devicename',
+                sort: true,
+                align: 'left',
+                render(text) {
+                    return `<span class="clickable">${text}</span>`;
+                }
+            },
+            {
+                title: '事件类型',
+                dataIndex: 'faultclassStr',
+                width: '100px',
+                sort: true,
+                render(text, item, index) {
+                    return (text || '-') + '';
+                }
+            },
+            {
+                title: '事件描述',
+                dataIndex: 'eventDesc',
+                sort: true,
+                align: 'left',
+                width: '400px'
+            },
+            {
+                title: '确认时间',
+                dataIndex: 'sureTime',
+                width: '135px',
+                align: 'center',
+                render: function (text, item, index) {
+                    return text ? new Date(text).Format('yyyy-MM-dd hh:mm') : '';
+                }
+            },
+            {
+                title: '状态',
+                dataIndex: 'handstatusStr',
+                sort: true,
+                align: 'center'
+            },
+        ];
+    });
+    // 查看设备详情
+    $scope.deviceRunList.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.$broadcast('equipmentPopUp', { stid: item.pstationid, eqid: item.deviceSerialNnumber})
+    };
+
+});

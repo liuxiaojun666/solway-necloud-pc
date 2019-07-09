@@ -1,0 +1,194 @@
+ajaxData({
+    realDataBInverter: {
+        name: 'GETRealDataBInverter',
+        data: {},
+        later: true
+    },
+    selectByConditionMap: {
+        name: 'GETselectByConditionMap',
+        data: {},
+        later: true
+    },
+}, {})('listViewCtrl', ['$scope', 'myAjaxData', '$interval'], ($scope, myAjaxData, $interval) => {
+    // 所有svg图路径
+    $scope.svgUrls = [
+        "tpl/rtMonitorPage/deviceLayout/css/svg_template/XB.svg",
+        "tpl/rtMonitorPage/deviceLayout/css/svg_template/NBQ.svg",
+        "tpl/rtMonitorPage/deviceLayout/css/svg_template/HLX.svg",
+        "tpl/rtMonitorPage/deviceLayout/css/svg_template/NBQHLX.svg",
+    ];
+
+    // 所有状态  默认全选
+    $scope.status = {
+        status1: true,
+        status2: true,
+        status3: true,
+        status4: true,
+        status5: true,
+        statusAll: true,
+    };
+
+    // 状态对应的颜色
+    $scope.colors = {
+        normal: '#3fad22',
+        fault: '#db412f',
+        warning: '#f90',
+        offline: '#999'
+    };
+
+    // 切换设备类型
+    $scope.changeType = (typeUrl, timing) => {
+        // if (typeUrl === $scope.svgUrl) return;
+        $scope.svgUrl = typeUrl;
+        $scope.drawSvg(typeUrl);
+        getData(timing);
+    };
+
+    // 改变状态
+    $scope.changeStatus = statu => {
+        $scope.status[statu] = !$scope.status[statu];
+        if (statu === 'statusAll') {
+            Object.keys($scope.status).forEach(v => $scope.status[v] = $scope.status[statu]);
+        } else {
+            const { statusAll, ...other } = $scope.status;
+            $scope.status.statusAll = Object.values(other).every(e => e);
+        }
+        getData();
+    };
+
+    // 获取对应的svg图
+    $scope.drawSvg = (svgUrl) => {
+        const { svgUrls } = $scope;
+        switch (svgUrl) {
+            case svgUrls[0]:
+                d3.xml(svgUrl, "image/svg+xml", xml => $scope.$apply(() => $scope.XB = xml.documentElement.outerHTML));
+                break;
+
+            case svgUrls[1]:
+                d3.xml(svgUrl, "image/svg+xml", xml => $scope.$apply(() => $scope.NBQ = xml.documentElement.outerHTML));
+                d3.xml(svgUrls[3], "image/svg+xml", xml => $scope.$apply(() => $scope.NBQHLX = xml.documentElement.outerHTML));
+                break;
+
+            case svgUrls[2]:
+                d3.xml(svgUrl, "image/svg+xml", xml => $scope.$apply(() => $scope.HLX = xml.documentElement.outerHTML));
+                break;
+
+            default:
+                break;
+        }
+    };
+
+    // 逆变器 接口 回调
+    $scope.realDataBInverter.getDataCallback = async (success, res) => {
+        await myAjaxData.timeout(0);
+        res.data && res.data.forEach((element, index) => {
+            const { colors } = $scope;
+            const nbqhlx = $('.NBQID').find('svg').eq(index);
+            let color = colors.offline;
+            if (element.comm === 0) {
+                switch (element.status) {
+                    case 1:
+                        color = colors.fault;
+                        break;
+
+                    case 2:
+                        color = colors.warning;
+                        break;
+
+                    default:
+                        color = colors.normal;
+                        break;
+                }
+            }
+            nbqhlx.find('g[type=nbq]').find('*').attr({
+                "stroke": color,
+                "fill": color
+            });
+            if (element.hasJB !== '1') return; // 如果没有组串  return
+            const hlx = nbqhlx.find('g[type=hlx]');
+            element.statuFlags.forEach((v, i) => {
+                let color = 'transparent';
+                switch (v) {
+                    case 1:
+                        color = colors.fault;
+                        break;
+
+                    case 2:
+                        color = colors.warning;
+                        break;
+
+                    case 3:
+                        color = colors.normal;
+                        break;
+
+                    default:
+                        color = 'transparent'
+                        break;
+                }
+                hlx.find('rect').eq(i * 2).attr({
+                    "stroke": color,
+                    "fill": color
+                });
+            });
+        });
+    };
+
+
+    // 点击，弹出层(类型为逆变器)
+    $scope.dblclick = async (deviceSerialNnumber, pstationid, deviceId, hasJB) => {
+        $('#taskList_historyData2').modal({ backdrop: 'static', keyboard: false });
+        const { id } = await $scope.selectByConditionMap.getData({
+            stid: pstationid,
+            sn: deviceSerialNnumber
+        });
+        $scope.inverterType = hasJB;// include 页面中用 点击逆变器，不同类型跳转不同样式页面（1->inverterDetailNew.jsp,2->inverterDetailNewType1.jsp）
+        $scope.$broadcast("showDeviceDetail2broad", {
+            deviceTypeNow: 2,
+            pstationid,
+            deviceId: id,
+            deviceSerialNnumber
+        });
+    };
+
+    // 请求接口
+    function getData(timing) {
+        const { svgUrl, svgUrls, status: { status1, status2, status3, status4, status5, statusAll } } = $scope;
+        const status = [];
+        if (statusAll) status.push('00');
+        if (status1) status.push('01');
+        if (status2) status.push('02');
+        if (status3) status.push('03');
+        if (status4) status.push('04');
+        if (status5) status.push('05');
+        switch (svgUrl) {
+            case svgUrls[0]:
+
+                break;
+
+            case svgUrls[1]:
+                const args = timing ? {} : { pageIndex: 0, pageSize: '20' }
+                $scope.realDataBInverter.getData({
+                    status: status.join(','),
+                    ...args
+                });
+                break;
+
+            case svgUrls[2]:
+
+                break;
+
+            default:
+                break;
+        }
+    }
+
+
+    // 切换电站  默认 逆变器
+    $scope.switchPowerCallback = () => $scope.changeType($scope.svgUrls[1]);
+
+
+    // 定时刷新数据
+    const timing = () => $scope.changeType($scope.svgUrl, true);
+    const timer = $interval(timing, 5000);
+    $scope.$on('$destroy', () => $interval.cancel(timer));
+});

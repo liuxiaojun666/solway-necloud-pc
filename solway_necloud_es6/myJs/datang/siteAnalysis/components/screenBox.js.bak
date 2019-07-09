@@ -1,0 +1,111 @@
+app.directive('screen', [() => ({
+    restrict: 'A',
+    replace: !0,
+    scope: false,
+    link ($scope, $element, $attr) {
+
+        /**
+         * 点击按钮  弹出筛选盒子
+         */
+        $element.on('click', () => false).find('button').on('click', () => {
+            $scope.showScreenBox = true
+            $scope.$apply()
+        })
+
+        /**
+         * 点击屏幕  影藏盒子
+         */
+        document.addEventListener('click', hideBox)
+        function hideBox () {
+            $scope.showScreenBox = false
+            $scope.$apply()
+        }
+
+
+        /**
+         * 组件销毁，取消绑定事件
+         */
+        $scope.$on('$destroy', () => {
+            $element.off('click').find('button').off('click')
+            document.removeEventListener('click', hideBox)
+        })
+    },
+})])
+
+
+app.directive('screenBox', ['$timeout', ($timeout) => ({
+    restrict: 'E',
+    replace: !0,
+    scope: false,
+    template: `
+        <div class="screenBox" ng-show="showScreenBox">
+            <div class="line-text"><span>投产时间&nbsp;&gt;&nbsp;</span><input type="number" ng-model="time"/><span>年</span></div>
+            <div class="line-text"><span>机型台数&nbsp;&gt;&nbsp;</span><input type="number" ng-model="number"/><span>台</span></div>
+            <div ng-show="timeType == 'ACCUM'" class="menology clearfix">
+                <span ng-click="selectMonth($index)" ng-repeat="item in ['全部', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']">{{ item }}</span>
+            </div>
+            <div class="btn-grup clearfix">
+                <button class="pull-left" ng-click="ok()">确定</button>
+                <button class="pull-right" ng-click="cancel()">取消</button>
+            </div>
+        </div>
+    `,
+    link ($scope, $element) {
+
+        /**
+         * 初始化  已经选中月  样式
+         */
+        $timeout(() => $scope.selectedMonth.forEach(v => $element.find('.menology span').eq(v).addClass('active')), 0)
+    },
+    controller ($scope, $element) {
+
+        /**
+         * 初始化数据
+         */
+        $scope.time = $scope.$parent.yearDiff || 0
+        $scope.number = $scope.$parent.num || 0
+        $scope.selectedMonth = $scope.$parent.selectedMonth && $scope.$parent.selectedMonth.slice(0) || []
+
+
+        /**
+         * 选择月份时
+         */
+        $scope.selectMonth = index => {
+            const spanEle = $element.find('.menology span')
+            if (Object.is(0, index)) {
+                if ($scope.selectedMonth.length < 12) {
+                    $scope.selectedMonth = (new Array(12)).fill('').map((v, i) => i + 1)
+                    spanEle.addClass('active')
+                }
+                else {
+                    $scope.selectedMonth = []
+                    spanEle.removeClass('active')
+                }
+            } else {
+                if (spanEle.eq(index).hasClass('active')) $scope.selectedMonth.splice($scope.selectedMonth.indexOf(index), 1)
+                else $scope.selectedMonth.push(index)
+                spanEle.eq(index).toggleClass('active')
+                if ($scope.selectedMonth.length < 12) spanEle.eq(0).removeClass('active')
+            }
+            
+        }
+
+        /**
+         * 点击确定  
+         */
+        $scope.ok = () => {
+            $scope.$parent.yearDiff = $scope.time
+            $scope.$parent.num = $scope.number
+            $scope.$parent.selectedMonth = $scope.selectedMonth
+            $scope.number = $scope.number
+            $scope.$parent.isSelected = true
+            $scope.$parent.showScreenBox = false
+            $scope.$parent.filterData()
+        }
+
+        /**
+         * 点击取消  影藏盒子
+         */
+        $scope.cancel = () => $scope.$parent.showScreenBox = false
+    }
+})])

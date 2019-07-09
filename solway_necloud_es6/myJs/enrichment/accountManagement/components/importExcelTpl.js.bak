@@ -1,0 +1,36 @@
+
+ajaxData({
+    importExcel:{
+        name:'POSTimportExcel',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'importExcelTplService',
+})('importModelCtrl', ['$scope', 'importExcelTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    
+    $scope.$on('importBroad',(e,data)=>{
+        $scope.type = data.modalType;
+    })
+    //保存
+    $scope.saveImport = () =>{
+        $scope.importExcel.getData({
+            excelFile:$('input[name=excelFile]')[0].files[0],
+            stid:$scope.stationId,
+            deviceType:$scope.type
+        }).then(res=>{
+            if(res.code == 0){
+                toaster.pop('success','','上传成功');
+                $scope.$emit('importSuccessCallback');
+            }else{
+                toaster.pop('error','',res.message?res.message:'上传失败');
+            }
+        });
+    }
+
+    //取消
+    $scope.cancelImport = () =>{
+        $scope.$emit('importSuccessCallback');
+    }
+});

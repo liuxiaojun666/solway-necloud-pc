@@ -1,0 +1,214 @@
+
+ajaxData({
+    companyListData:{
+        name:'POSTCompanyListData',
+        data: {},
+        later: true,
+    },
+    stationListByComid:{
+        name:'POSTStationListByComid',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    deviceTypeList:{
+        name:'GETdeviceTypeList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    selectDevicesByStation:{
+        name:'GETselectDevicesByStation',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    taskTypeList:{
+        name:'GETtaskTypeList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    updateDataInit:{
+        name:'POSTupdateDataInit',
+        data: {},
+        later: true,
+        onlyLatest: true,
+        saveParam:false
+    },
+    
+}, {
+    __serviceName__: 'editDataInitTplService',
+})('editDataInitTplModelCtrl', ['$scope', 'editDataInitTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+   
+    $scope.endDate = new Date('2099');
+
+    const getTaskTypeData = () =>{
+        $scope.taskTypeList.getData().then(res=>{
+            if(res.code == 0 && res.data && res.data.types){
+                $scope.taskList = res.data.types;
+                $scope.taskList.unshift({key:"",name:'请选择'});
+            }
+        });
+    }
+
+    //公司列表
+    const initCompanyList = () => {
+        $scope.companyListData.getData({
+        }).then(res => {
+            if(res && res.length){
+                $scope.companyList = res;
+                $scope.companyList.unshift({comId:"",comName:'请选择'});
+            }else{
+                $scope.companyList = [];
+            }
+        })
+    }
+
+    //电站列表数据
+    $scope.getStationList = () =>{
+        $scope.stationListByComid.getData({
+            companyid: $scope.formData.comId
+        }).then(res => {
+            if(res && res.length){
+                $scope.stationList = res;
+                $scope.stationList.unshift({id:"",stationname:'请选择', stationClass: ''});
+            }else{
+                $scope.stationList = [];
+            }
+        })
+    }
+
+    //设备类型列表
+    // $scope.getDeviceTypeList = () =>{
+    //     angular.forEach($scope.stationList,(item,v) => {
+    //         if(item.id == $scope.formData.sid){
+    //             $scope.stationClass = item.stationClass;
+    //         }
+    //     });
+    //     $scope.deviceTypeDataList = [];
+    //     $scope.deviceTypeList.getData({'stationClass':$scope.stationClass}).then(res=>{
+    //         if(res.code == 0 && res.body){
+    //             let data = res.body;
+    //             angular.forEach(data,(v,key,item) => {
+    //                 $scope.deviceTypeDataList.push({'id':key,'name':v})
+    //             });
+    //             $scope.deviceTypeDataList.unshift({'id':'','name':'请选择'});
+    //         }
+    //     });
+    // }
+
+    //设备列表
+    $scope.getDeviceList = () =>{
+        // let deviceType = $scope.formData.deviceType;
+        
+        $scope.selectDevicesByStation.getData({
+            stid: $scope.formData.sid,
+            // deviceType: deviceType,
+        }).then(res=>{
+            if(res && res.length){
+                $scope.deviceList = res;
+                $scope.deviceList.unshift({id:'',name:'请选择', serialNumber: '', deviceType: ''});
+            }else{
+                $scope.deviceList = []
+            }
+        });
+    }
+   
+    // 初始
+    $scope.$on('editDataInitBroad',async(e,data)=>{
+        initCompanyList();
+        getTaskTypeData();
+        $scope.formData = {};
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+
+        if(data){
+            $scope.formData = {
+                id:data.id,
+                serialNumber:data.serialNumber,
+                comId: data.comId,
+                did:data.did,
+                sid: data.sid,
+                stationClass:data.stationClass,
+                deviceType:data.deviceType,
+                type: data.type
+            };
+
+            if(data.comId){
+                $scope.getStationList();
+            }
+
+            if(data.sid){
+                $scope.getDeviceList();
+                // $scope.getDeviceTypeList();
+            }
+
+            // if(data.deviceType){
+            //     $scope.getDeviceList();
+            // }
+
+            $scope.formData['beginTime'] = data.beginTime?new Date(data.beginTime):new Date();
+            $scope.formData['endTime'] = data.endTime?new Date(data.endTime):new Date();
+            if(!data.beginTime) $scope.formData['beginTime'].showDate = '';
+            if(!data.endTime) $scope.formData['endTime'].showDate = '';
+
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        }else{
+     
+            $scope.formData['beginTime'] = new Date();
+            $scope.formData['endTime'] = new Date();
+            $scope.formData['beginTime'].showDate = '';
+            $scope.formData['endTime'].showDate = '';
+
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        }
+
+       
+    });
+
+     //保存
+    $scope.save = () =>{
+        if (!$solway.formValidation($scope.formData, '.editDataInitTpl', toaster)) return;//校验非空
+
+        $scope.formData['beginTime'] = $scope.formData['beginTime']?$scope.formData['beginTime'].showDate:'';
+        $scope.formData['endTime']   = $scope.formData['endTime']?$scope.formData['endTime'].showDate:'';
+
+        if(!$scope.formData.did){
+            $scope.stationList.map(item=>{
+                if(item.id == $scope.formData.sid) $scope.formData['deviceType'] = item.stationClass;
+            });
+            $scope.formData['serialNumber'] = '';
+        }else{   //若选择了设备
+            $scope.deviceList.map(item=>{
+                if(item.id == $scope.formData.did){
+                    $scope.formData['serialNumber'] = item.serialNumber;
+                    $scope.formData['deviceType'] = item.deviceType;
+                }  
+            })
+        }
+
+        $scope.stationList.map(item=>{
+            if(item.id == $scope.formData.sid) $scope.formData['stationClass'] = item.stationClass;
+        });
+       
+        $scope.updateDataInit.getData($scope.formData).then(res=>{
+            if(res.code == '0'){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('editCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
+
+     //取消
+     $scope.cancel = () =>{
+        $scope.$emit('cancel');
+    }
+
+    
+
+});

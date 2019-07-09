@@ -1,0 +1,88 @@
+
+ajaxData({
+    update:{
+        name:'POSTupdateBuyModule',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'editPurchaseModuleService',
+})('editPurchaseModuleCtrl', ['$scope', 'editPurchaseModuleService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    
+    $scope.endDate = new Date('2099');
+
+    const clearDateTime = () =>{
+        // $scope.mcssWarnDate = null;
+        $scope.mcssStartDate = null;
+        $scope.mcssEndDate = null;
+    }
+    $scope.$on('broadEditPurchaseModule',function(e,data){
+        $scope.detailInfo = data;
+
+        // $scope.mcssWarnDate = data.mcssWarnDate? new Date(data.mcssWarnDate):new Date();
+        $scope.mcssStartDate = data.mcssStartDate? new Date(data.mcssStartDate):new Date();
+        $scope.mcssEndDate = data.mcssEndDate? new Date(data.mcssEndDate):new Date((new Date).setDate((new Date).getDate() + 7));
+
+        $scope.mcssServiceStatus = data.mcssServiceStatus?data.mcssServiceStatus:'01'
+    });
+
+    $scope.$on('hideEditBroad',()=>{
+        clearDateTime();
+    });
+
+
+    //保存
+    $scope.save = () =>{
+        if($scope.mcssServiceStatus == '01'){
+            clearDateTime();
+        }
+        if($scope.mcssEndDate && $scope.mcssStartDate){
+            if($scope.mcssEndDate<=$scope.mcssStartDate){
+                toaster.pop('error', '','结束时间必须大于开始时间')
+                return false;
+            }
+        }
+
+        let formData = {
+            'appId':$scope.detailInfo.appId,
+            'appPid':$scope.detailInfo.appPid,
+            'mcComId':$scope.detailInfo.mcComId,
+            'mcId':$scope.detailInfo.mcId,
+            'mcssId':$scope.detailInfo.mcssId,
+            // 'mcssWarnDate':$scope.mcssWarnDate?$scope.mcssWarnDate.Format('yyyy-MM-dd'):'',
+            'mcssStartDate':$scope.mcssStartDate?$scope.mcssStartDate.Format('yyyy-MM-dd'):'',
+            'mcssEndDate':$scope.mcssEndDate?$scope.mcssEndDate.Format('yyyy-MM-dd'):'',
+            'mcssServiceStatus':$scope.mcssServiceStatus
+        };
+
+        $http({
+            method : "POST",
+            url: window.interface['POSTupdateBuyModule'],
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data:formData,
+            transformRequest: function (g) {
+                return JSON.stringify(g)
+            }
+        }).success(function(res) {
+            if(res.code == 0){
+                toaster.pop('success','',res.msg);
+                clearDateTime();
+                $scope.$emit('addPurchaseModuleCallback');
+            }else{
+                toaster.pop('error', '','配置失败')
+            }
+        })
+        
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        clearDateTime();
+        $scope.$emit('editPurchaseModuleCallback');
+    }
+
+});

@@ -1,0 +1,114 @@
+app.directive('assessmentScore', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
+    restrict: 'E',
+    replace: !0,
+    scope: {
+    },
+    templateUrl: 'tpl/enrichment/monitoringSummaryWp/components/themeEquipmentOperation/assessmentScore.html',
+    link($scope, $element, $attrs) {
+        $scope.drawRadar();
+    },
+    controller($scope) {
+        const myChart = echarts.init(document.getElementById('assessmentGraph'));
+        $scope.drawRadar = () =>{
+            window.addEventListener("resize", function () {
+                myChart.resize();
+            });
+            const option = {
+                color: ['rgb(96,206,231)', 'rgb(196,142,217)', 'rgb(238,199,78)'],//自身，城市平均，方圆50公里
+                tooltip: {
+                    trigger: 'item',
+                    confine: true
+                },
+                legend: {
+                    data: [{ name: '自身', icon: 'circle'},
+                        { name: '城市平均', icon: 'circle' },
+                        { name: '方圆50公里', icon: 'circle' }],
+                    orient: 'vertical',
+                    textStyle:{
+                        color:'white'
+                    },
+                    left: 0
+                },
+                noDataLoadingOption: {
+                    text: '暂无数据',
+                    effect: function (params, callback) {
+                        return "暂无数据"
+                    }
+                },
+                calculable: false,
+                radar: [
+                    {
+                        color:'white',
+                        indicator: [
+                            { text: '发电小时数', max: 100 },
+                            { text: 'PR', max: 100 },
+                            { text: 'MTBF', max: 100 },
+                            { text: 'MTTR', max: 100 },
+                            { text: '光资源', max: 100 }
+                        ],
+                        center: ['55%', '55%'],
+                        radius: 70
+                    }
+
+                ],
+                series: [
+                    {
+                        type: 'radar',
+                        data: [
+
+                            {
+                                value: [23,34,53,11,13],
+                                name: '城市平均',
+                                z: 2,
+                                itemStyle: {
+                                    normal: {
+                                        areaStyle: {
+                                            color: 'rgba(196,142,217,.4)'
+                                        },
+                                        lineStyle: {
+                                            color: 'rgba(196,142,217,.9)',
+                                            width: 1
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                value: [23, 11, 23,34, 53],
+                                z: 1,
+                                name: '方圆50公里',
+                                itemStyle: {
+                                    normal: {
+                                        areaStyle: {
+                                            color: 'rgba(238,199,78,.4)'
+                                        },
+                                        lineStyle: {
+                                            color: 'rgba(238,199,78,.9)',
+                                            width: 1
+                                        }
+                                    }
+                                },
+                            },
+                            {
+                                value: [1, 11, 15, 34, 53],
+                                name: '自身',
+                                z: 3,
+                                itemStyle: {
+                                    normal: {
+                                        areaStyle: {
+                                            color: 'rgba(96,206,231,.4)'
+                                        },
+                                        lineStyle: {
+                                            color: 'rgba(96,206,231,.9)',
+                                            width: 1
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+            myChart.setOption(option);  
+        }
+    }
+})])

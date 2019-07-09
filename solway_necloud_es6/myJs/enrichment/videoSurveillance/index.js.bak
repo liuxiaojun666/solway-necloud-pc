@@ -1,0 +1,212 @@
+ajaxData(
+    {
+        selectVideosByCom: {
+            name: 'GETselectVideosByCom',
+            data: {}
+        }
+    }, {
+
+    }
+)('videoSurveillanceCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $interval, toaster, $ocLazyLoad) => {
+    historicalRecord.init();// 历史记录 初始化
+    $scope.beforeLoading = true; // 页面loading
+    $scope.moduleName = '视频监控';//当前页面名称；
+    $scope.EnableFlash = navigator.plugins['Shockwave Flash'];
+    videojs.options.flash.swf = '/vendor/videojs/video-js-5.19.2/video-js-fixed.swf';
+    videojs.options.techOrder = ['flash'];
+    const maxVideoView = $scope.maxVideoView = 12;
+    historyInitCallback();
+    const createImg = createCanvas();
+    $ocLazyLoad.load(['vendor/videojs/videojs.hotkeys.min.js']);
+    const settings = {
+        check: {
+            enable: true,
+        },
+        view: {
+            showLine: false,
+            showIcon: true,
+            fontCss: { color: 'rgba(255,255,255,.8)' },
+            dblClickExpand: false,
+            nameIsHTML: false,
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                idKey: "id",
+                pIdKey: "pid",
+                rootPId: null
+            },
+            key: {
+                name: "name"
+            }
+        },
+        callback: {
+            onClick(e, treeId, treeNode) {
+                $.fn.zTree.getZTreeObj(treeId).expandNode(treeNode);
+                $(".curSelectedNode").removeClass("curSelectedNode");
+            },
+            onCheck(event, treeId, treeNode) {
+                const ztree = $.fn.zTree.getZTreeObj(treeId);
+                push_video(treeNode);
+                function push_video(_treeNode) {
+                    if (_treeNode.children) {
+                        return _treeNode.children.forEach(v => {
+                            push_video(v);
+                        });
+                    }
+
+                    const { id, name, monitorPointSource, monitorPointDest, stId } = _treeNode;
+                    const stationName = _treeNode.getParentNode().name;
+                    if ($scope.checked_videos[id] && !treeNode.checked) {
+                        const id_index = $scope.checked_videos.findIndex(v => id === v.id);
+                        $scope.checked_videos[id_index].video.dispose();
+                        $scope.checked_videos[id_index].req_data = null;
+                        $scope.checked_videos.splice(id_index, 1);
+                        $scope.checked_videos.push({ id: Math.random() });
+                        $scope.checked_videos[id] = null;
+                        $scope.$apply();
+                    } else if (!$scope.checked_videos[id] && treeNode.checked) {
+                        const index = $scope.checked_videos.findIndex(v => !v.monitorPointDest);
+                        if (index === -1) {
+                            _treeNode.checked = false;
+                            ztree.updateNode(_treeNode);
+                            toaster.pop('error', '', '最多同时查看视频' + maxVideoView + '个!');
+                            return $scope.$apply();
+                        }
+                        $scope.checked_videos[id] = true;
+                        $scope.checked_videos[index] = { id, name, monitorPointSource, monitorPointDest, stId };
+                        $scope.checked_videos[index].req_data = {
+                            station_id: stId,
+                            stream: [{
+                                name,
+                                source: monitorPointSource,
+                                dest: monitorPointDest
+                            }]
+                        };
+                        $scope.$apply();
+
+                        ; (async (_id, _name, _index, req_data, _stationName) => {
+                            await myAjaxData.timeout(0);
+                            $scope.checked_videos[_index].video = videojs(
+                                'video_' + _id,
+                                {
+                                    // autoplay: true,
+                                    poster: await createImg(_stationName + '：' + _name, null)
+                                },
+                                function () {
+                                    this.hotkeys({
+                                        volumeStep: 0.1,
+                                        seekStep: 5,
+                                        enableVolumeScroll: false, //禁用鼠标滚轮调节问音量大小
+                                        enableModifiersForNumbers: false
+                                    });
+                                    this.on('play', function () {
+                                        $scope.checked_videos[_index].isPlay = true;
+                                        $.ajax({
+                                            type: 'POST',
+                                            // url: 'http://192.168.10.183:50125',
+                                            url: 'http://netest.solway.cn:50125',
+                                            data: JSON.stringify(req_data),
+                                            beforeSend() { }
+                                        });
+                                        $scope.$apply();
+                                    });
+                                    this.on('pause', function () {
+                                        $scope.checked_videos[_index].isPlay = false;
+                                        $scope.$apply();
+                                    });
+                                }
+                            );
+                        })(id, name, index, $scope.checked_videos[index].req_data, stationName);
+                    }
+                }
+            }
+        }
+    };
+
+    $scope.selectVideosByCom.subscribe(res => {
+        if (res.code !== 0) return;
+        $ocLazyLoad.load([
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.core.js', //ztree
+        ]).then(() => $ocLazyLoad.load([
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.exhide.js', //ztree
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.excheck.js', //ztree        
+        ])).then(() => {
+            res.body.pv && $.fn.zTree.init($("#tree_pv"), settings, res.body.pv).expandAll(true);
+            res.body.wp && $.fn.zTree.init($("#tree_wp"), settings, res.body.wp).expandAll(true);
+        });
+    });
+
+
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const { lineNum = 4, proportion = [2, 1] } = historiData;
+
+        $scope.lineNum = lineNum;
+        $scope.proportion = proportion;
+        $scope.checked_videos = new Array(maxVideoView).fill('').map((v, i) => ({ id: Math.random() }));
+
+        $scope.beforeLoading = false;
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+    };
+
+    $scope.changeLineNum = num => {
+        $scope.lineNum = num;
+        historicalRecord.set({ lineNum: num });
+    };
+
+    $scope.changeProportion = proportion => {
+        $scope.proportion = proportion;
+        historicalRecord.set({ proportion });
+    };
+
+    const timer = $interval(() => {
+        $scope.checked_videos.forEach((v, i) => {
+            if (!v.req_data) return;
+            if (!v.isPlay) return;
+            $.ajax({
+                type: 'POST',
+                url: 'http://netest.solway.cn:50125',
+                data: JSON.stringify(v.req_data),
+                beforeSend() { }
+            });
+        });
+    }, 30 * 1000);
+
+    function createCanvas() {
+        const c = document.createElement('canvas');
+        c.setAttribute('width', 450);
+        c.setAttribute('height', 30);
+        const ctx = c.getContext("2d");
+        ctx.font = "18px Arial";
+        ctx.fillStyle = "#fff";
+
+        return async function createImg(name, url) {
+            ctx.clearRect(0, 0, 600, 300);
+            url && ctx.drawImage(await loadImg(url), 0, 0);
+            ctx.fillText(name, 10, 20);
+            return c.toDataURL("image/png");
+        };
+    }
+
+    function loadImg(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('图片加载失败'));
+        });
+    }
+
+    $scope.$on('$destroy', () => {
+        $scope.checked_videos.forEach(v => v.video && v.video.dispose());
+        $.fn.zTree.destroy();
+        $interval.cancel(timer);
+    });
+
+
+
+
+});

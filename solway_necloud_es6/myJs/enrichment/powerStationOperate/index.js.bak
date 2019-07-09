@@ -1,0 +1,255 @@
+ajaxData({
+    // 显示所有电站详情（按照集团分组）
+    StationRunStatusNew: {
+        name: 'GETStationRunStatusNew',
+        data: {},
+        later: true
+    },
+    // 获取集团列表
+    selectAllByAdmin: {
+        name: 'selectAllByAdmin',
+        data: {}
+    },
+}, {
+        stid: null
+    })('powerStationOperateCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$interval'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $interval) => {
+        $scope.moduleName = '电站运行';//当前页面名称
+
+        //集团点击全选
+        $scope.allChecked = true;
+        $scope.getAllGroup = () => {
+            $scope.groupList.forEach(item => {
+                item.checked = $scope.allChecked ? true : false;
+            });
+        }
+
+        //点击单个集团的多选框
+        $scope.itemGroup = () => {
+            var checkArr = $scope.groupList.filter(item => item.checked);
+            if (checkArr.length < $scope.groupList.length) {
+                $scope.allChecked = false;
+            } else {
+                $scope.allChecked = true;
+            }
+        }
+
+        //查询按钮  获取选中的集团
+        $scope.comIds = [];
+        $scope.getCheckedGroup = () => {
+            $scope.comIds = $scope.allChecked ? [] : $scope.groupList.filter(item => item.checked).map(item => item.comId);
+            $scope.getList();
+            $scope.searchShow = false;
+        }
+
+        //取消选中按钮
+        $scope.cancelChecked = (e) => {
+            e.stopPropagation();
+            // $scope.allChecked = false;
+            // $scope.groupList.forEach(item => {
+            //     item.checked = false;
+            // });
+            $scope.searchShow = false;
+        }
+
+        //获取集团列表
+        $scope.selectAllByAdmin.subscribe(res => {
+            $scope.groupList = res;
+            $scope.groupList.forEach(item => {
+                item.checked = false;
+            });
+            // 集团默认全选
+            $scope.getAllGroup();
+        });
+
+        //刷新按钮
+        $scope.refresh = () => {
+            $scope.getList();
+        }
+
+        $scope.statusArr = [
+            {
+                'checked': true,
+                'value': 0
+            },
+            {
+                'checked': true,
+                'value': 1
+            },
+            {
+                'checked': true,
+                'value': 2
+            },
+            {
+                'checked': true,
+                'value': 3
+            },
+            {
+                'checked': true,
+                'value': 4
+            },
+            {
+                'checked': true,
+                'value': 5
+            },
+            {
+                'checked': true,
+                'value': 6
+            },
+        ]
+
+        //-----------------------------------获取电站详情 (默认获取全部)
+        //状态的全选按钮
+        $scope.powerStatusCheckAll = true;
+        $scope.statusCheckAll = () => {
+            $scope.statusArr.forEach(item => {
+                item.checked = $scope.powerStatusCheckAll ? true : false;
+            })
+            $scope.getList();
+        }
+
+        //单个的状态多选按钮
+        $scope.statusCheck = () => {
+            var checkedStatus = [];
+            $scope.statusArr.forEach(item => {
+                if (item.checked) {
+                    checkedStatus.push(item.value)
+                }
+            })
+            $scope.powerStatusCheckAll = checkedStatus.length < 7 ? false : true;
+            $scope.getList();
+        }
+
+        //电站状态映射
+        var psMap = {
+            0: '正常',
+            1: '故障',
+            2: '报警',
+            3: '中断',
+            4: '初始化',
+            5: '未知',
+            6: '未接入'
+        }
+
+        //获取电站
+        $scope.getList = () => {
+            $scope.loading = true;
+            var checkedStatus = [];
+            $scope.statusArr.forEach(item => {
+                if (item.checked) {
+                    checkedStatus.push(item.value)
+                }
+            })
+
+            $scope.StationRunStatusNew.getData({
+                comIds: $scope.comIds.join(),
+                status: checkedStatus.join()
+            }).then(res => {
+                $scope.loading = false;
+                $scope.powerSt = res.body;
+                if (checkedStatus.join() == '0,1,2,3,4,5,6') {
+                    var { date, ...pStatusArr } = res.body;
+                    $scope.pStatusArr = pStatusArr;
+                }
+                $scope.powerStAll = [];
+                $scope.foldFlag = false;
+                $scope.powerSt.date.forEach(item => {
+                    item.srs.forEach(son => {
+                        son.shortName = son.stationName.substr(0, 4);
+                        son.statusName = '\xa0' + psMap[son.status];
+                    })
+                    $scope.powerStAll.push(...item.srs);
+                })
+            })
+        }
+        $scope.getList();
+
+        //切换 按照集团显示
+        $scope.isGroupShow = true;
+        $scope.changeInputAbsent = () => {
+            $scope.isGroupShow = !$scope.isGroupShow;
+        }
+
+        //切换 显示站名
+        $scope.showPowerName = true;
+        $scope.showNameAbsent = () => {
+            $scope.showPowerName = !$scope.showPowerName;
+            $scope.foldFlag = false;
+        }
+
+        //点击电站方块 - 弹出添加事件组件
+        $scope.addEvent = false;
+        $scope.addEventFun = (item) => {
+            $scope.addEvent = true;
+            $scope.$broadcast('powerStInfo', item);
+        }
+
+        //点击空白 - 关闭添加事件组件
+        $scope.closeAddEvent = (item) => {
+            $scope.addEvent = false;
+            $scope.$broadcast('closeAddEvent');
+        }
+
+        //点击电站运行事件 - 弹出电站运行事件表格
+        $scope.eventListShow = false;
+        $scope.openList = () => {
+            $scope.eventListShow = true;
+            $scope.$broadcast('eventList');
+        }
+
+        // 搜索按钮
+        $scope.searchShow = false;
+        $scope.showSearchModel = (e) => {
+            e.stopPropagation();
+            $scope.searchShow = true;
+        }
+
+        $scope.keep = (e) => {
+            e.stopPropagation();
+        }
+
+        document.addEventListener('click', eventListen);
+        function eventListen() {
+            $scope.searchShow = false;
+            $scope.$apply();
+        }
+
+        //折叠电站方块
+        $scope.foldFlag = false;
+        $scope.fold = (item) => {
+            if (!$scope.showPowerName) {
+                item.srs.forEach((v, i) => {
+                    if (i > 101) {
+                        v.show = !v.show;
+                    }
+                })
+            } else {
+                item.srs.forEach((v, i) => {
+                    if (i > 50) {
+                        v.show = !v.show;
+                    }
+                })
+            }
+
+            $scope.foldFlag = !$scope.foldFlag;
+        }
+
+        // 接收事件列表的返回按钮   电站详情子组件 取消按钮
+        $scope.$on('eventListHide', (event, v) => {
+            $scope.eventListShow = false;
+            $scope.addEvent = false;
+        })
+
+        //定时刷新
+        const interval = $interval(() => {
+            $scope.getList();
+        }, 10000);
+
+        $scope.$on('$destroy', () => {
+            $interval.cancel(interval);
+        });
+
+        //头部折叠框 显示
+        $timeout(() => {
+            $('.ng-clock').removeClass('ng-clock');
+        }, 2000);
+    });

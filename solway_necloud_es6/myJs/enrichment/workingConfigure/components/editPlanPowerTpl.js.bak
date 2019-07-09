@@ -1,0 +1,85 @@
+
+ajaxData({
+    planPowerListMonth:{
+        name:'GETplanPowerListMonth',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    planPowerSave:{
+        name:'POSTplanPowerSave',
+        data: {},
+        later: true,
+        saveParam:false,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'addPlanModelService',
+})('addPlanPowerModelCtrl', ['$scope', 'addPlanModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    
+    $scope.planYear = new Date();
+    $scope.endDate = new Date('2099');
+
+    function sortNumber(a,b){
+        return Number(a.month) - Number(b.month);
+    }
+
+     //初始
+    $scope.$on('addPlanPowerBroad',function(e,data){
+        $scope.year = data.year;
+        getPlanPowerListData();
+    });
+
+    //列表接口
+    const getPlanPowerListData = () =>{
+        let year = '';
+        if($scope.year){
+            year = $scope.year;
+        }else{
+            year = $scope.planYear.showDate;
+        }
+
+        $scope.planPowerListMonth.getData({
+            year:year,
+            stid:$scope.pstationid
+        }).then(res=>{
+            if(res.code == 0){
+                $scope.planPowerListData = res.body.sort(sortNumber);
+            }
+        });
+    }
+
+    $scope.dateUpdated = async(dateType, dateTime) => {
+        await myAjaxData.timeout(0)
+        $scope.$apply();
+        getPlanPowerListData();
+    }
+
+    //保存
+    $scope.savePlanPower = () =>{
+        // for(let i=0;i<$scope.planPowerListData.length;i++){
+        //     if(!$scope.planPowerListData[i].plannedValue){
+        //         toaster.pop('error','','每个月的计划发电量不能为空');
+        //         return;
+        //     }
+        // }
+        if($scope.savePlanPowerLoading) return;
+        $scope.savePlanPowerLoading = true;
+
+        $scope.planPowerSave.getData($scope.planPowerListData).then(res=>{
+            $scope.savePlanPowerLoading = false;
+
+            if(res.code == 0){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('savePlanPowerCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
+
+    //取消
+    $scope.cancelPlanPower = () =>{
+        $scope.$emit('cancelCallback');
+    }
+});

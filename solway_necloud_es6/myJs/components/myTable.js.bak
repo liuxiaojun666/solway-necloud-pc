@@ -1,0 +1,294 @@
+
+/**
+ * [表格]
+ *  column: '=',   列
+ *      title       列名
+ *      dataIndex   对应数据的字段名
+ *      width       列width
+ *      align       水平对齐方式
+ *      sort        是否排序  布尔值
+ *      render(text, record, index) 渲染函数，   text：dataIndex   record: 对应数据（datasource）中当前记录对象   index：当前行（datasource）的index
+ *          render 方法 return 可传自定义事件 lxj-click    该事件只接收字符串参数
+    datasource: '=',   行
+    trClick: '=',    tr-click='点击行要执行的函数'  可不传
+    scrollY: '=',   滚动部分的高度  不传不滚动
+    trackBy: '@',   默认根据哪个字段排序   不传不排序
+    beforeCreate: '=',       类vue生命周期
+    created: '=',           类vue生命周期
+    beforeMount: '=',       类vue生命周期
+    mounted: '=',           类vue生命周期
+    beforeUpdate: '=',      类vue生命周期
+    updated: '=',           类vue生命周期
+    beforeDestroy: '=',     类vue生命周期
+    destroyed: '=',         类vue生命周期
+ */
+app.directive('myTable', ['$timeout', '$q', '$ocLazyLoad', ($timeout, $q, $ocLazyLoad) => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: {
+        column: '=',
+        datasource: '=',
+        trClick: '=',
+        trDblclick: '=',
+        trStyle: '=',
+        scrollY: '=',
+        scrollHeight: '=',
+        trackBy: '@',
+        trKey: '=',
+        beforeCreate: '=',
+        created: '=',
+        beforeMount: '=',
+        mounted: '=',
+        beforeUpdate: '=',
+        updated: '=',
+        beforeDestroy: '=',
+        destroyed: '=',
+        tableExportFileName: '=',
+        placeholder: '=',
+        checkboxOnchange: '=',
+    },
+    templateUrl: 'tpl/publicComponent/myTable.html' + window.stamp,
+    link($scope, $element) {
+        $scope.beforeMount && $scope.beforeMount($scope, $element);
+        $timeout(() => {
+            trCheckeboxApply();
+            lxjClickApply();
+            // tbodyLazyLoadScrollListen();
+            tableScroll();
+            fixedTableWidth();
+
+            $scope.mounted && $scope.mounted($scope, $element);
+            $scope.isMounted = !0;
+        }, 0);
+
+        function fixedTableWidth() {
+            let width = 0;
+            $($element[0]).find('th.fixed-left-th').each((i, v) => {
+                width += $(v).outerWidth();
+            });
+            $element.find('.my-table-body.fixed-left table').width(width);
+            $element.find('.my-table-head.fixed-left table').width(width);
+        }
+
+        function trCheckeboxApply() {
+            const checkboxTh = $element.find('th[data-name]');
+            if (!checkboxTh[0]) return;
+            const { name } = checkboxTh[0].dataset;
+            const $inputs = () => $element.find(`input[name=${name}]`);
+            $element.on('click', 'th input:checkbox', allHandle);
+            $element.on('click', `input[name=${name}]`, everyHandle);
+            function allHandle (e) {
+                e.stopPropagation();
+                if (this.checked) Array.from($inputs()).forEach(v => v.checked = true);
+                else Array.from($inputs()).forEach(v => v.checked = false);
+                $scope.checkboxOnchange && $scope.checkboxOnchange(this.checked, $inputs());
+            }
+            function everyHandle(e) {
+                e.stopPropagation();
+                $element.find('th input:checkbox').prop('checked', Array.from($inputs()).every(v => v.checked === true));
+                $scope.checkboxOnchange && $scope.checkboxOnchange($element.find('th input:checkbox')[0].checked, $inputs());
+            }
+            $element.on('$destroy', () => {
+                $element.off('click', 'th input:checkbox', allHandle);
+                $element.off('click', `input[name=${name}]`, everyHandle);
+            });
+        }
+
+        function lxjClickApply() {
+            $element.on('click', '[lxj-click]', function (e) {
+                e.stopPropagation();
+                const arr = $(this).attr('lxj-click').split('(');
+                if (!arr[0]) return;
+                if (!$scope[arr[0]]) return;
+                $scope[arr[0]](...arr[1].split(')')[0].split(','), e);
+            });
+        }
+
+        function tbodyLazyLoadScrollListen() {
+            const $myTableBody = $($element[0]).find('.my-table-body');
+            $myTableBody.on('scroll', eventHand);
+            $element.on('$destroy', () => $myTableBody.off('scroll', eventHand));
+            function eventHand(e) {
+                const $this = $(this);
+                const $table = $this.find('table');
+                if (($table.position().top - $scope.scrollHeight + $table.height()) < 100) {
+                    $scope.pushData();
+                    $scope.$apply();
+                }
+            }
+        }
+
+        function tableScroll() {
+            const $myTableBody = $($element[0]).find('.my-table-body')
+            $myTableBody.on('scroll', eventHand)
+            $element.on('$destroy', () => $myTableBody.off('scroll', eventHand))
+            function eventHand(e) {
+                const $this = $(this);
+                const $table = $this.find('table').eq(0);
+                const tableOffset = $table.offset();
+                if (!tableOffset) return;
+                $element.find('.my-table-head.main-head table').css('margin-left', tableOffset.left - $this.offset().left + 'px');
+                $element.find('.my-table-body.fixed-left table').css('margin-top', tableOffset.top - $this.offset().top + 'px');
+            }
+        }
+
+        if ($scope.trClick) {
+            $scope.__trClick = (e, item, index) => {
+                if (e.target.parentElement.localName === 'label') return;
+                if (e.target.attributes['lxj-click']) return;
+                $scope.trClick(item, index, e);
+            };
+        }
+
+        if ($scope.trDblclick) {
+            $scope.__trDblClick = (e, item, index) => {
+                if (e.target.parentElement.localName === 'label') return;
+                if (e.target.attributes['lxj-click']) return;
+                $scope.trDblclick(item, index, e);
+            };
+        }
+
+        if ($scope.tableExportFileName) {
+            $ocLazyLoad.load([
+                'vendor/jquery/TableExport/libs/js-xlsx/xlsx.core.min.js',
+                'vendor/jquery/TableExport/libs/FileSaver/FileSaver.min.js',
+                'vendor/jquery/TableExport/tableExport.js'
+            ]).then(() => {
+                $scope.tableExport = () => {
+                    $($element[0]).find('table').eq(1).tableExport({
+                        headings: true,
+                        footers: true,
+                        formats: ["xls", "csv", "txt"],
+                        fileName: $scope.tableExportFileName || '未命名',
+                        bootstrap: true,
+                        position: "bottom",
+                        ignoreRows: null,
+                        ignoreCols: null
+                    });
+                };
+            });
+        }
+    },
+    controller($scope, $element) {
+        $scope.beforeCreate && $scope.beforeCreate($scope, $element);
+        $scope.timeout = t => {
+            let d = $q.defer();
+            $timeout(() => d.resolve(), t);
+            return d.promise;
+        }
+        $scope.npDataPlaceholder = '<img style="margin: 20px 0;" src="theme/images/enrichment/noData.png" alt="没有加载到数据"/>'
+        $scope.__datasource = [];
+        $scope.isWindows = ($scope.scrollY || $scope.scrollHeight) && window.navigator.userAgent.toLocaleLowerCase().includes('windows');
+        $scope.orderBy = !0;
+        $scope.sort = (sort, dataIndex) => {
+            if (void 0 === $scope.__datasource[0]) return;
+            if (!sort) return;
+            if (dataIndex !== $scope.orderByDataIndex) {
+                $scope.orderByDataIndex = dataIndex;
+                $scope.orderBy = !0;
+            }
+            if (typeof $scope.__datasource[0][dataIndex] === 'number') {
+                $scope.__datasource.sort((a, b) => {
+                    const aData = a[dataIndex] || 0;
+                    const bData = b[dataIndex] || 0;
+                    return $scope.orderBy ? aData - bData : bData - aData;
+                });
+            } else {
+                $scope.orderBy && $scope.__datasource.sort((a, b) => {
+                    const aData = (a[dataIndex] || '').toString();
+                    const bData = (b[dataIndex] || '').toString();
+                    return do {
+                        if (null === aData || null === bData) -1
+                        else if (aData.length == bData.length) bData.localeCompare(aData);
+                        else bData.length - aData.length;
+                    }
+                })
+                $scope.__datasource.reverse();
+            }
+            $scope.gen.next($scope.orderByDataIndex);
+            $scope.orderBy = !$scope.orderBy;
+        };
+
+        $scope.$watch('datasource', (newValue, oldValue) => {
+            copyDatasource(newValue || []);
+            $scope.gen = (function* () {
+                $scope.__orderByDataIndex__ = $scope.orderByDataIndex;
+                $scope.orderByDataIndex = void 0;
+                $scope.orderByDataIndex = yield;
+            })();
+            $scope.gen.next();
+            $timeout(() => {
+                if ($scope.orderByDataIndex) return;
+                $scope.gen.next(void 0);
+                if ($scope.trackBy) $scope.sort(!0, $scope.trackBy);
+                if ($scope.scrollY) {
+                    const _$element = $($element);
+                    if (_$element.find('.my-table-body').height() > _$element.find('.my-table-body table').height()) {
+                        _$element.find('.my-table-head').css('padding-right', '0px');
+                    } else {
+                        _$element.find('.my-table-head').css('padding-right', '17px');
+                    }
+                }
+            }, 0);
+        });
+
+        $scope.$watchGroup(['datasource', 'column'], async (newValue, oldValue, $scope) => {
+            if (!$scope.isMounted) return;
+            $scope.beforeUpdate && $scope.beforeUpdate($scope, $element);
+            await $scope.timeout(0);
+            $scope.updated && $scope.updated($scope, $element);
+        });
+
+        $element.on('$destroy', async () => {
+            $scope.beforeDestroy && $scope.beforeDestroy($scope, $element);
+            await $scope.timeout(0);
+            $scope.destroyed && $scope.destroyed($scope, $element);
+        });
+
+
+
+        let allDataSource = [], isLoading = false;
+        function copyDatasource(datasource) {
+            if (datasource.isConcat) {
+                allDataSource = allDataSource.concat(datasource);
+            } else {
+                $scope.__datasource = [];
+                allDataSource = datasource.concat();
+            }
+            $scope.pushData();
+            tbodySubstepTimingLoad();
+        }
+        $scope.pushData = () => {
+            const { trKey } = $scope;
+            const oldLength = $scope.__datasource.length;
+            $scope.__datasource = allDataSource.map((v, i) => ({
+                ...v,
+                __trKey: v[trKey] || i
+            })).slice(0, oldLength + 50);
+        }
+
+        function tbodySubstepTimingLoad() {
+            // if (isLoading) return;
+            // isLoading = true;
+            $timeout(function () {
+                $scope.pushData();
+                if ($scope.datasource && $scope.__datasource.length < $scope.datasource.length) {
+                    tbodySubstepTimingLoad();
+                } else {
+                    if ($scope.__orderByDataIndex__) {
+                        $scope.orderByDataIndex = $scope.__orderByDataIndex__;
+                        $scope.orderBy = !$scope.orderBy;
+                        $scope.sort(!0, $scope.__orderByDataIndex__);
+                        $scope.$apply();
+                    }
+                }
+                // isLoading = false;
+            }, 500);
+        }
+
+
+        $scope.created && $scope.created($scope, $element);
+
+    }
+})])

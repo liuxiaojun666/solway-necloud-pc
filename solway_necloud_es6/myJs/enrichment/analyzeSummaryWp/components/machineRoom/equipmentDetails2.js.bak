@@ -1,0 +1,32 @@
+ajaxData(
+    {
+        turbineWsmPoints: {
+            name: 'GETturbineWsmPoints',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'machineRoomEquipmentDetails2Service',
+    }
+)('machineRoomEquipmentDetails2Ctrl', ['$scope', 'machineRoomEquipmentDetails2Service'], ($scope) => {
+    $scope.$on('equipmentDetails2', (_e, { eqid, eq_name }) => {
+        $scope.eq_name = eq_name;
+        $scope.turbineWsmPoints.res = null;
+        $scope.turbineWsmPoints.getData({
+            dataType: 2,
+            dateType: 2,
+            date: $scope.dateTime.showDate,
+            queryType: 3,
+            eqid
+        });
+    });
+
+    $scope.turbineWsmPoints.tooltipFormatter = (params) => {
+        return params[0].name + '<br/>' + params.map(v => v.seriesName + '　　' + v.value[0] + 'm/s　　' + v.value[1] + 'kW<br/>').join('');
+    };
+
+    $scope.$on('$destroy', () => {
+        $scope.turbineWsmPoints.res = null;
+    });
+
+});

@@ -1,0 +1,28 @@
+ajaxData(
+    {
+        turbinePitchPoints: {
+            name: 'GETturbinePitchPoints',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'runningStateEquipmentDetailsService',
+    }
+)('runningStateEquipmentDetailsCtrl', ['$scope', 'runningStateEquipmentDetailsService'], ($scope) => {
+    $scope.$on('equipmentDetails', (_e, { eqid, eq_name }) => {
+        $scope.eq_name = eq_name;
+        $scope.turbinePitchPoints.res = null;
+        $scope.turbinePitchPoints.getData({
+            dataType: 2,
+            dateType: 2,
+            date: $scope.dateTime.showDate,
+            queryType: 3,
+            eqid
+        });
+    });
+
+    $scope.$on('$destroy', () => {
+        
+    });
+
+});

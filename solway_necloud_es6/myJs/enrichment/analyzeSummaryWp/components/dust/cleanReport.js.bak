@@ -1,0 +1,94 @@
+ajaxData({
+    analysis_station_clean_info: {
+        name:'GETanalysis_station_clean_info',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    analysis_station_clean_invlist: {
+        name: 'GETanalysis_station_clean_invlist',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+    analysis_station_clean_invline: {
+        name: 'GETanalysis_station_clean_invline',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+}, {
+    __serviceName__: 'dustCleanReportService',
+})('dustCleanReportCtrl', ['$scope', 'dustCleanReportService'], ($scope, myAjaxData) => {
+    $scope.$on('cleanReport', (e, date) =>{
+        $scope.cDatetime = date;
+        $scope.analysis_station_clean_invlist.res = null;
+        $scope.analysis_station_clean_invline.res = null;
+        $scope.cColumn = [];
+        $scope.cxdata = void 0;
+        $scope.cydata = void 0;
+        $scope.analysis_station_clean_info.getData({
+            queryCode: 'analysis_station_clean_info',
+            queryType: 3,
+            date: date
+        }).then(res => res.body.start_date && $scope.diffGetdata(date));
+    });
+    
+    $scope.diffGetdata = () => {
+        const { cShowShape = 'list', date = $scope.cDatetime } = $scope;
+        if (cShowShape === 'list') {
+            $scope.analysis_station_clean_invlist.getData({
+                queryCode: 'analysis_station_clean_invlist',
+                queryType: 3,
+                sort: 'pge_r,desc',
+                date
+            });
+        } else if (cShowShape === 'chart') {
+            $scope.analysis_station_clean_invline.getData({
+                queryCode: 'analysis_station_clean_invline',
+                queryType: 3,
+                sort: 'pge_r,desc',
+                date
+            });
+        }
+    }
+
+    $scope.analysis_station_clean_invlist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.cDatasource = res.body.data;
+        $scope.cColumn = [
+            {
+                title: '逆变器',
+                dataIndex: 'eq_name',
+                width: '30%',
+                align: 'left',
+                sort: true,
+            },
+            {
+                title: '提升前发电效率(%)',
+                dataIndex: 'before_pge',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '提升后发电效率(%)',
+                dataIndex: 'after_pge',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '提升比例(%)',
+                dataIndex: 'pge_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    $scope.analysis_station_clean_invline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.cxdata = res.body.data.eq_name;
+        $scope.cydatas = [[res.body.data.before_pge, res.body.data.after_pge], [res.body.data.pge_r]];
+    };
+
+});

@@ -1,0 +1,404 @@
+ajaxData({
+    // 电站 月 时间 列表
+    query_wp_station_month_res_timelist: {
+        name: 'GETquery_wp_station_month_res_timelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 月 时间 曲线
+    query_wp_station_month_res_timeline: {
+        name: 'GETquery_wp_station_month_res_timeline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }, 
+    stationWsfLine: {
+        name: 'GETstationWsfLine',
+        data: { },
+        later: true,
+        onlyLatest: true,
+    },
+    stationVPList: {
+        name: 'GETstationVPList',
+        data: { },
+        later: true,
+        onlyLatest: true,
+    },
+}, {
+
+        __serviceName__: 'themeResourceStationMonthService'
+    })('themeResourceStationMonthCtrl', ['$scope', 'themeResourceStationMonthService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            let { showShape, select1, select2 } = historicalRecord.get().themeResourceStationMonth || {};
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            await $scope.dateUpdated();
+            $scope.changeShowShape(showShape || 'list');
+            $scope.select1 = select1;
+            $scope.select2 = select2;
+            if (select1) await $scope.selectChange('select1');
+            if (select2) await $scope.selectChange('select2');
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            diffGetData();
+            $scope.$apply();
+        };
+
+
+        // 日期改变
+        $scope.dateUpdated = async () => {
+            await myAjaxData.timeout(0);
+            if ($scope.currentClass !== 'StationMonth') return;
+            diffSelectOptions();
+            diffGetData();
+        };
+
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            if (!$scope.initComplete) return;
+            if ($scope.currentClass !== 'StationMonth') return;
+            diffSelectOptions();
+            diffGetData();
+        };
+
+        // 切换显示形式  图表 or 列表
+        $scope.changeShowShape = showShape => {
+            if (showShape === $scope.showShape) return;
+            $scope.showShape = showShape;
+            historicalRecord.set({
+                themeResourceStationMonth: {
+                    ...historicalRecord.get().themeResourceStationMonth || {},
+                    showShape
+                }
+            });
+            myChart && myChart.dispose();
+            myChart = null;
+            diffGetData();
+        };
+
+        // 图标轴线切换
+        $scope.selectChange = async (arg) => {
+            await myAjaxData.timeout(0);
+            historicalRecord.set({
+                themeResourceStationMonth: {
+                    ...historicalRecord.get().themeResourceStationMonth || {},
+                    [arg]: $scope[arg]
+                }
+            });
+            diffChartLineData();
+            $scope.$apply();
+        };
+
+        // 电站月 列表 数据处理
+        $scope.query_wp_station_month_res_timelist.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    sort: 'true',
+                    align: 'center',
+                    style: 'position:relative;',
+                    render(text, item, index) {
+                        return text + `
+                            <svg style="width: 30px;height: 30px;cursor:pointer;position: absolute;right: 1em;top:10px;" class="symbol-icon" aria-hidden="true">
+                                <use xlink:href="#icon-${['', 'qingtian', 'yintian', 'yu-', 'xue-', 'wumai', 'other'][item.weather_code]}"></use>
+                            </svg>`;
+                    }
+                },
+                {
+                    title: '平均风速' + (res.body.units.ws_avg ? '(' + res.body.units.ws_avg + ')' : ''),
+                    dataIndex: 'ws_avg',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
+                    dataIndex: 'real_hours',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '最大风速' + (res.body.units.ws_max ? '(' + res.body.units.ws_max + ')' : ''),
+                    dataIndex: 'ws_max',
+                    sort: 'true',
+                    align: 'right',
+                },
+                {
+                    title: '平均温度' + (res.body.units.ta_avg ? '(' + res.body.units.ta_avg + ')' : ''),
+                    dataIndex: 'ta_avg',
+                    sort: 'true',
+                    align: 'right',
+                }
+            ];
+        };
+
+        // 电站月 图表 数据处理
+        $scope.query_wp_station_month_res_timeline.getDataCallback = async (success, res) => {
+            if (!success) return;
+            if (!res.body.data.dtime[0]) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'ws_avg';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_hours';
+            $scope.query_wp_station_month_res_timeline.res.body.data.nullBlock = [];
+            $scope.query_wp_station_month_res_timeline.res.body.data.nullBlock2 = [];
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            // const day = new Date($scope.dateTime.showDate.split('-')).getDay() - 1;
+            const showDateArr = $scope.dateTime.showDate.split('-');
+            showDateArr[2] = ['01'];
+            const day = new Date(showDateArr).getDay() - 1;
+            $scope.query_wp_station_month_res_timeline.res.body.data.nullBlock = new Array(day < 0 ? 6 : day).fill('');
+            if ($scope.dateTime.showDate === (new Date).Format('yyyy-MM')) {
+                const date = new Date();
+                const dateNum = date.getDate();
+                $scope.query_wp_station_month_res_timeline.res.body.data.nullBlock2 = new Array(new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate() - dateNum + 1).fill('').map((v, i) => (i + dateNum) < 10 ? '0' + (i + dateNum) : i + dateNum);
+            }
+            diffSelectOptions(res.body.units);
+            diffChartLineData();
+            $scope.$apply();
+        };
+
+        // 计算 图表 显示对应 轴
+        function diffChartLineData() {
+            if (!$scope.initComplete) return;
+            const { select1, select2 } = $scope;
+            $scope.xdata = $scope.query_wp_station_month_res_timeline.res.body.data.dtime
+            $scope.ydatas = [[$scope.query_wp_station_month_res_timeline.res.body.data[select1]], [$scope.query_wp_station_month_res_timeline.res.body.data[select2]]]
+        }
+
+        // 轴线切换  可选项  判断
+        function diffSelectOptions(units = {}) {
+            $scope.selectOptions = {
+                ws_max: '最大风速' + (units.ws_max ? '(' + units.ws_max + ')' : ''),
+                ws_avg: '平均风速' + (units.ws_avg ? '(' + units.ws_avg + ')' : ''),
+                ta_avg: '平均温度' + (units.ta_avg ? '(' + units.ta_avg + ')' : ''),
+                real_hours: '发电小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
+            };
+        }
+
+        // 风向玫瑰图
+        let myChart;
+        $scope.stationWsfLine.subscribe(res => {
+            if ($scope.showShape !== 'chart3') return;
+            const { x, wd_ws_curve, wd_wfreq_curve } = res.body;
+            const maxWs = Math.max.apply(null, wd_ws_curve);
+            const maxWf = Math.max.apply(null, wd_wfreq_curve);
+            if (!x) return myChart && myChart.clear();
+            myChart = myChart || echarts.init(document.getElementById('roseMap'));
+            const option = {
+                // backgroundColor: '#163E67',
+                color: ['#37E2A4', '#6893FF'],
+                tooltip: {
+                    formatter: function (params, ticket, callback) {
+                        const {name, value, seriesName} = params;
+                        return name + ': ' + value[seriesName.split('--')[1] * 2];
+                    }
+                },
+                legend: {
+                    icon: 'rect',
+                    top: 20,
+                    right: 50,
+                    itemWidth: 24,
+                    itemHeight: 12,
+                    data: ['风频(%)', '风速(m/s)'],
+                    orient: 'vertical',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                radar: [
+                    {
+                        indicator: new Array(32).fill({
+                            text: '', max: maxWf
+                        }).map(function (v, i) {
+                            if (i === 1) return { text: 'N', max: maxWf };
+                            return v
+                        }),
+                        name: {
+                            textStyle: {
+                                color: '#fff',
+                                fontSize: $scope.winHeight > 700 ? 20 : 12
+                            }
+                        },
+                        splitArea: {
+                            areaStyle: {
+                                color: 'transparent',
+                            }
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: 'transparent'
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: 'transparent'
+                            }
+                        },
+                        radius: '70%',
+                        startAngle: 78.75,
+                        splitNumber: 4,
+                    },
+                    {
+                        indicator: new Array(32).fill({
+                            text: '', max: maxWs
+                        }),
+                        splitArea: {
+                            areaStyle: {
+                                color: 'transparent',
+                            }
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: 'transparent'
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: 'transparent'
+                            }
+                        },
+                        radius: '70%',
+                        startAngle: 90,
+                        splitNumber: 4,
+                    },
+                    {
+                        indicator: new Array(16).fill({
+                            text: ''
+                        }),
+                        splitArea: {
+                            areaStyle: {
+                                color: 'transparent',
+                            }
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#677889'
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: '#677889'
+                            }
+                        },
+                        radius: '70%',
+                        startAngle: 78.75,
+                        splitNumber: 4,
+                        shape: 'circle',
+                    }
+                ],
+                series: [
+                    ...wd_wfreq_curve.map((v, i) => ({
+                        name: '风频--' + i,
+                        type: 'radar',
+                        radarIndex: 0,
+                        symbolSize: 0,
+                        areaStyle: {
+                            normal: {
+                                color: '#37E2A4',
+                            }
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 0
+                            }
+                        },
+                        data: [
+                            {
+                                value: new Array(32).fill(0).map((xv, xi) => {
+                                    return xi <= i * 2 + 1 && xi >= i * 2 ? v : 0;
+                                }),
+                                name: '风频(%)',
+                            },
+                        ]
+                    })),
+                    ...wd_ws_curve.map((v, i) => ({
+                        name: '风速--' + i,
+                        type: 'radar',
+                        radarIndex: 1,
+                        symbolSize: 0,
+                        areaStyle: {
+                            normal: {
+                                color: '#6893FF'
+                            }
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 0
+                            }
+                        },
+                        data: [
+                            {
+                                value: new Array(32).fill(0).map((xv, xi) => {
+                                    return xi <= i * 2 + 1 && xi >= i * 2 ? v : 0;
+                                }),
+                                name: '风速(m/s)',
+                            },
+                        ]
+                    })),
+                ]
+            };
+            window.addEventListener('resize', $scope.switchDetailFullPage);
+            myChart.setOption(option, true);
+        });
+        $scope.switchDetailFullPage = async () => {
+            await myAjaxData.timeout(0);
+            myChart && myChart.resize();
+        };
+
+        // 判断 调用  对应 接口
+        async function diffGetData() {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            const { showShape, dateTime } = $scope;
+            setDataNull();
+            if (showShape === 'list') {
+                $scope.query_wp_station_month_res_timelist.getData({
+                    queryCode: 'query_wp_station_month_res_timelist',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+            } else if (showShape === 'chart3') {
+                $scope.stationWsfLine.getData({
+                    queryType: 3,
+                    dateType: 2,
+                    date: $scope.dateTime.showDate
+                });
+                $scope.stationVPList.getData({
+                    queryType: 3,
+                    dateType: 2,
+                    date: $scope.dateTime.showDate
+                });
+            } else {
+                $scope.query_wp_station_month_res_timeline.getData({
+                    queryCode: 'query_wp_station_month_res_timeline',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+            }
+        }
+
+        function setDataNull() {
+            $scope.query_wp_station_month_res_timelist.res = null;
+            $scope.query_wp_station_month_res_timeline.res = null;
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
+            $scope.column = [];
+        }
+
+        $scope.$on('$destroy', () => {
+            setDataNull();
+            window.removeEventListener('resize', $scope.switchDetailFullPage);
+            myChart && myChart.dispose();
+            myChart = null;
+        });
+
+    });

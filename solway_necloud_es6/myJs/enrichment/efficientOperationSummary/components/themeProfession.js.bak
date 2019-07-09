@@ -1,0 +1,497 @@
+ajaxData({
+    // 该角色 电站列表
+    allSTListForPCBySession: {
+        name: 'GETStationList2',
+        data: {}
+    },
+    // 消息列表
+    getBaseMessageListNew: {
+        name: 'GETBaseMessageListNew',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 任务详情
+    taskDetailPC: {
+        name: 'GETBaseMessageDetailById',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 标记选中为已读
+    readBaseMessages: {
+        name: 'readBaseMessages',
+        data: {},
+        later: true,
+    },
+    // 全部消息标记为已读
+    readBaseAllMessages: {
+        name: 'readBaseAllMessages',
+        data: {},
+        later: true
+    },
+    // 批量关闭 消息
+    eventNoHandles: {
+        name: 'eventNoHandles',
+        data: {},
+        later: true
+    },
+    // 电站id  查询  电站人员
+    selectAllUserBySTID: {
+        name: 'GETselectAllUserBySTID',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 发布任务
+    opTimeTaskUpdate: {
+        name: 'opTimeTaskUpdate',
+        data: {},
+        later: true
+    },
+    // 定时任务管理 列表
+    timeTaskList: {
+        name: 'GETopTimeTaskList',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+    // 定时任务 删除
+    automaticTaskDelete: {
+        name: 'opTimeTaskDelete',
+        data: {},
+        later: true,
+    },
+    // 定时任务 打开关闭
+    opShareTimeTaskAutoPub: {
+        name: 'opTimeTaskAutoPub',
+        data: {},
+        later: true,
+    }
+}, {
+        __serviceName__: 'themeProfessionService'
+    })('themeProfessionCtrl', ['$scope', 'themeProfessionService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            const {
+                startDate: __sdate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365),
+                endDate: __edate = new Date,
+                pStationId,
+                isHis = '0',
+                handStatus = {
+                    '00': true,
+                    '01': true,
+                    '02': true,
+                    '03': true,
+                    '04': true,
+                    '05': true,
+                },
+                searchKey = '',
+                isDefaultList = true,
+            } = historicalRecord.get().themeProfession || {};
+            $scope.startDate = new Date(__sdate);
+            $scope.startDate.showDate = '';
+            $scope.endDate = new Date(__edate);
+            $scope.endDate.showDate = '';
+            $scope.pStationId = pStationId;
+            $scope.isHis = isHis;
+            $scope.handStatus = handStatus;
+            $scope.searchKey = searchKey;
+            $scope.isDefaultList = isDefaultList;
+            await myAjaxData.timeout(0);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            getBaseMessageList();
+            $scope.$apply();
+        };
+
+        // 查询 弹出 事件
+        $scope.searchPopUp = (e) => {
+            e.stopPropagation();
+            $scope.searchActive = true;
+            $scope.batchCloseActive = false;
+            // $scope.messagePopUp = false;
+        };
+
+        // 批量标记关闭 弹出 事件
+        $scope.batchClosePopUp = (e) => {
+            e.stopPropagation();
+            // if ($scope.messagePopUp) return;
+            $scope.batchCloseActive = true;
+            $scope.searchActive = false;
+            // $scope.messagePopUp = false;
+        };
+
+        // 发布任务 弹出 事件
+        $scope.releaseTaskPopUp = () => {
+            // if ($scope.messagePopUp) return;
+            $scope.releaseTask = true;
+            $scope.releaseTaskParame = {
+                timerType: '0',
+                ...($scope.releaseTaskParame || {}),
+            };
+        };
+
+        // 发布任务 发布时间 类型 默认时间 定义
+        $scope.releaseTaskDateUpdate = dateStr => $scope.releaseTaskParame.timerDate = dateStr;
+
+        // 发布任务 提交
+        $scope.releaseTaskSubmit = () => {
+            if (!$solway.formValidation($scope.releaseTaskParame, '.releaseTask .professional', toaster)) return;
+            $scope.releaseTask = false;
+            $scope.opTimeTaskUpdate.getData({ ...$scope.releaseTaskParame, dateArr: null }).then((res) => {
+                if (res.code === 0) {
+                    toaster.pop('success', '', res.msg || '发布任务成功');
+                    getBaseMessageList();
+                }
+                else return toaster.pop('error', '', res.msg || '发布任务失败');
+                $scope.releaseTaskParame.taskContent = '';
+            });
+        };
+
+        // 对比是否 默认 查询 条件
+        function diffIsDefaultList() {
+            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+            if (startDate.showDate !== '') return $scope.isDefaultList = false;
+            if (endDate.showDate !== '') return $scope.isDefaultList = false;
+            if (pStationId) return $scope.isDefaultList = false;
+            if (searchKey !== '') return $scope.isDefaultList = false;
+            if (isHis !== '0') return $scope.isDefaultList = false;
+            if (Object.keys(handStatus).filter(v => handStatus[v] === false)[0]) return $scope.isDefaultList = false;
+            return $scope.isDefaultList = true;
+        }
+
+
+        // 查询
+        $scope.search = () => {
+            $scope.searchActive = false;
+            $scope.closeMessagePopUp();
+            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+            diffIsDefaultList();
+            historicalRecord.set({
+                themeProfession: {
+                    ...historicalRecord.get().themeProfession || {},
+                    startDate, endDate, pStationId, isHis, handStatus, searchKey, isDefaultList: $scope.isDefaultList
+                }
+            });
+            return getBaseMessageList();
+        };
+
+        // 消息列表 接口 请求
+        function getBaseMessageList() {
+            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+            $scope.column = [];
+            $scope.getBaseMessageListNew.getData({
+                startDate: startDate.showDate,
+                endDate: endDate.showDate,
+                pStationId: pStationId || '',
+                searchKey: searchKey || '',
+                isHis,
+                handStatus: isHis == '0' ? Object.keys(handStatus).filter(v => handStatus[v]).join() : '03',
+                pageIndex: 0,
+                pageSize: 20
+            });
+        }
+
+        function editListDom() {
+            const { data: { mid: id }, index } = $scope.listActiveItem;
+            $scope.taskDetailPC.getData({ id }).then(res => {
+                const str = {
+                    '00': "待确认",
+                    '01': "待受理",
+                    '02': "待处理",
+                    '03': "已关闭",
+                    '04': "被确认",
+                    '05': "验收中"
+                }[res.handstatus];
+                $('#professionTaskList .my-table-body').eq(1).find('tr').eq(index + 1).find('td span.status').text(str);
+            });
+        }
+
+        // 消息列表 缺省 参数
+        $scope.resetList = (reloadList) => {
+            if (!reloadList) return editListDom();
+            $scope.startDate.showDate = '';
+            $scope.endDate.showDate = '';
+            $scope.pStationId = '';
+            $scope.searchKey = '';
+            $scope.isHis = '0';
+            $scope.handStatus = {
+                '00': true,
+                '01': true,
+                '02': true,
+                '03': true,
+                '04': true,
+                '05': true,
+            };
+            Array.from(document.querySelectorAll('#searchParams input'), v => v.value = '');
+            const { startDate, endDate, pStationId, isHis, handStatus, searchKey } = $scope;
+            historicalRecord.set({
+                themeProfession: {
+                    ...historicalRecord.get().themeProfession || {},
+                    startDate, endDate, pStationId, isHis, handStatus, searchKey,
+                    isDefaultList: $scope.isDefaultList = true
+                }
+            });
+            getBaseMessageList();
+        };
+
+        // 列表 接口 数据 回调
+        $scope.getBaseMessageListNew.getDataCallback = (success, res) => {
+            if (!success) return;
+
+            // 列表
+            $scope.column = [
+                {
+                    title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+                    dataIndex: '',
+                    width: '60px',
+                    align: 'center',
+                    checkboxName: 'batchprocessing',
+                    render(text, record, index) {
+                        return '<label class="i-checks m-b-none"><input data-identifies="' + record.busino + '_' + record.mid + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    }
+                },
+                {
+                    title: '电站名称',
+                    dataIndex: 'stname',
+                    width: '250px',
+                    // sort: true,
+                    render(text, item) {
+                        return `
+                    <span style="color: #3ae2ca;">${text || ''}</span>
+                    ${(item.unread_num > 0) ? '<span class="unread" style="margin-left:0.5em;display:inline-block;width:15px;height:15px;text-align:center;line-height:15px;background:#ed5454;border-radius:50%;">' + item.unread_num + '</span>' : ''}`
+                    }
+                },
+                {
+                    title: '发布时间',
+                    dataIndex: 'ct',
+                    align: 'center',
+                    // sort: true,
+                    width: '150px',
+                    render(text) {
+                        return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm:ss')}</span>`
+                    }
+                },
+                {
+                    title: '发布人',
+                    dataIndex: 'musname_real',
+                    // sort: true,
+                },
+                {
+                    title: '处理人',
+                    dataIndex: 'murname_real',
+                    // dataIndex: 'lastestHandMan',
+                    // sort: true,
+                },
+                {
+                    title: '内容',
+                    dataIndex: 'mc',
+                    // sort: true,
+                    width: '30%',
+                },
+                {
+                    title: '损失电量(kWh)',
+                    dataIndex: 'fail_we',
+                    // sort: true,
+                    // width: '30%',
+                },
+                {
+                    title: '状态',
+                    dataIndex: 'mhs',
+                    // sort: true,
+                    render(text) {
+                        switch (text) {
+                            case '00':
+                                return '<span class="status">待确认</span>'
+                            case '01':
+                                return '<span class="status">待受理</span>'
+                            case '02':
+                                return '<span class="status">待处理</span>'
+                            case '03':
+                                return '<span class="status">已关闭</span>'
+                            case '04':
+                                return '<span class="status">被确认</span>'
+                            case '05':
+                                return '<span class="status">验收中</span>'
+
+                            default:
+                                break;
+                        }
+                    }
+                },
+            ];
+            $scope.closeMessagePopUp();
+        };
+
+        // 消息 批量 标记为 已读
+        const batchReadMsg = async all => {
+            $scope.batchReadHandle = '0';
+            let res = null;
+            if (all) {
+                $solway.confirm({ message: '确定标记所有消息为已读？' }, async () => {
+                    res = await $scope.readBaseAllMessages.getData({});
+                    resultCallback();
+                });
+            } else {
+                $solway.confirm({ message: '确定标记选中消息为已读？'}, async () => {
+                    const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies.split('_')[1]);
+                    if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
+                    res = await $scope.readBaseMessages.getData({ ids: ids.join(',') });
+                    resultCallback();
+                });
+            }
+            function resultCallback () {
+                if (res && res.code === 0) toaster.pop('success', '', '批量处理成功');
+                else toaster.pop('error', '', '批量处理失败');
+                $scope.getBaseMessageListNew.getData({});
+            }
+        };
+
+        // 批量 标记已读 事件触发
+        $scope.batchReadHandleFunc = () => {
+            const { batchReadHandle } = $scope;
+            if (batchReadHandle == '1') batchReadMsg();
+            else if (batchReadHandle == '2') batchReadMsg(true);
+        };
+
+        // 批量关闭 未确认消息
+        $scope.batchClose = async () => {
+            const { otherreason, notprocereason } = $scope;
+            const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
+            if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
+            if (notprocereason == '0' && !otherreason) return toaster.pop('error', '', '请填写其他原因具体内容');
+            // if (!confirm('确定关闭选中消息为 关闭？')) return;
+            $solway.confirm({ message: '确定标记选中消息为关闭？' }, async () => {
+                const res = await $scope.eventNoHandles.getData({
+                    notprocereason,
+                    otherreason,
+                    e_m_ids: ids.join(',')
+                });
+                eventListen();
+                if (res.code === 0) toaster.pop('success', '', '批量处理成功');
+                else toaster.pop('error', '', '批量处理失败');
+                $scope.getBaseMessageListNew.getData({});
+            });
+        };
+
+        // 点击行
+        $scope.trClick = async (item, index, e) => {
+            e.stopPropagation();
+            $scope.listActiveItem = {
+                data: item,
+                index
+            };
+            $scope.searchActive = false;
+            $scope.batchCloseActive = false;
+            $scope.closeMessagePopUp();
+            await myAjaxData.timeout(100);
+            $scope.messagePopUp = true;
+            $scope.$broadcast("chatPanelObj", { ...item, isHis: [0, 1][$scope.isHis] });
+            $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
+            if (item.unread_num > 0) $scope.readBaseMessages.getData({ ids: item.mid });
+            $scope.$apply();
+        };
+
+        // 关闭 聊天 消息 面板
+        $scope.closeMessagePopUp = () => {
+            $scope.messagePopUp = false;
+            $('.my-table tbody tr').removeClass('active');
+        };
+
+        // 定时任务 删除操作 函数 挂载   打开关闭 操作 函数 挂载
+        $scope.timeTaskListCreated = (scope) => {
+            scope.deleteTimeTask = id => {
+                $solway.confirm({ message: '确定删除吗？此操作不可恢复！'}, () => {
+                    $scope.automaticTaskDelete.getData({ id }).then(res => {
+                        if (res.code === 0) {
+                            toaster.pop('success', '', res.msg);
+                            $scope.timeTaskList.getData({});
+                        }
+                        else toaster.pop('error', '', res.msg || '删除失败');
+                    });
+                });
+            };
+            scope.autoPubHandle = (id, oldValue, e) => {
+                const autoPub = e.currentTarget.children[0].checked ? '1' : '0';
+                if (autoPub === oldValue) return;
+                $scope.opShareTimeTaskAutoPub.getData({ id, autoPub }).then(res => {
+                    $scope.timeTaskList.getData({});
+                });
+            };
+        };
+
+        // 定时任务管理
+        $scope.timingTaskManagement = () => {
+            $scope.timingTask = true;
+            $scope.timeTaskList.getData({}).then(res => {
+                $scope.timeTaskListColumn = [
+                    {
+                        title: '电站名称',
+                        dataIndex: 'stationName',
+                        width: '25%',
+                        align: 'left'
+                    },
+                    {
+                        title: '发布人',
+                        dataIndex: 'distManName',
+                    },
+                    {
+                        title: '受理人',
+                        dataIndex: 'respManName',
+                    },
+                    {
+                        title: '内容',
+                        dataIndex: 'taskContent',
+                        width: '30%',
+                    },
+                    {
+                        title: '执行策略',
+                        dataIndex: 'timerDate',
+                        width: '150px',
+                        align: 'right',
+                        render(text) {
+                            if (!text) return;
+                            if (text.length < 6) return '每天' + text;
+                            const arr = text.split(' ');
+                            let date, dateStr, timeStr = arr[1];
+                            if (arr[1]) date = arr[0].split('-');
+                            if (date[1]) dateStr = '每年' + date.join('月') + '日';
+                            else dateStr = '每月' + date[0] + '日'
+                            return dateStr + arr[1];
+                        }
+                    },
+                    {
+                        dataIndex: 'autoPub',
+                        align: 'center',
+                        width: '150px',
+                        render(text, item, index) {
+                            return `
+                                <span lxj-click="deleteTimeTask(${item.id});" style="color:red;margin-right:1em;">删除</span>
+                                <label lxj-click="autoPubHandle(${item.id},${text});" class="i-switch i-switch-sm" style="vertical-align: bottom;background-color: #1cbbb4;">
+                                    <input type="checkbox" ${text === '1' ? 'checked' : ''} >
+                                    <i></i>
+                                </label>
+                                `
+                        }
+                    }
+                ];
+            });
+        };
+
+        // 页面 点击  影藏 弹出
+        document.addEventListener('click', eventListen);
+        function eventListen() {
+            $scope.searchActive = false;
+            $scope.batchCloseActive = false;
+            // $scope.messagePopUp = false;
+            $scope.$apply();
+        }
+        $scope.$on('$destroy', () => {
+            document.removeEventListener('click', eventListen);
+        });
+
+    });

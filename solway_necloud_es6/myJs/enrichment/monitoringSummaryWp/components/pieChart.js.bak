@@ -1,0 +1,77 @@
+app.directive('commonChartPie', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
+    restrict: 'E',
+    scope: {
+        width: '=',
+        height: '=',
+        chartName: '@',
+        chartData: '=',
+        colors: '='
+    },
+    link($scope, $element, $attrs) {
+        let myChart
+        setTimeout(() => {
+            setWidthHeight()
+            myChart = echarts.init($element[0])
+            window.addEventListener('resize', resizeFun)
+            $scope.$watch('chartData', (newValue, oldValue) => {
+                if (!newValue) return
+                if (Object.is(newValue, oldValue)) return
+                
+            })
+        }, 0);
+
+        const drawing = () => {
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                series: [{
+                    name: $scope.chartName,
+                    center: ['50%', '50%'],
+                    radius: ['45%', '70%'],
+                    type: 'pie',
+                    data: $scope.chartData.names.map((v, i) => ({
+                        name: v,
+                        value: $scope.chartData.values[i],
+                        label: {
+                            normal: {
+                                textStyle: {
+                                    color: '#3f3f3f',
+                                    fontSize: 14
+                                }
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: $scope.colors[i]
+                            },
+                        },
+                        hoverAnimation: false
+                    }))
+                }]
+            }
+            myChart.setOption(option, true);
+        };
+
+
+
+
+        // 设置宽高
+        const setWidthHeight = () => $element.width($scope.width).height($scope.height);
+
+        // 宽高改变  重新画
+        const resizeFunc = async () => {
+            await myAjaxData.timeout(0);
+            setWidthHeight();
+            myChart.resize();
+            drawing();
+        };
+        window.addEventListener('resize', resizeFunc);
+        $scope.$on('$destroy', () => {
+            window.removeEventListener('resize', resizeFunc);
+            myChart.dispose();
+            myChart = null;
+        });
+    }
+})])

@@ -1,0 +1,107 @@
+
+ajaxData({
+    manufacturerList:{
+        name:'GETmanufacturerList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    selectByManuList:{
+        name:'GETselectByManuList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    updateDeviceTurbine:{
+        name:'POSTupdateDeviceTurbine',
+        data: {},
+        later: true,
+        onlyLatest: true,
+        saveParam:false
+    }
+}, {
+    __serviceName__: 'editTurbineTplService',
+})('editTurbineTplModelCtrl', ['$scope', 'editTurbineTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    
+    // 初始
+    $scope.$on('editTurbineBroad',async(e,data)=>{
+        $scope.getManufacturerList();
+        if(data){
+            $scope.formData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+
+            $scope.formData = angular.copy(data);
+
+            if(data.manufid){
+                $scope.changemanufacturer();
+            }
+            $scope.formData['beginDate'] = data.beginDate?new Date(data.beginDate):new Date();
+            $scope.formData['endDate'] = data.endDate?new Date(data.endDate):new Date();
+            if(!data.beginDate) $scope.formData['beginDate'].showDate = '';
+            if(!data.endDate) $scope.formData['endDate'].showDate = '';
+
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        }else{
+            $scope.formData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+            $scope.formData['beginDate'] = new Date();
+            $scope.formData['endDate'] = new Date();
+            $scope.formData['beginDate'].showDate = '';
+            $scope.formData['endDate'].showDate = '';
+            $scope.formData['pstationID'] = $scope.stationId;
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        }
+    });
+
+    //获取厂商列表
+    $scope.getManufacturerList = ()=>{
+        $scope.manufacturerList.getData({
+            devicetype:18
+        }).then(res=>{
+            $scope.manuList = res;
+            if(res && res.length){
+                $scope.manuList.unshift({id :null,manufname : '-请选择-'});
+            }
+        });
+    }
+    
+
+    //选择某一厂商，获取产品型号列表
+    $scope.changemanufacturer = () =>{
+		$scope.selectByManuList.getData({
+            manufid : $scope.formData.manuFID,
+        }).then(res=>{
+            $scope.productList = res;
+            if(res && res.length){
+                $scope.productList.unshift({id :null,productname : '-请选择-'});
+            }
+        });
+    }
+    
+
+     //保存
+    $scope.saveTurbine = () =>{
+        if (!$solway.formValidation($scope.formData, '.editTurbineTpl', toaster)) return;//校验非空
+
+        $scope.formData['beginDate'] = $scope.formData['beginDate'].showDate ;
+        $scope.formData['endDate']   = $scope.formData['endDate'].showDate;
+
+        $scope.updateDeviceTurbine.getData($scope.formData).then(res=>{
+            if(res.code == '0'){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('editTurbineCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
+
+    //取消
+    $scope.cancelTurbine = () =>{
+        $scope.$emit('cancelTurbine');
+    }
+});

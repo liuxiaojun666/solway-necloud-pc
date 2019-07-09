@@ -1,0 +1,199 @@
+ajaxData(
+    {
+        settlePowerList: {
+            name: 'GETSettlePowerList',
+            data: {}
+        },
+        // 该角色 电站列表
+        allSTListForPCBySession: {
+            name: 'GETAllSTListForPCBySession',
+            data: {}
+        },
+        // 图片上传
+        uploadImageSingle: {
+            name: 'uploadImageSingle',
+            later: true,
+        },
+        // 新增 更新
+        settlePowerSave: {
+            name: 'POSTSettlePowerUpdate',
+            data: {},
+            later: true
+        },
+        // 查看详情
+        settlePowerDetail: {
+            name: 'GETSettlePowerDetail',
+            data: {},
+            later: true
+        },
+        // 删除
+        settlePowerDelete: {
+            name: 'POSTSettlePowerDelete',
+            data: {},
+            later: true
+        }
+    }, {}
+)('settlementAmountCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$ocLazyLoad', 'toaster'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad, toaster) => {
+    historicalRecord.init();
+    $scope.beforeLoading = true; // 页面loading
+    $scope.moduleName = '结算电量';//当前页面名称；
+    historyInitCallback();
+
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const {
+
+        } = historiData;
+        $scope.beforeLoading = false;
+    };
+
+    $scope.formDataInit = () => {
+        $scope.formData = {
+            stid: '',
+            num: '',
+            beginTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
+            endTime: new Date(Date.now() - 1000 * 60 * 60 * 24),
+            year: '',
+            netPower: 0,
+            selfPower: 0,
+            imgs: []
+        };
+    };
+
+    // 列表操作，删除 编辑
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        if (event.target.className.includes('edit')) {
+            $scope.newForm = true;
+            const { id, stid, num, beginTime, endTime, year, netPower, selfPower, imgs } = item;
+            $scope.formData = {
+                id,
+                stid,
+                num,
+                beginTime: new Date(beginTime),
+                endTime: new Date(endTime),
+                year,
+                netPower,
+                selfPower,
+                imgs: (imgs || '').split(',')
+            };
+        } else if (event.target.className.includes('delete')) {
+            $ocLazyLoad.load([
+                'theme/js/dist/components/confirm.js' + stamp,
+            ]).then(res => {
+                $solway.confirm(
+                    { title: '电站：' + item.stationName + ', 期数:' + item.num, message: ' 确定删除该记录吗？' },
+                    () => $scope.settlePowerDelete.getData({ id: item.id }).then(res => {
+                        $scope.settlePowerList.getData();
+                    })
+                );
+            });
+        }
+    };
+
+    // 列表
+    $scope.settlePowerList.subscribe(res => {
+        $scope.column = [
+            {
+                title: '年',
+                dataIndex: 'year',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '期数',
+                dataIndex: 'num',
+                // sort: true,
+                align: 'center'
+            },
+            {
+                title: '电站名称',
+                dataIndex: 'stationName',
+                sort: true,
+            },
+            {
+                title: '开始时间',
+                dataIndex: 'beginTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '结束时间',
+                dataIndex: 'endTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '上网电量(kWh)',
+                dataIndex: 'netPower',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '自发自用电量(kWh)',
+                dataIndex: 'selfPower',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '操作',
+                dataIndex: 'id',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return `
+                        <span title="编辑" style="padding: 0 10px;color:#31d3c9;cursor:pointer;" class="clickable edit iconfont icon-bianji-copy"></span>
+                        <span title="删除" style="padding: 0 10px;cursor:pointer;color:red;" class="clickable delete iconfont icon-shanchu1"></span>
+                    `
+                }
+            },
+        ];
+    });
+
+    // 图片上传
+    $scope.uploadFile = (element) => {
+        $scope.uploadImageSingle.getData({
+            classify: 'settlementPower',
+            file: element.files[0]
+        }).then(res => {
+            if (res.code !== 0) return;
+            if (!$scope.formData.imgs[0]) $scope.formData.imgs[0] = res.body;
+            else $scope.formData.imgs.push(res.body);
+        });
+    };
+
+    // 删除图片
+    $scope.deleteImage = (index) => {
+        $scope.formData.imgs.splice(index, 1);
+    };
+
+    // 新增 更新
+    $scope.formDataSubmit = () => {
+        const { beginTime, endTime, imgs } = $scope.formData;
+        $ocLazyLoad.load([
+            'theme/js/dist/components/formValidation.js' + stamp,
+        ]).then(res => {
+            if ($solway.formValidation($scope.formData, '.settlementAmount .slide-down', toaster)) {
+                $scope.settlePowerSave.getData({
+                    ...$scope.formData,
+                    beginTime: beginTime.showDate,
+                    endTime: endTime.showDate,
+                    imgs: imgs.join()
+                }).then(res => {
+                    if (res.code === 0) toaster.pop('success', '', res.msg || '成功');
+                    else return toaster.pop('error', '', res.msg || '失败');
+                    $scope.newForm = false;
+                    $scope.settlePowerList.getData();
+                });
+            }
+        });
+    };
+
+});

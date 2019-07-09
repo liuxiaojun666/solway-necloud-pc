@@ -1,0 +1,177 @@
+ajaxData({
+    // info
+    analysis_station_eval_fra_year_info: {
+        name: 'GETanalysis_station_eval_fra_year_info',
+        data: {},
+        later: true
+    },
+    // 时间 列表
+    analysis_station_eval_fra_year_timelist: {
+        name: 'GETanalysis_station_eval_fra_year_timelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 时间 曲线
+    analysis_station_eval_fra_year_timeline: {
+        name: 'GETanalysis_station_eval_fra_year_timeline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
+    __serviceName__: 'resourcesDeviationStationYearService',
+})('resourcesDeviationStationYearCtrl', ['$scope', 'resourcesDeviationStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, tabIndex = 0 } = historicalRecord.get().themeResourcesDeviationStationYear || {};
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeResourcesDeviationStationYear: {
+                ...historicalRecord.get().themeResourcesDeviationStationYear || {},
+                tabIndex
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeResourcesDeviationStationYear: {
+                ...historicalRecord.get().themeResourcesDeviationStationYear || {},
+                showShape
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 接口请求
+    $scope.diffGetData = async (getInfo) => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull(getInfo);
+        const { showShape, dateTime, tabIndex, dateType, dataType } = $scope;
+        if (dateType !== 2) return;
+        if (dataType !== 0) return;
+        if (getInfo) {
+            $scope.analysis_station_eval_fra_year_info.getData({
+                queryCode: 'analysis_station_eval_fra_year_info',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        }
+        if (tabIndex === 0 && showShape === 'list') {
+            $scope.analysis_station_eval_fra_year_timelist.getData({
+                queryCode: 'analysis_station_eval_fra_year_timelist',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 0 && showShape === 'chart') {
+            $scope.analysis_station_eval_fra_year_timeline.getData({
+                queryCode: 'analysis_station_eval_fra_year_timeline',
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        }
+    };
+
+    // 时间 列表
+    $scope.analysis_station_eval_fra_year_timelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '日期',
+                dataIndex: 'dtime',
+                align: 'center',
+                sort: true,
+            },
+            {
+                title: '评估辐射总量' + '(' + res.body.units.eval_rad_d + ')',
+                dataIndex: 'eval_rad_d',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '实际辐射总量' + '(' + res.body.units.rad_chk + ')',
+                dataIndex: 'rad_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '可研电量' + '(' + res.body.units.eval_kwh_d + ')',
+                dataIndex: 'eval_kwh_d',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '理论电量' + '(' + res.body.units.shd_kwh_chk + ')',
+                dataIndex: 'shd_kwh_chk',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '资源偏差' + '(' + res.body.units.res_dev_we_r + ')',
+                dataIndex: 'res_dev_we_r',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 时间 曲线
+    $scope.analysis_station_eval_fra_year_timeline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data.eval_kwh_d, res.body.data.shd_kwh_chk], [res.body.data.res_dev_we_r]];
+        $scope.ydatas2 = [[res.body.data.eval_rad_d, res.body.data.rad_chk], [res.body.data.res_dev_rad_r]];
+    };
+
+    // 数据置空
+    function setDataNull(getInfo) {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.ydatas2 = void 0;
+        $scope.analysis_station_eval_fra_year_timelist.res = null;
+        $scope.analysis_station_eval_fra_year_timeline.res = null;
+        if (getInfo) $scope.analysis_station_eval_fra_year_info.res = null;
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});

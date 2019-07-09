@@ -1,0 +1,205 @@
+ajaxData({
+    // 电站 日 月 年 
+    stationData: {
+        name: 'GETpvMonitorGetRunBaseList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 公司今日
+    companyData: {
+        name: 'GETBaseSituationCompanyData',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
+        __serviceName__: 'themeBasicSituationDetailService'
+    })('themeBasicSituationDetailCtrl', ['$scope', 'themeBasicSituationDetailService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            let { showShape } = historicalRecord.get().themeBasicSituationData || {};
+            await $scope.dateUpdated();
+            $scope.changeShowShape(showShape || 'list');
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            diffGetData();
+            $scope.$apply();
+        };
+
+        // 点击电站名  跳转到电站页面
+        $scope.trClick = (item, index, event) => {
+            if (!event.target.className.includes('clickable')) return;
+            $scope.reloadParentPage({
+                stationData: {
+                    dataType: 0,
+                    id: item.id,
+                    isGroup: "0",
+                    stClass: '02'
+                }
+            });
+        };
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            $scope.stationData.res = null;
+            $scope.companyData.res = null;
+            diffGetData();
+        };
+
+        // 日期改变
+        $scope.dateUpdated = async() => {
+            await myAjaxData.timeout(0);
+            if ($scope.dateType === 3) return;
+            diffData();
+            diffGetData();
+        };
+
+        // 切换显示形式  图表 or 列表
+        $scope.changeShowShape = showShape => {
+            if (showShape === $scope.showShape) return;
+            $scope.showShape = showShape;
+            historicalRecord.set({
+                themeBasicSituationData: {
+                    ...historicalRecord.get().themeBasicSituationData || {},
+                    showShape
+                }
+            });
+            diffData();
+        };
+
+
+        async function diffGetData() {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            const { currentClass, showShape, dateTime, dataType, dateType } = $scope;
+            // 电站接口
+            if (dataType === 0) {
+                if ($scope.stationData.res) return;
+                $scope.stationData.getData({
+                    queryType: 3,
+                    dateType: [3, 2, 1][dateType],
+                    date: dateTime.showDate
+                });
+            } else if (dataType > 0) {
+                if ($scope.companyData.res) return;
+                $scope.companyData.getData({
+                    queryType: 1,
+                    dateType: [3, 2, 1][dateType],
+                    date: dateTime.showDate
+                });
+            }
+        }
+
+        $scope.stationData.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.slideImages = (res.body.resultList.scenepictures || 'theme/images/defaultWP.png').split(',').map(v => ({
+                url: (res.body.resultList.scenepictures && res.body.resultList.filePath) + v
+            }));
+        };
+
+        // 公司  数据 处理
+        $scope.companyData.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.datasource = res.body.resultList;
+            $scope.ydatas = [[res.body.resultList.map(v => v.buildcapacity)]];
+            $scope.xdata = res.body.resultList.map(v => v.stationname);
+            $scope.column = [
+                {
+                    title: '电站名称',
+                    dataIndex: 'stationname',
+                    sort: 'true',
+                    width: '25%',
+                    align: 'left',
+                    render(text, item, index) {
+
+                        // ${
+                        //     (() => {
+                        //         if (item.st_comm == 1) return (`<span class="clickable">${text}</span>` || '') + '<i title="通讯中断" class="iconfont icon-icon-life-alarm-copy" style="color: #9d9d9d;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                        //         else if (item.st_comm == 2) return (`<span class="clickable">${text}</span>` || '') + '<i title="通讯初始化" class="iconfont icon-icon-life-alarm-copy" style="color: #9d9d9d;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                        //         else if (item.st_status == 99) return (`<span class="clickable">${text}</span>` || '') + '<i title="正常" class="iconfont icon-icon-life-alarm-copy" style="color: #52b876;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                        //         else if (item.st_status == 1) return (`<span class="clickable">${text}</span>` || '') + '<i title="故障" class="iconfont icon-icon-life-alarm-copy" style="color: #ff6161;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                        //         else if (item.st_status == 2) return (`<span class="clickable">${text}</span>` || '') + '<i title="报警" class="iconfont icon-icon-life-alarm-copy" style="color: #be9856;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                        //         return (`<span class="clickable">${text}</span>` || '');
+                        //     })()
+                        // }
+                        return `
+                            <span class="clickable">${text}</span>
+                            <svg style="width: 40px;height: 40px;display:none;position:absolute;right:1em;top:5px;" class="symbol-icon icon-new1" aria-hidden="true">
+                                <use xlink:href="#icon-new1"></use>
+                            </svg>`
+                    }
+                }, {
+                    title: '装机容量(kW)',
+                    dataIndex: 'buildcapacity',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'right'
+                }, {
+                    title: '投产时间',
+                    dataIndex: 'productiondate',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'center',
+                    render(text) {
+                        // const dateStr = new Date(text).Format('yyyy-MM-dd');
+                        return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
+                    }
+                }, {
+                    title: '接入时间',
+                    dataIndex: 'expiryDate',
+                    sort: 'true',
+                    width: '10%',
+                    align: 'center',
+                    render(text) {
+                        return `<span>${text || ''}</span>`
+                    }
+                }, {
+                    title: '地址',
+                    dataIndex: 'address',
+                    width: '45%',
+                    align: 'left'
+                }
+            ];
+        };
+
+        // 公司 数据 投产 时间 对比
+        async function diffData() {
+            if (!$scope.initComplete) return;
+            if ($scope.dataType === 0) return;
+            if (!$scope.companyData.res) return;
+            const {dateType, dateTime} = $scope;
+            $scope.imageSymbols = $scope.companyData.res.body.resultList.map(v => {
+                const base64str = 'image://data:image/png;base64,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';
+                if (dateType === 0 && dateTime.showDate === new Date(v.productiondate).Format('yyyy-MM-dd')) return base64str;
+                if (dateType === 1 && dateTime.showDate.substr(0, 7) === new Date(v.productiondate).Format('yyyy-MM')) return base64str;
+                if (dateType === 2 && dateTime.showDate.substr(0, 4) === new Date(v.productiondate).Format('yyyy')) return base64str;
+            });
+            // 列表 图标显示 影藏
+            if ($scope.showShape === 'chart') return;
+            await myAjaxData.timeout(0);
+            const icons = document.querySelectorAll('.symbol-icon.icon-new1');
+            $scope.imageSymbols.forEach((v, i) => icons[i].style.display = v ? 'block' : 'none');
+        }
+
+        // 点击 经纬度 定位
+        $scope.showPosition = () => {
+            $solway.baidumap({
+                longitude: $scope.stationData.res.body.resultList.longitude,
+                latitude: $scope.stationData.res.body.resultList.latitude,
+            });
+        };
+
+        $scope.showVedios = () => {
+            $scope.showVedios.visibel = true;
+            $scope.showVedios.pageSrc = 'tpl/enrichment/monitoringSummaryWp/components/themeBasicSituation/vedio.html';
+        };
+
+    });

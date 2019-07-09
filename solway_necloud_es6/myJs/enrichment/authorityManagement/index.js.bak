@@ -1,0 +1,169 @@
+ajaxData({
+    departmentList: {
+        name: 'GETdepartmentList',
+        data: {},
+        later: true
+    },
+    roleAllList: {
+        name: 'GETroleAllList',
+        data: {},
+        later: true
+    },
+    deleteRole:{
+        name: 'POSTdeleteRole',
+        data: {},
+        later: true
+    }
+}, {})('authorityManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+
+    $scope.moduleName = '权限管理';//当前页面名称；
+
+    const getRoleAllList = () => {
+        $scope.tableLoading = true;
+        $scope.roleAllList.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            depid: $scope.depid,
+            roleType: '02'
+        }).then(res => {
+            $scope.tableLoading = false;
+            $scope.column = [
+                {
+                    title: '角色编码',
+                    dataIndex: 'roleCode',
+                    align: 'left',
+                    sort: true
+                }, {
+                    title: '角色名称',
+                    dataIndex: 'roleName',
+                    align: 'center'
+                }, {
+                    title: '角色描述',
+                    dataIndex: 'remark',
+                    align: 'center',
+                    sort: true
+                },
+                 {
+                    title: '操作',
+                    align: 'center',
+                    dataIndex:'id',
+                    render(text,item,index) {
+                        return `
+                        <div class="clearfix">
+                            <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                            <i class="iconfont edit icon-peizhi" style="font-size: 23px;color:#1ddabe;margin-right:15px;"></i>
+                            <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                        </div>
+                        `
+                    },
+                }
+            ]
+        })
+    }
+
+    //删除此角色
+    const deleteRole = roleId =>{
+        $scope.deleteRole.getData({
+            roleId:roleId
+        }).then(res => {
+            if (res.key==1) {
+                toaster.pop('error', '','有下级部门');
+			} else if (res.key==2){
+                toaster.pop('error', '','删除失败');
+			} else if(res.key==3){
+                toaster.pop('success', '','删除成功');
+                getRoleAllList();
+			}
+        })
+    }
+
+    function onClick(event, treeId, treeNode, clickFlag) {
+        $scope.depid = treeNode.id;
+        $scope.depName = treeNode.name;
+        getRoleAllList();
+    };
+
+    let zTreeObj;
+    const setting = {
+        check: {
+            enable: true,
+            chkStyle: "radio",
+            radioType: "all"
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                idKey: "id",
+                pIdKey: "pId",
+                rootPId: 0
+            }
+        },
+        callback: {
+            onClick: onClick
+        }
+    };
+
+    const initDepartmentList = () => {
+        $scope.departmentList.getData({
+        }).then(res => {
+            if (res.key == 1) {
+                let zNodes = res.data;
+                $.fn.zTree.init($("#departmentTree"), setting, zNodes);
+                zTreeObj = $.fn.zTree.getZTreeObj("departmentTree")
+                $('#departmentTree li:first > a').trigger('click');
+                $('#departmentTree li:first > a').trigger('dblclick');
+            }
+        })
+    }
+
+    initDepartmentList();
+
+    $scope.trClick = (item, index, event) => {
+        const roleId = item.roleId;
+        const fixedType = item.fixedType;
+        if (event.target.className.includes('icon-bianji-copy')) {
+            $scope.showAddRoleTpl = true;
+            $scope.$broadcast('broadAddRole', { 'roleId': roleId });
+        }else if (event.target.className.includes('icon-peizhi')) {
+            $scope.showRoleConfigureModulesTpl = true;
+            $scope.$broadcast('broadRoleConfigureModules', { 'roleId': roleId ,'fixedType':fixedType});
+        }else if (event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此模块？' }, () => {
+                deleteRole(roleId)
+            });
+        };
+    };
+
+    $scope.addRole = () =>{
+        $scope.showAddRoleTpl = true;
+        $scope.$broadcast('broadAddRole', { 'roleId': '' });
+    }
+
+    //添加成功回调
+    $scope.$on('addRoleCallback',()=>{
+        $scope.showAddRoleTpl = false;
+        getRoleAllList();
+    });
+
+    //取消后回调
+    $scope.$on('addRoleCancelCallback',()=>{
+        $scope.showAddRoleTpl = false;
+    });
+
+    //编辑模块成功后回调
+    $scope.$on('roleConfigureModuleCallback',()=>{
+        $scope.showRoleConfigureModulesTpl = false;
+        getRoleAllList();
+    });
+
+    //取消后回调
+    $scope.$on('roleConfigureModulesCancelCallback',()=>{
+        $scope.showRoleConfigureModulesTpl = false;
+    });
+    
+
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+
+});

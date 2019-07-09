@@ -1,0 +1,263 @@
+ajaxData({
+// 获取指标
+HighAnalysis_selectFds: {
+    name: 'GETHighAnalysis_selectFds',
+    data: {},
+    later: true
+},
+}, {
+    __serviceName__: 'horizonService'
+})('horizonIndexCtrl', ['$scope', 'horizonService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
+    //获取时间纬度 发送的dmsTime
+    $scope.$on('dmsTime', (item, v) => {
+        parentmyAjaxData.config.dmsTime = $scope.dmsTime = v;
+        $scope.HighAnalysis_selectFds.getData({
+            stationClass: "01",
+            anlsType: parentmyAjaxData.config.anlsType,
+            dmsType: parentmyAjaxData.config.dmsType,
+            dmsTime: parentmyAjaxData.config.dmsTime
+        })
+    })
+
+    $scope.HighAnalysis_selectFds.subscribe(res => {
+        if (!res.body) {
+            toaster.pop('error', '', res.msg);
+            $scope.$emit('horizonNan', { data: 1});
+            return;
+        }
+        $scope.$emit('horizonNan', { data: 0});
+        $scope.herizonData = res.body;
+        $scope.horizonCheckData = [];
+        parentmyAjaxData.config.fdX.key = '';
+        parentmyAjaxData.config.fdX.name = '';
+        $scope.radioToSelect($scope.herizonData.ctg1, 0);
+        $scope.$emit('noChecked', 'horizontalAxisIndex');
+    });
+    
+    //监听横轴指标页面打开
+    $scope.$on('horizonOpen', () => {
+        //获取 checked 的数据 -> 重现到左侧列表
+        if($scope.horizonCheckData.length > 0){
+            var key;
+            for(key in $scope.herizonData){
+                $scope.herizonData[key].ll.map((son)=>{
+                    if(son.fdKey == $scope.horizonCheckData[0].fdKey){
+                        son.checked = true;
+                    }
+                })
+                $scope.herizonBottom.map((son) => {
+                    if(son.fdKey == $scope.horizonCheckData[0].fdKey){
+                        son.checked = true;
+                    }
+                })
+            }
+        }
+    })
+
+    //搜索功能
+    $scope.getList = () => {
+        $scope.herizonBottom.map((item) => {
+            if (item.fdName.includes($scope.keyWords)) {
+                item.show = true;
+            } else {
+                item.show = false;
+            }
+        })
+    }
+
+    //单选框选中-> 更改select的值
+    $scope.radioToSelect = (item, index) => {
+        $scope.hrizonAxisK = item.k;
+        $scope.$emit('radioToFather', { 'type': 'horizon', 'k': item.k, 'value': item.v });
+        $scope.herizonBottom = item.ll;
+        //给数据赋初始show值
+        $scope.herizonBottom.map((item) => {
+            item.show = true;
+        })
+        $scope.hrizonItem = item;
+        $scope.radioIndex = index;
+        //处理fdStyle 字段
+        fdStyleFun();
+        //往纵轴指标发送数据
+        parentmyAjaxData.config.herizonData = $scope.herizonData;
+    }
+
+    //处理fdStyle 字段
+    const fdStyleFun = () => {
+        var styleKey = {
+            1: '曲线',
+            2: '折线',
+            3: '柱状图',
+            4: '散点'
+        }
+        $scope.herizonBottom.map((item) => {
+            var result = item.fdStyle.split(",");
+            var newFdStyleCopy = [];
+            item.newFdStyle = [];
+            result.map((item) => {
+                var data = {};
+                data.key = item;
+                data.value = styleKey[item];
+                newFdStyleCopy.push(data);
+            })
+            item.newFdStyle = newFdStyleCopy;
+        })
+    }
+
+    $scope.horizonCheckData = [];
+    // $scope.horizonPoint = [];
+    // $scope.horizonKpi = [];
+
+    const key = {
+        0: 'horizonPoint',
+        1: 'horizonKpi'
+    }
+
+    //左侧多选按钮-> 右侧 穿梭
+    $scope.shuttle = (item, $index) => {
+        //点击一个区域 让另一个区域的选中状态置空
+        if ($scope.radioIndex == 0) {
+            $scope.herizonData.ctg2.ll.map((item) => {
+                item.checked = false;
+            })
+        } else {
+            $scope.herizonData.ctg1.ll.map((item) => {
+                item.checked = false;
+            })
+        }
+        //实现单选 和 重复点击取消选中
+        if (!item.checked) {
+            item.checked = false;
+            item.checkedH = item.checked;
+        } else {
+            $scope.herizonBottom.map((item) => {
+                item.checked = false;
+                item.checkedH = item.checked;
+            })
+            item.checked = true;
+            item.checkedH = item.checked;
+        }
+
+        //获取选中的数据
+        var filterBottom = $scope.herizonBottom.filter(item => item.checked && !item.checkedV);
+        if (filterBottom.length > 0) {
+            filterBottom.map((item) => {
+                // item.checkedH = item.checked;
+                if ($scope.horizonCheckData.indexOf(item) == '-1') {
+                    $scope.horizonCheckData = [];
+                    $scope.horizonCheckData.push(item);
+                }
+            })
+        } else {
+            $scope.horizonCheckData = [];
+        }
+    }
+
+    //右侧删除小按钮
+    $scope.delRight = (fdKey, index) => {
+        $scope.herizonData.ctg1.ll.forEach((item) => {
+            if (item.fdKey == fdKey) {
+                item.checked = false;
+                item.checkedH = false;
+            }
+        })
+        $scope.herizonData.ctg2.ll.forEach((item) => {
+            if (item.fdKey == fdKey) {
+                item.checked = false;
+                item.checkedH = false;
+            }
+        })
+        $scope.herizonBottom.forEach((item) => {
+            if (item.fdKey == fdKey) {
+                item.checked = false;
+                item.checkedH = false;
+            }
+        })
+        $scope.horizonCheckData.splice(index, 1);
+        parentmyAjaxData.config.fdX.key = '';
+        parentmyAjaxData.config.fdX.name = '';
+        $scope.$emit('noChecked', 'horizontalAxisIndex');
+    }
+
+    //全部删除
+    $scope.delRightAll = () => {
+        if ($scope.horizonCheckData.length == 0) {
+            toaster.pop('error', '', '请至少选择一条');
+        } else {
+            $solway.confirm({ message: '确定全部删除吗？' }, () => {
+                $scope.horizonCheckData = [];
+                $scope.herizonData.ctg1.ll.forEach((item) => {
+                    item.checked = false;
+                    item.checkedH = false;
+                })
+                $scope.herizonData.ctg2.ll.forEach((item) => {
+                    item.checked = false;
+                    item.checkedH = false;
+                })
+                $scope.herizonBottom.forEach((item) => {
+                    item.checked = false;
+                    item.checkedH = false;
+                })
+                parentmyAjaxData.config.fdX.key = '';
+                parentmyAjaxData.config.fdX.name = '';
+                $scope.$emit('noChecked', 'horizontalAxisIndex');
+                $scope.$apply();
+            });
+        }
+    }
+
+    //取消
+    $scope.cancel = () => {
+        $scope.$emit('cancelCallback');
+    }
+
+    //获取历史数据
+    $scope.$on('haveData', (e,v) => {
+        if(!v){
+            $scope.$emit('noChecked', 'horizontalAxisIndex');
+            return;
+        }
+        if(parentmyAjaxData.config.anlsType == 1){
+            $scope.hrizonAxisK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].horizon.hrizonAxisK;
+            $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].horizon.hrizonItem,parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].horizon.radioIndex);
+            $scope.horizonCheckData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].horizon.checkData;
+            parentmyAjaxData.config.fdX.key = $scope.horizonCheckData[0].fdKey;
+            parentmyAjaxData.config.fdX.name = $scope.horizonCheckData[0].fdName;
+            if (parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].horizon.radioIndex == 0) {
+                $scope.herizonData.ctg2.ll.map((item) => {
+                    item.checked = false;
+                })
+            } else {
+                $scope.herizonData.ctg1.ll.map((item) => {
+                    item.checked = false;
+                })
+            }
+            $scope.$emit('addCallback','horizontalAxisIndex');
+        }
+        
+    })
+
+    //确定
+    $scope.confirm = () => {
+        if ($scope.horizonCheckData.length == 0) {
+            toaster.pop('error', '', '所选数据不能为空');
+            return;
+        }
+        var json = {
+            fdKey: $scope.horizonCheckData[0].fdKey,
+            isx: 1
+        }
+        parentmyAjaxData.config.fds[parentmyAjaxData.config.checkChart][0] = json;
+        parentmyAjaxData.config.fdStyle = 4;
+        parentmyAjaxData.config.fdStyleArr[parentmyAjaxData.config.checkChart] = 4;
+
+        parentmyAjaxData.config.fdX.key = $scope.horizonCheckData[0].fdKey;
+        parentmyAjaxData.config.fdX.name = $scope.horizonCheckData[0].fdName;
+        //存储历史数据
+        parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].hrizonAxisK = $scope.hrizonAxisK;
+        parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].hrizonItem = $scope.hrizonItem;
+        parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
+        parentmyAjaxData.config.horizonHdata[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope.horizonCheckData));
+        $scope.$emit('addCallback','horizontalAxisIndex');
+    }
+});

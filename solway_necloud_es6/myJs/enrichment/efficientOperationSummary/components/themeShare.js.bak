@@ -1,0 +1,437 @@
+ajaxData({
+    // 该角色 电站列表
+    allSTListForPCBySession: {
+        name: 'GETAllSTListForPCBySession',
+        data: {}
+    },
+    // 消息列表
+    taskList: {
+        name: 'GETTaskList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 任务详情
+    taskDetailPC: {
+        name: 'GETTaskDetailPC',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 批量作废
+    wxaTaskDoInvalids: {
+        name: 'wxaTaskDoInvalids',
+        data: {},
+        later: true
+    },
+    // 发布任务
+    opShareTimeTaskUpdate: {
+        name: 'opShareTimeTaskUpdateV2',
+        data: {},
+        later: true
+    },
+    // 发布任务 可推送人员 列表
+    opShareUserStationRelSelectByCondition: {
+        name: 'GETopShareUserStationRelSelectByCondition',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 共享任务详情列表
+    // shareTaskDetailList: {
+    //     name: 'GETShareTaskDetailList',
+    //     data: {},
+    //     later: true,
+    //     onlyLatest: true
+    // },
+    // 定时任务管理 列表
+    timeTaskList: {
+        name: 'GETopShareTimeTaskList',
+        data: {},
+        later: true,
+        onlyLatest: true,
+    },
+    // 定时任务 删除
+    automaticTaskDelete: {
+        name: 'POSTAutomaticTaskDelete',
+        data: {},
+        later: true,
+    },
+    // 定时任务 打开关闭
+    opShareTimeTaskAutoPub: {
+        name: 'opShareTimeTaskAutoPub',
+        data: {},
+        later: true,
+    }
+}, {
+        __serviceName__: 'themeShareService'
+    })('themeShareCtrl', ['$scope', 'themeShareService', 'actionRecord', 'toaster'], ($scope, myAjaxData, historicalRecord, toaster) => {
+        /// 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            const {
+                startDate: __sdate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 365),
+                endDate: __edate = new Date,
+                isHis = '',
+                pStationId,
+                handStatus = {
+                    '00': true,
+                    '01': true,
+                    '02': true,
+                    '03': true,
+                    '04': true,
+                    '05': true,
+                    '06': true,
+                    '07': true,
+                },
+                searchKey = '',
+                isDefaultList = true
+            } = historicalRecord.get().themeShare || {};
+
+            $scope.startDate = new Date(__sdate);
+            $scope.startDate.showDate = '';
+            $scope.endDate = new Date(__edate);
+            $scope.endDate.showDate = '';
+
+            $scope.bounsTimeStart = new Date(__sdate);
+            $scope.bounsTimeStart.showDate = '';
+            $scope.bounsTimeEnd = new Date(__edate);
+            $scope.bounsTimeEnd.showDate = '';
+
+            $scope.isHis = isHis;
+            $scope.handStatus = handStatus;
+            $scope.searchKey = searchKey;
+            $scope.pStationId = pStationId;
+            $scope.isDefaultList = isDefaultList;
+            await myAjaxData.timeout(0);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            getBaseMessageList();
+            $scope.$apply();
+        };
+
+        // 查询 弹出 事件
+        $scope.searchPopUp = (e) => {
+            e.stopPropagation();
+            $scope.searchActive = true;
+            // $scope.messagePopUp = false;
+        };
+
+        // 发布任务 弹出 事件
+        $scope.releaseTaskPopUp = () => {
+            // if ($scope.messagePopUp) return;
+            $scope.releaseTask = true;
+            $scope.$broadcast('releaseTask');
+        };
+
+        $scope.$on('releaseTaskCallback', (e, success) => {
+            if (success) getBaseMessageList();
+            $scope.releaseTask = false;
+        });
+
+        // 查询
+        $scope.search = () => {
+            $scope.searchActive = false;
+            $scope.closeMessagePopUp();
+            const { startDate, endDate, searchKey, isHis, handStatus, pStationId } = $scope;
+            historicalRecord.set({
+                themeShare: {
+                    ...historicalRecord.get().themeShare || {},
+                    startDate, endDate, searchKey, isHis, handStatus, pStationId, isDefaultList: $scope.isDefaultList = false
+                }
+            });
+            getBaseMessageList();
+        };
+
+        // 消息列表 接口 请求
+        function getBaseMessageList() {
+            const { startDate, endDate, searchKey, isHis, handStatus, pStationId, bounsTimeEnd, bounsTimeStart } = $scope;
+            $scope.column = [];
+            $scope.taskList.getData({
+                stationId: pStationId,
+                distDateStartStr: startDate.showDate,
+                distDateEndStr: endDate.showDate,
+                bounsTimeStartStr: bounsTimeStart.showDate,
+                bounsTimeEndStr: bounsTimeEnd.showDate,
+                ss: isHis || Object.keys(handStatus).filter(v => handStatus[v]).join(),
+                keywords: searchKey || '',
+                pageIndex: 0,
+                pageSize: 20
+            });
+        }
+
+        function editListDom() {
+            const { data: { id }, index } = $scope.listActiveItem;
+            $scope.taskDetailPC.getData({ id }).then(res => {
+                const str = {
+                    '00': "未发布",
+                    '01': "已发布",
+                    '02': "处理中",
+                    '03': "处理未完成",
+                    '04': "审核中",
+                    '05': "审核通过",
+                    '06': "审核未通过",
+                    '07': "已完成",
+                    '99': "已作废"
+                }[res.body.publishStatus];
+                $('#shareTaskList .my-table-body').eq(1).find('tr').eq(index + 1).find('td span.status').text(str);
+            });
+        }
+
+        // 消息列表 缺省 参数
+        $scope.resetList = (reloadList) => {
+            if (!reloadList) return editListDom();
+            $scope.startDate.showDate = '';
+            $scope.endDate.showDate = '';
+            $scope.bounsTimeStart.showDate = '';
+            $scope.bounsTimeEnd.showDate = '';
+            $scope.pStationId = '';
+            $scope.searchKey = '';
+            $scope.isHis = '';
+            $scope.handStatus = {
+                '00': true,
+                '01': true,
+                '02': true,
+                '03': true,
+                '04': true,
+                '05': true,
+                '06': true,
+                '07': true,
+            };
+            Array.from(document.querySelectorAll('#searchParams input'), v => v.value = '');
+            const { startDate, endDate, searchKey, isHis, handStatus, pStationId } = $scope;
+            historicalRecord.set({
+                themeShare: {
+                    ...historicalRecord.get().themeShare || {},
+                    startDate, endDate, searchKey, isHis, handStatus, pStationId,
+                    isDefaultList: $scope.isDefaultList = true
+                }
+            });
+            getBaseMessageList();
+        };
+
+        // 列表 接口 数据 回调
+        $scope.taskList.getDataCallback = (success, res) => {
+            if (!success) return;
+
+            // 列表
+            $scope.column = [
+                {
+                    title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+                    dataIndex: '',
+                    width: '60px',
+                    align: 'center',
+                    checkboxName: 'batchprocessing',
+                    render(text, record, index) {
+                        return '<label class="i-checks m-b-none"><input data-identifies="' + record.id + '" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>';
+                    }
+                },
+                {
+                    title: '电站名称',
+                    dataIndex: 'stationName',
+                    width: '20%',
+                },
+                {
+                    title: '发布时间',
+                    dataIndex: 'distDate',
+                    align: 'center',
+                    // sort: true,
+                    width: '14%',
+                    render(text) {
+                        return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm')}</span>`
+                    }
+                },
+                {
+                    title: '发布人',
+                    dataIndex: 'distManName',
+                    // sort: true,
+                },
+                {
+                    title: '处理人',
+                    dataIndex: 'handleManName',
+                    // sort: true,
+                },
+                {
+                    title: '内容',
+                    dataIndex: 'taskContent',
+                    // sort: true,
+                    width: '20%',
+                },
+                {
+                    title: '红包金额',
+                    dataIndex: 'bounsFinal',
+                    // sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '发红包时间',
+                    dataIndex: 'bounsTime',
+                    // sort: true,
+                    align: 'center',
+                    width: '14%',
+                    render(text) {
+                        return text && new Date(text).Format('yyyy-MM-dd hh:mm:ss');
+                    }
+                },
+                {
+                    title: '状态',
+                    dataIndex: 'publishStatus',
+                    // sort: true,
+                    render(text) {
+                        return `<span class="status">
+                    ${
+                            {
+                                '00': "未发布",
+                                '01': "已发布",
+                                '02': "处理中",
+                                '03': "处理未完成",
+                                '04': "审核中",
+                                '05': "审核通过",
+                                '06': "审核未通过",
+                                '07': "已完成",
+                                '99': "已作废"
+                            }[text]
+                            }
+                    </span>`;
+                    }
+                },
+            ];
+            $scope.closeMessagePopUp();
+        };
+
+        // 批量 作废
+        $scope.batchClose = async () => {
+            const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
+            if (ids.length === 0) return toaster.pop('error', '', '请至少选择一条信息');
+            $solway.confirm({ message: '确定作废选择消息？' }, async () => {
+                const res = await $scope.wxaTaskDoInvalids.getData({ ids: ids.join(','), opType: 3 });
+                if (res.code === 0) {
+                    toaster.pop('success', '', '处理成功');
+                    $scope.taskList.getData({});
+                }
+                else toaster.pop('error', '', '处理失败');
+                $scope.$apply();
+            });
+        };
+
+        // 点击行
+        $scope.trClick = async (item, index, e) => {
+            e.stopPropagation();
+            $scope.listActiveItem = {
+                data: item,
+                index
+            };
+            $scope.searchActive = false;
+            // if ($scope.shareTaskDetailList.res && $scope.shareTaskDetailList.res.body[0].id === item.id && $scope.messagePopUp === true) return;
+            $scope.closeMessagePopUp();
+            await myAjaxData.timeout(100);
+            $scope.messagePopUp = true;
+            // const res = await $scope.shareTaskDetailList.getData({id: item.id});
+            $scope.$broadcast("chatPanelObj2", { id: item.id, distMan: item.distMan });
+            $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
+            $scope.$apply();
+        };
+
+        // 关闭 聊天 消息 面板
+        $scope.closeMessagePopUp = () => {
+            $scope.messagePopUp = false;
+            $('.my-table tbody tr').removeClass('active');
+        };
+
+
+        // 定时任务 删除操作 函数 挂载   打开关闭 操作 函数 挂载
+        $scope.timeTaskListCreated = (scope) => {
+            scope.deleteTimeTask = id => {
+                $solway.confirm({ message: '确定删除吗？此操作不可恢复！' }, () => {
+                    $scope.automaticTaskDelete.getData({ id }).then(res => {
+                        if (res.code === 0) {
+                            toaster.pop('success', '', res.msg);
+                            $scope.timeTaskList.getData({});
+                        }
+                        else toaster.pop('error', '', res.msg || '删除失败');
+                    });
+                });
+            };
+            scope.autoPubHandle = (id, oldValue, e) => {
+                const autoPub = e.currentTarget.children[0].checked ? '1' : '0';
+                if (autoPub === oldValue) return;
+                $scope.opShareTimeTaskAutoPub.getData({ id, autoPub }).then(res => {
+                    $scope.timeTaskList.getData({});
+                });
+            };
+        };
+
+        // 定时任务管理
+        $scope.timingTaskManagement = () => {
+            $scope.timingTask = true;
+            $scope.timeTaskList.getData({}).then(res => {
+                $scope.timeTaskListColumn = [
+                    {
+                        title: '电站名称',
+                        dataIndex: 'stationName',
+                        width: '25%',
+                        align: 'left'
+                    },
+                    {
+                        title: '发布人',
+                        dataIndex: 'distManName',
+                    },
+                    {
+                        title: '推送人',
+                        dataIndex: 'acceptMsgUsers',
+                        render(text) {
+                            return text.map(v => v.name).join('、')
+                        }
+                    },
+                    {
+                        title: '内容',
+                        dataIndex: 'taskContent',
+                        width: '30%',
+                    },
+                    {
+                        title: '执行策略',
+                        dataIndex: 'timerDate',
+                        align: 'right',
+                        render(text) {
+                            if (!text) return;
+                            if (text.length < 6) return '每天' + text;
+                            const arr = text.split(' ');
+                            let date, dateStr, timeStr = arr[1];
+                            if (arr[1]) date = arr[0].split('-');
+                            if (date[1]) dateStr = '每年' + date.join('月') + '日';
+                            else dateStr = '每月' + date[0] + '日'
+                            return dateStr + arr[1];
+                        }
+                    },
+                    {
+                        dataIndex: 'autoPub',
+                        align: 'center',
+                        width: '150px',
+                        render(text, item, index) {
+                            return `
+                                <span lxj-click="deleteTimeTask(${item.id});" style="color:red;margin-right:1em;">删除</span>
+                                <label lxj-click="autoPubHandle(${item.id},${text});" class="i-switch i-switch-sm" style="vertical-align: bottom;background-color: #1cbbb4;">
+                                    <input type="checkbox" ${text === '1' ? 'checked' : ''} >
+                                    <i></i>
+                                </label>
+                                `
+                        }
+                    }
+                ];
+            });
+        };
+
+        // 页面 点击  影藏 弹出
+        document.addEventListener('click', eventListen);
+        function eventListen() {
+            $scope.searchActive = false;
+            // $scope.messagePopUp = false;
+            $scope.$apply();
+        }
+        $scope.$on('$destroy', () => {
+            document.removeEventListener('click', eventListen);
+        });
+
+    });

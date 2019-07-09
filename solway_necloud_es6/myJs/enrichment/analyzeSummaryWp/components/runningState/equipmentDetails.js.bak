@@ -1,0 +1,295 @@
+ajaxData(
+    {
+        turbineVPPoints: {
+            name: 'GETturbineVPPoints',
+            data: {},
+            later: true
+        },
+        turbineVPList: {
+            name: 'GETturbineVPList',
+            data: {},
+            later: true
+        },
+        analysis_wp_device_st_r_year_info: {
+            name: 'GETanalysis_wp_device_st_r_year_info',
+            data: {},
+            later: true
+        },
+        analysis_wp_device_st_r_accum_info: {
+            name: 'GETanalysis_wp_device_st_r_accum_info',
+            data: {},
+            later: true
+        },
+    }, {
+        __serviceName__: 'runningStateEquipmentDetailsService',
+    }
+)('runningStateEquipmentDetailsCtrl', ['$scope', 'runningStateEquipmentDetailsService'], ($scope) => {
+    let myChart;
+    $scope.$on('equipmentDetails', (_e, { eqid, eq_name, stid }) => {
+        $scope.eq_name = eq_name;
+        $scope.turbineVPPoints.res = null;
+        $scope.turbineVPList.res = null;
+        $scope.analysis_wp_device_st_r_year_info.res = null;
+        $scope.analysis_wp_device_st_r_accum_info.res = null;
+        myChart && echarts.dispose(myChart);
+        myChart = null;
+        diffGetdata(eqid, stid);
+    });
+    
+    function diffGetdata(eqid, stid) {
+        const {dateTime = {}, dateType} = $scope;
+        $scope.turbineVPList.getData({
+            dateType: ['', 2, 1, 0][dateType],
+            date: dateTime.showDate,
+            queryType: 3,
+            eqid,
+            stid
+        });
+        switch (dateType) {
+            case 1:
+                $scope.turbineVPPoints.getData({
+                    dateType: ['', 2, 1, 0][dateType],
+                    date: dateTime.showDate,
+                    queryType: 3,
+                    eqid,
+                    stid
+                });
+                break;
+
+            case 2:
+                $scope.analysis_wp_device_st_r_year_info.getData({
+                    queryCode: 'analysis_wp_device_st_r_year_info',
+                    queryType: 3,
+                    date: dateTime.showDate,
+                    eqid,
+                    stid
+                })
+                break;
+
+            case 3:
+                $scope.analysis_wp_device_st_r_accum_info.getData({
+                    queryCode: 'analysis_wp_device_st_r_accum_info',
+                    queryType: 3,
+                    date: dateTime.showDate,
+                    eqid,
+                    stid
+                })
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+    $scope.turbineVPList.tooltipFormatter = (params, _ticket, _callback) => {
+        return params[0].axisId.substr(0, 3) + '：' + params[0].name + 'm/s' + '<br/>' + params.map(v => v.seriesName + '：   ' + v.value + '<br/>').join('');
+    };
+
+    $scope.turbineVPPoints.subscribe(res => {
+        myChart = echarts.init(document.getElementById('scatterChart'));
+        const option = {
+            color: ['#75D3FF', '#FF7575', '#F9D79C', '#A39CF9', '#577BFF'],
+            grid: {
+                left: '40',
+                right: '60',
+                bottom: '40',
+                containLabel: true
+            },
+            tooltip: {
+                showDelay: 0,
+                formatter: function (params) {
+                    if (params.value.length > 1) {
+                        return params.seriesName + ' :<br/>' + params.value[0] + 'm/s; ' + params.value[1] + 'kW ';
+                    }
+                    else {
+                        return params.seriesName + ' :<br/>' + params.name + ' : ' + params.value + 'kW ';
+                    }
+                },
+            },
+            legend: {
+                data: ['停待机', '爬坡', '转矩控制', '满发变桨', '限负荷'],
+                left: 'center',
+                top: 30,
+                textStyle: {
+                    fontSize: 12,
+                    color: '#fffeff'
+                },
+            },
+            xAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    axisLabel: {
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '风速',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    axisLabel: {
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '功率',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            series: Object.values(res.body.names).map((v, i) => ({
+                name: v,
+                type: 'scatter',
+                symbolSize: 6,
+                data: res.body[Object.keys(res.body.names)[i]]
+            }))
+        };
+        myChart.setOption(option, true);
+    });
+
+    $scope.analysis_wp_device_st_r_year_info.subscribe(res => {
+        myChart = echarts.init(document.getElementById('scatterChart'));
+        const { stop_st_r, climb_st_r, torque_st_r, full_st_r, limit_st_r} = res.body.data;
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{b}: {c}%"
+            },
+            legend: {
+                icon: 'rect',
+                itemWidth: 20,
+                itemHeight: 4,
+                itemGap: 30,
+                x: 'center',
+                top: '30', 
+                textStyle: {
+                    fontSize: 12,
+                    color: '#fff'
+                },
+                data: ['停待机', '爬坡', '转矩控制', '满发变桨', '限负荷']
+            },
+            color: ['#FF7575', '#75D3FF', '#F9D79C', '#A39CF9', '#577BFF'],
+            series: [
+                {
+                    type: 'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: false,
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '30',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data: [
+                        { value: stop_st_r, name: '停待机' },
+                        { value: climb_st_r, name: '爬坡' },
+                        { value: torque_st_r, name: '转矩控制' },
+                        { value: full_st_r, name: '满发变桨' },
+                        { value: limit_st_r, name: '限负荷' }
+                    ]
+                }
+            ]
+        };
+        myChart.setOption(option, true);
+    });
+
+    $scope.analysis_wp_device_st_r_accum_info.subscribe(res => {
+        myChart = echarts.init(document.getElementById('scatterChart'));
+        const { stop_st_r, climb_st_r, torque_st_r, full_st_r, limit_st_r} = res.body.data;
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{b}: {c}%"
+            },
+            legend: {
+                icon: 'rect',
+                itemWidth: 20,
+                itemHeight: 4,
+                itemGap: 30,
+                x: 'center',
+                top: '30', 
+                textStyle: {
+                    fontSize: 12,
+                    color: '#fff'
+                },
+                data: ['停待机', '爬坡', '转矩控制', '满发变桨', '限负荷']
+            },
+            color: ['#FF7575', '#75D3FF', '#F9D79C', '#A39CF9', '#577BFF'],
+            series: [
+                {
+                    type: 'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: false,
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '30',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data: [
+                        { value: stop_st_r, name: '停待机' },
+                        { value: climb_st_r, name: '爬坡' },
+                        { value: torque_st_r, name: '转矩控制' },
+                        { value: full_st_r, name: '满发变桨' },
+                        { value: limit_st_r, name: '限负荷' }
+                    ]
+                }
+            ]
+        };
+        myChart.setOption(option, true);
+    });
+
+    $scope.$on('$destroy', () => {
+        myChart && echarts.dispose(myChart);
+        myChart = null;
+    });
+
+});

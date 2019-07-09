@@ -1,0 +1,49 @@
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+        typeof define === 'function' && define.amd ? define(['exports'], factory) :
+            (factory((global.$solway = global.$solway || {})));
+}(window, ((exports) => {
+    const win = window;
+    let store = {};
+    const persist = obj => {
+        const persistStr = win.localStorage.persist;
+
+        if (obj === void 0) return store;
+
+        if (!(typeof obj == 'object' && obj)) return console.error('不是一个合法的json，数据持久失败');
+
+        if (obj.__set__) {
+            delete obj.__set__;
+            win.localStorage.persist = JSON.stringify(obj);
+            return store = obj;
+        }
+
+        if (persistStr) {
+            const o = JSON.parse(persistStr);
+            if (!(typeof o == 'object' && o)) return console.error('数据被损坏');
+            return store = JSON.parse(persistStr);
+        }
+
+        win.localStorage.persist = JSON.stringify(obj);
+        return store = obj;
+
+    };
+
+
+    const setStore = (name, action) => {
+        if (typeof name !== 'string') return console.error('设置的存储名不是一个合法的key' + name);
+        if (!(typeof action == 'object' && action)) return console.error('设置的值不是一个合法的json' + action);
+        if (!store.hasOwnProperty(name)) return console.error('store中没有该项数据' + name);
+        const _store = {
+            ...store,
+            [name]: action,
+            __set__: true
+        };
+        return $solway.persist(_store)[name];
+    };
+    const getStore = () => ({ ...store });
+
+    exports.persist = persist;
+    exports.setStore = setStore;
+    exports.getStore = getStore;
+})));

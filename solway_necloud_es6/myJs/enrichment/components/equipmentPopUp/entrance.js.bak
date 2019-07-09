@@ -1,0 +1,140 @@
+ajaxData(
+    {
+        rtmSingleStationComm: {
+            name: 'GETRtmSingleStationComm',
+            data: {
+                dateString: new Date().Format("yyyy-MM-dd"),
+            },
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true
+        },
+        deviceInfo: {
+            name: 'GETdeviceInfo',
+            data: {},
+            later: true
+        },
+        queryDeviceWithType: {
+            name: 'GETqueryDeviceWithType',
+            data: { },
+            later: true
+        }
+    },
+    {
+        __serviceName__: 'equipmentPopUpService',
+        depend: [
+            'theme/js/dist/enrichment/components/equipmentPopUp/bigInverter.js' + stamp, 
+            'theme/js/dist/enrichment/components/equipmentPopUp/junctionBox.js' + stamp, 
+            'theme/js/dist/enrichment/components/equipmentPopUp/smallInverter.js' + stamp, 
+            'theme/js/dist/enrichment/components/equipmentPopUp/boxChange.js' + stamp,
+            'theme/js/dist/enrichment/components/equipmentPopUp/electricMeter.js' + stamp,
+            'theme/js/dist/enrichment/components/equipmentPopUp/weather.js' + stamp,
+        ],
+        templateUrl: [
+            'tpl/enrichment/components/equipmentPopUp/bigInverter.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/junctionBox.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/smallInverter.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/boxChange.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/electricMeter.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/weather.html' + stamp,
+        ]
+    }
+)('equipmentPopUpCtrl', ['$scope', 'equipmentPopUpService', '$ocLazyLoad', '$interval'], function ($scope, currentService, $ocLazyLoad, $interval) {
+    $scope.display = false;
+    let timer;
+
+    $scope.$on('equipmentPopUp', async(e, eqObj) => {
+        if (!eqObj.deviceSerialNnumber && (!eqObj.stid || !eqObj.eqid)) return;
+        if ($scope.display) return;
+        
+        if (!eqObj.deviceSerialNnumber && eqObj.stid && eqObj.eqid) {
+            const {stid, eqid} = eqObj;
+            const res = await $scope.deviceInfo.getData({stid, eqid});
+            const { hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow } = res.body;
+            eqObj.deviceSerialNnumber = deviceSerialNnumber;
+            eqObj.hasJB = hasJB;
+            eqObj.pstationid = pstationid;
+            eqObj.deviceId = deviceId;
+            eqObj.deviceTypeNow = deviceTypeNow;
+        }
+
+        $scope.queryDeviceWithType.getData({ type: eqObj.deviceTypeNow })
+        .then(res => $scope.queryDeviceWithType.res.body = res.body.map(v => ({ ...v, show: true })));
+
+        currentService.config.eqObj = eqObj;
+        $scope.templateLoading = true;
+        $scope.display = true;
+        $scope.templateUrl = '';
+        const dataIndex = eqObj.hasJB === '0' ? 0 : eqObj.deviceTypeNow;
+
+        $ocLazyLoad.load([
+            'theme/js/dist/components/calendar.js' + stamp,
+            'theme/js/dist/components/myTable.js' + stamp,
+            'theme/js/dist/components/myPagin.js' + stamp,
+        ].concat(currentService.config.depend[dataIndex])).then(() => {
+            $scope.templateUrl = currentService.config.templateUrl[dataIndex];
+        });
+
+        $scope.rtmSingleStationComm.getData({
+            dateString: new Date().Format("yyyy-MM-dd"),
+            stids: eqObj.pstationid
+        });
+
+        timer = $interval(() => {
+            if (!$scope.rtmSingleStationComm.res || !$scope.templateUrl) return;
+            $scope.rtmSingleStationComm.getData({})
+        }, 5 * 1000);
+
+        await currentService.timeout(0);
+        $scope.$apply();
+    });
+
+    $scope.queryDeviceWithType.filter = str => {
+        $scope.queryDeviceWithType.res.body = $scope.queryDeviceWithType.res.body.map(v => ({
+            ...v,
+            show: v.name.includes(str) ? true : false
+        }));
+    };
+
+    $scope.switchDevice = async ({stid, eqid}) => {
+        $scope.templateUrl = '';
+        $interval.cancel(timer);
+        $scope.$broadcast('includePageDesdroy');
+        await currentService.timeout(0);
+        $scope.$apply();
+
+        const eqObj = {};
+        const res = await $scope.deviceInfo.getData({ stid, eqid });
+        const { hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow } = res.body;
+        eqObj.deviceSerialNnumber = deviceSerialNnumber;
+        eqObj.hasJB = hasJB;
+        eqObj.pstationid = pstationid;
+        eqObj.deviceId = deviceId;
+        eqObj.deviceTypeNow = deviceTypeNow;
+
+        currentService.config.eqObj = eqObj;
+        $scope.templateLoading = true;
+        $scope.display = true;
+        $scope.templateUrl = '';
+        const dataIndex = eqObj.hasJB === '0' ? 0 : eqObj.deviceTypeNow;
+
+        $ocLazyLoad.load([
+            'theme/js/dist/components/calendar.js' + stamp,
+            'theme/js/dist/components/myTable.js' + stamp,
+            'theme/js/dist/components/myPagin.js' + stamp,
+        ].concat(currentService.config.depend[dataIndex])).then(() => {
+            $scope.templateUrl = currentService.config.templateUrl[dataIndex];
+        });
+
+        await currentService.timeout(0);
+        $scope.$apply();
+    };
+
+
+    $scope.includePageDesdroy = () => {
+        $scope.display = false; 
+        $scope.templateUrl = '';
+        $interval.cancel(timer);
+        $scope.$broadcast('includePageDesdroy');
+    }
+});

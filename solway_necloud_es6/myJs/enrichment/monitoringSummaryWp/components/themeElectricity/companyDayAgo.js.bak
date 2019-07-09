@@ -1,0 +1,220 @@
+ajaxData(
+    {
+        // 集团 日 历史日 列表
+        query_wp_company_day_elec_timelist: {
+            name: 'GETquery_wp_company_day_elec_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 集团 日 历史日 图表
+        query_wp_company_day_elec_timeline: {
+            name: 'GETquery_wp_company_day_elec_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+    },
+    {
+        __serviceName__: 'themeElectricityDayAgoService'
+    }
+)('themeElectricityCompanyDayAgoCtrl', ['$scope', 'themeElectricityDayAgoService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, select1, select2 } = historicalRecord.get().themeElectricityCompanyDayAgo || {};
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.select1 = select1 || 2;
+        $scope.select2 = select2 || 2;
+        if (select1) await $scope.selectChange('select1');
+        if (select2) await $scope.selectChange('select2');
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'CompanyDayAgo') return;
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+    // 点击电站名  跳转到电站页面
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.reloadParentPage({
+            stationData: {
+                dataType: 0,
+                id: item.stid,
+                isGroup: "0",
+                stClass: '02'
+            }
+        });
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        if ($scope.currentClass !== 'CompanyDayAgo') return;
+        await myAjaxData.timeout(0);
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeElectricityCompanyDayAgo: {
+                ...historicalRecord.get().themeElectricityCompanyDayAgo || {},
+                showShape
+            }
+        });
+        setDataNull();
+        diffSelectOptions();
+        $scope.diffGetData();
+    };
+
+    // 图标轴线切换
+    $scope.selectChange = async (arg) => {
+        await myAjaxData.timeout(0);
+        historicalRecord.set({
+            themeElectricityCompanyDayAgo: {
+                ...historicalRecord.get().themeElectricityCompanyDayAgo || {},
+                [arg]: $scope[arg]
+            }
+        });
+        diffChartLineData();
+        $scope.$apply();
+    };
+
+    $scope.diffGetData = async () => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        const { showShape, dateTime } = $scope;
+        if (showShape === 'list') {
+            $scope.query_wp_company_day_elec_timelist.getData({
+                queryCode: 'query_wp_company_day_elec_timelist',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        } else if (showShape === 'chart') {
+            $scope.query_wp_company_day_elec_timeline.getData({
+                queryCode: 'query_wp_company_day_elec_timeline',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        }
+        $scope.$apply();
+    };
+
+    // 集团 历史 日 列表
+    $scope.query_wp_company_day_elec_timelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                width: '20%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
+                dataIndex: 'inst_kw',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '实发电量' + (res.body.units.real_kwh ? '(' + res.body.units.real_kwh + ')' : ''),
+                dataIndex: 'real_kwh',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '理论电量' + (res.body.units.shd_kwh ? '(' + res.body.units.shd_kwh + ')' : ''),
+                dataIndex: 'shd_kwh',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '上网电量' + (res.body.units.send_kwh ? '(' + res.body.units.send_kwh + ')' : ''),
+                dataIndex: 'send_kwh',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '日平均风速' + (res.body.units.ws_avg ? '(' + res.body.units.ws_avg + ')' : ''),
+                dataIndex: 'ws_avg',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
+                dataIndex: 'real_hours',
+                width: '15%',
+                sort: true,
+                align: 'right'
+            },
+        ];
+    };
+    // 集团 历史 日 图表
+    $scope.query_wp_company_day_elec_timeline.getDataCallback = async (success, res) => {
+        if (!success) return;
+        $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'inst_kw';
+        $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'real_kwh';
+        await $scope.selectChange('select1');
+        await $scope.selectChange('select2');
+        diffSelectOptions(res.body.units);
+        diffChartLineData();
+        $scope.$apply();
+    };
+
+
+    // 计算 图表 显示对应 轴
+    function diffChartLineData() {
+        if (!$scope.initComplete) return;
+        const { select1, select2 } = $scope;
+        $scope.xdata = $scope.query_wp_company_day_elec_timeline.res.body.data.st_name
+        $scope.ydatas = [[$scope.query_wp_company_day_elec_timeline.res.body.data[select1]], [$scope.query_wp_company_day_elec_timeline.res.body.data[select2]]]
+    }
+
+    // 轴线切换  可选项  判断
+    function diffSelectOptions(units = {}) {
+        $scope.selectOptions = {
+            inst_kw: '装机容量' + (units.inst_kw ? '(' + units.inst_kw + ')' : ''),
+            real_kwh: '实发电量' + (units.real_kwh ? '(' + units.real_kwh + ')' : ''),
+            send_kwh: '上网电量' + (units.send_kwh ? '(' + units.send_kwh + ')' : ''),
+            shd_kwh: '理论电量' + (units.shd_kwh ? '(' + units.shd_kwh + ')' : ''),
+            ws_avg: '平均风速' + (units.ws_avg ? '(' + units.ws_avg + ')' : ''),
+            real_hours: '发电小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
+        };
+    }
+
+    // 数据置空
+    function setDataNull() {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.query_wp_company_day_elec_timelist.res = null;
+        $scope.query_wp_company_day_elec_timeline.res = null;
+    }
+});

@@ -1,0 +1,46 @@
+ajaxData({
+    cardDetail: {
+        name: 'GETcardDetail',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    addViewsCount:{
+        name: 'POSTaddViewsCount',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'historicalMaintenanceDetailService',
+})('historicalMaintenanceDetailCtrl', ['$scope', 'historicalMaintenanceDetailService', 'actionRecord','$timeout','$http'], ($scope, myAjaxData, historicalRecord,$timeout,$http) => {
+    
+    $scope.$on('historicalMaintenanceId',(e,v)=>{
+        $scope.detail = v;
+        $scope.id = v.id;
+        getDetailData();
+    });
+
+    const getDetailData = ()=>{
+        $scope.cardDetail.getData({
+            id : $scope.id,
+			queryType : 'historyRepair'
+        }).then(res=>{
+            if (res.code == 0) {
+                $scope.data = res.data;
+                $http({
+					method : "POST",
+                    url: window.interface['POSTaddViewsCount'],
+					params : {
+						'id' : $scope.id,
+						'queryType' : 'historyRepair'
+					}
+				});
+            }
+        });
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+    });
+});

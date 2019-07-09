@@ -1,0 +1,226 @@
+ajaxData(
+    {
+        // 用户列表
+        userList: {
+            name: 'GETselectComUser',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 库管查询
+        opUserBusiConfigMult02getCurrData: {
+            name: 'GETopUserBusiConfigMult02getCurrData',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 库房列表
+        opFittingsRoomSelectByCondition: {
+            name: 'GETopFittingsRoomSelectByCondition',
+            data: {},
+            later: true
+        },
+        // 库管更新
+        opUserBusiConfigMult02updateCurrData: {
+            name: 'opUserBusiConfigMult02updateCurrData',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+        // 库管更新 人员 库房选中
+        opUserBusiConfigMult02RelSaveBusiData: {
+            name: 'opUserBusiConfigMult02RelSaveBusiData',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+        // 库管更新 人员 库房取消
+        opUserBusiConfigMult02RelDelBusiData: {
+            name: 'opUserBusiConfigMult02RelDelBusiData',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+        // 发红包查询
+        opUserBusiConfigSingle01getCurrData: {
+            name: 'GETopUserBusiConfigSingle01getCurrData',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 发红包更新
+        opUserBusiConfigSingle01updateCurrData: {
+            name: 'opUserBusiConfigSingle01updateCurrData',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+        // 删除
+        opUserBusiConfigDelete: {
+            name: 'opUserBusiConfigDelete',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+    }, {
+        __serviceName__: 'roleConfigurationService',
+    }
+)('roleConfigurationCtrl', ['$scope', 'roleConfigurationService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
+
+    $scope.$on('roleConfiguration', () => {
+        $scope.changeTab(0);
+    });
+    
+    // tab 切换
+    $scope.changeTab = index => {
+
+        $scope.tabIndex = index;
+
+        switch (index) {
+            case 0:
+                $scope.opUserBusiConfigMult02getCurrData.getData();
+                break;
+        
+            case 1:
+                $scope.opUserBusiConfigSingle01getCurrData.getData();
+                break;
+        
+            default:
+                break;
+        }
+    };
+
+    // 库房管理员  人员查看  请求人员列表
+    $scope.opUserBusiConfigMult02getCurrData.subscribe(() => $scope.userList.getData());
+    // 库房管理员  人员查看  请求库房列表
+    $scope.opUserBusiConfigMult02getCurrData.subscribe(() => $scope.opFittingsRoomSelectByCondition.getData());
+    // 库房管理员  人员查看 人员库房处理
+    $scope.opUserBusiConfigMult02getCurrData.subscribe(res => {
+        $scope.opUserBusiConfigMult02getCurrData.res.body = res.body.map(v => ({
+            edit: $scope.opUserBusiConfigMult02getCurrData.editUserId === v.id,
+            ...v,
+            ...(() => {
+                const o = {};
+                v.busiRels.forEach(xv => o['busiId' + xv.busiId] = true);
+                return o;
+            })(),
+        }));
+    });
+
+    // 库房管理员 保存 或 删除
+    $scope.opUserBusiConfigMult02updateCurrData.itemChange = item => {
+        if (item.checked) return $scope.opUserBusiConfigMult02updateCurrData.getData({ userId: item.userid });
+        $scope.opUserBusiConfigDelete.getData({ id: item.id });
+    };
+
+    // 库房管理员 保存更新后操作
+    $scope.opUserBusiConfigMult02updateCurrData.subscribe(res => {
+        if (res.code !== 0) toaster.pop('error', '', res.msg);
+        else {
+            toaster.pop('success', '', res.msg);
+            $scope.opUserBusiConfigMult02getCurrData.getData();
+        }
+        $scope.userList.getData();
+    });
+    // 库房管理员 库房配置  选中 取消
+    $scope.opUserBusiConfigMult02getCurrData.updateDelete = (busi, user, checked) => {
+        $scope.opUserBusiConfigMult02getCurrData.editUserId = user.id;
+        if (checked) $scope.opUserBusiConfigMult02RelDelBusiData.getData({
+            id: user.id,
+            busiId: busi.id
+        }); 
+        else $scope.opUserBusiConfigMult02RelSaveBusiData.getData({
+            userId: user.userId,
+            busiId: busi.id,
+            id: user.id
+        });
+    };
+    // 库房管理员 库房配置  选中 取消 结果处理
+    $scope.opUserBusiConfigMult02RelDelBusiData.subscribe(res => {
+        if (res.code !== 0) return toaster.pop('error', '', res.msg);
+        toaster.pop('success', '', res.msg);
+        $scope.opUserBusiConfigMult02getCurrData.getData();
+    });
+    // 库房管理员 库房配置  选中 取消 结果处理
+    $scope.opUserBusiConfigMult02RelSaveBusiData.subscribe(res => {
+        if (res.code !== 0) return toaster.pop('error', '', res.msg);
+        toaster.pop('success', '', res.msg);
+        $scope.opUserBusiConfigMult02getCurrData.getData();
+    });
+
+    // 发红包  人员查看
+    $scope.opUserBusiConfigSingle01getCurrData.subscribe(() => $scope.userList.getData());
+
+    // 发红包 保存 或 删除
+    $scope.opUserBusiConfigSingle01updateCurrData.itemChange = item => {
+        if (item.checked) return $scope.opUserBusiConfigSingle01updateCurrData.getData({ userId: item.userid });
+        $scope.opUserBusiConfigDelete.getData({ id: item.id });
+    };
+
+    // 发红包 保存更新后操作
+    $scope.opUserBusiConfigSingle01updateCurrData.subscribe(res => {
+        if (res.code !== 0) toaster.pop('error', '', res.msg);
+        else {
+            toaster.pop('success', '', res.msg);
+            $scope.opUserBusiConfigSingle01getCurrData.getData();
+        }
+        $scope.userList.getData();
+    });
+
+    // 删除  操作结果处理
+    $scope.opUserBusiConfigDelete.subscribe(res => {
+        if (res.code !== 0) return toaster.pop('error', '', res.msg);
+        toaster.pop('success', '', res.msg);
+        const {tabIndex} = $scope;
+
+        switch (tabIndex) {
+            case 0:
+                $scope.opUserBusiConfigMult02getCurrData.getData();
+                $scope.userList.getData();
+                break;
+
+            case 1:
+                $scope.opUserBusiConfigSingle01getCurrData.getData();
+                $scope.userList.getData();
+                break;
+        
+            default:
+                break;
+        }
+    });
+
+    // 集团所有人员列表 处理
+    $scope.userList.subscribe(res => {
+        const { tabIndex } = $scope;
+        switch (tabIndex) {
+            case 0:
+                $scope.userList.checkedArr = [...$scope.opUserBusiConfigMult02getCurrData.res.body];
+                break;
+        
+            case 1:
+                $scope.userList.checkedArr = [$scope.opUserBusiConfigSingle01getCurrData.res.body];
+                break;
+        
+            default:
+                break;
+        }
+    });
+
+    // 集团所有人员列表 处理
+    $scope.userList.subscribe(res => {
+        if (!$scope.userList.checkedArr[0].userId) return;
+        $scope.userList.res = res.map(v => {
+            let _v = { ...v };
+            $scope.userList.checkedArr.forEach(xv => {
+                if (xv.userId === v.userid) {
+                    _v = {
+                        ...v,
+                        id: xv.id,
+                        checked: true
+                    };
+                }
+            });
+            return _v;
+        });
+    });
+});

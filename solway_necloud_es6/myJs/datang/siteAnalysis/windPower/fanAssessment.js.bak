@@ -1,0 +1,544 @@
+app.directive('contentLeftFanAssessment', ['myAjaxData', myAjaxData => {
+    return {
+        restrict: 'E',
+        template: $('#content-left-fan-assessment').html(),
+        replace: true,
+        scope: {
+            pageList: '=',
+            detail: '=',
+            deviceType: '='
+        },
+
+        link ($scope, $element, $attrs) {
+            $scope.setTableHeight()
+            window.addEventListener('resize', () => {
+                $scope.setTableHeight()
+
+                $scope.$apply()
+            })
+        },
+
+        controller ($scope, $element) {
+            /**
+             * 设置列表可滚动高度
+             * @return {[type]} [description]
+             */
+            $scope.setTableHeight = () => {
+                let windowHeight = window.innerHeight
+                $(".content-body").height(do {
+                    if ( (windowHeight - 100) < 545 ) 545
+                    else windowHeight - 100
+                })
+                $scope.tableScrollY = do {
+                    if ( (windowHeight - 393) < 245 ) 245
+                    else windowHeight - 393
+                }
+
+            }
+
+            /**
+             * 设置起始时间、结束时间
+             * @type {Date}
+             */
+            $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
+            $scope.dateTime2 = new Date
+
+            /**
+             * 根据设备类型获取  设备名
+             * @param  {[type]} i [description]
+             * @return {[type]}   [description]
+             */
+            $scope.getDeviceName = async (i) => {
+                $scope.deviceName = ''
+                if (i < 0) return $scope.deviceNames = []
+                    
+                $scope.deviceNames = await myAjaxData.getData({
+                    name: myAjaxData.config.url[i],
+                    data: {}
+                })
+                $scope.$apply()
+            }
+
+             /**
+             * 根据条件搜索列表
+             * @return {[type]} [description]
+             */
+            $scope.search = () => {
+                $scope.pageList.getData({
+                    deviceId: $scope.deviceName, 
+                    deviceType: $scope.deviceTypeVal, 
+                    pageIndex: 0,
+                    startDate: $scope.dateTime1.Format('yyyy-MM-dd'),
+                    endDate: $scope.dateTime2.Format('yyyy-MM-dd')
+                })
+            }
+            
+            /**
+             * [监听数据改变之后   处理当前选中  and  选中状态样式]
+             */
+            $scope.$watch('pageList', (newValue, oldValue) => {
+                //console.log(oldValue);
+                //console.log(newValue);
+                if (void 0 === newValue.res) return
+                if (void 0 === newValue.res.data.data[0]) return $scope.loadDetail()
+                const _newValue = newValue.res.data.data
+                $($element).find('tbody tr').removeClass('active')
+                if (oldValue.res) {
+                    const _oldValue = oldValue.res.data.data
+                    for (let i = 0, len = _newValue.length; i < len; i++) {
+                        if (_oldValue[activeIndex] && _newValue[i].deviceId == _oldValue[activeIndex].deviceId) {
+                            $($element).find('tbody tr').eq(i).addClass('active')
+                            return activeIndex = i
+                        }
+                    }
+                }                
+                activeIndex = 0
+                $scope.loadDetail(_newValue[0])
+            }, !0)
+
+            /**
+             * [column table列]
+             * @type {Array}
+             */
+            $scope.column = [
+                {
+                    title: '风机',
+                    dataIndex: 'deviceName',
+                    width: '35%',
+                    align: 'center',
+                    sort: true
+                }, {
+                    title: '综合评分',
+                    dataIndex: 'beginTime',
+                    width: '35%',
+                    align: 'center',
+                    sort: true,
+                    render(text, record, index) {
+                        return text && new Date(text).Format('yyyy-MM-dd')                       
+                    }
+                }, {
+                    title: '统计时间',
+                    dataIndex: 'eqreduce',
+                    width: '30%',
+                    align: 'right',
+                    sort: true,
+                    render (text, record) {
+                        return text + '%'
+                    }
+                }
+            ]
+
+
+            let activeIndex = 0
+
+            /**
+             * [loadDetail 加载详情]
+             */
+            $scope.loadDetail = async (data: Object, index = 0) => {
+                activeIndex = index
+                if (!data) {
+                    $scope.detail.res = null
+                    return $scope.detail.isLoding = !1
+                }
+                await $scope.detail.getData({
+                    stId: myAjaxData.currentStationData.currentSTID,
+                    deviceId: data.deviceId,
+                    dtime : new Date(data.beginTime).Format("yyyy-MM-dd")
+                })
+                $($element).find('tbody tr').removeClass('active').eq(index).addClass('active')
+            }
+
+            /**
+             * [默认显示第一条详情]
+             * @param  {[type]} ) 
+             */
+            ;(async () => {
+                await $scope.pageList.promise
+                await myAjaxData.timeout(0)
+                $scope.loadDetail($scope.pageList.res.data.data[0])
+            })()
+        }
+    }
+}])
+app.directive('setHeightRight', ['$timeout', ($timeout) => ({
+    restrict: 'A',
+    
+    link () {
+        $(".right-con >.h2-1").css("height","50%");
+        window.addEventListener('resize', () => {
+            $(".right-con >.h2-1").css("height","50%");
+        })
+    }
+})])
+
+/* 雷达图 */
+app.directive('chartRadarFan', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    scope: {
+        detail: '='
+    },
+    replace: true,
+    link($scope, $element, $attrs) {　　　
+　　　　const setWidthHeight = () => {
+            $($element).height((window.innerHeight-170)/2)
+        }
+
+        setWidthHeight()
+
+        const myChart = echarts.init($element[0])
+        const renderChart = () => {
+            const option = {
+                tooltip : {
+                    trigger: 'item',
+                    confine : true
+                },
+                legend: {
+                    data: ['自身','设备平均'],
+                    orient : 'horizontal',
+                    top:'5%',
+                    left : 'center'
+                },
+                noDataLoadingOption:{
+                    text : '暂无数据',
+                    effect :function(params,callback){
+                        return "暂无数据"
+                    }
+                },
+                calculable : false,
+                radar:[
+                   {
+                       indicator : [
+                                    {text : '故障情况',max:100},
+                                    {text : '功率曲线',max:100},
+                                    {text : '运行效率',max:100}
+                        ],  
+                        center : ['50%', '65%'],
+                        name: {
+                            textStyle: {
+                                color: '#1cb09a'
+                            }
+                        },
+                        nameGap:8,
+                        radius:'65%'
+                   }
+                      
+                ],
+                series : [
+                    {
+                        type: 'radar',
+                        data : [
+                            {
+                                value : [30,10,50],
+                                z : 1,
+                                name : '设备平均',
+                                itemStyle : {
+                                    normal : {
+                                        color : 'rgb(254,194,78)',
+                                        areaStyle : {
+                                            color : 'rgba(254,194,78,.4)'
+                                        },
+                                        lineStyle : {
+                                            color : 'rgba(254,194,78,.9)',
+                                            width : 1
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                value :[40,70,20,] ,
+                                name : '自身',
+                                z : 2,
+                                itemStyle : {
+                                    normal : {
+                                        color:'rgba(92,206,233,.4)',
+                                        areaStyle : {
+                                            color : 'rgba(92,206,233,.4)'
+                                        },
+                                        
+                                        lineStyle : {
+                                            color : 'rgba(92,206,233,.9)',
+                                            width : 1
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+            myChart.setOption(option)
+        }
+
+        renderChart();
+        window.addEventListener('resize', () => {
+            setWidthHeight()
+            myChart.resize()
+        })
+    }
+})])
+
+/* 饼图 */
+app.directive('chartPieFan', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    scope: {
+        detail: '='
+    },
+    replace: true,
+    link($scope, $element, $attrs) {　　　
+　　　　const setWidthHeight = () => {
+            $($element).height((window.innerHeight-170)/2)
+        }
+
+        setWidthHeight()
+
+        let nature = 65
+        const myChart = echarts.init($element[0])
+        const renderChart = () => {
+            const labelFromatter = {
+                normal: {
+                    formatter:function (params){
+                        return params.value
+                    },
+                    position: 'center',
+                    show: true,
+                    textStyle: {
+                        fontSize: '48',
+                        fontWeight: 'normal',
+                        color: 'black'
+                    }
+                }
+            }
+            const labelBottom = {
+                normal: {
+                    color: 'rgba(36,176,155,1)', // 未完成的圆环的颜色
+                    label: {
+                        show: false
+                    },
+                    labelLine: {
+                        show: false
+                    }
+                },
+                emphasis: {
+                    color: 'rgba(36,176,155,1)' // 未完成的圆环的颜色
+                }
+            };
+            const labelTop = {
+                normal : {
+                    color:new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgb(141,254,236)'
+                        }, {
+                            offset: 1,
+                            color: 'rgb(46,183,162)'
+                        }]),
+                    labelLine : {
+                        show : false
+                    }
+                }
+            };
+            const option = {
+                title: {
+                    text: '综合评分',
+                    left: 'center',
+                    y: '10%',
+                    textStyle: {
+                        fontWeight: 'normal',
+                        fontSize: 18,
+                        color:'#1cb09a'
+                    }
+                },
+                series : [
+                    {   clockWise:false,
+                        type : 'pie',
+                        center : ['50%', '60%'],
+                        radius : ['30%', '60%'],
+                        startAngle: 0,
+                        hoverAnimation: false,
+                        legendHoverLink: false, 
+                        data : [
+                            {value:nature,itemStyle : labelTop,label:labelFromatter},
+                            {value:100-nature, itemStyle : labelBottom}
+                        ]
+                    }
+                ]
+            }
+            myChart.setOption(option)
+        }
+
+        renderChart();
+        window.addEventListener('resize', () => {
+            setWidthHeight()
+            myChart.resize()
+        })
+    }
+})])
+
+// 柱形图
+app.directive('chartBarFan', ['myAjaxData', (myAjaxData) => ({
+    restrict: 'E',
+    scope: {
+        detail: '='
+    },
+
+    link ($scope, $element, $attrs) {
+        const setWidthHeight = () => {
+            $($element).height((window.innerHeight-170)/2)
+        }
+        setWidthHeight()
+        const myChart = echarts.init($element[0])
+        window.addEventListener('resize', () => {
+            setWidthHeight()
+            myChart.resize()
+        })
+
+        const renderChart = resData => {
+            const legend = ['平均发电量', '发电量']
+            const option = {
+                color: ['#2cc6ff'],
+                tooltip: {
+                    trigger: 'axis',
+                },
+                legend: {
+                    data: [{name: '平均发电量'}, {name: '发电量'}, {name: '平均功率曲线'}, {name: '功率曲线'}],
+                    itemWidth: 25,
+                    itemGap: 40,
+                    height: 15,
+                    left: 40,
+                    top: 20
+                },
+                grid: {
+                    top: '80',
+                    left: '50',
+                    right: '50',
+                    bottom: '35',
+                    //containLabel: true
+                },
+                xAxis: [
+                    {
+                        name: '',
+                        type : 'category',
+                        axisLine : {
+                            lineStyle : {
+                                color : '#a4a4a4',
+                                width : 1
+                            }
+                        },
+                        data : Array.apply(null, { length: 10 }).map((v, i) => i + 1 + '')
+                    }
+                ],
+                yAxis : [
+                    {
+                        name: '功率（kWh）',
+                        type : 'value',
+                        axisLine : {
+                            lineStyle : {
+                                color : '#a4a4a4',
+                                width : 1
+                            }
+                        },
+                        axisTick:{
+                            show:false
+                        },
+                        splitLine: {
+                            show: false
+                        }
+                    },{
+                        name: '发电量（kWh）',
+                        type : 'value',
+                        axisLine : {
+                            lineStyle : {
+                                color : '#a4a4a4',
+                                width : 1
+                            }
+                        },
+                        axisTick:{
+                            show:false
+                        },
+                        splitLine: {
+                            show: false
+                        }
+                    }
+                ],
+                series : [
+                    ...legend.map((v, i) => ({
+                        name: v,
+                        type:'bar',
+                        barWidth: '20',
+                        yAxisIndex: 0,
+                        stack: '发电量（kWh）',
+                        itemStyle: {
+                            normal: {
+                                color: ['rgb(45,199,255)', 'rgb(83,204,174)'][i]
+                            }
+                        },
+                        data: Array.apply(null, { length: 10 }).map((v, i) => Math.random() * 20)
+                    })),
+                    {
+                        name: '平均功率曲线',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        yAxisIndex: 1,
+                        symbolSize:10,
+                        showSymbol: true,
+                        itemStyle: {
+                            normal: {
+                                color: 'rgb(255,173,93)',
+                            },
+                        },
+                       data: [220, 182, 191, 134, 150, 120, 110, 125, 145, 122]
+                    },
+                      {
+                        name: '功率曲线',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        yAxisIndex: 1,
+                        symbolSize: 10,
+                        showSymbol: true,
+                        lineStyle: {
+                            normal: {
+                                width: 2,
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: 'rgb(162,105,247)'
+                
+                            }
+                        },
+                        data: [120, 110, 125, 145, 122, 165, 122, 191, 134, 150]
+                    }
+                ]
+            }
+            myChart.setOption(option)
+        }
+        renderChart()
+    }
+})])
+
+ajaxData({
+    pageList: {
+        name: 'GETanalysisPage',
+        data: {
+            pageIndex:0,
+            pageSize:10,
+            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
+            endDate: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+    detail: {
+        name: 'GETselectEqPaintingData',
+        later: true
+    },
+    deviceType: {
+        name: 'GETgetDeviceType',
+        data: {}
+    }
+},{
+    //设备查询地址
+    url: [ "GETgetJunctionBox", "GETgetInverter", "GETgetBoxchange", "GETgetAmmeter", "GETgetAerograph" ]
+})('fanAssessmentCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+
+    
+})

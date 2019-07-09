@@ -1,0 +1,114 @@
+app.directive('lopChartBar', ['myAjaxData', myAjaxData => ({
+    restrict: 'E',
+    scope: {
+        detail: '='
+    },
+
+    link ($scope, $element, $attrs) {
+        const setWidthHeight = () => {
+            $($element).width( ((window.innerWidth - 220) < 800) ? 800 : window.innerWidth - 220)
+                    .height( ((window.innerHeight - 370) < 270) ? 270 : window.innerHeight - 370)
+        }
+        setWidthHeight()
+        const myChart = echarts.init($element[0])
+        window.addEventListener('resize', () => {
+            setWidthHeight()
+            myChart.resize()
+        })
+
+        const renderChart = resData => {
+            const legend = ['故障', '亚健康', '限电', '计划检修','其他']
+            const option = {
+                color: ['#2cc6ff'],
+                tooltip: {
+                    trigger: 'axis',
+                },
+                legend: {
+                    data: [{name: '故障'}, {name: '亚健康'},{name: '限电'}, {name: '计划检修'}, {name: '其他'}],
+                    itemWidth: 25,
+                    itemGap: 40,
+                    height: 15,
+                    right: 60,
+                    top: 10
+                },
+                grid: {
+                    top: '60',
+                    left: '20',
+                    right: '60',
+                    bottom: '20',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        name: '时间',
+                        type : 'category',
+                        axisLine : {
+                            lineStyle : {
+                                color : '#a4a4a4',
+                                width : 1
+                            }
+                        },
+                        data : Array.apply(null, { length: 30 }).map((v, i) => i + 1 + '')
+                    }
+                ],
+                yAxis : [{
+                    name: '电量(kWh)',
+                    type : 'value',
+                    axisLine : {
+                        lineStyle : {
+                            color : '#a4a4a4',
+                            width : 1
+                        }
+                    },
+                    axisTick:{
+                        show:false
+                    },
+                    splitLine: {
+                        show: false
+                    }
+                }],
+                series : [
+                    ...legend.map((v, i) => ({
+                        name: v,
+                        type:'bar',
+                        barWidth: '20',
+                        yAxisIndex: 0,
+                        stack: '电量',
+                        itemStyle: {
+                            normal: {
+                                color: ['rgb(244,151,193)','rgb(100,201,226)','rgb(122,203,161)','rgb(250,171,128)', 'rgb(102,102,102)'][i]
+                            }
+                        },
+                        data: Array.apply(null, { length: 30 }).map((v, i) => Math.random() * 20)
+                    })),
+                ]
+            }
+            myChart.setOption(option)
+        }
+        renderChart()
+    }
+})])
+
+ajaxData({
+    pageList: {
+        name: 'GETanalysisPage',
+        data: {
+            pageIndex:0,
+            pageSize:10,
+            startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
+            endDate: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+    detail: {
+        name: 'GETselectEqPaintingData',
+        later: true
+    },
+    deviceType: {
+        name: 'GETgetDeviceType',
+        data: {}
+    }
+},{
+})('lossOfPowerWindCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
+    $scope.dateTime2 = new Date
+})

@@ -1,0 +1,265 @@
+ajaxData(
+    {
+        // 公司今日 时间 列表
+        companyDayTodayTime: {
+            name: 'GETrunAcpTimeList',
+            data: { },
+            later: true,
+            onlyLatest: true,
+            // sameTimeOnce: true,
+        },
+        // 公司今日 时间 图表
+        companyDayTodayTime2: {
+            name: 'GETrunAcpTimeList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+        //集团-今日
+        companyToday: {
+            name: 'GETrunStatusInfoList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+    }, 
+    {
+        __serviceName__: 'themeEquipmentOperationCompanyDayTodayService'
+    }
+)('themeEquipmentOperationCompanyDayTodayCtrl', ['$scope', 'themeEquipmentOperationCompanyDayTodayService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape = 'chart', tabIndex = 0 } = historicalRecord.get().themeEquipmentOperationCompanyDayToday || {};
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        $scope.changeShowShape(showShape);
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await diffGetData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'CompanyDayToday') return;
+        setDataNull();
+        return diffGetData();
+    };
+
+    // 点击电站名  跳转到电站页面
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.reloadParentPage({
+            stationData: {
+                dataType: 0,
+                id: item.stid,
+                isGroup: "0",
+                stClass: '02'
+            }
+        });
+    };
+
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeEquipmentOperationCompanyDayToday: {
+                ...historicalRecord.get().themeEquipmentOperationCompanyDayToday || {},
+                showShape
+            }
+        });
+        setDataNull();
+        return diffGetData();
+    };
+
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeEquipmentOperationCompanyDayToday: {
+                ...historicalRecord.get().themeEquipmentOperationCompanyDayToday || {},
+                tabIndex
+            }
+        });
+        setDataNull();
+        return diffGetData();
+    };
+
+    function diffGetData() {
+        if ($scope.currentClass !== 'CompanyDayToday') return;
+        const {tabIndex, showShape, dateTime} = $scope;
+        if (tabIndex === 0) {
+            if (showShape === 'list') {
+                if ($scope.companyDayTodayTime.res) return;
+                $scope.companyDayTodayTime.getData({
+                    queryType: 1,
+                    dateType: 3,
+                    date: dateTime.showDate,
+                    dataType: 1,
+                    stime: 0,
+                });
+            } else if (showShape === 'chart') {
+                $scope.companyDayTodayTime2.getData({
+                    queryType: 1,
+                    dateType: 3,
+                    date: dateTime.showDate,
+                    dataType: 2,
+                    stime: $scope.companyDayTodayTime2.res
+                        ? $scope.companyDayTodayTime2.res.body.echarts_xaxisTime[$scope.companyDayTodayTime2.res.body.echarts_xaxisTime.length - 1].split(':').join('')
+                        : 0,
+                });
+            }
+        } else if (tabIndex === 1) {
+            $scope.companyToday.getData({
+                queryType: 1,
+                dateType: 3,
+                date: dateTime.showDate
+            });
+        }
+    }
+
+    // 公司 今日 时间 列表
+    $scope.companyDayTodayTime.getDataCallback = (success, res) => {
+        if (!success) return;
+        const tempArr = res.body.chartList.slice(1);
+        tempArr.isConcat = true;
+        $scope.datasource = tempArr;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'xaTime',
+                sort: true,
+                width: '',
+                align: 'center'
+            },
+            {
+                title: '实发功率(kW)',
+                dataIndex: 'power',
+                sort: true,
+                width: '',
+                align: 'right',
+            },
+            {
+                title: '理论功率(kW)',
+                dataIndex: 'predictPower',
+                sort: true,
+                width: '',
+                align: 'right',
+            },
+            {
+                title: '风速(m/s)',
+                dataIndex: 'windSpeed',
+                sort: true,
+                width: '',
+                align: 'right',
+            }
+        ];
+    }
+    // 公司 今日 时间 图表
+    const companyDayTodayTimeLineData = { xdata: [], line1: [], line2: [], line3: [] };
+    $scope.companyDayTodayTime2.getDataCallback = (success, res) => {
+        if (!success) return;
+        const { xdata, line1, line2, line3 } = companyDayTodayTimeLineData;
+        const length = xdata.length;
+        $scope.xdata = companyDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaxisTime);
+        $scope.ydatas = [[companyDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_power_o),
+            companyDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_predictPower_o)],
+            [companyDayTodayTimeLineData.line3 = line3.slice(0, length - 1).concat(res.body.echarts_windSpeed_o)]];
+    };
+
+    //集团当日
+    $scope.companyToday.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '电站名称',
+                width: '25%',
+                dataIndex: 'stName',
+                align: 'left',
+                style: 'position:relative',
+                render(text, item, index) {
+                    if (item.st_comm == 1) return (`<span class="clickable">${text}</span>` || '') + '<i title="通讯中断" class="iconfont icon-icon-life-alarm-copy" style="color: #9d9d9d;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                    else if (item.st_comm == 2) return (`<span class="clickable">${text}</span>` || '') + '<i title="通讯初始化" class="iconfont icon-icon-life-alarm-copy" style="color: #9d9d9d;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                    else if (item.st_status == 99) return (`<span class="clickable">${text}</span>` || '') + '<i title="正常" class="iconfont icon-icon-life-alarm-copy" style="color: #52b876;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                    else if (item.st_status == 1) return (`<span class="clickable">${text}</span>` || '') + '<i title="故障" class="iconfont icon-icon-life-alarm-copy" style="color: #ff6161;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                    else if (item.st_status == 2) return (`<span class="clickable">${text}</span>` || '') + '<i title="报警" class="iconfont icon-icon-life-alarm-copy" style="color: #be9856;cursor:pointer;font-size:32px;position:absolute;top:0;right: 1em;line-height: 50px;"></i>';
+                    return (`<span class="clickable">${text}</span>` || '');
+                }
+            },
+            {
+                title: '总台数',
+                dataIndex: '',
+                sort: 'true',
+                align: 'right',
+                render(text, item, index) {
+                    return `<span>${item.comm + item.fault + item.maintain + item.run + item.wait || ''}</span>`
+                }
+            },
+            {
+                title: '运行台数',
+                dataIndex: 'run',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '报警台数',
+                dataIndex: 'alarm',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '待机',
+                dataIndex: 'wait',
+                sort: 'true',
+                align: 'right',
+            },
+            {
+                title: '故障',
+                dataIndex: 'fault',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '维护',
+                dataIndex: 'maintain',
+                sort: 'true',
+                align: 'right'
+            },
+            {
+                title: '离线',
+                dataIndex: 'comm',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+    };
+
+    function setDataNull() {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        companyDayTodayTimeLineData.xdata = [];
+        companyDayTodayTimeLineData.line1 = [];
+        companyDayTodayTimeLineData.line2 = [];
+        companyDayTodayTimeLineData.line3 = [];
+        $scope.companyDayTodayTime.res = null;
+        $scope.companyDayTodayTime2.res = null;
+        $scope.companyToday.res = null;
+    }
+
+    // 定时器  定时刷新接口
+    const timer = $interval(() => diffGetData(), 10000);
+    $scope.$on('$destroy', () => {
+        $interval.cancel(timer);
+    });
+
+});

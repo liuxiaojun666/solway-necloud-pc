@@ -1,0 +1,161 @@
+ajaxData({
+    dataInitList:{
+        name: 'GETdataInitList',
+        data: {},
+        later: true
+    },
+    deleteDataInitData:{
+        name: 'POSTdeleteDataInit',
+        data: {},
+        later: true
+    },
+}, {})('dataInitManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '数据初始化';
+    
+    $scope.getListData = () =>{
+        $scope.dataInitList.getData({
+            pageIndex : 0,
+            pageSize : 10,
+            keyWords : $scope.keyWords,
+        })
+    }
+
+    $scope.getListData();
+    
+    $scope.column = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'dataInitCheckboxName',
+            render(text, record, index) {
+                return '<label class="i-checks m-b-none"><input data-id="' + record.id + '" name="dataInitCheckboxName" type="checkbox" /><i style="background:transparent;"></i></label>';
+            }
+        },{
+            title: '公司名称',
+            dataIndex: 'companyName',
+            width:'20%',
+            sort: !0,
+            align: 'center'
+        },{
+            title: '电站名称',
+            dataIndex: 'stationName',
+            sort: !0,
+            align: 'center'
+        },{
+            title: '设备名称',
+            dataIndex: 'deviceName',
+            sort: !0,
+            align: 'center'
+        },{
+            title: '开始时间',
+            dataIndex: 'beginTime',
+            align: 'center',
+            render(text, item) {
+                return text?new Date(text).Format('yyyy-MM-dd'):'-';
+            }
+        },{
+            title: '结束时间',
+            dataIndex: 'endTime',
+            align: 'center',
+            render(text, item) {
+                return text?new Date(text).Format('yyyy-MM-dd'):'-';
+            }
+        },{
+            title: '任务生成时间',
+            dataIndex: 'createTime',
+            align: 'center',
+            render(text, item) {
+                return text?new Date(text).Format('yyyy-MM-dd hh:mm:ss'):'-';
+            }
+        },{
+            title: '任务执行时间',
+            dataIndex: 'executeTime',
+            align: 'center',
+            render(text, item) {
+                return text?new Date(text).Format('yyyy-MM-dd hh:mm:ss'):'-';
+            }
+        },{
+            title: '类型',
+            dataIndex: 'typeName',
+            align: 'center',
+            sort: !0
+        },{
+            title: '任务执行情况',
+            dataIndex: 'statusName',
+            align: 'center',
+            sort: !0
+        },{
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render(text, item, index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="授权"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
+
+    //删除
+    const deleteDataInit = ids =>{
+        $scope.deleteDataInitData.getData({ids:ids.join(',')}).then(res=>{
+            if (res.code == '0'){
+                toaster.pop('success','','删除成功');
+                $scope.getListData();
+            }else{
+                toaster.pop('error', '','删除失败')
+            }
+        });
+    }
+    $scope.trClick = (item, index, event) => {
+        if(event.target.className.includes('icon-bianji-copy')) {
+            $scope.editDataInitModel = true;
+            $scope.$broadcast('editDataInitBroad',item);
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此条数据？' }, () => {
+                deleteDataInit([item.id])
+            });
+        }
+    };
+
+    //新增
+    $scope.newDataInit = ()=>{
+        $scope.editDataInitModel = true;
+        $scope.$broadcast('editDataInitBroad',{});
+    }
+
+    $scope.deleteBatchDataInit = () =>{
+        let ids = [];
+        $("input[name='dataInitCheckboxName']:checked").each(function () {
+            ids.push(this.dataset.id);
+        });
+        if (ids.length == 0){
+            alert("请选择删除的数据");
+            return;
+        }
+        $solway.confirm({ message: '确定删除所选的数据？' }, () => {
+            deleteDataInit(ids)
+        });
+    }
+
+    //编辑成功回调
+    $scope.$on('editCallback',function(){
+        $scope.editDataInitModel = false;
+        $scope.getListData();
+    })
+
+    //编辑取消回调
+    $scope.$on("cancel",function(){
+        $scope.editDataInitModel = false;
+    })
+   
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});

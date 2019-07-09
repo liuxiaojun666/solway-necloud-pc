@@ -1,0 +1,507 @@
+ajaxData(
+    {
+        boxChangeCount: {
+            name: 'GETboxChangeCount',
+            data: {},
+            later: true
+        },
+        boxChangeHours: {
+            name: 'GETboxChangeHours',
+            data: {},
+            later: true
+        },
+        singleRealDataBBoxChange: {
+            name: 'GETsingleRealDataBBoxChange',
+            data: {},
+            later: true,
+            sameTimeOnce: true,
+            onlyLatest: true
+        },
+        newHistoryData: {
+            name: 'GETnewHistoryData',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            cache: true
+        },
+        faultAlarmList: {
+            name: 'GETfaultAlarmList',
+            data: {},
+            later: true
+        }
+    },
+    {
+        __serviceName__: 'boxChangeService',
+    }
+)('boxChangeCtrl', ['$scope', 'boxChangeService', 'equipmentPopUpService', '$interval'], function ($scope, currentService, eqService, $interval) {
+    $('.boxChange.ng-clock').removeClass('ng-clock');
+    $scope.tabIndex = 0; //初始化 tab 标签页   0：实时数据  1：历史数据   2：故障信息
+    $scope.pstationid = eqService.config.eqObj.pstationid;
+    $scope.serialnumber = eqService.config.eqObj.deviceSerialNnumber;
+    $scope.historyDataNullPlaceholder = '<img style="position:absolute;left:500px;top:70px;" src="theme/images/enrichment/noData.png" alt="没有加载到数据插画" />';
+    $scope.eqHistoryDataStartDate = new Date(Date.now() - 1000 * 60 * 60 * 24);
+    $scope.eqHistoryDataEndDate = new Date;
+
+    // 逆变器小时数信息获取
+    $scope.boxChangeHours.beforGetData = () => {
+        if ($scope.boxChangeHours.res) return;
+        $scope.boxChangeHours.getData({ id: eqService.config.eqObj.deviceId });
+    };
+
+    // 逆变器基本信息获取
+    $scope.boxChangeCount.getData({
+        pageIndex: 0,
+        param: eqService.config.eqObj.deviceId
+    }).then(res => $scope.deviceName = res.bboxChange.name);
+
+    // 实时数据获取
+    $scope.singleRealDataBBoxChange.getData({
+        id: eqService.config.eqObj.deviceId,
+        serialnumber: eqService.config.eqObj.deviceSerialNnumber,
+        pstationid: eqService.config.eqObj.pstationid
+    });
+
+    // 实时数据 处理
+    $scope.singleRealDataBBoxChange.subscribe(res => {
+        $scope.realListData = [1, 2].map(v => ['a', 'b', 'c'].map(xv => ({
+            c1: v + xv.toLocaleUpperCase(),
+            c2: res.data['p' + xv + v],
+            c3: res.data['q' + xv + v],
+            c4: res.data['c' + xv + v],
+            c5: res.data['u' + xv + v],
+        }))).reduce((a, b) => a.concat(b), []);
+        $scope.realListColumn = [
+            {
+                title: '',
+                dataIndex: 'c1'
+            },
+            {
+                title: '有功功率（kW）',
+                dataIndex: 'c2',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            },
+            {
+                title: '无功功率（kVar）',
+                dataIndex: 'c3',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            },
+            {
+                title: '电流（A）',
+                dataIndex: 'c4',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            },
+            {
+                title: '电压（V）',
+                dataIndex: 'c5',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            },
+        ];
+    });
+
+    // 状态刷新
+    const timer = $interval(() => {
+        if ($scope.tabIndex !== 0) return;
+        if ($scope.rtmSingleStationComm.res.comm === 1) return;
+        $scope.singleRealDataBBoxChange.getData();
+    }, 5 * 1000);
+
+    // 历史数据 列表 接口请求
+    $scope.newHistoryData.beforGetData = async () => {
+        await currentService.timeout(0);
+        $scope.$apply();
+        const { eqHistoryDataEndDate, eqHistoryDataStartDate } = $scope;
+        const { pstationid, deviceSerialNnumber, deviceId } = eqService.config.eqObj;
+        $scope.newHistoryData.getData({
+            pageIndex: 1,
+            pageSize: 10,
+            devicetype: 3,
+            begindate: eqHistoryDataStartDate.showDate,
+            enddate: eqHistoryDataEndDate.showDate,
+            stationid: pstationid,
+            serialnumber: deviceSerialNnumber,
+            id: deviceId
+        });
+    };
+
+    // 历史数据 列表 接口 返回 处理
+    $scope.newHistoryData.subscribe( async res => {
+        $scope.column = [
+            {
+                dataIndex: 'dtime',
+                title: '时间',
+                width: '180px',
+                align: 'center',
+                sort: true,
+                fixed: 'left',
+                render(text) {
+                    return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
+                }
+            }, {
+                dataIndex: 'pa1',
+                title: '绕组1A相有功功率(kW)',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'pb1',
+                title: '绕组1B相有功功率(kW)',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'pc1',
+                title: '绕组1C相有功功率(kW)',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'qa1',
+                title: '绕组1A相无功功率(kVar)',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'qb1',
+                title: '绕组1B相无功功率(kVar)',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'qc1',
+                title: '绕组1C相无功功率(kVar)',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'ca1',
+                title: '绕组1A相电流(A)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'cb1',
+                title: '绕组1B相电流(A)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'cc1',
+                title: '绕组1C相电流(A)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'ua1',
+                title: '绕组1A相电压(V)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'ub1',
+                title: '绕组1B相电压(V)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'uc1',
+                title: '绕组1C相电压(V)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'f1',
+                title: '绕组1频率(Hz)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'pf1',
+                title: '绕组1功率因数',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'w1',
+                title: '绕组1电量(kWh)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'pa2',
+                title: '绕组2A相有功功率(kW)',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'pb2',
+                title: '绕组2B相有功功率(kW)',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'pc2',
+                title: '绕组2C相有功功率(kW)',
+                width: '150px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'qa2',
+                title: '绕组2A相无功功率(kVar)',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'qb2',
+                title: '绕组2B相无功功率(kVar)',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'qc2',
+                title: '绕组2C相无功功率(kVar)',
+                width: '160px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'ca2',
+                title: '绕组2A相电流(A)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'cb2',
+                title: '绕组2B相电流(A)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'cc2',
+                title: '绕组2C相电流(A)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'ua2',
+                title: '绕组2A相电压(V)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'ub2',
+                title: '绕组2B相电压(V)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'uc2',
+                title: '绕组2C相电压(V)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'f2',
+                title: '绕组2频率(Hz)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'pf2',
+                title: '绕组2功率因数',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'w2',
+                title: '绕组2电量(kWh)',
+                width: '120px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'ta',
+                title: 'A相温度(℃)',
+                width: '80px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'tb',
+                title: 'B相温度(℃)',
+                width: '80px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 'tc',
+                title: 'C相温度(℃)',
+                width: '80px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }, {
+                dataIndex: 't',
+                title: '温度(℃)',
+                width: '80px',
+                align: 'right',
+                render(text) {
+                    return text.toFixed(2) + '';
+                }
+            }
+        ];
+
+        await currentService.timeout(0);
+        $scope.$apply();
+    });
+
+    // 故障 列表 接口请求
+    $scope.faultAlarmList.beforGetData = () => {
+        $scope.faultAlarmList.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            deviceId: eqService.config.eqObj.deviceId,
+            deviceType: 3,
+            pstationid: eqService.config.eqObj.pstationid
+        });
+    };
+
+    // 故障列表 返回 处理
+    $scope.faultAlarmList.subscribe(res => {
+        $scope.column2 = [
+            {
+                dataIndex: 'sStartTime',
+                title: '发生时间',
+                width: '180px',
+                align: 'center',
+                sort: true,
+                render(text) {
+                    return text && `<text>${new Date(text).Format('yyyy-MM-dd hh:mm')}</text>`
+                }
+            },
+            {
+                dataIndex: 'sEndTime',
+                title: '结束时间',
+                width: '180px',
+                align: 'center',
+                sort: true,
+                render(text) {
+                    return text && `<text>${new Date(text).Format('yyyy-MM-dd hh:mm')}</text>`
+                }
+            },
+            {
+                dataIndex: 'faultlevelStr',
+                title: '故障级别',
+                width: '100px',
+                align: 'center',
+                sort: true,
+            },
+            {
+                dataIndex: 'eventDesc',
+                title: '故障描述',
+                width: '200px',
+                align: 'left',
+                sort: true,
+            },
+            {
+                dataIndex: 'sEndTime',
+                title: '结果',
+                width: '200px',
+                align: 'left',
+                render(text) {
+                    return text ? '关闭' : '报告'
+                }
+            },
+            {
+                dataIndex: 'handstatusStr',
+                title: '人工处理状态',
+                width: '200px',
+                align: 'left',
+                sort: true,
+            },
+        ];
+    });
+
+    // 销毁事件
+    $scope.$on('includePageDesdroy', () => {
+        $scope.boxChangeCount.res = null;
+        $scope.boxChangeHours.res = null;
+        $scope.singleRealDataBBoxChange.res = null;
+        $scope.newHistoryData.res = null;
+        $scope.faultAlarmList.res = null;
+        $interval.cancel(timer);
+    });
+
+});

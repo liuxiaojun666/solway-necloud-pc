@@ -1,0 +1,158 @@
+ajaxData({
+
+    // 查询所有省份
+    province: {
+        name: 'GETprovinces',
+        data: {}
+    },
+
+    // 设备数据线性分析 +++++++++++++++++++++++++
+    lineFaultType: {
+        name: 'GETlineFaultType',
+        data: {
+            powerType: 'PV',
+            idType: '1',
+            indicators: 'FAULTRATE',
+            timeType: 'MONTH',
+            dateStr: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+
+    // 查询 各故障类型排名  默认 集团 故障率 总排名 ++++++++++++++++++++++++++++++++
+    rankingFaultType: {
+        name: 'GETrankingFaultType',
+        data: {
+            powerType: 'PV',
+            idType: '1',
+            indicators: 'FAULTRATE',
+            timeType: 'MONTH',
+            dateStr: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+
+    // 查询 品牌 排名 ++++++++++++++++++++++++++
+    rankingBrand: {
+        name: 'GETrankingBrand',
+        data: {
+            powerType: 'PV',
+            idType: '1',
+            indicators: 'FAULTRATE',
+            timeType: 'MONTH',
+            dateStr: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+
+    // 查询 省份故障率排名 +++++++++++++++++++++++++++++
+    rankingProvince: {
+        name: 'GETrankingProvince',
+        data: {
+            powerType: 'PV',
+            idType: '1',
+            indicators: 'FAULTRATE',
+            timeType: 'MONTH',
+            dateStr: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+
+    // 查询 省份 设备台数   默认  各省份 设备台数
+    rankingProject: {
+        name: 'GETrankingProject',
+        data: {
+            powerType: 'PV',
+            idType: '1',
+            indicators: 'FAULTRATE',
+            timeType: 'MONTH',
+            dateStr: (new Date).Format('yyyy-MM-dd')
+        }
+    },
+}, {})('equipmentFaultCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    $scope.dateTime1 = new Date; //选择月日期
+    $scope.dateTime1.setMonth($scope.dateTime1.getMonth() - 1);
+    $scope.dateTime2 = new Date; //选择年日期
+    $scope.timeType = 'MONTH';   //默认查累计
+    $scope.idType = 1;           //默认范围 集团  1:集团|2:省份|3:电站
+    $scope.ids = null;           //默认集团 不传ids 
+    $scope.currDataType = 'FAULTRATE'; //默认查询检修台次
+    $scope.allDataType = {       //所有查询类型
+        FAULTRATE: '故障率',
+        MTBF: 'MTBF',
+        MTTR: 'MTTR',
+    };
+
+    // 所有省份  + 集团
+    $scope.province.promise.then(res => $scope.allIds = res.body.map(v => ({ [v.provinceId]: v.provinceName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
+
+    // 改变  范围 执行 函数  重新请求 所有
+    $scope.changeIds = value => {
+        if (value === $scope.ids) return;
+        const isJT = value == 1; // 选择的是否是集团
+        const idType = $scope.idType = isJT ? 1 : 2;
+        const ids = $scope.ids = isJT ? null : value;
+
+        $scope.rankingFaultType.getData({ idType, ids, dateStr: getDateStr() });
+        $scope.rankingBrand.getData({ idType, ids, dateStr: getDateStr() });
+        $scope.rankingProvince.getData({ idType, ids, dateStr: getDateStr() });
+        $scope.rankingProject.getData({ idType, ids, dateStr: getDateStr() });
+        $scope.lineFaultType.getData({ idType, ids, dateStr: getDateStr() });
+    };
+
+    // 改变 查询类型  执行 函数 重新请求  类型 排名
+    $scope.changeDataType = value => {
+        if (value === $scope.currDataType) return;
+        const indicators = $scope.currDataType = value;
+
+        $scope.rankingFaultType.getData({ indicators, dateStr: getDateStr() });
+        $scope.rankingProvince.getData({ indicators, dateStr: getDateStr() });
+        $scope.lineFaultType.getData({ indicators, dateStr: getDateStr() });
+        $scope.rankingBrand.getData({ indicators, dateStr: getDateStr() });
+        $scope.rankingProject.getData({ indicators, dateStr: getDateStr() });
+    };
+
+    // 改变时间维度 执行 func update all data
+    $scope.changeTimeType = value => {
+        if ($scope.timeType === value) return;
+        const timeType = $scope.timeType = value;
+        const dateStr = $scope.dateStr = getDateStr();
+
+        $scope.rankingFaultType.getData({ timeType, dateStr });
+        $scope.rankingBrand.getData({ timeType, dateStr });
+        $scope.rankingProvince.getData({ timeType, dateStr });
+        $scope.rankingProject.getData({ timeType, dateStr });
+        $scope.lineFaultType.getData({ timeType, dateStr });
+    };
+
+    // 改变查询时间  执行函数 
+    $scope.changeDateTime = async () => {
+        await myAjaxData.timeout(0);
+        const dateStr = getDateStr();
+        if (dateStr === $scope.dateStr) return;
+        $scope.dateStr = dateStr;
+
+        $scope.rankingFaultType.getData({ dateStr });
+        $scope.rankingBrand.getData({ dateStr });
+        $scope.rankingProvince.getData({ dateStr });
+        $scope.rankingProject.getData({ dateStr });
+        $scope.lineFaultType.getData({ dateStr });
+    };
+
+    // 条件过滤  改变  投产时间  投产 台数  投产月份  执行 函数
+    $scope.filterData = () => {
+        const { yearDiff = 0, num = 0, selectedMonth = [] } = $scope;
+        const months = selectedMonth.join(',') || null;
+
+        $scope.rankingFaultType.getData({ yearDiff, num, months, dateStr: getDateStr() });
+        $scope.rankingBrand.getData({ yearDiff, num, months, dateStr: getDateStr() });
+        $scope.rankingProvince.getData({ yearDiff, num, months, dateStr: getDateStr() });
+        $scope.rankingProject.getData({ yearDiff, num, months, dateStr: getDateStr() });
+        $scope.lineFaultType.getData({ yearDiff, num, months, dateStr: getDateStr() });
+    };
+
+
+    // 根据时间维度  判断 需要 使用的 时间 字符串
+    function getDateStr() {
+        if ($scope.timeType === 'MONTH') return $scope.dateTime1.Format('yyyy-MM');
+        if ($scope.timeType === 'YEAR') return $scope.dateTime2.Format('yyyy');
+        return (new Date).Format('yyyy-MM-dd');
+    }
+
+})

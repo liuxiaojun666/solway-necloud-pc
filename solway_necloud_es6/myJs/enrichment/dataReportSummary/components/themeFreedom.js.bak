@@ -1,0 +1,423 @@
+ajaxData(
+    {
+        freeRptPage: {
+            name: 'GETfreeRptPage',
+            data: {},
+            later: true,
+        },
+        freeRptSubGetRptSubList: {
+            name: 'GETfreeRptSubGetRptSubList',
+            data: {},
+            later: true,
+        },
+        freeRptSubscribe: {
+            name: 'freeRptSubscribe',
+            data: {},
+            later: true,
+        },
+        freeRptUnSubscribe: {
+            name: 'freeRptUnSubscribe',
+            data: {},
+            later: true,
+        },
+        rptTplList: {
+            name: 'GETrptTplList',
+            data: {},
+            later: true,
+        },
+        freeRptTplSetEnable: {
+            name: 'freeRptTplSetEnable',
+            data: {},
+            later: true,
+        },
+        freeRptTplDeleteBatch: {
+            name: 'freeRptTplDeleteBatch',
+            data: {},
+            later: true,
+        },
+        updateRptTpl: {
+            name: 'updateRptTpl',
+            data: {},
+            later: true,
+        },
+        updateRptTplFile: {
+            name: 'updateRptTplFile',
+            data: {},
+            later: true,
+        },
+        insertRptTpl: {
+            name: 'insertRptTpl',
+            data: {},
+            later: true,
+        },
+        powerStations: {
+            name: 'POSTPowerStationId',
+            data: {},
+            later: true,
+        },
+    }, {
+        __serviceName__: 'themeFreedomService',
+        getDateArr(reportType, startDate) {
+            const func = str => str.split('-').join().split(' ').join().split(':').join().split(',').map(v => v.length === 1 ? '0' + v : v);
+            if (reportType == '1') {
+                if (startDate) return [null, ...func(startDate), null];
+                else return [null, '01', '01', '08', '00', null];
+            } else if (reportType == '2') {
+                if (startDate) return [null, null, ...func(startDate), null];
+                else return [null, null, '01', '08', '00', null];
+            } else if (reportType == '4') {
+                if (startDate) return [null, null, null, ...func(startDate), null];
+                else return [null, null, null, '08', '00', null];
+            } else if (reportType == '3') {
+                if (startDate) return [null, null, null, ...func(startDate.substr(0, startDate.length - 2)), null];
+                else return [null, null, null, '08', '00', null];
+            }
+        }
+    }
+)('themeFreedomCtrl', ['$scope', 'themeFreedomService', 'actionRecord', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, toaster, $ocLazyLoad) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { timeRange } = historicalRecord.get().themeFreedom || {};
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.timeRange = timeRange;
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        $scope.freeRptPage.beforGetData();
+        $scope.$apply();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+        $scope.freeRptPage.beforGetData();
+    };
+
+    // 切换电站
+    $scope.switchPowerCallback = () => {
+        // getTabData();
+        $scope.freeRptPage.beforGetData();
+    };
+
+    // 列表 接口请求
+    $scope.freeRptPage.beforGetData = () => {
+        if (!$scope.initComplete) return;
+        $scope.column = [];
+        const { _dateType, _dateTime = {}, keywords, _weekTimeStart, _weekTimeEnd } = $scope;
+        $scope.freeRptPage.getData({
+            pageIndex: 0,
+            pageSize: 10,
+            dateType: [4, 2, 1, 0, 3][_dateType],
+            queryDate: _dateType === 4 ? _weekTimeStart.showDate + ',' + _weekTimeEnd.showDate : _dateTime.showDate,
+            keywords
+        });
+    };
+
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const _filename = item.fileName.split('.');
+        const extension = _filename[_filename.length - 1];
+        if (event.target.className.includes('download')) {
+            $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name + '.' + extension);
+        } else if (event.target.className.includes('preview')) {
+            $scope.downloadFile(`minio/download.htm?id=${item.fid}`, item.name, true);
+        }
+    };
+
+    // 列表 接口 返回
+    $scope.freeRptPage.subscribe(res => {
+
+        $scope.column = [
+            {
+                title: '报表名称',
+                dataIndex: 'name',
+                sort: true,
+                align: 'center',
+            },
+            {
+                title: '报表日期',
+                dataIndex: 'rdate',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '生成时间',
+                dataIndex: 'ctime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd hh:mm:ss');
+                }
+            },
+            {
+                title: '操作',
+                dataIndex: 'fid',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return `
+                        <span class="clickable download" style="color: #428bca;margin-right:3em;" >下载</span>
+                        <span class="clickable preview" style="color: #428bca;" >预览</span>`;
+                }
+            },
+        ];
+    }, () => {
+        $scope.column = [];
+    });
+
+    // 订阅报表列表 接口返回
+    $scope.freeRptSubGetRptSubList.subscribe(res => {
+        $scope.subscribeReportColumn = [
+            {
+                title: '报表名称',
+                dataIndex: 'name',
+                width: '40%',
+                align: 'left'
+            },
+            {
+                title: '邮件发送时间',
+                dataIndex: 'startDate',
+                width: '40%',
+                align: 'left',
+                render(text, item) {
+                    return `
+                        <span>每</span>
+                        <span ng-show="!item.editing">${['', '年', '月', '', '日'][item.reportType]}</span>
+                        <span>${item.startDate || '未指定时间'}</span>
+                        `
+                }
+            },
+            {
+                title: '操作',
+                dataIndex: 'sub_id',
+                width: '20%',
+                align: 'center',
+                render(text) {
+                    return `<span class="clickable subscribe ${text && 'enable'}">
+                        <i class="clickable iconfont icon-xuanzhong"></i>
+                    </span><span class="clickable text">订阅</span>`
+                }
+            }
+        ];
+    });
+
+    // 订阅 取消订阅 操作
+    $scope.subscribeReportTrClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        if ($scope.freeRptSubscribe.isLoding || $scope.freeRptSubGetRptSubList.isLoding) return;
+        $scope[item.sub_id ? 'freeRptUnSubscribe' : 'freeRptSubscribe'].getData(
+            item.sub_id ? { id: item.sub_id } : { tplId: item.id }
+        ).then(res => {
+            if (res.code !== 0) return;
+            $scope.freeRptSubGetRptSubList.getData();
+        });
+    };
+
+    // 模板管理列表
+    $scope.templeteManageFun = () => {
+        $scope.templeteManage = true;
+        $scope.rptTplList.getData();
+        // document.querySelectorAll('.publicSummary>div .switch-power-enrich .station-name')[0].style.opacity = 0;
+        // document.querySelectorAll('.publicSummary>div .switch-power-enrich i.switch-station.switchPowerIcon')[0].style.display = 'none';
+    };
+
+    // 模板管理 关闭
+    $scope.templeteManageClose = () => {
+        $scope.templeteManage = false;
+        // document.querySelectorAll('.publicSummary>div .switch-power-enrich .station-name')[0].style.opacity = 1;
+        // document.querySelectorAll('.publicSummary>div .switch-power-enrich i.switch-station.switchPowerIcon')[0].style.display = 'inline';
+    };
+
+    // 模板管理 列表 处理
+    $scope.rptTplList.subscribe(async res => {
+        $scope.rptTplList.rendered = false;
+        await myAjaxData.timeout(0);
+        $scope.rptTplList.res.body = res.body.map(v => ({
+            ...v,
+            weekDateArr: v.startDate.split(':').join().split(','),
+            dateArr: myAjaxData.config.getDateArr(v.reportType, v.startDate),
+        }));
+        $scope.$apply();
+        await myAjaxData.timeout(100);
+        $scope.rptTplList.rendered = true;
+    });
+
+    // 日期规则更新 函数
+    $scope.datePickerUpdated = async (dateStr, dateArr, attrs) => {
+        if (!$scope.rptTplList.rendered) return;
+        await myAjaxData.timeout(0);
+        $scope.rptTplList.res.body[attrs.index].startDate = dateStr;
+        $scope.rptTplList.res.body[attrs.index].changed = true;
+        $scope.$apply();
+    };
+
+    // 模板启用 和 作废 接口处理
+    $scope.freeRptTplSetEnable.subscribe(res => {
+        if (res.code !== 0) return;
+        $scope.rptTplList.getData();
+    });
+
+    // 模板删除 请求
+    $scope.freeRptTplDeleteBatch.beforGetData = (id, name) => {
+        $ocLazyLoad.load([
+            'theme/js/dist/components/confirm.js' + stamp,
+        ]).then(res => {
+            $solway.confirm(
+                { title: '模板：' + name, message: ' 确定删除该模板吗？' },
+                () => $scope.freeRptTplDeleteBatch.getData({ ids: id })
+            );
+        });
+    };
+
+    // 模板删除 接口处理
+    $scope.freeRptTplDeleteBatch.subscribe(res => {
+        if (res.code !== 0) return;
+        $scope.rptTplList.getData();
+    });
+
+    // 模板更新  完成
+    $scope.updateRptTpl.subscribe(res => {
+        if (res.code !== 0) return;
+        $scope.rptTplList.getData();
+    });
+
+    // 替换文件
+    $scope.updateRptTplFile.beforGetData = e => {
+        $scope.updateRptTplFile.getData({
+            id: e.attributes.attrid.value,
+            excelFile: e.files[0]
+        });
+    };
+
+    // 模板更新  完成
+    $scope.updateRptTplFile.subscribe(res => {
+        if (res.code !== 0) return;
+        $scope.rptTplList.getData();
+    });
+
+    // 添加模板 按钮点击
+    $scope.addTemplatePopUpFunc = (load) => {
+        if (!load) $scope.templatePreviewName = '';
+        $scope.addTemplatePopUp = true;
+        if ($scope.newTempleteObj.excelFile && !load) return $scope.importFile({
+            files: [$scope.newTempleteObj.nullExcelFile],
+            preview: true,
+            addFile: true
+        });
+        if ($scope.powerStations.res && load) return load(true);
+        if (!$scope.powerStations.res) $scope.powerStations.getData({ currentView: '00', isGroup: 1 });
+        $ocLazyLoad.load([
+            'vendor/spreadjs/css/gc.spread.sheets.excel2013white.11.0.0.css',
+            'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
+        ]).then(() => $ocLazyLoad.load([
+            'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
+        ])).then(res => load ? load() : $scope.importFile({ files: [], preview: true, addFile: true }));
+    };
+
+    // 添加模板 执行策略更新
+    $scope.addTemplatedatePickerUpdated = async (dateStr, dateArr, attrs) => {
+        await myAjaxData.timeout(0);
+        if (dateStr === $scope.newTempleteObj.startDate) return;
+        $scope.newTempleteObj.startDate = dateStr;
+        $scope.$apply();
+    };
+
+    // 新增模板 文件导入
+    let spread;
+    $scope.importFile = e => {
+        $scope.newTempleteObj.showMark = e.addFile;
+        const spreadNS = GC.Spread.Sheets;
+        spread = spread || new spreadNS.Workbook(document.getElementById('ss'), { tabStripRatio: 1 });
+        const excelIO = new GC.Spread.Excel.IO();
+        if (!$scope.newTempleteObj.nullExcelFile) {
+            excelIO.save(JSON.stringify(spread.toJSON()), function (blob) {
+                $scope.newTempleteObj.nullExcelFile = blob;
+            });
+        }
+        $scope.newTempleteObj.excelFile = e.files[0] || $scope.newTempleteObj.nullExcelFile;
+        $scope.newTempleteObj.name = ((e.files[0] || {}).name || '').split('.')[0];
+        excelIO.open($scope.newTempleteObj.excelFile, function (spreadJson) {
+            if (spreadJson.version && spreadJson.sheets) {
+                spread.unbindAll();
+                spread.fromJSON(spreadJson);
+                spread.sheets.forEach(v => v.options.isProtected = true);
+                e.value = '';
+            } else {
+                alert('无效的文件');
+            }
+        });
+        if (e.preview) return;
+        $scope.$apply();
+    };
+
+    // 电站列表处理
+    $scope.powerStations.subscribe(res => {
+        $scope.powerStations.res.comList = res.comList.filter(v => v.stFlag && v.id !== 0);
+        $scope.newTempleteObj.sid = res.comList[0].id || res.comList[1].id;
+    });
+
+    // 新增模板
+    $scope.uploadFile = () => {
+        const { week, weekTimeHour, weekTimeMinute, reportType } = $scope.newTempleteObj;
+        if (reportType == 3) $scope.newTempleteObj.startDate = (weekTimeHour || '08') + ':' + (weekTimeMinute || '00') + ',' + (week || 1)
+        $scope.insertRptTpl.getData({
+            ...$scope.newTempleteObj,
+            dateArr: null,
+            nullExcelFile: null,
+            week: null,
+            weekTimeHour: null,
+            weekTimeMinute: null,
+            comid: $scope.powerStations.res.comList.filter(obj => obj.id == $scope.newTempleteObj.sid)[0].comId
+        }).then(res => {
+            if (res.code !== 0) return;
+            $scope.addTemplatePopUp = false;
+            $scope.rptTplList.getData();
+        });
+    };
+
+    // 文件下载
+    $scope.downloadFile = (url, filename, preview) => {
+        $scope.fileLoading = true;
+        $ocLazyLoad.load([
+            'theme/js/dist/components/downloadFile.js',
+        ]).then(() => {
+            $solway.download({
+                url,
+                filename,
+                blob: preview,
+                download: !preview,
+                callback(blob) {
+                    $scope.fileLoading = false;
+                    if (!blob) return $scope.$apply();
+                    $scope.templatePreview = true;
+                    $scope.templatePreviewName = filename;
+                    $scope.$apply();
+                    $scope.addTemplatePopUpFunc((apply) => {
+                        $scope.importFile({ files: [blob.size ? blob : null], preview });
+                        apply && $scope.$apply();
+                    });
+                }
+            });
+        });
+    };
+
+    // 打印 Excel
+    $scope.excelPrint = () => {
+        $scope.fileLoading = true;
+        $ocLazyLoad.load('vendor/spreadjs/scripts/gc.spread.sheets.print.11.0.0.min.js').then(() => {
+            spread.print();
+            $scope.fileLoading = false;
+        });
+    };
+
+});

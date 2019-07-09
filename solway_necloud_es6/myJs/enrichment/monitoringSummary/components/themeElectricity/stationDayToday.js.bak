@@ -1,0 +1,159 @@
+ajaxData(
+    {
+        equipmentCount: {
+            name: 'GETequipmentDetailCompanyToday',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
+        stationDayTodayData: {
+            name: 'GETpvMonitorDataGetRunKWPowerList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+    },
+    {
+        __serviceName__: 'themeElectricityStationDayTodayService'
+    }
+)('themeElectricityStationDayTodayCtrl', ['$scope', 'themeElectricityStationDayTodayService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { searchKey = '', checkboxStatus = [true, true, true, true, true, true] } = historicalRecord.get().themeElectricityStationDayToday || {};
+
+        $scope.checkboxStatus = checkboxStatus;
+        $scope.searchKey = searchKey;
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        getData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'StationDayToday') return;
+        $scope.stationDayTodayData.res = null;
+        if ($scope.dateType === 0) return $scope.stationDayTodayData.getData({});
+    };
+
+    // 复选框状态改变
+    $scope.changeCheckboxStatus = index => {
+        if (index === 0) $scope.checkboxStatus.fill($scope.checkboxStatus[0]);
+        else if (!$scope.checkboxStatus[index]) $scope.checkboxStatus[0] = false;
+        else if ($scope.checkboxStatus.slice(1).every(v => v)) $scope.checkboxStatus[0] = true;
+        historicalRecord.set({
+            themeElectricityStationDayToday: {
+                ...historicalRecord.get().themeElectricityStationDayToday || {},
+                checkboxStatus: $scope.checkboxStatus
+            }
+        });
+        getData();
+    };
+
+    function getData() {
+        $scope.equipmentCount.getData({
+            queryType: 3,
+            dateType: 3,
+            date: $scope.dateTime.showDate,
+        });
+        $scope.stationDayTodayData.getData({
+            queryType: 3,
+            dateType: 3,
+            date: (new Date).Format('yyyy-MM-dd'),
+            search: $scope.searchKey || '',
+            status: $scope.checkboxStatus.map((v, i) => v ? (
+                '0' + (i > 2 ? i - 1 : i === 2 ? 7 : i)
+            ) : v).filter(v => v !== false).join()
+        });
+    }
+
+    $scope.stationDayTodayData.subscribe(res => {
+        historicalRecord.set({
+            themeElectricityStationDayToday: {
+                ...historicalRecord.get().themeElectricityStationDayToday || {},
+                searchKey: $scope.searchKey
+            }
+        });
+    });
+
+    // 设备故障， 查看设备详情
+    $scope.equipmentDetail = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        const { did: eqid, sid: stid } = item;
+        $scope.$broadcast("equipmentPopUp", {
+            stid: stid || myAjaxDataParent.currentStationData.currentSTID,
+            eqid
+        });
+    };
+
+    $scope.stationDayTodayData.subscribe(res => {
+        $scope.column = [
+            {
+                title: '状态',
+                dataIndex: 'statusDesc',
+                width: '15%',
+                sort: true,
+                render(text, item) {
+                    if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                    else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else return `<span>${text}</span>`;
+                }
+            },
+            {
+                title: '设备名称',
+                dataIndex: 'name',
+                width: '25%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '装机容量(kW)',
+                dataIndex: 'acc_kw',
+                width: '15%',
+                sort: true,
+                align: 'right',
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            },
+            {
+                title: '发电量(kWh)',
+                dataIndex: 'dw',
+                width: '15%',
+                sort: true,
+                align: 'right',
+                render(text) {
+                    return `<span>${text.toFixed(2)}</span>`
+                }
+            },
+            {
+                title: '发电小数数(h)',
+                dataIndex: 'dw',
+                width: '15%',
+                sort: true,
+                align: 'right',
+                render(text, item) {
+                    if (!text || !item.acc_kw) return '-'
+                    return `<span>${(text / item.acc_kw).toFixed(2)}</span>`
+                }
+            },
+        ];
+    });
+
+    // 定时器  定时刷新接口
+    const timer = $interval(() => $scope.stationDayTodayData.getData({}), 10000);
+    $scope.$on('$destroy', () => {
+        $interval.cancel(timer);
+        $scope.stationDayTodayData.res = null;
+    });
+
+});

@@ -1,0 +1,40 @@
+ajaxData({
+    
+}, {
+    __serviceName__: 'faultAssistantService',
+})('faultAssistantCtrl', ['$scope', 'faultAssistantService', 'actionRecord','$timeout','$http'], ($scope, myAjaxData, historicalRecord,$timeout,$http) => {
+    
+    $scope.$on('faultAssistant',(e,v)=>{
+        $scope.busino = v;
+        getDetailData();
+    });
+
+    const getDetailData = ()=>{
+        $http({
+            method : "GET",
+            url : window.interface['GETsuggest'],
+            params : {
+                'busino' : $scope.busino,
+                'type' : '2'
+            }
+        }).success(res=>{
+            $scope.faultData = res.data.faultSuggest;
+            $scope.realAdvices = res.data.realAdvices.realAdvices;
+        });
+        $http({
+            method : "GET",
+            url : window.interface['GETsuggest'],
+            params : {
+                'busino' : $scope.busino,
+                'type' : '3'
+            }
+        }).success(res=>{
+            $scope.repairData = res.data.repairSuggest;
+        });
+    }
+
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+    });
+});

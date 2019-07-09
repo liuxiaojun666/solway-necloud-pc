@@ -1,0 +1,271 @@
+app.directive('seChart', ['myAjaxData', '$timeout', (myAjaxData, $timeout) => ({
+    restrict: 'E',
+    transclude: !0,
+    replace: !0,
+    scope: {
+        data: '='
+    },
+    link($scope, $element) {
+        let allTimes = [];
+        let allData = [];
+        const maxLength = 100;//最多点数
+        const setOption = (myChart, data) => {
+            if (data.newData) {
+                allTimes = [];
+                allData = [];
+                myChart.clear();
+            }
+            allTimes = allTimes.concat(data.times);
+            data.lines.forEach((v, i) => {
+                if (!allData[i]) allData[i] = {};
+                allData[i].name = v.name;
+                if (!allData[i].data) allData[i].data = [];
+                allData[i].data = allData[i].data.concat(v.data);
+            });
+            if (allTimes.length > maxLength) {
+                allTimes = allTimes.slice(-maxLength);
+                allData = allData.map(v => ({
+                    name: v.name,
+                    data: v.data.slice(-maxLength)
+                }));
+            }
+            const option = {
+                backgroundColor: '#fff',
+                "tooltip": {
+                    "trigger": "axis"
+                },
+                xAxis: {
+                    type: 'category',
+                    data: allTimes.map(v => new Date(v).Format('yyyy-MM-dd hh:mm:ss').slice(-8))
+                },
+                grid: {
+                    left: allData.length * 30,
+                    right: 20,
+                    bottom: 20,
+                    containLabel: true
+                },
+                yAxis: allData.map((v, i) => ({
+                    name: v.name,
+                    position: 'left',
+                    offset: i * 60,
+                    splitLine: {
+                        show: false
+                    },
+                    type: 'value'
+                })),
+                series: allData.map((v, i) => ({
+                    name: v.name,
+                    data: v.data,
+                    yAxisIndex: i,
+                    type: 'line'
+                }))
+            };
+            myChart.setOption(option);
+        }
+
+
+        $timeout(() => {
+            const myChart = echarts.init($element[0]);
+            $scope.$watch('data', async (newData, oldData) => {
+                if (!newData || Object.is(newData, oldData)) return;
+                await myAjaxData.timeout(0);
+                setOption(myChart, $scope.data)
+            });
+            window.addEventListener('resize', myChart.resize);
+            $scope.$on('$destroy', () => window.removeEventListener('resize', myChart.resize));
+        }, 0);
+    }
+})]);
+
+ajaxData({}, {})('singleEquipmentCtrl', ['$scope', 'myAjaxData', '$timeout', '$location'], ($scope, myAjaxData, $timeout, $location) => {
+    $scope.lineOrTable = '列表';
+    $scope.changeShowType = function(){
+        $scope.lineOrTable == '曲线'?$scope.lineOrTable = '列表':$scope.lineOrTable = '曲线';
+    }
+
+    $scope.tbody = [];
+
+    let optionalEquipmentNum = 1; //根据路径判断 是多设备 还是 单设备
+    switch ($location.$$url) {
+        case "/app/singleEquipment":
+            optionalEquipmentNum = 1;
+            break;
+
+        case "/app/moreEquipmentBiaxial":
+            optionalEquipmentNum = 9;
+            break;
+    
+        default:
+            break;
+    }
+    const optionalAnalogCurveNum = optionalEquipmentNum === 1 ? 9 : 2;//可选模拟量类型个数
+    const optionalSwitchCurveNum = optionalEquipmentNum === 1 ? 9 : 2;//可选开关量类型个数
+    $scope.startDate = new Date;//历史曲线 开始 时间
+    $scope.endDate = new Date;//历史曲线 结束 时间
+    $scope.selectedEquipments = [];//已选择的设备
+    $scope.selectedAnalogCurves = [];//已选择，模拟量曲线类型
+    $scope.selectedSwitchCurves = [];//已选择，开关量曲线类型
+
+    // 设备 模拟数据
+    $scope.equipments = new Array(30).fill('').map((v, i) => ({
+        name: `a#${i}`,
+        id: (Math.random() + '').substr(2)
+    }));
+
+    // 模拟量曲线模拟数据
+    $scope.analogCurve = {
+        wd: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        sd: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        dl: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        gl: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        dy: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        dl2: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        qt: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+    };
+
+    // 开关量曲线模拟数据
+    $scope.switchCurve = {
+        ty: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        jc: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        fl: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        fdj: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        blq: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        cd: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+        ph: new Array(30).fill('').map((v, i) => ({
+            name: `a#${i}`,
+            id: (Math.random() + '').substr(2)
+        })),
+    };
+
+    // 选择设备执行
+    $('#equipments').on('click', 'input', function () {
+        selectFunc('selectedEquipments', this, optionalEquipmentNum);
+    });
+
+    // 选择模拟量曲线类型
+    $('#analogCurve').on('click', 'input', function (e) {
+        selectFunc('selectedAnalogCurves', this, optionalEquipmentNum === 1 ? optionalAnalogCurveNum : optionalAnalogCurveNum - $scope.selectedSwitchCurves.length);
+    });
+
+    // 选择开关量曲线类型
+    $('#switchCurve').on('click', 'input', function (e) {
+        selectFunc('selectedSwitchCurves', this, optionalEquipmentNum === 1 ? optionalSwitchCurveNum : optionalSwitchCurveNum - $scope.selectedAnalogCurves.length);
+    });
+
+    // 开关量曲线  模拟量曲线  选择重置操作
+    $scope.reset = name => $('#' + name).find('input').prop('checked', false);
+
+    // 查询曲线执行函数
+    let timer;
+    $scope.inquire = (selectedEquipments, selectedAnalogCurves, selectedSwitchCurves, curveType, startDate, endDate, newData = true) => {
+        $timeout.cancel(timer);//停止刷新数据
+
+        //检查是否选择设备
+        const minimumEquipments = optionalEquipmentNum > 1 ? 2 : 1
+        if (selectedEquipments.length < minimumEquipments) {
+            return alert('请至少选择' + minimumEquipments + '台设备');
+        }
+
+        const types = [...selectedAnalogCurves, ...selectedSwitchCurves];
+
+        if (types.length < 1) return alert('请选择设备曲线类型');
+
+        let _startDate = startDate.showDate;
+        let _endDate = endDate.showDate;
+
+        //如果是实时数据  需要定时刷新
+        if (curveType === 'realTime') {
+            _startDate = _endDate = null;
+            timer = $timeout(() => $scope.inquire(selectedEquipments, selectedAnalogCurves, selectedSwitchCurves, curveType, startDate, endDate, false), 5000);
+        }
+
+        //模拟数据
+        $timeout(() => {
+            const dateNow = Date.now();
+            const length = 5
+            $scope.data = {
+                newData,
+                times: new Array(length).fill('').map((v, i) => dateNow - 1000 * (5 - i)),
+                lines: new Array(types.length * selectedEquipments.length).fill('').map((v, i) => ({
+                    name: 'name' + i,
+                    data: new Array(length).fill('').map(() => (Math.random() * 1000).toFixed()),
+                }))
+            };
+
+            //测试
+            $scope.thead = ['时间','设备1','a1','a2','设备1','b1'];
+            $scope.tbody.push(['2018-03-23','d1','123','43','d2','48']) ;
+
+        }, 1000);
+        
+    };
+
+    // 停止实时数据刷新
+    $scope.stop = () => $timeout.cancel(timer);
+
+
+    /* 选择执行公共函数 */
+    function selectFunc(name/* 数组名 */, ele/* 当前点击的 复选框 */, max/* 最多选择个数 */) {
+
+        const id = ele.dataset['id']
+
+        if (ele.checked) {
+
+            if ($scope[name].length < max) $scope[name].push(id);
+
+            else ele.checked = false;
+
+        } else $scope[name] = $scope[name].filter(v => v != id);
+    }
+
+
+    // 获取窗口高度，使高度自适应屏幕
+    const getWindowHeight = () => {
+        $scope.windowHeight = document.body.clientHeight;
+        $scope.windowWidth = document.body.clientWidth;
+        $scope.$apply();
+    };
+    setTimeout(getWindowHeight, 0);
+    window.addEventListener('resize', getWindowHeight);
+    $scope.$on('$destroy', () => window.removeEventListener('resize', getWindowHeight));
+
+});

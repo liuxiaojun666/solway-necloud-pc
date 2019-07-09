@@ -1,0 +1,166 @@
+app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval', (myAjaxData, $timeout, $http, $interval) => ({
+    restrict: 'E',
+    replace: !0,
+    scope: {
+        
+    },
+    templateUrl: window.baseUrl + '/tpl/enrichment/components/personalCenter.html' + window.stamp,
+    link($scope) {
+        
+    },
+    controller($scope) {
+        $scope.stamp = window.stamp;
+        //获取角色
+        $http({
+            method: "POST",
+            url: window.interface['GETroleListForPC']
+        }).success(function (res) {
+            $scope.rolelist = res.rolelist;	//用户列表
+            $scope.currentRoleID = res.currentRole;//当前用户的ID‘
+            $scope.roleType = res.roleType;//当前角色类型
+            const currentRoleNum = getArrAtrNum($scope.rolelist, 'roleId', $scope.currentRoleID);
+            $scope.currentRoleName = $scope.rolelist[currentRoleNum].roleDisplayName;//当前角色名
+        });
+
+        //切换角色,默认跳到各角色的首页
+        $scope.changeRole = function (Id) {
+            $http({
+                method : "POST",
+                url: window.interface['changeRoleNew'],
+                params: {
+                    roleId: Id	//用户要切换的ID
+                }
+            }).success(function(response) {
+                if(localStorage.getItem('switchStationData')){
+                    localStorage.removeItem('switchStationData');
+                }
+                $scope.roleType = response.roleType;
+                
+                $scope.currentRoleID = Id;//当前角色Id
+                var currentRoleNum = getArrAtrNum($scope.rolelist, 'roleId', $scope.currentRoleID);
+                $scope.currentRoleName = $scope.rolelist[currentRoleNum].roleDisplayName;//当前角色名
+
+                var res = {};
+                res.currCompanyName = response.comName;
+                res.currCompanyLogo = response.comLogo;
+                $scope.$emit("chCompanyInfo", res);
+                $http({
+                    method: "GET",
+                    url: window.interface['GETrightListForPCNew'],
+                    params: {}
+                }).success(function (result) {
+                    var welComeUrl = '/power-index';
+                    if (result.roleType == 3) {
+                        welComeUrl = '/businessManagement';
+                        window._czc && window._czc.push(["_setCustomVar", "访客级别", "集团/企业管理员", "-1"]);
+                    } else if (result.roleType == 99) {
+                        welComeUrl = '/companyManagement';
+                        window._czc && window._czc.push(["_setCustomVar", "访客级别", "系统管理员", "-1"]);
+                    } else {
+                        welComeUrl = "/" + result.mainPage;
+                        window._czc && window._czc.push(["_setCustomVar", "访客级别", "普通用户", "-1"]);
+                    }
+                    window.localStorage.welComeUrl = welComeUrl;
+                    window.location.href = window.baseUrl + "/index.html";
+                })
+
+                // if (response.roleType ==3 || response.roleType==99) {//集团管理员,系统管理员
+                //     /*var uisref = getArrRealVal(response.rightlist, 'uisref');//获取第一个uisref不为空的值
+                //     $scope.isRootRoleType = '0';
+                //     $state.go(uisref, {
+                //         RoleId: $scope.currentRoleID
+                //     },{reload: true});*/
+                //     window.location.href=window.baseUrl +"/index.html";
+                // } else {//非集团系统角色
+                //     window.location.href=window.baseUrl +"/index.html";
+                // };
+            });
+        };
+
+        //获取当前用户
+        $http.get(window.interface['GETloginUserInfo'], {
+            timeout: 5000
+        }).success(function (result) {
+            $scope.loginName = result.userName;
+            $scope.realName = result.realName;
+            $scope.userId = result.userId;
+            
+        })
+
+        var intervalInvites = $interval(function() {
+            getInvitesNum();
+        },60000)
+
+        getInvitesNum();
+
+        //获取邀请消息条数
+        function getInvitesNum() {
+            $http({
+                method: "GET",
+                url: window.interface['GETqueryCompanyInviteCount']
+            }).success(function (res) {
+                if(res.code == 1 && res.data>0){
+                    $scope.ifInviteNote = true;
+                }else{
+                    $scope.ifInviteNote = false;
+                }
+            });
+        }
+
+        //接受or 拒绝后，列表为空，图标显示变化
+        $scope.$on('noInviteNote',function(e,v) {
+            $scope.ifInviteNote = false;            
+        });
+
+        //打开邀请消息弹框
+        $scope.showInviteListModel = function(params) {
+            $('#invitePersonNoteModel').modal('show');
+            $scope.$broadcast('invitePersonNote', true);
+        }
+        //电站组
+        $scope.powerStationManage = function () {
+            $('#powerStationManageModal').modal('show');
+        }
+
+        //个人信息
+        $scope.editUserData = function () {
+            initPageDataUserMod($scope.userId);
+            $('#userInformationUpdateModel').modal('show');
+        }
+
+        //修改密码
+        $scope.changePassword = function () {
+            $('#userPasswordChangeModel').modal('show');
+        }
+
+        //退出登录
+        $scope.logOut = () =>{
+            $.ajax({
+                type: "post",
+                url: window.interface['logout'],
+                timeout: 5000,
+                data: {},
+                success: function (msg) {
+                    window.location.href = window.baseUrl+"/login.html";
+                },
+                error: function (msg) {
+                    window.location.href = window.baseUrl +"/login.html";
+                }
+            });
+        }
+
+        $scope.$on('$destroy', () => {
+            $interval.cancel(intervalInvites);
+        });
+
+        //根据数组中每项的每个属性的值查找在数组中的排序，找不到返回-1
+        function getArrAtrNum(arr, atr, value) {//getArrAtrNum([{id:1},{id:2}], "id", 3)
+            for (var i = 0; i < arr.length; i++) {
+                if (arr[i][atr] == value) {
+                    return i;
+                }
+            }
+            return -1;
+        };
+    }
+})]);

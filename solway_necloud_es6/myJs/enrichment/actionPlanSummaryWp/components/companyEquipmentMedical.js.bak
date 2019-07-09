@@ -1,0 +1,106 @@
+ajaxData(
+    {
+        actionCompanyDevCheckup: {
+            name: 'GETactionCompanyDevCheckupWp',
+            data: {},
+            later: true
+        },
+    },
+    {
+        __serviceName__: 'actionPlanSummaryCompanyEquipmentMedicalService',
+    }
+)('actionPlanSummaryCompanyEquipmentMedicalCtrl', ['$scope', 'actionPlanSummaryCompanyEquipmentMedicalService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true
+        diffGetData();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.dataType === 0) return;
+        return diffGetData();
+    };
+
+    // 点击电站名  跳转到电站页面
+    $scope.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.reloadParentPage({
+            stationData: {
+                dataType: 0,
+                id: item.stid,
+                isGroup: "0",
+                stClass: '02'
+            }
+        });
+    };
+
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        $scope.actionCompanyDevCheckup.getData({
+            dateType: 3,
+            queryType: 1,
+            start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+            date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+        });
+    }
+
+    $scope.actionCompanyDevCheckup.subscribe(res => {
+
+        $scope.column = [
+            {
+                title: '电站名称',
+                dataIndex: 'st_name',
+                align: 'left',
+                width: '30%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '待处理故障设备(台)',
+                dataIndex: 'dev_no_handler_num',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text || '0'}</span>`
+                }
+            },
+            {
+                title: '限负荷(台)',
+                dataIndex: 'epitch_count',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text || '0'}</span>`
+                }
+            },
+            {
+                title: 'PBA异常设备(台)',
+                dataIndex: 'epba_count',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text || '0'}</span>`
+                }
+            },
+            {
+                title: '功率曲线指数(%)',
+                dataIndex: 'epower_exp_count',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return `<span>${text || '0'}</span>`
+                }
+            },
+        ];
+    });
+
+    
+});

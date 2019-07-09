@@ -1,0 +1,460 @@
+ajaxData({
+    //电站----月
+
+    //时间
+    analysis_station_operation_time_month_list: {
+        name: 'GETanalysis_station_operation_time_month_list',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //设备
+    analysis_station_operation_dev_month_list: {
+        name: 'GETanalysis_station_operation_dev_month_list',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //专业人员
+    analysis_station_operation_person_month_list: {
+        name: 'GETanalysis_station_operation_person_month_list',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //共享人员
+    sharePeopleList:{
+        name: 'GETsharePeopleList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'maintenancePersonStationMonth',
+})('maintenancePersonStationMonthCtrl', ['$scope', 'maintenancePersonStationMonth', 'actionRecord','$timeout'], ($scope, myAjaxData, historicalRecord,$timeout) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { tabIndex = 0 } = historicalRecord.get() || {};
+        // let tabIndex = 0 ;
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        // await $scope.dateUpdated();
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        $scope.diffGetData();
+        $scope.$broadcast('predPacket');
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData();
+        $scope.$broadcast('predPacket');
+    };
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            tabIndex,
+            themeMaintenanceStationMonth: {
+                ...historicalRecord.get().themeMaintenanceStationMonth || {},
+                tabIndex
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    //监听刷新
+    $scope.$on('refresh',()=>{
+        $scope.brandCondition = [];
+        $scope.brandArr = [];
+        $scope.keywords = '';
+        $scope.ftid = '';
+        $scope.manufids = '';
+        $scope.diffGetData();
+    });
+
+    //监听退回
+    $scope.$on('beback',()=>{
+        $scope.brandCondition = [];
+        $scope.brandArr = [];
+        $scope.keywords = '';
+        $scope.ftid = '';
+        $scope.manufids = '';
+        $scope.diffGetData();
+    });
+
+    //监听查询-专业
+    $scope.$on('search',(e,val)=>{
+        $scope.ftid = val.brandCondition.join();
+        $scope.manufids = val.faultCondition.join();
+        $scope.diffGetData()
+    });
+
+    //监听查询-共享
+    $scope.$on('searchShare',(e,val)=>{
+        $scope.keywords = val.keywords;
+        $scope.diffGetData()
+    });
+    
+    $scope.trClick = (item,index,e) =>{
+        e.stopPropagation();
+        if($scope.tabIndex == 2 ){
+            $scope.$broadcast('paramsPeopleInfoProfessional',{'userId':item.userid});
+            $scope.showPeopleInfoProfessional = true;
+        }else if($scope.tabIndex == 3){
+            $scope.$broadcast('paramsPeopleInfoShare',{'userId':item.id,'phone':item.phone});
+            $scope.showPeopleInfoShare = true;
+        }
+    }
+
+    //清除专业---弹框的查询时间
+    $scope.$watch('showPeopleInfoProfessional',(n,o)=>{
+        if(!n){
+            $scope.$broadcast('clearDate');
+        }
+    });
+
+    //清除共享---弹框的查询时间
+    $scope.$watch('showPeopleInfoShare',(n,o)=>{
+        if(!n){
+            $scope.$broadcast('clearDateShare');
+        }
+    });
+
+    // 判断 调用  对应 接口
+    $scope.diffGetData = async()=>{
+        if (!$scope.initComplete) return;
+        $scope.stationMonthLoading = true;
+        await myAjaxData.timeout(0);
+        const {dateTime, tabIndex,dateType, dataType } = $scope;
+        if(dateType !== 1) return;
+        if(dataType) return; //电站0
+        switch (tabIndex) {
+            case 0: //时间
+                $scope.analysis_station_operation_time_month_list.getData({
+                    queryCode: 'analysis_station_operation_time_month_list',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+                $scope.tabName = "时间";
+                break;
+            case 1: //设备
+                $scope.analysis_station_operation_dev_month_list.getData({
+                    queryCode: 'analysis_station_operation_dev_month_list',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+                $scope.tabName = "设备";
+
+                break;
+            case 2: //专业人员
+                $scope.analysis_station_operation_person_month_list.getData({
+                    queryCode: 'analysis_station_operation_person_month_list',
+                    queryType: 3,
+                    date: dateTime.showDate,
+                    manufid:$scope.manufids,
+                    ftid:$scope.ftid,
+                    pageIndex: 0,
+                    pageSize: 20
+                });
+                $scope.tabName = "专业人员";
+                break;
+            case 3: //共享人员
+                $scope.sharePeopleList.getData({
+                    pageIndex: 0,
+                    pageSize: 20,
+                    dateType: 2,
+                    date: dateTime.showDate,
+                    keywords:$scope.keywords
+                });
+                $scope.tabName = "共享人员";
+                break;
+            default:
+                break;
+        }
+        
+    }
+
+    // 时间列表
+    $scope.analysis_station_operation_time_month_list.getDataCallback = (success, res) => {
+        $scope.stationMonthLoading = false;
+        if (!success) return;
+        $scope.listSource = res.body.data;
+
+        $scope.column = [
+            {
+                title: '时间',
+                width: '25%',
+                dataIndex: 'dtime',
+                align: 'left',
+                // render(text, record, index) {
+                //     return `<span class="alert-name" id="${record.id}">${text}</span>`
+                // }
+            },
+            {
+                title: '检修台次',
+                dataIndex: 'repair_count',
+                align: 'right',
+            },
+            {
+                title: '检修台数',
+                dataIndex: 'repair_number',
+                align: 'right',
+            },
+            {
+                title: '响应时间'+ '(' + res.body.units.res_hours_avg + ')',
+                dataIndex: 'res_hours_avg',
+                sort: 'true',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+                }
+            },
+            {
+                title: '检修时间'+ '(' + res.body.units.repair_hours_avg + ')',
+                dataIndex: 'repair_hours_avg',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+                    
+                }
+            },
+            {
+                title: '检修成功率'+ '(' + res.body.units.repair_finish_r + ')',
+                dataIndex: 'repair_finish_r',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+        
+        // $scope.selectedBrands = [],$scope.selectedFaults = [];
+        // $scope.$watch("selectedBrands", function(n, o){
+        //     // console.log(n)
+        // })
+        // $scope.$watch("selectedFaults", function(n, o){
+        //     // console.log(n)
+        // })
+
+        // $(".maintenanceStationMonth").on('click','.alert-name',function(){
+        //     let a = $(this).attr('id')
+        // })
+        // 
+        // 
+    };
+
+    $scope.eqPopUp = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.$broadcast("equipmentPopUp", {
+            stid: item.stid,
+            eqid: item.eqid
+        });
+    };
+    // 设备列表
+    $scope.analysis_station_operation_dev_month_list.getDataCallback = (success, res) => {
+        $scope.stationMonthLoading = false;
+
+        if (!success) return;
+        $scope.listSource = res.body.data;
+        
+        $scope.column = [
+            {
+                title: '设备',
+                width: '25%',
+                dataIndex: 'eq_name',
+                align: 'left',
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                }
+            },
+            {
+                title: '检修台次',
+                dataIndex: 'repair_count',
+                align: 'right',
+            },
+            {
+                title: '检修台数',
+                dataIndex: 'repair_number',
+                align: 'right',
+            },
+            {
+                title: '响应时间'+ '(' + res.body.units.res_hours_avg + ')',
+                dataIndex: 'res_hours_avg',
+                sort: 'true',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+
+                }
+            },
+            {
+                title: '检修时间'+ '(' + res.body.units.repair_hours_avg + ')',
+                dataIndex: 'repair_hours_avg',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+
+                }
+            },
+            {
+                title: '检修成功率'+ '(' + res.body.units.repair_finish_r + ')',
+                dataIndex: 'repair_finish_r',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+        
+        // $scope.selectedBrands = [],$scope.selectedFaults = [];
+        // $scope.$watch("selectedBrands", function(n, o){
+        //     // console.log(n)
+        // })
+        // $scope.$watch("selectedFaults", function(n, o){
+        //     // console.log(n)
+        // })
+
+        // $(".maintenanceStationMonth").on('click','.alert-name',function(){
+        //     let a = $(this).attr('id')
+        // })
+        // 
+        // 
+    };
+
+    // 专业人员列表
+    $scope.analysis_station_operation_person_month_list.getDataCallback = (success, res) => {
+        $scope.stationMonthLoading = false;
+
+        if (!success) return;
+        $scope.listSource = res.body.data.data;
+        $scope.column = [
+            {
+                title: '姓名',
+                width: '25%',
+                dataIndex: 'user_name',
+                align: 'center',
+                render(text, record, index) {
+                    return `<span style="color:#1ddabe" id="${record.id}">${text}</span>`
+                }
+            },
+            {
+                title: '检修台次',
+                dataIndex: 'repair_count',
+                align: 'right',
+            },
+            {
+                title: '检修台数',
+                dataIndex: 'repair_number',
+                align: 'right',
+            },
+            {
+                title: '响应时间'+ '(' + res.body.units.res_hours_avg + ')',
+                dataIndex: 'res_hours_avg',
+                sort: 'true',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+
+                }
+            },
+            {
+                title: '检修时间'+ '(' + res.body.units.repair_hours_avg + ')',
+                dataIndex: 'repair_hours_avg',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+
+                }
+            },
+            {
+                title: '检修成功率'+ '(' + res.body.units.repair_finish_r + ')',
+                dataIndex: 'repair_finish_r',
+                sort: 'true',
+                align: 'right'
+            }
+        ];
+        
+        // $scope.selectedBrands = [],$scope.selectedFaults = [];
+        // $scope.$watch("selectedBrands", function(n, o){
+        //     // console.log(n)
+        // })
+        // $scope.$watch("selectedFaults", function(n, o){
+        //     // console.log(n)
+        // })
+
+        // $(".maintenanceStationMonth").on('click','.alert-name',function(){
+        //     let a = $(this).attr('id')
+        // })
+        // 
+        // 
+    };
+    
+    //共享人员列表
+    $scope.sharePeopleList.getDataCallback = (success, res) => {
+
+        $scope.stationMonthLoading = false;
+        if (!success) return;
+        $scope.listSource = res.body.data;
+        $scope.column = [
+            {
+                title: '姓名',
+                width: '25%',
+                dataIndex: 'realName',
+                align: 'center',
+                render(text, record, index) {
+                    return `<span style="color:#1ddabe" id="${record.id}">${text}</span>`
+                }
+            },
+            {
+                title: '手机号',
+                dataIndex: 'phone',
+                align: 'center',
+            },
+            {
+                title: '抢单次数',
+                dataIndex: 'h_num',
+                align: 'right',
+            },
+            {
+                title: '响应时间(h)',
+                dataIndex: 'res_hours',
+                sort: 'true',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+
+                }
+            },
+            {
+                title: '处理时间(h)',
+                dataIndex: 'repair_hours',
+                align: 'right',
+                render(text, record, index) {
+                    return `<span>${text===null?0:text}</span>`
+
+                }
+            },
+            // {
+            //     title: '成功率(%)',
+            //     dataIndex: '',
+            //     sort: 'true',
+            //     align: 'right'
+            // }
+        ];
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+    });
+});

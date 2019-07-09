@@ -1,0 +1,246 @@
+app.directive('elDetails', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
+    restrict: 'E',
+    template: $('#el-details').html(),
+    scope: {
+        detail: '=',
+        objs: '=',
+        powerType: '='
+    },
+    link($scope, $element) {
+
+        $scope.repairDimensionFun = function (params) {
+            const ele = document.getElementsByName('repairDimensionName');
+            [].forEach.call(ele, element => element.checked = false);
+            ele[this.$index].checked = true;
+            $scope._getData(this.item.str);
+        };
+
+    },
+    controller($scope) {
+        $scope.repairDimension = [
+            { name: '检修台次', str: 'GETrepairCount' },
+            { name: '检修时间', str: 'GETrepairHours' },
+            { name: '检修成功率', str: 'GETrepairSuccessRate' },
+            { name: '检修影响时间', str: 'GETrepairRespHours' },
+            { name: '检修台数', str: 'GETrepairNum' }
+        ];
+
+        $scope._getData = str => {
+            ['Brand', 'Project', 'FaultType'].forEach(v => {
+                $scope.objs[str + v].getData({
+                    powerType: $scope.powerType,
+                    id: $scope.detail._id
+                }).then(res => $scope[v] = res)
+            });
+        };
+
+
+        $scope.$watch('detail', (newValue, oldValue) => {
+            if (!newValue) return;
+            $scope._getData('GETrepairCount');
+        });
+    }
+})]);
+
+
+app.directive('elChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocLazyLoad) => ({
+    restrict: 'E',
+    scope: {
+        data: '=',
+        name: '='
+    },
+    link($scope, $element, $attrs) {
+        const myChart = echarts.init($element[0])
+        $scope.$watch('data', (newValue, oldValue) => {
+            if(!newValue) return;
+            renderChart();
+        });
+        const renderChart = () => {
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                series: [{
+                    name: '损失电量构成',
+                    center: ['50%', '50%'],
+                    radius: ['25%', '50%'],
+                    type: 'pie',
+                    data: $scope.data.map((v, i) => ({
+                        name: $scope.name[i],
+                        value: v,
+                        label: {
+                            normal: {
+                                textStyle: {
+                                    color: '#3f3f3f',
+                                    fontSize: 14
+                                }
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: ['#ffc275', '#fff075', '#7ede44', '#4fbfe3', '#656cf8', '#cd80e9'][i]
+                            },
+                        },
+                        hoverAnimation: false
+                    }))
+                }]
+            }
+            myChart.setOption(option)
+        };
+    }
+})]);
+
+ajaxData({
+    // 专家库列表
+    pageList: {
+        name: 'GETExpertLibrary',
+        data: {
+            powerType: 'PV',
+            idType: 1,
+            pageIndex: 0,
+            pageSize: 10
+        },
+        later: true
+    },
+    detail: {
+        name: 'GETmasterDetail',
+        later: true
+    },
+
+    // 集团 省份
+    province: {
+        name: 'GETprovinces',
+        data: {}
+    },
+    // 品牌列表接口  powerType = PV | WP
+    selectBypowerType: {
+        name: 'GETselectBypowerType',
+        data: {
+            powerType: 'PV'
+        }
+    },
+    // 故障类型列表接口  光伏：dictType传  FAULT_REAL_TYPE  风电：dictType传  WT_SYSTEM
+    basedictionarySelectAll: {
+        name: 'GETBasedictionarySelectAll',
+        data: {
+            dictType: 'FAULT_REAL_TYPE'
+        }
+    },
+    ...[
+        'GETrepairCountBrand',
+        'GETrepairCountProject',
+        'GETrepairCountFaultType',
+
+        'GETrepairHoursBrand',
+        'GETrepairHoursProject',
+        'GETrepairHoursFaultType',
+
+        'GETrepairSuccessRateBrand',
+        'GETrepairSuccessRateProject',
+        'GETrepairSuccessRateFaultType',
+
+        'GETrepairRespHoursBrand',
+        'GETrepairRespHoursProject',
+        'GETrepairRespHoursFaultType',
+
+        'GETrepairNumBrand',
+        'GETrepairNumProject',
+        'GETrepairNumFaultType',
+    ].map(v => ({ [v]: { name: v, later: true } })).reduce((obj, cur) => ({ ...obj, ...cur })),
+}, {
+        gzName: ['塔筒及基础', '变桨系统', '测风系统', '电控系统', '机械传动系统', '发电机'],
+        ppName: ['西门子', '远景', 'GE', '葛美凤', '华创', '金风'],
+        xhName: ['jj-1550', 's2000', 'k2000', 'm500'],
+    })('expertLibraryCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+        
+        $scope.powerType = 'PV';
+        $scope.idType = 1; // 集团 省份，默认集团
+        $scope.switchTab = '1'; // 默认选择  品牌  使用品牌查询
+        // 所有省份  + 集团
+        $scope.province.promise.then(res => $scope.allIds = res.body.map(v => ({ [v.provinceId]: v.provinceName })).reduce((obj, cur) => ({ ...obj, ...cur }), { 1: '集团' }));
+
+        // 查询  搜索
+        $scope.conditionSearch = () => {
+            
+            $scope.pageList.getData({
+                powerType: $scope.powerType,
+                idType: $scope.idType,
+                ids: $scope.ids,
+                ...(checkObj()),
+                keyword: $scope.keyword,
+                pageIndex: 0,
+                pageSize: 6
+            }).then(async res => {
+                // $scope.keyword = '';
+                await myAjaxData.timeout(0);
+                $scope.pageList.res.body.data = res.body.data.map(v => ({
+                    ...v,
+                    createDate2: new Date(v.createDate).Format('yyyy-MM-dd')
+                }));
+                $scope.$apply();
+            });
+        };
+
+
+        //切换电站类型
+        $scope.changePowerType = async type => {
+            $scope.powerType = type;
+            $scope.selectBypowerType.getData({ powerType: type });
+            const pro2 = $scope.basedictionarySelectAll.getData({
+                dictType: type === 'PV' ? 'FAULT_REAL_TYPE' : 'WT_SYSTEM'
+            });
+            if ($scope.switchTab === '1') return;
+            await pro2
+            $scope.conditionSearch();
+        };
+
+        // 改变  范围 执行 函数  重新请求 数据 汇总
+        $scope.changeIds = value => {
+            if (value === $scope.ids) return;
+            const isJT = value == 1; // 选择的是否是集团
+            $scope.idType = isJT ? 1 : 2;
+            $scope.ids = isJT ? null : value;
+            $scope.conditionSearch();
+        };
+
+
+        // 品牌接口  完成后，  
+        $scope.selectBypowerType.getDataCallback = async () => {
+            await myAjaxData.timeout(0);
+            $scope.conditionSearch();
+        };
+
+        // 全选 品牌  或者  故障类型
+        $scope.checkAll = function (type, e) {
+            [].forEach.call(document.getElementsByName(type), ele => ele.checked = e.target.checked)
+            $scope.conditionSearch();
+        };
+
+
+
+        // 弹出框 详情
+        $scope.showDetails = function (obj) {
+            $('.el-details').show();
+            $scope.detail.res = obj;
+        };
+        $(document).on('click.el', () => $('.el-details').hide());
+
+
+        // 检查选中状态
+        function checkObj() {
+            const obj = { brandIds: null, faultTypeIds: null };
+
+            if ($scope.switchTab === '1') {
+                const eles = document.getElementsByName('shortType');
+                obj.brandIds = [].filter.call(eles, v => v.checked).map(v => v.value).join(',');
+                document.getElementsByName('shortTypeCheckAll')[0].checked = eles.length === obj.brandIds.split(',').length;
+            } else {
+                const eles = document.getElementsByName('faultType');
+                obj.faultTypeIds = [].filter.call(eles, v => v.checked).map(v => v.value).join(',');
+                document.getElementsByName('faultTypeCheckAll')[0].checked = eles.length === obj.faultTypeIds.split(',').length;
+            }
+            obj.skillIds = [].filter.call(document.getElementsByName('skill'), v => v.checked).map(v => v.value).join(',');
+            return obj;
+        }
+    });

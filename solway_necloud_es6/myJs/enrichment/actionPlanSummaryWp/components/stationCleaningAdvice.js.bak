@@ -1,0 +1,339 @@
+ajaxData(
+    {
+        // 风向标
+        wp_station_vane_month_deviceline: {
+            name: 'GETwp_station_vane_month_deviceline',
+            data: {},
+            later: true
+        },
+        // 风速计
+        wp_station_wsm_month_abnormalrateline: {
+            name: 'GETwp_station_wsm_month_abnormalrateline',
+            data: {},
+            later: true
+        },
+        // 齿轮箱
+        wp_station_gearbox_month_oilline: {
+            name: 'GETwp_station_gearbox_month_oilline',
+            data: {},
+            later: true
+        },
+        // 检修建议预计提升效率
+        wp_station_action_month_detail: {
+            name: 'GETwp_station_action_month_detail',
+            data: {},
+            later: true
+        },
+        // 风向标弹窗
+        geturbineVaneList: {
+            name: 'GETgeturbineVaneList',
+            data: {},
+            later: true
+        },
+        // 风速计 弹窗
+        turbineWsmPoints: {
+            name: 'GETturbineWsmPoints',
+            data: {},
+            later: true
+        },
+        // 齿轮箱油温 弹窗
+        turbineGearboxPointsDevice: {
+            name: 'GETturbineGearboxPointsDevice',
+            data: {},
+            later: true
+        },
+    },
+    {
+        __serviceName__: 'actionPlanSummaryStationCleaningAdviceService',
+    }
+)('actionPlanSummaryStationCleaningAdviceCtrl', ['$scope', 'actionPlanSummaryStationCleaningAdviceService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    $scope.tablePlaceholder = '<img style="margin: 15px 0;" src="theme/images/enrichment/notFound.png" alt="未发现异常设备插画"/>'
+
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { tabIndex = 0 } = historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {};
+        // if (!cost) {
+        //     await $scope.stationCleanCost.getData({});
+        //     cost = $scope.stationCleanCost.res.body.totalCost
+        //     price = $scope.stationCleanCost.res.body.price || 1
+        // }
+        // $scope.price = price;
+        // $scope.cost = cost;
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData();
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.dataType !== 0) return;
+        $scope.diffGetData();
+    };
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            actionPlanSummaryStationCleaningAdvice: {
+                ...historicalRecord.get().actionPlanSummaryStationCleaningAdvice || {},
+                tabIndex
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 接口请求
+    $scope.diffGetData = async () => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull();
+        const { tabIndex, dataType } = $scope;
+        if (dataType !== 0) return;
+        if (tabIndex === 0) {
+            $scope.wp_station_vane_month_deviceline.getData({
+                queryCode: 'wp_station_vane_month_deviceline',
+                queryType: 3,
+                date: (new Date).Format('yyyy-MM')
+            });
+            $scope.wp_station_action_month_detail.getData({
+                queryCode: 'wp_station_action_month_detail',
+                queryType: 3,
+                date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd')
+            });
+        } else if (tabIndex === 1) {
+            $scope.wp_station_wsm_month_abnormalrateline.getData({
+                queryCode: 'wp_station_wsm_month_abnormalrateline',
+                queryType: 3,
+                date: (new Date).Format('yyyy-MM')
+            });
+        } else if (tabIndex === 2) {
+            $scope.wp_station_gearbox_month_oilline.getData({
+                queryCode: 'wp_station_gearbox_month_oilline',
+                queryType: 3,
+                date: (new Date).Format('yyyy-MM')
+            });
+        }
+    };
+
+    // 设备故障， 查看设备详情
+    $scope.equipmentDetail = (item, index, event) => {
+        const { stid, eqid } = item;
+        const { tabIndex } = $scope;
+        if (event.target.className.includes('clickable')) {
+            return $scope.$broadcast("equipmentPopUpWp", {
+                stid: stid,
+                eqid: eqid
+            });
+        }
+        if (tabIndex === 0) {
+            return $scope.wp_station_vane_month_deviceline.equipmentDetail(item);
+        } else if (tabIndex === 1) {
+            return $scope.wp_station_wsm_month_abnormalrateline.equipmentDetail(item);
+        } else if (tabIndex === 2) {
+            return $scope.wp_station_gearbox_month_oilline.equipmentDetail(item);
+        }
+    };
+
+    // 风向标
+    $scope.wp_station_vane_month_deviceline.subscribe(res => {
+        $scope.wp_station_vane_month_deviceline.column = [
+            {
+                title: '风机',
+                dataIndex: 'eq_name',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                },
+            },
+            {
+                title: '机型',
+                dataIndex: 'product_name',
+                sort: true,
+                width: '25%',
+            },
+            {
+                title: '偏航误差(度)',
+                dataIndex: 'vane_yaw_error',
+                sort: true,
+            },
+            {
+                title: '校正后预计提升爬坡效率(%)',
+                dataIndex: 'vane_climb_e',
+                width: '40%',
+                sort: true,
+                align: 'right'
+            },
+        ];
+    });
+    // 风向标弹窗 befor
+    $scope.wp_station_vane_month_deviceline.equipmentDetail = (obj) => {
+        $scope.wp_station_vane_month_deviceline.detailShow = true;
+        $scope.geturbineVaneList.res = null;
+        $scope.wp_station_vane_month_deviceline.equipmentDetail.eq_name = obj.eq_name;
+        $scope.geturbineVaneList.getData({
+            dataType: 2,
+            date: (new Date).Format('yyyy-MM-dd'),
+            dateType: 2,
+            eqid: obj.eqid,
+            queryType: 3
+        });
+    };
+    // 风向标弹窗 处理
+    $scope.geturbineVaneList.subscribe(res => {
+        $scope.geturbineVaneList.xdata = res.body.x;
+        $scope.geturbineVaneList.ydatas = [[res.body.vane_ws_p_curve, res.body.vane_ws_p_curve2]];
+    });
+
+    // 风速计
+    $scope.wp_station_wsm_month_abnormalrateline.subscribe(res => {
+        $scope.wp_station_wsm_month_abnormalrateline.column = [
+            {
+                title: '风机',
+                dataIndex: 'eq_name',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                },
+            },
+            {
+                title: '机型',
+                dataIndex: 'product_name',
+                sort: true,
+            },
+            {
+                title: '风速数据异常率(%)',
+                dataIndex: 'ewsm_r',
+                sort: true,
+                align: 'right'
+            },
+        ];
+    });
+    // 风速计弹窗
+    $scope.wp_station_wsm_month_abnormalrateline.equipmentDetail = (obj) => {
+        $scope.wp_station_wsm_month_abnormalrateline.detailShow = true;
+        $scope.turbineWsmPoints.res = null;
+        $scope.wp_station_wsm_month_abnormalrateline.equipmentDetail.eq_name = obj.eq_name;
+        $scope.turbineWsmPoints.getData({
+            dataType: 2,
+            dateType: 2,
+            date: (new Date).Format('yyyy-MM-dd'),
+            queryType: 3,
+            eqid: obj.eqid
+        });
+    };
+    $scope.turbineWsmPoints.tooltipFormatter = (params) => {
+        return params[0].name + '<br/>' + params.map(v => v.seriesName + '　　' + v.value[0] + 'm/s　　' + v.value[1] + 'kW<br/>').join('');
+    };
+
+    // 齿轮箱
+    $scope.wp_station_gearbox_month_oilline.subscribe(res => {
+        $scope.wp_station_gearbox_month_oilline.column = [
+            {
+                title: '风机',
+                dataIndex: 'eq_name',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable">${text}</span>`
+                },
+            },
+            {
+                title: '机型',
+                dataIndex: 'product_name',
+                sort: true,
+            },
+            {
+                title: '满发油温' + (res.body.units.gearbox_temp ? '(' + res.body.units.gearbox_temp + ')' : ''),
+                dataIndex: 'gearbox_temp',
+                sort: true,
+                align: 'right'
+            },
+        ];
+    });
+    // 风速计弹窗
+    $scope.wp_station_gearbox_month_oilline.equipmentDetail = (obj) => {
+        $scope.wp_station_gearbox_month_oilline.detailShow = true;
+        $scope.turbineGearboxPointsDevice.res = null;
+        $scope.wp_station_gearbox_month_oilline.equipmentDetail.eq_name = obj.eq_name;
+        $scope.wp_station_gearbox_month_oilline.equipmentDetail.eqid = obj.eqid;
+        $scope.turbineGearboxPointsDevice.getData({
+            dataType: 2,
+            dateType: 2,
+            date: (new Date).Format('yyyy-MM-dd'),
+            queryType: 3,
+            eqid: obj.eqid
+        });
+    };
+    $scope.turbineGearboxPointsDevice.subscribe(res => {
+        $scope.turbineGearboxPointsDevice.ydatas = [[res.body[$scope.wp_station_gearbox_month_oilline.equipmentDetail.eqid]]];
+    });
+    $scope.turbineGearboxPointsDevice.markLine = {
+        lineStyle: {
+            normal: {
+                type: 'solid',
+                color: 'rgba(255,255,255,0.4)'
+            }
+        },
+        label: {
+            normal: {
+                show: true,
+                position: 'end',
+                color: 'rgba(255,255,255,1)',
+            }
+        },
+        data: [
+            { yAxis: 60, name: '' },
+            { yAxis: 65, name: '' },
+            { yAxis: 70, name: '' },
+            { yAxis: 75, name: '' },
+            { yAxis: 80, name: '' },
+        ]
+    };
+
+    $scope.turbineGearboxPointsDevice.tooltipFormatter = (params) => {
+        return params[0].value[0] + 'rpm<br/>' + params.sort((a, b) => b.value[1] - a.value[1]).map(v => `<span>` + v.seriesName + '油温(℃):    ' + v.value[1] + '<span/><br/>').join('');
+    };
+
+
+    // 数据置空
+    function setDataNull() {
+        $scope.wp_station_vane_month_deviceline.res = null;
+        $scope.wp_station_wsm_month_abnormalrateline.res = null;
+        $scope.wp_station_gearbox_month_oilline.res = null;
+        $scope.wp_station_action_month_detail.res = null;
+    }
+
+
+    // 键盘 左右 键   切换主题  组合键 放大缩小（ctrl + M）
+    $(document).on('keydown', keyChangeTheme);
+    $scope.$on('$destroy', () => $(document).off('keydown', keyChangeTheme));
+    function keyChangeTheme(event) {
+        const { tabIndex } = $scope;
+        switch (event.keyCode) {
+            case 38:
+                if (tabIndex === 0) return;
+                $scope.changeTab(tabIndex - 1);
+                $scope.$apply();
+                break;
+
+            case 40:
+                if (tabIndex === 2) return;
+                $scope.changeTab(tabIndex + 1);
+                $scope.$apply();
+                break;
+
+            default:
+                break;
+        }
+    }
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});

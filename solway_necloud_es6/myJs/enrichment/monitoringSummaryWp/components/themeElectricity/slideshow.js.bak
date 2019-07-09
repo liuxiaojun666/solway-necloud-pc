@@ -1,0 +1,21 @@
+app.directive('themeElectricitySlideshow', ['$timeout', ($timeout) => ({
+    restrict: 'E',
+    replace: !0,
+    templateUrl: 'tpl/enrichment/monitoringSummaryWp/components/themeElectricity/slideshow.html',
+    scope: {
+        imgs: '='
+    },
+    link($scope, $element, $attrs) {
+        $timeout(() => {
+            $element.css('display', 'block');
+        }, 0)
+    },
+    controller($scope) {
+        $scope.slideImgs = ['', '', '', ''];
+        $scope.$watch('imgs', (newValue, oldValue) => {
+            if (newValue && newValue[0]) {
+                $scope.slideImgs = newValue.slice(0, 4);
+            }
+        });
+    }
+})])

@@ -1,0 +1,144 @@
+ajaxData({
+    getLoginUserInfo: {
+        name: 'loginUserInfo',
+        data: {},
+        later: true
+    },
+    getCurrentInfoNew:{
+        name:'GETgetCurrentInfoNew',
+        data:{},
+        later:true
+    },
+    shareTaskDetailList: {
+        name: 'GETShareTaskDetailList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 发红包权限
+    // miniAppRadPayAuth: {
+    //     name: 'GETminiAppRadPayAuth',
+    //     data: {},
+    // },
+}, {
+        __serviceName__: 'sharedTaskDetailService'
+    })('sharedTaskDetailCtrl', ['$scope', 'sharedTaskDetailService'], ($scope, myAjaxData) => {
+
+        //接收
+        $scope.$on('chatPanelObj2', (e, obj) => {
+            $scope.shareList = [];
+            $scope.shareListResult = true;
+            $scope.noShareList = false;
+
+            $scope.id = obj.id;
+            $scope.distMan = obj.distMan;
+            getShareList();
+            getUserID();
+        });
+
+
+        $scope.$on('chatPanelObjTaskId', (e, obj) => {
+            $scope.shareList = [];
+            $scope.shareListResult = true;
+            $scope.noShareList = false;
+
+            $scope.taskId = obj.taskId;
+            $scope.distMan = obj.distMan;
+            
+            getShareListTaskId();
+            getUserID();
+        });
+
+        //重新获取列表
+        $scope.$on('initShareTaskList',(e,v)=>{
+            initWhichInterface();
+            if(v.refresh){
+                $scope.$parent.$parent.resetList();
+                // $scope.taskList.getData({});
+            }
+        })
+
+        //操作审核，发红包等回调
+        $scope.$on('clickBtnTaskCallback', (e, success) => {
+            $scope.shareTaskDetailShow = false;
+        });
+
+        function initWhichInterface(){
+            if($scope.taskId){
+                getShareListTaskId();
+            }else{
+                getShareList();
+            }
+            getUserID();
+        }
+
+        //获取当前用户ID 和 权限信息
+        const getUserID = () =>{
+            $scope.userId = '';
+            $scope.miniAppAuthType = '';
+
+            $scope.getLoginUserInfo.getData({
+            }).then(res => {
+                $scope.userId = res.userId;
+            });
+
+            $scope.getCurrentInfoNew.getData({
+            }).then(res => {
+                $scope.miniAppAuthType = res.miniAppAuthType;
+            });
+        } 
+
+        //列表接口
+        const getShareList = () => {
+            $scope.shareTaskDetailList.getData(
+                { id: $scope.id }
+            ).then(res => {
+                $scope.shareListResult = false;
+                $scope.shareList = res.body;
+                if ($scope.shareList.length == 0){
+                    $scope.noShareList = true;
+                }
+            });
+        }
+
+        const getShareListTaskId = () => {
+            
+            $scope.shareTaskDetailList.getData(
+                { taskId: $scope.taskId }
+            ).then(res => {
+                $scope.shareListResult = false;
+                $scope.shareList = res.body;
+                if ($scope.shareList.length == 0) {
+                    $scope.noShareList = true;
+                }
+            });
+        }
+
+        //详情
+        $scope.showDetail = id =>{
+            $scope.shareTaskDetailShow = true;
+            $scope.$broadcast('shareTaskDetailBro', { id: id, taskStatus: 'detail'});
+        }
+
+        $scope.getSendList = arr =>{
+            return arr.replace(/,/g, "   ")
+        }
+
+        //审核
+        $scope.examine = id => {
+            $scope.shareTaskDetailShow = true;
+            $scope.$broadcast('shareTaskDetailBro',{id:id,taskStatus:'examine'});
+        }
+
+        //发红包
+        $scope.handOutMoney = id => {
+            $scope.shareTaskDetailShow = true;
+            $scope.$broadcast('shareTaskDetailBro', { id: id, taskStatus: 'handoutMoney' });
+        }
+
+
+        $scope.$on('$destroy', () => {
+            // window.removeEventListener('resize', resizeHeight);
+        });
+
+    });

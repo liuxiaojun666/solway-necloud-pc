@@ -1,0 +1,274 @@
+ajaxData({
+    knowledgeBaseList: {
+        name: 'GETknowledgeBaseList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //厂商列表
+    manufacturerList: {
+        name: 'GETmanufacturerList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //产品型号列表
+    selectByManuList: {
+        name: 'GETselectByManuList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    //设备分类
+    deviceTypeList: {
+        name: 'GETdeviceTypeList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'historicalMaintenanceKnowledgeService',
+})('historicalMaintenanceKnowledgeCtrl', ['$scope', 'historicalMaintenanceKnowledgeService', 'actionRecord','$timeout'], ($scope, myAjaxData, historicalRecord,$timeout) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => { 
+        let { sortField ='time',arrowView='desc',arrowCode = 'desc',arrowTime = 'desc' } = historicalRecord.get().knowledgeBaseHistoricalMaintenance || {};
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+
+        $scope.sortField = sortField;
+        $scope.arrowView = arrowView;
+        $scope.arrowCode = arrowCode;
+        $scope.arrowTime = arrowTime;
+        $scope.$apply();
+        judgeDescOrAsc($scope.sortField);
+
+        await $scope.diffGetData();
+
+        $scope.getManufacturerList();
+        $scope.getDeviceTypeList();
+
+        $(".searchConditionTpl").on('click',(e)=>{
+            e.stopPropagation();
+        })
+    };
+
+    //切换排序方式
+    $scope.setSortField = sortField =>{
+        $scope.sortField = sortField;
+        judgeDescOrAsc($scope.sortField);
+
+        historicalRecord.set({
+            knowledgeBaseHistoricalMaintenance: {
+                ...historicalRecord.get().knowledgeBaseHistoricalMaintenance || {},
+                sortField
+            }
+        });
+
+        $scope.diffGetData();
+    }
+
+    //判断升序还是降序
+    const judgeDescOrAsc = sortField =>{
+        if(sortField == 'views'){
+            $scope.ascOrDesc = $scope.arrowView;
+        }else if(sortField == 'code'){
+            $scope.ascOrDesc = $scope.arrowCode;
+        }else if(sortField == 'time'){
+            $scope.ascOrDesc = $scope.arrowTime;
+        }
+    }
+
+    //点击排序箭头
+    $scope.ascOrDescRank = sortField =>{
+        if(sortField !== $scope.sortField) return;
+        if(sortField == 'views'){
+            let arrowView = $scope.arrowView = $scope.arrowView=='asc'?'desc':'asc';
+            historicalRecord.set({
+                knowledgeBaseHistoricalMaintenance: {
+                    ...historicalRecord.get().knowledgeBaseHistoricalMaintenance || {},
+                    arrowView
+                }
+            });
+        }else if(sortField == 'code'){
+            let arrowCode = $scope.arrowCode = $scope.arrowCode=='asc'?'desc':'asc';
+            historicalRecord.set({
+                knowledgeBaseHistoricalMaintenance: {
+                    ...historicalRecord.get().knowledgeBaseHistoricalMaintenance || {},
+                    arrowCode
+                }
+            });
+        }else if(sortField == 'time'){
+            let arrowTime = $scope.arrowTime = $scope.arrowTime=='asc'?'desc':'asc';
+            historicalRecord.set({
+                knowledgeBaseHistoricalMaintenance: {
+                    ...historicalRecord.get().knowledgeBaseHistoricalMaintenance || {},
+                    arrowTime
+                }
+            });
+        }
+        judgeDescOrAsc($scope.sortField);
+
+        $scope.diffGetData();
+    }
+
+    //刷新
+    $scope.refresh = (e)=>{
+        $scope.searchFieldType = '';
+        $scope.searchContent = '';
+        $scope.manufacturerId = '';
+        $scope.productId = '';
+        $scope.deviceType = '';
+
+        $scope.diffGetData();
+    }
+
+    //后退
+    $scope.beback = (e)=>{
+        $scope.ifBeback = false;
+
+        $scope.searchFieldType = '';
+        $scope.searchContent = '';
+        $scope.manufacturerId = '';
+        $scope.productId = '';
+        $scope.deviceType = '';
+
+        $scope.diffGetData();
+    }
+
+    //获取厂商列表
+    $scope.getManufacturerList = ()=>{
+        $scope.manufacturerList.getData({
+        }).then(res=>{
+            $scope.manufacturerList = res;
+        });
+    }
+
+    //选择某一厂商，获取产品型号列表
+    $scope.changemanufacturer = () =>{
+		$scope.selectByManuList.getData({
+            manufid : $scope.manufacturerId,
+        }).then(res=>{
+            $scope.productList = res;
+        });
+    }
+    
+    //获取设备分类列表
+    $scope.getDeviceTypeList = ()=>{
+        $scope.deviceTypeList.getData({
+        }).then(res=>{
+            $scope.deviceTypeList = res;
+        });
+    }
+
+    //查询
+    $scope.search = () =>{
+        $scope.ifShowModel = false;
+        $scope.ifBeback = true;
+        $scope.diffGetData();
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.ifShowModel = false;
+    }
+
+    //显示查询条件弹框
+    $scope.showSearchModel = (e) =>{
+        e.stopPropagation();
+        $scope.ifShowModel = !$scope.ifShowModel;
+    }
+
+    //卡片列表
+    $scope.diffGetData = async() =>{
+        if (!$scope.initComplete) return;
+        $scope.loading = true;
+        await myAjaxData.timeout(0);
+
+        $scope.knowledgeBaseList.getData({
+            //公共
+            pageIndex: 0,
+            pageSize : 9,
+            queryType : 'historyRepair',
+            sortField : $scope.sortField,
+            ascOrDesc : $scope.ascOrDesc,
+            searchFieldType : $scope.searchFieldType,
+            searchContent : $scope.searchContent,
+            manuFId : $scope.manufacturerId,
+            productId : $scope.productId,
+            //故障指导，历史检修
+            devicetype : $scope.deviceType
+        });
+    }
+
+    $scope.knowledgeBaseList.getDataCallback = (success, res) => {
+        $scope.loading = false;
+        $scope.column =  [
+            {
+                title: '故障码',
+                width: '25%',
+                dataIndex: 'field1',
+                sort: 'true',
+                align: 'center',
+                // render(text) {
+                //     return `<span class="clickable">${text}</span>`
+                // }
+            },
+            {
+                title: '故障内容',
+                dataIndex: 'field5',
+                sort: 'true',
+                align: 'left',
+            },
+            {
+                title: '厂家名称',
+                dataIndex: 'field2',
+                sort: 'true',
+                align: 'left',
+            },
+            {
+                title: '产品型号',
+                dataIndex: 'field3',
+                sort: 'true',
+                align: 'left',
+            },
+            {
+                title: '维修内容',
+                dataIndex: 'content',
+                sort: 'true',
+                align: 'left',
+            },
+            {
+                title: '维修时间',
+                dataIndex: 'field4',
+                sort: 'true',
+                align: 'center',
+                // render(text, record, index) {
+                //     return `<span>${text===null?0:text}</span>`
+                // }
+            }
+        ];
+    }
+
+    //详情
+    $scope.trClick = (item, index, event) => {
+        return false;
+        $scope.showHistoricalMaintenanceDetail = true;
+        $scope.$broadcast('historicalMaintenanceId',item);
+    };
+
+    //点击页面其他地方，搜索框消失
+    document.addEventListener('click', closeSearchAlert);
+    function closeSearchAlert() {
+        $scope.ifShowModel = false;
+        $scope.$apply();
+    }
+  
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        document.removeEventListener('click', closeSearchAlert);
+    });
+});

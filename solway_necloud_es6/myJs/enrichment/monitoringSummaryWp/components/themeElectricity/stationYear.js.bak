@@ -1,0 +1,493 @@
+ajaxData({
+    // 电站 年 时间 列表
+    query_wp_station_year_elec_timelist: {
+        name: 'GETquery_wp_station_year_elec_timelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 年 时间 曲线
+    query_wp_station_year_elec_timeline: {
+        name: 'GETquery_wp_station_year_elec_timeline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 年 设备 列表
+    query_wp_station_year_elec_devlist: {
+        name: 'GETquery_wp_station_year_elec_devlist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 年 设备 曲线
+    query_wp_station_year_elec_devline: {
+        name: 'GETquery_wp_station_year_elec_devline',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 年 结算电量 汇总
+    opSettlementPowerAnalysisByNumTotal: {
+        name: 'GETopSettlementPowerAnalysisByNumTotal',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 年 结算电量 列表
+    opSettlementPowerAnalysisByNumList: {
+        name: 'GETopSettlementPowerAnalysisByNumList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    // 电站 年 结算电量 图表
+    opSettlementPowerAnalysisByNumLine: {
+        name: 'GETopSettlementPowerAnalysisByNumLine',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+}, {
+        __serviceName__: 'themeElectricityStationYearService'
+    })('themeElectricityStationYearCtrl', ['$scope', 'themeElectricityStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+        // 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            let { showShape, select1, select2, tabIndex = 0 } = historicalRecord.get().themeElectricityStationYear || {};
+            $scope.changeShowShape(showShape || 'list');
+            const { dateType, dateTime } = historicalRecord.get();
+            $scope.dateType = dateType;
+            $scope.dateTime = dateTime;
+            await $scope.dateUpdated();
+            $scope.select1 = select1 || 2;
+            $scope.select2 = select2 || 2;
+            if (select1) await $scope.selectChange('select1');
+            if (select2) await $scope.selectChange('select2');
+            $scope.changeTab(tabIndex);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            await $scope.diffGetData();
+            $scope.$apply();
+        };
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            if ($scope.currentClass !== 'StationYear') return;
+            if ($scope.dataType > 0) return;
+            setDataNull();
+            diffSelectOptions();
+            $scope.diffGetData();
+        };
+
+        // 日期改变
+        $scope.dateUpdated = async () => {
+            if ($scope.currentClass !== 'StationYear') return;
+            await myAjaxData.timeout(0);
+            setDataNull();
+            diffSelectOptions();
+            $scope.diffGetData();
+        };
+
+
+        // tab 切换
+        $scope.changeTab = tabIndex => {
+            $scope.tabIndex = tabIndex;
+            historicalRecord.set({
+                themeElectricityStationYear: {
+                    ...historicalRecord.get().themeElectricityStationYear || {},
+                    tabIndex
+                }
+            });
+            setDataNull();
+            diffSelectOptions();
+            $scope.diffGetData();
+        };
+
+        // 切换显示形式  图表 or 列表
+        $scope.changeShowShape = showShape => {
+            $scope.showShape = showShape;
+            historicalRecord.set({
+                themeElectricityStationYear: {
+                    ...historicalRecord.get().themeElectricityStationYear || {},
+                    showShape
+                }
+            });
+            setDataNull();
+            diffSelectOptions();
+            $scope.diffGetData();
+        };
+
+        // 图标轴线切换
+        $scope.selectChange = async (arg) => {
+            await myAjaxData.timeout(0);
+            historicalRecord.set({
+                themeElectricityStationYear: {
+                    ...historicalRecord.get().themeElectricityStationYear || {},
+                    [arg]: $scope[arg]
+                }
+            });
+            diffChartLineData();
+            $scope.$apply();
+        };
+
+        $scope.diffGetData = async () => {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+            if (showShape === 'list' && tabIndex === 0) {
+                $scope.query_wp_station_year_elec_timelist.getData({
+                    queryCode: 'query_wp_station_year_elec_timelist',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+            }
+            else if (showShape === 'chart' && tabIndex === 0) {
+                $scope.query_wp_station_year_elec_timeline.getData({
+                    queryCode: 'query_wp_station_year_elec_timeline',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+            }
+            else if (showShape === 'list' && tabIndex === 1) {
+                $scope.query_wp_station_year_elec_devlist.getData({
+                    queryCode: 'query_wp_station_year_elec_devlist',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+            }
+            else if (showShape === 'chart' && tabIndex === 1) {
+                $scope.query_wp_station_year_elec_devline.getData({
+                    queryCode: 'query_wp_station_year_elec_devline',
+                    queryType: 3,
+                    date: dateTime.showDate
+                });
+            }
+            else if (tabIndex === 2) {
+                $scope.opSettlementPowerAnalysisByNumTotal.getData({
+                    year: dateTime.showDate
+                });
+                if (showShape === 'list') {
+                    $scope.opSettlementPowerAnalysisByNumList.getData({
+                        style: 1,
+                        year: dateTime.showDate
+                    });
+                } else if (showShape === 'chart') {
+                    $scope.opSettlementPowerAnalysisByNumLine.getData({
+                        style: 2,
+                        year: dateTime.showDate
+                    });
+                }
+            }
+        }
+
+        // 电站 年 时间 列表
+        $scope.query_wp_station_year_elec_timelist.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '时间',
+                    dataIndex: 'dtime',
+                    width: '20%',
+                    sort: true,
+                    align: 'center'
+                },
+                {
+                    title: '实发电量' + (res.body.units.real_kwh ? '(' + res.body.units.real_kwh + ')' : ''),
+                    dataIndex: 'real_kwh',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '理论电量' + (res.body.units.shd_kwh ? '(' + res.body.units.shd_kwh + ')' : ''),
+                    dataIndex: 'shd_kwh',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '上网电量' + (res.body.units.send_kwh ? '(' + res.body.units.send_kwh + ')' : ''),
+                    dataIndex: 'send_kwh',
+                    width: '20%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
+                    dataIndex: 'real_hours',
+                    width: '10%',
+                    sort: true,
+                    align: 'right',
+                },
+                {
+                    title: '平均风速' + (res.body.units.ws_avg ? '(' + res.body.units.ws_avg + ')' : ''),
+                    dataIndex: 'ws_avg',
+                    width: '20%',
+                    sort: true,
+                    align: 'right',
+                },
+                {
+                    title: 'PBA' + (res.body.units.pba ? '(' + res.body.units.pba + ')' : ''),
+                    dataIndex: 'pba',
+                    width: '10%',
+                    sort: true,
+                    align: 'right',
+                },
+            ];
+        };
+        // 电站 年 时间 图表
+        $scope.query_wp_station_year_elec_timeline.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'shd_kwh';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
+            diffChartLineData();
+            $scope.$apply();
+        };
+        // 电站 年 设备 列表
+        $scope.query_wp_station_year_elec_devlist.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '设备名称',
+                    dataIndex: 'eq_name',
+                    width: '25%',
+                    sort: true,
+                },
+                {
+                    title: '装机容量' + (res.body.units.inst_kw ? '(' + res.body.units.inst_kw + ')' : ''),
+                    dataIndex: 'inst_kw',
+                    width: '15%',
+                    sort: true,
+                    align: 'right'
+                },
+                {
+                    title: '发电量' + (res.body.units.real_kwh ? '(' + res.body.units.real_kwh + ')' : ''),
+                    dataIndex: 'real_kwh',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                    render(text, item, index) {
+                        return `
+                            <span>${text || '-'}</span>
+                            <i title="环比${item.real_kwh_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                    }
+                },
+                {
+                    title: '发电小时数' + (res.body.units.real_hours ? '(' + res.body.units.real_hours + ')' : ''),
+                    dataIndex: 'real_hours',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                    render(text, item, index) {
+                        return `
+                            <span>${text || '-'}</span>
+                            <i title="环比${item.real_hours_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                    }
+                },
+                {
+                    title: 'PBA' + (res.body.units.pba ? '(' + res.body.units.pba + ')' : ''),
+                    dataIndex: 'pba',
+                    width: '10%',
+                    sort: true,
+                    align: 'right',
+                },
+                {
+                    title: '故障损失电量' + (res.body.units.fail_we ? '(' + res.body.units.fail_we + ')' : ''),
+                    dataIndex: 'fail_we',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                    render(text, item, index) {
+                        return `
+                            <span>${text}</span>
+                            <i title="同比${item.fail_we_tb_rate || '-'}%, 环比${item.fail_we_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                    }
+                },
+                {
+                    title: '限电损失电量' + (res.body.units.restrict_we ? '(' + res.body.units.restrict_we + ')' : ''),
+                    dataIndex: 'restrict_we',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                    render(text, item, index) {
+                        return `
+                            <span>${text}</span>
+                            <i title="同比${item.restrict_we_tb_rate || '-'}%, 环比${item.restrict_we_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                    }
+                },
+                {
+                    title: '检修损失电量' + (res.body.units.repair_we ? '(' + res.body.units.repair_we + ')' : ''),
+                    dataIndex: 'repair_we',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                    render(text, item, index) {
+                        return `
+                            <span>${text}</span>
+                            <i title="同比${item.repair_we_tb_rate || '-'}%, 环比${item.repair_we_hb_rate || '-'}%" 
+                                class="iconfont icon-zhuzhuangtu" 
+                                style="color: #2ac2ad;cursor:pointer;"></i>`
+                    }
+                },
+            ]
+        };
+        // 电站 年 设备 曲线
+        $scope.query_wp_station_year_elec_devline.getDataCallback = async (success, res) => {
+            if (!success) return;
+            $scope.select1 = $scope.selectOptions[$scope.select1 || '__'] ? $scope.select1 : 'real_kwh';
+            $scope.select2 = $scope.selectOptions[$scope.select2 || '__'] ? $scope.select2 : 'inst_kw';
+            await $scope.selectChange('select1');
+            await $scope.selectChange('select2');
+            diffSelectOptions(res.body.units);
+            diffChartLineData();
+            $scope.$apply();
+        };
+        // 电站 年 结算电量 列表
+        $scope.opSettlementPowerAnalysisByNumList.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.column = [
+                {
+                    title: '序号',
+                    dataIndex: 'num',
+                    width: '10%',
+                    sort: true,
+                },
+                {
+                    title: '开始日期',
+                    dataIndex: 'beginTime',
+                    width: '20%',
+                    sort: true,
+                    align: 'center',
+                    render(text) {
+                        return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
+                    }
+                },
+                {
+                    title: '结算日期',
+                    dataIndex: 'endTime',
+                    width: '20%',
+                    sort: true,
+                    align: 'center',
+                    render(text) {
+                        return `<span>${new Date(text).Format('yyyy-MM-dd')}</span>`
+                    }
+                },
+                {
+                    title: '发电量(kWh)',
+                    dataIndex: 'realPower',
+                    width: '20%',
+                    sort: true,
+                    align: 'right',
+                },
+                {
+                    title: '上网电量(kWh)',
+                    dataIndex: 'netPower',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                },
+                {
+                    title: '自发自用电量(kWh)',
+                    dataIndex: 'selfPower',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                },
+                {
+                    title: '自用比例(%)',
+                    dataIndex: 'selfPowerDiff',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                },
+                {
+                    title: '耗损率(%)',
+                    dataIndex: 'powerDiff',
+                    width: '15%',
+                    sort: true,
+                    align: 'right',
+                },
+            ];
+        };
+        // 电站 年 结算电量 图表
+        $scope.opSettlementPowerAnalysisByNumLine.getDataCallback = (success, res) => {
+            if (!success) return;
+            $scope.xdata = res.body.nums.map(v => v + '期');
+            $scope.ydatas = [
+                [
+                    res.body.realPowers,
+                    res.body.netPowers,
+                    res.body.selfPowers
+                ],
+                [
+                    res.body.selfPowerDiffs,
+                    res.body.powerDiffs
+                ]
+            ]
+        };
+
+
+        // 计算 图表 显示对应 轴
+        function diffChartLineData() {
+            if (!$scope.initComplete) return;
+            const { select1, select2, tabIndex } = $scope;
+            if (tabIndex === 0) {
+                $scope.xdata = $scope.query_wp_station_year_elec_timeline.res.body.data.dtime
+                $scope.ydatas = [[$scope.query_wp_station_year_elec_timeline.res.body.data[select1]], [$scope.query_wp_station_year_elec_timeline.res.body.data[select2]]]
+            } else if (tabIndex === 1) {
+                $scope.xdata = $scope.query_wp_station_year_elec_devline.res.body.data.eq_name
+                $scope.ydatas = [[$scope.query_wp_station_year_elec_devline.res.body.data[select1]], [$scope.query_wp_station_year_elec_devline.res.body.data[select2]]]
+            }
+        }
+
+        // 轴线切换  可选项  判断
+        function diffSelectOptions(units = {}) {
+
+            if ($scope.tabIndex === 0) {
+                $scope.selectOptions = {
+                    real_kwh: '实发电量' + (units.real_kwh ? '(' + units.real_kwh + ')' : ''),
+                    send_kwh: '上网电量' + (units.send_kwh ? '(' + units.send_kwh + ')' : ''),
+                    shd_kwh: '理论电量' + (units.shd_kwh ? '(' + units.shd_kwh + ')' : ''),
+                    we_rate: '其他损失电量' + (units.we_rate ? '(' + units.we_rate + ')' : ''),
+                };
+            } else if ($scope.tabIndex === 1) {
+                $scope.selectOptions = {
+                    fail_we: '故障损失电量' + (units.fail_we ? '(' + units.fail_we + ')' : ''),
+                    inst_kw: '装机容量' + (units.inst_kw ? '(' + units.inst_kw + ')' : ''),
+                    other_we: '其他损失电量' + (units.other_we ? '(' + units.other_we + ')' : ''),
+                    real_hours: '发电小时数' + (units.real_hours ? '(' + units.real_hours + ')' : ''),
+                    real_kwh: '实发电量' + (units.real_kwh ? '(' + units.real_kwh + ')' : ''),
+                    repair_we: '检修损失电量' + (units.repair_we ? '(' + units.repair_we + ')' : ''),
+                    restrict_we: '限电损失电量' + (units.restrict_we ? '(' + units.restrict_we + ')' : ''),
+                };
+            }
+        }
+
+        // 数据置空
+        function setDataNull() {
+            $scope.column = [];
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
+            $scope.query_wp_station_year_elec_devlist.res = null;
+            $scope.query_wp_station_year_elec_devline.res = null;
+            $scope.query_wp_station_year_elec_timelist.res = null;
+            $scope.query_wp_station_year_elec_timeline.res = null;
+            $scope.opSettlementPowerAnalysisByNumTotal.res = null;
+
+        }
+    });

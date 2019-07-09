@@ -1,0 +1,44 @@
+ajaxData({
+    businessManagementData: {
+        name: 'GETbusinessManagementData',
+        data: {},
+        later: true
+    },
+    
+}, {})('businessManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+
+    $scope.moduleName = '企业管理';//当前页面名称；
+
+    const getData = () =>{
+        $scope.businessManagementData.getData({}).then(res=>{
+            if (res.key==2) {
+				$scope.customConfig = res.customConfig;
+                $scope.ComInfo = res.data;
+            }
+        });
+    }
+
+    getData();
+
+    //编辑
+    $scope.edit = () =>{
+        $scope.showEditBusinessManagement = true;
+        $scope.$broadcast('broadEdit');
+    }
+
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+
+    //取消回调
+    $scope.$on('cancelCallback',()=>{
+        $scope.showEditBusinessManagement = false;
+    });
+
+    //保存成功回调
+    $scope.$on('saveSuccessCallback',()=>{
+        $scope.showEditBusinessManagement = false;
+        getData();
+    });
+
+});

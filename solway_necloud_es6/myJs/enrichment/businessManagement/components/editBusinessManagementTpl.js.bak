@@ -1,0 +1,202 @@
+ajaxData({
+    businessManagementData: {
+        name: 'GETbusinessManagementData',
+        data: {},
+        later: true
+    },
+    selectProvince:{
+        name: 'POSTSelectProvince',
+        data: {},
+        later: true
+    },
+    update:{
+        name:'POSTbusinessManagementSave',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'editBusManageTplService',
+})('editBusManageTplCtrl', ['$scope', 'editBusManageTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
+
+    $scope.enterpriseTypeList = [
+        {id:32,dictName:'国有企业'},
+        {id:33,dictName:'股份制企业'},
+        {id:34,dictName:'私营企业'},
+        {id:35,dictName:'联营企业'},
+        {id:36,dictName:'外商投资企业'},
+        {id:37,dictName:'港、澳、台'},
+        {id:38,dictName:'股份合作企业'},
+        {id:39,dictName:'集体所有制'}
+    ];
+
+    $scope.endDate = new Date('2099');
+
+    const clearData = () =>{
+        $scope.formData = {};
+        $scope.customConfig = {};
+        $scope.admintime = null;
+
+    }
+
+    const initShowImages = (data,customConfig) =>{
+        if(data && data.logo){
+            $("#showLogo").attr("src", data.logo);
+        }
+        if(customConfig && customConfig.logo_lg){
+            $("#showLogolg").attr("src", customConfig.logo_lg);
+        }
+        if(customConfig && customConfig.logo_sm){
+            $("#showLogosm").attr("src", customConfig.logo_sm);
+        }
+    }
+
+    const getData = () =>{
+        clearData();
+        $scope.businessManagementData.getData({}).then(res=>{
+            if (res.key==2) {
+                const data = res.data;
+                const customConfig = res.customConfig;
+                initShowImages(data,customConfig);
+
+                data.insureTel = +data.insureTel;
+                $scope.formData = data;
+                $scope.customConfig = customConfig?customConfig:{};
+                
+                $scope.admintime = new Date(data.admintime);
+                getProvence();
+            }
+        });
+    }
+
+    const getProvence = ()=>{
+        $scope.selectProvince.getData({
+            treeLevel:1,
+            parentId:1
+        }).then(res=>{
+            $scope.provinceList = res;
+            getCity();
+        });
+        
+    }
+
+    const getCity = () =>{
+        if(!$scope.formData.provinceid) return;
+        $scope.selectProvince.getData({
+            treeLevel:2,
+            parentId:$scope.formData.provinceid
+        }).then(res=>{
+            $scope.cityList = res;
+            getCountry();
+        });
+    }
+
+    const getCountry = () =>{
+        if(!$scope.formData.cityid) return;
+        $scope.selectProvince.getData({
+            treeLevel:3,
+            parentId:$scope.formData.cityid
+        }).then(res=>{
+            $scope.countryList = res;
+        });
+    }
+
+    $scope.$on('broadEdit',()=>{
+        getData();
+    });
+
+    //省change
+    $scope.provinceChange = () =>{
+        $scope.cityList = [];
+        $scope.countryList = [];
+        $scope.formData.cityid = '';
+        $scope.formData.countyid = '';
+        getCity();
+    }
+
+    //市change
+    $scope.cityChange = ()=>{
+        $scope.countryList = [];
+        $scope.formData.countyid = '';
+        getCountry();
+    }
+
+    //上传图片公共方法
+    function commonUploadImg(inputId,showPlaceId,dataObj,dataParams){
+        $(document).on('change', '#'+inputId, function() {
+            $.ajaxFileUpload({
+                url: 'uploadImage/uploadImageFrom.htm', //用于文件上传的服务器端请求地址
+                secureuri: false, //是否需要安全协议，一般设置为false
+                fileElementId: inputId,
+                formName: "file",
+                dataType: 'json', //返回值类型 一般设置为json
+                data: {"nodeId":inputId},
+                success: function (data){
+                    if (data.key==0) {
+                        $("#"+showPlaceId).attr("src", data.path);
+                        if(dataObj){
+                            $scope[dataObj][dataParams] = data.path;
+                            $scope.$apply();
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    $timeout(()=>{
+        commonUploadImg('updateLogolg','showLogolg','customConfig','logo_lg');//登录页logo大上传
+        commonUploadImg('updateLogosm','showLogosm','customConfig','logo_sm');//登录页logo小上传
+        commonUploadImg('updateLogo','showLogo','formData','logo');//logo上传
+    },0);
+
+    //删除上传图片
+    $scope.deleteImg = (dataObj,dataParams,showPlaceId) =>{
+        $('#'+showPlaceId).attr('src', '');
+		delete $scope[dataObj][dataParams];
+    }
+
+    $scope.radioCheck = num =>{
+        $scope.customConfig.logo_sm_flag = num;
+    }
+
+    //设置CheckBox的值
+    $scope.checkboxValue = param =>{
+        if($("."+param).prop("checked")){
+            $scope.formData[param] = '1';
+        }else{
+            $scope.formData[param] = '0';
+        }
+    }
+
+    //保存
+    $scope.save = () =>{
+        if(!$scope.customConfig.logo_sm) delete $scope.customConfig.logo_sm_flag;
+
+        let checkedArr = [];
+        $("input[name='stationType']:checked").each(function(){
+            checkedArr.push(this.value);
+        })
+        $scope.formData['comType'] = checkedArr.join(",");
+
+        $scope.update.getData({
+            data:  JSON.stringify($scope.formData),
+            customConfig : JSON.stringify($scope.customConfig)
+        }).then(res=>{
+            if (res.key==3) {
+                toaster.pop('error', '','企业名称不合法')
+            };
+            if (res.key==4) {
+                toaster.pop('error', '','校验企业类型必选其一')
+            };
+            if (res.key==1) {
+                $scope.$emit('saveSuccessCallback');
+            };
+        })
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+    }
+});

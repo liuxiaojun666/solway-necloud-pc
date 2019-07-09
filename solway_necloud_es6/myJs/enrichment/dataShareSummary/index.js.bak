@@ -1,0 +1,454 @@
+ajaxData({
+    esquery: {
+        name: 'GETesquery',
+        data: {},
+        later: true
+    },
+}, {})('dataShareSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    historicalRecord.init();// 历史记录 初始化
+    $scope.beforeLoading = true; // 页面loading
+    $scope.moduleName = '数据共享'; //当前页面名称
+    $scope.endDate = new Date((+new Date) - 1000 * 60 * 60 * 24); // 日历可选 的截止日期
+    let map = echarts.init(document.getElementById("map"));
+    const dateKey = {
+        0: 'day',
+        1: 'month',
+        2: 'year'
+    }
+    const chartKey = {
+        0: 'citylist',
+        1: 'cityline',
+        2: 'cityline',
+        3: 'cityline',
+        4: 'cityline'
+    }
+    const yKeyName = {
+        1: 'ta_avg',
+        2: 'rad_chk',
+        3: 'real_hours',
+        4: 'ws_avg'
+    }
+    const units = {
+        1: '(℃)',
+        2: '(kWh/㎡)',
+        3: '(h)',
+        4: '(m/s)'
+    }
+
+    // 当前页面行为记录初始化回调 获取行为记录
+    historyInitCallback();
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get();
+        const {
+            dateType = 1,
+            dateTime = new Date(+$scope.endDate),
+            chartType = 0,
+            chartName = '地图'
+        } = historiData;
+        if (dateType == 0) {
+            dateTime.showDate = dateTime.Format('yyyy-MM-dd');
+        } else if (dateType == 1) {
+            dateTime.showDate = dateTime.Format('yyyy-MM');
+        } else if (dateType == 2) {
+            dateTime.showDate = dateTime.Format('yyyy');
+        }
+        $scope.dateTime = dateTime;
+        $scope.dateType = dateType;
+        $scope.weekTimeStart = new Date(dateTime.getTime() - 1000 * 60 * 60 * 24 * 6);
+        $scope.weekTimeEnd = new Date(dateTime.getTime());
+        $scope.beforeLoading = false;
+        await myAjaxData.timeout(0);
+        $scope.showCharts(chartType, chartName);
+    };
+
+    // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
+    $scope.dateUpdated = async (dateType, dateTime) => {
+        historicalRecord.set({ dateType, dateTime });
+        // if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM');
+        if (!dateTime.showDate) {
+            if (dateType == 0) {
+                dateTime.showDate = dateTime.Format('yyyy-MM-dd');
+            } else if (dateType == 1) {
+                dateTime.showDate = dateTime.Format('yyyy-MM');
+            } else if (dateType == 2) {
+                dateTime.showDate = dateTime.Format('yyyy');
+            }
+        }
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await myAjaxData.timeout(0);
+        $scope.showCharts($scope.chartType, $scope.chartName);
+    };
+
+    //点击事件范围
+    // $scope.weekUpdated = (scope) => {
+    //     if (!scope.startDate.showDate || !scope.endDate.showDate) return;
+    //     $scope._weekTimeStart = scope.startDate;
+    //     $scope._weekTimeEnd = scope.endDate;
+    //     $scope.dateUpdated($scope._dateType, $scope._dateTime);
+    // };
+
+
+    //点击圆球 -> 右侧切换图表
+    $scope.showCharts = (type, name) => {
+        $scope.chartType = type;
+        $scope.chartName = name;
+        historicalRecord.set({
+            chartType: $scope.chartType,
+            chartName: $scope.chartName
+        });
+        $scope.loading = true;
+        $scope.esquery.getData({
+            date: $scope.dateTime.showDate,
+            queryCode: `pv_station_city_${dateKey[$scope.dateType]}_${chartKey[$scope.chartType]}`
+        }).then((res) => {
+            $scope.chartData = res.body;
+            if ($scope.chartType != 0) {
+                fillChart();
+            } else {
+                map.resize();
+                fillMap();
+            }
+            $scope.loading = false;
+        })
+    }
+
+    // 给图表填充数据
+    function fillChart() {
+        $scope.yname = [];
+        $scope.ymin = 0;
+        $scope.newArrName = [];
+        $scope.tableType = [];
+        $scope.colors = [];
+        $scope.xdata = [];
+        $scope.ydatas = [[]];
+
+        if (!$scope.chartData) {
+            return;
+        }
+        $scope.chartData.cityid.forEach(item => {
+            $scope.tableType.push('bar');
+            $scope.colors.push('rgb(240,193,103)');
+            $scope.newArrName.push($scope.chartName);
+        });
+        $scope.xdata = $scope.chartData.city_name;
+        $scope.yname = $scope.chartName + units[$scope.chartType];
+        $scope.ydatas[0].push($scope.chartData[yKeyName[$scope.chartType]]);
+        $scope.chartData[yKeyName[$scope.chartType]].sort((a, b) => {
+            return a - b;
+        })
+        $scope.ymin = $scope.chartData[yKeyName[$scope.chartType]][0] > 0 ? 0 : $scope.chartData[yKeyName[$scope.chartType]][0];
+    }
+
+    // 给地图填充数据
+    function fillMap() {
+        var mapData = [];
+        $scope.chartData.data.forEach(item => {
+            mapData.push({
+                name: item.city_name,
+                value: [item.longitude, item.latitude, Number(item.rad_chk[0]), item.real_hours[0], item.ta_avg[0], item.ws_avg[0], item.city_name]
+            })
+        })
+        map.setOption({
+            series: [
+                {
+                    type: 'scatter',
+                    data: mapData
+                }
+            ]
+        });
+    }
+
+    //中国地图
+    var option = {
+        backgroundColor: 'rgba(49, 65, 84, 0.1)',
+        // title: {
+        //     text: '全国主要城市空气质量',
+        //     subtext: 'data from PM25.in',
+        //     sublink: 'http://www.pm25.in',
+        //     x:'center',
+        //     textStyle: {
+        //         color: '#fff'
+        //     }
+        // },
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: '#2481DC',
+            padding: 15,
+            textStyle: {
+                fontSize: 16
+            },
+            position: function (p) { //其中p为当前鼠标的位置
+                return [p[0] - 50, p[1] - 165];
+            },
+            formatter: function (params) {
+                var str;
+                str = `<div class="toolTip">${params.value[6]}<br/>温度:${params.value[4]}℃<br/>辐射总量:${params.value[2]}kWh/㎡<br/>发电小时数:${params.value[3]}h<br/>风速:${params.value[5]}m/s<br/></div>`
+                return str;
+            }
+        },
+        // legend: {
+        //     orient: 'vertical',
+        //     y: 'bottom',
+        //     x:'right',
+        //     data:['pm2.5'],
+        //     textStyle: {
+        //         color: '#fff'
+        //     }
+        // },
+        // visualMap: {
+        //     min: 0,
+        //     max: 200,
+        //     calculable: true,
+        //     inRange: {
+        //         color: ['#50a3ba', '#eac736', '#d94e5d']
+        //     },
+        //     textStyle: {
+        //         color: '#fff'
+        //     }
+        // },
+        geo: {
+            map: 'china',
+            roam: true,
+            label: {
+                emphasis: {
+                    show: true,
+                    color: '#fff'
+                }
+            },
+            itemStyle: {
+                normal: {
+                    areaColor: 'rgb(11, 44, 78)',
+                    borderColor: 'rgb(0, 234, 239)'
+                },
+                emphasis: {
+                    areaColor: 'rgb(4, 163, 139)'
+                }
+            }
+        },
+        series: [
+            {
+                name: '',
+                type: 'scatter',
+                coordinateSystem: 'geo',
+                data: [],
+                symbolSize: 9,
+                label: {
+                    normal: {
+                        show: false
+                    },
+                    emphasis: {
+                        show: false
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: '#FFCE57'
+                    },
+                    emphasis: {
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }
+                }
+            }
+        ]
+    }
+    map.setOption(option, true);
+
+    // $scope.showCharts(0, '地图');
+
+
+
+    //----------------------------------------------------------小球碰撞方法集合
+    var main = document.getElementById('main');
+    var circles = main.getElementsByTagName('div');
+    var json = [], arr = {};
+    //根据浏览器窗口的大小自动调节小球的运动空间
+    window.onresize = function () {
+        // var main = document.getElementById('main');
+        // maxW = window.innerWidth - circles[0].clientWidth;
+        // maxH = window.innerHeight - circles[0].clientHeight;
+        // main.style.width = window.innerWidth + 'px';
+        // main.style.height = window.innerHeight + 'px';
+        // initBall();
+        // bind();
+        map.resize();
+
+        for (var i = 0; i < circles.length; i++) {
+            circles[i].maxW = $('#main').width() - circles[i].clientWidth;
+            circles[i].maxH = document.body.clientHeight - 95 - circles[i].clientHeight;
+        }
+    }
+    onresize();
+
+    //初始化
+    initBall();
+    function initBall() {
+        //数组对象的初始化
+        for (var i = 0; i < circles.length; i++) {
+            arr = {};
+            arr.maxW = $('#main').width() - circles[i].clientWidth;
+            arr.maxH = document.body.clientHeight - 95 - circles[i].clientHeight;
+            arr.x = Math.floor(Math.random() * (arr.maxW + 1));//初始x坐标
+            arr.y = Math.floor(Math.random() * (arr.maxH + 1));//初始y坐标
+            arr.cx = arr.x + circles[i].offsetWidth / 2;//圆心x坐标
+            arr.cy = arr.y + circles[i].offsetHeight / 2;//圆心y坐标
+            arr.movex = Math.floor(Math.random() * 2);//x轴移动方向
+            arr.movey = Math.floor(Math.random() * 2);//y轴移动方向
+            // arr.speed = 0.1 + Math.random() * 0.5;
+            arr.speed = 0.3;
+            arr.timer = null;//计时器
+            arr.index = i;//索引值
+            json.push(arr);
+            circles[i].style.left = arr.x + 'px';//小球位置初始化
+            circles[i].style.top = arr.y + 'px';//小球位置初始化
+        }
+        json[0].x = 120;
+        json[0].y = 60;
+        json[0].cx = 120 + circles[0].offsetWidth / 2;
+        json[0].cy = 60 + circles[0].offsetHeight / 2;
+        circles[0].style.left = json[0].x + 'px';
+        circles[0].style.top = json[0].y + 'px';
+
+        json[1].x = 330;
+        json[1].y = 20;
+        json[1].cx = 330 + circles[1].offsetWidth / 2;
+        json[1].cy = 20 + circles[1].offsetHeight / 2;
+        circles[1].style.left = json[1].x + 'px';
+        circles[1].style.top = json[1].y + 'px';
+
+        json[2].x = 255;
+        json[2].y = 155;
+        json[2].cx = 240 + circles[2].offsetWidth / 2;
+        json[2].cy = 140 + circles[2].offsetHeight / 2;
+        circles[2].style.left = json[2].x + 'px';
+        circles[2].style.top = json[2].y + 'px';
+
+        json[3].x = 20;
+        json[3].y = 240;
+        json[3].cx = 20 + circles[3].offsetWidth / 2;
+        json[3].cy = 200 + circles[3].offsetHeight / 2;
+        circles[3].style.left = json[3].x + 'px';
+        circles[3].style.top = json[3].y + 'px';
+
+        json[4].x = 290;
+        json[4].y = 330;
+        json[4].cx = 270 + circles[4].offsetWidth / 2;
+        json[4].cy = 330 + circles[4].offsetHeight / 2;
+        circles[4].style.left = json[4].x + 'px';
+        circles[4].style.top = json[4].y + 'px';
+    }
+
+    //碰撞函数
+    function crash(a) {
+        var ball1x = json[a].cx;
+        var ball1y = json[a].cy;
+        var radius1 = circles[a].offsetWidth / 2;
+        for (var i = 0; i < json.length; i++) {
+            if (i != a) {
+                var ball2x = json[i].cx;
+                var ball2y = json[i].cy;
+                var radius2 = circles[i].offsetWidth / 2;
+                //圆心距离的平方
+                var len = (ball1x - ball2x) * (ball1x - ball2x) + (ball1y - ball2y) * (ball1y - ball2y);
+                if (len <= (radius1 + radius2) * (radius1 + radius2)) {
+                    //小球位置的判断，发生碰撞反应
+                    if (ball1x > ball2x) {
+                        if (ball1y > ball2y) {
+                            json[a].movex = 1;
+                            json[a].movey = 1;
+                            json[i].movex = 0;
+                            json[i].movey = 0;
+                        } else if (ball1y < ball2y) {
+                            json[a].movex = 1;
+                            json[a].movey = 0;
+                            json[i].movex = 0;
+                            json[i].movey = 1;
+                        } else {
+                            json[a].movex = 1;
+                            json[i].movex = 0;
+                        }
+                    } else if (ball1x < ball2x) {
+                        if (ball1y > ball2y) {
+                            json[a].movex = 0;
+                            json[a].movey = 0;
+                            json[i].movex = 1;
+                            json[i].movey = 1;
+                        } else if (ball1y < ball2y) {
+                            json[a].movex = 0;
+                            json[a].movey = 1;
+                            json[i].movex = 1;
+                            json[i].movey = 0;
+                        } else {
+                            json[a].movex = 0;
+                            json[i].movex = 1;
+                        }
+                    } else {
+                        if (ball1y > ball2y) {
+                            json[a].movey = 1;
+                            json[i].movey = 0;
+                        } else if (ball1y < ball2y) {
+                            json[a].movey = 0;
+                            json[i].movey = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //移动函数
+    function move(circle) {
+        circle.timer = setInterval(function () {
+            if (circle.movex == 1) {
+                circle.x += circle.speed;
+                if (circle.x + circle.speed >= circle.maxW) {//防止小球出界
+                    circle.x = circle.maxW;
+                    circle.movex = 0;//小球运动方向发生改变
+                }
+            } else {
+                circle.x -= circle.speed;
+                if (circle.x - circle.speed <= 0) {
+                    circle.x = 0;
+                    circle.movex = 1;
+                }
+            }
+            if (circle.movey == 1) {
+                circle.y += circle.speed;
+                if (circle.y + circle.speed >= circle.maxH) {
+                    circle.y = circle.maxH;
+                    circle.movey = 0;
+                }
+            } else {
+                circle.y -= circle.speed;
+                if (circle.y - circle.speed <= 0) {
+                    circle.y = 0;
+                    circle.movey = 1;
+                }
+            }
+            circle.cx = circle.x + circles[circle.index].offsetWidth / 2;//小球每一次运动圆心都会发生改变
+            circle.cy = circle.y + circles[circle.index].offsetHeight / 2;
+            circles[circle.index].style.left = circle.x + 'px';//小球位置重定位
+            circles[circle.index].style.top = circle.y + 'px';
+            crash(circle.index);
+        }, 14);
+    }
+
+    //对每一个小球绑定计时器，让小球动起来
+    for (var i = 0; i < circles.length; i++) {
+        move(json[i]);
+    }
+
+    //鼠标移入 移出
+    var hoverTime, hoverIndex;
+    $('#main div').hover(function () {
+        hoverIndex = $(this).index();
+        clearInterval(json[hoverIndex].timer);
+        hoverTime = setInterval(()=>{
+            crash(hoverIndex);
+        },10);
+    }, function () {
+        move(json[hoverIndex]);
+        clearInterval(hoverTime);
+    })
+});

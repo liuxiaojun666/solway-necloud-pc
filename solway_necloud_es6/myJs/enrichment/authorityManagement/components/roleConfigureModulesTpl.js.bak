@@ -1,0 +1,97 @@
+
+ajaxData({
+    selectCustomModules:{
+        name:'GETselectCustomModules',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    updateCustomModules:{
+        name:'POSTupdateCustomModules',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'roleConfigureModulesService',
+})('roleConfigureModulesTplCtrl', ['$scope', 'roleConfigureModulesService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    const getCustomModules = ()=>{
+        $scope.customModules = [];
+        $scope.parentPid = [];
+        $scope.selectCustomModules.getData({
+            roleId:$scope.roleId
+        }).then(res => {
+            const data = res.body,childData = res.body;
+            for(let i=0;i<data.length;i++){
+                if(data[i].appPid == 0){
+                    $scope.customModules.push(data[i]);
+                    $scope.parentPid.push(data[i]);
+                }
+                for(let j=0;j<childData.length;j++){
+                    if(childData[j].appPid == data[i].appId){
+                        $scope.customModules.push(childData[j]);
+                    }
+                }
+            }
+        })
+    }
+    
+    $scope.$on('broadRoleConfigureModules',function(e,data){
+        $scope.roleId = data.roleId;
+        $scope.fixedType = data.fixedType;
+        getCustomModules();
+    });
+
+    $scope.includes = (str = '---------', i) => str.includes(i);
+
+    //保存
+    $scope.save = () =>{
+        const appIdArr = [];
+        const btnIds = [];
+        $("input[name='roleModuleIds']:checked").map((index,v)=>{
+            appIdArr.push(v.value)
+            const curPid = v.dataset.pid;
+            if(curPid != '0' && !appIdArr.includes(curPid)){
+                appIdArr.push(curPid);
+            }
+            const btns = $(v).parents('tr').find('input[name="btnNames"]').map((i, v) => {
+                if (v.checked) return v.value;
+            })::[].join();
+            btnIds.push(btns);
+        })
+
+        const parentAndChildArr = appIdArr.map((index, v) => ({ 'appId': index, btnIds: btnIds[v]}))
+
+        let formData = {
+            'roleId':$scope.roleId,
+            'ls':parentAndChildArr
+        };
+
+        $http({
+            method : "POST",
+            url: window.interface['POSTupdateCustomModules'],
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data:JSON.stringify(formData),
+            transformRequest: function (g) {
+                return JSON.stringify(g)
+            }
+        }).success(function(res) {
+            if(res.code == 0){
+                toaster.pop('success','',res.msg);
+                $scope.$emit('roleConfigureModuleCallback');
+            }else{
+                toaster.pop('error', '','配置失败')
+            }
+        })
+        
+    }
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('roleConfigureModulesCancelCallback');
+    }
+
+});

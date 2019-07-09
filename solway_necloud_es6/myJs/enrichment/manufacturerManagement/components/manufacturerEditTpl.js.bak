@@ -1,0 +1,124 @@
+
+ajaxData({
+    selectProvince:{
+        name: 'POSTSelectProvince',
+        data: {},
+        later: true
+    },
+  
+    updateManufacturer:{
+        name:'POSTupdateManufacturer',
+        data: {},
+        later: true,
+        onlyLatest: true,
+        saveParam:false
+    },
+    
+}, {
+    __serviceName__: 'editManufacturerTplService',
+})('editManufacturerTplModelCtrl', ['$scope', 'editManufacturerTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+   
+    const regPhone = /^(\d{3,4}-)?\d{7,8}$/ ;
+    const regZipCode = /^[0-9]{6}$/ ;
+
+    const getProvence = ()=>{
+        $scope.selectProvince.getData({
+            treeLevel:1,
+            parentId:1
+        }).then(res=>{
+            $scope.provinceList = res;
+            $scope.provinceChange();
+        });
+        
+    }
+
+    $scope.provinceChange = () =>{
+        if(!$scope.formData.provinceid) return;
+        $scope.selectProvince.getData({
+            treeLevel:2,
+            parentId:$scope.formData.provinceid
+        }).then(res=>{
+            $scope.cityList = res;
+            $scope.cityChange();
+        });
+    }
+
+    $scope.cityChange = () =>{
+        if(!$scope.formData.cityid) return;
+        $scope.selectProvince.getData({
+            treeLevel:3,
+            parentId:$scope.formData.cityid
+        }).then(res=>{
+            $scope.countryList = res;
+        });
+    }
+   
+    // 初始
+    $scope.$on('editManufacturerBroad',async(e,data)=>{
+        if(data){
+            $scope.formData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+
+            $scope.formData = {
+                id:data.id,
+                manufcode: data.manufcode,
+                manufname: data.manufname,
+                compscale: data.compscale,
+                marketposition: data.marketposition,
+                regman: data.regman,
+                regmoney: data.regmoney,
+                presalescall: data.presalescall,
+                aftersalescall: data.aftersalescall,
+                postcode: data.postcode,
+                provinceid: data.provinceid,
+                cityid: data.cityid,
+                countyid: data.countyid,
+                address: data.address,
+                descp: data.descp
+            };
+
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        }else{
+            $scope.formData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        }
+        getProvence();
+    });
+
+     //保存
+    $scope.save = () =>{
+        if($scope.formData.presalescall && !regPhone.test($scope.formData.presalescall)){
+            toaster.pop('error','','售前电话格式不正确'); return;
+        } 
+
+        if($scope.formData.aftersalescall && !regPhone.test($scope.formData.aftersalescall)){
+            toaster.pop('error','','售后电话格式不正确'); return;
+        } 
+
+        if($scope.formData.postcode && !regZipCode.test($scope.formData.postcode)){
+            toaster.pop('error','','邮编格式不正确'); return;
+        } 
+
+        if (!$solway.formValidation($scope.formData, '.editManufacturerTpl', toaster)) return;//校验非空
+
+        $scope.updateManufacturer.getData($scope.formData).then(res=>{
+            if(res.id){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('editCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
+
+     //取消
+     $scope.cancel = () =>{
+        $scope.$emit('cancel');
+    }
+
+    
+
+});

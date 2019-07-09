@@ -1,0 +1,432 @@
+ajaxData(
+    {
+        // 时间 列表
+        analysis_wp_company_st_month_timelist: {
+            name: 'GETanalysis_wp_company_st_month_timelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 时间 曲线
+        analysis_wp_company_st_month_timeline: {
+            name: 'GETanalysis_wp_company_st_month_timeline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 电站 列表
+        analysis_wp_company_st_month_stationlist: {
+            name: 'GETanalysis_wp_company_st_month_stationlist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 电站 曲线
+        analysis_wp_company_st_month_stationline: {
+            name: 'GETanalysis_wp_company_st_month_stationline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备 列表
+        analysis_wp_station_st_month_devicelist: {
+            name: 'GETanalysis_wp_station_st_month_devicelist',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备 曲线
+        analysis_wp_station_st_month_deviceline: {
+            name: 'GETanalysis_wp_station_st_month_deviceline',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 查设备型号
+        queryProducts: {
+            name: 'GETqueryProducts',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+    }, {
+        __serviceName__: 'runningStateCompanyMonthService',
+    }
+)('runningStateCompanyMonthCtrl', ['$scope', 'runningStateCompanyMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, tabIndex = 1 } = historicalRecord.get().themeRunningStateCompanyMonth || {};
+        $scope.changeShowShape(showShape || 'list');
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        await $scope.dateUpdated();
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await myAjaxData.timeout(0);
+        await $scope.diffGetData(true);
+        $scope.$apply();
+    };
+
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => $scope.diffGetData(true);
+
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        $scope.tabIndex = tabIndex;
+        historicalRecord.set({
+            themeRunningStateCompanyMonth: {
+                ...historicalRecord.get().themeRunningStateCompanyMonth || {},
+                tabIndex
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeRunningStateCompanyMonth: {
+                ...historicalRecord.get().themeRunningStateCompanyMonth || {},
+                showShape
+            }
+        });
+        $scope.diffGetData();
+    };
+
+    // 接口请求
+    $scope.diffGetData = async () => {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        setDataNull();
+        const { showShape, dateTime, tabIndex, dateType, dataType } = $scope;
+        if (dateType !== 1) return;
+        if (dataType === 0) return;
+        if (tabIndex === 0 && showShape === 'list') {
+            $scope.analysis_wp_company_st_month_timelist.getData({
+                queryCode: 'analysis_wp_company_st_month_timelist',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 0 && showShape === 'chart') {
+            $scope.analysis_wp_company_st_month_timeline.getData({
+                queryCode: 'analysis_wp_company_st_month_timeline',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 1 && showShape === 'list') {
+            $scope.analysis_wp_company_st_month_stationlist.getData({
+                queryCode: 'analysis_wp_company_st_month_stationlist',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 1 && showShape === 'chart') {
+            $scope.analysis_wp_company_st_month_stationline.getData({
+                queryCode: 'analysis_wp_company_st_month_stationline',
+                queryType: 1,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 2 && showShape === 'list') {
+            if (!$scope.queryProducts.res) {
+                const res = await $scope.queryProducts.getData({
+                    deviceType: 18
+                });
+                $scope.analysis_wp_station_st_month_devicelist.productId = res.body[0].productId;
+                $scope.$apply();
+            }
+            $scope.analysis_wp_station_st_month_devicelist.getData({
+                queryCode: 'analysis_wp_station_st_month_devicelist',
+                queryType: 1,
+                date: dateTime.showDate,
+                productid: $scope.analysis_wp_station_st_month_devicelist.productId
+            });
+        } else if (tabIndex === 2 && showShape === 'chart') {
+            if (!$scope.queryProducts.res) {
+                const res = await $scope.queryProducts.getData({
+                    deviceType: 18
+                });
+                $scope.analysis_wp_station_st_month_devicelist.productId = res.body[0].productId;
+                $scope.$apply();
+            }
+            $scope.analysis_wp_station_st_month_deviceline.getData({
+                queryCode: 'analysis_wp_station_st_month_deviceline',
+                queryType: 1,
+                date: dateTime.showDate,
+                productid: $scope.analysis_wp_station_st_month_devicelist.productId
+            });
+        }
+    };
+
+    // 设备详情 弹出 处理 函数
+    $scope.equipmentDetail = (obj) => {
+        $scope.equipmentDetailShow = true;
+        $scope.$broadcast('equipmentDetails', obj);
+    };
+
+    // 图表 点击 事件 处理 函数
+    $scope.chartClick = (params) => {
+        if ($scope.tabIndex !== 2) return;
+        const { eq_name, eqid } = $scope.analysis_wp_station_st_month_deviceline.res.body.data;
+        $scope.equipmentDetail({
+            eq_name: params.name,
+            eqid: eqid[eq_name.indexOf(params.name)]
+        });
+        $scope.$apply();
+    };
+
+    // 设备 列表 点击行
+    // $scope.equipmentListTrClick = (item, index) => {
+    //     const { eqid, eq_name } = item;
+    //     $scope.equipmentDetail({ eqid, eq_name });
+    // };
+
+    // 时间 列表
+    $scope.analysis_wp_company_st_month_timelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '日期',
+                dataIndex: 'dtime',
+                align: 'center',
+                style: 'position:relative;',
+                sort: true,
+                render(text, item, index) {
+                    return text + (item.clean_status
+                        ? `<span title="清洗" style="cursor:pointer;position: absolute;right: 0.1em;top:0;line-height:50px;color:#57a2ff;font-size: 30px;" class="iconfont icon-qingxi1"></span>`
+                        : '');
+                }
+            },
+            {
+                title: '停待机' + '(' + res.body.units.stop_st_r + ')',
+                dataIndex: 'stop_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '爬坡' + '(' + res.body.units.climb_st_r + ')',
+                dataIndex: 'climb_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '转矩控制' + '(' + res.body.units.torque_st_r + ')',
+                dataIndex: 'torque_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '满发变桨' + '(' + res.body.units.full_st_r + ')',
+                dataIndex: 'full_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '限负荷' + '(' + res.body.units.limit_st_r + ')',
+                dataIndex: 'limit_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '状态指数' + (res.body.units.ope_score ? '(' + res.body.units.ope_score + ')' : ''),
+                dataIndex: 'ope_score',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 时间 曲线
+    $scope.analysis_wp_company_st_month_timeline.subscribe((res) => {
+        if ($scope.showShape !== 'chart') return;
+        $scope.xdata = res.body.data.dtime;
+        $scope.ydatas = [[res.body.data.stop_st_r, res.body.data.climb_st_r, res.body.data.torque_st_r, res.body.data.full_st_r, res.body.data.limit_st_r]];
+    });
+
+    // 电站 列表
+    $scope.analysis_wp_company_st_month_stationlist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站',
+                dataIndex: 'st_name',
+                style: 'position:relative;',
+                sort: true,
+                render(text, item, index) {
+                    return text && `<span class="clickable station">${text}</span>`;
+                }
+            },
+            {
+                title: '停待机' + '(' + res.body.units.stop_st_r + ')',
+                dataIndex: 'stop_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '爬坡' + '(' + res.body.units.climb_st_r + ')',
+                dataIndex: 'climb_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '转矩控制' + '(' + res.body.units.torque_st_r + ')',
+                dataIndex: 'torque_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '满发变桨' + '(' + res.body.units.full_st_r + ')',
+                dataIndex: 'full_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '限负荷' + '(' + res.body.units.limit_st_r + ')',
+                dataIndex: 'limit_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '状态指数' + (res.body.units.ope_score ? '(' + res.body.units.ope_score + ')' : ''),
+                dataIndex: 'ope_score',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 电站 曲线
+    $scope.analysis_wp_company_st_month_stationline.subscribe((res) => {
+        if ($scope.showShape !== 'chart') return;
+        $scope.xdata = res.body.data.st_name;
+        $scope.ydatas = [[res.body.data.stop_st_r, res.body.data.climb_st_r, res.body.data.torque_st_r, res.body.data.full_st_r, res.body.data.limit_st_r]];
+    });
+
+    // 查看设备详情
+    $scope.equipmentDetailruning = (item, index, event) => {
+        if ($scope.tabIndex === 0) return;
+        const { stid, eqid } = item;
+        if (event.target.className.includes('clickable eq')) {
+            return $scope.$broadcast("equipmentPopUpWp", {
+                stid,
+                eqid
+            });
+        }
+        if (event.target.className.includes('clickable station')) {
+            return $scope.reloadParentPage({
+                stationData: {
+                    dataType: 0,
+                    id: item.stid,
+                    isGroup: "0",
+                    stClass: '02'
+                }
+            });
+        }
+        if ($scope.tabIndex !== 2) return;
+        $scope.equipmentDetail(item);
+    };
+
+    // 设备 列表
+    $scope.analysis_wp_station_st_month_devicelist.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.datasource = res.body.data;
+        $scope.column = [
+            {
+                title: '电站',
+                dataIndex: 'st_name',
+                style: 'position:relative;',
+                sort: true,
+                width: '20%',
+                render(text, item, index) {
+                    return text && `<span class="clickable station">${text}</span>`;
+                }
+            },
+            {
+                title: '名称',
+                dataIndex: 'eq_name',
+                align: 'left',
+                width: '20%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable eq">${text}</span>`
+                }
+            },
+            {
+                title: '停待机' + '(' + res.body.units.stop_st_r + ')',
+                dataIndex: 'stop_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '爬坡' + '(' + res.body.units.climb_st_r + ')',
+                dataIndex: 'climb_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '转矩控制' + '(' + res.body.units.torque_st_r + ')',
+                dataIndex: 'torque_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '满发变桨' + '(' + res.body.units.full_st_r + ')',
+                dataIndex: 'full_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '限负荷' + '(' + res.body.units.limit_st_r + ')',
+                dataIndex: 'limit_st_r',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '状态指数' + (res.body.units.ope_score ? '(' + res.body.units.ope_score + ')' : ''),
+                dataIndex: 'ope_score',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    };
+
+    // 设备 曲线
+    $scope.analysis_wp_station_st_month_deviceline.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.xdata = res.body.data.eq_name;
+        $scope.ydatas = [[res.body.data.stop_st_r, res.body.data.climb_st_r, res.body.data.torque_st_r, res.body.data.full_st_r, res.body.data.limit_st_r]];
+    };
+
+    // 数据置空
+    function setDataNull() {
+        $scope.column = [];
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.analysis_wp_company_st_month_timelist.res = null;
+        $scope.analysis_wp_company_st_month_timeline.res = null;
+        $scope.analysis_wp_company_st_month_stationlist.res = null;
+        $scope.analysis_wp_company_st_month_stationline.res = null;
+        $scope.analysis_wp_station_st_month_devicelist.res = null;
+        $scope.analysis_wp_station_st_month_deviceline.res = null;
+    }
+
+    // 销毁 事件
+    $scope.$on('$destroy', () => {
+        setDataNull();
+    });
+});

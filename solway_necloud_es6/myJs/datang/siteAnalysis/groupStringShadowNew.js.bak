@@ -1,0 +1,458 @@
+app.directive('contentLeft', ['myAjaxData', myAjaxData => {
+    return {
+        restrict: 'E',
+        template: $('#content-left').html(),
+        replace: true,
+        scope: {
+            pageList: '=',
+            detail: '=',
+            deviceType: '='
+        },
+
+        link ($scope, $element, $attrs) {
+            $scope.setTableHeight()
+            window.addEventListener('resize', () => {
+                $scope.setTableHeight()
+                $scope.$apply()
+            })
+        },
+
+        controller ($scope, $element) {
+            /**
+             * 设置列表可滚动高度
+             * @return {[type]} [description]
+             */
+            $scope.setTableHeight = () => {
+                let windowHeight = window.innerHeight
+                $(".content-body").height(do {
+                    if ( (windowHeight - 100) < 545 ) 545
+                    else windowHeight - 100
+                })
+                $scope.tableScrollY = do {
+                    if ( (windowHeight - 393) < 245 ) 245
+                    else windowHeight - 393
+                }
+            }
+
+            /**
+             * 设置起始时间、结束时间
+             * @type {Date}
+             */
+            $scope.dateTime1 = new Date((new Date).setDate((new Date).getDate() - 7))
+            $scope.dateTime2 = new Date
+
+            /**
+             * 根据设备类型获取  设备名
+             * @param  {[type]} i [description]
+             * @return {[type]}   [description]
+             */
+            $scope.getDeviceName = async (i) => {
+                $scope.deviceName = ''
+                if (i < 0) {
+                    return $scope.deviceNames = []
+                }
+                    
+                $scope.deviceNames = await myAjaxData.getData({
+                    name: myAjaxData.config.url[i],
+                    data: {}
+                })
+                $scope.$apply()
+            }
+
+            /**
+             * 根据条件搜索列表
+             * @return {[type]} [description]
+             */
+            $scope.search = () => {
+                $scope.pageList.getData({
+                    deviceId: $scope.deviceName, 
+                    deviceType: $scope.deviceTypeVal, 
+                    pageIndex: 0,
+                    startDate: $scope.dateTime1.Format('yyyy-MM-dd'),
+                    endDate: $scope.dateTime2.Format('yyyy-MM-dd')
+                })
+            }
+
+            let activeIndex = 0
+
+            /**
+             * [loadDetail 加载详情]
+             */
+            $scope.loadDetail = async (data: Object, index = 0) => {
+                activeIndex = index
+                if (!data) {
+                    $scope.detail.res = null
+                    return $scope.detail.isLoding = !1
+                }
+                await $scope.detail.getData({
+                    stId: myAjaxData.currentStationData.currentSTID,
+                    deviceId: data.deviceId,
+                    dtime : new Date(data.beginTime).Format("yyyy-MM-dd")
+                })
+                $($element).find('tbody tr').removeClass('active').eq(index).addClass('active')
+            }
+
+            /**
+             * [监听数据改变之后   处理当前选中  and  选中状态样式]
+             */
+            $scope.$watch('pageList', (newValue, oldValue) => {
+                if (void 0 === newValue.res) return
+                if (void 0 === newValue.res.data.data[0]) return $scope.loadDetail()
+                const _newValue = newValue.res.data.data
+                $($element).find('tbody tr').removeClass('active')
+                if (oldValue.res) {
+                    const _oldValue = oldValue.res.data.data
+                    for (let i = 0, len = _newValue.length; i < len; i++) {
+                        if (_oldValue[activeIndex] && _newValue[i].deviceId == _oldValue[activeIndex].deviceId) {
+                            $($element).find('tbody tr').eq(i).addClass('active')
+                            return activeIndex = i
+                        }
+                    }
+                }                
+                activeIndex = 0
+                $scope.loadDetail(_newValue[0])
+            }, !0)
+
+            /**
+             * [column table列]
+             * @type {Array}
+             */
+            $scope.column = [
+                {
+                    title: '设备名称',
+                    dataIndex: 'deviceName',
+                    width: '35%',
+                    align: 'center',
+                    sort: true
+                }, {
+                    title: '时间',
+                    dataIndex: 'beginTime',
+                    width: '35%',
+                    align: 'center',
+                    sort: true,
+                    render(text, record, index) {
+                        return text && new Date(text).Format('yyyy-MM-dd')                       
+                    }
+                }, {
+                    title: '损失比例',
+                    dataIndex: 'eqreduce',
+                    width: '30%',
+                    align: 'right',
+                    sort: true,
+                    render (text, record) {
+                        return text + '%'
+                    }
+                }
+            ]
+
+            /**
+             * 监听电站切换  或  其他  引起的设备类型改变，重新初始化设备类型跟设备
+             * @param  {[type]} 'deviceType' [description]
+             * @param  {[type]} (async       (newValue,    oldValue [description]
+             * @return {[type]}              [description]
+             */
+            $scope.$watch('deviceType', (async (newValue, oldValue) => {
+                await myAjaxData.timeout(0)
+                $scope.deviceTypeVal = ''
+                $scope.deviceName = ''
+                $scope.deviceNames = []
+                $scope.$apply()
+            }), !0)
+
+            /**
+             * [默认显示第一条详情]
+             * @param  {[type]} ) 
+             */
+            ;(async () => {
+                await $scope.pageList.promise
+                await myAjaxData.timeout(0)
+                $scope.loadDetail($scope.pageList.res.data.data[0])
+            })()
+        }
+    }
+}])
+
+app.directive('chart1', ['myAjaxData', myAjaxData => {
+    return{
+        restrict: 'E',
+        scope: {
+            detail: '='
+        },
+        link($scope, $element, $attrs) {
+            $scope.$watch("detail", (newValue, oldValue) => {
+　　　　　　　　if(newValue.res) renderChart()
+　　　　　　}, !0)
+
+            const setWidthHeight = () => {
+                $($element).width(do {
+                    if ((window.innerWidth - 490) < 800) 800
+                    else window.innerWidth - 490
+                } + 'px')
+            }
+            setWidthHeight()
+            let myChart = null
+            function renderChart () {
+                myChart = echarts.init($element[0])
+                let allTime = []
+                for (let i = 0; i < 24; i++) {
+                    for (let j = 0; j < 60; j++) {
+                        let J = j < 10 ? '0' + j : j
+                        allTime.push(i + ':' + J)
+                    }
+                }
+                const computDataArr = data => {
+                    let arr = []
+                    arr.length = 1440
+                    let startTimeArr = []
+                    let endTimeArr = []
+                    data.times.forEach( (v, i) => {
+                        startTimeArr.push(allTime.indexOf(v[0]))
+                        endTimeArr.push(allTime.indexOf(v[1]))
+                    })
+                    startTimeArr.forEach( (outerV, outerIndex) => {
+                        for(let i = 0; i < arr.length; i++){
+                            if (i >= startTimeArr[outerIndex] && i <= endTimeArr[outerIndex]) {
+                                arr[i] = data.stringId
+                                continue
+                            }
+                        }
+                    })
+                    return arr
+                }
+                let seriesData = $scope.detail.res.data.map( (v, i) => {
+                    let color = do {
+                        if (v.property == 'AbnormalShadow') "yellow"
+                        else if (v.property == 'AlwaysShadow') "blue"
+                        else '#999'
+                    }
+                    return {
+                        name: '组串编号',
+                        xAxisIndex: [0],
+                        yAxisIndex: [0],
+                        type: 'line',
+                        showAllSymbol: true,
+                        symbol: 'none',
+                        lineStyle: {
+                            normal: {
+                                color,
+                                width: 5
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: '#333'
+                            },
+                            emphais: {
+                                color: '#333'
+                            }
+                        },
+                        data: computDataArr(v)
+                    }
+                })
+                
+                seriesData = [
+                    ...seriesData,
+                    {
+                        name:'持续阴影',
+                        type:'bar',
+                        itemStyle: {
+                            normal: {
+                                color: 'blue'
+                            }
+                        },
+                    },
+                    {
+                        name:'异常阴影',
+                        type:'bar',
+                        itemStyle: {
+                            normal: {
+                                color: 'yellow'
+                            }
+                        },
+                    },
+                    {
+                        name:'普通阴影　　　　　',
+                        type:'bar',
+                        itemStyle: {
+                            normal: {
+                                color: '#999'
+                            }
+                        },
+                    }
+                ]
+                let option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        position (pt) {
+                            return [pt[0], '20%'];
+                        },
+                        formatter (params, b, c) {
+                            let res = params[0].name + '<br/>'
+                            params.slice(0).reverse().forEach(v => {
+                                res += `${v.seriesName}:${v.value || ''}<br/>`
+                            })
+                            return res
+                        }
+                    },
+                    legend: {
+                        data:['持续阴影', '异常阴影', '普通阴影　　　　　'],
+                        x: 'right',
+                        selectedMode: false
+                    },
+                    grid: {
+                        top: '40',
+                        left: '20',
+                        right: '80',
+                        bottom: '20',
+                        containLabel: true
+                    },
+                    xAxis: [{
+                        name: '时间',
+                        type: 'category',
+                        splitLine: {
+                            show: false
+                        },
+                        axisLabel : {
+                            interval : 119,
+                            textStyle : {
+                                fontSize : 12
+                            }
+                        },
+                        boundaryGap: false,
+                        data: allTime
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        interval: 1,
+                        splitLine: {
+                            show: false
+                        },
+                        nameTextStyle: {
+                            fontSize: 14,
+                            rotation: 2
+                        },
+                        name: '组串编号'
+                    }],
+                    series: seriesData
+                }
+                myChart.setOption(option, true)
+            }
+            
+            window.addEventListener('resize', () => {
+                setWidthHeight()
+                myChart.resize()
+            })
+        }
+    }
+}])
+
+app.directive('chart2', ['myAjaxData', (myAjaxData) => {
+    return{
+        restrict: 'E',
+        scope: {
+            detail: '='
+        },
+
+        link ($scope, $element, $attrs) {
+            $scope.$watch("detail", (newValue, oldValue) => {
+　　　　　　　　if(newValue.res) renderChart(newValue.res.data)
+　　　　　　}, true)
+            const setWidthHeight = () => {
+                $($element).width(do {
+                            if ((window.innerWidth - 490) < 800) 800
+                            else window.innerWidth - 490
+                        } + 'px')
+                        .height( do {
+                            if((window.innerHeight - 420) < 225) 225
+                            else window.innerHeight - 420
+                        } + 'px')
+            }
+            setWidthHeight()
+            const myChart = echarts.init($element[0])
+
+            const renderChart = resData => {
+
+                
+                resData.sort( (a, b) => (a.stringId - b.stringId) )
+
+                let xValue = []
+                let xData = resData.map( (v, i) => {
+                    xValue.push(v.reduce)
+                    return v.stringId
+                })
+
+
+                const option = {
+                    color: ['#2cc6ff'],
+                    tooltip : {
+                        trigger: 'axis',
+                    },
+                    grid: {
+                        top: '40',
+                        left: '20',
+                        right: '80',
+                        bottom: '20',
+                        containLabel: true
+                    },
+                    xAxis : [
+                        {
+                            name: '组串编号',
+                            type : 'category',
+                            data : xData
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            name: '损失比例(%)',
+                            splitLine: {
+                                show: false
+                            },
+                            type : 'value'
+                        }
+                    ],
+                    series : [
+                        {
+                            name:'损失比例（%）',
+                            type:'bar',
+                            barWidth: '20',
+                            data:xValue
+                        }
+                    ]
+                }
+                myChart.setOption(option)
+            }
+
+
+            window.addEventListener('resize', () => {
+                setWidthHeight()
+                myChart.resize()
+            })
+        }
+    }
+}])
+
+
+ajaxData({
+        pageList: {
+            name: 'GETanalysisPage',
+            data: {
+                pageIndex:0,
+                pageSize:10,
+                startDate: new Date((new Date).setDate((new Date).getDate() - 7)).Format('yyyy-MM-dd'),
+                endDate: (new Date).Format('yyyy-MM-dd')
+            }
+        },
+        detail: {
+            name: 'GETselectEqPaintingData',
+            later: true
+        },
+        deviceType: {
+            name: 'GETgetDeviceType',
+            data: {}
+        }
+},{
+    //设备查询地址
+    url: [ "GETgetJunctionBox", "GETgetInverter", "GETgetBoxchange", "GETgetAmmeter", "GETgetAerograph" ]
+})('groupStringShadowCtrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+    
+})

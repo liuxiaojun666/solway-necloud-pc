@@ -1,0 +1,116 @@
+ajaxData({
+    systemModulelist: {
+        name: 'GETsystemModulelist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    checkCodeExist:{
+        name: 'GETcheckCodeExist',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    selectModule:{
+        name: 'GETselectModule',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
+    update:{
+        name:'POSTupdateModule',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
+}, {
+    __serviceName__: 'addModuleTplService',
+})('addModuleTplCtrl', ['$scope', 'addModuleTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
+
+    const initParentModuleData = ()=>{
+        $scope.systemModulelist.getData({
+            pid:0,
+            category:$scope.serviceType
+        }).then(res=>{
+            if(res.code == 0){
+                $scope.parrentModuleList = res.body;
+            }
+        });
+    }
+
+    initParentModuleData();
+
+    const save = () =>{
+        $scope.formData['id'] = $scope.id;
+        $scope.formData['category'] = $scope.serviceType;
+        
+        $scope.update.getData($scope.formData).then(res=>{
+            if(res.code == 0 && res.body.id){
+                toaster.pop('success', '',res.msg)
+                $scope.$emit('addModuleCallback');
+                initParentModuleData();
+            }
+        });
+    }
+
+    const selectModuleDetail = id =>{
+        $scope.selectModule.getData({
+            id:id
+        }).then(res=>{
+            $scope.formData = res.body;
+        });
+    }
+    $scope.$on('broadAddModule',function(e,data){
+        initParentModuleData();
+        $scope.id = data.moduleId;
+        $scope.formData = {};
+        
+        if($scope.id){
+            $scope.tplTitle = '修改';
+            selectModuleDetail($scope.id)
+        }else{
+            $scope.tplTitle = '新增';
+        }
+
+        // let categoryList = [{value:'1',name:'普通用户'},{value:'2',name:'集团管理员'},{value:'-9',name:'系统管理员'}];
+
+        // for(let i =0;i<categoryList.length;i++){
+        //     if($scope.serviceType == categoryList[i].value)  categoryList.splice(i,1)
+        // }
+        
+        // $scope.categoryList = categoryList;
+    });
+
+    //保存
+    $scope.save = () =>{
+        if (!$solway.formValidation($scope.formData, '.addModuleTpl', toaster)) return;//校验非空
+
+        save();
+        // if($scope.id){
+        //     //编辑无需校验编码
+        //     save();
+        // }else{
+        //     //校验编码是否存在编码
+        //     $scope.checkCodeExist.getData({
+        //         code:$scope.formData.code
+        //     }).then(res=>{
+        //         if(res.code == 0){
+        //             save();
+        //         }else{
+        //             toaster.pop('error', '',res.msg)
+        //         }
+        //     });
+        // }
+    }
+
+    //删除成功
+    $scope.$on('broadDeleteModule',()=>{
+        initParentModuleData();
+    });
+
+    //取消
+    $scope.cancel = () =>{
+        $scope.$emit('cancelCallback');
+    }
+
+});

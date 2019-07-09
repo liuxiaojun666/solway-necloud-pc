@@ -1,0 +1,741 @@
+//添加、编辑
+app.directive('taskAddTemp', ['myAjaxData','$timeout', (myAjaxData,$timeout) => {
+    return {
+        restrict: 'E',
+        template: $('#task-add-temp').html(),
+        replace: true,
+        scope: {
+            pageList:'=',
+            taskDetail:'=',
+            provinceList: '=',
+            stationList:'=',
+            cityList: '=',
+            countryList: '=',
+            getLatAndLong:'=',
+            getRepairPersonList:'=',
+            creatTask:"="
+        },
+
+        link ($scope, $element, $attrs) {
+
+            $scope.stationChange = () =>{
+                const lat = $scope.stationList.selected.latitude;
+                const long = $scope.stationList.selected.longitude;
+
+                $scope.getMap(lat ,long, false);
+            }
+            $scope.getMap();
+
+            $scope.deleteCurrentImg = index =>{
+                $scope.responseImgs.splice(index,1)
+            }
+            $timeout(()=>{
+                $('#result_table').on('click','.icon-note.font16', function () {
+                    let id = $(this).attr('id')
+                    $scope.taskDetail.getData({
+                        'id':id
+                    }).then(res =>{
+                        $scope.formData = res.body
+                        $scope.radioValue = '2';
+                        $scope.provinced.selected= { regionName: $scope.formData.provinceName,id: $scope.formData.provinceId}
+                        $scope.cityd.selected = {regionName :$scope.formData.cityName,id: $scope.formData.cityId}
+                        $scope.countyd.selected =  {regionName :$scope.formData.countyName,id: $scope.formData.countyId}
+                        $("#address").val($scope.formData.address)
+                        $scope.latitude = $scope.formData.latitude
+                        $scope.longitude = $scope.formData.longitude
+                         $scope.timeSetLine = []
+                        for(let i = 1;i<=3;i++){
+                            if($scope.formData['bounsTime'+i] != null){
+                                $scope.timeSetLine.push({time:new Date($scope.formData['bounsTime'+i]),money:$scope.formData['bouns'+i]})
+                            }
+                        }
+
+                        $scope.responseImgs = formData.taskImgs?formData.taskImgs.split(","):[]
+
+                        $('#powerIndexModalAdd').modal();
+                    })
+                })
+
+                $(".issueTaskList").on('click','#add-new',function(){
+                    $scope.formData = {}
+                    $scope.radioValue = '1';
+                    $scope.provinced.selected= { regionName: "",id: ""}
+                    $scope.cityd.selected = {regionName :"",id: ""}
+                    $scope.countyd.selected =  {regionName :"",id: ""}
+                    $("#address").val("")
+                    $scope.latitude =""
+                    $scope.longitude = ""
+                    $scope.personList = []
+                    $scope.timeSetLine = [{time:$scope.dateTime,money:""}]
+                    $scope.responseImgs = []
+                    $scope.$apply()
+                    $('#powerIndexModalAdd').modal()
+                })
+
+                $scope.uploadOneImg = () =>{
+                    $.ajaxFileUpload ({
+                        url: window.baseUrl+'/wxa/img.htm', 
+                        secureuri: false,
+                        fileElementId: 'fileaaa',
+                        type:"POST",
+                        formName: "file",
+                        dataType: 'json',
+                        data:{
+                            classify:'task',
+                        },
+                        success: function (data) {
+                            if(data && data.length >=0){
+                                $scope.responseImgs.push(data[0]);
+                                $scope.$apply()
+                            }
+                        },
+                        error: function (data, status, e) {
+                            promptObj('error', "","上传失败");
+                        }
+                    })
+                    /*测试
+                    $scope.responseImgs = ['document/miniapp/task/1513652333181circle-rotate-green1.png',
+                        'document/miniapp/task/1513652333181circle-rotate-green2.png',
+                        'document/miniapp/task/1513652333181circle-rotate-green3.png']
+                    $scope.$apply()*/
+                }
+                
+
+                $scope.uploadImgs = [],$scope.responseImgs = []
+
+                $(".issueTaskList").on('change','#fileaaa',function(){
+                    
+                    $scope.uploadOneImg()
+
+                    //本地显示图片
+                    /*
+                    var fileImg = $("#billImg0");
+                    var explorer = navigator.userAgent;
+                    var imgSrc = $(this)[0].value;
+                    if (explorer.indexOf('MSIE') >= 0) {
+                         if (!/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(imgSrc)) {
+                             imgSrc = "";
+                             $scope.uploadImgs.push("/img/default.png")
+                             return false;
+                         }else{
+                            $scope.uploadImgs.push(imgSrc)
+                         }
+                    }else{
+                         if (!/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(imgSrc)) {
+                             imgSrc = "";
+                             $scope.uploadImgs.push("/img/default.png")
+                             return false;
+                         }else{
+                             var file = $(this)[0].files[0];
+                             var url = URL.createObjectURL(file);
+                             $scope.uploadImgs.push(url)
+                         }
+                    }
+                    $scope.$apply()
+                    */
+                })
+                
+            },0);
+        },
+
+        controller ($scope, $element) {
+
+            $scope.radioValue = '1'
+            $scope.hasGetPerson = false //是否获取过人员列表
+
+            $scope.dateTime = new Date()
+            $scope.startDate = new Date()
+            $scope.endDate = new Date("2050,12,12,12,12")
+            $scope.timeSetLine = [{time:$scope.dateTime,money:""}]
+
+            $scope.$watch('radioValue',function(value){
+                let allOverlay = map.getOverlays()
+                for (let i = 0; i < allOverlay.length; i++){
+                    map.removeOverlay(allOverlay[i])
+                }
+            })
+            const map = new BMap.Map("allmap")
+            $scope.getMap = (lat = 39.915 ,long = 116.404,first = true) =>{
+
+                const point = new BMap.Point(long,lat);
+                
+                if(!first){
+                    const marker = new BMap.Marker(point);
+                    map.addOverlay(marker);
+                }
+                map.centerAndZoom(point, 11)
+                map.enableScrollWheelZoom(true)
+  
+                map.addEventListener("click", function(e){  
+                    if($scope.radioValue == '2'){
+                        let allOverlay = map.getOverlays()
+                        for (let i = 0; i < allOverlay.length; i++){
+                            map.removeOverlay(allOverlay[i])
+                        }
+                        $scope.longitude = e.point.lng
+                        $scope.latitude = e.point.lat
+                        $scope.$apply()
+                        let pt = e.point
+                        const marker = new BMap.Marker(pt)
+                        map.addOverlay(marker)
+                        /*const geoc = new BMap.Geocoder()  
+                        geoc.getLocation(pt, function(rs){
+                        })   */   
+                    }
+                    
+                })
+                
+            }
+
+            $scope.provinced = {}
+            $scope.cityd = {}
+            $scope.countyd = {}
+            $scope.formData = {}
+            
+
+            const getProvinceList = () =>{
+                $scope.provinceList.getData({
+                    'treeLevel':1,
+                    'parentId':1
+                }).then(res =>{
+                    $scope.province = res;
+                    $scope.provinced.selected= { regionName: $scope.province[0].regionName,id: $scope.province[0].id}
+
+                    if($scope.provinced.selected.id != undefined && $scope.provinced.selected != null){
+                       $scope.provinceChange() 
+                    }
+                })
+            }
+            getProvinceList()
+
+            $scope.provinceChange = () =>{
+                let a = angular.copy($scope.provinced.selected.id);
+                $scope.cityList.getData({
+                    "treeLevel":2,
+                    "parentId":a
+                }).then(res =>{
+                    $scope.city = res;
+                    $scope.cityd.selected = {regionName : $scope.city[0].regionName,id : $scope.city[0].id}
+
+                    if($scope.cityd.selected.id != undefined && $scope.cityd.selected != null){
+                       $scope.cityChange() 
+                    }
+                })        
+            }
+
+            $scope.cityChange = () =>{
+                let b = angular.copy($scope.cityd.selected.id);
+                $scope.countryList.getData({
+                    "treeLevel":3,
+                    "parentId":((b==null) || (b==""))?0:b
+                }).then(res =>{
+                    $scope.county = res;
+                    $scope.countyd.selected = {regionName : $scope.county[0].regionName,id : $scope.county[0].id}
+
+                })
+            }
+            
+            $scope.getlatandlng = () =>{
+                const province = $scope.provinced.selected ?$scope.provinced.selected.regionName :null
+                const city = $scope.cityd.selected ? $scope.cityd.selected.regionName :null
+                const country = $scope.countyd.selected ? $scope.countyd.selected.regionName :null
+                const street = $("#address").val();
+                if(province !=null && city != null && country != null && street != ""){
+                    const str = province+city+country+street
+                    $scope.getLatAndLong.getData({
+                        "add":str
+                    }).then(res =>{
+                        $scope.longitude = res[0]
+                        $scope.latitude = res[1]
+                        $scope.getMap($scope.latitude ,$scope.longitude, false);
+                    })
+
+                }else{
+                    alert("省市县街道均不能为空")
+                }
+            }
+
+            //获取周边人员
+            $scope.getPersonList = () =>{
+
+                let lat = "",long = ""
+                if($scope.radioValue == "1"){
+                    lat = $scope.stationList.selected.latitude
+                    long = $scope.stationList.selected.longitude
+                    if($scope.formData.sendScope == ""|| $scope.formData.sendScope == undefined){
+                        alert("推送范围均不能为空")
+                        return false
+                    }
+                    personListData(lat,long)
+                }else if($scope.radioValue == "2"){
+                    if($scope.longitude == "" || $scope.longitude == undefined || $scope.latitude == "" || $scope.latitude == undefined || $scope.formData.sendScope == ""|| $scope.formData.sendScope == undefined){
+                        alert("经度、纬度、推送范围均不能为空")
+                        return false
+                    }else{
+                        lat = $scope.latitude
+                        long = $scope.longitude
+                        personListData(lat,long)
+                    }
+                }             
+            }  
+
+            const personListData = (lat,long) =>{
+
+                $scope.getRepairPersonList.getData({
+                    "latitude":lat,
+                    "longitude":long,
+                    "range":$scope.formData.sendScope,
+                    'keywords':$scope.personNameKeyword
+                }).then(res =>{
+                    $scope.hasGetPerson = true
+                    if(res.code == 0 ){
+                        $scope.personList = res.body
+                    }else{
+                        alert(res.msg)
+                    }
+                })    
+            }
+            $scope.addTimeLine = () =>{
+                $scope.timeSetLine.push({time:$scope.dateTime,money:""});
+            }
+
+            $scope.deleteTimeLine = (index) =>{
+                $scope.timeSetLine.splice(index,1);
+            }
+            
+            $scope.release = () =>{
+                organizeParams()
+                if(validate()){
+                    $scope.creatTask.getData(
+                        $scope.formData
+                    ).then(res =>{
+                        if(res.code == "0"){
+                            promptObj('success', '',res.msg);
+                            $scope.pageList.getData({
+                                pageIndex:0,
+                                pageSize:10,
+                            }).then(res =>{
+                                $scope.hiddenModalAdd()
+                            })
+                        }
+                    })
+
+                }
+               
+            }
+
+            const organizeParams = () =>{
+                if($scope.radioValue == "1"){
+                    $scope.formData['provinceId'] = $scope.stationList.selected.provinceid
+                    $scope.formData['cityId'] = $scope.stationList.selected.cityid
+                    $scope.formData['countyId'] = $scope.stationList.selected.countyid
+                    $scope.formData['address'] = $scope.stationList.selected.address
+                    $scope.formData['latitude'] = $scope.stationList.selected.latitude
+                    $scope.formData['longitude'] = $scope.stationList.selected.longitude
+                }else if($scope.radioValue == "2"){
+                    $scope.formData['provinceId'] = $scope.provinced.selected.id
+                    $scope.formData['cityId'] = $scope.cityd.selected.id
+                    $scope.formData['countyId'] = $scope.countyd.selected.id
+                    $scope.formData['address'] = $("#address").val()
+                    $scope.formData['latitude'] = $scope.latitude
+                    $scope.formData['longitude'] = $scope.longitude
+                }
+
+                $scope.formData['sendScope'] = $scope.formData.sendScope
+                $scope.formData['taskTitle'] = $scope.formData.taskTitle
+                $scope.formData['taskContent'] = $scope.formData.taskContent
+
+                for(let i = 0;i<$scope.timeSetLine.length;i++){
+                    let index = i+1
+                    $scope.formData['bounsTime'+index] = ($scope.timeSetLine[i].time).Format('yyyy-MM-dd hh:mm')
+                    $scope.formData['bouns'+index] = $scope.timeSetLine[i].money
+                }
+
+                let checkedIds = []
+                let checkedInput = $("input[name=userIds]:checked")
+                for(let i = 0;i<checkedInput.length;i++){
+                    checkedIds.push(checkedInput[i].value)
+                }
+                $scope.formData['userIds'] = checkedIds.join(",")
+                $scope.formData['opType'] = 1
+
+                $scope.formData['taskImgs'] = $scope.responseImgs.join(",")
+                $scope.formData['a'] = "noUse"//todo
+            }
+            const validate = () =>{
+                let validateFlag = true
+
+                const validateKeys  = ['provinceId','cityd','countyId','address','latitude','longitude','sendScope','userIds','taskTitle','taskContent']
+                const validateNamesMap = {'provinceId':'省','cityd':'市','countyId':'县','address':'详细地址','latitude':'纬度',
+                                    'longitude':'经度','sendScope':'推送范围','userIds':'检修人员','taskTitle':'任务标题','taskContent':'任务内容'}
+
+                for(let i = 0;i<validateKeys.length;i++){
+                    for(let key in $scope.formData){
+                        if(validateKeys[i] == key){
+                            let val = $scope.formData[key]
+                            if(val == undefined || val == null || val == ""){
+                                alert(validateNamesMap[key]+'不能为空')
+                                validateFlag = false
+                                return validateFlag
+                            }
+                        }
+                    }
+                    if(validateKeys[i] == 'userIds'){
+                        if($scope.formData['userIds'].length<=0){
+                            alert(validateNamesMap['userIds']+'不能为空')
+                            validateFlag = false
+                            return validateFlag
+                        }
+                    }
+                }
+
+                //验证时间（时间从上到下，依次增大）
+                let timeStrArr = []
+                for(let i = 0;i<$scope.timeSetLine.length;i++){
+                    timeStrArr[i] = $scope.timeSetLine[i].time.getTime()
+                    if($scope.timeSetLine[i].money == undefined || $scope.timeSetLine[i].money == null || $scope.timeSetLine[i].money == ""){
+                        alert("每组时间对应的红包金额不能为空")
+                        validateFlag =  false
+                        return validateFlag
+                    }
+                }
+                let currentMaxTime = timeStrArr[0];
+                for(let i = 1;i<timeStrArr.length;i++){
+                    if(timeStrArr[i] <= currentMaxTime){
+                        alert("上一个截止日期，不能大于下一个截止日期")
+                        validateFlag = false
+                        return validateFlag
+                    }else{
+                        currentMaxTime = timeStrArr[i]
+                    }
+                }
+
+                return validateFlag
+            }
+
+            $scope.hiddenModalAdd = () =>{
+                $('#powerIndexModalAdd').modal("hide");
+            }
+        }
+    }
+}])
+
+//审核，发红包
+app.directive('taskExamineTemp',['myAjaxData','$timeout',(myAjaxData,$timeout) => {
+    return {
+        restrict:'E',
+        template:$('#task-examine-temp').html(),
+        replace:true,
+        scope:{
+            pageList:"=",
+            taskDetail:"=",
+            taskBonusNum:"=",
+            taskExamine:"=",
+            redPacket:"="
+        },
+        link($scope,$element,$attrs){
+            $timeout(()=>{
+
+                $("#result_table").on('click','.task-title',function(){
+                    $scope.statusType = "showInfo"
+                    $scope.$apply()
+                    $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal()
+                    $scope.taskDetail.getData({
+                        'id':$scope.id
+                    }).then(res =>{
+                        renderPage(res)
+                    })
+
+                })
+
+                $('#result_table').on('click','.examine', function () {
+                    $scope.statusType = "examine"
+                    $scope.$apply()
+                    $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal()
+                    $scope.taskDetail.getData({
+                        'id':$scope.id
+                    }).then(res =>{
+                        renderPage(res)
+                    })
+
+                    $scope.taskBonusNum.getData({
+                        'id':$scope.id
+                    }).then(res =>{
+                        $scope.bonusNum = res.body ? res.body :0
+                        $scope.credit = $scope.bonusNum
+                    })
+                   
+                })
+                $('#result_table').on('click','.money', function () {
+                    $scope.statusType = "money"
+                    $scope.$apply()
+                    $scope.id = $(this).attr("id")
+                    $('#taskExamineModal').modal()
+
+                    $scope.bonusBtnAbled = true
+                    $scope.taskDetail.getData({
+                        'id':$scope.id
+                    }).then(res =>{
+                        renderPage(res)
+                    })
+                })
+                
+            })
+
+            const renderPage = res =>{
+                $scope.data = res.body
+                $scope.imageList = $scope.data.handleImg ? $scope.data.handleImg.split(",").map((v => window.baseUrl + '/' + v)) : []
+                $scope.taskImageList = $scope.data.taskImgs ? $scope.data.taskImgs.split(",").map((v => window.baseUrl + '/' + v)) : []
+                $scope.showHisContent =JSON.parse($scope.data.reviewContent || '[]')
+            }
+
+             //通过或者不通过
+            $scope.ifPass = yesOrNot =>{
+                if(validateMaxAmount('money')){
+                    let time = new Date().getTime()
+                    const wxuser = localStorage.getItem("wxuser") ? JSON.parse(localStorage.getItem("wxuser")) : null
+                    const curContent = $("#examineCircumstance").val()
+                    const result = myAjaxData.config.passMap[yesOrNot]
+                    if(wxuser){
+                        let content = [{'id':wxuser.id,'name':wxuser.realName,'time':time,'phone':wxuser.phone,'content':curContent,'result':result}]
+                        if($scope.showHisContent){
+                            content = [...$scope.showHisContent,...content]
+                        }
+                        $scope.taskExamine.getData({
+                            'id':$scope.id,
+                            'opType':yesOrNot,
+                            'content':JSON.stringify(content),
+                            'bonus':$("#bonusNum").val(),
+                            'points':$("#credit").val()
+                        }).then(res =>{
+                            if(res.code == 0 ){
+                                $scope.hiddenModalExamine()
+                                promptObj('success', '',res.msg?res.msg:"审核成功");
+                                $scope.pageList.getData({
+                                    pageIndex:0,
+                                    pageSize:10,
+                                })
+                            }else{
+                                promptObj('error', "", res.msg?res.msg:"审核失败")
+                            }
+                        })
+                    }else{
+                        alert("审核人信息没有获取到")
+                    }
+                }
+            }
+
+            //发红包
+            $scope.handOutMoney = () =>{
+                if($scope.bonusBtnAbled){
+                    $scope.bonusBtnAbled = false
+                    $scope.redPacket.getData({
+                        'id':$scope.id,
+                        'opType':1,
+                    }).then(res =>{
+                        $scope.bonusBtnAbled = true
+                        if(res.code == 0 ){
+                            $scope.hiddenModalExamine()
+                            promptObj('success', '',res.msg?res.msg:"发放成功");
+                            $scope.pageList.getData({
+                                pageIndex:0,
+                                pageSize:10,
+                            })
+                        }else{
+                            promptObj('error', "", res.msg?res.msg:"发放失败")
+                        }
+
+                    })
+                }
+                
+            }
+            
+            $(".issueTaskList").on('click','.upload-img',function(){
+                $(".bigImg").show()
+                let imgUrl = $(this).attr('src')
+                $scope.bigImg = imgUrl
+                $scope.$apply()
+            })
+
+            $scope.hiddenBigImg = () =>{
+                $(".bigImg").hide()
+            }
+        },
+        controller($scope,$element){
+
+            $scope.statusType = ""
+            
+            $scope.showStatus = sta =>{
+                return myAjaxData.config.statusMap[sta]
+            }
+            $scope.hiddenModalExamine = () =>{
+                $('#taskExamineModal').modal("hide");
+            }
+        }
+    }
+}])
+
+ajaxData({
+    pageList: {
+        name: 'GETTaskList',
+        data: {
+            pageIndex: 0,
+            pageSize: 10
+        }
+    },
+    stationsPosition:{
+        name:'GETStationsPos',
+        data: {},
+        later:true
+    },
+    provinceList:{
+        name: 'POSTSelectProvince',
+        data: {},
+        later:true
+    },
+    cityList:{
+        name: 'POSTSelectCity',
+        data: {},
+        later:true
+    },
+    countryList:{
+        name: 'POSTSelectCountry',
+        data: {},
+        later:true
+    },
+    getLatAndLong:{
+        name:'POSTLatandlng',
+        data: {},
+        later:true
+    },
+    getRepairPersonList:{
+        name:'GETSelectRepairPerson',
+        data: {},
+        later:true
+    },
+    creatTask:{
+        name:'POSTCreatTask',
+        data:{},
+        later:true
+    },
+    taskDetail:{
+        name:'GETTaskDetailPC',
+        data:{},
+        later:true
+    },
+    taskBonusNum:{
+        name:'GETTaskBonusNum',
+        data:{},
+        later:true
+    },
+    taskExamine:{
+        name:'POSTTaskExamine',
+        data:{},
+        later:true
+    },
+    taskDoInvalid:{
+        name:'POSTTaskDoInvalid',
+        data:{},
+        later:true
+    },
+    redPacket:{
+        name:'POSTRedPacket',
+        data:{},
+        later:true
+    }
+},{
+    statusMap:{'00':"未发布",'01':"已发布",'02':"处理中",'03':"处理未完成",'04':"审核中",'05':"审核通过",'06':"审核未通过",'07':"已完成",'99':"已作废"},
+    passMap : {'0':'不通过','1':'通过'}
+})('issueTaskListCtrl', ['$scope', 'myAjaxData','$ocLazyLoad'], ($scope, myAjaxData,$ocLazyLoad) => {
+
+    $scope.baseUrl = window.baseUrl
+    const wxuser = localStorage.getItem("wxuser") ? JSON.parse(localStorage.getItem("wxuser")) : null
+    if(wxuser){
+        $scope.authType = wxuser.authType
+    }
+
+    $(".dist-datetime-start").datetimepicker({
+        language : 'zh-CN',
+        format: 'yyyy-mm-dd hh:ii',
+        autoclose:true,
+        todayBtn : true,
+        pickerPosition : "bottom-left"
+    }).on("click",function(){
+        $(".dist-datetime-start").datetimepicker("setEndDate",$("#endTime").val())
+    });
+    
+    $(".dist-datetime-end").datetimepicker({
+        language : 'zh-CN',
+        format: 'yyyy-mm-dd hh:ii',
+        autoclose:true,
+        todayBtn : true,
+        pickerPosition : "bottom-left"
+    }).on("click",function(){
+        $(".dist-datetime-end").datetimepicker("setStartDate",$("#startTime").val())
+    });
+
+    $ocLazyLoad.load([
+        "http://api.map.baidu.com/api?v=2.0&ak=aBsOf0A0mp32b7M6A15dvByz"
+    ]).then(()=>{
+        //获取电站列表
+        $scope.stationsPosition.getData({
+        }).then(res =>{
+            if(res.code == 0){
+                $scope.stationList = res.body
+                $scope.stationList.selected = $scope.stationList[0]
+            }
+        })
+    })
+
+    $scope.getStatus = sta => myAjaxData.config.statusMap[sta]
+
+    $scope.taskStatusList = [{ statusName: '-所有-', value: '' },{ statusName: '未发布', value: '00' }, { statusName: '已发布', value: '01' }, { statusName: '处理中', value: '02' }, { statusName: '处理未完成', value: '03' }, { statusName: '审核中', value: '04' }, { statusName: '审核通过', value: '05' },
+     { statusName: '审核未通过', value: '06' }, { statusName: '已完成', value: '07' }, { statusName: '已作废', value: '99' }]
+    
+    $scope.getPageList = () =>{
+        let startDate = $("#startTime").val()
+        let endDate = $("#endTime").val()
+        $scope.pageList.getData({
+            publishStatus: $scope.taskStatusList.selected ? $scope.taskStatusList.selected.value : "",
+            distDateStartStr: startDate,
+            distDateEndStr: endDate,
+            keywords: $scope.keywords,
+            pageIndex: 0,
+            pageSize: 10
+        })
+    }
+
+    //废除任务
+    $('#result_table').on('click','.delete-task', function () {
+        if(confirm("确定废除此任务？")){
+            let id = $(this).attr("id")
+            $scope.taskDoInvalid.getData({
+                'id':id,
+                'opType':3
+            }).then(res =>{
+                if(res.code == 0){
+                    promptObj('success', "", res.msg?res.msg:"删除成功")
+                    $scope.pageList.getData({
+                        pageIndex:0,
+                        pageSize:10
+                    })
+                }else{
+                    promptObj('error', "", res.msg?res.msg:"删除失败")
+                }
+            })
+        }
+        
+    })
+
+    //导出
+    $scope.export = () =>{
+        let publishStatus = $scope.taskStatusList.selected ? $scope.taskStatusList.selected.value : "";
+        let keywords = $scope.keywords?$scope.keywords:'';
+        let startDate = $("#startTime").val()? $("#startTime").val():'';
+        let endDate = $("#endTime").val()?$("#endTime").val():'';
+        let url = window.baseUrl?window.baseUrl:'/NECloud';
+        window.open(url+'/wxa/export/task.htm?distDateStartStr='+startDate+"&distDateEndStr="+endDate+"&keywords="+keywords+"&publishStatus="+publishStatus);
+    }
+})

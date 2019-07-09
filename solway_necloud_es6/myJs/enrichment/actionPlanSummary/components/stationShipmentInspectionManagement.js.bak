@@ -1,0 +1,141 @@
+ajaxData(
+    {
+        action_station_clean_suggest_people_effic_list: {
+            name: 'GETaction_station_clean_suggest_people_effic_list',
+            data: {},
+            later: true,
+            onlayLatest: true,
+        }
+    },
+    {
+        __serviceName__: 'actionPlanSummaryStationShipmentInspectionManagementService',
+    }
+)('actionPlanSummaryStationShipmentInspectionManagementCtrl', ['$scope', 'actionPlanSummaryStationShipmentInspectionManagementService',
+    'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+        /// 初始化 scope
+        $scope.initChildScope($scope, myAjaxData);
+
+        // 主页面初始化完成 回调
+        $scope.mainPageInitComplete = async () => {
+            let { tabIndex = 0 } = historicalRecord.get().actionPlanSummaryStationShipmentInspectionManagement || {};
+            $scope.changeTab(tabIndex);
+            $('.ng-clock').removeClass('ng-clock');
+            $scope.initComplete = true;
+            await myAjaxData.timeout(0);
+            await $scope.diffGetData();
+            $scope.$apply();
+        };
+
+        // 切换电站 回调
+        $scope.switchPowerCallback = () => {
+            $scope.diffGetData();
+        };
+
+        // tab 切换
+        $scope.changeTab = tabIndex => {
+            $scope.tabIndex = tabIndex;
+            historicalRecord.set({
+                actionPlanSummaryStationShipmentInspectionManagement: {
+                    ...historicalRecord.get().actionPlanSummaryStationShipmentInspectionManagement || {},
+                    tabIndex
+                }
+            });
+            $scope.diffGetData();
+        };
+
+        // 接口请求
+        $scope.diffGetData = async (getInfo) => {
+            if (!$scope.initComplete) return;
+            await myAjaxData.timeout(0);
+            setDataNull(getInfo);
+            const { tabIndex, dataType } = $scope;
+            if (dataType !== 0) return;
+            if (tabIndex === 0) {
+                $scope.action_station_clean_suggest_people_effic_list.getData({
+                    queryCode: 'action_station_clean_suggest_people_effic_list',
+                    queryType: 3,
+                    date: new Date(Date.now() - 1000 * 24 * 60 * 60).Format('yyyy-MM-dd'),
+                    start_date: new Date(Date.now() - 1000 * 24 * 60 * 60 * 30).Format('yyyy-MM-dd'),
+                });
+            }
+        };
+
+        // 人员效率
+        $scope.action_station_clean_suggest_people_effic_list.subscribe(res => {
+            const { user_name, repair_hours_avg, res_hours_avg, repair_count, res_count} = res.body.data;
+            $scope.markLine = [[{
+                label: {
+                    normal: {
+                        formatter: '{b}: {c}' + new Array(250).fill(' ').join(''),
+                        position: 'middle'
+                    }
+                },
+                lineStyle: {
+                    normal: {
+                        type: 'solid',
+                        color: '#2BCF68'
+                    }
+                },
+                data: [{
+                    name: '平均检修时间(h)',
+                    type: 'average'
+                }],
+            }], [{
+                    label: {
+                        normal: {
+                            formatter: new Array(250).fill(' ').join('') + '{b}: {c}',
+                            position: 'middle'
+                        }
+                    },
+                    lineStyle: {
+                        normal: {
+                            type: 'solid',
+                            color: '#FF929C'
+                        }
+                    },
+                    data: [{
+                        name: '平均响应次数(次)',
+                        type: 'average'
+                    }],
+            }]];
+            $scope.xdata = user_name;
+            $scope.ydatas = [[repair_hours_avg], [repair_count]];
+        });
+
+        // 数据置空
+        function setDataNull(getInfo) {
+            $scope.xdata = void 0;
+            $scope.ydatas = void 0;
+            $scope.markLine = void 0;
+            $scope.action_station_clean_suggest_people_effic_list.res = null;
+        }
+
+
+        // 键盘 左右 键   切换主题  组合键 放大缩小（ctrl + M）
+        $(document).on('keydown', keyChangeTheme);
+        $scope.$on('$destroy', () => $(document).off('keydown', keyChangeTheme));
+        function keyChangeTheme(event) {
+            const {tabIndex} = $scope;
+            switch (event.keyCode) {
+                case 38:
+                    if (tabIndex === 0) return;
+                    $scope.changeTab(tabIndex - 1);
+                    $scope.$apply();
+                    break;
+
+                case 40:
+                    if (tabIndex === 2) return;
+                    $scope.changeTab(tabIndex + 1);
+                    $scope.$apply();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        // 销毁 事件
+        $scope.$on('$destroy', () => {
+            setDataNull();
+        });
+    });

@@ -1,0 +1,947 @@
+ajaxData(
+    {
+        
+        equipmentCount: {
+            name: 'GETrunStatusInfoList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+        },
+        // 矩阵视图
+        getDeviceLayout: {
+            name: 'GETdeviceLayoutV2',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+        rtmSingleStationComm: {
+            name: 'GETRtmSingleStationComm',
+            data: {
+                dateString: new Date().Format("yyyy-MM-dd")
+            },
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+        // 电站 今日  时间  列表
+        stationDayTodayTime: {
+            name: 'GETrunAcpTimeList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+        // 电站 今日  时间  图表
+        stationDayTodayTime2: {
+            name: 'GETrunAcpTimeList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+        // 电站 发电能力
+        turbineOPEList: {
+            name: 'GETturbineOPEList',
+            data: {},
+            onlyLatest: true,
+            later: true,
+        },
+        // 测风塔列表
+        realtimeWindTower: {
+            name: 'GETrealtimeWindTower',
+            data: {},
+            onlyLatest: true,
+            sameTimeOnce: true,
+            later: true
+        },
+        // 风机组列表
+        realtimeWindTurbine: {
+            name: 'GETrealtimeWindTurbine2',
+            data: {},
+            onlyLatest: true,
+            sameTimeOnce: true,
+            later: true
+        },
+        //电站-今日-故障列表
+        getStationFaultAlarmRtData: {
+            name: 'GETwpStationFaultAlarmRtData',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true,
+        },
+    },
+    {
+        __serviceName__: 'themeEquipmentOperationStationDayTodayService'
+    }
+)('themeEquipmentOperationStationDayTodayCtrl', ['$scope', 'themeEquipmentOperationStationDayTodayService', 'actionRecord', '$interval'], ($scope, myAjaxData, historicalRecord, $interval) => {
+    // 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        let { showShape, currentDeviceType = '2', tabIndex = 0, checkboxStatus = [true, true, true, true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
+        $scope.changeShowShape((tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'chart'));
+        const { dateType, dateTime } = historicalRecord.get();
+        $scope.dateType = dateType;
+        $scope.dateTime = dateTime;
+        $scope.currentDeviceType = currentDeviceType;
+        await $scope.dateUpdated();
+        $scope.checkboxStatus = checkboxStatus;
+        $scope.changeTab(tabIndex);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        await diffGetData();
+        $scope.$apply();
+    };
+
+    // 切换电站 回调
+    $scope.switchPowerCallback = () => {
+        if ($scope.currentClass !== 'StationDayToday') return;
+        $scope.$broadcast("switchPowerCallback");
+        setDataNull();
+        diffGetData();
+    };
+
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        if ($scope.currentClass !== 'StationDayToday') return;
+        await myAjaxData.timeout(0);
+        setDataNull();
+        diffGetData();
+    };
+
+    $scope.switchDetailFullPage = () => {
+        myChart && myChart.resize();
+    };
+
+    // tab 切换
+    $scope.changeTab = tabIndex => {
+        if (tabIndex === $scope.tabIndex) return;
+        $scope.tabIndex = tabIndex;
+        if ($scope.showShape === 'chart2' && tabIndex !== 1) $scope.changeShowShape('chart');
+        historicalRecord.set({
+            themeEquipmentOperationStationDayToday: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayToday || {},
+                tabIndex
+            }
+        });
+        setDataNull();
+        diffGetData();
+    };
+
+    // 切换显示形式  图表 or 列表
+    $scope.changeShowShape = showShape => {
+        if (showShape === $scope.showShape) return;
+        $scope.showShape = showShape;
+        historicalRecord.set({
+            themeEquipmentOperationStationDayToday: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayToday || {},
+                showShape
+            }
+        });
+        if ($scope.tabIndex === 1 && $scope.showShape === 'chart') {
+            // $scope.getDeviceLayout.getData({});
+            $scope.rtmSingleStationComm.getData({ dateString: new Date().Format("yyyy-MM-dd") });
+        }
+        setDataNull();
+        diffGetData();
+    };
+
+    // 列表视图  切换 设备类型
+    $scope.switchDeviceType = () => {
+        historicalRecord.set({
+            themeEquipmentOperationStationDayToday: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayToday || {},
+                currentDeviceType: $scope.currentDeviceType
+            }
+        });
+        $scope.diffDeviceTypeGetData();
+    };
+
+    // 复选框状态改变
+    $scope.changeCheckboxStatus = index => {
+        if (index === 0) $scope.checkboxStatus.fill($scope.checkboxStatus[0]);
+        else if (!$scope.checkboxStatus[index]) $scope.checkboxStatus[0] = false;
+        else if ($scope.checkboxStatus.slice(1).every(v => v)) $scope.checkboxStatus[0] = true;
+        historicalRecord.set({
+            themeEquipmentOperationStationDayToday: {
+                ...historicalRecord.get().themeEquipmentOperationStationDayToday || {},
+                checkboxStatus: $scope.checkboxStatus
+            }
+        });
+        $scope.diffDeviceTypeGetData();
+    };
+
+    window.__showInformation__ = $scope.showInformation = (item, index, event) => {
+        $scope.$broadcast('equipmentPopUpWp', { stid: item.sid, eqid: item.did});
+    };
+
+
+    // 列表视图 接口请求
+    $scope.diffDeviceTypeGetData = () => {
+        switch ($scope.currentDeviceType) {
+            case '1':
+                $scope.realtimeWindTower.getData({
+                    search: $scope.searchKey,
+                    status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
+                                                .filter(v => v !== false)
+                                                .join()
+                                                .replace('07', '099')
+                });
+                break;
+
+            case '2':
+                $scope.realtimeWindTurbine.getData({
+                    search: $scope.searchKey,
+                    status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
+                                                .filter(v => v !== false)
+                                                .join()
+                                                .replace('07', '099')
+                    // status: '00,01,02,03,04,099'
+                });
+                break;
+
+
+            default:
+                break;
+        }
+    }
+    // 判断 调用  对应 接口
+    async function diffGetData() {
+        if (!$scope.initComplete) return;
+        await myAjaxData.timeout(0);
+        const { currentClass, showShape, dateTime, tabIndex, dateType } = $scope;
+        if (!currentClass.includes('DayToday')) $scope.column = [];
+        if (tabIndex === 0 && showShape === 'chart') {
+            $scope.stationDayTodayTime.res = null;
+            $scope.stationDayTodayTime2.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate,
+                dataType: 2,
+                stime: $scope.stationDayTodayTime2.res
+                    ? $scope.stationDayTodayTime2.res.body.echarts_xaxisTime[$scope.stationDayTodayTime2.res.body.echarts_xaxisTime.length - 1].split(':').join('')
+                    : 0,
+            });
+        } else if (tabIndex === 0 && showShape === 'list') {
+            if ($scope.stationDayTodayTime.res) return;
+            $scope.stationDayTodayTime.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate,
+                dataType: 1,
+                stime: $scope.stationDayTodayTime.res
+                    ? $scope.stationDayTodayTime.res.body.chartList[$scope.stationDayTodayTime.res.body.chartList.length - 1].xaTime.split(':').join('')
+                    : 0,
+            });
+        } else if (tabIndex === 1 && showShape === 'chart') {
+            $scope.realtimeWindTurbine.getData({
+                search: '',
+                status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
+                    .filter(v => v !== false)
+                    .join()
+                    .replace('06', '099')
+                    .replace('05', '06')
+                    .replace('01', '01,05'),
+                pageIndex: 0,
+                pageSize: 999
+            });
+            $scope.equipmentCount.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate,
+            });
+        } else if (tabIndex === 1 && showShape === 'list') {
+            // $scope.getDeviceType.getData({});
+            // $scope.currentDeviceType = '1';
+            $scope.switchDeviceType();
+            $scope.equipmentCount.getData({
+                queryType: 3,
+                dateType: 3,
+                date: dateTime.showDate,
+            });
+        } else if (tabIndex === 3) {
+            if ($scope.turbineOPEList.res) return;
+            $scope.turbineOPEList.getData({
+                dataType: 2,
+                dateType: 2,
+                queryType: 3,
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 4) {
+            $scope.getStationFaultAlarmRtData.getData({
+                pageIndex: 0,
+                pageSize: 10
+            });
+        }
+    };
+
+    // 电站 今日 设备 列表视图 测风塔 列表
+    $scope.realtimeWindTower.subscribe((res) => {
+        $scope.column = [
+            {
+                dataIndex: 'statusDesc',
+                title: '状态',
+                width: '100px',
+                sort: true,
+                fixed: 'left',
+                render(text, item, index) {
+                    if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                    else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else if (item.status == '-99') return `<span>初始化</span>`;
+                    else return `<span>${text}</span>`;
+                }
+            },
+            {
+                dataIndex: 'did',
+                title: '编号',
+                width: '90px',
+                fixed: 'left',
+                sort: true,
+            },
+            {
+                dataIndex: 'name',
+                title: '名称',
+                width: '150px',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `<text style="color: #428bca;">${text}</text>`
+                }
+            },
+            {
+                dataIndex: 'dtime',
+                title: '时间',
+                width: '170px',
+                align: 'center',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
+                }
+            }, 
+            {
+                dataIndex: 'sh1',
+                title: '测点1高度',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'ta1',
+                title: '测点1环境温度(℃)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'h2o1',
+                title: '测点1湿度(%)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'p1',
+                title: '测点1压力',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'ws1',
+                title: '测点1风速(m/s)',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'wsa1',
+                title: '测点1风速均值(m/s)',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'wd1',
+                title: '测点1风向(度)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'sh2',
+                title: '测点2高度',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'ta2',
+                title: '测点2环境温度(℃)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'h2o2',
+                title: '测点2湿度(%)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'p2',
+                title: '测点2压力',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'ws2',
+                title: '测点2风速(m/s)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'wsa2',
+                title: '测点2风速均值(m/s)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'wd2',
+                title: '测点2风向(度)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'sh3',
+                title: '测点3测点高度',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'ta3',
+                title: '测点3环境温度(℃)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'h2o3',
+                title: '测点3湿度(%)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'p3',
+                title: '测点3压力',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'ws3',
+                title: '测点3风速(m/s)',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'wsa3',
+                title: '测点3风速均值(m/s)',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'wd3',
+                title: '测点3风向(度)',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'sh4',
+                title: '测点4高度',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'ta4',
+                title: '测点4环境温度(℃)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'h2o4',
+                title: '测点4湿度(%)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'p4',
+                title: '测点4压力',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'ws4',
+                title: '测点4风速(m/s)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'wsa4',
+                title: '测点4风速均值(m/s)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'wd4',
+                title: '测点4风向(度)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'sh5',
+                title: '测点5测点高度',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'ta5',
+                title: '测点5环境温度(℃)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'h2o5',
+                title: '测点5湿度(%)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'p5',
+                title: '测点5压力',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'ws5',
+                title: '测点5风速(m/s)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'wsa5',
+                title: '测点5风速均值(m/s)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'wd5',
+                title: '测点5风向(度)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'sh6',
+                title: '测点6测点高度',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'ta6',
+                title: '测点6环境温度(℃)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'h2o6',
+                title: '测点6湿度(%)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'p6',
+                title: '测点6压力',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'ws6',
+                title: '测点6风速(m/s)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'wsa6',
+                title: '测点6风速均值(m/s)',
+                width: '110px',
+                align: 'right',
+            }, {
+                dataIndex: 'wd6',
+                title: '测点6风向(度)',
+                width: '110px',
+                align: 'right',
+            }
+
+        ];
+    });
+    // 电站 今日 设备 列表视图 风机组 列表
+    $scope.realtimeWindTurbine.subscribe((res) => {
+        $scope.column = [
+            {
+                dataIndex: 'statusDesc',
+                title: '状态',
+                width: '80px',
+                sort: true,
+                fixed: 'left',
+                render(text, item, index) {
+                    if (item.comm == '1') return '<span class="data-grey">通讯中断</span>';
+                    else if (item.comm == '2') return `<span class="data-grey">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '1') return `<span class="data-red">${text}</span>`;
+                    else if (item.comm == '0' && item.status == '2') return `<span class="data-yellow">${text}</span>`;
+                    else return `<span>${text}</span>`;
+                }
+            },
+            {
+                dataIndex: 'did',
+                title: '编号',
+                width: '90px',
+                fixed: 'left',
+                sort: true,
+            },
+            {
+                dataIndex: 'name',
+                title: '名称',
+                width: '150px',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return `<text style="color: #428bca;">${text}</text>`
+                }
+            },
+            {
+                dataIndex: 'dtime',
+                title: '时间',
+                width: '170px',
+                align: 'center',
+                fixed: 'left',
+                sort: true,
+                render(text) {
+                    return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
+                }
+            }, {
+                dataIndex: 'wdspd',
+                title: '机舱外风速(m/s)',
+                width: '150px',
+                align: 'right',
+            }, {
+                dataIndex: 'extmp',
+                title: '机舱外温度(℃)',
+                width: '150px',
+                align: 'right',
+            }, {
+                dataIndex: 'intltmp',
+                title: '机舱内温度(℃)',
+                width: '150px',
+                align: 'right',
+            }, {
+                dataIndex: 'nacdirang',
+                title: '风向夹角(度)',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'rotspd',
+                title: '叶轮转速(rpm)',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'ptangvalbl1',
+                title: '叶片1桨距角',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'ptangvalbl2',
+                title: '叶片2桨距角',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'ptangvalbl3',
+                title: '叶片3桨距角',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'spd',
+                title: '发电机转速(rpm)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'w',
+                title: '有功功率(kW)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'var',
+                title: '无功功率(kW)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'gntoptmpsta',
+                title: '发电机最高绕组温度(℃)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'hz',
+                title: '频率值(Hz)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'gripf',
+                title: '功率因数',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'trmtmpentgbxdrv',
+                title: '齿轮箱高速轴驱动端轴承温度(℃)',
+                width: '120px',
+                align: 'right',
+            }, {
+                dataIndex: 'trmtmpentgbxnondrv',
+                title: '齿轮箱高速轴非驱动端轴承温度(℃)',
+                width: '150px',
+                align: 'right',
+            }, {
+                dataIndex: 'trmtmpgbxoil',
+                title: '齿轮箱油温(℃)',
+                width: '150px',
+                align: 'right',
+            }, {
+                dataIndex: 'ywdir',
+                title: '偏航角度(度)',
+                width: '150px',
+                align: 'right',
+            }, {
+                dataIndex: 'daykwh',
+                title: '有功发电量日计(kWh)',
+                width: '160px',
+                align: 'right',
+            }, {
+                dataIndex: 'totkwh',
+                title: '有功发电量总计(kWh)',
+                width: '160px',
+                align: 'right',
+            }, 
+            // {
+            //     dataIndex: 'turst',
+            //     title: '风机状态',
+            //     width: '160px',
+            //     align: 'right',
+            //     render(text) {
+            //         return '';
+            //     }
+            // }, {
+            //     dataIndex: 'limwst',
+            //     title: '风机限功率状态',
+            //     width: '120px',
+            //     align: 'right',
+            //     render(text) {
+            //         return ``;
+            //     }
+            // }
+
+        ];
+    });
+    // 电站 今日 时间 列表 列表
+    $scope.stationDayTodayTime.getDataCallback = (success, res) => {
+        if (!success) return;
+        const tempArr = res.body.chartList.slice(1);
+        tempArr.isConcat = true;
+        $scope.datasource = tempArr;
+        $scope.column = [
+            {
+                title: '时间',
+                dataIndex: 'xaTime',
+                sort: true,
+                width: '',
+                align: 'center'
+            },
+            {
+                title: '实发功率(kW)',
+                dataIndex: 'power',
+                sort: true,
+                width: '',
+                align: 'right',
+            },
+            {
+                title: '理论功率(kW)',
+                dataIndex: 'predictPower',
+                sort: true,
+                width: '',
+                align: 'right',
+            },
+            {
+                title: '风速(m/s)',
+                dataIndex: 'windSpeed',
+                sort: true,
+                width: '',
+                align: 'right',
+            }
+        ];
+    };
+    // 电站 今日 时间 列表 图表
+    const stationDayTodayTimeLineData = { xdata: [], line1: [], line2: [], line3: [] };
+    $scope.stationDayTodayTime2.getDataCallback = (success, res) => {
+        if (!success) return;
+        
+        const { xdata, line1, line2, line3 } = stationDayTodayTimeLineData;
+        const length = xdata.length;
+        $scope.xdata = stationDayTodayTimeLineData.xdata = xdata.slice(0, length - 1).concat(res.body.echarts_xaxisTime);
+        $scope.ydatas = [[stationDayTodayTimeLineData.line1 = line1.slice(0, length - 1).concat(res.body.echarts_power_o),
+            stationDayTodayTimeLineData.line2 = line2.slice(0, length - 1).concat(res.body.echarts_predictPower_o)],
+            [stationDayTodayTimeLineData.line3 = line3.slice(0, length - 1).concat(res.body.echarts_windSpeed_o)]];
+    };
+
+
+    // 电站 今日 发电能力
+    let myChart;
+    $scope.turbineOPEList.getDataCallback = (success, res) => {
+        myChart = echarts.init(document.getElementById('scatterChart'));
+        const option = {
+            color: ['rgba(212, 165, 255, 1)'],
+            grid: {
+                left: '40',
+                right: '70',
+                bottom: '40',
+                containLabel: true
+            },
+            tooltip: {
+                showDelay: 0,
+                formatter: function (params) {
+                    if (!params.value.join) {
+                        return params.name + params.value + '以上';
+                    }
+                    return params.data[3] + '<br/>'
+                        + '运行状态：' + params.data[0]
+                        + '<br/>'
+                        + '效率：' + params.data[1]
+                },
+            },
+            xAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    // min: 0,
+                    max: 1,
+                    axisLabel: {
+                        // show:false,
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '运行状态',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    scale: true,
+                    // min: 0,
+                    max: 1,
+                    axisLabel: {
+                        // show:false,
+                        textStyle: {
+                            color: '#fffeff'
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#366090'
+                        }
+                    },
+                    name: '功率曲线',
+                    nameTextStyle: {
+                        color: '#fffeff'
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: '',
+                    type: 'scatter',
+                    data: res.body,
+                    markLine: {
+                        lineStyle: {
+                            normal: {
+                                type: 'solid',
+                                color: 'rgba(255,255,255,0.4)'
+                            }
+                        },
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'end',
+                                color: 'rgba(255,255,255,1)',
+                            }
+                        },
+                        data: [
+                            { xAxis: 0.6, name: '正常标志线' },
+                            { xAxis: 0.9, name: '高效标志线' },
+                            { yAxis: 0.96, name: '正常标志线' },
+                            { yAxis: 0.99, name: '高效标志线' }
+                        ]
+                    }
+                }
+            ]
+        };
+        myChart.setOption(option, true);
+        const fun = myChart.resize;
+        myChart.resize = async () => {
+            await myAjaxData.timeout(16);
+            fun();
+        };
+        window.addEventListener('resize', myChart.resize);
+    };
+
+    //电站-故障列表
+    $scope.getStationFaultAlarmRtData.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
+            {
+                title: '设备名称',
+                width: '25%',
+                dataIndex: 'name',
+                sort: 'true',
+                align: 'left',
+            },
+            {
+                title: '故障类型',
+                dataIndex: 'eventType',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '设备类型',
+                dataIndex: 'deviceType',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '故障发生时间',
+                dataIndex: 'sStartTime',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '故障描述',
+                dataIndex: 'eventDesc',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '持续时间',
+                dataIndex: 'hours',
+                sort: 'true',
+                align: 'center'
+            },
+            // {
+            //     title: '处理详情',
+            //     dataIndex: '',
+            //     sort: 'true',
+            //     align: 'right',
+            //     render(text, item, index) {
+            //         return `<span>待写</span>`
+            //     }
+            // }
+        ];
+    }
+
+    function setDataNull() {
+        $scope.getDeviceLayout.res = null;
+        $scope.rtmSingleStationComm.res = null;
+        $scope.stationDayTodayTime.res = null;
+        $scope.stationDayTodayTime2.res = null;
+        $scope.getStationFaultAlarmRtData.res = null;
+        $scope.turbineOPEList.res = null;
+        $scope.xdata = void 0;
+        $scope.ydatas = void 0;
+        $scope.column = [];
+        myChart && window.removeEventListener('resize', myChart.resize);
+        myChart = null;
+        stationDayTodayTimeLineData.xdata = [];
+        stationDayTodayTimeLineData.line1 = [];
+        stationDayTodayTimeLineData.line2 = [];
+        stationDayTodayTimeLineData.line3 = [];
+    }
+
+    // 定时器  定时刷新接口
+    const timer = $interval(() => diffGetData(), 10000);
+    $scope.$on('$destroy', () => $interval.cancel(timer));
+
+});

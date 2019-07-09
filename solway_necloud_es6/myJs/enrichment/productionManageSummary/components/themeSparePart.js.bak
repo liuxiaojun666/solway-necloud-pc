@@ -1,0 +1,496 @@
+ajaxData(
+    {
+        // 查询 是否库管
+        fittingManageAuth: {
+            name: 'GETfittingManageAuth',
+            data: {},
+        },
+        // 备件清单分页
+        opFittingsDictFdnumPage: {
+            name: 'GETopFittingsDictFdnumPage',
+            data: {},
+            later: true
+        },
+        // 库房列表
+        opFittingsRoomSelectByCondition: {
+            name: 'GETopFittingsRoomSelectByCondition',
+            data: {},
+            later: true,
+            cache: true
+        },
+        // 备件入库分页
+        fittingsInPage: {
+            name: 'GETfittingsInPage',
+            data: {},
+            later: true,
+        },
+        // 领料 分页
+        opWorkFittingsReqPage: {
+            name: 'GETopWorkFittingsReqPage',
+            data: {},
+            later: true
+        },
+        // 出库 分页
+        opWorkFittingsOutPage: {
+            name: 'GETopWorkFittingsOutPage',
+            data: {},
+            later: true
+        },
+        selectCurrComUsers: {
+            name: 'GETselectCurrComUsers',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            cache: true
+        },
+        // 还库分页
+        opFittingsRebackPage: {
+            name: 'GETopFittingsRebackPage',
+            data: {},
+            later: true,
+        },
+    }, {
+        __serviceName__: 'themeSparePartService'
+    }
+)('themeSparePartCtrl', ['$scope', 'themeSparePartService', 'actionRecord', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, toaster, $ocLazyLoad) => {
+    /// 初始化 scope
+    $scope.initChildScope($scope, myAjaxData);
+
+    // 主页面初始化完成 回调
+    $scope.mainPageInitComplete = async () => {
+        const {
+            tabIndex = 0,
+            isDefaultList = true,
+            startDate = new Date(Date.now() - 1000 * 24 * 60 * 60 * 365),
+            endDate = new Date,
+        } = historicalRecord.get().themeSparePart || {};
+        $scope.tabIndex = tabIndex;
+        $scope.isDefaultList = isDefaultList;
+        $scope.startDate = startDate;
+        $scope.endDate = endDate;
+        await $scope.fittingManageAuth.promise;
+        await myAjaxData.timeout(0);
+        $('.ng-clock').removeClass('ng-clock');
+        $scope.initComplete = true;
+        $scope.diffGetData()
+        $scope.$apply();
+    };
+
+    $scope.changeTab = index => {
+        $scope.tabIndex = index;
+        historicalRecord.set({
+            themeSparePart: {
+                ...historicalRecord.get().themeSparePart || {},
+                tabIndex: index
+            }
+        });
+        $scope.closeMessagePopUp();
+        $scope.diffGetData();
+    };
+
+    $scope.publicFunc = (obj) => {
+        myAjaxData.config.publicObj = obj;
+        const { tabIndex } = $scope;
+        let fileName = '';
+        if (tabIndex === 0 && $scope.fittingManageAuth.res.body.enable) fileName = 'spareParts';
+        else if (tabIndex === 1 && $scope.fittingManageAuth.res.body.enable) fileName = 'putInStorage';
+        else if (tabIndex === 2) fileName = 'picking';
+        else if (tabIndex === 3 && obj) fileName = 'outStock';
+        else if (tabIndex === 4 && $scope.fittingManageAuth.res.body.enable) fileName = 'returningLibrary';
+        if (!fileName) return;
+        $ocLazyLoad.load('theme/js/dist/enrichment/productionManageSummary/components/' + fileName + '.js' + stamp).then(() => {
+            $scope['tpl' + tabIndex] = 'tpl/enrichment/productionManageSummary/components/' + fileName + '.html' + stamp;
+            if (!$scope['tpl' + tabIndex + 'loaded']) {
+                $scope.tplLoaded = () => {
+                    $scope['tpl' + tabIndex + 'loaded'] = true;
+                    $scope.$broadcast('popUp', myAjaxData.config.publicObj);
+                };
+            } else {
+                $scope.$broadcast('popUp', myAjaxData.config.publicObj);
+            }
+        });
+    };
+
+    $scope.warehouse = () => {
+        $ocLazyLoad.load('theme/js/dist/enrichment/productionManageSummary/components/warehouse.js').then(() => {
+            $scope.warehouseTpl = 'tpl/enrichment/productionManageSummary/components/warehouse.html';
+            if (!$scope['warehouseTplLoaded']) {
+                $scope.kftplLoaded = () => {
+                    $scope['warehouseTplLoaded'] = true;
+                    $scope.$broadcast('popUpKf');
+                };
+            } else {
+                $scope.$broadcast('popUpKf');
+            }
+        });
+    };
+
+    $scope.trClick = async (item, index, event) => {
+        const { tabIndex } = $scope;
+        if (tabIndex === 1) {
+            $scope.publicFunc(item);
+        } else if (tabIndex === 2) {
+            $scope.chartPanelLoading = true;
+            event.stopPropagation();
+            $scope.searchActive = false;
+            $scope.currentTplName = item.tplName + '-' + item.title;
+            $scope.closeMessagePopUp();
+            await myAjaxData.timeout(100);
+            $scope.messagePopUp = true;
+            $ocLazyLoad.load([
+                'theme/js/dist/enrichment/productionManageSummary/components/chatPanel2.js' + stamp
+            ]).then(res => {
+                $scope.chatPanelLoad = () => {
+                    $scope.chartPanelLoaded = true;
+                    $scope.chartPanelLoading = false;
+                    $scope.$broadcast("chatPanel2Obj", item);
+                    $('.my-table tbody tr').eq(index + 1).addClass('active');
+                };
+                if ($scope.chartPanelLoaded) return $scope.chatPanelLoad();
+                return $scope.chatPanelView = 'tpl/enrichment/productionManageSummary/components/chatPanel2.html' + stamp;
+            });
+            $scope.$apply();
+        } else if (tabIndex === 3) {
+            $scope.publicFunc(item);
+        } else if (tabIndex === 4) {
+            $scope.publicFunc(item);
+        }
+    };
+
+    $scope.trDblClick = (item, index, event) => {
+        const { tabIndex } = $scope;
+        if (tabIndex === 2) {
+            $scope.publicFunc(item);
+        }
+    };
+
+    // 关闭 聊天 消息 面板
+    $scope.closeMessagePopUp = () => {
+        $scope.messagePopUp = false;
+        $('.my-table tbody tr').removeClass('active');
+    };
+
+
+    $scope.diffGetData = () => {
+        $scope.isDefaultList = true;
+        $scope.column = [];
+        $scope.pagingGetData = void 0;
+        $scope.datasource = null;
+        const { tabIndex } = $scope;
+        if (tabIndex === 0) {
+            $scope.opFittingsRoomSelectByCondition.getData();
+            $scope.opFittingsDictFdnumPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+        } else if (tabIndex === 1 && $scope.fittingManageAuth.res.body.enable) {
+            $scope.opFittingsRoomSelectByCondition.getData();
+            $scope.fittingsInPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+        } else if (tabIndex === 2) {
+            $scope.opFittingsRoomSelectByCondition.getData();
+            $scope.opWorkFittingsReqPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+        } else if (tabIndex === 3 && $scope.fittingManageAuth.res.body.enable) {
+            $scope.selectCurrComUsers.getData({ hasTel: 1 });
+            $scope.opWorkFittingsOutPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+        } else if (tabIndex === 4 && $scope.fittingManageAuth.res.body.enable) {
+            $scope.selectCurrComUsers.getData({ hasTel: 1 });
+            $scope.opFittingsRebackPage.getData({ pageIndex: 0, pageSize: 20, roomId: null, keywords: null, isMin: null, startDate: null, endDate: null, stationId: null, createUid: null });
+        }
+    }
+
+    // 备件清单分页
+    $scope.opFittingsDictFdnumPage.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.opFittingsDictFdnumPage.getData;
+        $scope.column = [
+            {
+                title: '备件编号',
+                dataIndex: 'code',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '备件名称',
+                dataIndex: 'name',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '型号及规格',
+                dataIndex: 'ft',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '数量',
+                dataIndex: 'num',
+                sort: true,
+                align: 'right'
+            },
+            {
+                title: '单位',
+                dataIndex: 'fu',
+                sort: true,
+                align: 'center'
+            },
+            // {
+            //     title: '单价(元)',
+            //     dataIndex: 'fp',
+            //     sort: true,
+            //     align: 'right'
+            // },
+            // {
+            //     title: '金额(元)',
+            //     dataIndex: '',
+            //     align: 'right',
+            //     render(text, item, index) {
+            //         return (item.fp * item.num).toFixed(2) + '';
+            //     }
+            // },
+        ];
+    });
+
+    // 备件入库管理分页
+    $scope.fittingsInPage.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.fittingsInPage.getData;
+        $scope.column = [
+            {
+                title: '入库单号',
+                dataIndex: 'sn',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '仓库名称',
+                dataIndex: 'stationName',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '入库日期',
+                dataIndex: 'createTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '操作人员',
+                dataIndex: 'createUname',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '备注',
+                dataIndex: 'summary',
+                sort: true,
+                width: '30%',
+                align: 'left'
+            },
+        ];
+    });
+
+    // 备件 领料 分页
+    $scope.opWorkFittingsReqPage.subscribe(res => {
+        $scope.datasource = res.body.data
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.opWorkFittingsReqPage.getData;
+        $scope.closeMessagePopUp();
+        $scope.column = [
+            {
+                title: '申请日期',
+                dataIndex: 'createTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '申请人',
+                dataIndex: 'createUname',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '领料原因',
+                dataIndex: 'summary',
+                sort: true,
+                width: '30%',
+                align: 'left'
+            },
+            {
+                title: '状态',
+                dataIndex: 'state',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    switch (text) {
+                        case '00':
+                            return '完成';
+                        case '01':
+                            return '待处理';
+                        case '02':
+                            return '正在处理';
+                        case '03':
+                            return '作废';
+                        case '04':
+                            return '不合格';
+                        case '05':
+                            return '退回';
+                        case '06':
+                            return '';
+                    }
+                }
+            },
+        ];
+    });
+
+    // 备件 出库 分页
+    $scope.opWorkFittingsOutPage.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.opWorkFittingsOutPage.getData;
+        $scope.closeMessagePopUp();
+        $scope.column = [
+            {
+                title: '申请编号',
+                dataIndex: 'sn',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '申请日期',
+                dataIndex: 'createTime',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    return new Date(text).Format('yyyy-MM-dd')
+                }
+            },
+            {
+                title: '申请人',
+                dataIndex: 'createUname',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '出库时间',
+                dataIndex: 'modifyTime',
+                sort: true,
+                align: 'center',
+                render(text, item) {
+                    if (item.state !== '00') return '';
+                    return new Date(text).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '操作人',
+                dataIndex: 'modifyUname',
+                sort: true,
+                align: 'center',
+                render(text, item) {
+                    if (item.state !== '00') return '';
+                    return text;
+                }
+            },
+            {
+                title: '备注',
+                dataIndex: 'summary',
+                sort: true,
+                width: '30%',
+                align: 'left'
+            },
+            {
+                title: '状态',
+                dataIndex: 'state',
+                sort: true,
+                align: 'center',
+                render(text) {
+                    switch (text) {
+                        case '00':
+                            return '已出库';
+                        case '01':
+                            return '待出库';
+                    }
+                }
+            },
+        ];
+    });
+
+    // 备件 还库 分页
+    $scope.opFittingsRebackPage.subscribe(res => {
+        $scope.datasource = res.body.data;
+        $scope.paging = res.body;
+        $scope.pagingGetData = $scope.opFittingsRebackPage.getData;
+        $scope.closeMessagePopUp();
+        $scope.column = [
+
+            {
+                title: '申请编号',
+                dataIndex: 'sn',
+                sort: true,
+                align: 'left'
+            },
+            {
+                title: '申请时间',
+                dataIndex: 'createTime',
+                sort: true,
+                align: 'center',
+                render(text, item) {
+                    return new Date(text).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '还库时间',
+                dataIndex: 'modifyTime',
+                sort: true,
+                align: 'center',
+                render(text, item) {
+                    if (item.state !== '00') return '';
+                    return new Date(text).Format('yyyy-MM-dd');
+                }
+            },
+            {
+                title: '申请人',
+                dataIndex: 'createUname',
+                sort: true,
+                align: 'center'
+            },
+            {
+                title: '操作人',
+                dataIndex: 'modifyUname',
+                sort: true,
+                align: 'center'
+            },
+        ];
+    });
+
+    // 批量入库模板下载
+    $scope.downloadTemplate = () => {
+        $scope.downloading = true;
+        $ocLazyLoad.load([
+            'theme/js/dist/components/downloadFile.js' + stamp
+        ]).then(() => $solway.download({
+            url: window.interface['GETfittingsDownloadTemplate'],
+            filename: null,
+            callback() {
+                $scope.downloading = false;
+            }
+        }));
+    };
+
+    // 页面 点击  影藏 弹出
+    document.addEventListener('click', eventListen);
+    function eventListen() {
+        $scope.searchActive = false;
+        // $scope.showOpenVotes = false;
+        // $scope.messagePopUp = false;
+        $scope.$apply();
+    }
+    $scope.$on('$destroy', () => {
+        document.removeEventListener('click', eventListen);
+    });
+
+});

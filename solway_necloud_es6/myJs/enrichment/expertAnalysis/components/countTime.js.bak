@@ -1,0 +1,278 @@
+ajaxData({
+    AddbaseDictionary: {
+        name: 'AddbaseDictionary',
+        data: {},
+        later: true
+    }
+}, {
+        __serviceName__: 'countTimeService'
+    })('countTimeCtrl', ['$scope', 'countTimeService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
+
+        //获取时间纬度 发送的dmsTime
+        $scope.$on('dmsTime', (item, v) => {
+            $scope.dmsTime = v;
+        })
+
+        //重新设置 日历切换的按钮
+        var btnFunction = () => {
+            //日 下一个按钮
+            $scope.nextD = () => {
+                setTimeout(() => {
+                    $('#cander1 .laydate-icon.laydate-next-m').click();
+                }, 0)
+            }
+
+            //日 上一个按钮
+            $scope.preD = () => {
+                setTimeout(() => {
+                    $('#cander1 .laydate-icon.laydate-prev-m').click();
+                }, 0)
+            }
+
+            //月 下一个按钮
+            $scope.nextM = () => {
+                setTimeout(() => {
+                    $('#cander2 .laydate-icon.laydate-next-y').click();
+                }, 0)
+            }
+
+            //月 上一个按钮
+            $scope.preM = () => {
+                setTimeout(() => {
+                    $('#cander2 .laydate-icon.laydate-prev-y').click();
+                }, 0)
+            }
+
+            //月 下一个按钮
+            $scope.nextY = () => {
+                setTimeout(() => {
+                    $('#cander3 .laydate-icon.laydate-next-y').click();
+                }, 0)
+            }
+
+            //月 上一个按钮
+            $scope.preY = () => {
+                setTimeout(() => {
+                    $('#cander3 .laydate-icon.laydate-prev-y').click();
+                }, 0)
+            }
+        }
+        btnFunction();
+
+        // layui日历
+        var myDate = new Date();
+        var maxYear = myDate.getFullYear();
+        var Month = myDate.getMonth() + 1;
+        var maxMonth = maxYear + '-' + Month;
+        var maxDay = maxMonth + '-' + myDate.getDate();
+
+        //日
+        laydate.render({
+            elem: '#cander1', //指定元素
+            position: 'static',
+            showBottom: true,
+            btns: ['now'],
+            theme: '#245182',
+            max: maxDay.toString(),
+            ready(date) {
+                $('#layui-laydate1 .laydate-btns-now').html('今日');
+            },
+            done: function (value, date) {
+                if ($scope[key[$scope.radioIndex]].indexOf(value) == '-1') {
+                    $scope[key[$scope.radioIndex]].push(value);
+                }
+                $scope.$apply();
+            }
+        });
+
+        //月
+        laydate.render({
+            elem: '#cander2', //指定元素
+            position: 'static',
+            showBottom: true,
+            btns: ['now', 'confirm'],
+            type: 'month',
+            theme: '#245182',
+            max: maxMonth.toString(),
+            ready(date) {
+                $('#layui-laydate2 .laydate-btns-now').html('本月');
+                $('#layui-laydate2').on('click', 'ul.layui-laydate-list.laydate-month-list li', () => {
+                    setTimeout(() => {
+                        $('#layui-laydate2 .laydate-btns-confirm').click();
+                    }, 0)
+                })
+            },
+            done: function (value, date) {
+                if ($scope[key[$scope.radioIndex]].indexOf(value) == '-1') {
+                    $scope[key[$scope.radioIndex]].push(value);
+                }
+                $scope.$apply();
+            }
+        });
+
+        //年
+        laydate.render({
+            elem: '#cander3', //指定元素
+            position: 'static',
+            showBottom: true,
+            btns: ['now', 'confirm'],
+            type: 'year',
+            theme: '#245182',
+            max: maxYear.toString(),
+            ready(date) {
+                $('#layui-laydate3 .laydate-btns-now').html('今年');
+                $('#layui-laydate3').on('click', 'ul.layui-laydate-list.laydate-year-list li', () => {
+                    setTimeout(() => {
+                        $('#layui-laydate3 .laydate-btns-confirm').click();
+                    }, 0)
+                })
+            },
+            done: function (value, date) {
+                if ($scope[key[$scope.radioIndex]].indexOf(value) == '-1') {
+                    $scope[key[$scope.radioIndex]].push(value);
+                }
+                $scope.$apply();
+            }
+        });
+
+        //切换分析类型 -> 清空统计时间弹框
+        $scope.$on('clearTime',()=>{
+            $scope.radioToSelect('日', 3);
+            $scope.radioIndex = 1;
+            $scope.timeGroupDay = [];
+            $scope.timeGroupMonth = [];
+            $scope.timeGroupYear = [];
+            $scope.timeGroupUser = [];
+            parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
+        })
+
+        //获取历史数据
+        $scope.$on('haveData', (event, v) => {
+            if (!v) {
+                $scope.radioToSelect('日', 3);
+                $scope.radioIndex = 1;
+                $scope.timeGroupDay = [];
+                $scope.timeGroupMonth = [];
+                $scope.timeGroupYear = [];
+                $scope.timeGroupUser = [];
+                $scope.$emit('noChecked', 'countTime');
+                return;
+            }
+            $scope.$emit('addCallback','countTime');
+            $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioName, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.dateType);
+            $scope.radioIndex = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.radioIndex;
+            $scope[key[$scope.radioIndex]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].ctime.checkData;
+        })
+
+        //单选框选中-> 更改select的值
+        $scope.radioToSelect = (name, dateType) => {
+            var radioIndex = document.querySelectorAll('[name=cTime]'):: [].filter(item => item.checked).map(item => item.dataset.index);
+            $scope.radioName = name;
+            $scope.dateType = dateType;
+            $scope.$emit('radioToFather', { 'name': name, 'type': 'countTime', 'dateType': dateType });
+            $scope.radioIndex = radioIndex.length > 0 ? radioIndex[0] : 1;
+        }
+        $scope.radioToSelect('日', 3);
+
+        $scope.timeGroupDay = [];
+        $scope.timeGroupMonth = [];
+        $scope.timeGroupYear = [];
+        $scope.timeGroupUser = [];
+        $scope.GroupUser = {
+            date: new Date,
+            startDate: new Date,
+            endDate: new Date
+        }
+
+        //确定按钮
+        var arr = [];
+        $scope.allDate = 0;
+        $scope.oneAdd = () => {
+            //页面显示用的json
+            var groupJson = {
+                startDate: $scope.GroupUser.startDate.showDate,
+                endDate: $scope.GroupUser.endDate.showDate
+            }
+            var date = ($scope.GroupUser.endDate.getTime() - $scope.GroupUser.startDate.getTime()) / (1000 * 60 * 60 * 24);
+            date = Math.ceil(date);
+            $scope.allDate += date;
+            // 未去重的数据
+            $scope.timeGroupUser.push(groupJson);
+            // 数组格式转换 (后台要的数据格式)
+            var i = `${groupJson.startDate},${groupJson.endDate}`;
+            arr.push(i);
+            // 数组去重
+            $scope.newtimeGroupUser = [...new Set(arr)];
+            //整理 显示到页面的数据格式
+            $scope.timeGroupUser = [];
+            $scope.newtimeGroupUser.map((item) => {
+                var m = item.split(",");
+                $scope.timeGroupUser.push({ 'startDate': m[0], 'endDate': m[1] });
+            })
+        }
+
+        const key = {
+            1: 'timeGroupDay',
+            2: 'timeGroupMonth',
+            3: 'timeGroupYear',
+            4: 'timeGroupUser',
+        }
+
+        //右侧删除小按钮
+        $scope.delRight = (id, index) => {
+            $scope[key[$scope.radioIndex]].splice(index, 1);
+            if ($scope[key[$scope.radioIndex]].length == 0) {
+                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
+                $scope.$emit('noChecked', 'countTime');
+            }
+        }
+
+        //全部删除
+        $scope.delRightAll = () => {
+            if ($scope[key[$scope.radioIndex]].length == 0) {
+                toaster.pop('error', '', '请至少选择一条');
+            } else {
+                $solway.confirm({ message: '确定全部删除吗？' }, () => {
+                    $scope[key[$scope.radioIndex]] = [];
+                    parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
+                    $scope.$emit('noChecked', 'countTime');
+                    $scope.$apply();
+                });
+            }
+        }
+
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('cancelCallback');
+        }
+
+        //确定
+        $scope.confirm = () => {
+            if ($scope[key[$scope.radioIndex]].length == 0) {
+                toaster.pop('error', '', '所选数据不能为空');
+                return;
+            } else if (parentmyAjaxData.config.anlsType == 1 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].analysisObjectK == 99 && $scope.radioIndex == 1 && $scope[key[$scope.radioIndex]].length * parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData[parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex].length >= 31) {
+                toaster.pop('error', '', '1分钟级数据设备数与天数之积应小于31');
+                return;
+            } else if (parentmyAjaxData.config.anlsType == 1 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].analysisObjectK == 99 && (($scope.radioIndex == 2 && $scope[key[$scope.radioIndex]].length > 1) || ($scope.radioIndex == 3 && $scope[key[$scope.radioIndex]].length >= 1))) {
+                toaster.pop('error', '', '1分钟级数据设备数与天数之积应小于31');
+                return;
+            } 
+            else if (parentmyAjaxData.config.anlsType == 1 && $scope.dmsTime == 5 && parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].analysisObjectK == 99 && $scope.radioIndex == 4 && $scope.allDate * parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData[parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex].length >= 31) {
+                toaster.pop('error', '', '1分钟级数据设备数与天数之积应小于31');
+                return;
+            }
+
+            if ($scope.radioIndex == 4) {
+                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify($scope.newtimeGroupUser));
+            } else {
+                parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify($scope[key[$scope.radioIndex]]));
+            }
+            //历史数据的set
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].radioName = $scope.radioName;
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].dateType = $scope.dateType;
+            parentmyAjaxData.config.countTime[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope[key[$scope.radioIndex]]));
+            $scope.$emit('addCallback','countTime');
+        }
+    });
