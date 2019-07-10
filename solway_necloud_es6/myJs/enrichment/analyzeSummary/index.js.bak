@@ -23,7 +23,7 @@ ajaxData({
         data: {},
         later: true
     }
-}, {})('analyzeSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout'], ($scope, myAjaxData, historicalRecord, $timeout) => {
+}, {})('analyzeSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
     historicalRecord.init();// 历史记录 初始化
     $scope.beforeLoading = true; // 页面loading
     $scope.themeLoading = true;
@@ -141,11 +141,15 @@ ajaxData({
     // 主题切换
     $scope.$on('changeTheme', (e, theme) => {
         $scope.themeLoading = true;
+        _czc.push(["_trackEvent", $state.current.name + '_$_' + window.localStorage.username, 'themeSwitch', theme]);
         return computeThemeDetail(theme);
     });
 
     // 返回 首页 能流图
-    $scope.goIndex = () => computeThemeDetail('default');
+    $scope.goIndex = () => {
+        _czc.push(["_trackEvent", $state.current.name + '_$_' + window.localStorage.username, 'themeSwitch', 'default']);
+        return computeThemeDetail('default');
+    };
 
     // theme 切换 计算
     function computeThemeDetail(theme = $scope.theme) {

@@ -125,14 +125,16 @@ ajaxData(
         const keys = Object.keys(res.body.names);
         const names = Object.values(res.body.names);
         const idIndex = names.findIndex(v => v === $scope.turbineDynamoPoints2.activeEqName);
+        const ydatas = [keys.map(v => res.body[v]).concat([res.body.dynamo_rs_torque_curve])];
         $scope.turbineDynamoPoints2.chart = {
-            types: [new Array(keys.length).fill('line')],
+            types: [new Array(keys.length).fill('line').concat('line')],
             xdata: res.body.x,
-            linenames: [names],
-            ydatas: [keys.map(v => res.body[v])],
+            linenames: [names.concat('中位数')],
+            xmin: Math.floor(ydatas[0][0][0][0]) - 1,
+            ydatas,
             // ydatas: [keys.map(v => res.body[v].slice(0, keys.length))],
-            z: [keys.map((v, i) => i === idIndex ? 3 : 2)],
-            colors: [keys.map((v, i) => i === idIndex ? '#FF6C6C' : '#fff')]
+            z: [keys.map((v, i) => i === idIndex ? 4 : 2).concat(3)],
+            colors: [keys.map((v, i) => i === idIndex ? '#75D3FF' : '#fff').concat('#FF6C6C')]
         };
     });
 
@@ -145,8 +147,8 @@ ajaxData(
         event && $(event.target).parents('tr').css('background', '#1b4980').siblings().css('background', '');
         $scope.turbineDynamoPoints2.chart = {
             ...$scope.turbineDynamoPoints2.chart,
-            z: [ids.map((v, i) => i === idIndex ? 3 : 2)],
-            colors: [ids.map((v, i) => i === idIndex ? '#FF6C6C' : '#fff')],
+            z: [ids.map((v, i) => i === idIndex ? 4 : 2)],
+            colors: [ids.map((v, i) => i === idIndex ? '#75D3FF' : '#fff')],
         };
         $scope.turbineDynamoPoints2.activeEqName = item.eq_name;
     };

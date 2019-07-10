@@ -129,10 +129,18 @@ ajaxData(
             });
         }
         else if (tabIndex === 1) {
-            $scope.eventType.getData({ dictType: 'EVENT_TYPE' });
-            const res = await $scope.getDeviceType.getData();
-            $scope.deviceRunList.deviceType = res.data[0].devid;
-            $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+            if (!$scope.eventType.res) {
+                $scope.eventType.getData({ dictType: 'EVENT_TYPE' });
+            }
+            if (!$scope.getDeviceType.res) {
+                const res = await $scope.getDeviceType.getData();
+                $scope.deviceRunList.deviceType = res.data[0].devid;
+            }
+            if (!$scope.queryDeviceWithType.res) {
+                $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+            } else {
+                $scope.deviceRunList.getData({ date: dateTime.showDate, pageIndex: 0});
+            }
         }
     };
     // 电站  历史日   时间   列表

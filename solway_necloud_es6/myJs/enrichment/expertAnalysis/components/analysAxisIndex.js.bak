@@ -1,312 +1,170 @@
 ajaxData({
-// 获取指标
-HighAnalysis_selectFds: {
-    name: 'GETHighAnalysis_selectFds',
-    data: {},
-    later: true
-},
+    // 获取指标
+    HighAnalysis_selectFds: {
+        name: 'GETHighAnalysis_selectFds',
+        data: {},
+        later: true
+    },
 }, {
-    __serviceName__: 'analysService'
-})('analysIndexCtrl', ['$scope', 'analysService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
-    //对标分析-> 获取分析对象 发送的dmsType
-    $scope.$on('bench_dmsType', (e,v) => {
-        $scope.anlsType = v;
-        //对标分析-> 获取分析指标的数据
-        if($scope.anlsType == 3){
-            $scope.HighAnalysis_selectFds.getData({
-                stationClass: "01",
-                anlsType: $scope.anlsType,
-                dmsType: parentmyAjaxData.config.dmsType,
-                dmsTime: null
-            })
-        }
-    })
-    
-    //趋势分析-> 获取时间纬度 发送的dmsTime
-    $scope.$on('trend_dmsTime', (e, v) => {
-        $scope.anlsType = parentmyAjaxData.config.anlsType;
-        $scope.dmsTime = v;
-        //趋势分析-> 获取分析指标的数据
-        if($scope.anlsType == 2){
-            $scope.HighAnalysis_selectFds.getData({
-                stationClass: "01",
-                anlsType: parentmyAjaxData.config.anlsType,
-                dmsType: parentmyAjaxData.config.dmsType,
-                dmsTime: $scope.dmsTime
-            })
-        }
-    })
-
-    $scope.HighAnalysis_selectFds.subscribe(res => {
-        if (!res.body) {
-            toaster.pop('error', '', '分析指标无数据');
-            $scope.$emit('analysNan', { data: 1});
-            return;
-        }
-        $scope.analysData = res.body;
-        $scope.$emit('analysNan', { data: 0});
-        var key;
-        if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
-            //图表没有数据
-            for(key in $scope.analysData){
-                $scope.analysData[key].ll.map((item)=>{
-                    item.actFdTb = 0;
-                    item.actFdHb = 0;
+        __serviceName__: 'analysService'
+    })('analysIndexCtrl', ['$scope', 'analysService', 'actionRecord', '$timeout', 'toaster', 'myAjaxData'], ($scope, _myAjaxData, historicalRecord, $timeout, toaster, parentmyAjaxData) => {
+        //对标分析-> 获取分析对象 发送的dmsType
+        $scope.$on('bench_dmsType', (e, v) => {
+            $scope.anlsType = v;
+            //对标分析-> 获取分析指标的数据
+            if ($scope.anlsType == 3) {
+                $scope.HighAnalysis_selectFds.getData({
+                    stationClass: "01",
+                    anlsType: $scope.anlsType,
+                    dmsType: parentmyAjaxData.config.dmsType,
+                    dmsTime: null
                 })
             }
-            $scope.analysCheckData = [];
-            $scope.radioToSelect($scope.analysData.ctg1, 0);
-            $scope.$emit('noChecked', 'analysAxisIndex');
-        }
-        else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)){
-            //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
-            return;
-        }
-        else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] &&(parentmyAjaxData.config.anlsType==parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)&&(parentmyAjaxData.config.dmsType==parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)&&($scope.dmsTime==parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)){
-            //趋势分析 图表有数据 分析类型不重新选 分析对象不重新选 时间纬度不重新选
-            return;
-        } else {
-            for(key in $scope.analysData){
-                $scope.analysData[key].ll.map((item)=>{
-                    item.actFdTb = 0;
-                    item.actFdHb = 0;
+        })
+
+        //趋势分析-> 获取时间纬度 发送的dmsTime
+        $scope.$on('trend_dmsTime', (e, v) => {
+            $scope.anlsType = parentmyAjaxData.config.anlsType;
+            $scope.dmsTime = v;
+            //趋势分析-> 获取分析指标的数据
+            if ($scope.anlsType == 2) {
+                $scope.HighAnalysis_selectFds.getData({
+                    stationClass: "01",
+                    anlsType: parentmyAjaxData.config.anlsType,
+                    dmsType: parentmyAjaxData.config.dmsType,
+                    dmsTime: $scope.dmsTime
                 })
             }
-            $scope.analysCheckData = [];
-            parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
-            $scope.radioToSelect($scope.analysData.ctg1, 0);
-            $scope.$emit('noChecked', 'analysAxisIndex');
-        }
-    });
+        })
 
-    //监听 分析指标页面打开
-    $scope.$on('analysOpen', () => {
-        //获取 checked 的数据 -> 重现到左侧列表
-        if($scope.analysCheckData.length > 0){
+        $scope.HighAnalysis_selectFds.subscribe(res => {
+            if (!res.body) {
+                toaster.pop('error', '', '分析指标无数据');
+                $scope.$emit('analysNan', { data: 1 });
+                return;
+            }
+            $scope.analysData = res.body;
+            $scope.$emit('analysNan', { data: 0 });
             var key;
-            for(key in $scope.analysData){
-                $scope.analysData[key].ll.map((son)=>{
-                    if(son.fdKey == $scope.analysCheckData[0].fdKey){
-                        son.checked = true;
-                    }
-                })
-            }
-        }
-    })
-
-    //排序 源数据
-    $scope.sortArr = [
-        {
-            'key': 'asc',
-            'value': '升序'
-        },
-        {
-            'key': 'desc',
-            'value': '降序'
-        }
-    ]
-
-    //搜索功能
-    $scope.getList = () => {
-        $scope.analysBottom.map((item) => {
-            if (item.fdName.includes($scope.keyWords)) {
-                item.show = true;
-            } else {
-                item.show = false;
-            }
-        })
-    }
-
-    //单选框选中-> 更改select的值
-    $scope.radioToSelect = (item, index) => {
-        $scope.alysIndexK = item.k;
-        $scope.$emit('radioToFather', { 'type': 'analys', 'value': item.v});
-        $scope.analysBottom = item.ll;
-        //给数据赋初始show值
-        $scope.analysBottom.map((item) => {
-            item.show = true;
-        })
-        $scope.alysItem = item;
-        $scope.radioIndex = index;
-        //处理fdStyle 字段
-        fdStyleFun();
-    }
-
-    //处理fdStyle 字段
-    const fdStyleFun = () => {
-        var styleKey = {
-            1: '曲线',
-            2: '折线',
-            3: '柱状图',
-            4: '散点'
-        }
-        $scope.analysBottom.map((item) => {
-            var result = item.fdStyle.split(",");
-            var newFdStyleCopy = [];
-            item.newFdStyle = [];
-            result.map((item) => {
-                var data = {};
-                data.key = item - 0;
-                data.value = styleKey[item];
-                newFdStyleCopy.push(data);
-            })
-            item.newFdStyle = newFdStyleCopy;
-        })
-    }
-
-    $scope.analysCheckData = [];
-
-    //左侧多选按钮-> 右侧 穿梭
-    $scope.shuttle = (item, $index) => {
-        //点击一个区域 让另一个区域的选中状态置空
-        if ($scope.radioIndex == 0) {
-            $scope.analysData.ctg2.ll.map((item) => {
-                item.checked = false;
-            })
-        } else {
-            $scope.analysData.ctg1.ll.map((item) => {
-                item.checked = false;
-            })
-        }
-        //实现单选 和 重复点击取消选中
-        if (!item.checked) {
-            item.checked = false;
-        } else {
-            $scope.analysBottom.map((item) => {
-                item.checked = false;
-            })
-            item.checked = true;
-        }
-
-        //获取选中的数据
-        var filterBottom = $scope.analysBottom.filter(item => item.checked);
-        if (filterBottom.length > 0) {
-            filterBottom.map((item) => {
-                if ($scope.analysCheckData.indexOf(item) == '-1') {
-                    $scope.analysCheckData = [];
-                    $scope.analysCheckData.push(item);
+            if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
+                //图表没有数据
+                for (key in $scope.analysData) {
+                    $scope.analysData[key].ll.map((item) => {
+                        item.actFdTb = 0;
+                        item.actFdHb = 0;
+                        item.tableType = 1;
+                        item.sortType = 'asc';
+                    })
                 }
-            })
-        } else {
-            $scope.analysCheckData = [];
-        }
-
-        //获取同比 环比
-        $scope.actFdTb = item.actFdTb;
-        $scope.actFdHb = item.actFdHb;
-    }
-
-    //右侧删除小按钮
-    $scope.delRight = (fdKey, index) => {
-        $scope.analysData.ctg1.ll.forEach((item) => {
-            if (item.fdKey == fdKey) {
-                item.checked = false;
+                $scope.analysCheckData = [];
+                $scope.radioToSelect($scope.analysData.ctg1, 0);
+                $scope.$emit('noChecked', 'analysAxisIndex');
             }
-        })
-        $scope.analysData.ctg2.ll.forEach((item) => {
-            if (item.fdKey == fdKey) {
-                item.checked = false;
+            else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)) {
+                //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
+                return;
             }
-        })
-        $scope.analysBottom.forEach((item) => {
-            if (item.fdKey == fdKey) {
-                item.checked = false;
-            }
-        })
-        $scope.analysCheckData.splice(index, 1);
-        if ($scope.analysCheckData.length == 0) {
-            parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
-        }
-        $scope.$emit('noChecked', 'analysAxisIndex');
-    }
-
-    //全部删除
-    $scope.delRightAll = () => {
-        if ($scope.analysCheckData.length == 0) {
-            toaster.pop('error', '', '请至少选择一条');
-        } else {
-            $solway.confirm({ message: '确定全部删除吗？' }, () => {
+            else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType) && ($scope.dmsTime == parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)) {
+                //趋势分析 图表有数据 分析类型不重新选 分析对象不重新选 时间纬度不重新选
+                return;
+            } else {
+                for (key in $scope.analysData) {
+                    $scope.analysData[key].ll.map((item) => {
+                        item.actFdTb = 0;
+                        item.actFdHb = 0;
+                        item.tableType = 1;
+                        item.sortType = 'asc';
+                    })
+                }
                 $scope.analysCheckData = [];
                 parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
+                $scope.radioToSelect($scope.analysData.ctg1, 0);
                 $scope.$emit('noChecked', 'analysAxisIndex');
-                $scope.analysData.ctg1.ll.forEach((item) => {
-                    item.checked = false;
-                })
-                $scope.analysData.ctg2.ll.forEach((item) => {
-                    item.checked = false;
-                })
-                $scope.analysBottom.forEach((item) => {
-                    item.checked = false;
-                })
-                $scope.$apply();
-            });
-        }
-    }
+            }
+        });
 
-    //点击同比 环比
-    $scope.tongBi = (v, type) => {
-        if (type == 'tong') {
+        //监听 分析指标页面打开
+        $scope.$on('analysOpen', () => {
+            //获取 checked 的数据 -> 重现到左侧列表
+            if ($scope.analysCheckData.length > 0) {
+                var key;
+                for (key in $scope.analysData) {
+                    $scope.analysData[key].ll.map((son) => {
+                        if (son.fdKey == $scope.analysCheckData[0].fdKey) {
+                            son.checked = true;
+                        }
+                    })
+                }
+            }
+        })
+
+        //排序 源数据
+        $scope.sortArr = [
+            {
+                'key': 'asc',
+                'value': '升序'
+            },
+            {
+                'key': 'desc',
+                'value': '降序'
+            }
+        ]
+
+        //搜索功能
+        $scope.getList = () => {
             $scope.analysBottom.map((item) => {
-                if (item.fdKey == v.fdKey) {
-                    item.actFdTb == 0 ? item.actFdTb = 1 : item.actFdTb = 0;
-                    if (v.checked) {
-                        $scope.actFdTb = item.actFdTb;
-                    }
+                if (item.fdName.includes($scope.keyWords)) {
+                    item.show = true;
+                } else {
+                    item.show = false;
                 }
             })
-        } else {
+        }
+
+        //单选框选中-> 更改select的值
+        $scope.radioToSelect = (item, index) => {
+            $scope.alysIndexK = item.k;
+            $scope.$emit('radioToFather', { 'type': 'analys', 'value': item.v });
+            $scope.analysBottom = item.ll;
+            123
+            //给数据赋初始show值
             $scope.analysBottom.map((item) => {
-                if (item.fdKey == v.fdKey) {
-                    item.actFdHb == 0 ? item.actFdHb = 1 : item.actFdHb = 0;
-                    if (v.checked) {
-                        $scope.actFdHb = item.actFdHb;
-                    }
-                }
+                item.show = true;
+            })
+            $scope.alysItem = item;
+            $scope.radioIndex = index;
+            //处理fdStyle 字段
+            fdStyleFun();
+        }
+
+        //处理fdStyle 字段
+        const fdStyleFun = () => {
+            var styleKey = {
+                1: '曲线',
+                2: '折线',
+                3: '柱状图',
+                4: '散点'
+            }
+            $scope.analysBottom.map((item) => {
+                var result = item.fdStyle.split(",");
+                var newFdStyleCopy = [];
+                item.newFdStyle = [];
+                result.map((item) => {
+                    var data = {};
+                    data.key = item - 0;
+                    data.value = styleKey[item];
+                    newFdStyleCopy.push(data);
+                })
+                item.newFdStyle = newFdStyleCopy;
             })
         }
-    }
 
-    //取消
-    $scope.cancel = () => {
-        $scope.$emit('cancelCallback');
-    }
+        $scope.analysCheckData = [];
 
-    // 获取select 图表类型 (曲线、柱状图)
-    $scope.query = {
-        'tableType': 1,
-        'sortType': 'asc'
-    }
-    
-    //获取历史数据
-    $scope.$on('haveData', (e,v) => {
-        if(!v){
-            $scope.$emit('noChecked', 'analysAxisIndex');
-            return;
-        }
-        if(parentmyAjaxData.config.anlsType != 1){
-            $scope.analysData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.analysData;
-            $scope.anlsType = parentmyAjaxData.config.tableData[$scope.checkChart].analysisType;
-            $scope['historyData' + parentmyAjaxData.config.checkChart] = true;
-            $scope.alysIndexK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysIndexK;
-
-            parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysItem.ll.map((item)=>{
-                if(item.fdKey == parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.checkData[0].fdKey){
-                    $scope.actFdTb = item.actFdTb = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.actFdTb;
-                    $scope.actFdHb = item.actFdHb = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.actFdHb;
-                }
-            })
-
-            setTimeout(()=>{
-                $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysItem,parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.radioIndex, 1);
-                $scope.analysCheckData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.checkData;
-                //恢复被删除的 analysFds 参数
-                parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart];
-            },0)
-               
-            $scope.query.sortType = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.sortType;
-            $scope.query.tableType = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.tableType;
-            
-            if (parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.radioIndex == 0) {
+        //左侧多选按钮-> 右侧 穿梭
+        $scope.shuttle = (item, $index) => {
+            //点击一个区域 让另一个区域的选中状态置空
+            if ($scope.radioIndex == 0) {
                 $scope.analysData.ctg2.ll.map((item) => {
                     item.checked = false;
                 })
@@ -315,49 +173,244 @@ HighAnalysis_selectFds: {
                     item.checked = false;
                 })
             }
-            $scope.$emit('addCallback','analysAxisIndex');
-        }
-    })
+            //实现单选 和 重复点击取消选中
+            // if (!item.checked) {
+            //     item.checked = false;
+            // } else {
+            //     $scope.analysBottom.map((item) => {
+            //         item.checked = false;
+            //     })
+            //     item.checked = true;
+            // }
 
-    //确定
-    $scope.actFdTb = 0;
-    $scope.actFdHb = 0;
-    $scope.confirm = () => {
-        if ($scope.analysCheckData.length == 0) {
-            toaster.pop('error', '', '所选数据不能为空');
-            return;
-        }
-        var analysFds_y1 = {};
-        if(parentmyAjaxData.config.anlsType==3){
-            analysFds_y1 = {
-                fdKey: $scope.analysCheckData[0].fdKey
+            //获取选中的数据
+            var filterBottom = $scope.analysBottom.filter(item => item.checked);
+            if (filterBottom.length > 3) {
+                item.checked = false;
+                toaster.pop('error', '', '最多选择3个指标');
+                return;
             }
-        } else {
-            analysFds_y1 = {
-                fdKey: $scope.analysCheckData[0].fdKey,
-                fdTb: $scope.actFdTb,
-                fdHb: $scope.actFdHb
+            if (filterBottom.length > 0) {
+                $scope.analysCheckData = [];
+                filterBottom.map((item) => {
+                    if ($scope.analysCheckData.indexOf(item) == '-1') {
+                        $scope.analysCheckData.push(item);
+                    }
+                })
+            } else {
+                $scope.analysCheckData = [];
+            }
+
+            //获取同比 环比
+            $scope.actFdTb = item.actFdTb;
+            $scope.actFdHb = item.actFdHb;
+        }
+
+        //右侧删除小按钮
+        $scope.delRight = (fdKey, index) => {
+            $scope.analysData.ctg1.ll.forEach((item) => {
+                if (item.fdKey == fdKey) {
+                    item.checked = false;
+                }
+            })
+            $scope.analysData.ctg2.ll.forEach((item) => {
+                if (item.fdKey == fdKey) {
+                    item.checked = false;
+                }
+            })
+            $scope.analysBottom.forEach((item) => {
+                if (item.fdKey == fdKey) {
+                    item.checked = false;
+                }
+            })
+            $scope.analysCheckData.splice(index, 1);
+            if ($scope.analysCheckData.length == 0) {
+                parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
+            }
+            $scope.$emit('noChecked', 'analysAxisIndex');
+        }
+
+        //全部删除
+        $scope.delRightAll = () => {
+            if ($scope.analysCheckData.length == 0) {
+                toaster.pop('error', '', '请至少选择一条');
+            } else {
+                $solway.confirm({ message: '确定全部删除吗？' }, () => {
+                    $scope.analysCheckData = [];
+                    parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
+                    $scope.$emit('noChecked', 'analysAxisIndex');
+                    $scope.analysData.ctg1.ll.forEach((item) => {
+                        item.checked = false;
+                    })
+                    $scope.analysData.ctg2.ll.forEach((item) => {
+                        item.checked = false;
+                    })
+                    $scope.analysBottom.forEach((item) => {
+                        item.checked = false;
+                    })
+                    $scope.$apply();
+                });
             }
         }
-        parentmyAjaxData.config.benchSort[parentmyAjaxData.config.checkChart] = parentmyAjaxData.config.anlsType==3 ? $scope.analysCheckData[0].fdKey + ',' + $scope.query.sortType : null;
-        parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart][0] = analysFds_y1;
 
-        $scope['analysFdsArr'+ parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart]));
+        //点击同比 环比
+        $scope.tongBi = (v, type) => {
+            if (type == 'tong') {
+                $scope.analysBottom.map((item) => {
+                    if (item.fdKey == v.fdKey) {
+                        item.actFdTb == 0 ? item.actFdTb = 1 : item.actFdTb = 0;
+                        if (v.checked) {
+                            $scope.actFdTb = item.actFdTb;
+                        }
+                    }
+                })
+            } else {
+                $scope.analysBottom.map((item) => {
+                    if (item.fdKey == v.fdKey) {
+                        item.actFdHb == 0 ? item.actFdHb = 1 : item.actFdHb = 0;
+                        if (v.checked) {
+                            $scope.actFdHb = item.actFdHb;
+                        }
+                    }
+                })
+            }
+        }
 
-        parentmyAjaxData.config.fdStyle = $scope.query.tableType;
-        parentmyAjaxData.config.fdStyleArr[parentmyAjaxData.config.checkChart] = $scope.query.tableType;
-        //存储历史数据
-        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].alysIndexK = $scope.alysIndexK;
-        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].analysData = $scope.analysData;
-        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].alysItem = $scope.alysItem;
-        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
-        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope.analysCheckData));
-        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].sortType = $scope.query.sortType;
-        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].tableType = $scope.query.tableType;
-        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].actFdTb = $scope.actFdTb;
-        parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].actFdHb = $scope.actFdHb;
-        
-        $scope.$emit('analysFds_fdName',{'fdName': $scope.analysCheckData[0].fdName});
-        $scope.$emit('addCallback','analysAxisIndex');
-    }
-});
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('cancelCallback');
+        }
+
+        // 获取select 图表类型 (曲线、柱状图)
+        $scope.query = {
+            'tableType': 1,
+            'sortType': 'asc'
+        }
+
+        //获取历史数据
+        $scope.$on('haveData', (e, v) => {
+            if (!v) {
+                $scope.$emit('noChecked', 'analysAxisIndex');
+                return;
+            }
+            if (parentmyAjaxData.config.anlsType != 1) {
+                $scope.analysData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.analysData;
+                $scope.anlsType = parentmyAjaxData.config.tableData[$scope.checkChart].analysisType;
+                $scope['historyData' + parentmyAjaxData.config.checkChart] = true;
+                $scope.alysIndexK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysIndexK;
+
+                // parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysItem.ll.map((item)=>{
+                //     if(item.fdKey == parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.checkData[0].fdKey){
+                //         $scope.actFdTb = item.actFdTb = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.actFdTb;
+                //         $scope.actFdHb = item.actFdHb = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.actFdHb;
+                //     }
+                // })
+
+                setTimeout(() => {
+                    $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.alysItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.radioIndex, 1);
+                    $scope.analysCheckData = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.checkData;
+                    //恢复被删除的 analysFds 参数
+                    parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = $scope['analysFdsArr' + parentmyAjaxData.config.checkChart];
+                }, 0)
+
+                // $scope.query.sortType = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.sortType;
+                // $scope.query.tableType = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.tableType;
+
+                if (parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alys.radioIndex == 0) {
+                    $scope.analysData.ctg2.ll.map((item) => {
+                        item.checked = false;
+                    })
+                } else {
+                    $scope.analysData.ctg1.ll.map((item) => {
+                        item.checked = false;
+                    })
+                }
+                $scope.$emit('addCallback', 'analysAxisIndex');
+            }
+        })
+
+        //确定
+        // $scope.actFdTb = 0;
+        // $scope.actFdHb = 0;
+        $scope.confirm = () => {
+            if ($scope.analysCheckData.length == 0) {
+                toaster.pop('error', '', '所选数据不能为空');
+                return;
+            }
+            // var analysFds_y1 = {};
+            var analysFds_y1 = [];
+            var sort = '';
+            if (parentmyAjaxData.config.anlsType == 3) {
+                $scope.analysCheckData.forEach((item) => {
+                    //获取fds
+                    analysFds_y1.push(
+                        {
+                            fdKey: item.fdKey
+                        }
+                    )
+                    //获取sort
+                    sort += item.fdKey + ',' + item.sortType + ';';
+
+                })
+                sort = sort.substr(0,sort.length - 1);
+                // analysFds_y1 = {
+                //     fdKey: $scope.analysCheckData[0].fdKey
+                // }
+            } else {
+                $scope.analysCheckData.forEach((item) => {
+                    analysFds_y1.push(
+                        {
+                            fdKey: item.fdKey,
+                            fdTb: item.actFdTb,
+                            fdHb: item.actFdHb
+                        }
+                    )
+                })
+                // analysFds_y1 = {
+                //     fdKey: $scope.analysCheckData[0].fdKey,
+                //     fdTb: $scope.actFdTb,
+                //     fdHb: $scope.actFdHb
+                // }
+            }
+            // parentmyAjaxData.config.benchSort[parentmyAjaxData.config.checkChart] = parentmyAjaxData.config.anlsType == 3 ? $scope.analysCheckData[0].fdKey + ',' + $scope.query.sortType : null;
+
+            parentmyAjaxData.config.benchSort[parentmyAjaxData.config.checkChart] = sort;
+            
+            parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = analysFds_y1;
+
+            $scope['analysFdsArr' + parentmyAjaxData.config.checkChart] = JSON.parse(JSON.stringify(parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart]));
+
+            // parentmyAjaxData.config.fdStyle = $scope.query.tableType;
+            var fdstyle = [];
+            $scope.analysCheckData.forEach((item) => {
+                fdstyle.push(
+                    {
+                        fdKey: item.fdKey,
+                        fdStyle: item.tableType
+                    }
+                )
+            })
+            parentmyAjaxData.config.fdStyleArr[parentmyAjaxData.config.checkChart] = fdstyle;
+            //存储历史数据
+            parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].alysIndexK = $scope.alysIndexK;
+            parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].analysData = $scope.analysData;
+            parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].alysItem = $scope.alysItem;
+            parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].radioIndex = $scope.radioIndex;
+            parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].checkData = JSON.parse(JSON.stringify($scope.analysCheckData));
+            // parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].sortType = $scope.query.sortType;
+            // parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].tableType = $scope.query.tableType;
+            parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].actFdTb = $scope.actFdTb;
+            parentmyAjaxData.config.alysHdata[parentmyAjaxData.config.checkChart].actFdHb = $scope.actFdHb;
+            var names = [];
+            $scope.analysCheckData.forEach((item, i) => {
+                names.push(
+                    {
+                        fdKey: item.fdKey,
+                        fdName: item.fdName
+                    }
+                );
+            })
+            $scope.$emit('analysFds_fdName', { 'fdName': names });
+            $scope.$emit('addCallback', 'analysAxisIndex');
+        }
+    });
