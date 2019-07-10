@@ -9,8 +9,8 @@ app.directive('switchListChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocL
             .switch-list-chart i.iconfont.active{ color:#31d3c9!important; }
             i.icon-daochu.disabled { color: rgba(255,255,255,.5)!important; }
         </style>
-        <i ng-show="!noChart" title="列表" style="margin-top: 4px;font-size:26px;" ng-click="changeShowShape('list')" class="iconfont icon-list" ng-class="{'active': showShape === 'list'}"></i>
-        <i ng-show="!noChart" title="图表" style="margin-top: 2px;font-size:22px;margin-left:2em;" ng-click="changeShowShape('chart')" class="iconfont {{chartIcon || 'icon-zhuzhuangtu'}}" ng-class="{'active': showShape === 'chart'}"></i>
+        <i ng-show="!noChart" title="{{iconTitle[0] || '列表'}}" style="margin-top: 4px;font-size:26px;" ng-click="changeShowShape('list')" class="iconfont icon-list" ng-class="{'active': showShape === 'list'}"></i>
+        <i ng-show="!noChart" title="{{iconTitle[1] || '图标'}}" style="margin-top: 2px;font-size:22px;margin-left:2em;" ng-click="changeShowShape('chart')" class="iconfont {{chartIcon || 'icon-zhuzhuangtu'}}" ng-class="{'active': showShape === 'chart'}"></i>
         <i ng-show="chart2" title="{{chart2.title}}" style="margin-top: 2px;font-size:22px;margin-left:2em;" ng-click="changeShowShape('chart2')" class="iconfont {{chart2.icon}}" ng-class="{'active': showShape === 'chart2'}"></i>
         <i ng-show="chart3" title="{{chart3.title}}" style="margin-top: 2px;font-size:24px;margin-left:2em;" ng-click="changeShowShape('chart3')" class="iconfont {{chart3.icon}}" ng-class="{'active': showShape === 'chart3'}"></i>
     </div>`,
@@ -21,6 +21,7 @@ app.directive('switchListChart', ['myAjaxData', '$ocLazyLoad', (myAjaxData, $ocL
         chartIcon: "=",
         chart2: '=',
         chart3: '=',
+        iconTitle: '='
     },
     link($scope, $element, $attrs) {
         

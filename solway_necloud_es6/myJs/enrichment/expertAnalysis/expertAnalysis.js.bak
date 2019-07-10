@@ -112,6 +112,9 @@ ajaxData({
 
         //初始化图表
         var line0 = echarts.init(document.getElementById("line0"));
+        var line1 = echarts.init(document.getElementById("line1"));
+        var line2 = echarts.init(document.getElementById("line2"));
+        var line3 = echarts.init(document.getElementById("line3"));
 
         // 分析类型下拉框的数据获取
         $scope.HighAnalysis_selectAnlsType.subscribe(res => {
@@ -530,7 +533,10 @@ ajaxData({
                             //获取到 yname  保证ydatas 和 yname 一致
                             $scope['analysfdName' + $scope.checkChart].forEach((item) => {
                                 if (key == item.fdKey) {
-                                    $scope['yname' + $scope.checkChart].push(item.fdName);
+                                    var units;
+                                    units = $scope.tableData.units[key] ? $scope.tableData.units[key] : '';
+                                    $scope['yname' + $scope.checkChart].push(item.fdName + '(' + units + ')');
+                                    $scope['newArrName' + $scope.checkChart].push(item.fdName);
                                 }
                             })
                             //获取到 fdstyle
@@ -542,11 +548,6 @@ ajaxData({
                             //获取到ydatas   同时获取ydatas 和 fdstyle，保证y轴数据 和 数据类型一致
                             myAjaxData.config.analysFds[myAjaxData.config.checkChart].forEach((son) => {
                                 if (key == son.fdKey) {
-                                    // $scope['analysfdName' + $scope.checkChart].forEach((item)=>{
-                                    //     if(item.fdKey == key){
-                                    //         $scope['yname' + $scope.checkChart].push(item.fdName);
-                                    //     }
-                                    // })
                                     $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key]);
                                 } else {
                                     if (myAjaxData.config.dmsType == 5) {
@@ -611,7 +612,7 @@ ajaxData({
                         $scope['ydatas' + $scope.checkChart].forEach((item, i) => {
                             series.push({
                                 type: $scope['tableType' + $scope.checkChart][i],
-                                name: $scope['yname' + $scope.checkChart][i],
+                                name: $scope['newArrName' + $scope.checkChart][i],
                                 yAxisIndex: i,
                                 data: item,
                                 barWidth: 15
@@ -626,9 +627,22 @@ ajaxData({
                             tooltip: {
                                 trigger: 'axis',
                             },
+                            toolbox: {
+                                show: true,
+                                orient: 'vertical',
+                                left: 'right',
+                                top: 'center',
+                                feature: {
+                                    mark: {show: true},
+                                    dataView: {show: true, readOnly: false},
+                                    magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                                    restore: {show: true},
+                                    saveAsImage: {show: true}
+                                }
+                            },
                             legend: {
                                 type: 'scroll',
-                                data: $scope['yname' + $scope.checkChart],
+                                data: $scope['newArrName' + $scope.checkChart],
                                 textStyle: {
                                     color: '#fff',
                                     fontSize: 12,
@@ -678,6 +692,7 @@ ajaxData({
                         //获取 xdata
                         $scope['xdata' + $scope.checkChart] = $scope.tableData.data.dtime;
                         $scope['ydatas' + $scope.checkChart] = [];
+                        $scope['newArrName' + $scope.checkChart] = [];
                         delete $scope.tableData.data.dtime;
                         //获取 yunits
                         // for (key in $scope.tableData.units) {
@@ -685,168 +700,274 @@ ajaxData({
                         //         $scope['yunits' + $scope.checkChart] = $scope.tableData.units[key];
                         //     }
                         // }
-
-                        // [
-                        //     {
-                        //         fdKey: item.fdKey,
-                        //         fdTb: item.actFdTb,
-                        //         fdHb: item.actFdHb
-                        //     },
-                        //     {
-                        //         fdKey: item.fdKey,
-                        //         fdTb: item.actFdTb,
-                        //         fdHb: item.actFdHb
-                        //     }
-                        // ]
                         var ydatalen = myAjaxData.config.analysFds[myAjaxData.config.checkChart].length;
-                        for(var i=0;i<ydatalen;i++){
+                        for (var i = 0; i < ydatalen; i++) {
                             $scope['ydatas' + $scope.checkChart].push([]);
+                            $scope['newArrName' + $scope.checkChart].push([]);
+                            $scope['tableType' + $scope.checkChart].push([]);
                         }
                         //判断 是否点击 同比 环比
-                        myAjaxData.config.analysFds[myAjaxData.config.checkChart].forEach((item,i) => {
+                        myAjaxData.config.analysFds[myAjaxData.config.checkChart].forEach((item, i) => {
                             var judge = item.fdTb.toString() + item.fdHb.toString();
                             var topKey = item.fdKey;
+                            var topName;
+                            $scope['analysfdName' + $scope.checkChart].forEach((v) => {
+                                if (v.fdKey == topKey) {
+                                    topName = v.fdName;
+                                }
+                            })
                             switch (judge) {
                                 case '10':
                                     for (key in $scope.tableData.data) {
+                                        // $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key]);
                                         $scope['yname' + $scope.checkChart] = [];
-                                        $scope['analysfdName' + $scope.checkChart].forEach((item) => {
-                                            if (key == item.fdKey) {
-                                                $scope['yname' + $scope.checkChart].push(item.fdName);
-                                            }
-                                        })
-                                        $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key]);
                                         for (key2 in $scope.tableData.data[key]) {
                                             if (key2.toLowerCase().indexOf('hb') == -1 && key2.toLowerCase().indexOf('tb') == -1) {
-                                                $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key][key2]);
+                                                if (key2 == topKey) {
+                                                    $scope['ydatas' + $scope.checkChart][i].push($scope.tableData.data[key][key2]);
+                                                    $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + topName);
+                                                    //获取到 fdstyle
+                                                    myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                        if (item.fdKey == key2) {
+                                                            $scope['tableType' + $scope.checkChart][i].push(tableStyle[item.fdStyle]);
+                                                        }
+                                                    })
+                                                }
+                                                //同步获取 yname
+                                                $scope['analysfdName' + $scope.checkChart].forEach((item) => {
+                                                    if (key2 == item.fdKey) {
+                                                        var units;
+                                                        units = $scope.tableData.units[key2] ? '(' + $scope.tableData.units[key2] + ')' : '';
+                                                        $scope['yname' + $scope.checkChart].push(item.fdName + units);
+                                                    }
+                                                })
+                                                //获取到 fdstyle
+                                                // myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                //     if (key2 == item.fdKey) {
+                                                //         $scope['tableType' + $scope.checkChart].push(tableStyle[item.fdStyle]);
+                                                //     }
+                                                // })
                                             } else if (key2.toLowerCase().indexOf('tb') != -1 && key2.toLowerCase().indexOf('rate') == -1) {
-                                                $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key][key2]);
-                                                $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + '同比');
+                                                if (key2.includes(topKey)) {
+                                                    $scope['ydatas' + $scope.checkChart][i].push($scope.tableData.data[key][key2]);
+                                                    $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + topName + '同比');
+                                                    //获取到 fdstyle
+                                                    myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                        if (key2.includes(topKey)) {
+                                                            $scope['tableType' + $scope.checkChart][i].push(tableStyle[item.fdStyle]);
+                                                        }
+                                                    })
+                                                }
+
+                                                //获取到 fdstyle
+                                                // myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                //     if (key2.includes(topKey)) {
+                                                //         $scope['tableType' + $scope.checkChart].push(tableStyle[item.fdStyle]);
+                                                //     }
+                                                // })
+
+                                                // $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key][key2]);
+                                                // $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + '同比');
                                             }
                                         }
                                     }
-                                    $scope['ydatas' + $scope.checkChart].map(() => {
-                                        $scope['tableType' + $scope.checkChart].push(tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle]);
-                                    })
                                     break;
                                 case '01':
                                     for (key in $scope.tableData.data) {
+                                        // $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key]);
                                         $scope['yname' + $scope.checkChart] = [];
-                                        $scope['analysfdName' + $scope.checkChart].forEach((item) => {
-                                            if (key == item.fdKey) {
-                                                $scope['yname' + $scope.checkChart].push(item.fdName);
-                                            }
-                                        })
-                                        $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key]);
+                                        // $scope['analysfdName' + $scope.checkChart].forEach((item) => {
+                                        //     if (key == item.fdKey) {
+                                        //         $scope['yname' + $scope.checkChart].push(item.fdName);
+                                        //     }
+                                        // })
+
                                         for (key2 in $scope.tableData.data[key]) {
                                             if (key2.toLowerCase().indexOf('hb') == -1 && key2.toLowerCase().indexOf('tb') == -1) {
-                                                $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key][key2]);
+                                                if (key2 == topKey) {
+                                                    $scope['ydatas' + $scope.checkChart][i].push($scope.tableData.data[key][key2]);
+                                                    $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + topName);
+                                                    //获取到 fdstyle
+                                                    myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                        if (item.fdKey == key2) {
+                                                            $scope['tableType' + $scope.checkChart][i].push(tableStyle[item.fdStyle]);
+                                                        }
+                                                    })
+                                                }
+                                                //同步获取 yname
+                                                $scope['analysfdName' + $scope.checkChart].forEach((item) => {
+                                                    if (key2 == item.fdKey) {
+                                                        var units;
+                                                        units = $scope.tableData.units[key2] ? '(' + $scope.tableData.units[key2] + ')' : '';
+                                                        $scope['yname' + $scope.checkChart].push(item.fdName + units);
+                                                    }
+                                                })
+                                                //获取到 fdstyle
+                                                // myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                //     if (key2 == item.fdKey) {
+                                                //         $scope['tableType' + $scope.checkChart].push(tableStyle[item.fdStyle]);
+                                                //     }
+                                                // })
                                             } else if (key2.toLowerCase().indexOf('hb') != -1 && key2.toLowerCase().indexOf('rate') == -1) {
-                                                $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key][key2]);
-                                                $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + '环比');
+                                                if (key2.includes(topKey)) {
+                                                    $scope['ydatas' + $scope.checkChart][i].push($scope.tableData.data[key][key2]);
+                                                    $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + topName + '环比');
+                                                    //获取到 fdstyle
+                                                    myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                        if (key2.includes(topKey)) {
+                                                            $scope['tableType' + $scope.checkChart][i].push(tableStyle[item.fdStyle]);
+                                                        }
+                                                    })
+                                                }
+                                                //获取到 fdstyle
+                                                // myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                //     if (key2.includes(topKey)) {
+                                                //         $scope['tableType' + $scope.checkChart].push(tableStyle[item.fdStyle]);
+                                                //     }
+                                                // })
+
+                                                // $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key][key2]);
+                                                // $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + '环比');
                                             }
                                         }
                                     }
-                                    $scope['ydatas' + $scope.checkChart].map(() => {
-                                        $scope['tableType' + $scope.checkChart].push(tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle]);
-                                    })
                                     break;
                                 case '11':
                                     for (key in $scope.tableData.data) {
-                                        $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key]);
+                                        // $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + topName);
+                                        // var arrNameLen = $scope['newArrName' + $scope.checkChart][i].length;
+                                        $scope['yname' + $scope.checkChart] = [];
                                         for (key2 in $scope.tableData.data[key]) {
                                             if (key2.toLowerCase().indexOf('hb') == -1 && key2.toLowerCase().indexOf('tb') == -1) {
-                                                $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key][key2]);
+                                                if (key2 == topKey) {
+                                                    $scope['ydatas' + $scope.checkChart][i].push($scope.tableData.data[key][key2]);
+                                                    $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + topName);
+                                                    // $scope['analysfdName' + $scope.checkChart].forEach((item) => {
+                                                    //     if (item.fdKey == key2) {
+                                                    //         $scope['newArrName' + $scope.checkChart][i][arrNameLen - 1] = $scope['newArrName' + $scope.checkChart][i][arrNameLen - 1] + item.fdName;
+                                                    //     }
+                                                    // })
+                                                    //获取到 fdstyle
+                                                    myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                        if (item.fdKey == key2) {
+                                                            $scope['tableType' + $scope.checkChart][i].push(tableStyle[item.fdStyle]);
+                                                        }
+                                                    })
+                                                }
                                                 //同步获取 yname
-                                                $scope['yname' + $scope.checkChart] = [];
                                                 $scope['analysfdName' + $scope.checkChart].forEach((item) => {
                                                     if (key2 == item.fdKey) {
-                                                        $scope['yname' + $scope.checkChart].push(item.fdName);
+                                                        var units;
+                                                        units = $scope.tableData.units[key2] ? '(' + $scope.tableData.units[key2] + ')' : '';
+                                                        $scope['yname' + $scope.checkChart].push(item.fdName + units);
                                                     }
                                                 })
                                                 //获取到 fdstyle
-                                                myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
-                                                    if (key2 == item.fdKey) {
-                                                        $scope['tableType' + $scope.checkChart].push(tableStyle[item.fdStyle]);
-                                                    }
-                                                })
+                                                // myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                //     if (key2 == item.fdKey) {
+                                                //         $scope['tableType' + $scope.checkChart].push(tableStyle[item.fdStyle]);
+                                                //     }
+                                                // })
                                             } else if (key2.toLowerCase().indexOf('hb') != -1 && key2.toLowerCase().indexOf('rate') == -1) {
-                                                $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key][key2]);
-                                                $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + '环比');
-                                                //获取到 fdstyle
-                                            myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
-                                                if (key2 == item.fdKey) {
-                                                    $scope['tableType' + $scope.checkChart].push(tableStyle[item.fdStyle]);
+                                                if (key2.includes(topKey)) {
+                                                    $scope['ydatas' + $scope.checkChart][i].push($scope.tableData.data[key][key2]);
+                                                    $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + topName + '环比');
+                                                    // arrNameLen = $scope['newArrName' + $scope.checkChart][i].length;
+                                                    // $scope['analysfdName' + $scope.checkChart].forEach((item) => {
+                                                    //     if (key2.includes(item.fdKey)) {
+                                                    //         $scope['newArrName' + $scope.checkChart][i][arrNameLen - 1] = $scope['newArrName' + $scope.checkChart][i][arrNameLen - 1] + item.fdName;
+                                                    //     }
+                                                    // })
+
+                                                    //获取到 fdstyle
+                                                    myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                        if (key2.includes(topKey)) {
+                                                            $scope['tableType' + $scope.checkChart][i].push(tableStyle[item.fdStyle]);
+                                                        }
+                                                    })
                                                 }
-                                            })
+
                                             } else if (key2.toLowerCase().indexOf('tb') != -1 && key2.toLowerCase().indexOf('rate') == -1) {
-                                                $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key][key2]);
-                                                $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + '同比');
-                                                //获取到 fdstyle
-                                            myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
-                                                if (key2 == item.fdKey) {
-                                                    $scope['tableType' + $scope.checkChart].push(tableStyle[item.fdStyle]);
+                                                if (key2.includes(topKey)) {
+                                                    $scope['ydatas' + $scope.checkChart][i].push($scope.tableData.data[key][key2]);
+                                                    $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + topName + '同比');
+                                                    // arrNameLen = $scope['newArrName' + $scope.checkChart][i].length;
+                                                    // $scope['analysfdName' + $scope.checkChart].forEach((item) => {
+                                                    //     if (key2.includes(item.fdKey)) {
+                                                    //         $scope['newArrName' + $scope.checkChart][i][arrNameLen - 1] = $scope['newArrName' + $scope.checkChart][i][arrNameLen - 1] + item.fdName;
+                                                    //     }
+                                                    // })
+                                                    //获取到 fdstyle
+                                                    myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                        if (key2.includes(topKey)) {
+                                                            $scope['tableType' + $scope.checkChart][i].push(tableStyle[item.fdStyle]);
+                                                        }
+                                                    })
                                                 }
-                                            })
+
+
                                             }
                                         }
                                     }
-                                    // $scope['ydatas' + $scope.checkChart].map(() => {
-                                    //     $scope['tableType' + $scope.checkChart].push(tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle]);
-                                    // })
                                     break;
                                 case '00':
-                                    // $scope['ydatas' + $scope.checkChart] = [];
-                                    $scope['newArrName' + $scope.checkChart] = [];
-                                    var arr = [];
                                     for (key in $scope.tableData.data) {
-                                        // arr.push(...$scope.tableData.data[key][topKey]);
-                                        
-                                        $scope['newArrName' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key]);
-                                        // $scope['tableType' + $scope.checkChart].push(tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle]);
+                                        // $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key]);
+                                        // var arrNameLen = $scope['newArrName' + $scope.checkChart][i].length;
                                         $scope['yname' + $scope.checkChart] = [];
                                         for (key2 in $scope.tableData.data[key]) {
-                                            if(key2 == topKey){
+                                            if (key2 == topKey) {
                                                 $scope['ydatas' + $scope.checkChart][i].push($scope.tableData.data[key][key2]);
+                                                $scope['newArrName' + $scope.checkChart][i].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][key] + topName);
+                                                // $scope['analysfdName' + $scope.checkChart].forEach((item) => {
+                                                //     if (item.fdKey == key2) {
+                                                //         $scope['newArrName' + $scope.checkChart][i][arrNameLen - 1] = $scope['newArrName' + $scope.checkChart][i][arrNameLen - 1] + item.fdName;
+                                                //     }
+                                                // })
+                                                //获取到 fdstyle
+                                                myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
+                                                    if (item.fdKey == key2) {
+                                                        $scope['tableType' + $scope.checkChart][i].push(tableStyle[item.fdStyle]);
+                                                    }
+                                                })
                                             }
                                             //同步获取 yname
                                             $scope['analysfdName' + $scope.checkChart].forEach((item) => {
                                                 if (key2 == item.fdKey) {
-                                                    $scope['yname' + $scope.checkChart].push(item.fdName);
-                                                }
-                                            })
-                                            //获取到 fdstyle
-                                            myAjaxData.config.tableData[$scope.checkChart].fdStyle.forEach((item) => {
-                                                if (key2 == item.fdKey) {
-                                                    $scope['tableType' + $scope.checkChart].push(tableStyle[item.fdStyle]);
+                                                    var units;
+                                                    units = $scope.tableData.units[key2] ? '(' + $scope.tableData.units[key2] + ')' : '';
+                                                    $scope['yname' + $scope.checkChart].push(item.fdName + units);
                                                 }
                                             })
                                         }
                                     }
-                                    // debugger
                                     break;
                             }
                         })
 
-
                         //计算endPercent
-                        // var dataLen = 0;
-                        // $scope['ydatas' + $scope.checkChart].map(item => {
-                        //     dataLen += item.length;
-                        // })
-
-                        // $scope['endPercent' + $scope.checkChart] = dataLen < 30 ? 100 : (30 / dataLen) * 100;
+                        var dataLen = 0;
+                        $scope.endPercent = 0;
+                        $scope['ydatas' + $scope.checkChart].forEach(v => {
+                            v.forEach((xv) => {
+                                dataLen += xv.length;
+                            })
+                        })
+                        $scope.endPercent = dataLen < 30 ? 100 : (30 / dataLen) * 100;
 
                         //曲线或者柱状图 颜色 的获取
-                        $scope['newArrName' + $scope.checkChart].map((item, i) => {
-                            if (colorsAry[i]) {
-                                $scope['colors' + $scope.checkChart].push(colorsAry[i]);
-                            } else {
-                                colorsAry[i] = '#' + ('00000' + (Math.random() * 0x1000000 << 0).toString(16)).substr(-6);
-                                $scope['colors' + $scope.checkChart].push(colorsAry[i]);
-                            }
+                        $scope['newArrName' + $scope.checkChart].forEach((item, i) => {
+                            item.forEach((xitem, xi) => {
+                                if (colorsAry[xi]) {
+                                    $scope['colors' + $scope.checkChart].push(colorsAry[xi]);
+                                } else {
+                                    colorsAry[xi] = '#' + ('00000' + (Math.random() * 0x1000000 << 0).toString(16)).substr(-6);
+                                    $scope['colors' + $scope.checkChart].push(colorsAry[xi]);
+                                }
+                            })
                         })
 
+                        //yAxis数据 整合
                         var yAxis = [];
                         $scope['yname' + $scope.checkChart].forEach((item, i) => {
                             var offset = i == 2 ? 60 : 0;
@@ -886,23 +1007,22 @@ ajaxData({
                                 });
                         })
 
+                        //series数据 整合
                         var series = [];
-
-                        $scope['ydatas' + $scope.checkChart].forEach((item, i) => {
-                            item.forEach((xitem,xi)=>{
+                        $scope['ydatas' + $scope.checkChart].forEach((v, i) => {
+                            v.forEach((xv, xi) => {
                                 series.push({
-                                    type: $scope['tableType' + $scope.checkChart][xi],
-                                    name: $scope['newArrName' + $scope.checkChart][xi],
+                                    type: $scope['tableType' + $scope.checkChart][i][xi],
+                                    name: $scope['newArrName' + $scope.checkChart][i][xi],
                                     yAxisIndex: i,
-                                    data: xitem,
+                                    data: xv.map((xxv, xxi) => {
+                                        return xxv === null ? '-' : xxv;
+                                    }),
                                     barWidth: 15
                                 })
                             })
-                            
                         })
                         debugger
-
-
                         //-------------------------------------------------------------------重写
                         //初始化echarts 并 塞入数据
                         echarts.init(document.getElementById('line' + $scope.checkChart)).setOption({
@@ -914,35 +1034,48 @@ ajaxData({
                                     // 提示框位置
                                     var x = 0; // x坐标位置
                                     var y = 0; // y坐标位置
-            
+
                                     // 当前鼠标位置
                                     var pointX = point[0];
                                     var pointY = point[1];
-            
+
                                     // 提示框大小
                                     var boxWidth = size.contentSize[0];
                                     var boxHeight = size.contentSize[1];
-            
+
                                     // boxWidth > pointX 说明鼠标左边放不下提示框
                                     if (boxWidth > pointX) {
                                         x = 5;
                                     } else { // 左边放的下
                                         x = pointX - boxWidth;
                                     }
-            
+
                                     // boxHeight > pointY 说明鼠标上边放不下提示框
                                     if (boxHeight > pointY) {
                                         y = 5;
                                     } else { // 上边放得下
                                         y = pointY - boxHeight;
                                     }
-            
+
                                     return [x, y];
+                                }
+                            },
+                            toolbox: {
+                                show: true,
+                                orient: 'vertical',
+                                left: 'right',
+                                top: 'center',
+                                feature: {
+                                    mark: {show: true},
+                                    dataView: {show: true, readOnly: false},
+                                    magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                                    restore: {show: true},
+                                    saveAsImage: {show: true}
                                 }
                             },
                             legend: {
                                 type: 'scroll',
-                                data: $scope['newArrName' + $scope.checkChart],
+                                data: $scope['newArrName' + $scope.checkChart].reduce((a, b) => a.concat(b), []),
                                 textStyle: {
                                     color: '#fff',
                                     fontSize: 12,
@@ -978,12 +1111,24 @@ ajaxData({
                             },
                             yAxis: yAxis,
                             series: series,
+                            dataZoom: [
+                                {
+                                    type: 'slider',
+                                    show: true,
+                                    start: 0,
+                                    end: $scope.endPercent
+                                },
+                            ],
                             grid: {
                                 top: "26%",
                                 right: "18%",
                                 bottom: "18%"
                             }
                         }, true)
+
+                        setTimeout(() => {
+                            echarts.getInstanceByDom(document.getElementById('line' + $scope.checkChart)).resize();
+                        }, 0)
                     }
                 }
 
@@ -1294,6 +1439,9 @@ ajaxData({
                 myChart2.resize();
                 myChart3.resize();
                 line0.resize();
+                line1.resize();
+                line2.resize();
+                line3.resize();
                 // if ($scope['fdStyle' + $scope.checkChart] != 4 && $scope['fdStyle' + $scope.checkChart] && $scope['xdata' + $scope.checkChart] && $scope['ydatas' + $scope.checkChart]) {
                 //     echarts.getInstanceByDom(document.getElementById("line" + $scope.checkChart)).resize();
                 // }
