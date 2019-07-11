@@ -1,0 +1,14 @@
+(function () {
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = '#pop_ad{ display: none !important; }';
+    document.getElementsByTagName('HEAD').item(0).appendChild(style);
+
+    var __observe = window.MutationObserver.prototype.observe;
+    window.MutationObserver.prototype.observe = function (target, options) {
+        if (target.id !== "cy-cmt-list") return __observe();
+        return setTimeout(function () {
+            document.getElementById('feedAv').style.cssText = 'display: none !important';
+        }, 0);
+    };
+}());

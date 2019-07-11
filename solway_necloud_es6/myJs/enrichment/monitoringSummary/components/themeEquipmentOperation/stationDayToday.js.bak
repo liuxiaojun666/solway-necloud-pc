@@ -104,40 +104,12 @@ ajaxData(
             sameTimeOnce: true,
         },
         //电站-今日-故障列表
-        // getStationFaultAlarmRtData: {
-        //     name: 'GETgetStationFaultAlarmRtData',
-        //     data: {},
-        //     later: true,
-        //     onlyLatest: true,
-        //     sameTimeOnce: true,
-        // },
-
-        // 设备类型
-        getDeviceType: {
-            name: 'GETgetDeviceType',
+        getStationFaultAlarmRtData: {
+            name: 'GETgetStationFaultAlarmRtData',
             data: {},
             later: true,
-            onlyLatest: true
-        },
-        // 设备列表
-        queryDeviceWithType: {
-            name: 'GETqueryDeviceWithType',
-            data: {},
-            later: true
-        },
-        // 事件类型
-        eventType: {
-            name: 'GETBasedictionarySelectAll',
-            data: {},
-            later: true,
-            onlyLatest: true
-        },
-        // 设备日志
-        deviceRunList: {
-            name: 'GETdeviceRunList',
-            data: {},
-            later: true,
-            onlyLatest: true
+            onlyLatest: true,
+            sameTimeOnce: true,
         },
     },
     {
@@ -349,22 +321,10 @@ ajaxData(
                 date: dateTime.showDate
             });
         } else if (tabIndex === 4) {
-            // $scope.getStationFaultAlarmRtData.getData({
+            $scope.getStationFaultAlarmRtData.getData({
                 // pageIndex: 0,
                 // pageSize: 10
-            // });
-            if (!$scope.eventType.res) {
-                $scope.eventType.getData({ dictType: 'EVENT_TYPE' });
-            }
-            if (!$scope.getDeviceType.res) {
-                const res = await $scope.getDeviceType.getData();
-                $scope.deviceRunList.deviceType = res.data[0].devid;
-            }
-            if (!$scope.queryDeviceWithType.res) {
-                $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
-            } else {
-                $scope.deviceRunList.getData();
-            }
+            });
         }
     };
 
@@ -1454,106 +1414,68 @@ ajaxData(
         });
     };
 
-
-
-    // 设备列表
-    $scope.queryDeviceWithType.subscribe(res => {
-        $scope.deviceRunList.deviceId = '';
-        const { dateTime } = $scope;
-        $scope.deviceRunList.getData({
-            // deviceId: '',
-            // deviceType: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid,
-            // eventType: $scope.deviceRunList.eventType,
-            // pageIndex: 0,
-            // sEndTime: dateTime.showDate + ' 23:59',
-            // sStartTime: dateTime.showDate + ' 00:00',
-
-            deviceId: '',
-            deviceType: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid,
-            eventType: $scope.deviceRunList.eventType,
-            pageIndex: 0,
-            date: dateTime.showDate,
-            // startTime: '23:59',
-            // endTime: '00:00'
-        });
-    });
-    // 设备日志
-    $scope.deviceRunList.subscribe(res => {
-        $scope.deviceRunList.column = [
-            {
-                title: '发生时间',
-                dataIndex: 'sStartTime',
-                sort: true,
-                align: 'center',
-                width: '150px',
-                render(text) {
-                    return text && new Date(text).Format('yyyy-MM-dd hh:mm')
-                }
-            },
-            {
-                title: '消缺时间',
-                dataIndex: 'sEndTime',
-                sort: true,
-                align: 'center',
-                width: '150px',
-                render(text) {
-                    return text && new Date(text).Format('yyyy-MM-dd hh:mm')
-                }
-            },
+    //电站-故障列表
+    $scope.getStationFaultAlarmRtData.getDataCallback = (success, res) => {
+        if (!success) return;
+        $scope.column = [
             {
                 title: '设备名称',
-                dataIndex: 'devicename',
-                sort: true,
+                width: '25%',
+                dataIndex: 'name',
+                sort: 'true',
                 align: 'left',
                 render(text) {
-                    return `<span class="clickable">${text}</span>`;
+                    return `<span class="clickable">${text}</span>`
                 }
             },
             {
-                title: '事件类型',
-                dataIndex: 'faultclassStr',
-                width: '100px',
-                sort: true,
-                render(text, item, index) {
-                    return (text || '-') + '';
-                }
-            },
-            {
-                title: '事件描述',
-                dataIndex: 'eventDesc',
-                sort: true,
-                align: 'left',
-                width: '400px'
-            },
-            {
-                title: '确认时间',
-                dataIndex: 'sureTime',
-                width: '135px',
-                align: 'center',
-                render: function (text, item, index) {
-                    return text ? new Date(text).Format('yyyy-MM-dd hh:mm') : '';
-                }
-            },
-            {
-                title: '状态',
-                dataIndex: 'handstatusStr',
-                sort: true,
+                title: '故障类型',
+                dataIndex: 'eventType',
+                sort: 'true',
                 align: 'center'
             },
+            {
+                title: '设备类型',
+                dataIndex: 'deviceType',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '故障发生时间',
+                dataIndex: 'sStartTime',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '故障描述',
+                dataIndex: 'eventDesc',
+                sort: 'true',
+                align: 'center'
+            },
+            {
+                title: '持续时间',
+                dataIndex: 'hours',
+                sort: 'true',
+                align: 'center'
+            },
+            // {
+            //     title: '处理详情',
+            //     dataIndex: '',
+            //     sort: 'true',
+            //     align: 'right',
+            //     render(text, item, index) {
+            //         return `<span>待写</span>`
+            //     }
+            // }
         ];
-    });
-    // 查看设备详情
-    $scope.deviceRunList.trClick = (item, index, event) => {
-        if (!event.target.className.includes('clickable')) return;
-        $scope.$broadcast('equipmentPopUp', { stid: item.pstationid, eqid: item.deviceSerialNnumber })
-    };
+    }
 
     function setDataNull() {
         $scope.getDeviceLayout.res = null;
         $scope.rtmSingleStationComm.res = null;
         $scope.stationDayTodayTime.res = null;
         $scope.stationDayTodayTime2.res = null;
-        // $scope.getStationFaultAlarmRtData.res = null;
+        $scope.getStationFaultAlarmRtData.res = null;
         $scope.query_station_day_dev_power_timelist_his.res = null;
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
