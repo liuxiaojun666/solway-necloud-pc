@@ -34,9 +34,23 @@ ajaxData(
             later: true,
             onlyLatest: true
         },
-        // 设备日志
+        // 设备日志 列表
         deviceRunList: {
             name: 'GETdeviceRunList',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备日志 河流图
+        deviceHisRiver: {
+            name: 'GETdeviceHisRiver',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备日志 河流图
+        deviceHisTrendChart: {
+            name: 'GETdeviceHisTrendChart',
             data: {},
             later: true,
             onlyLatest: true
@@ -134,12 +148,54 @@ ajaxData(
             }
             if (!$scope.getDeviceType.res) {
                 const res = await $scope.getDeviceType.getData();
-                $scope.deviceRunList.deviceType = res.data[0].devid;
+                $scope.deviceRunList.deviceType = ''; //res.data[0].devid;
+                $scope.$apply();
             }
             if (!$scope.queryDeviceWithType.res) {
-                $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+                if (showShape === 'list') {
+                    $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+                } else if (showShape === 'chart2') {
+                    $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
+                    $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
+                } else {
+                    if (myChart) {
+                        echarts.dispose(myChart);
+                        myChart = null;
+                    }
+                    $scope.deviceHisRiver.getData({
+                        date: dateTime.showDate,
+                        deviceType: $scope.deviceRunList.deviceType
+                    });
+                }
             } else {
-                $scope.deviceRunList.getData({ date: dateTime.showDate, pageIndex: 0});
+                if (showShape === 'list') {
+                    $scope.deviceRunList.getData({ date: dateTime.showDate, pageIndex: 0 });
+                } else if (showShape === 'chart') {
+                    if (myChart) {
+                        echarts.dispose(myChart);
+                        myChart = null;
+                    }
+                    $scope.deviceHisRiver.getData({
+                        date: dateTime.showDate,
+                        deviceType: $scope.deviceRunList.deviceType
+                    });
+                } else if (showShape === 'chart2') {
+                    if (!$scope.deviceRunList.deviceType) {
+                        $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
+                        await $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
+                        $scope.$apply();
+                    } else {
+                        if (!$scope.deviceRunList.deviceId) {
+                            $scope.deviceRunList.deviceId = $scope.queryDeviceWithType.res.body[0].serialNumber
+                        }
+                        $scope.deviceHisTrendChart.getData({
+                            date: dateTime.showDate,
+                            deviceType: $scope.deviceRunList.deviceType,
+                            deviceId: $scope.deviceRunList.deviceId
+                        });
+                    }
+
+                }
             }
         }
     };
@@ -186,23 +242,23 @@ ajaxData(
 
     // 设备列表
     $scope.queryDeviceWithType.subscribe(res => {
+        if ($scope.showShape === 'chart2') {
+            $scope.deviceRunList.deviceId = res.body[0].serialNumber
+            $scope.deviceHisTrendChart.getData({
+                date: $scope.dateTime.showDate,
+                deviceType: $scope.deviceRunList.deviceType,
+                deviceId: $scope.deviceRunList.deviceId
+            });
+        }
+        if ($scope.showShape !== 'list') return;
         $scope.deviceRunList.deviceId = '';
-        const {dateTime} = $scope;
+        const { dateTime } = $scope;
         $scope.deviceRunList.getData({
-            // deviceId: '',
-            // deviceType: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid,
-            // eventType: $scope.deviceRunList.eventType,
-            // pageIndex: 0,
-            // sEndTime: dateTime.showDate + ' 23:59',
-            // sStartTime: dateTime.showDate + ' 00:00',
-
             deviceId: '',
-            deviceType: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid,
+            deviceType: $scope.deviceRunList.deviceType,
             eventType: $scope.deviceRunList.eventType,
             pageIndex: 0,
             date: dateTime.showDate,
-            // startTime: '23:59',
-            // endTime: '00:00'
         });
     });
     // 设备日志
@@ -270,10 +326,116 @@ ajaxData(
             },
         ];
     });
+
+    $scope.switchDetailFullPage = () => {
+        myChart && myChart.resize();
+    };
+    // 设备日志河流图
+    let myChart;
+    $scope.deviceHisRiver.subscribe(res => {
+        myChart = myChart || echarts.init(document.getElementById('themeRiver'));
+        const types = res.data.slice(0, 9).map(v => v[2]);
+        const colorMap = ["故障", "报警", "正常运行", "待机", "启动中", "关机中", "停机", "通讯中断", "未知"].reduce((pre, curr, index) => (
+            { ...pre, [curr]: ['#F75454', '#FFC939', '#58C471', '#34BFED', '#97B385', '#636363', '#000000', '#6E869E', '#E7E7E7'][index] }
+        ), {});
+        const color = types.map(v => colorMap[v]);
+        color.push(color.shift());
+        // debugger
+        const option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    lineStyle: {
+                        color: '#366090'
+                    }
+                },
+            },
+            color,
+            legend: {
+                data: res.legend,
+                textStyle: {
+                    fontSize: 12,
+                    color: '#fffeff'
+                },
+            },
+            singleAxis: {
+                max: 'dataMax',
+                top: 20,
+                bottom: 20,
+                type: 'time',
+                axisPointer: {
+                    animation: true,
+                    label: {
+                        show: true
+                    }
+                },
+                splitLine: {
+                    show: false
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#366090' //坐标轴线线的颜色。
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: '#fffeff'
+                    }
+                },
+                axisTick: {
+                    inside: true
+                },
+                nameTextStyle: {
+                    color: '#fffeff'
+                }
+            },
+            series: [
+                {
+                    type: 'themeRiver',
+                    label: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data: res.data
+                }
+            ]
+        };
+        myChart.setOption(option, true);
+        const fun = myChart.resize;
+        myChart.resize = async () => {
+            await myAjaxData.timeout(16);
+            fun();
+        };
+        window.addEventListener('resize', myChart.resize);
+    });
+
+    // 设备日志趋势图
+    $scope.deviceHisTrendChart.subscribe(res => {
+        $scope.deviceHisTrendChart.colorMap = {
+            "停机": '#000000',
+            "关机中": '#636363',
+            "启动中": '#97B385',
+            "待机": '#34BFED',
+            "报警": '#FFC939',
+            "故障": '#F75454',
+            "未知": '#B4B4B4',
+            "正常运行": '#58C471',
+            "通讯中断": '#6E869E'
+        };
+    });
+
+
     // 查看设备详情
     $scope.deviceRunList.trClick = (item, index, event) => {
         if (!event.target.className.includes('clickable')) return;
-        $scope.$broadcast('equipmentPopUp', { stid: item.pstationid, eqid: item.deviceSerialNnumber})
+        $scope.$broadcast('equipmentPopUp', { stid: item.pstationid, eqid: item.deviceSerialNnumber })
     };
+
+    $scope.$on('$destroy', () => {
+        myChart && echarts.dispose(myChart);
+        myChart && window.removeEventListener('resize', myChart.resize);
+        myChart = null;
+    });
 
 });

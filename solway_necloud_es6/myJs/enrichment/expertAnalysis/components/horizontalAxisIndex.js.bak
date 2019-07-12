@@ -27,6 +27,7 @@ HighAnalysis_selectFds: {
         }
         $scope.$emit('horizonNan', { data: 0});
         $scope.herizonData = res.body;
+        $scope.herizonData.ctg1.ll = [...$scope.herizonData.ctg1.ll,...$scope.herizonData.ctg2.ll];
         $scope.horizonCheckData = [];
         parentmyAjaxData.config.fdX.key = '';
         parentmyAjaxData.config.fdX.name = '';
@@ -116,15 +117,15 @@ HighAnalysis_selectFds: {
     //左侧多选按钮-> 右侧 穿梭
     $scope.shuttle = (item, $index) => {
         //点击一个区域 让另一个区域的选中状态置空
-        if ($scope.radioIndex == 0) {
-            $scope.herizonData.ctg2.ll.map((item) => {
-                item.checked = false;
-            })
-        } else {
-            $scope.herizonData.ctg1.ll.map((item) => {
-                item.checked = false;
-            })
-        }
+        // if ($scope.radioIndex == 0) {
+        //     $scope.herizonData.ctg2.ll.map((item) => {
+        //         item.checked = false;
+        //     })
+        // } else {
+        //     $scope.herizonData.ctg1.ll.map((item) => {
+        //         item.checked = false;
+        //     })
+        // }
         //实现单选 和 重复点击取消选中
         if (!item.checked) {
             item.checked = false;

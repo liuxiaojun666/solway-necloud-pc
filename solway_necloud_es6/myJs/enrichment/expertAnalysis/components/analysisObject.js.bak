@@ -809,14 +809,15 @@ ajaxData({
                     'groupName': 'gp' + parseInt(Math.random() * 10000),
                     "ids": []
                 }
-                FTmiddleArr.map((item) => {
+                var newArr = JSON.parse(JSON.stringify(FTmiddleArr));
+                newArr.map((item) => {
                     item.isgroup = true;
                     item.groupName = groupItem.groupName;
                     groupItem.ids.push(item.busiId);
                 })
 
                 $scope['groupResult' + $scope.analysisObjectK].push(groupItem);
-                $scope[key[$scope.analysisObjectK]].push(FTmiddleArr);
+                $scope[key[$scope.analysisObjectK]].push(newArr);
             } else if ($scope.analysisObjectK == 99) {
                 //组装接口需要的数据 (设备)
                 var groupItem = {
@@ -824,13 +825,15 @@ ajaxData({
                     'groupName': 'gp' + parseInt(Math.random() * 10000),
                     "st_eqids": []
                 }
-                FTmiddleArr.map((item) => {
+
+                var newArr = JSON.parse(JSON.stringify(FTmiddleArr));
+                newArr.map((item) => {
                     item.isgroup = true;
                     item.groupName = groupItem.groupName;
                     groupItem.st_eqids.push(`${item.stids}-${item.busiId}`);
                 })
                 $scope.groupResultDevice.push(groupItem);
-                $scope.objectDevice[$scope.equipChoiceIndex].push(FTmiddleArr);
+                $scope.objectDevice[$scope.equipChoiceIndex].push(newArr);
             } else if ($scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) {
                 //机型/故障类型  获取根节点
                 var typeArr = [];
@@ -1059,7 +1062,6 @@ ajaxData({
                     }
                 })
             }
-
             parentmyAjaxData.config.bIdToName[parentmyAjaxData.config.checkChart] = analyOjName;
         }
 

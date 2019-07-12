@@ -44,6 +44,7 @@ ajaxData({
                 return;
             }
             $scope.analysData = res.body;
+            $scope.analysData.ctg1.ll = [...$scope.analysData.ctg1.ll,...$scope.analysData.ctg2.ll];
             $scope.$emit('analysNan', { data: 0 });
             var key;
             if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
@@ -164,15 +165,15 @@ ajaxData({
         //左侧多选按钮-> 右侧 穿梭
         $scope.shuttle = (item, $index) => {
             //点击一个区域 让另一个区域的选中状态置空
-            if ($scope.radioIndex == 0) {
-                $scope.analysData.ctg2.ll.map((item) => {
-                    item.checked = false;
-                })
-            } else {
-                $scope.analysData.ctg1.ll.map((item) => {
-                    item.checked = false;
-                })
-            }
+            // if ($scope.radioIndex == 0) {
+            //     $scope.analysData.ctg2.ll.map((item) => {
+            //         item.checked = false;
+            //     })
+            // } else {
+            //     $scope.analysData.ctg1.ll.map((item) => {
+            //         item.checked = false;
+            //     })
+            // }
             //实现单选 和 重复点击取消选中
             // if (!item.checked) {
             //     item.checked = false;
@@ -208,16 +209,16 @@ ajaxData({
 
         //右侧删除小按钮
         $scope.delRight = (fdKey, index) => {
-            $scope.analysData.ctg1.ll.forEach((item) => {
-                if (item.fdKey == fdKey) {
-                    item.checked = false;
-                }
-            })
-            $scope.analysData.ctg2.ll.forEach((item) => {
-                if (item.fdKey == fdKey) {
-                    item.checked = false;
-                }
-            })
+            // $scope.analysData.ctg1.ll.forEach((item) => {
+            //     if (item.fdKey == fdKey) {
+            //         item.checked = false;
+            //     }
+            // })
+            // $scope.analysData.ctg2.ll.forEach((item) => {
+            //     if (item.fdKey == fdKey) {
+            //         item.checked = false;
+            //     }
+            // })
             $scope.analysBottom.forEach((item) => {
                 if (item.fdKey == fdKey) {
                     item.checked = false;
@@ -239,12 +240,12 @@ ajaxData({
                     $scope.analysCheckData = [];
                     parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
                     $scope.$emit('noChecked', 'analysAxisIndex');
-                    $scope.analysData.ctg1.ll.forEach((item) => {
-                        item.checked = false;
-                    })
-                    $scope.analysData.ctg2.ll.forEach((item) => {
-                        item.checked = false;
-                    })
+                    // $scope.analysData.ctg1.ll.forEach((item) => {
+                    //     item.checked = false;
+                    // })
+                    // $scope.analysData.ctg2.ll.forEach((item) => {
+                    //     item.checked = false;
+                    // })
                     $scope.analysBottom.forEach((item) => {
                         item.checked = false;
                     })
@@ -258,7 +259,7 @@ ajaxData({
             if (type == 'tong') {
                 $scope.analysBottom.map((item) => {
                     if (item.fdKey == v.fdKey) {
-                        item.actFdTb == 0 ? item.actFdTb = 1 : item.actFdTb = 0;
+                        item.actFdTb = item.actFdTb == 0 ? 1 : 0;
                         if (v.checked) {
                             $scope.actFdTb = item.actFdTb;
                         }
@@ -267,7 +268,7 @@ ajaxData({
             } else {
                 $scope.analysBottom.map((item) => {
                     if (item.fdKey == v.fdKey) {
-                        item.actFdHb == 0 ? item.actFdHb = 1 : item.actFdHb = 0;
+                        item.actFdHb = item.actFdHb == 0 ? 1 : 0;
                         if (v.checked) {
                             $scope.actFdHb = item.actFdHb;
                         }
