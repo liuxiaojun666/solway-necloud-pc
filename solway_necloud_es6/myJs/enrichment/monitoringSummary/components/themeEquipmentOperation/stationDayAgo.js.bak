@@ -423,6 +423,28 @@ ajaxData(
             "正常运行": '#58C471',
             "通讯中断": '#6E869E'
         };
+        $scope.deviceHisTrendChart.mouseScroll = function (e) {
+            e = e || window.event;
+            const $chart_scrollx = $('#chart_scrollx');
+            const old_width = $chart_scrollx.width();
+
+            if (e.wheelDelta) $chart_scrollx.width(old_width + (e.wheelDelta) / 120 * old_width / 10);
+            else if (e.detail) $chart_scrollx.width(old_width + e.detail * -40 / 120 * old_width / 10);
+
+            const width = $chart_scrollx.width();
+
+            const old_scrollLeft = $chart_scrollx.parent()[0].scrollLeft;
+
+            const scale_scrollLeft = width / (old_width / old_scrollLeft);
+
+            const translateX = (e.x - 50) * (width / old_width) - (e.x - 50);
+
+            if (!old_width) return;
+
+            $chart_scrollx.parent()[0].scrollLeft = scale_scrollLeft + translateX;
+        };
+        document.addEventListener('DOMMouseScroll', $scope.deviceHisTrendChart.mouseScroll, false);
+        window.onmousewheel = document.onmousewheel = $scope.deviceHisTrendChart.mouseScroll;
     });
 
 
@@ -436,6 +458,11 @@ ajaxData(
         myChart && echarts.dispose(myChart);
         myChart && window.removeEventListener('resize', myChart.resize);
         myChart = null;
+
+        if ($scope.deviceHisTrendChart.mouseScroll) {
+            document.removeEventListener('DOMMouseScroll', $scope.deviceHisTrendChart.mouseScroll);
+            window.onmousewheel = document.onmousewheel = null;
+        }
     });
 
 });

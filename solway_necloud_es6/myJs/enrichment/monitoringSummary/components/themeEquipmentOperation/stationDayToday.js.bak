@@ -111,6 +111,47 @@ ajaxData(
             onlyLatest: true,
             sameTimeOnce: true,
         },
+        // 设备类型
+        getDeviceType: {
+            name: 'GETgetDeviceType',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备列表
+        queryDeviceWithType: {
+            name: 'GETqueryDeviceWithType',
+            data: {},
+            later: true
+        },
+        // 事件类型
+        eventType: {
+            name: 'GETBasedictionarySelectAll',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备日志 列表
+        deviceRunList: {
+            name: 'GETdeviceLogListRtmDay',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备日志 河流图
+        deviceHisRiver: {
+            name: 'GETdeviceRtmRiver',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 设备日志 趋势图
+        deviceHisTrendChart: {
+            name: 'GETdeviceRtmTrendChart',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
     },
     {
         __serviceName__: 'themeEquipmentOperationStationDayTodayService'
@@ -180,8 +221,8 @@ ajaxData(
             }
         });
         if ($scope.tabIndex === 1 && $scope.showShape === 'chart') {
-            $scope.getDeviceLayout.getData({ id: myAjaxDataParent.currentStationData.currentSTID});
-            $scope.rtmSingleStationComm.getData({ 
+            $scope.getDeviceLayout.getData({ id: myAjaxDataParent.currentStationData.currentSTID });
+            $scope.rtmSingleStationComm.getData({
                 dateString: new Date().Format("yyyy-MM-dd"),
                 stids: myAjaxDataParent.currentStationData.currentSTID
             });
@@ -326,11 +367,69 @@ ajaxData(
                 // pageSize: 10
             });
         }
+        else if (tabIndex === 5) {
+            if (!$scope.eventType.res) {
+                $scope.eventType.getData({ dictType: 'EVENT_TYPE' });
+            }
+            if (!$scope.getDeviceType.res) {
+                const res = await $scope.getDeviceType.getData();
+                $scope.deviceRunList.deviceType = res.data[0].devid;
+                $scope.$apply();
+            }
+            if (!$scope.queryDeviceWithType.res) {
+                if (showShape === 'list') {
+                    $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+                } else if (showShape === 'chart2') {
+                    $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
+                    $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
+                } else {
+                    // if (myChart) {
+                    //     echarts.dispose(myChart);
+                    //     myChart = null;
+                    // }
+                    $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
+                    $scope.deviceHisRiver.getData({
+                        date: dateTime.showDate,
+                        deviceType: $scope.deviceRunList.deviceType
+                    });
+                }
+            } else {
+                if (showShape === 'list') {
+                    $scope.deviceRunList.getData({ date: dateTime.showDate, pageIndex: 0, deviceType: $scope.deviceRunList.deviceType });
+                } else if (showShape === 'chart') {
+                    // if (myChart) {
+                    //     echarts.dispose(myChart);
+                    //     myChart = null;
+                    // }
+                    $scope.deviceHisRiver.getData({
+                        date: dateTime.showDate,
+                        deviceType: $scope.deviceRunList.deviceType
+                    });
+                } else if (showShape === 'chart2') {
+                    if (!$scope.deviceRunList.deviceType) {
+                        $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
+                        await $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
+                        $scope.$apply();
+                    } else {
+                        if (!$scope.deviceRunList.deviceId) {
+                            $scope.deviceRunList.deviceId = $scope.queryDeviceWithType.res.body[0].serialNumber
+                        }
+                        $scope.deviceHisTrendChart.getData({
+                            date: dateTime.showDate,
+                            deviceType: $scope.deviceRunList.deviceType,
+                            deviceId: $scope.deviceRunList.deviceId
+                        });
+                    }
+
+                }
+            }
+        }
     };
 
     // 电站 今日 设备 列表视图
     $scope.getDeviceType.getDataCallback = async (success, res) => {
         if (!success) return;
+        if ($scope.tabIndex === 5) return;
         const { currentDeviceType } = $scope;
         const isChange = !res.data.some(v => v.devid === currentDeviceType);
         // $scope.getDeviceType.res.data = res.data.filter(v => (v.devid === '1' || v.devid === '2' || v.devid === '3' || v.devid === '4'));
@@ -951,7 +1050,7 @@ ajaxData(
                 render(text) {
                     return `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`
                 }
-            }, 
+            },
             {
                 dataIndex: 'k',
                 title: '开关',
@@ -964,7 +1063,7 @@ ajaxData(
                         <span>${['无效', '无效', '闭合', '开启'][text]}</span>
                     `
                 }
-            }, 
+            },
             {
                 dataIndex: 'arrester',
                 title: '防雷器',
@@ -977,7 +1076,7 @@ ajaxData(
                         <span>${['无效', '无效', '正常', '异常'][text]}</span>
                     `
                 }
-            }, 
+            },
             {
                 dataIndex: 'u',
                 title: '电压(V)',
@@ -1087,7 +1186,7 @@ ajaxData(
                 render(text) {
                     return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
                 }
-            }, 
+            },
             {
                 dataIndex: 'w',
                 title: '总电能(度)',
@@ -1118,7 +1217,7 @@ ajaxData(
                 // render(text) {
                 //     return `<span>${text.toFixed(2)}</span>`
                 // }
-            }, 
+            },
             {
                 dataIndex: 'ua',
                 title: 'A相电压(V)',
@@ -1129,7 +1228,7 @@ ajaxData(
                 // render(text) {
                 //     return `<span>${text.toFixed(2)}</span>`
                 // }
-            }, 
+            },
             {
                 dataIndex: 'ub',
                 title: 'B相电压(V)',
@@ -1162,7 +1261,7 @@ ajaxData(
                 // render(text) {
                 //     return `<span>${text.toFixed(2)}</span>`
                 // }
-            }, 
+            },
             {
                 dataIndex: 'ib',
                 title: 'B相电流(A)',
@@ -1195,7 +1294,7 @@ ajaxData(
                 // render(text) {
                 //     return `<span>${text.toFixed(2)}</span>`
                 // }
-            }, 
+            },
             {
                 dataIndex: 'pb',
                 title: 'B相功率(kW)',
@@ -1275,7 +1374,7 @@ ajaxData(
                 render(text) {
                     return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
                 }
-            }, 
+            },
             {
                 dataIndex: 'lh',
                 title: '水平面光照强度瞬时值(W/㎡)',
@@ -1469,6 +1568,239 @@ ajaxData(
             // }
         ];
     }
+
+
+    // 设备列表
+    $scope.queryDeviceWithType.subscribe(res => {
+        if ($scope.showShape === 'chart2') {
+            $scope.deviceRunList.deviceId = res.body[0].serialNumber
+            $scope.deviceHisTrendChart.getData({
+                date: $scope.dateTime.showDate,
+                deviceType: $scope.deviceRunList.deviceType,
+                deviceId: $scope.deviceRunList.deviceId
+            });
+        }
+        if ($scope.showShape !== 'list') return;
+        $scope.deviceRunList.deviceId = '';
+        const { dateTime } = $scope;
+        $scope.deviceRunList.getData({
+            deviceId: '',
+            deviceType: $scope.deviceRunList.deviceType,
+            eventType: $scope.deviceRunList.eventType,
+            pageIndex: 0,
+            date: dateTime.showDate,
+        });
+    });
+    // 设备日志
+    $scope.deviceRunList.subscribe(res => {
+        $scope.deviceRunList.column = [
+            {
+                title: '发生时间',
+                dataIndex: 'sStartTime',
+                sort: true,
+                align: 'center',
+                width: '150px',
+                render(text) {
+                    return text && new Date(text).Format('yyyy-MM-dd hh:mm')
+                }
+            },
+            {
+                title: '消缺时间',
+                dataIndex: 'sEndTime',
+                sort: true,
+                align: 'center',
+                width: '150px',
+                render(text) {
+                    return text && new Date(text).Format('yyyy-MM-dd hh:mm')
+                }
+            },
+            {
+                title: '设备名称',
+                dataIndex: 'devicename',
+                sort: true,
+                align: 'left',
+                render(text) {
+                    return `<span class="clickable">${text}</span>`;
+                }
+            },
+            {
+                title: '事件类型',
+                dataIndex: 'faultclassStr',
+                width: '100px',
+                sort: true,
+                render(text, item, index) {
+                    return (text || '-') + '';
+                }
+            },
+            {
+                title: '事件描述',
+                dataIndex: 'eventDesc',
+                sort: true,
+                align: 'left',
+                width: '400px'
+            },
+            {
+                title: '确认时间',
+                dataIndex: 'sureTime',
+                width: '135px',
+                align: 'center',
+                render: function (text, item, index) {
+                    return text ? new Date(text).Format('yyyy-MM-dd hh:mm') : '';
+                }
+            },
+            {
+                title: '状态',
+                dataIndex: 'handstatusStr',
+                sort: true,
+                align: 'center'
+            },
+        ];
+    });
+
+    $scope.switchDetailFullPage = () => {
+        myChart && myChart.resize();
+    };
+    // 设备日志河流图
+    let myChart;
+    $scope.deviceHisRiver.subscribe(res => {
+        // debugger
+        if (myChart) {
+            echarts.dispose(myChart);
+            myChart = null;
+        }
+        myChart = echarts.init(document.getElementById('themeRiver'));
+        const types = res.data.slice(0, 9).map(v => v[2]);
+        const colorMap = ["故障", "报警", "正常运行", "待机", "启动中", "关机中", "停机", "通讯中断", "未知"].reduce((pre, curr, index) => (
+            { ...pre, [curr]: ['#F75454', '#FFC939', '#58C471', '#34BFED', '#97B385', '#636363', '#000000', '#6E869E', '#E7E7E7'][index] }
+        ), {});
+        const color = types.map(v => colorMap[v]);
+        color.push(color.shift());
+        // debugger
+        const option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    lineStyle: {
+                        color: '#366090'
+                    }
+                },
+            },
+            animation: false,
+            color,
+            legend: {
+                data: res.legend,
+                inactiveColor: 'rgba(255,255,255,.2)',
+                textStyle: {
+                    fontSize: 12,
+                    color: '#fffeff'
+                },
+            },
+            singleAxis: {
+                max: 'dataMax',
+                top: 20,
+                bottom: 20,
+                type: 'time',
+                axisPointer: {
+                    animation: true,
+                    label: {
+                        show: true
+                    }
+                },
+                splitLine: {
+                    show: false
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#366090' //坐标轴线线的颜色。
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: '#fffeff'
+                    }
+                },
+                axisTick: {
+                    inside: true
+                },
+                nameTextStyle: {
+                    color: '#fffeff'
+                }
+            },
+            series: [
+                {
+                    type: 'themeRiver',
+                    label: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data: res.data
+                }
+            ]
+        };
+        myChart.setOption(option, true);
+        const fun = myChart.resize;
+        myChart.resize = async () => {
+            await myAjaxData.timeout(16);
+            fun();
+        };
+        window.addEventListener('resize', myChart.resize);
+    });
+
+    // 设备日志趋势图
+    $scope.deviceHisTrendChart.subscribe(res => {
+        $scope.deviceHisTrendChart.colorMap = {
+            "停机": '#000000',
+            "关机中": '#636363',
+            "启动中": '#97B385',
+            "待机": '#34BFED',
+            "报警": '#FFC939',
+            "故障": '#F75454',
+            "未知": '#B4B4B4',
+            "正常运行": '#58C471',
+            "通讯中断": '#6E869E'
+        };
+        $scope.deviceHisTrendChart.mouseScroll = function (e) {
+            e = e || window.event;
+            const $chart_scrollx = $('#chart_scrollx');
+            const old_width = $chart_scrollx.width();
+
+            if (e.wheelDelta) $chart_scrollx.width(old_width + (e.wheelDelta) / 120 * old_width / 10);
+            else if (e.detail) $chart_scrollx.width(old_width + e.detail * -40 / 120 * old_width / 10);
+
+            const width = $chart_scrollx.width();
+
+            const old_scrollLeft = $chart_scrollx.parent()[0].scrollLeft;
+
+            const scale_scrollLeft = width / (old_width / old_scrollLeft);
+
+            const translateX = (e.x - 50) * (width / old_width) - (e.x - 50);
+
+            if (!old_width) return;
+            
+            $chart_scrollx.parent()[0].scrollLeft = scale_scrollLeft + translateX;
+        };
+        document.addEventListener('DOMMouseScroll', $scope.deviceHisTrendChart.mouseScroll, false);
+        window.onmousewheel = document.onmousewheel = $scope.deviceHisTrendChart.mouseScroll;
+    });
+
+
+    // 查看设备详情
+    $scope.deviceRunList.trClick = (item, index, event) => {
+        if (!event.target.className.includes('clickable')) return;
+        $scope.$broadcast('equipmentPopUp', { stid: item.pstationid, eqid: item.deviceSerialNnumber })
+    };
+
+    $scope.$on('$destroy', () => {
+        myChart && echarts.dispose(myChart);
+        myChart && window.removeEventListener('resize', myChart.resize);
+        myChart = null;
+
+        if ($scope.deviceHisTrendChart.mouseScroll) {
+            document.removeEventListener('DOMMouseScroll', $scope.deviceHisTrendChart.mouseScroll);
+            window.onmousewheel = document.onmousewheel = null;
+        }
+    });
 
     function setDataNull() {
         $scope.getDeviceLayout.res = null;

@@ -513,51 +513,21 @@ ajaxData({
                     //获取最大值 最小值
                     extreme(newArr);
 
-                    //整合echarts -> table的数据
-                    $scope['fileName' + $scope.checkChart] = '关联分析';
-                    var arr = [];
-                    $scope['series' + myAjaxData.config.checkChart].forEach((v, i) => {
-                        var headData = [];
-                        var secondData = [];
-                        headData.push(v.name, '', '');
-                        secondData.push($scope['xname' + $scope.checkChart], $scope['yname' + $scope.checkChart], '统计时间');
-                        arr.push(headData);
-                        arr.push(secondData);
-                        v.data.forEach((xv, xi) => {
-                            arr.push(xv);
-                        })
-                    })
-
-
-                    // $ocLazyLoad.load([
-                    //     'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
-                    //     'vendor/spreadjs/scripts/FileSaver.min.js',
-                    // ]).then(() => {
-                    //     $ocLazyLoad.load([
-                    //         'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',       
-                    //     ])
-                    // }).then(() => {
-                    //     $scope['spread' + $scope.checkChart] = new GC.Spread.Sheets.Workbook(document.getElementById('relationTable' + $scope.checkChart), { sheetCount: $scope['series' + myAjaxData.config.checkChart].length });
-                    //     excelIo = new GC.Spread.Excel.IO();      
-                    //     $scope['series' + myAjaxData.config.checkChart].forEach((v,i)=>{
-                    //         var arr = [];
-                    //         var secondData = [];
-                    //         secondData.push($scope['xname' + $scope.checkChart], $scope['yname' + $scope.checkChart], '统计时间');
-                    //         arr.push(secondData);
-                    //         v.data.forEach((xv, xi) => {
-                    //             xv.forEach((xxv,xxi)=>{
-                    //                 xxv = xxv == null ? '-' : xxv;
-                    //             })
-                    //             arr.push(xv);
-                    //         })
-                    //         var sheet = $scope['spread' + $scope.checkChart].getSheet(i);
-                    //         sheet.name(v.name);
-                    //         sheet.setArray(0, 0, arr);
-                    //     })      
-                    // });
-
-
-
+                    //------------------------------------整合echarts -> table的数据  (excel单个sheet)
+                    // $scope['fileName' + $scope.checkChart] = '关联分析';
+                    // var arr = [];
+                    // $scope['series' + myAjaxData.config.checkChart].forEach((v, i) => {
+                    //     var headData = [];
+                    //     var secondData = [];
+                    //     headData.push(v.name, '', '');
+                    //     secondData.push($scope['xname' + $scope.checkChart], $scope['yname' + $scope.checkChart], '统计时间');
+                    //     arr.push(headData);
+                    //     arr.push(secondData);
+                    //     v.data.forEach((xv, xi) => {
+                    //         arr.push(xv);
+                    //     })
+                    // })
+                    
                     // var str = ``;
                     // arr.forEach((v, i) => {
                     //     str += `<tr>`;
@@ -568,6 +538,25 @@ ajaxData({
                     // })
 
                     // $('.chartTable' + $scope.checkChart).html(str);
+
+                    //------------------------------------整合echarts -> table的数据  (excel多个sheet)
+                    $scope['spread' + $scope.checkChart] = new GC.Spread.Sheets.Workbook(document.getElementById('relationTable' + $scope.checkChart), { sheetCount: $scope['series' + myAjaxData.config.checkChart].length });
+                    excelIo = new GC.Spread.Excel.IO();      
+                    $scope['series' + myAjaxData.config.checkChart].forEach((v,i)=>{
+                        var arr = [];
+                        var secondData = [];
+                        secondData.push($scope['xname' + $scope.checkChart], $scope['yname' + $scope.checkChart], '统计时间');
+                        arr.push(secondData);
+                        v.data.forEach((xv, xi) => {
+                            var newXv = xv.map((xxv,xxi)=>{
+                               return xxv == null ? '-' : xxv;
+                            })
+                            arr.push(newXv);
+                        })
+                        var sheet = $scope['spread' + $scope.checkChart].getSheet(i);
+                        sheet.name(v.name);
+                        sheet.setArray(0, 0, arr);
+                    })      
 
                     //图表的 setoption
                     chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart]);
@@ -1158,31 +1147,23 @@ ajaxData({
         }
 
         $scope.relaTableExport = (i) => {
-            var json = $scope['spread' + $scope.checkChart].toJSON({ includeBindingSource: true });
+            var json = $scope['spread' + $scope.checkChart].toJSON();
             excelIo.save(json, function (blob) {
                 saveAs(blob, '关联分析' + ".xlsx");
             }, function (e) {
-                alert(e);
+                console.log(e);
             });
         }
 
         $ocLazyLoad.load([
-            'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js',
+            'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js'
         ]).then(() => {
-            $ocLazyLoad.load([
-                'vendor/spreadjs/scripts/FileSaver.min.js',
+            return $ocLazyLoad.load([
+                'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js'
             ])
         }).then(() => {
-            $ocLazyLoad.load([
-                'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js',
-                'vendor/spreadjs/scripts/gc.spread.sheets.charts.11.0.0.min.js',
-                'vendor/spreadjs/scripts/gc.spread.sheets.print.11.0.0.min.js',
-            ])
-        }).then(() => {
-            // debugger
-            excelIo = new GC.Spread.Excel.IO();
+            // excelIo = new GC.Spread.Excel.IO();
         });
-
 
         //导出图表
         $ocLazyLoad.load([

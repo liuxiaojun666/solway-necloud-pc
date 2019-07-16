@@ -134,10 +134,11 @@ ajaxData({
         $scope.xdata = $scope.chartData.city_name;
         $scope.yname = $scope.chartName + units[$scope.chartType];
         $scope.ydatas[0].push($scope.chartData[yKeyName[$scope.chartType]]);
-        $scope.chartData[yKeyName[$scope.chartType]].sort((a, b) => {
+        var newArr = JSON.parse(JSON.stringify($scope.chartData[yKeyName[$scope.chartType]]));
+        newArr.sort((a, b) => {
             return a - b;
         })
-        $scope.ymin = $scope.chartData[yKeyName[$scope.chartType]][0] > 0 ? 0 : $scope.chartData[yKeyName[$scope.chartType]][0];
+        $scope.ymin = newArr[0] > 0 ? 0 : newArr[0];
     }
 
     // 给地图填充数据

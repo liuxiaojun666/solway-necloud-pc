@@ -1,0 +1,152 @@
+ajaxData({
+    baseDictionaryList: {
+        name: 'GETbaseDictionaryList',
+        data: {},
+        later: true
+    }
+}, {})('abnormalShutdownCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+    historicalRecord.init(); //历史记录 初始化
+    $scope.beforeLoading = true;
+    historyInitCallback();
+    $scope.moduleName = '异常停机'; //当前页面名称
+
+    // 当前页面行为记录初始化回调 获取行为记录
+    async function historyInitCallback() {
+        const historiData = historicalRecord.get(); //获取记录
+        const { keyWords } = historiData;
+        $scope.keyWords = keyWords;
+        $scope.beforeLoading = false;
+    };
+
+    //查询 ->时间
+    $scope.filter = {
+        date: new Date,
+        startDate: new Date,
+        endDate: new Date
+    }
+    //新增 ->时间
+    $scope.addOption = {
+        date: new Date,
+        startDate: new Date,
+        endDate: new Date
+    }
+    //编辑 ->时间
+    $scope.GroupUser = [{
+        startDate: new Date,
+        endDate: new Date,
+        limitEndDate: new Date,
+    }];
+
+    //获取表格列表数据
+    $scope.getList = () => {
+
+    }
+    $scope.getList();
+
+    // 异常停机 新增
+    $scope.addTpl = false;
+    $scope.add = (e) => {
+        e.preventDefault();
+        $scope.addTpl = !$scope.addTpl;
+    }
+
+    //点击设备日志
+    $scope.showRecords = false;
+    $scope.showRecord = () => {
+        $scope.showRecords = !$scope.showRecords;
+    }
+
+    //切换到编辑状态
+    var flag = false;
+    $scope.showEdit = (item, i) => {
+        $scope.powerStList.forEach(item => {
+            if (item.edit) {
+                toaster.pop('error', '', '每次只能编辑一条');
+                flag = true;
+                return;
+            }
+        })
+        if (!flag) {
+            item.edit = true;
+            $scope.edit[i].show = item.show;
+            $scope.edit[i].status = item.status;
+        }
+    }
+
+    //--------------------------------------------------------------------设备日志part
+    //表格的表头设置
+    $scope.column = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'batchprocessing',
+            render(text, record, index) {
+                return `<label class="i-checks m-b-none"><input data-identifies="${record.id}" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>`;
+            }
+        },
+        {
+            title: '电站',
+            dataIndex: 'id',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '设备类型',
+            width: '25%',
+            dataIndex: 'dictType',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '设备',
+            dataIndex: 'dictName',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '事件类型',
+            dataIndex: 'dictCode',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '开始时间',
+            dataIndex: 'dictEnName',
+            align: 'center'
+        }, {
+            title: '结束时间',
+            dataIndex: 'description',
+            align: 'center'
+        },
+        {
+            title: '操作',
+            dataIndex: '',
+            align: 'center',
+            sort: !0,
+            render: function () {
+                function render(text, item, index) {
+                    return `<div class="clearfix"><i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="\u6388\u6743"></i><i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i></div>`;
+                }
+
+                return render;
+            }()
+        }];
+
+    //弹出设备日志
+    // $scope.equipmentLogShow = false;
+    // $scope.showEventModel = () => {
+    //     $scope.equipmentLogShow = true;
+    // }
+
+    //取消 新增后的回调
+    $scope.$on('cancelCallback', () => {
+        $scope.newStationModel = false;
+    });
+
+    $scope.$on('addCallback', () => {
+        $scope.newStationModel = false;
+    });
+
+    //头部折叠框 显示
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    }, 2000);
+});

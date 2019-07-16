@@ -213,9 +213,27 @@ ajaxData(
         const topRes = $scope.action_station_clean_suggest_dust_top5_line.res;
         const bottomRes = $scope.action_station_clean_suggest_dust_bottom5_line.res;
         $scope.xdata = [...bottomRes.body.data.eq_name, ...topRes.body.data.eq_name.reverse()];
-        $scope.ydatas = [[bottomRes.body.data.clean_mark, [...new Array(bottomRes.body.data.clean_mark.length).fill(null), ...topRes.body.data.clean_mark.reverse()]]];
-        $scope.tooltipFormatter = '{a}<br/>{b0}: {c0}'
+        $scope.ydatas = [[bottomRes.body.data.clean_mark, [...new Array(bottomRes.body.data.clean_mark.length).fill(null), ...topRes.body.data.clean_mark.concat().reverse()]]];
+        $scope.tooltipFormatter = '{a}<br/>{b0}: {c0}';
     }
+
+    $scope.chartClick = function (obj) {
+        const { seriesIndex, dataIndex } = obj;
+        let stid, eqid;
+        if (seriesIndex === 0) {
+            stid = $scope.action_station_clean_suggest_dust_bottom5_line.res.body.data.stid[dataIndex];
+            eqid = $scope.action_station_clean_suggest_dust_bottom5_line.res.body.data.eqid[dataIndex];
+        } else if (seriesIndex === 1) {
+            const length = $scope.action_station_clean_suggest_dust_bottom5_line.res.body.data.stid.length;
+            stid = $scope.action_station_clean_suggest_dust_top5_line.res.body.data.stid.concat().reverse()[dataIndex - length];
+            eqid = $scope.action_station_clean_suggest_dust_top5_line.res.body.data.eqid.concat().reverse()[dataIndex - length];
+        }
+
+        $scope.$broadcast("equipmentPopUp", {
+            stid,
+            eqid
+        });
+    };
 
 
     // 数据置空
