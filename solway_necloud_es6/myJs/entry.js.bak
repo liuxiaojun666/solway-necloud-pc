@@ -1,0 +1,101 @@
+// loading
+$('body').append(`<div class="outer-loding-view" style="position:absolute;width:100%;height:100%;top:0;left:0;z-index:0;text-align:center;">
+    <div class="k-ball-holder3">
+        <div class="k-ball7a"></div>
+        <div class="k-ball7b"></div>
+        <div class="k-ball7c"></div>
+        <div class="k-ball7d"></div>
+    </div>
+</div>`);
+
+
+
+// 版本校验
+$('body').append('<script src="/theme/js/dist/tools/versionCheck.js?_=' + window.localStorage.stamp + '" ><\/script>');
+// 单窗口校验
+$('body').append('<script src="/theme/js/dist/tools/singleWindow.js?_=' + window.localStorage.stamp + '" ><\/script>');
+
+
+// angular.js
+$('body').append('<script src="/vendor/angular/angular.min.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-animate/angular-animate.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-cookies/angular-cookies.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-sanitize/angular-sanitize.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-touch/angular-touch.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-ui-router/angular-ui-router.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/ngstorage/ngStorage.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-bootstrap/ui-bootstrap-tpls.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/oclazyload/ocLazyLoad.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-translate/angular-translate.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-translate/loader-static-files.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-translate/storage-cookie.js" ><\/script>');
+$('body').append('<script src="/vendor/angular/angular-translate/storage-local.js" ><\/script>');
+
+// 数据持久化
+$('body').append('<script src="/theme/js/dist/components/persist.js?_=' + window.localStorage.stamp + '" ><\/script>');
+// 数据持久化仓库初始化
+$('body').append('<script src="/theme/js/dist/enrichment/store.js?_=' + window.localStorage.stamp + '"><\/script>');
+
+// angular 单页面根元素
+$('body').append(`<div ui-view="" class="app ng-scope app-header-fixed app-aside-fixed" id="app" ng-class="{'app-header-fixed':app.settings.headerFixed, 'app-aside-fixed':app.settings.asideFixed, 'app-aside-folded':app.settings.asideFolded, 'app-aside-dock':app.settings.asideDock, 'container':app.settings.container}"></div>`);
+
+
+$('body').append('<script src="/theme/js/app.js?_=' + window.localStorage.stamp + '" ><\/script>');
+$('body').append('<script src="/theme/js/config.js?_=' + window.localStorage.stamp + '" ><\/script>');
+$('body').append('<script src="/theme/js/config.lazyload.js?_=' + window.localStorage.stamp + '" ><\/script>');
+$('body').append('<script id="routerJS" param="" src="/theme/js/config.router.js?_=' + window.localStorage.stamp + '"><\/script>');
+$('body').append('<script src="/theme/js/main.js?_=' + window.localStorage.stamp + '" ><\/script>');
+$('body').append('<script src="/theme/js/services/ui-load.js?_=' + window.localStorage.stamp + '"" ><\/script>');
+
+
+
+$(function () {
+    setTimeout(() => {
+        // 接口 地址 文件
+        $('body').append('<script async src="/theme/js/dist/interface.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // rem
+        $('body').append('<script async src="/theme/js/dist/components/rem.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // echarts
+        $('body').append('<script async src="/vendor/echarts/echarts-all-3new.min.js" ><\/script>');
+        // jquery 验证
+        $('body').append('<script async src="/vendor/jquery/validate/jquery.validate.min.js"" ><\/script>');
+        // bootstrap js
+        $('body').append('<script async src="/vendor/bootstrap/js/bootstrap.min.js"" ><\/script>');
+        
+    }, 0);
+    
+    setTimeout(() => {
+        // 帮助文档
+        $('body').append('<script async src="/theme/js/dist/aboutDoc/init.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // root 权限数据获取
+        $('body').append('<script async src="/theme/js/dist/tools/root.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // 获取本地ip并携带到每次请求中
+        $('body').append('<script async src="/theme/js/dist/tools/getLocalIp.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // 定时刷新
+        $('body').append('<script async src="/theme/js/dist/tools/timedReload.js?_=' + window.localStorage.stamp + '" ><\/script>');    
+
+    }, 1000 * 5);
+
+
+    if ((location.host.indexOf('necloud.solway.cn') > 0)) {
+        // 生产埋点统计
+        $('body').append('<script async type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"><\/script>');
+    } else {
+        // 开发环境热更新
+        window.stamp = '?_=' + Date.now();
+        $('body').append('<script async src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
+        setTimeout(function (params) {
+            if (!window.LiveReload) return;
+            window.LiveReload.close = function () {
+                LiveReload.reloader.reloadPage = function () {
+                    return;
+                };
+            };
+        }, 1000);
+        // $('body').append('<script async src="/theme/js/dist/tools/hotRelad.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // 开发环境埋点统计
+        $('body').append('<script async type="text/javascript" src="https://s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
+    }
+    
+
+});

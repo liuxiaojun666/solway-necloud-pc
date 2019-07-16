@@ -131,14 +131,28 @@ ajaxData({
             $scope.colors.push('#F0C167');
             $scope.newArrName.push($scope.chartName);
         });
-        $scope.xdata = $scope.chartData.city_name;
+        // $scope.xdata = $scope.chartData.city_name;
         $scope.yname = $scope.chartName + units[$scope.chartType];
         $scope.ydatas[0].push($scope.chartData[yKeyName[$scope.chartType]]);
-        var newArr = JSON.parse(JSON.stringify($scope.chartData[yKeyName[$scope.chartType]]));
-        newArr.sort((a, b) => {
+        var map = $scope.chartData.city_name.map((v, i) => {
+            return v + '-' + $scope.chartData[yKeyName[$scope.chartType]][i];
+        })
+        $scope.chartData[yKeyName[$scope.chartType]].sort((a, b) => {
             return a - b;
         })
-        $scope.ymin = newArr[0] > 0 ? 0 : newArr[0];
+        $scope.ymin = $scope.chartData[yKeyName[$scope.chartType]][0] > 0 ? 0 : $scope.chartData[yKeyName[$scope.chartType]][0];
+        $scope.chartData[yKeyName[$scope.chartType]].forEach((v, i) => {
+            map.forEach((xv, xi) => {
+                var newXv = xv.split('-');
+                if (newXv[1] == v) {
+                    if ($scope.xdata.length == map.length) {
+                        return;
+                    }
+                    $scope.xdata.push(newXv[0]);
+                }
+            })
+        })
+        // debugger
     }
 
     // 给地图填充数据
@@ -445,9 +459,9 @@ ajaxData({
     $('#main div').hover(function () {
         hoverIndex = $(this).index();
         clearInterval(json[hoverIndex].timer);
-        hoverTime = setInterval(()=>{
+        hoverTime = setInterval(() => {
             crash(hoverIndex);
-        },10);
+        }, 10);
     }, function () {
         move(json[hoverIndex]);
         clearInterval(hoverTime);

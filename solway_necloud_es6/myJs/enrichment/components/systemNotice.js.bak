@@ -8,12 +8,16 @@ app.directive('publicNotice', ['$ocLazyLoad', '$http', '$state', '$stateParams',
         },
         templateUrl: 'tpl/enrichment/components/publicNotice.html' + window.stamp,
         link($scope, $element) {
+            
             const allowAlertRouterList = ['main','companyManagement','businessManagement']; //允许公告弹框的路由配置
 
             const setPageHeight = () => {
                 $scope.pageH = $(window).height();
+                let htmlFont = $("html").css('font-size')
+                let rightWidth = htmlFont.substring(0,htmlFont.length-2)*1.1+$(".realName").width();
+                $(".mainPage .publicNotice  .close-notice").css({'width':'0.5rem','right':rightWidth+'px'});
             }
-            setPageHeight()
+            
 
             window.addEventListener('resize', setPageHeight);
             $scope.$on('$destroy', () => {
@@ -177,6 +181,11 @@ app.directive('publicNotice', ['$ocLazyLoad', '$http', '$state', '$stateParams',
                 }
                 $(".notice-list").animate({ left: distance+'%' }, 100);
             }
+
+            $timeout(()=>{
+                setPageHeight()
+                
+            },1000);
 
             //每五分钟获取一次最新公告信息
             const interval = $interval(() => {

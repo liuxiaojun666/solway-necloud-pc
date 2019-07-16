@@ -1,0 +1,52 @@
+// loading
+$('body').append(`<div class="outer-loding-view" style="position:absolute;width:100%;height:100%;top:0;left:0;z-index:0;text-align:center;">
+    <div class="k-ball-holder3">
+        <div class="k-ball7a"></div>
+        <div class="k-ball7b"></div>
+        <div class="k-ball7c"></div>
+        <div class="k-ball7d"></div>
+    </div>
+</div>`);
+
+// 数据持久化
+$('body').append('<script src = "/theme/js/dist/components/persist.js?_=' + window.localStorage.stamp + '" ><\/script>');
+// 数据持久化仓库初始化
+$('body').append('<script src="/theme/js/dist/enrichment/store.js?_=' + window.localStorage.stamp + '"><\/script>');
+// 路由
+$('body').append('<script id="routerJS" param="" src="/theme/js/config.router.js?_=' + window.localStorage.stamp + '"><\/script>');
+// 接口
+$('body').append('<script src = "/theme/js/dist/interface.js?_=' + window.localStorage.stamp + '" ><\/script>');
+
+$(function () {
+    setTimeout(() => {
+        // rem
+        $('body').append('<script async src = "/theme/js/dist/components/rem.js?_=' + window.localStorage.stamp + '" ><\/script>');
+
+        // echarts
+        $('body').append('<script async src = "/vendor/echarts/echarts-all-3new.min.js" ><\/script>');
+        // jquery 验证
+        // $('body').append('<script async src = "/vendor/jquery/validate/jquery.validate.min.js"" ><\/script>');
+    }, 0);
+    
+    setTimeout(() => {
+        // 帮助文档
+        $('body').append('<script async src = "/theme/js/dist/aboutDoc/init.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // root 权限数据获取
+        $('body').append('<script async src = "/theme/js/dist/tools/root.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // 获取本地ip并携带到每次请求中
+        $('body').append('<script async src = "/theme/js/dist/tools/getLocalIp.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // 定时刷新
+        $('body').append('<script async src = "/theme/js/dist/tools/timedReload.js?_=' + window.localStorage.stamp + '" ><\/script>');    
+    }, 1000 * 1);
+    
+    if ((location.host.indexOf('necloud.solway.cn') > 0)) {
+        // 生产埋点统计
+        $('body').append('<script async type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"><\/script>');
+    } else {
+        // 开发环境热更新
+        $('body').append('<script async src = "/theme/js/dist/tools/hotRelad.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        // 开发环境埋点统计
+        $('body').append('<script async type="text/javascript" src="https://s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
+    }
+
+});

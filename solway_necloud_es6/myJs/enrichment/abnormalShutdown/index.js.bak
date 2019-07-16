@@ -1,9 +1,24 @@
 ajaxData({
-    baseDictionaryList: {
-        name: 'GETbaseDictionaryList',
+    getAllSTListForPCBySession: {
+        name: 'GETAllSTListForPCBySession',
         data: {},
         later: true
-    }
+    },
+    queryDeviceWithType: {
+        name: 'GETqueryDeviceWithType',
+        data: {},
+        later: true
+    },
+    selectByConditionPage: {
+        name: 'selectByConditionPage',
+        data: {},
+        later: true
+    },
+    saveAbnormalHalt: {
+        name: 'saveAbnormalHalt',
+        data: {},
+        later: true
+    },
 }, {})('abnormalShutdownCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
     historicalRecord.init(); //历史记录 初始化
     $scope.beforeLoading = true;
@@ -18,12 +33,42 @@ ajaxData({
         $scope.beforeLoading = false;
     };
 
+    //时间格式转换
+    function dateConversion(value) {
+        var d = new Date(value);
+        var Month = d.getMonth() + 1 < 10 ? '0' + (d.getMonth() + 1) : d.getMonth() + 1;
+        var dateF = d.getDate() < 10 ? '0' + d.getDate() : d.getDate();
+        var Hours = d.getHours() < 10 ? '0' + d.getHours() : d.getHours();
+        var Minutes = d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes();
+        var date = d.getFullYear() + '-' + Month + '-' + dateF + ' ' + Hours + ':' + Minutes;
+        return date;
+    }
+
+    $scope.query = {
+        type: '',
+        stid: '',
+        deviceid: ''
+    }
+
+    $scope.addNew = {
+        type: '',
+        stid: '',
+        deviceid: ''
+    }
+
     //查询 ->时间
+    var date1 = new Date();
+    var date2 = new Date(date1);
+    date2.setDate(date1.getDate() - 1);
     $scope.filter = {
         date: new Date,
         startDate: new Date,
-        endDate: new Date
+        endDate: new Date,
+        limitEndDate: date2
     }
+    $scope.filter.startDate.showDate = '';
+    $scope.filter.endDate.showDate = '';
+
     //新增 ->时间
     $scope.addOption = {
         date: new Date,
@@ -37,17 +82,174 @@ ajaxData({
         limitEndDate: new Date,
     }];
 
-    //获取表格列表数据
-    $scope.getList = () => {
+    //设备类型 数据源
+    $scope.equipType = [
+        {
+            k: 1,
+            v: '汇流箱'
+        },
+        {
+            k: 2,
+            v: '逆变器'
+        },
+        {
+            k: 3,
+            v: '箱变'
+        }
+    ]
 
+    //获取电站列表
+    $scope.stationArr = [];
+    $scope.getAllSTListForPCBySession.getData({
+
+    }).then(res => {
+        res.forEach((v, i) => {
+            $scope.stationArr.push({
+                'k': v.id,
+                'v': v.stationname
+            })
+        })
+    })
+
+    //查询 - change 设备类型、电站
+    $scope.equipArr = [];
+    $scope.getEquips = () => {
+        if ($scope.query.type && $scope.query.stid) {
+            //获取设备
+            $scope.queryDeviceWithType.getData({
+                type: $scope.query.type,
+                stids: $scope.query.stid
+            }).then((res) => {
+                $scope.equipArr = res.body;
+            })
+        } else {
+            $scope.query.deviceid = '';
+            $scope.equipArr = [];
+        }
     }
-    $scope.getList();
 
-    // 异常停机 新增
+    //------------------------------------------------------------------新增方法组
+    //新增 - change 设备类型、电站
+    $scope.addEquipArr = [];
+    $scope.getAddEquips = () => {
+        if ($scope.addNew.type && $scope.addNew.stid) {
+            //获取设备
+            $scope.queryDeviceWithType.getData({
+                type: $scope.addNew.type,
+                stids: $scope.addNew.stid
+            }).then((res) => {
+                $scope.addEquipArr = res.body;
+            })
+        } else {
+            $scope.addNew.deviceid = '';
+            $scope.addEquipArr = [];
+        }
+    }
+
+    //新增按钮
+    $scope.emitAdd = () => {
+        if (!$scope.addNew.stid) {
+            toaster.pop('error', '', '请选择电站');
+        } else if (!$scope.addNew.type) {
+            toaster.pop('error', '', '请选择设备类型');
+        } else if (!$scope.addNew.deviceid) {
+            toaster.pop('error', '', '请选择设备');
+        } else if (!$scope.addOption.startDate) {
+            toaster.pop('error', '', '请选择开始时间');
+        } else if (!$scope.addOption.endDate) {
+            toaster.pop('error', '', '请选择结束时间');
+        } else if (!$scope.addEventExplain) {
+            toaster.pop('error', '', '请输入事件说明');
+        } else {
+            $scope.saveAbnormalHalt.getData({
+                pStationId: $scope.addNew.stid,
+                deviceType: $scope.addNew.type,
+                deviceId: $scope.addNew.deviceid,
+                sStartTime: dateConversion($scope.addOption.startDate),
+                sEndTime: dateConversion($scope.addOption.endDate),
+                eventExplain: $scope.addEventExplain,
+                id: null
+            }).then(res => {
+                if (res.code == 0) {
+                    toaster.pop('success', '', '添加成功');
+                    $scope.getList();
+                    $scope.addNew.stid = '';
+                    $scope.addNew.type = '';
+                    $scope.addNew.deviceid = '';
+                    $scope.addEventExplain = '';
+                    $scope.addOver = false;
+                    setTimeout(() => {
+                        $scope.addOver = true;
+                        $scope.addOption.startDate.showDate = '';
+                        $scope.addOption.endDate.showDate = '';
+                    }, 0)
+                } else {
+                    toaster.pop('error', '', '添加失败');
+                }
+            })
+        }
+    }
+
+    //新增按钮
     $scope.addTpl = false;
+    $scope.addOver = false;
     $scope.add = (e) => {
         e.preventDefault();
         $scope.addTpl = !$scope.addTpl;
+        $scope.addOver = true;
+    }
+
+    //取消添加按钮
+    $scope.cancelAdd = () => {
+        $scope.addTpl = false;
+        $scope.addOver = false;
+        $scope.addNew.stid = '';
+        $scope.addNew.type = '';
+        $scope.addNew.deviceid = '';
+        $scope.addOption.startDate.showDate = '';
+        $scope.addOption.endDate.showDate = '';
+        $scope.addEventExplain = '';
+    }
+
+    //获取表格列表数据
+    $scope.abnormalList = [];
+    $scope.getList = () => {
+        $scope.selectByConditionPage.getData({
+            pageIndex: 0,
+            startDate: '2019-07-01 04:20',
+            endDate: '2019-07-15 16:37',
+            deviceType: 2,
+            stId: 4090,
+            deviceId: null
+            // pageIndex: 0,
+            // startDate: dateConversion($scope.filter.startDate),
+            // endDate: dateConversion($scope.filter.endDate),
+            // deviceType: $scope.query.type,
+            // stId: $scope.query.stid,
+            // deviceId: $scope.query.deviceid
+        }).then(res => {
+            $scope.abnormalList = res.data;
+            $scope.edit = [];
+            $scope.abnormalList.forEach((v, i) => {
+                $scope.edit.push(
+                    {
+                        pStationId: '',
+                        deviceType: '',
+                        deviceId: '',
+                        startDate: new Date,
+                        endDate: new Date,
+                        eventExplain: ''
+                    }
+                )
+                $scope.edit[i].startDate.showDate = v.sStartTimeStr;
+            });
+        })
+    }
+    $scope.getList();
+
+    //查询按钮
+    $scope.search = () => {
+        $scope.getList();
     }
 
     //点击设备日志
@@ -55,11 +257,11 @@ ajaxData({
     $scope.showRecord = () => {
         $scope.showRecords = !$scope.showRecords;
     }
-
+    //----------------------------------------------------------------------编辑方法组
     //切换到编辑状态
     var flag = false;
-    $scope.showEdit = (item, i) => {
-        $scope.powerStList.forEach(item => {
+    $scope.showEdit = async (item, i) => {
+        $scope.abnormalList.forEach(item => {
             if (item.edit) {
                 toaster.pop('error', '', '每次只能编辑一条');
                 flag = true;
@@ -68,73 +270,39 @@ ajaxData({
         })
         if (!flag) {
             item.edit = true;
-            $scope.edit[i].show = item.show;
-            $scope.edit[i].status = item.status;
+            $scope.edit[i].pStationId = item.pStationId;
+            $scope.edit[i].deviceType = item.deviceType;
+            $scope.edit[i].eventExplain = item.eventExplain;
+            $scope.getEditEquips(i);
+            await myAjaxData.timeout(1000);
+            $scope.edit[i].deviceId = item.deviceId;
+            // debugger
         }
     }
 
-    //--------------------------------------------------------------------设备日志part
-    //表格的表头设置
-    $scope.column = [
-        {
-            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
-            dataIndex: '',
-            width: '60px',
-            align: 'center',
-            checkboxName: 'batchprocessing',
-            render(text, record, index) {
-                return `<label class="i-checks m-b-none"><input data-identifies="${record.id}" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>`;
-            }
-        },
-        {
-            title: '电站',
-            dataIndex: 'id',
-            align: 'center',
-            sort: !0
-        }, {
-            title: '设备类型',
-            width: '25%',
-            dataIndex: 'dictType',
-            sort: !0,
-            align: 'center'
-        }, {
-            title: '设备',
-            dataIndex: 'dictName',
-            align: 'center',
-            sort: !0
-        }, {
-            title: '事件类型',
-            dataIndex: 'dictCode',
-            align: 'center',
-            sort: !0
-        }, {
-            title: '开始时间',
-            dataIndex: 'dictEnName',
-            align: 'center'
-        }, {
-            title: '结束时间',
-            dataIndex: 'description',
-            align: 'center'
-        },
-        {
-            title: '操作',
-            dataIndex: '',
-            align: 'center',
-            sort: !0,
-            render: function () {
-                function render(text, item, index) {
-                    return `<div class="clearfix"><i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="\u6388\u6743"></i><i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i></div>`;
-                }
+    //编辑 - change 设备类型、电站
+    $scope.addEquipArr = [];
+    $scope.getEditEquips = (i) => {
+        if ($scope.edit[i].deviceType && $scope.edit[i].pStationId) {
+            //获取设备
+            $scope.queryDeviceWithType.getData({
+                type: $scope.edit[i].deviceType,
+                stids: $scope.edit[i].pStationId
+            }).then((res) => {
+                $scope.editEquipArr = res.body;
+            })
+        } else {
+            $scope.edit[i].deviceId = '';
+            $scope.editEquipArr = [];
+        }
+    }
 
-                return render;
-            }()
-        }];
+    //取消编辑按钮
+    $scope.cancelEdit = (item) => {
+        item.edit = false;
+        flag = false;
+    }
 
-    //弹出设备日志
-    // $scope.equipmentLogShow = false;
-    // $scope.showEventModel = () => {
-    //     $scope.equipmentLogShow = true;
-    // }
 
     //取消 新增后的回调
     $scope.$on('cancelCallback', () => {
