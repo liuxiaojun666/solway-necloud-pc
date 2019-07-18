@@ -109,10 +109,33 @@ ajaxData(
                                             data: JSON.stringify(req_data),
                                             beforeSend() { }
                                         });
+                                        $('#video_' + _id).append(`
+                                            <div style="display:none;" class="cloud_contrller">
+                                                <h5>云镜控制</h5>
+                                                <div>
+                                                    <div>
+                                                        <i class="iconfont pull-left"> + </i>
+                                                        <span>变倍</span>
+                                                        <i class="iconfont pull-right"> - </i>
+                                                    </div>
+                                                    <div>
+                                                        <i class="iconfont pull-left"> + </i>
+                                                        <span>焦距</span>
+                                                        <i class="iconfont pull-right"> - </i>
+                                                    </div>
+                                                    <div>
+                                                        <i class="iconfont pull-left"> + </i>
+                                                        <span>光圈</span>
+                                                        <i class="iconfont pull-right"> - </i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `);
                                         $scope.$apply();
                                     });
                                     this.on('pause', function () {
                                         $scope.checked_videos[_index].isPlay = false;
+                                        $('#video_' + _id).find('.cloud_contrller').remove();
                                         $scope.$apply();
                                     });
                                 }

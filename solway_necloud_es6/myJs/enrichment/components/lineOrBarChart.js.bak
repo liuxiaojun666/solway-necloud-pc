@@ -104,6 +104,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
             let { width, height } = $scope;
             width = width === '100%' ? $element[0].clientWidth : width;
             height = height === '100%' ? $element[0].clientWidth : height;
+            const dataZoomShow = datazoom && (((width - 100) / ydatas[0][0].length / (types[0].concat(types[1]).filter(v => (v === 'bar' || linezoom)).length)) < (barWidth + 10));
             const option = {
                 backgroundColor,
                 animation,
@@ -188,7 +189,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                         }
                     }
                 })),
-                dataZoom: datazoom && (((width - 100) / ydatas[0][0].length / (types[0].concat(types[1]).filter(v => (v === 'bar' || linezoom)).length)) < (barWidth + 10)) && [{
+                dataZoom: dataZoomShow && [{
                     type: 'slider',
                     xAxisIndex: 0,
                     filterMode: 'empty',
@@ -228,7 +229,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                             lineStyle: {
                                 width: lineWidth
                             },
-                            color: (types[i][xi] === 'bar') && (colors[i][xi].includes('rgb')) ? {
+                            color: (types[i][xi] === 'bar') && (colors[i][xi].includes('rgb')) && (!dataZoomShow) ? {
                                 type: 'linear',
                                 x: 0,
                                 y: 0,

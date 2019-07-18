@@ -61,7 +61,9 @@ ajaxData({
             render(text, item, index) {
                 return `
                 <div class="clearfix">
-                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="编辑"></i>
+                    <i class="iconfont editDevice icon-shebeiguanli" style="font-size: 20px;color:#1ddabe;margin-right:15px;" title="编辑设备台账"></i>
+                    <i class="iconfont editStation icon-bianji-copy " style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="编辑电站信息"></i>
+                    <i class="iconfont download icon-xiazai" style="font-size: 20px;color:#1ddabe;margin-right:15px;" title="下载"></i>
                     <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
                 </div>
                 `
@@ -88,9 +90,19 @@ ajaxData({
     }
 
     $scope.trClick = (item, index, event) => {
-        if(event.target.className.includes('icon-bianji-copy')) {
+        if(event.target.className.includes('editDevice')) {
+            if(item.stationClass == '01'){ //光伏
+                $scope.accountSolar = true;
+                $scope.$broadcast('solarBroad',item);
+            }else if(item.stationClass == '02'){ //风电
+                $scope.accountWind = true;
+                $scope.$broadcast('windBroad',item);
+            }
+        }else if(event.target.className.includes('editStation')) {
             $scope.newStationModel = true;
             $scope.$broadcast('broadAddStation', item);
+        }else if(event.target.className.includes('download')){ //下载
+            window.location.href = window.baseUrl+'/PowerStation/exportExcelData.htm?stationid='+item.id;
         }else if(event.target.className.includes('icon-shanchu1')) {
             $solway.confirm({ message: '确定删除此电站？删除电站，相关配置信息将一起被删除,请谨慎操作 ! ! !' }, () => {
                 deleteStationFun(item.id)

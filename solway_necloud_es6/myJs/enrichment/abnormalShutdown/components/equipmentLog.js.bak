@@ -1,19 +1,264 @@
 ajaxData({
-    baseDictionaryList: {
-        name: 'GETbaseDictionaryList',
+    selectDeviceLog: {
+        name: 'selectDeviceLog',
         data: {},
         later: true
+    },
+    insertDeviceLog2AbnormalHalt: {
+        name: 'insertDeviceLog2AbnormalHalt',
+        data: {},
+        later: true
+    },
+    GETBasedictionarySelectAll: {
+        name: 'GETBasedictionarySelectAll',
+        data: {},
+        later: true
+    },
+}, {
+    __serviceName__: 'child_myAjaxData'
+})('equipmentLogCtrl', ['$scope', 'child_myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, parentmyAjaxData, historicalRecord, $timeout, toaster) => {
+    // Unix时间戳转换
+    function FormatDateTime(UnixTime) {
+        var date = new Date(UnixTime);
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        var h = date.getHours();
+        h = h < 10 ? ('0' + h) : h;
+        var minute = date.getMinutes();
+        var second = date.getSeconds();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        second = second < 10 ? ('0' + second) : second;
+        return y + '-' + m + '-' + d + ' ' + h + ':' + minute;
+    };
+
+    //查询的数据
+    var date1 = new Date();
+    date1.setDate(date1.getDate() - 1);
+    $scope.query = {
+        type: '',
+        stid: '',
+        deviceid: '',
+        eventValue: '',
+        isToday: 1,
+        startDate: new Date,
+        endDate: new Date,
+        limitEndDate: new Date
     }
-}, {})('equipmentLogCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+    $scope.query.startDate.showDate = '';
+    $scope.query.endDate.showDate = '';
+
+    //设备类型 数据源
+    $scope.equipType = [
+        {
+            k: 1,
+            v: '汇流箱'
+        },
+        {
+            k: 2,
+            v: '逆变器'
+        },
+        {
+            k: 3,
+            v: '箱变'
+        }
+    ]
+
+    //数据状态 数据源
+    $scope.dataStatusArr = [
+        {
+            k: 1,
+            v: '今日'
+        },
+        {
+            k: 0,
+            v: '昨日以前'
+        }
+    ]
+
+    //获取时间范围
+    $scope.statusCheck = true;
+    $scope.getLimitTime = async () => {
+        if ($scope.query.isToday == 1) {
+            $scope.statusCheck = false;
+            await parentmyAjaxData.timeout(0);
+            $scope.statusCheck = true;
+            $scope.query.startDate = new Date;
+            $scope.query.endDate = new Date;
+            $scope.query.limitEndDate = new Date;
+            $scope.query.startDate.showDate = '';
+            $scope.query.endDate.showDate = '';
+        } else {
+            $scope.statusCheck = false;
+            await parentmyAjaxData.timeout(0);
+            $scope.statusCheck = true;
+            $scope.query.startDate = date1;
+            $scope.query.endDate = date1;
+            $scope.query.limitEndDate = date1;
+            $scope.query.startDate.showDate = '';
+            $scope.query.endDate.showDate = '';
+        }
+    }
+
+    //获取电站列表
+    $scope.stationArr = [];
+    $scope.getAllSTListForPCBySession.getData({
+
+    }).then(res => {
+        res.forEach((v, i) => {
+            $scope.stationArr.push({
+                'k': v.id,
+                'v': v.stationname
+            })
+        })
+    })
+
+    //获取事件列表
+    $scope.eventArr = [];
+    $scope.GETBasedictionarySelectAll.getData({
+        dictType: 'EVENT_TYPE'
+    }).then(res => {
+        $scope.eventArr = res;
+    })
+
+    //查询 - change 设备类型、电站
+    $scope.equipArr = [];
+    $scope.getEquips = () => {
+        if ($scope.query.type && $scope.query.stid) {
+            //获取设备
+            $scope.queryDeviceWithType.getData({
+                type: $scope.query.type,
+                stids: $scope.query.stid
+            }).then((res) => {
+                $scope.equipArr = res.body;
+            })
+        } else {
+            $scope.query.deviceid = '';
+            $scope.equipArr = [];
+        }
+    }
+
+    //获取表格列表数据
+    $scope.recordList = [];
+    $scope.getList = () => {
+        $scope.selectDeviceLog.getData({
+            pageIndex: 0,
+            startDate: '2019-07-01 04:20',
+            endDate: '2019-07-15 16:37',
+            deviceType: 2,
+            stId: 4090,
+            deviceId: null,
+            eventType: 1,
+            isToday: 1
+            // pageIndex: 0,
+            // startDate: dateConversion($scope.filter.startDate),
+            // endDate: dateConversion($scope.filter.endDate),
+            // deviceType: $scope.query.type,
+            // stId: $scope.query.stid,
+            // deviceId: $scope.query.deviceid,
+            // isToday: $scope.query.isToday
+        }).then(res => {
+            $scope.recordList = res.body.data;
+            $scope.recordList.forEach((v, i) => {
+                v.startTimeStr = FormatDateTime(v.sStartTime);
+                v.endTimeStr = FormatDateTime(v.sEndTime);
+            })
+        })
+    }
+    $scope.getList();
+
+    //查询按钮
+    $scope.search = () => {
+        $scope.getList();
+    }
+
+    //表格的表头设置
+    $scope.column = [
+        {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'batchprocessing',
+            render(text, record, index) {
+                return `<label class="i-checks m-b-none"><input data-identifies="${record.id}" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>`;
+            }
+        },
+        {
+            title: '电站',
+            dataIndex: 'stName',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '设备类型',
+            width: '25%',
+            dataIndex: 'devicetypeStr',
+            sort: !0,
+            align: 'center'
+        }, {
+            title: '设备',
+            dataIndex: 'deviceName',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '事件类型',
+            dataIndex: 'eventTypeStr',
+            align: 'center',
+            sort: !0
+        }, {
+            title: '开始时间',
+            dataIndex: 'startTimeStr',
+            align: 'center'
+        }, {
+            title: '结束时间',
+            dataIndex: 'endTimeStr',
+            align: 'center'
+        },
+        // {
+        //     title: '操作',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     sort: !0,
+        //     render: function () {
+        //         function render(text, item, index) {
+        //             return `<div class="clearfix"><i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="\u6388\u6743"></i><i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i></div>`;
+        //         }
+
+        //         return render;
+        //     }()
+        // }
+    ];
+
     //弹出事件说明
     $scope.eventExplainShow = false;
     $scope.showEventModel = () => {
-        $scope.eventExplainShow = true;
+        $scope.recordIds = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies);
+        if ($scope.recordIds.length == 0) {
+            toaster.pop('error', '', '请至少选择一条日志');
+        } else {
+            $scope.eventExplainShow = true;
+        }
+    }
+
+    //添加事件说明
+    $scope.emitExplain = () => {
+        $scope.insertDeviceLog2AbnormalHalt.getData({
+            ids: $scope.recordIds.join(),
+            eventExplain: $scope.explainCon
+        }).then(res => {
+            if (res.code == 0) {
+                toaster.pop('success', '', '转换成功');
+            } else {
+                toaster.pop('error', '', '转换失败');
+            }
+        })
     }
 
     //取消按钮
     $scope.cancel = () => {
         $scope.eventExplainShow = false;
-        $scope.explainZi = '';
+        $scope.explainCon = '';
     }
 });

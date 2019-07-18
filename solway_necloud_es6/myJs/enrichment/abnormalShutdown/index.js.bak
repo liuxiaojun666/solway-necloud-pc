@@ -19,7 +19,12 @@ ajaxData({
         data: {},
         later: true
     },
-}, {})('abnormalShutdownCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
+    deleteAbnormalHalt: {
+        name: 'deleteAbnormalHalt',
+        data: {},
+        later: true
+    },
+}, {})('abnormalShutdownCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $ocLazyLoad) => {
     historicalRecord.init(); //历史记录 初始化
     $scope.beforeLoading = true;
     historyInitCallback();
@@ -28,8 +33,16 @@ ajaxData({
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
         const historiData = historicalRecord.get(); //获取记录
-        const { keyWords } = historiData;
-        $scope.keyWords = keyWords;
+        const { deviceType, pStationId, deviceId, isToday } = historiData;
+
+        // debugger
+        await myAjaxData.timeout(1000);
+        $scope.query.type = deviceType;
+        $scope.query.stid = pStationId;
+        $scope.getEquips();
+        $scope.query.deviceid = deviceId;
+        $scope.query.isToday = isToday;
+
         $scope.beforeLoading = false;
     };
 
@@ -47,7 +60,8 @@ ajaxData({
     $scope.query = {
         type: '',
         stid: '',
-        deviceid: ''
+        deviceid: '',
+        isToday: 1
     }
 
     $scope.addNew = {
@@ -58,13 +72,11 @@ ajaxData({
 
     //查询 ->时间
     var date1 = new Date();
-    var date2 = new Date(date1);
-    date2.setDate(date1.getDate() - 1);
+    date1.setDate(date1.getDate() - 1);
     $scope.filter = {
-        date: new Date,
         startDate: new Date,
         endDate: new Date,
-        limitEndDate: date2
+        limitEndDate: new Date
     }
     $scope.filter.startDate.showDate = '';
     $scope.filter.endDate.showDate = '';
@@ -75,12 +87,6 @@ ajaxData({
         startDate: new Date,
         endDate: new Date
     }
-    //编辑 ->时间
-    $scope.GroupUser = [{
-        startDate: new Date,
-        endDate: new Date,
-        limitEndDate: new Date,
-    }];
 
     //设备类型 数据源
     $scope.equipType = [
@@ -97,6 +103,42 @@ ajaxData({
             v: '箱变'
         }
     ]
+
+    //数据状态 数据源
+    $scope.dataStatusArr = [
+        {
+            k: 1,
+            v: '今日'
+        },
+        {
+            k: 0,
+            v: '昨日以前'
+        }
+    ]
+
+    //获取时间范围
+    $scope.statusCheck = true;
+    $scope.getLimitTime = async () => {
+        if ($scope.query.isToday == 1) {
+            $scope.statusCheck = false;
+            await myAjaxData.timeout(0);
+            $scope.statusCheck = true;
+            $scope.filter.startDate = new Date;
+            $scope.filter.endDate = new Date;
+            $scope.filter.limitEndDate = new Date;
+            $scope.filter.startDate.showDate = '';
+            $scope.filter.endDate.showDate = '';
+        } else {
+            $scope.statusCheck = false;
+            await myAjaxData.timeout(0);
+            $scope.statusCheck = true;
+            $scope.filter.startDate = date1;
+            $scope.filter.endDate = date1;
+            $scope.filter.limitEndDate = date1;
+            $scope.filter.startDate.showDate = '';
+            $scope.filter.endDate.showDate = '';
+        }
+    }
 
     //获取电站列表
     $scope.stationArr = [];
@@ -193,10 +235,12 @@ ajaxData({
     //新增按钮
     $scope.addTpl = false;
     $scope.addOver = false;
-    $scope.add = (e) => {
+    $scope.showAdd = (e) => {
         e.preventDefault();
         $scope.addTpl = !$scope.addTpl;
         $scope.addOver = true;
+        $scope.addOption.startDate.showDate = '';
+        $scope.addOption.endDate.showDate = '';
     }
 
     //取消添加按钮
@@ -212,7 +256,6 @@ ajaxData({
     }
 
     //获取表格列表数据
-    $scope.abnormalList = [];
     $scope.getList = () => {
         $scope.selectByConditionPage.getData({
             pageIndex: 0,
@@ -220,15 +263,18 @@ ajaxData({
             endDate: '2019-07-15 16:37',
             deviceType: 2,
             stId: 4090,
+            isToday: 1,
             deviceId: null
             // pageIndex: 0,
             // startDate: dateConversion($scope.filter.startDate),
             // endDate: dateConversion($scope.filter.endDate),
             // deviceType: $scope.query.type,
             // stId: $scope.query.stid,
-            // deviceId: $scope.query.deviceid
+            // deviceId: $scope.query.deviceid,
+            // isToday: $scope.query.isToday
         }).then(res => {
-            $scope.abnormalList = res.data;
+            $scope.abnormalList = [];
+            $scope.abnormalList = res.body.data;
             $scope.edit = [];
             $scope.abnormalList.forEach((v, i) => {
                 $scope.edit.push(
@@ -236,14 +282,19 @@ ajaxData({
                         pStationId: '',
                         deviceType: '',
                         deviceId: '',
-                        startDate: new Date,
-                        endDate: new Date,
-                        eventExplain: ''
+                        eventExplain: '',
+                        startDate: new Date(v.sStartTime),
+                        endDate: new Date(v.sEndTime)
                     }
                 )
-                $scope.edit[i].startDate.showDate = v.sStartTimeStr;
             });
         })
+        historicalRecord.set({
+            deviceType: $scope.query.type,
+            pStationId: $scope.query.stid,
+            deviceId: $scope.query.deviceid,
+            isToday: $scope.query.isToday,
+        });
     }
     $scope.getList();
 
@@ -273,16 +324,15 @@ ajaxData({
             $scope.edit[i].pStationId = item.pStationId;
             $scope.edit[i].deviceType = item.deviceType;
             $scope.edit[i].eventExplain = item.eventExplain;
-            $scope.getEditEquips(i);
+            $scope.getEditEquips(i, item);
             await myAjaxData.timeout(1000);
             $scope.edit[i].deviceId = item.deviceId;
-            // debugger
         }
     }
 
     //编辑 - change 设备类型、电站
     $scope.addEquipArr = [];
-    $scope.getEditEquips = (i) => {
+    $scope.getEditEquips = (i, item) => {
         if ($scope.edit[i].deviceType && $scope.edit[i].pStationId) {
             //获取设备
             $scope.queryDeviceWithType.getData({
@@ -290,11 +340,34 @@ ajaxData({
                 stids: $scope.edit[i].pStationId
             }).then((res) => {
                 $scope.editEquipArr = res.body;
+                $scope.edit[i].deviceId = item.deviceId;
             })
         } else {
             $scope.edit[i].deviceId = '';
             $scope.editEquipArr = [];
         }
+    }
+
+    //编辑的确定按钮
+    $scope.editItem = (item, i) => {
+        $scope.saveAbnormalHalt.getData({
+            pStationId: $scope.edit[i].pStationId,
+            deviceType: $scope.edit[i].deviceType,
+            deviceId: $scope.edit[i].deviceId,
+            sStartTime: $scope.edit[i].startDate.showDate,
+            sEndTime: $scope.edit[i].endDate.showDate,
+            eventExplain: $scope.edit[i].eventExplain,
+            id: item.id
+        }).then(res => {
+            if (res.code == 0) {
+                item.edit = false;
+                flag = false;
+                toaster.pop('success', '', '编辑成功');
+                $scope.getList();
+            } else {
+                toaster.pop('error', '', '编辑失败');
+            }
+        })
     }
 
     //取消编辑按钮
@@ -303,6 +376,42 @@ ajaxData({
         flag = false;
     }
 
+    //删除按钮
+    $scope.delListItem = (item) => {
+        $solway.confirm({ message: '确定删除此事件吗？' }, () => {
+            $scope.deleteAbnormalHalt.getData({
+                ids: item.id
+            })
+            $scope.deleteAbnormalHalt.subscribe(res => {
+                if (res.code == 0) {
+                    toaster.pop('success', '', '删除成功');
+                    $scope.getList();
+                } else {
+                    toaster.pop('error', '', '删除失败');
+                }
+            });
+        });
+    }
+
+    //导出图表
+    $ocLazyLoad.load([
+        'vendor/jquery/TableExport/libs/js-xlsx/xlsx.core.min.js',
+        'vendor/jquery/TableExport/libs/FileSaver/FileSaver.min.js',
+        'vendor/jquery/TableExport/tableExport.js'
+    ]).then(() => {
+        $scope.tableExport = () => {
+            $('.exportTable').tableExport({
+                headings: true,
+                footers: true,
+                formats: ["xls", "csv", "txt"],
+                fileName: '异常停机',
+                bootstrap: true,
+                position: "bottom",
+                ignoreRows: null,
+                ignoreCols: null
+            });
+        };
+    });
 
     //取消 新增后的回调
     $scope.$on('cancelCallback', () => {
