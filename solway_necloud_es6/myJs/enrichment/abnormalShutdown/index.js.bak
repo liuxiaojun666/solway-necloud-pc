@@ -33,16 +33,29 @@ ajaxData({
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
         const historiData = historicalRecord.get(); //获取记录
-        const { deviceType, pStationId, deviceId, isToday } = historiData;
-
-        // debugger
+        const { deviceType = '', pStationId = '', deviceId = '',startDate = '', endDate = ''} = historiData;
         await myAjaxData.timeout(1000);
         $scope.query.type = deviceType;
         $scope.query.stid = pStationId;
         $scope.getEquips();
         $scope.query.deviceid = deviceId;
-        $scope.query.isToday = isToday;
+        $scope.statusCheck = false;
+        await myAjaxData.timeout(0);
+        $scope.statusCheck = true;
+        if (startDate == '') {
+            $scope.filter.startDate.showDate = '';
+        } else {
+            $scope.filter.startDate = new Date(startDate);
+        }
 
+        if (endDate == '') {
+            $scope.filter.startDate.endDate = '';
+        } else {
+            $scope.filter.endDate = new Date(endDate);
+        }
+
+        await myAjaxData.timeout(0);
+        $scope.getList();
         $scope.beforeLoading = false;
     };
 
@@ -78,8 +91,8 @@ ajaxData({
         endDate: new Date,
         limitEndDate: new Date
     }
-    $scope.filter.startDate.showDate = '';
-    $scope.filter.endDate.showDate = '';
+    // $scope.filter.startDate.showDate = '';
+    // $scope.filter.endDate.showDate = '';
 
     //新增 ->时间
     $scope.addOption = {
@@ -116,28 +129,10 @@ ajaxData({
         }
     ]
 
-    //获取时间范围
-    $scope.statusCheck = true;
-    $scope.getLimitTime = async () => {
-        if ($scope.query.isToday == 1) {
-            $scope.statusCheck = false;
-            await myAjaxData.timeout(0);
-            $scope.statusCheck = true;
-            $scope.filter.startDate = new Date;
-            $scope.filter.endDate = new Date;
-            $scope.filter.limitEndDate = new Date;
-            $scope.filter.startDate.showDate = '';
-            $scope.filter.endDate.showDate = '';
-        } else {
-            $scope.statusCheck = false;
-            await myAjaxData.timeout(0);
-            $scope.statusCheck = true;
-            $scope.filter.startDate = date1;
-            $scope.filter.endDate = date1;
-            $scope.filter.limitEndDate = date1;
-            $scope.filter.startDate.showDate = '';
-            $scope.filter.endDate.showDate = '';
-        }
+    //开始时间方法
+    $scope.startTimeModel = false;
+    $scope.showStartTime = () => {
+        $scope.startTimeModel = true;
     }
 
     //获取电站列表
@@ -220,6 +215,7 @@ ajaxData({
                     $scope.addNew.deviceid = '';
                     $scope.addEventExplain = '';
                     $scope.addOver = false;
+                    $scope.addTpl = !$scope.addTpl;
                     setTimeout(() => {
                         $scope.addOver = true;
                         $scope.addOption.startDate.showDate = '';
@@ -257,46 +253,51 @@ ajaxData({
 
     //获取表格列表数据
     $scope.getList = () => {
+        $scope.loading = true;
         $scope.selectByConditionPage.getData({
-            pageIndex: 0,
-            startDate: '2019-07-01 04:20',
-            endDate: '2019-07-15 16:37',
-            deviceType: 2,
-            stId: 4090,
-            isToday: 1,
-            deviceId: null
             // pageIndex: 0,
-            // startDate: dateConversion($scope.filter.startDate),
-            // endDate: dateConversion($scope.filter.endDate),
-            // deviceType: $scope.query.type,
-            // stId: $scope.query.stid,
-            // deviceId: $scope.query.deviceid,
-            // isToday: $scope.query.isToday
-        }).then(res => {
-            $scope.abnormalList = [];
-            $scope.abnormalList = res.body.data;
-            $scope.edit = [];
-            $scope.abnormalList.forEach((v, i) => {
-                $scope.edit.push(
-                    {
-                        pStationId: '',
-                        deviceType: '',
-                        deviceId: '',
-                        eventExplain: '',
-                        startDate: new Date(v.sStartTime),
-                        endDate: new Date(v.sEndTime)
-                    }
-                )
-            });
+            // startDate: '2019-07-01 04:20',
+            // endDate: '2019-07-15 16:37',
+            // deviceType: 2,
+            // stId: 4090,
+            // isToday: 1,
+            // deviceId: null
+
+            pageIndex: 0,
+            startDate: $scope.filter.startDate.showDate,
+            endDate: $scope.filter.endDate.showDate,
+            deviceType: $scope.query.type,
+            stId: $scope.query.stid,
+            deviceId: $scope.query.deviceid,
+            isToday: $scope.query.isToday
         })
         historicalRecord.set({
             deviceType: $scope.query.type,
             pStationId: $scope.query.stid,
             deviceId: $scope.query.deviceid,
-            isToday: $scope.query.isToday,
+            startDate: $scope.filter.startDate.getTime(),
+            endDate: $scope.filter.endDate.getTime()
         });
     }
-    $scope.getList();
+
+    $scope.selectByConditionPage.subscribe(res => {
+        $scope.loading = false;
+        // $scope.abnormalList = [];
+        $scope.abnormalList = res.body.data;
+        $scope.edit = [];
+        $scope.abnormalList.forEach((v, i) => {
+            $scope.edit.push(
+                {
+                    pStationId: '',
+                    deviceType: '',
+                    deviceId: '',
+                    eventExplain: '',
+                    startDate: new Date(v.sStartTime),
+                    endDate: new Date(v.sEndTime)
+                }
+            )
+        });
+    });
 
     //查询按钮
     $scope.search = () => {
@@ -350,24 +351,39 @@ ajaxData({
 
     //编辑的确定按钮
     $scope.editItem = (item, i) => {
-        $scope.saveAbnormalHalt.getData({
-            pStationId: $scope.edit[i].pStationId,
-            deviceType: $scope.edit[i].deviceType,
-            deviceId: $scope.edit[i].deviceId,
-            sStartTime: $scope.edit[i].startDate.showDate,
-            sEndTime: $scope.edit[i].endDate.showDate,
-            eventExplain: $scope.edit[i].eventExplain,
-            id: item.id
-        }).then(res => {
-            if (res.code == 0) {
-                item.edit = false;
-                flag = false;
-                toaster.pop('success', '', '编辑成功');
-                $scope.getList();
-            } else {
-                toaster.pop('error', '', '编辑失败');
-            }
-        })
+        if (!$scope.edit[i].pStationId) {
+            toaster.pop('error', '', '请选择电站');
+        } else if (!$scope.edit[i].deviceType) {
+            toaster.pop('error', '', '请选择设备类型');
+        } else if (!$scope.edit[i].deviceId) {
+            toaster.pop('error', '', '请选择设备');
+        } else if (!$scope.edit[i].startDate) {
+            toaster.pop('error', '', '请选择开始时间');
+        } else if (!$scope.edit[i].endDate) {
+            toaster.pop('error', '', '请选择结束时间');
+        } else if (!$scope.edit[i].eventExplain) {
+            toaster.pop('error', '', '请输入事件说明');
+        } else {
+            $scope.saveAbnormalHalt.getData({
+                pStationId: $scope.edit[i].pStationId,
+                deviceType: $scope.edit[i].deviceType,
+                deviceId: $scope.edit[i].deviceId,
+                sStartTime: $scope.edit[i].startDate.showDate,
+                sEndTime: $scope.edit[i].endDate.showDate,
+                eventExplain: $scope.edit[i].eventExplain,
+                id: item.id
+            }).then(res => {
+                if (res.code == 0) {
+                    item.edit = false;
+                    flag = false;
+                    toaster.pop('success', '', '编辑成功');
+                    $scope.getList();
+                } else {
+                    toaster.pop('error', '', '编辑失败');
+                }
+            })
+        }
+
     }
 
     //取消编辑按钮
@@ -418,8 +434,8 @@ ajaxData({
         $scope.newStationModel = false;
     });
 
-    $scope.$on('addCallback', () => {
-        $scope.newStationModel = false;
+    $scope.$on('showAbnormal', () => {
+        $scope.showRecords = false;
     });
 
     //头部折叠框 显示

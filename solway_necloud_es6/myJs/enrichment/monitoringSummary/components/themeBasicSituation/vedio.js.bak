@@ -6,7 +6,20 @@ ajaxData({
     },
 }, {
         __serviceName__: 'themeBasicSituationVedioService'
-    })('themeBasicSituationVedioCtrl', ['$scope', 'themeBasicSituationVedioService', '$http'], ($scope, myAjaxData, $http) => {
+    })('themeBasicSituationVedioCtrl', ['$scope', 'themeBasicSituationVedioService', '$http', , '$ocLazyLoad'], ($scope, myAjaxData, $http, $ocLazyLoad) => {
+
+        $scope.EnableFlash = navigator.plugins['Shockwave Flash'];
+        $ocLazyLoad.load([
+            "/vendor/videojs/video-js-5.19.2/video-js.min.css",
+            "/vendor/videojs/video-js-5.19.2/video.min.js",
+        ]).then(() => $ocLazyLoad.load([
+            'vendor/videojs/videojs.hotkeys.min.js',   
+        ])).then(() => {
+            videojs.options.flash.swf = '/vendor/videojs/video-js-5.19.2/video-js-fixed.swf';
+            videojs.options.techOrder = ['flash'];
+        });
+
+
         $scope.selectVideos.subscribe((res) => {
             $scope.params = [];
             const $videosContainer = $('#videosContainer');
@@ -21,6 +34,7 @@ ajaxData({
                         }
                     ]
                 });
+
                 $videosContainer.append(
                     `<a href="#" title="${item.monitorPointName}" style="
                             position:relative;
@@ -33,78 +47,18 @@ ajaxData({
                         id="player${i}"></a>`
                 );
 
-                flowplayer("player" + i, "vendor/flash/flowplayer/flowplayer-3.2.18.swf", {
-                    clip: {
-                        url: item.monitorPointDest,
-                        provider: 'rtmp',
-                        live: true,
-                        autoPlay: true,
-                    },
-                    plugins: {
-                        rtmp: {
-                            url: 'vendor/flash/flowplayer/flowplayer.rtmp-3.2.8.swf',
-                            netConnectionUrl: item.monitorPointDest
-                        },
-                        controls: {
-                            play: false, opacity: 0.5, scrubber: false, volume: false, mute: false, time: false,
-                            tooltips: {
-                                buttons: true,
-                                fullscreen: '全屏',
-                            }
-                        }
-                    }
-                }).onBegin(function () {
-                    if (!this.again) {
-                        setTimeout(() => {
-                            this.again = true;
-                            this.stop();
-                        }, 10 * 1000);
-                    } else {
-                        $scope.params.push({
-                            station_id: item.stId,
-                            stream: [
-                                {
-                                    name: item.monitorPointName,
-                                    source: item.monitorPointSource,
-                                    dest: item.monitorPointDest
-                                }
-                            ]
-                        });
-                    }
-                }).onStart(function () {
-                    // debugger
-                    
-                }).onBeforeStop(function (obj) {
-                    $scope.params = $scope.params.filter(item => item.stream[0].dest !== obj.url)
-                });
             });
             timer();
         });
 
         async function timer() {
             $scope.params.forEach(item => {
-                // $http({
-                //     method: "POST",
-                //     url: $scope.selectVideos.res.VIDEO_URL,
-                //     timeout: 4000,
-                //     headers: {
-                //         'Content-Type': 'application/x-www-form-urlencoded',
-                //     },
-                //     data: item,
-                // });
-
                 $.ajax({
                     type: 'POST',
                     url: $scope.selectVideos.res.VIDEO_URL,
                     data: JSON.stringify(item), 
-                    beforeSend: function (xhr) {
-                        
-                    }
-                })
-                // $.post(
-                //     $scope.selectVideos.res.VIDEO_URL,
-                //     JSON.stringify(item)
-                // );
+                    beforeSend: function (xhr) {}
+                });
             });
             if ($scope.isDestroy) return;
             await myAjaxData.timeout(30 * 1000);

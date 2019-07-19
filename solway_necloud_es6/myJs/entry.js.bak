@@ -1,59 +1,135 @@
-$('head').append(`<link rel="stylesheet" href="/theme/css/myCss.css">`);
-const $body = $('body');
-// loading
-$body.append(`<div class="outer-loding-view" style="position:absolute;width:100%;height:100%;top:0;left:0;z-index:99;text-align:center;">
-    <div class="k-ball-holder3">
-        <div class="k-ball7a"></div>
-        <div class="k-ball7b"></div>
-        <div class="k-ball7c"></div>
-        <div class="k-ball7d"></div>
-    </div>
-</div>`);
-
-
-// 版本校验
-$body.append('<script src="/theme/js/dist/tools/versionCheck.js?_=' + window.localStorage.stamp + '" ><\/script>');
-// 单窗口校验
-$body.append('<script src="/theme/js/dist/tools/singleWindow.js?_=' + window.localStorage.stamp + '" ><\/script>');
-
-
-// angular.js
-$body.append('<script src="/vendor/angular/angular.all.js" ><\/script>');
-
-
-// 数据持久化
-$body.append('<script src="/theme/js/dist/components/persist.js?_=' + window.localStorage.stamp + '" ><\/script>');
-// 数据持久化仓库初始化
-$body.append('<script src="/theme/js/dist/enrichment/store.js?_=' + window.localStorage.stamp + '"><\/script>');
-
-// angular 单页面根元素
-$body.append(`<div ui-view="" class="app ng-scope app-header-fixed app-aside-fixed" id="app" ng-class="{'app-header-fixed':app.settings.headerFixed, 'app-aside-fixed':app.settings.asideFixed, 'app-aside-folded':app.settings.asideFolded, 'app-aside-dock':app.settings.asideDock, 'container':app.settings.container}"></div>`);
-
-
-$body.append('<script src="/theme/js/app.js?_=' + window.localStorage.stamp + '" ><\/script>');
-$body.append('<script src="/theme/js/config.js?_=' + window.localStorage.stamp + '" ><\/script>');
-$body.append('<script src="/theme/js/config.lazyload.js?_=' + window.localStorage.stamp + '" ><\/script>');
-$body.append('<script id="routerJS" param="" src="/theme/js/config.router.js?_=' + window.localStorage.stamp + '"><\/script>');
-$body.append('<script src="/theme/js/main.js?_=' + window.localStorage.stamp + '" ><\/script>');
-$body.append('<script src="/theme/js/services/ui-load.js?_=' + window.localStorage.stamp + '"" ><\/script>');
-
-
-
 $(function () {
+    const $head = $('head');
+    const $body = $('body');
+    
+    // 运行环境检测
+    const HOST = location.host;
+    if ((HOST === "necloud.solway.cn")) {
+        window.PROCESS_EVN = 'production';
+        $body.addClass('PROCESS_EVN_production');
+    } else if (HOST === "netest.solway.cn") {
+        window.PROCESS_EVN = 'test';
+        $body.addClass('PROCESS_EVN_test');
+    } else if (HOST.includes('local.solway.cn')) {
+        window.PROCESS_EVN = 'lxj_private';
+        $body.addClass('PROCESS_EVN_lxj_private');
+        $body.addClass('PROCESS_EVN_development');
+    } else {
+        window.PROCESS_EVN = 'development';
+        $body.addClass('PROCESS_EVN_development');
+    }
+
+    // 版本校验
+    if ((window.PROCESS_EVN === 'production') || (window.PROCESS_EVN === 'test')) {
+        if (!window.localStorage.stamp) window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+
+        const oReq = new XMLHttpRequest();
+        oReq.open("GET", '/stamp.txt?_=' + Math.random(), true);
+        oReq.responseType = "blob";
+        oReq.onload = function (oEvent) {
+            const _blob = new Blob([oReq.response]);
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const stamp = reader.result;
+                if (stamp !== window.localStorage.stamp) {
+                    alert('页面缓存或受非正常访问，请刷新登录页后重新登录！');
+                    return window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+                }
+            };
+            reader.readAsText(_blob);
+        };
+        oReq.send();
+    }
+
+    // 单窗口校验
+    ;(function () {
+        var xx = function () {
+            window.opener = null;
+            window.open("", "_self", "");
+            window.close();
+            location.href = "about:blank";
+        };
+        if (window.localStorage.hasWindow) {
+            alert('为防止未知错误，建议使用一个窗口访问系统，您已打开窗口。');
+            if (confirm('确定继续访问将重新登录系统')) window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+            else xx();
+        }
+        else {
+            window.addEventListener('beforeunload', function (e) {
+                window.localStorage.hasWindow = '';
+            });
+            window.localStorage.hasWindow = 'true';
+        }
+    })();
+
+
+    // angular.js
+    $body.append('<script src="/vendor/angular/angular.all.js" ><\/script>');
+
+
+    // 数据持久化
+    $body.append('<script src="/theme/js/dist/components/persist.js?_=' + window.localStorage.stamp + '" ><\/script>');
+    // 数据持久化仓库初始化
+    $body.append('<script src="/theme/js/dist/enrichment/store.js?_=' + window.localStorage.stamp + '"><\/script>');
+
+    $body.append('<script src="/theme/js/app.js?_=' + window.localStorage.stamp + '" ><\/script>');
+    $body.append('<script src="/theme/js/config.js?_=' + window.localStorage.stamp + '" ><\/script>');
+    $body.append('<script src="/theme/js/config.lazyload.js?_=' + window.localStorage.stamp + '" ><\/script>');
+    $body.append('<script id="routerJS" param="" src="/theme/js/config.router.js?_=' + window.localStorage.stamp + '"><\/script>');
+    $body.append('<script src="/theme/js/main.js?_=' + window.localStorage.stamp + '" ><\/script>');
+    $body.append('<script src="/theme/js/services/ui-load.js?_=' + window.localStorage.stamp + '"" ><\/script>');
+
+
     setTimeout(() => {
-        // 接口 地址 文件
-        $body.append('<script async src="/theme/js/dist/interface.js?_=' + window.localStorage.stamp + '" ><\/script>');
+
         // rem
-        $body.append('<script async src="/theme/js/dist/components/rem.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        var html = document.getElementsByTagName('html')[0], oWidth = document.body.clientWidth || document.documentElement.clientWidth;
+        html.style.fontSize = oWidth / 1366 * 100 + 'px';
+        window.addEventListener('resize', function () {
+            var html = document.getElementsByTagName('html')[0], oWidth = document.body.clientWidth || document.documentElement.clientWidth;
+            html.style.fontSize = oWidth / 1366 * 100 + 'px';
+        });
+
+        // css 加载
+        $head.append(`<link rel="stylesheet" href="/theme/css/myCss.css">`);
+        // 接口 地址 文件
+        $body.append('<script src="/theme/js/dist/interface.js?_=' + window.localStorage.stamp + '" ><\/script>');
         // echarts
         $body.append('<script async src="/vendor/echarts/echarts-all-3new.min.js" ><\/script>');
         // jquery 验证
         $body.append('<script async src="/vendor/jquery/validate/jquery.validate.min.js"" ><\/script>');
         // bootstrap js
         $body.append('<script async src="/vendor/bootstrap/js/bootstrap.min.js"" ><\/script>');
-        
+
+        if (window.PROCESS_EVN === 'production') {
+            // 运行环境影藏class
+            $head.append('<style>.PROCESS_EVN_production .hide-evn-production {display: none!important;}</style>');
+            // 埋点统计
+            $body.append('<script async type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"><\/script>');
+        } else if (window.PROCESS_EVN === 'test') {
+            // 运行环境影藏class
+            $head.append('<style>.PROCESS_EVN_test .hide-evn-test {display: none!important;}</style>');
+            // 埋点统计
+            $body.append('<script async type="text/javascript" src="https://s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
+        } else {
+            // 运行环境影藏class
+            $head.append('<style>.PROCESS_EVN_development .hide-evn-development {display: none!important;}</style>');
+            // 埋点统计
+            $body.append('<script async type="text/javascript" src="https://s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
+            // 开发环境热更新
+            window.stamp = '?_=' + Date.now();
+            $body.append('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
+            setTimeout(function () {
+                if (!window.LiveReload) return;
+                window.LiveReload.close = function () {
+                    LiveReload.reloader.reloadPage = function () {
+                        return;
+                    };
+                };
+            }, 1000);
+        }
     }, 0);
-    
+
     setTimeout(() => {
         // 帮助文档
         $body.append('<script async src="/theme/js/dist/aboutDoc/init.js?_=' + window.localStorage.stamp + '" ><\/script>');
@@ -62,55 +138,8 @@ $(function () {
         // 获取本地ip并携带到每次请求中
         $body.append('<script async src="/theme/js/dist/tools/getLocalIp.js?_=' + window.localStorage.stamp + '" ><\/script>');
         // 定时刷新
-        $body.append('<script async src="/theme/js/dist/tools/timedReload.js?_=' + window.localStorage.stamp + '" ><\/script>');    
+        $body.append('<script async src="/theme/js/dist/tools/timedReload.js?_=' + window.localStorage.stamp + '" ><\/script>');
 
     }, 1000 * 5);
-
-
-    const HOST = location.host;
-    if ((HOST === "necloud.solway.cn")) {
-        window.PROCESS_EVN = 'production';
-        $body.addClass('PROCESS_EVN_production');
-        production();
-    } else if (HOST === "netest.solway.cn") {
-        window.PROCESS_EVN = 'test';
-        $body.addClass('PROCESS_EVN_test');
-        test();
-    } else if (HOST.includes('local.solway.cn')){
-        window.PROCESS_EVN = 'lxj_private';
-        $body.addClass('PROCESS_EVN_lxj_private');
-        development();
-    } else {
-        window.PROCESS_EVN = 'development';
-        $body.addClass('PROCESS_EVN_development');
-        development();
-    }
-
-    function production() {
-        // 生产埋点统计
-        $body.append('<script async type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"><\/script>');
-    }
-
-    function test() {
-        // 测试埋点统计
-        $body.append('<script async type="text/javascript" src="https://s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
-    }
-
-    function development() {
-        // 开发环境埋点统计
-        $body.append('<script async type="text/javascript" src="https://s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
-        // 开发环境热更新
-        window.stamp = '?_=' + Date.now();
-        $body.append('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
-        setTimeout(function () {
-            if (!window.LiveReload) return;
-            window.LiveReload.close = function () {
-                LiveReload.reloader.reloadPage = function () {
-                    return;
-                };
-            };
-        }, 1000);
-    }
-    
 
 });

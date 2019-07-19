@@ -371,6 +371,71 @@ ajaxData({
             return dataJ;
         }
 
+        //另存一份 params 参数
+        function storeAnotherParams() {
+            myAjaxData.config.paramsData[$scope.checkChart].dmsTypeAs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart]));
+            myAjaxData.config.paramsData[$scope.checkChart].dmsTypeBs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart]));
+            myAjaxData.config.paramsData[$scope.checkChart].dmsTypeCs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart]));
+            myAjaxData.config.paramsData[$scope.checkChart].dmsTypeDs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart]));
+            myAjaxData.config.paramsData[$scope.checkChart].dmsTime = JSON.parse(JSON.stringify(myAjaxData.config.dmsTimeDates[myAjaxData.config.checkChart]));
+            myAjaxData.config.paramsData[$scope.checkChart].fds = JSON.parse(JSON.stringify(myAjaxData.config.fds[myAjaxData.config.checkChart]));
+        }
+        
+        //存储历史数据
+        function storeData() {
+            //获取图表的类型(曲线、柱状、散点)
+            myAjaxData.config.tableData[$scope.checkChart].fdStyle = myAjaxData.config.fdStyleArr[$scope.checkChart];
+            //获取图表的历史数据
+            myAjaxData.config.tableDataTrue[$scope.checkChart] = true;
+
+            $scope['alysType' + $scope.checkChart] = myAjaxData.config.tableData[$scope.checkChart].analysisType = $scope.queryData.analysisType;
+            if ($scope.queryData.analysisType != 3) {
+                myAjaxData.config.tableData[$scope.checkChart].timeLat = $scope.queryData.timeLat;
+            }
+
+            myAjaxData.config.tableData[$scope.checkChart].alsObj = {
+                'alsObjk': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].analysisObjectK,
+                'dmsType': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].dmsType,
+                'equipCItem': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].equipChoiceItem,
+                'equipCIndex': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].equipChoiceIndex,
+                'checkData': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].checkData,
+                'radioItem': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].radioItem
+            }
+
+            myAjaxData.config.tableData[$scope.checkChart].ctime = {
+                'radioIndex': myAjaxData.config.countTime[myAjaxData.config.checkChart].radioIndex,
+                'radioName': myAjaxData.config.countTime[myAjaxData.config.checkChart].radioName,
+                'dateType': myAjaxData.config.countTime[myAjaxData.config.checkChart].dateType,
+                'checkData': myAjaxData.config.countTime[myAjaxData.config.checkChart].checkData
+            };
+
+            myAjaxData.config.tableData[$scope.checkChart].horizon = {
+                'hrizonAxisK': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].hrizonAxisK,
+                'hrizonItem': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].hrizonItem,
+                'radioIndex': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].radioIndex,
+                'checkData': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].checkData
+            };
+
+            myAjaxData.config.tableData[$scope.checkChart].vertical = {
+                'verticAxisK': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].verticAxisK,
+                'verticItem': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].verticItem,
+                'radioIndex': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].radioIndex,
+                'checkData': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].checkData
+            };
+
+            myAjaxData.config.tableData[$scope.checkChart].alys = {
+                'alysIndexK': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].alysIndexK,
+                'analysData': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].analysData,
+                'alysItem': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].alysItem,
+                'radioIndex': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].radioIndex,
+                'checkData': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].checkData,
+                // 'sortType': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].sortType,
+                // 'tableType': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].tableType,
+                // 'actFdTb': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].actFdTb,
+                // 'actFdHb': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].actFdHb
+            };
+        }
+
         //最终的 查询按钮
         $scope.loading0 = false;
         $scope.loading1 = false;
@@ -402,66 +467,11 @@ ajaxData({
                     $scope['loading' + $scope.checkChart] = false;
                     return;
                 }
-
                 //另存一份 params 参数
-                myAjaxData.config.paramsData[$scope.checkChart].dmsTypeAs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart]));
-                myAjaxData.config.paramsData[$scope.checkChart].dmsTypeBs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart]));
-                myAjaxData.config.paramsData[$scope.checkChart].dmsTypeCs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart]));
-                myAjaxData.config.paramsData[$scope.checkChart].dmsTypeDs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart]));
-                myAjaxData.config.paramsData[$scope.checkChart].dmsTime = JSON.parse(JSON.stringify(myAjaxData.config.dmsTimeDates[myAjaxData.config.checkChart]));
-                myAjaxData.config.paramsData[$scope.checkChart].fds = JSON.parse(JSON.stringify(myAjaxData.config.fds[myAjaxData.config.checkChart]));
+                storeAnotherParams();
+                //存储历史数据
+                storeData();
 
-                //获取图表的类型(曲线、柱状、散点)
-                myAjaxData.config.tableData[$scope.checkChart].fdStyle = myAjaxData.config.fdStyleArr[$scope.checkChart];
-                //获取图表的历史数据
-                myAjaxData.config.tableDataTrue[$scope.checkChart] = true;
-
-                $scope['alysType' + $scope.checkChart] = myAjaxData.config.tableData[$scope.checkChart].analysisType = $scope.queryData.analysisType;
-                if ($scope.queryData.analysisType != 3) {
-                    myAjaxData.config.tableData[$scope.checkChart].timeLat = $scope.queryData.timeLat;
-                }
-
-                myAjaxData.config.tableData[$scope.checkChart].alsObj = {
-                    'alsObjk': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].analysisObjectK,
-                    'dmsType': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].dmsType,
-                    'equipCItem': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].equipChoiceItem,
-                    'equipCIndex': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].equipChoiceIndex,
-                    'checkData': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].checkData,
-                    'radioItem': myAjaxData.config.analysObjData[myAjaxData.config.checkChart].radioItem
-                }
-
-                myAjaxData.config.tableData[$scope.checkChart].ctime = {
-                    'radioIndex': myAjaxData.config.countTime[myAjaxData.config.checkChart].radioIndex,
-                    'radioName': myAjaxData.config.countTime[myAjaxData.config.checkChart].radioName,
-                    'dateType': myAjaxData.config.countTime[myAjaxData.config.checkChart].dateType,
-                    'checkData': myAjaxData.config.countTime[myAjaxData.config.checkChart].checkData
-                };
-
-                myAjaxData.config.tableData[$scope.checkChart].horizon = {
-                    'hrizonAxisK': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].hrizonAxisK,
-                    'hrizonItem': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].hrizonItem,
-                    'radioIndex': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].radioIndex,
-                    'checkData': myAjaxData.config.horizonHdata[myAjaxData.config.checkChart].checkData
-                };
-
-                myAjaxData.config.tableData[$scope.checkChart].vertical = {
-                    'verticAxisK': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].verticAxisK,
-                    'verticItem': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].verticItem,
-                    'radioIndex': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].radioIndex,
-                    'checkData': myAjaxData.config.verticHdata[myAjaxData.config.checkChart].checkData
-                };
-
-                myAjaxData.config.tableData[$scope.checkChart].alys = {
-                    'alysIndexK': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].alysIndexK,
-                    'analysData': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].analysData,
-                    'alysItem': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].alysItem,
-                    'radioIndex': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].radioIndex,
-                    'checkData': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].checkData,
-                    // 'sortType': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].sortType,
-                    // 'tableType': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].tableType,
-                    // 'actFdTb': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].actFdTb,
-                    // 'actFdHb': myAjaxData.config.alysHdata[myAjaxData.config.checkChart].actFdHb
-                };
                 $scope.tableData = res.body;
                 if ($scope.queryData.analysisType == 1) {
                     //获取 x轴和 y轴的 名字和单位
@@ -527,7 +537,7 @@ ajaxData({
                     //         arr.push(xv);
                     //     })
                     // })
-                    
+
                     // var str = ``;
                     // arr.forEach((v, i) => {
                     //     str += `<tr>`;
@@ -541,22 +551,22 @@ ajaxData({
 
                     //------------------------------------整合echarts -> table的数据  (excel多个sheet)
                     $scope['spread' + $scope.checkChart] = new GC.Spread.Sheets.Workbook(document.getElementById('relationTable' + $scope.checkChart), { sheetCount: $scope['series' + myAjaxData.config.checkChart].length });
-                    excelIo = new GC.Spread.Excel.IO();      
-                    $scope['series' + myAjaxData.config.checkChart].forEach((v,i)=>{
+                    excelIo = new GC.Spread.Excel.IO();
+                    $scope['series' + myAjaxData.config.checkChart].forEach((v, i) => {
                         var arr = [];
                         var secondData = [];
                         secondData.push($scope['xname' + $scope.checkChart], $scope['yname' + $scope.checkChart], '统计时间');
                         arr.push(secondData);
                         v.data.forEach((xv, xi) => {
-                            var newXv = xv.map((xxv,xxi)=>{
-                               return xxv == null ? '-' : xxv;
+                            var newXv = xv.map((xxv, xxi) => {
+                                return xxv == null ? '-' : xxv;
                             })
                             arr.push(newXv);
                         })
                         var sheet = $scope['spread' + $scope.checkChart].getSheet(i);
                         sheet.name(v.name);
                         sheet.setArray(0, 0, arr);
-                    })      
+                    })
 
                     //图表的 setoption
                     chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart]);
@@ -1161,9 +1171,7 @@ ajaxData({
             return $ocLazyLoad.load([
                 'vendor/spreadjs/scripts/gc.spread.excelio.11.0.0.min.js'
             ])
-        }).then(() => {
-            // excelIo = new GC.Spread.Excel.IO();
-        });
+        })
 
         //导出图表
         $ocLazyLoad.load([

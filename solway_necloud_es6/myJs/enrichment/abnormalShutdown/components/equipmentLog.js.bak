@@ -1,19 +1,19 @@
 ajaxData({
-    selectDeviceLog: {
-        name: 'selectDeviceLog',
-        data: {},
-        later: true
-    },
-    insertDeviceLog2AbnormalHalt: {
-        name: 'insertDeviceLog2AbnormalHalt',
-        data: {},
-        later: true
-    },
-    GETBasedictionarySelectAll: {
-        name: 'GETBasedictionarySelectAll',
-        data: {},
-        later: true
-    },
+selectDeviceLog: {
+    name: 'selectDeviceLog',
+    data: {},
+    later: true
+},
+insertDeviceLog2AbnormalHalt: {
+    name: 'insertDeviceLog2AbnormalHalt',
+    data: {},
+    later: true
+},
+GETBasedictionarySelectAll: {
+    name: 'GETBasedictionarySelectAll',
+    data: {},
+    later: true
+},
 }, {
     __serviceName__: 'child_myAjaxData'
 })('equipmentLogCtrl', ['$scope', 'child_myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, parentmyAjaxData, historicalRecord, $timeout, toaster) => {
@@ -78,10 +78,17 @@ ajaxData({
         }
     ]
 
-    //获取时间范围
+    //开始时间方法
+    $scope.startTimeModel = false;
+    $scope.showStartTime = () => {
+        $scope.startTimeModel = true;
+    }
+
+    //切换单选框
+    $scope.radioIndex = 1;
     $scope.statusCheck = true;
-    $scope.getLimitTime = async () => {
-        if ($scope.query.isToday == 1) {
+    $scope.radioStartTime = async (k) => {
+        if (k == 1) {
             $scope.statusCheck = false;
             await parentmyAjaxData.timeout(0);
             $scope.statusCheck = true;
@@ -100,7 +107,34 @@ ajaxData({
             $scope.query.startDate.showDate = '';
             $scope.query.endDate.showDate = '';
         }
+        historicalRecord.set({
+            radioIndex: k
+        });
     }
+
+    //获取时间范围
+    // $scope.statusCheck = true;
+    // $scope.getLimitTime = async () => {
+    //     if ($scope.query.isToday == 1) {
+    //         $scope.statusCheck = false;
+    //         await parentmyAjaxData.timeout(0);
+    //         $scope.statusCheck = true;
+    //         $scope.query.startDate = new Date;
+    //         $scope.query.endDate = new Date;
+    //         $scope.query.limitEndDate = new Date;
+    //         $scope.query.startDate.showDate = '';
+    //         $scope.query.endDate.showDate = '';
+    //     } else {
+    //         $scope.statusCheck = false;
+    //         await parentmyAjaxData.timeout(0);
+    //         $scope.statusCheck = true;
+    //         $scope.query.startDate = date1;
+    //         $scope.query.endDate = date1;
+    //         $scope.query.limitEndDate = date1;
+    //         $scope.query.startDate.showDate = '';
+    //         $scope.query.endDate.showDate = '';
+    //     }
+    // }
 
     //获取电站列表
     $scope.stationArr = [];
@@ -143,30 +177,36 @@ ajaxData({
     //获取表格列表数据
     $scope.recordList = [];
     $scope.getList = () => {
+        $scope.loading = true;
         $scope.selectDeviceLog.getData({
-            pageIndex: 0,
-            startDate: '2019-07-01 04:20',
-            endDate: '2019-07-15 16:37',
-            deviceType: 2,
-            stId: 4090,
-            deviceId: null,
-            eventType: 1,
-            isToday: 1
             // pageIndex: 0,
-            // startDate: dateConversion($scope.filter.startDate),
-            // endDate: dateConversion($scope.filter.endDate),
-            // deviceType: $scope.query.type,
-            // stId: $scope.query.stid,
-            // deviceId: $scope.query.deviceid,
-            // isToday: $scope.query.isToday
-        }).then(res => {
-            $scope.recordList = res.body.data;
-            $scope.recordList.forEach((v, i) => {
-                v.startTimeStr = FormatDateTime(v.sStartTime);
-                v.endTimeStr = FormatDateTime(v.sEndTime);
-            })
+            // startDate: '2019-07-01 04:20',
+            // endDate: '2019-07-15 16:37',
+            // deviceType: 2,
+            // stId: 4090,
+            // deviceId: null,
+            // eventType: 1,
+            // isToday: 1
+
+            pageIndex: 0,
+            startDate: $scope.query.startDate.showDate,
+            endDate: $scope.query.endDate.showDate,
+            deviceType: $scope.query.type,
+            stId: $scope.query.stid,
+            deviceId: $scope.query.deviceid,
+            eventType: $scope.query.eventValue,
+            isToday: $scope.query.isToday
         })
     }
+
+    $scope.selectDeviceLog.subscribe(res => {
+        $scope.loading = false;
+        $scope.recordList = res.body.data;
+        $scope.recordList.forEach((v, i) => {
+            v.startTimeStr = FormatDateTime(v.sStartTime);
+            v.endTimeStr = FormatDateTime(v.sEndTime);
+        })
+    });
     $scope.getList();
 
     //查询按钮
@@ -243,13 +283,15 @@ ajaxData({
     }
 
     //添加事件说明
-    $scope.emitExplain = () => {
+    $scope.emitExplain = async () => {
         $scope.insertDeviceLog2AbnormalHalt.getData({
             ids: $scope.recordIds.join(),
             eventExplain: $scope.explainCon
         }).then(res => {
             if (res.code == 0) {
                 toaster.pop('success', '', '转换成功');
+                $scope.eventExplainShow = false;
+                $scope.explainCon = '';
             } else {
                 toaster.pop('error', '', '转换失败');
             }
@@ -260,5 +302,18 @@ ajaxData({
     $scope.cancel = () => {
         $scope.eventExplainShow = false;
         $scope.explainCon = '';
+    }
+
+    //返回主页
+    $scope.backMain = () => {
+        $scope.startTimeModel = false;
+        var startDate = $scope.query.startDate.showDate ? $scope.query.startDate.showDate: '-';
+        var endDate = $scope.query.endDate.showDate ? $scope.query.endDate.showDate: ' -';
+        $scope.startTimeNum = startDate + ' -- ' + endDate;
+    }
+
+    //返回异常报警
+    $scope.showAbnormal = () => {
+        $scope.$emit('showAbnormal');
     }
 });

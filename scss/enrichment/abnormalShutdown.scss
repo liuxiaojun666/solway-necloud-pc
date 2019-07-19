@@ -3,6 +3,7 @@
   .abnormalCon {
     .select-con {
       font-size: 14px;
+      height: 24px;
       select {
         background: rgba(13, 52, 99, 1);
         border: 1px solid rgba(95, 146, 200, 1);
@@ -18,6 +19,9 @@
         border-radius: 2px;
         text-align: center;
       }
+      .calendar span.clearable {
+        z-index: 1;
+      }
       .search {
         width: 48px;
         height: 25px;
@@ -27,6 +31,122 @@
         line-height: 25px;
         float: right;
         cursor: pointer;
+      }
+      .startTimeUp-con {
+        display: inline-block;
+        vertical-align: top;
+        span {
+          vertical-align: middle;
+        }
+        .startTimeUp {
+          float: right;
+          width: 200px;
+          height: 22px;
+          line-height: 25px;
+          background: rgba(13, 52, 99, 1);
+          border: 1px solid rgba(95, 146, 200, 1);
+          opacity: 0.7;
+          border-radius: 2px;
+          text-align: center;
+          margin-left: 5px;
+          cursor: pointer;
+        }
+      }
+    }
+    .alertModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+      overflow: hidden;
+      transition: height 0.2s ease 0s;
+      .st-con {
+        width: 400px;
+        height: 240px;
+        padding: 20px 20px 5px 20px;
+        background: #396faa;
+        position: absolute;
+        top: 135px;
+        left: 440px;
+        font-size: 14px;
+        .radioBox {
+          display: flex;
+          flex-direction: row;
+          margin-bottom: 5px;
+          .ce-box {
+            margin-right: 30px;
+            position: relative;
+            line-height: 18px;
+        }
+          input[type="radio"] {
+            opacity: 0;
+            margin-left: -16px;
+            position: absolute;
+            left: 16px;
+          }
+          input[type="radio"] + label::before {
+            content: "";
+            background: rgba(22, 54, 95, 0.27);
+            border: 1px solid rgba(20, 54, 98, 1);
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            float: left;
+            margin-right: 6px;
+            margin-top: 1px;
+          }
+          input[type="radio"]:checked + label::before {
+            background: rgba(37, 195, 152, 1);
+            border: 1px solid rgba(37, 195, 152, 1);
+            background-clip: content-box;
+            padding: 2px;
+          }
+        }
+        .choose-box{
+          width: 100%;
+          height: 150px;
+          padding: 15px;
+          background: rgba(36, 81, 130, 1);
+          position: relative;
+          .calendar input {
+            background: rgba(13, 52, 99, 1);
+            border: 1px solid rgba(95, 146, 200, 1);
+            opacity: 0.7;
+            border-radius: 2px;
+            text-align: center;
+          }
+          .calendar span.clearable {
+            z-index: 1;
+          }
+          .copyTime {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            .start {
+              width: 130px;
+              height: 24px;
+              margin-left: 5px;
+              background: #0d3463;
+              border: 1px solid #5f92c8;
+              opacity: 0.7;
+              border-radius: 2px;
+              text-align: center;
+              display: inline-block;
+            }
+            .end {
+              width: 130px;
+              height: 24px;
+              background: #0d3463;
+              border: 1px solid #5f92c8;
+              opacity: 0.7;
+              border-radius: 2px;
+              text-align: center;
+              display: inline-block;
+            }
+          }
+        }
       }
     }
     .btn-con {
@@ -127,6 +247,12 @@
           border-right: 0;
         }
       }
+      .noData {
+        background-color: rgba(18, 66, 113, 0.3);
+        &:hover {
+          background-color: #1b4980;
+        }
+      }
       .listTable {
         margin: auto;
         width: 100%;
@@ -163,8 +289,8 @@
               cursor: pointer;
               background: rgba(41, 189, 180, 1);
               float: left;
-          }
-          .button-cancel {
+            }
+            .button-cancel {
               width: 47px;
               height: 28px;
               line-height: 28px;
@@ -172,7 +298,7 @@
               background: rgba(48, 86, 134, 1);
               border: 1px solid rgba(22, 55, 97, 1);
               float: right;
-          }
+            }
           }
         }
         .calendar span.clearable {

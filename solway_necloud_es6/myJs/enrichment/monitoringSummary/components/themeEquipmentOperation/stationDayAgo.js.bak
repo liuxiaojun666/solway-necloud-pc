@@ -240,6 +240,16 @@ ajaxData(
         $scope.ydatas = [[res.body.real_curve, res.body.shd_curve], [res.body.sun_curve]]
     };
 
+    $scope.queryDeviceWithType.typeChange = () => {
+        $scope.deviceRunList.deviceId = '';
+        if ($scope.showShape === 'chart') {
+            $scope.deviceHisRiver.getData({ deviceType: $scope.deviceRunList.deviceType });
+            $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+        } else {
+            $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+        }
+    };
+
     // 设备列表
     $scope.queryDeviceWithType.subscribe(res => {
         if ($scope.showShape === 'chart2') {
@@ -404,6 +414,8 @@ ajaxData(
         myChart.setOption(option, true);
         const fun = myChart.resize;
         myChart.resize = async () => {
+            if ($scope.tabIndex !== 1) return;
+            if ($scope.showShape !== 'chart2') return;
             await myAjaxData.timeout(16);
             fun();
         };
@@ -424,6 +436,8 @@ ajaxData(
             "通讯中断": '#6E869E'
         };
         $scope.deviceHisTrendChart.mouseScroll = function (e) {
+            if ($scope.tabIndex !== 1) return;
+            if ($scope.showShape !== 'chart2') return;
             e = e || window.event;
             const $chart_scrollx = $('#chart_scrollx');
             const old_width = $chart_scrollx.width();

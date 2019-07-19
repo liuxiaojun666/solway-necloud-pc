@@ -374,7 +374,6 @@ ajaxData(
             if (!$scope.getDeviceType.res) {
                 const res = await $scope.getDeviceType.getData();
                 $scope.deviceRunList.deviceType = res.data[0].devid;
-                $scope.$apply();
             }
             if (!$scope.queryDeviceWithType.res) {
                 if (showShape === 'list') {
@@ -408,8 +407,7 @@ ajaxData(
                 } else if (showShape === 'chart2') {
                     if (!$scope.deviceRunList.deviceType) {
                         $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
-                        await $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
-                        $scope.$apply();
+                        $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
                     } else {
                         if (!$scope.deviceRunList.deviceId) {
                             $scope.deviceRunList.deviceId = $scope.queryDeviceWithType.res.body[0].serialNumber
@@ -424,6 +422,8 @@ ajaxData(
                 }
             }
         }
+
+        $scope.$apply();
     };
 
     // 电站 今日 设备 列表视图
@@ -1567,7 +1567,18 @@ ajaxData(
             //     }
             // }
         ];
-    }
+    };
+
+    $scope.queryDeviceWithType.typeChange = () => {
+        $scope.deviceRunList.deviceId = '';
+        if ($scope.showShape === 'chart') {
+            $scope.deviceHisRiver.getData({ deviceType: $scope.deviceRunList.deviceType }); 
+            $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+        } else {
+            $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
+        }
+    };
+
 
 
     // 设备列表
@@ -1616,7 +1627,7 @@ ajaxData(
             },
             {
                 title: '设备名称',
-                dataIndex: 'devicename',
+                dataIndex: 'deviceName',
                 sort: true,
                 align: 'left',
                 render(text) {
@@ -1625,7 +1636,7 @@ ajaxData(
             },
             {
                 title: '事件类型',
-                dataIndex: 'faultclassStr',
+                dataIndex: 'eventTypeStr',
                 width: '100px',
                 sort: true,
                 render(text, item, index) {
@@ -1741,6 +1752,8 @@ ajaxData(
         myChart.setOption(option, true);
         const fun = myChart.resize;
         myChart.resize = async () => {
+            if ($scope.tabIndex !== 5) return;
+            if ($scope.showShape !== 'chart2') return;
             await myAjaxData.timeout(16);
             fun();
         };
@@ -1761,6 +1774,8 @@ ajaxData(
             "通讯中断": '#6E869E'
         };
         $scope.deviceHisTrendChart.mouseScroll = function (e) {
+            if ($scope.tabIndex !== 5) return;
+            if ($scope.showShape !== 'chart2') return;
             e = e || window.event;
             const $chart_scrollx = $('#chart_scrollx');
             const old_width = $chart_scrollx.width();
