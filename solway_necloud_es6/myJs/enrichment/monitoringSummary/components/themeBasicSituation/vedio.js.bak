@@ -1,71 +1,120 @@
-ajaxData({
-    selectVideos: {
-        name: 'GETPowerStationMonitorSelectVideos',
-        data: {},
-        onlyLatest: true
-    },
-}, {
+ajaxData(
+    {
+        selectVideos: {
+            name: 'GETPowerStationMonitorSelectVideos',
+            data: {}
+        },
+    }, {
         __serviceName__: 'themeBasicSituationVedioService'
-    })('themeBasicSituationVedioCtrl', ['$scope', 'themeBasicSituationVedioService', '$http', , '$ocLazyLoad'], ($scope, myAjaxData, $http, $ocLazyLoad) => {
+    }
+)('themeBasicSituationVedioCtrl', ['$scope', 'themeBasicSituationVedioService', '$interval', '$ocLazyLoad'], ($scope, myAjaxData, $interval, $ocLazyLoad) => {
 
-        $scope.EnableFlash = navigator.plugins['Shockwave Flash'];
-        $ocLazyLoad.load([
-            "/vendor/videojs/video-js-5.19.2/video-js.min.css",
-            "/vendor/videojs/video-js-5.19.2/video.min.js",
-        ]).then(() => $ocLazyLoad.load([
-            'vendor/videojs/videojs.hotkeys.min.js',   
-        ])).then(() => {
-            videojs.options.flash.swf = '/vendor/videojs/video-js-5.19.2/video-js-fixed.swf';
-            videojs.options.techOrder = ['flash'];
-        });
-
-
-        $scope.selectVideos.subscribe((res) => {
-            $scope.params = [];
-            const $videosContainer = $('#videosContainer');
-            res.videos.forEach((item, i) => {
-                $scope.params.push({
-                    station_id: item.stId,
-                    stream: [
-                        {
-                            name: item.monitorPointName,
-                            source: item.monitorPointSource,
-                            dest: item.monitorPointDest
-                        }
-                    ]
-                });
-
-                $videosContainer.append(
-                    `<a href="#" title="${item.monitorPointName}" style="
-                            position:relative;
-                            float:left;
-                            display:block;
-                            margin-right:2px;
-                            margin-bottom:2px;
-                            width:${($scope.winWidth - 46) / 3}px;
-                            height:${($scope.winWidth - 46) / 4}px" 
-                        id="player${i}"></a>`
-                );
-
-            });
-            timer();
-        });
-
-        async function timer() {
-            $scope.params.forEach(item => {
-                $.ajax({
-                    type: 'POST',
-                    url: $scope.selectVideos.res.VIDEO_URL,
-                    data: JSON.stringify(item), 
-                    beforeSend: function (xhr) {}
-                });
-            });
-            if ($scope.isDestroy) return;
-            await myAjaxData.timeout(30 * 1000);
-            timer();
-        }
-
-        $scope.$on('$destroy', () => {
-            $scope.isDestroy = true;
-        });
+    $scope.EnableFlash = navigator.plugins['Shockwave Flash'];
+    const createImg = createCanvas();
+    $ocLazyLoad.load([
+        "/vendor/videojs/video-js-5.19.2/video-js.min.css",
+        "/vendor/videojs/video-js-5.19.2/video.min.js",
+    ]).then(() => $ocLazyLoad.load([
+        'vendor/videojs/videojs.hotkeys.min.js',
+    ])).then(() => {
+        videojs.options.flash.swf = '/vendor/videojs/video-js-5.19.2/video-js-fixed.swf';
+        videojs.options.techOrder = ['flash'];
+        $scope.videojsOk = true;
+        if ($scope.selectVideos.res) return initVideo();
     });
+
+    $scope.selectVideos.subscribe((res) => {
+        $scope.params = [];
+        res.videos.forEach((item, i) => {
+            item.req_data = {
+                station_id: item.stId,
+                stream: [
+                    {
+                        name: item.monitorPointName,
+                        source: item.monitorPointSource,
+                        dest: item.monitorPointDest
+                    }
+                ]
+            };
+        });
+        if ($scope.videojsOk) return initVideo();
+    });
+
+
+    function initVideo() {
+        $scope.selectVideos.res.videos.forEach((item, i) => {
+            ; (async (_id, _name, obj, req_data) => {
+                await myAjaxData.timeout(0);
+                item.video = videojs('video_' + _id, { poster: await createImg(_name, null) }, function () {
+    
+                    this.hotkeys({
+                        volumeStep: 0.1,
+                        seekStep: 5,
+                        enableVolumeScroll: false, //禁用鼠标滚轮调节问音量大小
+                        enableModifiersForNumbers: false
+                    });
+    
+                    this.on('play', function () {
+                        obj.isPlay = true;
+                        $.ajax({
+                            type: 'POST',
+                            url: 'http://netest.solway.cn:50125',
+                            data: JSON.stringify(req_data),
+                            beforeSend() { }
+                        });
+                        $scope.$apply();
+                    });
+                    
+                    this.on('pause', function () {
+                        obj.isPlay = false;
+                        $scope.$apply();
+                    });
+                });
+            })(item.id, item.monitorPointName, item, item.req_data);
+        });
+    }
+
+
+    const timer = $interval(() => {
+        $scope.selectVideos.res.videos.forEach(obj => {
+            obj.isPlay && $.ajax({
+                type: 'POST',
+                url: $scope.selectVideos.res.VIDEO_URL,
+                data: JSON.stringify(obj.req_data),
+                beforeSend: function () { }
+            });
+        });
+    }, 30 * 1000);
+
+
+
+    function createCanvas() {
+        const c = document.createElement('canvas');
+        c.setAttribute('width', 450);
+        c.setAttribute('height', 30);
+        const ctx = c.getContext("2d");
+        ctx.font = "18px Arial";
+        ctx.fillStyle = "#fff";
+
+        return async function createImg(name, url) {
+            ctx.clearRect(0, 0, 600, 300);
+            url && ctx.drawImage(await loadImg(url), 0, 0);
+            ctx.fillText(name, 10, 20);
+            return c.toDataURL("image/png");
+        };
+    }
+
+    function loadImg(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('图片加载失败'));
+        });
+    }
+
+    $scope.$on('$destroy', () => {
+        $interval.cancel(timer);
+        $scope.selectVideos.res.videos.forEach(v => v.video.dispose());
+    });
+});
