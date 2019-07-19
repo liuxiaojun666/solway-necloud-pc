@@ -16,9 +16,7 @@ ajaxData(
         },
         rtmSingleStationComm: {
             name: 'GETRtmSingleStationComm',
-            data: {
-                dateString: new Date().Format("yyyy-MM-dd")
-            },
+            data: { },
             later: true,
             onlyLatest: true,
             sameTimeOnce: true,
@@ -184,6 +182,7 @@ ajaxData(
         $scope.getDeviceType.res = null;
         $scope.$broadcast("switchPowerCallback");
         setDataNull();
+        $scope.queryDeviceWithType.res = null;
         diffGetData();
     };
 
@@ -429,7 +428,10 @@ ajaxData(
     // 电站 今日 设备 列表视图
     $scope.getDeviceType.getDataCallback = async (success, res) => {
         if (!success) return;
-        if ($scope.tabIndex === 5) return;
+        if ($scope.tabIndex === 5) {
+            // $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
+            return
+        };
         const { currentDeviceType } = $scope;
         const isChange = !res.data.some(v => v.devid === currentDeviceType);
         // $scope.getDeviceType.res.data = res.data.filter(v => (v.devid === '1' || v.devid === '2' || v.devid === '3' || v.devid === '4'));

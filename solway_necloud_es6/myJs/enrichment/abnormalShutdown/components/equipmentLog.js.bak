@@ -85,7 +85,6 @@ GETBasedictionarySelectAll: {
     }
 
     //切换单选框
-    $scope.radioIndex = 1;
     $scope.statusCheck = true;
     $scope.radioStartTime = async (k) => {
         if (k == 1) {
@@ -107,9 +106,7 @@ GETBasedictionarySelectAll: {
             $scope.query.startDate.showDate = '';
             $scope.query.endDate.showDate = '';
         }
-        historicalRecord.set({
-            radioIndex: k
-        });
+        $scope.query.isToday = k;
     }
 
     //获取时间范围
@@ -310,6 +307,11 @@ GETBasedictionarySelectAll: {
         var startDate = $scope.query.startDate.showDate ? $scope.query.startDate.showDate: '-';
         var endDate = $scope.query.endDate.showDate ? $scope.query.endDate.showDate: ' -';
         $scope.startTimeNum = startDate + ' -- ' + endDate;
+    }
+
+    //开始时间弹框 取消按钮
+    $scope.backMainCancel = () => {
+        $scope.startTimeModel = false;
     }
 
     //返回异常报警

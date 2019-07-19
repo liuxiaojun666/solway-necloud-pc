@@ -10,7 +10,7 @@ ajaxData({
         later: true
     },
     selectByConditionPage: {
-        name: 'selectByConditionPage',
+        name: 'GETselectByConditionPage',
         data: {},
         later: true
     },
@@ -49,7 +49,7 @@ ajaxData({
         }
 
         if (endDate == '') {
-            $scope.filter.startDate.endDate = '';
+            $scope.filter.endDate.showDate = '';
         } else {
             $scope.filter.endDate = new Date(endDate);
         }
@@ -191,9 +191,9 @@ ajaxData({
             toaster.pop('error', '', '请选择设备类型');
         } else if (!$scope.addNew.deviceid) {
             toaster.pop('error', '', '请选择设备');
-        } else if (!$scope.addOption.startDate) {
+        } else if (!$scope.addOption.startDate.showDate) {
             toaster.pop('error', '', '请选择开始时间');
-        } else if (!$scope.addOption.endDate) {
+        } else if (!$scope.addOption.endDate.showDate) {
             toaster.pop('error', '', '请选择结束时间');
         } else if (!$scope.addEventExplain) {
             toaster.pop('error', '', '请输入事件说明');
@@ -228,7 +228,7 @@ ajaxData({
         }
     }
 
-    //新增按钮
+    //弹出新增组件
     $scope.addTpl = false;
     $scope.addOver = false;
     $scope.showAdd = (e) => {
@@ -268,8 +268,7 @@ ajaxData({
             endDate: $scope.filter.endDate.showDate,
             deviceType: $scope.query.type,
             stId: $scope.query.stid,
-            deviceId: $scope.query.deviceid,
-            isToday: $scope.query.isToday
+            deviceId: $scope.query.deviceid
         })
         historicalRecord.set({
             deviceType: $scope.query.type,
@@ -322,12 +321,12 @@ ajaxData({
         })
         if (!flag) {
             item.edit = true;
-            $scope.edit[i].pStationId = item.pStationId;
+            $scope.edit[i].pStationId = item.pStationId ? item.pStationId : '';
             $scope.edit[i].deviceType = item.deviceType;
             $scope.edit[i].eventExplain = item.eventExplain;
             $scope.getEditEquips(i, item);
             await myAjaxData.timeout(1000);
-            $scope.edit[i].deviceId = item.deviceId;
+            $scope.edit[i].deviceId = item.deviceId ? item.deviceId : '';
         }
     }
 
@@ -357,9 +356,9 @@ ajaxData({
             toaster.pop('error', '', '请选择设备类型');
         } else if (!$scope.edit[i].deviceId) {
             toaster.pop('error', '', '请选择设备');
-        } else if (!$scope.edit[i].startDate) {
+        } else if (!$scope.edit[i].startDate.showDate) {
             toaster.pop('error', '', '请选择开始时间');
-        } else if (!$scope.edit[i].endDate) {
+        } else if (!$scope.edit[i].endDate.showDate) {
             toaster.pop('error', '', '请选择结束时间');
         } else if (!$scope.edit[i].eventExplain) {
             toaster.pop('error', '', '请输入事件说明');
