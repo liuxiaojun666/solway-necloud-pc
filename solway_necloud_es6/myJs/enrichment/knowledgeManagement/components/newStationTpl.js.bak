@@ -1,0 +1,187 @@
+ajaxData({
+    shareRepositoryInitPageData: {
+        name: 'GETshareRepositoryInitPageData',
+        data: {},
+        later: true
+    },
+    shareRepositoryUpdate: {
+        name: 'shareRepositoryUpdate',
+        data: {},
+        later: true
+    },
+    shareRepositoryDict: {
+        name: 'shareRepositoryDict',
+        data: {},
+        later: true
+    },
+    shareRepositoryManu: {
+        name: 'shareRepositoryManu',
+        data: {},
+        later: true
+    },
+    selectByManuList: {
+        name: 'GETselectByManuList',
+        data: {},
+        later: true
+    },
+}, {
+        __serviceName__: 'newStationTplService',
+    })('newStationTplCtrl', ['$scope', 'newStationTplService', 'actionRecord', '$timeout', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $ocLazyLoad) => {
+
+        let zTree;
+
+        //根据广播传递的值，判断是新增 还是 编辑
+        $scope.$on('broadAddStation', (index, v) => {
+            $scope.id = v.id;
+            if ($scope.id) {
+                $scope.initPageData();
+            } else {
+                $scope.initPageData();
+                $scope.formData = {};
+            }
+        });
+
+        // 初始化
+        $scope.initPageData = () => {
+            $scope.shareRepositoryInitPageData.getData({ id: $scope.id }).then(res => {
+                $scope.zNodes = res.tree;
+                $.fn.zTree.init($("#tree"), setting, $scope.zNodes);
+                if (res.sRepos) {
+                    $scope.formData = res.sRepos;
+                    $scope.formData.repclass = $scope.formData.repclass ? $scope.formData.repclass : '';
+                    $scope.formData.productId = $scope.formData.productId ? $scope.formData.productId : '';
+                    res.tree.forEach(v => {
+                        if (v.id == $scope.formData.type) {
+                            $scope.formData.type = v.name;
+                            $scope.formData.typeId = v.id;
+                            zTree.checkNode(zTree.getNodeByParam("id", v.id), true, true);
+                        }
+                    });
+
+                    ue.ready(function () {
+                        ue.setContent(angular.copy($scope.formData.content));
+                    });
+
+                }
+            })
+        }
+
+        // 获取类别option
+        $scope.shareRepositoryDict.getData({ dictType: "REPOSITORY_CLASS" }).then(res => {
+            $scope.dicts = res;
+        })
+
+        // 获取生产厂商option
+        $scope.shareRepositoryManu.getData({}).then(res => {
+            $scope.manuf = res;
+        })
+
+        // 获取产品型号
+        $scope.getProduct = () => {
+            $scope.formData.productId = '';
+            $scope.products = [];
+            $scope.selectByManuList.getData({ manufid: $scope.formData.manus }).then(res => {
+                $scope.products = res;
+            })
+        }
+
+        // 上传附件
+        $scope.fileArr = [];
+        $(".upload-file").change(function () {
+            var name = Array.from($(".upload-file")[0].files)[0];
+            $scope.fileArr.push(name);
+        });
+
+        //保存
+        $scope.save = () => {
+            if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
+            if (!ue.hasContents()) {
+                $('#container').append('<label id="content-error" class="error" for="title">必填项</label>');
+                return;
+            } else {
+                $('#content-error').remove();
+            }
+            let formData = {
+                id: $scope.id,
+                title: $scope.formData.title,
+                type: $scope.formData.typeId,
+                repclass: $scope.formData.repclass ? $scope.formData.repclass : '',
+                productId: $scope.formData.productId ? $scope.formData.productId : '',
+                introduce: $scope.formData.introduce ? $scope.formData.introduce : '',
+                keywords: $scope.formData.keywords ? $scope.formData.keywords : '',
+                content: ue.getContent(),
+                attachment: []
+            }
+
+            $scope.shareRepositoryUpdate.getData({ "data": JSON.stringify(formData) }).then(res => {
+                if (res.key != 0) {
+                    toaster.pop('success', '', '保存成功');
+                    $scope.$emit('addCallback');
+                } else {
+                    toaster.pop('error', '', '保存失败');
+                }
+            })
+        }
+
+        $scope.treeShow = false;
+        $scope.showTree = () => {
+            $scope.treeShow = !$scope.treeShow;
+        }
+
+        var setting = {
+            check: {
+                enable: true,
+                chkStyle: "radio",
+                radioType: "all"
+            },
+            view: {
+                showLine: true,
+                showIcon: true
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                    idKey: "id",
+                    pIdKey: "pId",
+                    rootPId: 0
+                },
+                key: {
+                    name: "name"
+                }
+            },
+            callback: {
+                onCheck: onCheck
+            }
+        };
+
+        function onCheck(event, treeId, treeNode) {
+            $scope.formData.type = treeNode.name;
+            $scope.formData.typeId = treeNode.id;
+            $scope.treeShow = !$scope.treeShow;
+        }
+
+        //按需加载ztree文件
+        $ocLazyLoad.load([
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.core.js', //ztree
+        ]).then(() => $ocLazyLoad.load([
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.exhide.js', //ztree
+            'vendor/jquery/ztree/jsCopy/jquery.ztree.excheck.js', //ztree        
+        ])).then(() => {
+            $.fn.zTree.init($("#tree"), setting, $scope.zNodes);
+            zTree = $.fn.zTree.getZTreeObj("tree");
+        })
+
+        var ue = UE.getEditor('container');
+        ue.addListener('blur', function (editor) {
+            if (!ue.hasContents()) {
+                $('#container').append('<label id="content-error" class="error" for="title">必填项</label>');
+            } else {
+                $('#content-error').remove();
+            }
+        })
+
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('cancelCallback');
+        }
+    });
