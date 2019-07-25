@@ -37,18 +37,34 @@ GETBasedictionarySelectAll: {
     //查询的数据
     var date1 = new Date();
     date1.setDate(date1.getDate() - 1);
+    date1.setHours(23, 59, 59, 999);
+
+    var start = new Date(
+        new Date(new Date().toLocaleDateString()).getTime()
+    );
+
+    var start2 = new Date(
+        new Date(date1.toLocaleDateString()).getTime()
+    );
+
+    var end2 = new Date(date1);
+    end2.setHours(23, 59, 59, 999);
+
+    var date2 = new Date();
+    date2.setDate(date2.getDate() - 10000);
     $scope.query = {
-        type: '',
+        type: 2,
         stid: '',
         deviceid: '',
         eventValue: '',
         isToday: 1,
-        startDate: new Date,
+        startDate: start,
+        limitStart: start,
         endDate: new Date,
         limitEndDate: new Date
     }
-    $scope.query.startDate.showDate = '';
-    $scope.query.endDate.showDate = '';
+    // $scope.query.startDate.showDate = '';
+    // $scope.query.endDate.showDate = '';
 
     //设备类型 数据源
     $scope.equipType = [
@@ -91,20 +107,22 @@ GETBasedictionarySelectAll: {
             $scope.statusCheck = false;
             await parentmyAjaxData.timeout(0);
             $scope.statusCheck = true;
-            $scope.query.startDate = new Date;
+            $scope.query.startDate = start;
             $scope.query.endDate = new Date;
             $scope.query.limitEndDate = new Date;
-            $scope.query.startDate.showDate = '';
-            $scope.query.endDate.showDate = '';
+            $scope.query.limitStart = start;
+            // $scope.query.startDate.showDate = '';
+            // $scope.query.endDate.showDate = '';
         } else {
             $scope.statusCheck = false;
             await parentmyAjaxData.timeout(0);
             $scope.statusCheck = true;
-            $scope.query.startDate = date1;
-            $scope.query.endDate = date1;
+            $scope.query.startDate = start2;
+            $scope.query.endDate = end2;
             $scope.query.limitEndDate = date1;
-            $scope.query.startDate.showDate = '';
-            $scope.query.endDate.showDate = '';
+            $scope.query.limitStart = date2;
+            // $scope.query.startDate.showDate = '';
+            // $scope.query.endDate.showDate = '';
         }
         $scope.query.isToday = k;
     }
@@ -174,6 +192,10 @@ GETBasedictionarySelectAll: {
     //获取表格列表数据
     $scope.recordList = [];
     $scope.getList = () => {
+        if(!$scope.query.startDate.showDate || !$scope.query.endDate.showDate){
+            toaster.pop('error', '', '开始时间不能为空');
+            return;
+        }
         $scope.loading = true;
         $scope.selectDeviceLog.getData({
             // pageIndex: 0,
@@ -204,7 +226,6 @@ GETBasedictionarySelectAll: {
             v.endTimeStr = FormatDateTime(v.sEndTime);
         })
     });
-    $scope.getList();
 
     //查询按钮
     $scope.search = () => {
@@ -304,10 +325,14 @@ GETBasedictionarySelectAll: {
     //返回主页
     $scope.backMain = () => {
         $scope.startTimeModel = false;
-        var startDate = $scope.query.startDate.showDate ? $scope.query.startDate.showDate: '-';
-        var endDate = $scope.query.endDate.showDate ? $scope.query.endDate.showDate: ' -';
+        var startDate = $scope.query.startDate.showDate ? $scope.query.startDate.showDate : '-';
+        var endDate = $scope.query.endDate.showDate ? $scope.query.endDate.showDate : ' -';
         $scope.startTimeNum = startDate + ' -- ' + endDate;
     }
+    setTimeout(()=>{
+        $scope.backMain();
+        $scope.getList();
+    },1000)
 
     //开始时间弹框 取消按钮
     $scope.backMainCancel = () => {
