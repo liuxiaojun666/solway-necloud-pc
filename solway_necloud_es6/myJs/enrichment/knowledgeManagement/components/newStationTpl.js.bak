@@ -24,11 +24,22 @@ ajaxData({
         data: {},
         later: true
     },
+    shareRepositoryFileUpload: {
+        name: 'shareRepositoryFileUpload',
+        data: {},
+        later: true
+    },
+    shareRepositorydownload: {
+        name: 'shareRepositorydownload',
+        data: {},
+        later: true
+    },
 }, {
         __serviceName__: 'newStationTplService',
-    })('newStationTplCtrl', ['$scope', 'newStationTplService', 'actionRecord', '$timeout', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $ocLazyLoad) => {
+    })('newStationTplCtrl', ['$scope', 'newStationTplService', 'actionRecord', '$timeout', 'toaster', '$ocLazyLoad'], ($scope, parentmyAjaxData, historicalRecord, $timeout, toaster, $ocLazyLoad) => {
 
         let zTree;
+        let ue = UE.getEditor('container', { autoFloatEnabled: false });
 
         //根据广播传递的值，判断是新增 还是 编辑
         $scope.$on('broadAddStation', (index, v) => {
@@ -38,18 +49,24 @@ ajaxData({
             } else {
                 $scope.initPageData();
                 $scope.formData = {};
+                ue.ready(function () {
+                    ue.setContent('');
+                });
+                $scope.fileArr = [];
             }
         });
 
         // 初始化
         $scope.initPageData = () => {
-            $scope.shareRepositoryInitPageData.getData({ id: $scope.id }).then(res => {
+            $scope.shareRepositoryInitPageData.getData({ id: $scope.id }).then( async (res) => {
                 $scope.zNodes = res.tree;
                 $.fn.zTree.init($("#tree"), setting, $scope.zNodes);
                 if (res.sRepos) {
-                    $scope.formData = res.sRepos;
+                    $scope.formData = JSON.parse(JSON.stringify(res.sRepos));
                     $scope.formData.repclass = $scope.formData.repclass ? $scope.formData.repclass : '';
-                    $scope.formData.productId = $scope.formData.productId ? $scope.formData.productId : '';
+                    $scope.formData.manus = $scope.formData.manuFId ? $scope.formData.manuFId : '';
+                    $scope.getProduct(res.sRepos); 
+                    
                     res.tree.forEach(v => {
                         if (v.id == $scope.formData.type) {
                             $scope.formData.type = v.name;
@@ -62,6 +79,18 @@ ajaxData({
                         ue.setContent(angular.copy($scope.formData.content));
                     });
 
+                    var d = res.sRepos.attachment;
+                    $scope.fileArr = [];
+                    $.each(d, function (i, v) {
+                        $scope.fileArr.push({
+                            id: v.id,
+                            fileName: v.attachment,
+                            originalFileName: v.fileName
+                        });
+                    });
+
+                    await parentmyAjaxData.timeout(1000);
+                    $scope.formData.productId = res.sRepos.productId ? res.sRepos.productId : '';
                 }
             })
         }
@@ -77,20 +106,48 @@ ajaxData({
         })
 
         // 获取产品型号
-        $scope.getProduct = () => {
+        $scope.getProduct = (item) => {
             $scope.formData.productId = '';
             $scope.products = [];
             $scope.selectByManuList.getData({ manufid: $scope.formData.manus }).then(res => {
                 $scope.products = res;
+                // $scope.formData.productId = item.productId;
             })
         }
 
         // 上传附件
+        // $scope.fileArr = [];
         $scope.fileArr = [];
         $(".upload-file").change(function () {
-            var name = Array.from($(".upload-file")[0].files)[0];
-            $scope.fileArr.push(name);
+            if ($scope.fileArr.length >= 5) {
+                toaster.pop('error', '', '最多上传5个附件');
+                return;
+            }
+            var fileObj = Array.from($(".upload-file")[0].files)[0];
+            // $scope.fileArr.push(fileObj);
+            $scope.shareRepositoryFileUpload.getData(
+                {
+                    id: 'WU_FILE_' + ($scope.fileArr.length + 1),
+                    name: fileObj.name,
+                    type: fileObj.type,
+                    lastModifiedDate: fileObj.lastModifiedDate,
+                    size: fileObj.size,
+                    files: this.files[0]
+                }
+            ).then(res => {
+                $scope.fileArr.push(res.data);
+            })
         });
+
+        // 删除附件
+        $scope.deleteFile = (i) => {
+            $scope.fileArr.splice(i, 1);
+        }
+
+        // 下载附件
+        $scope.downloadFile = (id) => {
+            window.open("/shareRepository/downloadAttachment.htm?id=" + id);
+        }
 
         //保存
         $scope.save = () => {
@@ -101,6 +158,13 @@ ajaxData({
             } else {
                 $('#content-error').remove();
             }
+            var ment = [];
+            $scope.fileArr.forEach(v => {
+                ment.push({
+                    filename: v.originalFileName,
+                    attachment: v.fileName
+                })
+            })
             let formData = {
                 id: $scope.id,
                 title: $scope.formData.title,
@@ -110,7 +174,7 @@ ajaxData({
                 introduce: $scope.formData.introduce ? $scope.formData.introduce : '',
                 keywords: $scope.formData.keywords ? $scope.formData.keywords : '',
                 content: ue.getContent(),
-                attachment: []
+                attachment: ment
             }
 
             $scope.shareRepositoryUpdate.getData({ "data": JSON.stringify(formData) }).then(res => {
@@ -171,7 +235,6 @@ ajaxData({
             zTree = $.fn.zTree.getZTreeObj("tree");
         })
 
-        var ue = UE.getEditor('container');
         ue.addListener('blur', function (editor) {
             if (!ue.hasContents()) {
                 $('#container').append('<label id="content-error" class="error" for="title">必填项</label>');

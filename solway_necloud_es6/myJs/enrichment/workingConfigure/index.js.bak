@@ -457,9 +457,9 @@ ajaxData({
             $scope.initialPowerData = data;
 
             $scope.temporaryObj['expirydate'] = data.expirydate ? new Date(data.expirydate) : new Date();
-            $scope.temporaryObj['endDate'] = data.endDate ? new Date(data.endDate) : new Date();
+            // $scope.temporaryObj['endDate'] = data.endDate ? new Date(data.endDate) : new Date();
             if (!data.expirydate) $scope.temporaryObj['expirydate'].showDate = '';
-            if (!data.endDate) $scope.temporaryObj['endDate'].showDate = '';
+            // if (!data.endDate) $scope.temporaryObj['endDate'].showDate = '';
         });
     }
     $scope.initialPowerEditShow = () => {
@@ -478,7 +478,8 @@ ajaxData({
         if (!$solway.formValidation($scope.initialPowerData, '.initial-power', toaster)) return;//校验非空
 
         $scope.initialPowerData['expirydate'] = $scope.temporaryObj['expirydate'] ? $scope.temporaryObj['expirydate'].showDate : '';
-        $scope.initialPowerData['endDate'] = $scope.temporaryObj['endDate'] ? $scope.temporaryObj['endDate'].showDate : '';
+        // $scope.initialPowerData['endDate'] = $scope.temporaryObj['endDate'] ? $scope.temporaryObj['endDate'].showDate : '';
+        delete $scope.initialPowerData.endDate;
         $scope.initialPowerData['flag'] = $("input[name='ifFlag']:checked").val();
 
         $scope.saveInitPowerLoading = true;

@@ -1,0 +1,27 @@
+ajaxData({
+    shareRepositoryInitPageData: {
+        name: 'GETshareRepositoryInitPageData',
+        data: {},
+        later: true
+    },
+}, {
+        __serviceName__: 'infoService',
+    })('infoCtrl', ['$scope', 'infoService', 'actionRecord', '$timeout', 'toaster', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $ocLazyLoad) => {
+
+        $scope.$on('infoOpen', (event, v) => {
+            $scope.shareRepositoryInitPageData.getData({ id: v.id }).then(res => {
+                $scope.info = res.sRepos;
+                res.tree.forEach(v => {
+                    if(v.id == $scope.info.type){
+                        $scope.info.typeName = v.name;
+                    }
+                });
+                $('.content').html($scope.info.content);
+            })
+        });
+
+        //取消
+        $scope.cancel = () => {
+            $scope.$emit('cancelCallback');
+        }
+    });

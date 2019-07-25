@@ -146,7 +146,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
             }
 
             render() {
-                const { Xb, Nbq, Loading } = window.reactComponent;
+                const { Xb, Nbq, Hlx, Loading } = window.reactComponent;
                 return this.state.data ? (
                     this.state.data[0]
                         ? this.state.data.map(v => (
@@ -169,6 +169,10 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
                                     data={v} /> : null}
 
                                 {v.deviceType === '2' ? <Nbq
+                                    hover={this.state.hover[v.deviceType + '' + v.id]}
+                                    data={v} /> : null}
+
+                                {v.deviceType === '3' ? <Hlx
                                     hover={this.state.hover[v.deviceType + '' + v.id]}
                                     data={v} /> : null}
                             </div>

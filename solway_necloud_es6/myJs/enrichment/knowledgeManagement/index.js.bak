@@ -126,7 +126,10 @@ ajaxData({
             width: '25%',
             dataIndex: 'title',
             sort: !0,
-            align: 'center'
+            align: 'center',
+            render(text) {
+                return `<span class="clickable">${text}</span>`
+            }
         }, {
             title: '发布时间',
             dataIndex: 'releasetimeFormat',
@@ -153,14 +156,18 @@ ajaxData({
         }];
 
     //点击表格后的事件委托（设置按钮、删除按钮）
+    $scope.infoModel = false;
     $scope.trClick = (item, index, event) => {
         if (event.target.className.includes('icon-bianji-copy')) {
             $scope.newStationModel = true;
-            $scope.$broadcast('broadAddStation', { 'id': item.id })
+            $scope.$broadcast('broadAddStation', { 'id': item.id });
         } else if (event.target.className.includes('icon-shanchu1')) {
-            $solway.confirm({ message: '确定删除此字典？' }, () => {
+            $solway.confirm({ message: '确定删除吗？' }, () => {
                 deleteDictionary(item.id);
             });
+        } else if (event.target.className.includes('clickable')) {
+            $scope.infoModel = true;
+            $scope.$broadcast('infoOpen', { 'id': item.id });
         }
     }
 
@@ -168,6 +175,7 @@ ajaxData({
     //取消 新增后的回调
     $scope.$on('cancelCallback', () => {
         $scope.newStationModel = false;
+        $scope.infoModel = false;
     });
 
     $scope.$on('addCallback', () => {
