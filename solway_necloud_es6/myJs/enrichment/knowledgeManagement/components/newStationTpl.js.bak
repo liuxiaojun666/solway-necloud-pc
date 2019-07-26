@@ -38,8 +38,25 @@ ajaxData({
         __serviceName__: 'newStationTplService',
     })('newStationTplCtrl', ['$scope', 'newStationTplService', 'actionRecord', '$timeout', 'toaster', '$ocLazyLoad'], ($scope, parentmyAjaxData, historicalRecord, $timeout, toaster, $ocLazyLoad) => {
 
-        let zTree;
-        let ue = UE.getEditor('container', { autoFloatEnabled: false });
+        let zTree, ue;
+        $ocLazyLoad.load([
+            'vendor/ueditor/ueditor.config.js',
+            'vendor/ueditor/ueditor.all.min.js',
+        ]).then(() => {
+            return $ocLazyLoad.load([
+            'vendor/ueditor/lang/zh-cn/zh-cn.js',
+            ])
+        }).then(() => {
+            ue = UE.getEditor('container', { autoFloatEnabled: false })
+
+            ue.addListener('blur', function (editor) {
+                if (!ue.hasContents()) {
+                    $('#container').append('<label id="content-error" class="error" for="title">必填项</label>');
+                } else {
+                    $('#content-error').remove();
+                }
+            })
+        })
 
         //根据广播传递的值，判断是新增 还是 编辑
         $scope.$on('broadAddStation', (index, v) => {
@@ -58,15 +75,15 @@ ajaxData({
 
         // 初始化
         $scope.initPageData = () => {
-            $scope.shareRepositoryInitPageData.getData({ id: $scope.id }).then( async (res) => {
+            $scope.shareRepositoryInitPageData.getData({ id: $scope.id }).then(async (res) => {
                 $scope.zNodes = res.tree;
                 $.fn.zTree.init($("#tree"), setting, $scope.zNodes);
                 if (res.sRepos) {
                     $scope.formData = JSON.parse(JSON.stringify(res.sRepos));
                     $scope.formData.repclass = $scope.formData.repclass ? $scope.formData.repclass : '';
                     $scope.formData.manus = $scope.formData.manuFId ? $scope.formData.manuFId : '';
-                    $scope.getProduct(res.sRepos); 
-                    
+                    $scope.getProduct(res.sRepos);
+
                     res.tree.forEach(v => {
                         if (v.id == $scope.formData.type) {
                             $scope.formData.type = v.name;
@@ -188,6 +205,7 @@ ajaxData({
         }
 
         $scope.treeShow = false;
+        debugger
         $scope.showTree = () => {
             $scope.treeShow = !$scope.treeShow;
         }
@@ -233,14 +251,6 @@ ajaxData({
         ])).then(() => {
             $.fn.zTree.init($("#tree"), setting, $scope.zNodes);
             zTree = $.fn.zTree.getZTreeObj("tree");
-        })
-
-        ue.addListener('blur', function (editor) {
-            if (!ue.hasContents()) {
-                $('#container').append('<label id="content-error" class="error" for="title">必填项</label>');
-            } else {
-                $('#content-error').remove();
-            }
         })
 
         //取消
