@@ -1,181 +1,202 @@
-ajaxData({
-    shareRepositoryInitPageData: {
-        name: 'GETshareRepositoryInitPageData',
-        data: {},
-        later: true
+ajaxData(
+    {
+        shareRepositoryInitPageData: {
+            name: 'GETshareRepositoryInitPageData',
+            data: {},
+            later: true
+        },
+        shareRepositoryUpdate: {
+            name: 'shareRepositoryUpdate',
+            data: {},
+            later: true
+        },
+        shareRepositoryDict: {
+            name: 'shareRepositoryDict',
+            data: {},
+            later: true
+        },
+        shareRepositoryManu: {
+            name: 'shareRepositoryManu',
+            data: {},
+            later: true
+        },
+        selectByManuList: {
+            name: 'GETselectByManuList',
+            data: {},
+            later: true
+        },
+        shareRepositoryFileUpload: {
+            name: 'shareRepositoryFileUpload',
+            data: {},
+            later: true
+        },
+        shareRepositorydownload: {
+            name: 'shareRepositorydownload',
+            data: {},
+            later: true
+        }
     },
-    shareRepositoryUpdate: {
-        name: 'shareRepositoryUpdate',
-        data: {},
-        later: true
-    },
-    shareRepositoryDict: {
-        name: 'shareRepositoryDict',
-        data: {},
-        later: true
-    },
-    shareRepositoryManu: {
-        name: 'shareRepositoryManu',
-        data: {},
-        later: true
-    },
-    selectByManuList: {
-        name: 'GETselectByManuList',
-        data: {},
-        later: true
-    },
-    shareRepositoryFileUpload: {
-        name: 'shareRepositoryFileUpload',
-        data: {},
-        later: true
-    },
-    shareRepositorydownload: {
-        name: 'shareRepositorydownload',
-        data: {},
-        later: true
-    },
-}, {
-        __serviceName__: 'newStationTplService',
-    })('newStationTplCtrl', ['$scope', 'newStationTplService', 'actionRecord', '$timeout', 'toaster', '$ocLazyLoad'], ($scope, parentmyAjaxData, historicalRecord, $timeout, toaster, $ocLazyLoad) => {
-
-        let zTree, ue;
-        $ocLazyLoad.load([
-            'vendor/ueditor/ueditor.config.js',
-            'vendor/ueditor/ueditor.all.min.js',
-        ]).then(() => {
-            return $ocLazyLoad.load([
-            'vendor/ueditor/lang/zh-cn/zh-cn.js',
+    {
+        __serviceName__: 'newStationTplService'
+    }
+)(
+    'newStationTplCtrl',
+    ['$scope', 'newStationTplService', 'actionRecord', '$timeout', 'toaster', '$ocLazyLoad'],( $scope, parentmyAjaxData, historicalRecord, $timeout, toaster, $ocLazyLoad ) => {
+        let zTree, ue
+        $ocLazyLoad
+            .load([
+                'vendor/ueditor/ueditor.config.js',
+                'vendor/ueditor/ueditor.all.min.js',
             ])
-        }).then(() => {
-            ue = UE.getEditor('container', { autoFloatEnabled: false })
-
-            ue.addListener('blur', function (editor) {
-                if (!ue.hasContents()) {
-                    $('#container').append('<label id="content-error" class="error" for="title">必填项</label>');
-                } else {
-                    $('#content-error').remove();
-                }
+            .then(() => {
+                return $ocLazyLoad.load(['vendor/ueditor/lang/zh-cn/zh-cn.js'])
             })
-        })
+            .then(() => {
+                UE.delEditor('container')
+                ue = window.UE.getEditor('container', { autoFloatEnabled: false })
+                ue.addListener('blur', function (editor) {
+                    if (!ue.hasContents()) {
+                        $('#container').append(
+                            '<label id="content-error" class="error" for="title">必填项</label>'
+                        )
+                    } else {
+                        $('#content-error').remove()
+                    }
+                })
+            })
 
         //根据广播传递的值，判断是新增 还是 编辑
         $scope.$on('broadAddStation', (index, v) => {
-            $scope.id = v.id;
+            $scope.id = v.id
             if ($scope.id) {
-                $scope.initPageData();
+                $scope.initPageData()
             } else {
-                $scope.initPageData();
-                $scope.formData = {};
+                $scope.initPageData()
+                $scope.formData = {}
                 ue.ready(function () {
-                    ue.setContent('');
-                });
-                $scope.fileArr = [];
+                    ue.setContent('')
+                })
+                $scope.fileArr = []
             }
-        });
+        })
 
         // 初始化
         $scope.initPageData = () => {
-            $scope.shareRepositoryInitPageData.getData({ id: $scope.id }).then(async (res) => {
-                $scope.zNodes = res.tree;
-                $.fn.zTree.init($("#tree"), setting, $scope.zNodes);
-                if (res.sRepos) {
-                    $scope.formData = JSON.parse(JSON.stringify(res.sRepos));
-                    $scope.formData.repclass = $scope.formData.repclass ? $scope.formData.repclass : '';
-                    $scope.formData.manus = $scope.formData.manuFId ? $scope.formData.manuFId : '';
-                    $scope.getProduct(res.sRepos);
+            $scope.shareRepositoryInitPageData
+                .getData({ id: $scope.id })
+                .then(async res => {
+                    $scope.zNodes = res.tree
+                    $.fn.zTree.init($('#tree'), setting, $scope.zNodes)
+                    if (res.sRepos) {
+                        $scope.formData = JSON.parse(JSON.stringify(res.sRepos))
+                        $scope.formData.repclass = $scope.formData.repclass
+                            ? $scope.formData.repclass
+                            : ''
+                        $scope.formData.manus = $scope.formData.manuFId
+                            ? $scope.formData.manuFId
+                            : ''
+                        $scope.getProduct(res.sRepos)
 
-                    res.tree.forEach(v => {
-                        if (v.id == $scope.formData.type) {
-                            $scope.formData.type = v.name;
-                            $scope.formData.typeId = v.id;
-                            zTree.checkNode(zTree.getNodeByParam("id", v.id), true, true);
-                        }
-                    });
+                        res.tree.forEach(v => {
+                            if (v.id == $scope.formData.type) {
+                                $scope.formData.type = v.name
+                                $scope.formData.typeId = v.id
+                                zTree.checkNode(zTree.getNodeByParam('id', v.id), true, true)
+                            }
+                        })
 
-                    ue.ready(function () {
-                        ue.setContent(angular.copy($scope.formData.content));
-                    });
+                        ue.ready(function () {
+                            ue.setContent(angular.copy($scope.formData.content))
+                        })
 
-                    var d = res.sRepos.attachment;
-                    $scope.fileArr = [];
-                    $.each(d, function (i, v) {
-                        $scope.fileArr.push({
-                            id: v.id,
-                            fileName: v.attachment,
-                            originalFileName: v.fileName
-                        });
-                    });
+                        var d = res.sRepos.attachment
+                        $scope.fileArr = []
+                        $.each(d, function (i, v) {
+                            $scope.fileArr.push({
+                                id: v.id,
+                                fileName: v.attachment,
+                                originalFileName: v.fileName
+                            })
+                        })
 
-                    await parentmyAjaxData.timeout(1000);
-                    $scope.formData.productId = res.sRepos.productId ? res.sRepos.productId : '';
-                }
-            })
+                        await parentmyAjaxData.timeout(1000)
+                        $scope.formData.productId = res.sRepos.productId
+                            ? res.sRepos.productId
+                            : ''
+                    }
+                })
         }
 
         // 获取类别option
-        $scope.shareRepositoryDict.getData({ dictType: "REPOSITORY_CLASS" }).then(res => {
-            $scope.dicts = res;
-        })
+        $scope.shareRepositoryDict
+            .getData({ dictType: 'REPOSITORY_CLASS' })
+            .then(res => {
+                $scope.dicts = res
+            })
 
         // 获取生产厂商option
         $scope.shareRepositoryManu.getData({}).then(res => {
-            $scope.manuf = res;
+            $scope.manuf = res
         })
 
         // 获取产品型号
-        $scope.getProduct = (item) => {
-            $scope.formData.productId = '';
-            $scope.products = [];
-            $scope.selectByManuList.getData({ manufid: $scope.formData.manus }).then(res => {
-                $scope.products = res;
-                // $scope.formData.productId = item.productId;
-            })
+        $scope.getProduct = item => {
+            $scope.formData.productId = ''
+            $scope.products = []
+            $scope.selectByManuList
+                .getData({ manufid: $scope.formData.manus })
+                .then(res => {
+                    $scope.products = res
+                    // $scope.formData.productId = item.productId;
+                })
         }
 
         // 上传附件
-        // $scope.fileArr = [];
-        $scope.fileArr = [];
-        $(".upload-file").change(function () {
+        $scope.fileArr = []
+        $('.upload-file').change(function () {
             if ($scope.fileArr.length >= 5) {
-                toaster.pop('error', '', '最多上传5个附件');
-                return;
+                toaster.pop('error', '', '最多上传5个附件')
+                return
             }
-            var fileObj = Array.from($(".upload-file")[0].files)[0];
+            var fileObj = Array.from($('.upload-file')[0].files)[0]
             // $scope.fileArr.push(fileObj);
-            $scope.shareRepositoryFileUpload.getData(
-                {
+            $scope.shareRepositoryFileUpload
+                .getData({
                     id: 'WU_FILE_' + ($scope.fileArr.length + 1),
                     name: fileObj.name,
                     type: fileObj.type,
                     lastModifiedDate: fileObj.lastModifiedDate,
                     size: fileObj.size,
                     files: this.files[0]
-                }
-            ).then(res => {
-                $scope.fileArr.push(res.data);
-            })
-        });
+                })
+                .then(res => {
+                    $scope.fileArr.push(res.data)
+                })
+        })
 
         // 删除附件
-        $scope.deleteFile = (i) => {
-            $scope.fileArr.splice(i, 1);
+        $scope.deleteFile = i => {
+            $scope.fileArr.splice(i, 1)
         }
 
         // 下载附件
-        $scope.downloadFile = (id) => {
-            window.open("/shareRepository/downloadAttachment.htm?id=" + id);
+        $scope.downloadFile = id => {
+            window.open('/shareRepository/downloadAttachment.htm?id=' + id)
         }
 
         //保存
         $scope.save = () => {
-            if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
+            if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster))
+                return //校验非空
             if (!ue.hasContents()) {
-                $('#container').append('<label id="content-error" class="error" for="title">必填项</label>');
-                return;
+                $('#container').append(
+                    '<label id="content-error" class="error" for="title">必填项</label>'
+                )
+                return
             } else {
-                $('#content-error').remove();
+                $('#content-error').remove()
             }
-            var ment = [];
+            var ment = []
             $scope.fileArr.forEach(v => {
                 ment.push({
                     filename: v.originalFileName,
@@ -194,27 +215,28 @@ ajaxData({
                 attachment: ment
             }
 
-            $scope.shareRepositoryUpdate.getData({ "data": JSON.stringify(formData) }).then(res => {
-                if (res.key != 0) {
-                    toaster.pop('success', '', '保存成功');
-                    $scope.$emit('addCallback');
-                } else {
-                    toaster.pop('error', '', '保存失败');
-                }
-            })
+            $scope.shareRepositoryUpdate
+                .getData({ data: JSON.stringify(formData) })
+                .then(res => {
+                    if (res.key != 0) {
+                        toaster.pop('success', '', '保存成功')
+                        $scope.$emit('addCallback')
+                    } else {
+                        toaster.pop('error', '', '保存失败')
+                    }
+                })
         }
 
-        $scope.treeShow = false;
-        debugger
+        $scope.treeShow = false
         $scope.showTree = () => {
-            $scope.treeShow = !$scope.treeShow;
+            $scope.treeShow = !$scope.treeShow
         }
 
         var setting = {
             check: {
                 enable: true,
-                chkStyle: "radio",
-                radioType: "all"
+                chkStyle: 'radio',
+                radioType: 'all'
             },
             view: {
                 showLine: true,
@@ -223,38 +245,44 @@ ajaxData({
             data: {
                 simpleData: {
                     enable: true,
-                    idKey: "id",
-                    pIdKey: "pId",
+                    idKey: 'id',
+                    pIdKey: 'pId',
                     rootPId: 0
                 },
                 key: {
-                    name: "name"
+                    name: 'name'
                 }
             },
             callback: {
                 onCheck: onCheck
             }
-        };
+        }
 
-        function onCheck(event, treeId, treeNode) {
-            $scope.formData.type = treeNode.name;
-            $scope.formData.typeId = treeNode.id;
-            $scope.treeShow = !$scope.treeShow;
+        function onCheck (event, treeId, treeNode) {
+            $scope.formData.type = treeNode.name
+            $scope.formData.typeId = treeNode.id
+            $scope.treeShow = !$scope.treeShow
         }
 
         //按需加载ztree文件
-        $ocLazyLoad.load([
-            'vendor/jquery/ztree/jsCopy/jquery.ztree.core.js', //ztree
-        ]).then(() => $ocLazyLoad.load([
-            'vendor/jquery/ztree/jsCopy/jquery.ztree.exhide.js', //ztree
-            'vendor/jquery/ztree/jsCopy/jquery.ztree.excheck.js', //ztree        
-        ])).then(() => {
-            $.fn.zTree.init($("#tree"), setting, $scope.zNodes);
-            zTree = $.fn.zTree.getZTreeObj("tree");
-        })
+        $ocLazyLoad
+            .load([
+                'vendor/jquery/ztree/jsCopy/jquery.ztree.core.js' //ztree
+            ])
+            .then(() =>
+                $ocLazyLoad.load([
+                    'vendor/jquery/ztree/jsCopy/jquery.ztree.exhide.js', //ztree
+                    'vendor/jquery/ztree/jsCopy/jquery.ztree.excheck.js' //ztree
+                ])
+            )
+            .then(() => {
+                $.fn.zTree.init($('#tree'), setting, $scope.zNodes)
+                zTree = $.fn.zTree.getZTreeObj('tree')
+            })
 
         //取消
         $scope.cancel = () => {
-            $scope.$emit('cancelCallback');
+            $scope.$emit('cancelCallback')
         }
-    });
+    }
+)

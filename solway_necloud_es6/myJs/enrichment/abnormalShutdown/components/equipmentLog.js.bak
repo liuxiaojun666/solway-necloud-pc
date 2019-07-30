@@ -18,7 +18,7 @@ GETBasedictionarySelectAll: {
     __serviceName__: 'child_myAjaxData'
 })('equipmentLogCtrl', ['$scope', 'child_myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, parentmyAjaxData, historicalRecord, $timeout, toaster) => {
     // Unix时间戳转换
-    function FormatDateTime(UnixTime) {
+    function FormatDateTime (UnixTime) {
         var date = new Date(UnixTime);
         var y = date.getFullYear();
         var m = date.getMonth() + 1;
@@ -81,6 +81,12 @@ GETBasedictionarySelectAll: {
             v: '箱变'
         }
     ]
+
+    let equipTypeKey = {
+        1: '汇流箱',
+        2: '逆变器',
+        3: '箱变'
+    }
 
     //数据状态 数据源
     $scope.dataStatusArr = [
@@ -153,7 +159,7 @@ GETBasedictionarySelectAll: {
 
     //获取电站列表
     $scope.stationArr = [];
-    $scope.getAllSTListForPCBySession.getData({
+    $scope.StationList.getData({
 
     }).then(res => {
         res.forEach((v, i) => {
@@ -192,7 +198,7 @@ GETBasedictionarySelectAll: {
     //获取表格列表数据
     $scope.recordList = [];
     $scope.getList = () => {
-        if(!$scope.query.startDate.showDate || !$scope.query.endDate.showDate){
+        if (!$scope.query.startDate.showDate || !$scope.query.endDate.showDate) {
             toaster.pop('error', '', '开始时间不能为空');
             return;
         }
@@ -220,11 +226,16 @@ GETBasedictionarySelectAll: {
 
     $scope.selectDeviceLog.subscribe(res => {
         $scope.loading = false;
-        $scope.recordList = res.body.data;
-        $scope.recordList.forEach((v, i) => {
-            v.startTimeStr = FormatDateTime(v.sStartTime);
-            v.endTimeStr = FormatDateTime(v.sEndTime);
-        })
+        $scope.recordList = $scope.query.isToday == 1 ? res.body.data : res.body.data.data;
+        $scope.selectDeviceLogPaging = $scope.query.isToday == 1 ? res.body : res.body.data;
+        if ($scope.recordList.length > 0) {
+            $scope.recordList.forEach((v, i) => {
+                v.startTimeStr = FormatDateTime(v.sStartTime);
+                v.endTimeStr = FormatDateTime(v.sEndTime);
+                v.devicetypeStr = equipTypeKey[v.deviceType];
+            })
+        }
+
     });
 
     //查询按钮
@@ -240,7 +251,7 @@ GETBasedictionarySelectAll: {
             width: '60px',
             align: 'center',
             checkboxName: 'batchprocessing',
-            render(text, record, index) {
+            render (text, record, index) {
                 return `<label class="i-checks m-b-none"><input data-identifies="${record.id}" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>`;
             }
         },
@@ -329,10 +340,10 @@ GETBasedictionarySelectAll: {
         var endDate = $scope.query.endDate.showDate ? $scope.query.endDate.showDate : ' -';
         $scope.startTimeNum = startDate + ' -- ' + endDate;
     }
-    setTimeout(()=>{
+    setTimeout(() => {
         $scope.backMain();
         $scope.getList();
-    },1000)
+    }, 1000)
 
     //开始时间弹框 取消按钮
     $scope.backMainCancel = () => {
