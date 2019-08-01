@@ -8,7 +8,6 @@ app.directive('publicNotice', ['$ocLazyLoad', '$http', '$state', '$stateParams',
         },
         templateUrl: 'tpl/enrichment/components/publicNotice.html' + window.stamp,
         link($scope, $element) {
-            
             const allowAlertRouterList = ['main','companyManagement','businessManagement']; //允许公告弹框的路由配置
 
             const setPageHeight = () => {
@@ -182,9 +181,43 @@ app.directive('publicNotice', ['$ocLazyLoad', '$http', '$state', '$stateParams',
                 $(".notice-list").animate({ left: distance+'%' }, 100);
             }
 
+            //控制公告弹框跟随鼠标移动
+
+            let container  = $(".notice-container-alert")[0]; //整个移动的区域（弹框整体）
+            let headerDrag = $(".notice-container-alert .notice-header")[0]; //鼠标点击起作用的区域（仅在点击头部header区域可移动）
+
+            let x, y; //存储div的坐标
+            let isDrop = false; //移动状态的判断鼠标按下才能移动
+            headerDrag.onmousedown = function(event) {
+                let e = event || window.event; //要用event这个对象来获取鼠标的位置
+                x = e.clientX - container.offsetLeft;
+                y = e.clientY - container.offsetTop;
+                isDrop = true; //设为true表示可以移动
+            }
+
+            document.onmousemove = function(event) {
+                if(isDrop) {//是否为可移动状态          
+                    let e = event || window.event;   
+                    let moveX = e.clientX - x; //得到距离左边距离                    　　
+                    let moveY = e.clientY - y; //得到距离上边距离
+                   
+                    let maxX = document.documentElement.clientWidth - container.offsetWidth;
+                    let maxY = document.documentElement.clientHeight - container.offsetHeight;
+
+                    moveX=Math.min(maxX, Math.max(0,moveX));
+                    moveY=Math.min(maxY, Math.max(0,moveY));
+
+                    container.style.left = moveX + "px";　　
+                    container.style.top = moveY + "px";　　　　　　　　　　
+                }
+            }
+
+            document.onmouseup = function() {
+                isDrop = false; //设置为false不可移动
+            }
+
             $timeout(()=>{
                 setPageHeight()
-                
             },1000);
 
             //每五分钟获取一次最新公告信息

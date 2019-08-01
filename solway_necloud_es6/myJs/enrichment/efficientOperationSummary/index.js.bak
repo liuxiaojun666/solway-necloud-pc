@@ -3,7 +3,7 @@ ajaxData(
         checkModuleAuth: {
             name: 'GETcheckModuleAuth',
             data: {
-                codes: 618
+                codes: 620
             }
         }
     }, {
@@ -23,7 +23,10 @@ ajaxData(
         } = historiData;
         $scope.theme = theme;
         await myAjaxData.timeout(0);
-        $scope.changeTheme(theme);
+        if (($scope.checkModuleAuth.res && $scope.checkModuleAuth.res.body['620'].userStatus !== '00') && ($scope.theme === 'Share')) {
+            $scope.theme = 'Profession';
+        }
+        $scope.changeTheme($scope.theme);
         $scope.beforeLoading = false;
         $scope.mainPageInitComplete && $scope.mainPageInitComplete();
         $scope.$apply();
@@ -38,7 +41,7 @@ ajaxData(
     };
 
     $scope.checkModuleAuth.subscribe(res => {
-        if (res.body['618'].userStatus !== '00' && $scope.theme === 'Share') {
+        if ((res.body['620'].userStatus !== '00') && ($scope.theme === 'Share')) {
             $scope.changeTheme('Profession');
         }
     });

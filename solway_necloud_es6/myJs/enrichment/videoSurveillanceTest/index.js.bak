@@ -30,13 +30,15 @@ ajaxData(
     function openWs() {
         let _ws = new WebSocket('ws://192.168.10.183:50225/video');
         _ws.onopen = function () {
-            console.log('ws连接成功');
+            toaster.pop('success', '', 'ws连接成功');
+            $scope.$apply();
         };
         _ws.onmessage = function (evt) {
-            console.log('ws接收到来自服务器的数据：' + evt.data);
+            toaster.pop('error', '', evt.data);
+            $scope.$apply();
         };
         _ws.onclose = function () {
-            console.log("WebSocket 连接已关闭...");
+            $scope.$apply();
             if (wsReOpen) ws = openWs();
         };
         return _ws;
@@ -86,8 +88,9 @@ ajaxData(
                     const stationName = _treeNode.getParentNode().name;
                     if ($scope.checked_videos[id] && !treeNode.checked) {
                         const id_index = $scope.checked_videos.findIndex(v => id === v.id);
-                        $scope.checked_videos[id_index].video.dispose();
+                        $scope.checked_videos[id_index].video && $scope.checked_videos[id_index].video.dispose();
                         $scope.checked_videos[id_index].req_data = null;
+                        $scope.checked_videos[id_index].destUrl = '';
                         $scope.checked_videos[id_index].token = null;
                         $scope.checked_videos.splice(id_index, 1);
                         $scope.checked_videos.push({ id: Math.random() });
@@ -206,7 +209,11 @@ ajaxData(
     // websocked 云镜控制
     function wsSend(event) {
         const {token, eqid, stid} = event.currentTarget.dataset
-        if (event.target.className.includes('top')) {
+        if (event.target.className.includes('stop')) {
+            ws.send(JSON.stringify({ eqid: +eqid, stid: +stid, token, cmd: "stop" }));
+            console.log('ws: send: ' + "stop")
+            return
+        }else if (event.target.className.includes('top')) {
             ws.send(JSON.stringify({ eqid: +eqid, stid: +stid, token, cmd: "up" }));
             console.log('ws: send: ' + "up")
             return
@@ -229,10 +236,6 @@ ajaxData(
         } else if (event.target.className.includes('right')) {
             ws.send(JSON.stringify({ eqid: +eqid, stid: +stid, token, cmd: "right" }));
             console.log('ws: send: ' + "right")
-            return
-        } else if (event.target.className.includes('stop')) {
-            ws.send(JSON.stringify({ eqid: +eqid, stid: +stid, token, cmd: "stop" }));
-            console.log('ws: send: ' + "stop")
             return
         }
     }

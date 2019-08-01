@@ -9,12 +9,13 @@ ajaxData({
         data: {},
         later: true
     },
-
 }, {})('knowledgeCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
     historicalRecord.init();// 历史记录 初始化
     $scope.beforeLoading = true;
     historyInitCallback();
     $scope.moduleName = '知识库管理';//当前页面名称
+
+    $scope.userName = localStorage.getItem('username');
 
     // 当前页面行为记录初始化回调 获取行为记录
     async function historyInitCallback() {
