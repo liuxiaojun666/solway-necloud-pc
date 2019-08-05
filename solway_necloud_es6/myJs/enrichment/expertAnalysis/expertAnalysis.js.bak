@@ -288,15 +288,66 @@ ajaxData({
                 xAxis: {
                     name: $scope['xunits' + $scope.checkChart] ? `${$scope['xname' + $scope.checkChart]}(${$scope['xunits' + $scope.checkChart]})` : `${$scope['xname' + $scope.checkChart]}`,
                     min: $scope.minX,
-                    max: $scope.maxX
+                    max: $scope.maxX,
+                    nameTextStyle: {
+                        color: '#fff',
+                        fontSize: 12
+                    },
+                    //改变x轴字体颜色为白色
+                    axisLabel: {
+                        show: true,
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    //去掉x轴分隔线
+                    splitLine: {
+                        show: false
+                    },
+                    //设置轴线的属性
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(68, 150, 255, 1)'
+                        }
+                    }
                 },
                 yAxis: {
                     name: $scope['yunits' + $scope.checkChart] ? `${$scope['yname' + $scope.checkChart]}(${$scope['yunits' + $scope.checkChart]})` : `${$scope['yname' + $scope.checkChart]}`,
                     min: $scope.minY,
-                    max: $scope.maxY
+                    max: $scope.maxY,
+                    nameTextStyle: {
+                        color: '#fff',
+                        fontSize: 12
+                    },
+                    //改变y轴字体颜色为白色
+                    axisLabel: {
+                        show: true,
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    //设置y轴分隔线
+                    splitLine: {
+                        lineStyle: {
+                            color: 'rgba(68, 150, 255, 1)'
+                        }
+                    },
+                    //设置轴线的属性
+                    axisLine: {
+                        show: false
+                    },
+                    //去掉刻度线
+                    axisTick: {
+                        show: false
+                    }
                 },
-                series: series
-            })
+                series: series,
+                grid: {
+                    top: "26%",
+                    right: "14%",
+                    bottom: "18%"
+                }
+            },true)
             setTimeout(() => {
                 echarts.getInstanceByDom(document.getElementById('container' + i)).resize();
             }, 0)

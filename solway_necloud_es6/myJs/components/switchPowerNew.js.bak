@@ -196,6 +196,12 @@ app.controller('switchPowerNewCtrl', function ($scope, $rootScope, $http, $state
             }
         }
 
+        //若当前公司列表,只有一个主公司（stFlag==3，没有子公司的情况下),去请求这个主公司所有的电站列表，并显示
+        if(data.length == 1 && data[0].stFlag == 3 && data[0].comId == data[0].id){
+            $scope.currentParentId = data[0].id;
+            getStationList(data[0].id);
+        }
+
         $scope.groupAndCompanyList = data;
         if($scope.currentSTID && $scope.currentType == 0 && $scope.hasChildStation.includes($scope.currentComId)){ 
             $scope.$apply();
