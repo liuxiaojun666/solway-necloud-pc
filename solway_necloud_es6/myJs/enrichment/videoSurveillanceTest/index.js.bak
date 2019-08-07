@@ -25,10 +25,10 @@ ajaxData(
     const createImg = createCanvas();
     $ocLazyLoad.load(['vendor/videojs/videojs.hotkeys.min.js']);
     let wsReOpen = true;
-    let ws = openWs();
+    let ws;
 
     function openWs() {
-        let _ws = new WebSocket('ws://192.168.10.164:50225/video');
+        let _ws = new WebSocket($scope.selectVideos.res.body.onlineUrl);
         _ws.onopen = function () {
             toaster.pop('success', '', 'ws连接成功');
             $scope.$apply();
@@ -118,6 +118,7 @@ ajaxData(
 
     $scope.selectVideos.subscribe(res => {
         if (res.code !== 0) return;
+        ws = openWs();
         $ocLazyLoad.load([
             'vendor/jquery/ztree/jsCopy/jquery.ztree.core.js', //ztree
         ]).then(() => $ocLazyLoad.load([
