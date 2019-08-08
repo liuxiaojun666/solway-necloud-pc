@@ -25,6 +25,12 @@ ajaxData({
         saveParam: false,
         onlyLatest: true
     },
+    faultDescribeSuggestList:{
+        name: 'GETfaultDescribeSuggestList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
 }, {
         __serviceName__: 'editFaultCodeService',
     })('editFaultCodeTplModelCtrl', ['$scope', 'editFaultCodeService', 'actionRecord', '$timeout', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, $timeout, toaster, $http) => {
@@ -49,6 +55,8 @@ ajaxData({
         
 
         $scope.$on("editFaultCodeBroad", async (e, v) => {
+            $scope.showFaultSuggest = false;
+
             let data = v.item;
             getFaultTypeList();
             if($scope.stationType == 'wind'){
@@ -71,6 +79,7 @@ ajaxData({
                     faultClass : data.faultClass,
                     faultDescCH:data.faultDescCH,
                     faultDescEN:data.faultDescEN,
+                    faultDescCHOriginal:data.faultDescCHOriginal,
                     faultHandle:data.faultHandle,
                     descp:data.descp,
                 }
@@ -95,6 +104,22 @@ ajaxData({
             // $scope.$apply();
         });
 
+        //点击设备原始故障input，显示的建议填写列表
+        $scope.getFaultSuggest = () =>{
+            $scope.showFaultSuggest = true;
+            $scope.faultDescribeSuggestList.getData({protocolID:$scope.faultformData['protocolID']}).then(res=>{
+                $scope.faultSuggestList = res;
+            });
+        }
+
+        $(".editFaultCodeTpl").click(function(){
+            $scope.showFaultSuggest = false;
+        });
+
+        $scope.selectSuggest = item =>{
+            $scope.faultformData.faultDescCHOriginal = item;
+            $scope.showFaultSuggest = false;
+        }
  
         //添加一行推荐建议
         $scope.addLineRecommend = () =>{

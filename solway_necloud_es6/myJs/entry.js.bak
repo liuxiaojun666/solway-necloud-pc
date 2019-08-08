@@ -62,6 +62,12 @@ $(function () {
         }
     })();
 
+    // 埋点统计
+    if (window.PROCESS_EVN === 'production') {
+        $body.append('<script type="text/javascript" src="//s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"><\/script>');
+    } else {
+        $body.append('<script type="text/javascript" src="//s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
+    }
 
     // angular.js
     $body.append('<script src="/vendor/angular/angular.all.js" ><\/script>');
@@ -104,18 +110,12 @@ $(function () {
         if (window.PROCESS_EVN === 'production') {
             // 运行环境影藏class
             $head.append('<style>.PROCESS_EVN_production .hide-evn-production {display: none!important;}</style>');
-            // 埋点统计
-            $body.append('<script async type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"><\/script>');
         } else if (window.PROCESS_EVN === 'test') {
             // 运行环境影藏class
             $head.append('<style>.PROCESS_EVN_test .hide-evn-test {display: none!important;}</style>');
-            // 埋点统计
-            $body.append('<script async type="text/javascript" src="https://s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
         } else {
             // 运行环境影藏class
             $head.append('<style>.PROCESS_EVN_development .hide-evn-development {display: none!important;}</style>');
-            // 埋点统计
-            $body.append('<script async type="text/javascript" src="https://s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
             // 开发环境热更新
             window.stamp = '?_=' + Date.now();
             $body.append('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');

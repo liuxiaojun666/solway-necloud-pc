@@ -70,17 +70,7 @@ ajaxData({
             $scope.formData['depid'] = $scope.depid;
             $scope.formData['roleType'] = '02';
 
-            if (!$solway.formValidation($scope.formData, '.addRoleTpl', toaster)) {
-                if (newsTypeArr.length <= 0) {
-                    toaster.pop('error', '', '验证失败:接收消息类型至少选一个')
-                }
-                return;
-            }
-
-            if (newsTypeArr.length <= 0) {
-                toaster.pop('error', '', '验证失败:接收消息类型至少选一个');
-                return;
-            }
+            if (!$solway.formValidation($scope.formData, '.addRoleTpl', toaster)) return;
 
             $scope.update.getData({
                 data: JSON.stringify({
