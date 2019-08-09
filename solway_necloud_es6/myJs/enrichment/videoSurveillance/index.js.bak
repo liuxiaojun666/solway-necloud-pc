@@ -110,17 +110,6 @@ ajaxData(
                                             data: JSON.stringify(req_data),
                                             beforeSend() { }
                                         });
-                                        $('#video_' + _id).append(`
-                                            <div class="hide-evn-production cloud_contrller">
-                                                <h5>云镜控制</h5>
-                                                <div class="steeringWheel">
-                                                    <i class="top"></i>
-                                                    <i class="bottom"></i>
-                                                    <i class="left"></i>
-                                                    <i class="right"></i>
-                                                </div>
-                                            </div>
-                                        `);
                                         $scope.$apply();
                                     });
                                     this.on('pause', function () {
@@ -147,6 +136,7 @@ ajaxData(
         ])).then(() => {
             res.body.pv && $.fn.zTree.init($("#tree_pv"), settings, res.body.pv).expandAll(true);
             res.body.wp && $.fn.zTree.init($("#tree_wp"), settings, res.body.wp).expandAll(true);
+            if (!res.body.pv && res.body.wp) $scope.tabIndex = '02'
         });
     });
 

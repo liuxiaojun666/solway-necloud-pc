@@ -76,7 +76,7 @@ win.reactComponent = (() => {
 
     // 大逆变器
     const NbqD = ({ data, hover }, { status, dblClick }) => [
-        filterEle(status, data.status) && <div key={'nbqid' + data.id} style={{ display: 'inline-block', width: '115px' }}>
+        filterEle(status, data.status) && <div key={'nbqid' + data.id} style={{ display: data.children ? 'block' : 'inline-block', width: '115px' }}>
             <svg
                 onClick={dblClick.bind(this, data.stid, data.id, data.serialNumber, '2', data.hasJB)}
                 xmlns="http://www.w3.org/2000/svg" height="50" width="30"
@@ -101,7 +101,7 @@ win.reactComponent = (() => {
     // 汇流箱
     const Hlx = ({ data, hover }, { status, dblClick }) => (
         filterEle(status, data.status, data.statusData.shadowFlags) && <div
-            style={{ display: 'inline-block', cursor: 'pointer' }}
+            style={{ display: data.children ? 'block' : 'inline-block', cursor: 'pointer' }}
             onClick={dblClick.bind(this, data.stid, data.id, data.serialNumber, '1')}
             title={data.name}>
             <svg xmlns="http://www.w3.org/2000/svg" height="47" width="56">
@@ -130,7 +130,7 @@ win.reactComponent = (() => {
 
     // 小逆变器
     const NbqHlx = ({ data, hover }, { status, dblClick }) => (
-        filterEle(status, data.status, data.statusData.shadowFlags) && <div key={'nbqhlx' + data.id} style={{ display: 'inline-block', width: '200px' }}>
+        filterEle(status, data.status, data.statusData.shadowFlags) && <div key={'nbqhlx' + data.id} style={{ display: data.children ? 'block' : 'inline-block', width: '200px' }}>
             <svg
                 onClick={dblClick.bind(this, data.stid, data.id, data.serialNumber, '2', data.hasJB)}
                 style={{ verticalAlign: 'middle', cursor: 'pointer' }}
