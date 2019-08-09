@@ -18,6 +18,7 @@ ajaxData(
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '视频监控';//当前页面名称；
     $scope.EnableFlash = navigator.plugins['Shockwave Flash'];
+    $scope.isFirefox = navigator.userAgent.indexOf('Firefox') >= 0;
     videojs.options.flash.swf = '/vendor/videojs/video-js-5.19.2/video-js-fixed.swf';
     videojs.options.techOrder = ['flash'];
     const maxVideoView = $scope.maxVideoView = 12;
@@ -43,9 +44,6 @@ ajaxData(
         };
         return _ws;
     }
-
-    
-
 
     const settings = {
         check: {
@@ -84,7 +82,7 @@ ajaxData(
                         });
                     }
 
-                    const { id, name, destUrl, stid, eqid } = _treeNode;
+                    const { id, name, destUrl, stid, eqid, ctrl } = _treeNode;
                     const stationName = _treeNode.getParentNode().name;
                     if ($scope.checked_videos[id] && !treeNode.checked) {
                         const id_index = $scope.checked_videos.findIndex(v => id === v.id);
@@ -105,7 +103,7 @@ ajaxData(
                             return $scope.$apply();
                         }
                         $scope.checked_videos[id] = true;
-                        $scope.checked_videos[index] = { id, name, destUrl, stid: +stid, eqid: +eqid, stationName };
+                        $scope.checked_videos[index] = { id, name, destUrl, stid: +stid, eqid: +eqid, stationName, ctrl };
                         $scope.checked_videos[index].req_data = {
                             stid: +stid, eqid: +eqid
                         };
@@ -155,7 +153,7 @@ ajaxData(
         historicalRecord.set({ proportion });
     };
 
-    $scope.getTokenAndPlay = async ({ stid, eqid, id, stationName, name, req_data, destUrl }, index) => {
+    $scope.getTokenAndPlay = async ({ stid, eqid, id, stationName, name, req_data, destUrl, ctrl }, index) => {
         const res = await $scope.videoToken.getData({ stid, eqid });
         const token = $scope.checked_videos[index].token = res.body.token;
         $scope.checked_videos[index].rtmpSource = (destUrl + '/' + stid + '_' + eqid + '?stid=' + stid + '&eqid=' + eqid + '&token=' + encodeURIComponent(token));
@@ -174,9 +172,12 @@ ajaxData(
                     enableModifiersForNumbers: false
                 });
                 this.on('play', function () {
+                    $scope.played = true;
                     ws.send(JSON.stringify({ ...req_data, token, cmd: "getvideo" }));
                     console.log('getvideo')
                     $scope.checked_videos[index].isPlay = true;
+                    $scope.$apply();
+                    if (ctrl !== '02') return
                     $('#video_' + id).append(`
                         <div data-token="${token}" data-stid="${stid}" data-eqid="${eqid}" class="hide-evn-production cloud_contrller">
                             <h5>云镜控制</h5>
@@ -196,7 +197,6 @@ ajaxData(
                             </div>
                         </div>
                     `).find('.cloud_contrller').on('click', wsSend);
-                    $scope.$apply();
                 });
                 this.on('pause', function () {
                     $scope.checked_videos[index].isPlay = false;
