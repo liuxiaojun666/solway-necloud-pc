@@ -53,7 +53,7 @@ ajaxData({
         const historiData = historicalRecord.get();
         const {
             dateType = 1,
-            dateTime = new Date,
+            dateTime = new Date(Date.now() - 1000 * 60 * 60 * 24),
             stationData,
             theme = 'default',
         } = historiData;
@@ -75,6 +75,7 @@ ajaxData({
 
     // 日期更新后回调   range 时间范围（日月年累计）    date 为日期
     $scope.dateUpdated = (dateType, dateTime) => {
+        if (typeof dateType !== 'number') return;
         historicalRecord.set({ dateType, dateTime });
         if (dateType < 3 && !dateTime.showDate) dateTime.showDate = dateTime.Format('yyyy-MM');
         $scope._dateType = dateType;
