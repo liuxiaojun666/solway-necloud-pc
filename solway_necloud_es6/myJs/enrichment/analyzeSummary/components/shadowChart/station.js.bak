@@ -1,33 +1,53 @@
 ajaxData(
     {
         // 时间 列表
-        analysis_station_str_shade_timelist: {
-            name: 'GETanalysis_station_str_shade_timelist',
+        analysis_station_str_shade_timelist_new: {
+            name: 'GETanalysis_station_str_shade_timelist_new',
             data: {},
             later: true,
-            onlyLatest: true
+            onlyLatest: true,
+            sameTimeOnce: true
         },
         // 时间 曲线
-        analysis_station_str_shade_timeline: {
-            name: 'GETanalysis_station_str_shade_timeline',
+        analysis_station_str_shade_timeline_new: {
+            name: 'GETanalysis_station_str_shade_timeline_new',
             data: {},
             later: true,
-            onlyLatest: true
+            onlyLatest: true,
+            sameTimeOnce: true
         },
         // 设备 列表
-        analysis_station_str_shade_devicelist: {
-            name: 'GETanalysis_station_str_shade_devicelist',
+        shadowDateGetDeviceList: {
+            name: 'GETshadowDateGetDeviceList',
             data: {},
             later: true,
-            onlyLatest: true
+            onlyLatest: true,
+            sameTimeOnce: true
         },
         // 设备 曲线
-        analysis_station_str_shade_deviceline: {
-            name: 'GETanalysis_station_str_shade_deviceline',
+        shadowDateGetDeviceLine: {
+            name: 'GETshadowDateGetDeviceLine',
             data: {},
             later: true,
-            onlyLatest: true
+            onlyLatest: true,
+            sameTimeOnce: true
         },
+        // 组串列表
+        shadowDateGetStringList: {
+            name: 'GETshadowDateGetStringList',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true
+        },
+        // 组串曲线
+        shadowDateGetStringLine: {
+            name: 'GETshadowDateGetStringLine',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            sameTimeOnce: true
+        }
     }, {
         __serviceName__: 'shadowChartStationService',
     }
@@ -39,7 +59,9 @@ ajaxData(
     $scope.mainPageInitComplete = async () => {
         let { showShape, tabIndex = 0 } = historicalRecord.get().themeShadowChartStation || {};
         $scope.changeShowShape(showShape || 'list');
-        $scope.changeTab(tabIndex);
+        $scope.changeTab(tabIndex); 
+        $scope.startDate = '05';
+        $scope.endDate = '18';
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
         await myAjaxData.timeout(0);
@@ -51,6 +73,12 @@ ajaxData(
     // 切换电站 回调
     $scope.switchPowerCallback = () => $scope.diffGetData(true);
 
+    // 日期改变
+    $scope.dateUpdated = async () => {
+        await myAjaxData.timeout(0);
+        $scope.diffGetData(true);
+    };
+    
     // tab 切换
     $scope.changeTab = tabIndex => {
         $scope.tabIndex = tabIndex;
@@ -76,21 +104,36 @@ ajaxData(
     };
 
     $scope.chartClick = (event) => {
-        if (event.seriesName !== "异常阴影组串数") return;
-        $scope.equipmentDetailShow = true;
-        $scope.$broadcast('equipmentShadowDetails', {
-            eqid: $scope.analysis_station_str_shade_deviceline.res.body.data.eqid[event.dataIndex],
-            eq_name: $scope.analysis_station_str_shade_deviceline.res.body.data.eq_name[event.dataIndex],
-            stid: $scope.analysis_station_str_shade_deviceline.res.body.data.stid[event.dataIndex]
-        });
+        const {tabIndex} = $scope;
+        if (tabIndex === 1) {
+            if (event.seriesName !== "阴影组串数") return;
+            $scope.equipmentDetailShow = true;
+            $scope.$broadcast('equipmentShadowDetails', {
+                deviceId: $scope.shadowDateGetDeviceLine.res.st_eqid[event.dataIndex].split('-')[1],
+                deviceName: $scope.shadowDateGetDeviceLine.res.eqName[event.dataIndex],
+                stId: $scope.shadowDateGetDeviceLine.res.st_eqid[event.dataIndex].split('-')[0]
+            });
+        } else if (tabIndex === 2) {
+            if (event.seriesName !== "阴影") return;
+            $scope.equipmentDetailShow = true;
+            const eq_stringid = $scope.shadowDateGetStringLine.res.eq_stringid[event.dataIndex].split('-');
+            const stringId = eq_stringid.pop();
+            const st_eqid = $scope.shadowDateGetStringLine.res.st_eqid[event.dataIndex]
+            $scope.$broadcast('equipmentShadowDetails', {
+                deviceId: st_eqid.split('-')[1],
+                deviceName: eq_stringid.join('-'),
+                stId: st_eqid.split('-')[0],
+                stringId
+            });
+        }
     };
 
     $scope.equipmentListTrClick = (item, index, event) => {
         if (event.target.className.includes('clickable')) {
-            const { stid, eqid } = item;
+            const { stid, stId, eqid, deviceId } = item;
             return $scope.$broadcast("equipmentPopUp", {
-                stid: stid || myAjaxDataParent.currentStationData.currentSTID,
-                eqid
+                stid: stid || stId || myAjaxDataParent.currentStationData.currentSTID,
+                eqid: eqid || deviceId
             });
         }
         $scope.equipmentDetailShow = true;
@@ -102,42 +145,57 @@ ajaxData(
         if (!$scope.initComplete) return;
         await myAjaxData.timeout(0);
         setDataNull(getInfo);
-        const { showShape, tabIndex, dataType } = $scope;
+        const { showShape, tabIndex, dataType, dateTime, startDate, endDate } = $scope;
         if (dataType !== 0) return;
 
         if (tabIndex === 0 && showShape === 'list') {
-            $scope.analysis_station_str_shade_timelist.getData({
-                queryCode: 'analysis_station_str_shade_timelist',
+            $scope.analysis_station_str_shade_timelist_new.getData({
+                queryCode: 'analysis_station_str_shade_timelist_new',
                 queryType: 3,
                 sort: 'dtime,desc',
-                date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
+                startDate: dateTime.showDate + ' ' + startDate,
+                endDate: dateTime.showDate + ' ' + endDate
+                // date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
             });
         } else if (tabIndex === 0 && showShape === 'chart') {
-            $scope.analysis_station_str_shade_timeline.getData({
-                queryCode: 'analysis_station_str_shade_timeline',
+            $scope.analysis_station_str_shade_timeline_new.getData({
+                queryCode: 'analysis_station_str_shade_timeline_new',
                 queryType: 3,
                 sort: 'dtime,asc',
-                date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
+                startDate: dateTime.showDate + ' ' + startDate,
+                endDate: dateTime.showDate + ' ' + endDate
+                // date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
             });
         } else if (tabIndex === 1 && showShape === 'list') {
-            $scope.analysis_station_str_shade_devicelist.getData({
-                queryCode: 'analysis_station_str_shade_devicelist',
+            $scope.shadowDateGetDeviceList.getData({
+                isLine: 0,
                 queryType: 3,
-                date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
+                date: dateTime.showDate
             });
         } else if (tabIndex === 1 && showShape === 'chart') {
-            $scope.analysis_station_str_shade_deviceline.getData({
-                queryCode: 'analysis_station_str_shade_deviceline',
+            $scope.shadowDateGetDeviceLine.getData({
+                isLine: 1,
                 queryType: 3,
-                sort: 'eqreduce,desc',
-                date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
+                date: dateTime.showDate
+            });
+        } else if (tabIndex === 2 && showShape === 'list') {
+            $scope.shadowDateGetStringList.getData({
+                startDate: dateTime.showDate + ' ' + startDate,
+                endDate: dateTime.showDate + ' ' + endDate,
+                isLine: 0,
+            });
+        } else if (tabIndex === 2 && showShape === 'chart') {
+            $scope.shadowDateGetStringLine.getData({
+                startDate: dateTime.showDate + ' ' + startDate,
+                endDate: dateTime.showDate + ' ' + endDate,
+                isLine: 1,
             });
         }
         $scope.$apply();
     };
 
     // 时间 列表
-    $scope.analysis_station_str_shade_timelist.getDataCallback = (success, res) => {
+    $scope.analysis_station_str_shade_timelist_new.getDataCallback = (success, res) => {
         if (!success) return;
         $scope.datasource = res.body.data;
         $scope.column = [
@@ -148,13 +206,13 @@ ajaxData(
                 style: 'position:relative;',
                 sort: true,
                 render(text, item, index) {
-                    return text + (item.clean_status
+                    return text + ':00' + (item.clean_status
                         ? `<span lxj-click="cleanReport(${text});" title="清洗" style="cursor:pointer;position: absolute;right: 0.1em;top:0;line-height:50px;color:#57a2ff;font-size: 30px;" class="iconfont icon-qingxi1"></span>`
                         : '');
                 }
             },
             {
-                title: '阴影遮挡设备数',
+                title: '阴影设备数',
                 dataIndex: 'shade_eqcount',
                 align: 'right',
                 sort: true,
@@ -177,24 +235,36 @@ ajaxData(
                 align: 'right',
                 sort: true,
             },
+            {
+                title: '阴影损失电量' + '(' + res.body.units.shade_we + ')',
+                dataIndex: 'shade_we',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '阴影损失比例' + '(' + res.body.units.shade_we_r + ')',
+                dataIndex: 'shade_we_r',
+                align: 'right',
+                sort: true,
+            },
         ];
     };
 
     // 时间 曲线
-    $scope.analysis_station_str_shade_timeline.getDataCallback = (success, res) => {
+    $scope.analysis_station_str_shade_timeline_new.getDataCallback = (success, res) => {
         if (!success) return;
-        $scope.xdata = res.body.data.dtime;
-        $scope.ydatas = [[res.body.data.shade_count], [res.body.data.shade_str_r]];
+        $scope.xdata = res.body.data.dtime.map(v => v + ':00');
+        $scope.ydatas = [[res.body.data.shade_eqcount], [res.body.data.shade_we_r]];
     };
 
     // 设备 列表
-    $scope.analysis_station_str_shade_devicelist.getDataCallback = (success, res) => {
+    $scope.shadowDateGetDeviceList.getDataCallback = (success, res) => {
         if (!success) return;
-        $scope.datasource = res.body.data;
+        $scope.datasource = res.data;
         $scope.column = [
             {
                 title: '设备',
-                dataIndex: 'eq_name',
+                dataIndex: 'deviceName',
                 align: 'left',
                 width: '25%',
                 sort: true,
@@ -203,20 +273,20 @@ ajaxData(
                 }
             },
             {
-                title: '异常阴影组串数',
-                dataIndex: 'ab_shade_count',
+                title: '阴影组串数',
+                dataIndex: 'shadowCount',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '普通阴影组串数',
-                dataIndex: 'co_shade_count',
+                title: '全天损失电量' + '(' + res.units.shadeWe + ')',
+                dataIndex: 'shadeWe',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '设备阴影损失比例' + '(' + res.body.units.eqreduce + ')',
-                dataIndex: 'eqreduce',
+                title: '全天损失电量比例' + '(' + res.units.shadeWeR + ')',
+                dataIndex: 'shadeWeR',
                 align: 'right',
                 sort: true,
             },
@@ -224,10 +294,73 @@ ajaxData(
     };
 
     // 设备 曲线
-    $scope.analysis_station_str_shade_deviceline.getDataCallback = (success, res) => {
+    $scope.shadowDateGetDeviceLine.getDataCallback = (success, res) => {
         if (!success) return;
-        $scope.xdata = res.body.data.eq_name;
-        $scope.ydatas = [[res.body.data.ab_shade_count], [res.body.data.eqreduce]];
+        $scope.xdata = res.eqName;
+        $scope.ydatas = [[res.shadowCount], [res.shadeWeR]];
+    };
+    
+    // 组串列表
+    $scope.shadowDateGetStringList.subscribe(res => {
+        $scope.datasource = res.data;
+        $scope.column = [
+            {
+                title: '设备',
+                dataIndex: 'deviceName',
+                align: 'left',
+                width: '25%',
+                sort: true,
+                render(text) {
+                    return `<span class="clickable eq">${text}</span>`
+                }
+            },
+            {
+                title: '组串编号',
+                dataIndex: 'stringId',
+                align: 'right',
+                sort: true,
+            },
+            {
+                title: '遮挡时段',
+                dataIndex: 'shadowTime',
+                align: 'right',
+                sort: true,
+                render(text) {
+                    return text.split(',').join('<br/>')
+                }
+            },
+            {
+                title: '电流偏差率(%)',
+                dataIndex: 'stReduce',
+                align: 'right',
+                sort: true,
+            },
+        ];
+    });
+
+    // 组串图表
+    $scope.shadowDateGetStringLine.subscribe(res => {
+        if (!res.eq_stringid[0]) {
+            $scope.xdata = [];
+            $scope.ydatas = [[[]], [[]]]
+            return
+        }
+        $scope.xdata = res.eq_stringid.map(v => v + '号组串');
+        $scope.ydatas = [new Array(Math.max(...res.shadowTime.map(v => v.length)) / 2).fill('').map((v, i) => [
+            res.eq_stringid.map((v, xi) => ((res.shadowTime[xi][i * 2] - (res.shadowTime[xi][i * 2 - 1] || 0)) || 0)),
+            res.eq_stringid.map((v, xi) => ((res.shadowTime[xi][i * 2 + 1] - res.shadowTime[xi][i * 2]) || '-')),
+        ]).flat(), [res.stReduce]];
+    });
+    // 组串图表 tooltipFormatter
+    $scope.shadowDateGetStringLine.tooltipFormatter = (a, b) => {
+        let l = 0, s = '';
+        a.forEach((v, i) => {
+            if (!v.value) return;
+            if (v.value === '-') return;
+            if (i % 2 === 0) return l += v.value;
+            return s += l + ':00' + '-' + (l += v.value) + ':00' + '　';
+        });
+        return a[0].name + '<br/>' + '阴影：' + s + '<br/>' + '阴影损失电量比例（%）:' + a[a.length - 1].value;
     };
 
     // 数据置空
@@ -235,10 +368,12 @@ ajaxData(
         $scope.column = [];
         $scope.xdata = void 0;
         $scope.ydatas = void 0;
-        $scope.analysis_station_str_shade_timelist.res = null;
-        $scope.analysis_station_str_shade_timeline.res = null;
-        $scope.analysis_station_str_shade_devicelist.res = null;
-        $scope.analysis_station_str_shade_deviceline.res = null;
+        $scope.analysis_station_str_shade_timelist_new.res = null;
+        $scope.analysis_station_str_shade_timeline_new.res = null;
+        $scope.shadowDateGetDeviceList.res = null;
+        $scope.shadowDateGetDeviceLine.res = null;
+        $scope.shadowDateGetStringList.res = null;
+        $scope.shadowDateGetStringLine.res = null;
 
     }
 
