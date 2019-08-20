@@ -73,6 +73,8 @@ ajaxData(
         $scope.putList = $scope.putList.concat(res.body.map(v => ({
             fdId: v.id,
             num: v.num,
+            psn: v.psn,
+            pt: v.pt,
             position: v.position,
             // money: v.fpa.toFixed(2),
             edit: false
@@ -82,7 +84,7 @@ ajaxData(
 
 
     $scope.insert = () => {
-        $scope.putList.unshift({edit: true, num: 1});
+        $scope.putList.unshift({ edit: true, num: 0, psn: ''});
     };
 
 
@@ -96,6 +98,11 @@ ajaxData(
     };
 
 
+    $scope.getPt = (id, index) => {
+        $scope.putList[index].pt = ($scope.opFittingsDictSelectCurrData.res.body.find(v => v.id == id).pt);
+    };
+
+
     $scope.submit = () => {
 
         const { stationId, sn, summary, putList} = $scope;
@@ -106,12 +113,14 @@ ajaxData(
 
         if (putList.some(v => v.edit)) return toaster.pop('error', '', '请结束编辑状态');
 
-        if (putList.some(v => !(v.fdId && v.num && v.position))) return toaster.pop('error', '', '请删除或完成不完整记录');
+        if (putList.some(v => !(v.fdId && (v.num || v.psn) && v.position))) return toaster.pop('error', '', '请删除或完成不完整记录');
 
         const goods = putList.map(v => {
+            const fdPt = v.pt;
             delete v.edit;
             delete v.money;
-            return v;
+            delete v.pt;
+            return { ...v, fdPt };
         });
 
         $scope.opWorkFittingsInCreate.getData({
