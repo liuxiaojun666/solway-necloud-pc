@@ -140,7 +140,7 @@ ajaxData({
     $scope.StationList.getData({
 
     }).then(res => {
-        res.forEach((v, i) => {
+        res.forEach(v => {
             $scope.stationArr.push({
                 'k': v.id,
                 'v': v.stationname
@@ -281,21 +281,7 @@ ajaxData({
 
     $scope.selectByConditionPage.subscribe(res => {
         $scope.loading = false;
-        // $scope.abnormalList = [];
         $scope.abnormalList = res.body.data;
-        $scope.edit = [];
-        $scope.abnormalList.forEach((v, i) => {
-            $scope.edit.push(
-                {
-                    pStationId: '',
-                    deviceType: '',
-                    deviceId: '',
-                    eventExplain: '',
-                    startDate: new Date(v.sStartTime),
-                    endDate: new Date(v.sEndTime)
-                }
-            )
-        });
     });
 
     //查询按钮
@@ -311,7 +297,7 @@ ajaxData({
     //----------------------------------------------------------------------编辑方法组
     //切换到编辑状态
     var flag = false;
-    $scope.showEdit = async (item, i) => {
+    $scope.showEdit = (item, i) => {
         $scope.abnormalList.forEach(item => {
             if (item.edit) {
                 toaster.pop('error', '', '每次只能编辑一条');
@@ -321,55 +307,58 @@ ajaxData({
         })
         if (!flag) {
             item.edit = true;
-            $scope.edit[i].pStationId = item.pStationId ? item.pStationId : '';
-            $scope.edit[i].deviceType = item.deviceType;
-            $scope.edit[i].eventExplain = item.eventExplain;
-            $scope.getEditEquips(i, item);
-            await myAjaxData.timeout(1000);
-            $scope.edit[i].deviceId = item.deviceId ? item.deviceId : '';
+            $scope.edit = {
+                pStationId: item.pStationId ? item.pStationId : '',
+                deviceType: item.deviceType,
+                deviceId: '',
+                eventExplain: item.eventExplain,
+                startDate: new Date(item.sStartTime),
+                endDate: new Date(item.sEndTime)
+            }
+            $scope.getEditEquips(item);
         }
     }
 
     //编辑 - change 设备类型、电站
     $scope.addEquipArr = [];
-    $scope.getEditEquips = (i, item) => {
-        if ($scope.edit[i].deviceType && $scope.edit[i].pStationId) {
+    $scope.getEditEquips = (item) => {
+        if ($scope.edit.deviceType && $scope.edit.pStationId) {
             //获取设备
             $scope.queryDeviceWithType.getData({
-                type: $scope.edit[i].deviceType,
-                stids: $scope.edit[i].pStationId
-            }).then((res) => {
+                type: $scope.edit.deviceType,
+                stids: $scope.edit.pStationId
+            }).then( (res) => {
                 $scope.editEquipArr = res.body;
-                $scope.edit[i].deviceId = item.deviceId;
+                $scope.edit.deviceId = item.deviceId ? item.deviceId : '';
             })
         } else {
-            $scope.edit[i].deviceId = '';
+            $scope.edit.deviceId = '';
             $scope.editEquipArr = [];
         }
     }
 
     //编辑的确定按钮
     $scope.editItem = (item, i) => {
-        if (!$scope.edit[i].pStationId) {
+        if (!$scope.edit.pStationId) {
             toaster.pop('error', '', '请选择电站');
-        } else if (!$scope.edit[i].deviceType) {
+        } else if (!$scope.edit.deviceType) {
             toaster.pop('error', '', '请选择设备类型');
-        } else if (!$scope.edit[i].deviceId) {
+        } else if (!$scope.edit.deviceId) {
             toaster.pop('error', '', '请选择设备');
-        } else if (!$scope.edit[i].startDate.showDate) {
+        } else if (!$scope.edit.startDate.showDate) {
             toaster.pop('error', '', '请选择开始时间');
-        } else if (!$scope.edit[i].endDate.showDate) {
+        } else if (!$scope.edit.endDate.showDate) {
             toaster.pop('error', '', '请选择结束时间');
-        } else if (!$scope.edit[i].eventExplain) {
+        } else if (!$scope.edit.eventExplain) {
             toaster.pop('error', '', '请输入事件说明');
         } else {
             $scope.saveAbnormalHalt.getData({
-                pStationId: $scope.edit[i].pStationId,
-                deviceType: $scope.edit[i].deviceType,
-                deviceId: $scope.edit[i].deviceId,
-                sStartTime: $scope.edit[i].startDate.showDate,
-                sEndTime: $scope.edit[i].endDate.showDate,
-                eventExplain: $scope.edit[i].eventExplain,
+                pStationId: $scope.edit.pStationId,
+                deviceType: $scope.edit.deviceType,
+                deviceId: $scope.edit.deviceId,
+                sStartTime: $scope.edit.startDate.showDate,
+                sEndTime: $scope.edit.endDate.showDate,
+                eventExplain: $scope.edit.eventExplain,
                 id: item.id
             }).then(res => {
                 if (res.code == 0) {

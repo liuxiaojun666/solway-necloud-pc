@@ -476,7 +476,9 @@ ajaxData({
             parentmyAjaxData.config.alsRlist = $scope[key[$scope.analysisObjectK]].length;
             $scope.radioItem = item;
             $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': item.k, 'value': item.v, 'isHistory': isHistory });
-            treeData(item.k);
+            if (item.k.substr(0, 1) !=4) {
+                treeData(item.k);
+            }
             if (item.k == 101) {
                 selectArea();
                 $scope.selectPowerStation = [];
@@ -492,7 +494,7 @@ ajaxData({
         }
 
         //tree数据的获取
-        async function treeData(k) {
+        function treeData(k) {
             // 调 集团 电站 区域接口
             const st = {
                 1: 3,
@@ -532,9 +534,7 @@ ajaxData({
                 }
                 $scope.queryStTreeWithDevices.getData({
                     deviceType: devices[k]
-                })
-
-                $scope.queryStTreeWithDevices.subscribe(res => {
+                }).then(res => {
                     $scope.zNodes = res.body;
                     $scope.loading = false;
                     setTimeout(() => {
@@ -547,16 +547,14 @@ ajaxData({
                             })
                         }
                     }, 600)
-                });
+                })
             } else if (k == 101) {
                 $scope.loading = true;
                 $.fn.zTree.init($("#tree"), $scope.setting, []);
                 $scope.queryStTreeWithProducts.getData({
                     // deviceType: devices[k]
                     deviceType: 2
-                })
-
-                $scope.queryStTreeWithProducts.subscribe(res => {
+                }).then(res => {
                     var treeObj = $.fn.zTree.getZTreeObj("tree");
                     treeObj.refresh();
                     $scope.zNodes = res.body;
@@ -567,7 +565,7 @@ ajaxData({
                             zTree.checkNode(zTree.getNodeByParam("id", son.id), true, true);
                         })
                     })
-                });
+                })
             } else if (k == 102) {
                 $scope.loading = true;
                 $.fn.zTree.init($("#tree"), $scope.setting, []);
@@ -816,7 +814,9 @@ ajaxData({
                     groupItem.ids.push(item.busiId);
                 })
 
+                $scope['groupResult' + $scope.analysisObjectK] = []
                 $scope['groupResult' + $scope.analysisObjectK].push(groupItem);
+                $scope[key[$scope.analysisObjectK]] = []
                 $scope[key[$scope.analysisObjectK]].push(newArr);
             } else if ($scope.analysisObjectK == 99) {
                 //组装接口需要的数据 (设备)
@@ -832,8 +832,10 @@ ajaxData({
                     item.groupName = groupItem.groupName;
                     groupItem.st_eqids.push(`${item.stids}-${item.busiId}`);
                 })
-                $scope.groupResultDevice.push(groupItem);
-                $scope.objectDevice[$scope.equipChoiceIndex].push(newArr);
+                $scope.groupResultDevice = []
+                $scope.groupResultDevice.push(groupItem)
+                $scope.objectDevice[$scope.equipChoiceIndex] = []
+                $scope.objectDevice[$scope.equipChoiceIndex].push(newArr)
             } else if ($scope.analysisObjectK == 101 || $scope.analysisObjectK == 102) {
                 //机型/故障类型  获取根节点
                 var typeArr = [];
@@ -866,6 +868,7 @@ ajaxData({
                     item.isgroup = true;
                     item.groupName = groupItem.groupName;
                 })
+                $scope[key[$scope.analysisObjectK]] = []
                 $scope[key[$scope.analysisObjectK]].push(typeArr);
                 typeArr.map((item) => {
                     var cdtsItem = {
@@ -878,6 +881,7 @@ ajaxData({
                     })
                     groupItem['cdts'].push(cdtsItem);
                 })
+                $scope['groupResult' + $scope.analysisObjectK] = []
                 $scope['groupResult' + $scope.analysisObjectK].push(groupItem);
             }
         }

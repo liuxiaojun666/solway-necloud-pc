@@ -661,20 +661,27 @@ ajaxData({
                                 if (key == son.fdKey) {
                                     $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key]);
                                 } else {
+                                    $scope['xdata' + $scope.checkChart] = [];
                                     if (myAjaxData.config.dmsType == 5) {
-                                        $scope['xdata' + $scope.checkChart] = [];
                                         $scope.tableData.data['deptid'].map((item) => {
                                             $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
                                         })
+                                    } else if (myAjaxData.config.dmsType.substr(0, 1) == 4) {
+                                        $scope.tableData.data['st_eqid'].map((item) => {
+                                            $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
+                                        })
+                                    } else if (myAjaxData.config.dmsType == 1) {
+                                        $scope.tableData.data['companyid'].map((item) => {
+                                            $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
+                                        })
                                     } else {
-                                        $scope['xdata' + $scope.checkChart] = [];
                                         $scope.tableData.data[key].map((item) => {
                                             $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
                                         })
                                     }
                                 }
                             })
-                        }
+                        }  
                         // $scope['tableType' + $scope.checkChart].push(tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle]);
                         // $scope['colors' + $scope.checkChart].push('#D2E058');
                         // $scope['newArrName' + $scope.checkChart].push('对标分析');

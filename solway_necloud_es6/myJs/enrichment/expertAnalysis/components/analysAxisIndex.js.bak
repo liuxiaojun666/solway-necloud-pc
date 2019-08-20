@@ -18,6 +18,51 @@ ajaxData({
                     anlsType: $scope.anlsType,
                     dmsType: parentmyAjaxData.config.dmsType,
                     dmsTime: null
+                }).then(res => {
+                    if (!res.body) {
+                        toaster.pop('error', '', '分析指标无数据');
+                        $scope.$emit('analysNan', { data: 1 });
+                        return;
+                    }
+                    $scope.analysData = res.body;
+                    $scope.analysData.ctg1.ll = [...$scope.analysData.ctg1.ll,...$scope.analysData.ctg2.ll];
+                    $scope.$emit('analysNan', { data: 0 });
+                    var key;
+                    if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
+                        //图表没有数据
+                        for (key in $scope.analysData) {
+                            $scope.analysData[key].ll.map((item) => {
+                                item.actFdTb = 0;
+                                item.actFdHb = 0;
+                                item.tableType = 1;
+                                item.sortType = 'asc';
+                            })
+                        }
+                        $scope.analysCheckData = [];
+                        $scope.radioToSelect($scope.analysData.ctg1, 0);
+                        $scope.$emit('noChecked', 'analysAxisIndex');
+                    }
+                    else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)) {
+                        //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
+                        return;
+                    }
+                    else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType) && ($scope.dmsTime == parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)) {
+                        //趋势分析 图表有数据 分析类型不重新选 分析对象不重新选 时间纬度不重新选
+                        return;
+                    } else {
+                        for (key in $scope.analysData) {
+                            $scope.analysData[key].ll.map((item) => {
+                                item.actFdTb = 0;
+                                item.actFdHb = 0;
+                                item.tableType = 1;
+                                item.sortType = 'asc';
+                            })
+                        }
+                        $scope.analysCheckData = [];
+                        parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
+                        $scope.radioToSelect($scope.analysData.ctg1, 0);
+                        $scope.$emit('noChecked', 'analysAxisIndex');
+                    }
                 })
             }
         })
@@ -33,56 +78,54 @@ ajaxData({
                     anlsType: parentmyAjaxData.config.anlsType,
                     dmsType: parentmyAjaxData.config.dmsType,
                     dmsTime: $scope.dmsTime
+                }).then(res => {
+                    if (!res.body) {
+                        toaster.pop('error', '', '分析指标无数据');
+                        $scope.$emit('analysNan', { data: 1 });
+                        return;
+                    }
+                    $scope.analysData = res.body;
+                    $scope.analysData.ctg1.ll = [...$scope.analysData.ctg1.ll,...$scope.analysData.ctg2.ll];
+                    $scope.$emit('analysNan', { data: 0 });
+                    var key;
+                    if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
+                        //图表没有数据
+                        for (key in $scope.analysData) {
+                            $scope.analysData[key].ll.map((item) => {
+                                item.actFdTb = 0;
+                                item.actFdHb = 0;
+                                item.tableType = 1;
+                                item.sortType = 'asc';
+                            })
+                        }
+                        $scope.analysCheckData = [];
+                        $scope.radioToSelect($scope.analysData.ctg1, 0);
+                        $scope.$emit('noChecked', 'analysAxisIndex');
+                    }
+                    else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)) {
+                        //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
+                        return;
+                    }
+                    else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType) && ($scope.dmsTime == parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)) {
+                        //趋势分析 图表有数据 分析类型不重新选 分析对象不重新选 时间纬度不重新选
+                        return;
+                    } else {
+                        for (key in $scope.analysData) {
+                            $scope.analysData[key].ll.map((item) => {
+                                item.actFdTb = 0;
+                                item.actFdHb = 0;
+                                item.tableType = 1;
+                                item.sortType = 'asc';
+                            })
+                        }
+                        $scope.analysCheckData = [];
+                        parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
+                        $scope.radioToSelect($scope.analysData.ctg1, 0);
+                        $scope.$emit('noChecked', 'analysAxisIndex');
+                    }
                 })
             }
         })
-
-        $scope.HighAnalysis_selectFds.subscribe(res => {
-            if (!res.body) {
-                toaster.pop('error', '', '分析指标无数据');
-                $scope.$emit('analysNan', { data: 1 });
-                return;
-            }
-            $scope.analysData = res.body;
-            $scope.analysData.ctg1.ll = [...$scope.analysData.ctg1.ll,...$scope.analysData.ctg2.ll];
-            $scope.$emit('analysNan', { data: 0 });
-            var key;
-            if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
-                //图表没有数据
-                for (key in $scope.analysData) {
-                    $scope.analysData[key].ll.map((item) => {
-                        item.actFdTb = 0;
-                        item.actFdHb = 0;
-                        item.tableType = 1;
-                        item.sortType = 'asc';
-                    })
-                }
-                $scope.analysCheckData = [];
-                $scope.radioToSelect($scope.analysData.ctg1, 0);
-                $scope.$emit('noChecked', 'analysAxisIndex');
-            }
-            else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)) {
-                //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
-                return;
-            }
-            else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType) && ($scope.dmsTime == parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)) {
-                //趋势分析 图表有数据 分析类型不重新选 分析对象不重新选 时间纬度不重新选
-                return;
-            } else {
-                for (key in $scope.analysData) {
-                    $scope.analysData[key].ll.map((item) => {
-                        item.actFdTb = 0;
-                        item.actFdHb = 0;
-                        item.tableType = 1;
-                        item.sortType = 'asc';
-                    })
-                }
-                $scope.analysCheckData = [];
-                parentmyAjaxData.config.analysFds[parentmyAjaxData.config.checkChart] = [];
-                $scope.radioToSelect($scope.analysData.ctg1, 0);
-                $scope.$emit('noChecked', 'analysAxisIndex');
-            }
-        });
 
         //监听 分析指标页面打开
         $scope.$on('analysOpen', () => {
@@ -126,8 +169,8 @@ ajaxData({
         $scope.radioToSelect = (item, index) => {
             $scope.alysIndexK = item.k;
             $scope.$emit('radioToFather', { 'type': 'analys', 'value': item.v });
+            $scope.analysBottom = [];
             $scope.analysBottom = item.ll;
-            123
             //给数据赋初始show值
             $scope.analysBottom.map((item) => {
                 item.show = true;
