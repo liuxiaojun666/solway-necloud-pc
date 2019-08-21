@@ -19,6 +19,12 @@ ajaxData(
             later: true,
             sameTimeOnce: true
         },
+        // 备件编号校验
+        opFittingsDictRoomValidFsn: {
+            name: 'GETopFittingsDictRoomValidFsn',
+            data: {},
+            later: true
+        },
         // 入库 创建
         opWorkFittingsInCreate: {
             name: 'opWorkFittingsInCreate',
@@ -73,7 +79,7 @@ ajaxData(
         $scope.putList = $scope.putList.concat(res.body.map(v => ({
             fdId: v.id,
             num: v.num,
-            psn: v.psn,
+            fsn: v.fsn,
             pt: v.pt,
             position: v.position,
             // money: v.fpa.toFixed(2),
@@ -84,7 +90,7 @@ ajaxData(
 
 
     $scope.insert = () => {
-        $scope.putList.unshift({ edit: true, num: 0, psn: ''});
+        $scope.putList.unshift({ edit: true, num: 0, fsn: ''});
     };
 
 
@@ -103,6 +109,18 @@ ajaxData(
     };
 
 
+    $scope.opFittingsDictRoomValidFsn.beforGetData = (obj, index) => {
+        if (!obj.pt) return obj.edit = false;
+
+        $scope.opFittingsDictRoomValidFsn.getData({
+            fsn: obj.fsn
+        }).then(res => {
+            if (!res.body.flag) return toaster.pop('error', '', '备件编号已存在');
+            obj.edit = false;
+        });
+    };
+
+
     $scope.submit = () => {
 
         const { stationId, sn, summary, putList} = $scope;
@@ -113,7 +131,7 @@ ajaxData(
 
         if (putList.some(v => v.edit)) return toaster.pop('error', '', '请结束编辑状态');
 
-        if (putList.some(v => !(v.fdId && (v.num || v.psn) && v.position))) return toaster.pop('error', '', '请删除或完成不完整记录');
+        if (putList.some(v => !(v.fdId && (v.num || v.fsn) && v.position))) return toaster.pop('error', '', '请删除或完成不完整记录');
 
         const goods = putList.map(v => {
             const fdPt = v.pt;

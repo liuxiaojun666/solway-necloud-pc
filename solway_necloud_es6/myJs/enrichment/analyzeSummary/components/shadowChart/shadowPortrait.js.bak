@@ -55,7 +55,7 @@ ajaxData(
         $scope.c_ydatas_ = [new Array(Math.max(...res.shadowTime.map(v => v.length)) / 2).fill('').map((v, i) => [
             res.date.map((v, xi) => ((res.shadowTime[xi][i * 2] - (res.shadowTime[xi][i * 2 - 1] || 0)) || 0)),
             res.date.map((v, xi) => ((res.shadowTime[xi][i * 2 + 1] - res.shadowTime[xi][i * 2]) || '-')),
-        ]).flat(), [res.hours]];
+        ]).flatMap(v => v), [res.hours]];
     });
 
     $scope.shadowDateGetStringLineAll.tooltipFormatter = (a, b) => {

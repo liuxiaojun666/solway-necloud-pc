@@ -51,7 +51,11 @@
             name: v.fd.name,
             ft: v.fd.ft,
             fgId: v.id,
-            grs: v.fgrs
+            grs: v.fgrs,
+            categoryName: v.fd.categoryName,
+            ctg1: v.fd.ctg1,
+            ctg2: v.fd.ctg2,
+            pt: v.fd.pt,
         }));
     });
 
@@ -76,12 +80,21 @@
     };
 
 
-    $scope.opFittingsDictRoomSelectByFD.beforGetData = async (index, fdId) => {
+    $scope.saveSparePartsSn = (fdIndex, grsIndex) => {
+        const roomId = $scope.workedObj[fdIndex].grs[grsIndex].roomId = $scope.workedObj[fdIndex].roomList.find(v => {
+            return v.fsn === $scope.workedObj[fdIndex].grs[grsIndex].fsn;
+        }).id;
+        $scope.workedObj[fdIndex].grs[grsIndex].max = 1;
+        $scope.workedObj[fdIndex].grs[grsIndex].num = roomId ? 1 : 0;
+    };
+
+
+    $scope.opFittingsDictRoomSelectByFD.beforGetData = async (index, fdId, pt) => {
 
         const { roomList, grs, num } = $scope.workedObj[index];
         if (roomList && (grs.length >= roomList.length)) return toaster.pop('error', '', '超过库房数量');
 
-        $scope.workedObj[index].grs.push({ num: 0, max: 0 });
+        $scope.workedObj[index].grs.push({ num: 0, max: 0, fsn: void 0 });
 
         if ($scope.workedObj[index].grs.length !== 1) return;
 
@@ -105,9 +118,9 @@
                 fdId, 
                 fgId,
                 grs: grs.filter(v => v.roomId).map(xv => {
-                    const {num, max, roomId} = xv;
+                    const {num, max, roomId, fsn} = xv;
                     if (num > max) beyond = true;
-                    return {num, roomId};
+                    return {num, roomId, fsn};
                 })
             };
         });

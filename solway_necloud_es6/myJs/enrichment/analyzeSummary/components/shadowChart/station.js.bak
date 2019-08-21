@@ -152,7 +152,6 @@ ajaxData(
             $scope.analysis_station_str_shade_timelist_new.getData({
                 queryCode: 'analysis_station_str_shade_timelist_new',
                 queryType: 3,
-                sort: 'dtime,desc',
                 startDate: dateTime.showDate + ' ' + startDate,
                 endDate: dateTime.showDate + ' ' + endDate
                 // date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
@@ -161,7 +160,6 @@ ajaxData(
             $scope.analysis_station_str_shade_timeline_new.getData({
                 queryCode: 'analysis_station_str_shade_timeline_new',
                 queryType: 3,
-                sort: 'dtime,asc',
                 startDate: dateTime.showDate + ' ' + startDate,
                 endDate: dateTime.showDate + ' ' + endDate
                 // date: new Date(Date.now() - 1000 * 60 * 60 * 24).Format('yyyy-MM-dd')
@@ -206,8 +204,8 @@ ajaxData(
                 style: 'position:relative;',
                 sort: true,
                 render(text, item, index) {
-                    return text + ':00' + (item.clean_status
-                        ? `<span lxj-click="cleanReport(${text});" title="清洗" style="cursor:pointer;position: absolute;right: 0.1em;top:0;line-height:50px;color:#57a2ff;font-size: 30px;" class="iconfont icon-qingxi1"></span>`
+                    return text.split(' ')[1] + ':00' + (item.clean_status
+                        ? `<span title="清洗" style="cursor:pointer;position: absolute;right: 0.1em;top:0;line-height:50px;color:#57a2ff;font-size: 30px;" class="iconfont icon-qingxi1"></span>`
                         : '');
                 }
             },
@@ -224,7 +222,7 @@ ajaxData(
                 sort: true,
             },
             {
-                title: '阴影遮挡组串数',
+                title: '阴影组串数',
                 dataIndex: 'shade_count',
                 align: 'right',
                 sort: true,
@@ -253,7 +251,7 @@ ajaxData(
     // 时间 曲线
     $scope.analysis_station_str_shade_timeline_new.getDataCallback = (success, res) => {
         if (!success) return;
-        $scope.xdata = res.body.data.dtime.map(v => v + ':00');
+        $scope.xdata = res.body.data.dtime.map(v => v.split(' ')[1] + ':00');
         $scope.ydatas = [[res.body.data.shade_eqcount], [res.body.data.shade_we_r]];
     };
 
@@ -279,13 +277,13 @@ ajaxData(
                 sort: true,
             },
             {
-                title: '全天损失电量' + '(' + res.units.shadeWe + ')',
+                title: '阴影损失电量' + '(' + res.units.shadeWe + ')',
                 dataIndex: 'shadeWe',
                 align: 'right',
                 sort: true,
             },
             {
-                title: '全天损失电量比例' + '(' + res.units.shadeWeR + ')',
+                title: '阴影损失比例' + '(' + res.units.shadeWeR + ')',
                 dataIndex: 'shadeWeR',
                 align: 'right',
                 sort: true,
@@ -321,7 +319,7 @@ ajaxData(
                 sort: true,
             },
             {
-                title: '遮挡时段',
+                title: '时段',
                 dataIndex: 'shadowTime',
                 align: 'right',
                 sort: true,
@@ -349,7 +347,7 @@ ajaxData(
         $scope.ydatas = [new Array(Math.max(...res.shadowTime.map(v => v.length)) / 2).fill('').map((v, i) => [
             res.eq_stringid.map((v, xi) => ((res.shadowTime[xi][i * 2] - (res.shadowTime[xi][i * 2 - 1] || 0)) || 0)),
             res.eq_stringid.map((v, xi) => ((res.shadowTime[xi][i * 2 + 1] - res.shadowTime[xi][i * 2]) || '-')),
-        ]).flat(), [res.stReduce]];
+        ]).flatMap(v => v), [res.stReduce]];
     });
     // 组串图表 tooltipFormatter
     $scope.shadowDateGetStringLine.tooltipFormatter = (a, b) => {
@@ -360,7 +358,7 @@ ajaxData(
             if (i % 2 === 0) return l += v.value;
             return s += l + ':00' + '-' + (l += v.value) + ':00' + '　';
         });
-        return a[0].name + '<br/>' + '阴影：' + s + '<br/>' + '阴影损失电量比例（%）:' + a[a.length - 1].value;
+        return a[0].name + '<br/>' + '阴影：' + s + '<br/>' + '阴影损失比例（%）:' + a[a.length - 1].value;
     };
 
     // 数据置空
