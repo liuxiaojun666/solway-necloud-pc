@@ -25,6 +25,12 @@ ajaxData(
             later: true,
             // cache: true
         },
+        //  获取库房库位
+        opFittingsDictRoomSelectRoom: {
+            name: 'GETopFittingsDictRoomSelectRoom',
+            data: {},
+            later: true
+        },
         // 还库 创建
         opFittingsRebackCreate: {
             name: 'opFittingsRebackCreate',
@@ -114,6 +120,7 @@ ajaxData(
             code: v.fd.code,
             name: v.fd.name,
             ft: v.fd.ft,
+            pt: v.fd.pt,
             fgId: v.id,
             grs: v.fgrs
         }));
@@ -129,7 +136,9 @@ ajaxData(
             code: v.fd.code,
             name: v.fd.name,
             ft: v.fd.ft,
+            pt: v.fd.pt,
             fgId: v.id,
+            fgrs: v.fgrs,
             grs: []
         }));
         $('#rMyTable tbody tr.tr-click').eq(index).addClass('active').siblings().removeClass('active');
@@ -149,7 +158,19 @@ ajaxData(
     };
 
 
-    $scope.opFittingsDictRoomSelectByFD.beforGetData = async (index, fdId) => {
+    $scope.changeRoomId_position = (fdIndex, grsIndex, roomId_positon) => {
+        const [roomId, positon] = roomId_positon.split('_');
+        $scope.workedObj[fdIndex].grs[grsIndex].roomId = roomId;
+        $scope.workedObj[fdIndex].grs[grsIndex].positon = positon;
+    };
+
+
+    $scope.changeFsn = (fdIndex, grsIndex, fsn) => {
+        $scope.workedObj[fdIndex].grs[grsIndex].num = fsn ? 1 : 0;
+    };
+
+
+    $scope.opFittingsDictRoomSelectByFD.beforGetData = async (index, fdId, pt) => {
 
         const { roomList, grs, num } = $scope.workedObj[index];
         if (roomList && (grs.length >= roomList.length)) return toaster.pop('error', '', '超过库房数量');
@@ -157,8 +178,10 @@ ajaxData(
         $scope.workedObj[index].grs.push({ num: 0, max: num });
 
         if ($scope.workedObj[index].grs.length !== 1) return;
+        
+        // const res = await (pt ? $scope.opFittingsDictRoomSelectRoom.getData({isMe: 1}) : ($scope.opFittingsDictRoomSelectByFD.getData({ fdId, isMe: 1 })));
+        const res = await $scope.opFittingsDictRoomSelectRoom.getData({ isMe: 1 });
 
-        const res = await $scope.opFittingsDictRoomSelectByFD.getData({ fdId, isMe: 1 });
         if (!res) return;
         $scope.workedObj[index].roomList = res.body;
         $scope.$apply();
@@ -170,16 +193,17 @@ ajaxData(
         if (!summary) return toaster.pop('error', '', '请填写备注');
         let same = true, beyond = false, noRoom = false;
         const goods = workedObj.map(v => {
-            const { fdId, fgId, grs, num } = v;
+            const { fdId, fgId, grs, num, pt } = v;
             if (grs.reduce((a, b) => a + b.num, 0) > num) same = false;
             return {
                 fdId,
                 fgId,
-                grs: grs.filter(v => v.roomId && v.num).map(xv => {
-                    const { num, max, roomId } = xv;
+                fdPt: pt,
+                grs: grs.filter(v => v.roomId && v.num && (pt ? v.fsn : true)).map(xv => {
+                    const { num, max, roomId, positon, fsn } = xv;
                     // if (!grs[0]) noRoom = true;
                     if (num > max) beyond = true;
-                    return { num, roomId };
+                    return { num, roomId, positon, fsn };
                 })
             };
         });

@@ -112,11 +112,12 @@
         if (!summary) return toaster.pop('error', '', '请填写备注');
         let same = true, beyond = false;
         const goods = workedObj.map(v => {
-            const { fdId, fgId, grs, num } = v;
+            const { fdId, fgId, grs, num, pt } = v;
             if (grs.reduce((a, b) => a + b.num, 0) !== num) same = false;
             return {
                 fdId, 
                 fgId,
+                fdPt: pt,
                 grs: grs.filter(v => v.roomId).map(xv => {
                     const {num, max, roomId, fsn} = xv;
                     if (num > max) beyond = true;
