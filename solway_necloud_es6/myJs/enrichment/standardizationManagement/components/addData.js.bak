@@ -1,0 +1,71 @@
+
+ajaxData({
+    measureDeviceType:{
+        name: 'GETmeasureDeviceType',
+        data: {},
+        // later: true
+    },
+    dataTypeSelectAll:{
+        name:'GETdataTypeSelectAll',
+        data: {dictType:'BASE_DATA_TYPE'},
+        // later: true,
+        onlyLatest: true
+    },
+    saveStandardPoint:{
+        name:'POSTsaveStandardPoint',
+        data: {},
+        later: true,
+        onlyLatest: true,
+        saveParam:false
+    },
+    
+}, {
+    __serviceName__: 'editDataTplService',
+})('editDataTplModelCtrl', ['$scope', 'editDataTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    
+    // 初始
+    $scope.$on('editDataBroad',async(e,data)=>{
+        $scope.formData = {};
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+     
+        if(data){
+            $scope.formData = {
+                id: data.id,
+                deviceType :data.deviceType,
+                stdField : data.stdField ,
+                stdName  : data.stdName  ,
+                pointType:data.pointType ,
+                pointUnit:data.pointUnit,
+                stdRule  : data.stdRule ,
+            };
+
+            await myAjaxData.timeout(0);
+            $scope.$apply();    
+        }else{
+            $scope.formData = {};
+            await myAjaxData.timeout(0);
+            $scope.$apply();
+        }
+    });
+
+     //保存
+    $scope.save = () =>{
+        if (!$solway.formValidation($scope.formData, '.editStandardizationTpl', toaster)) return;//校验非空
+
+        $scope.saveStandardPoint.getData($scope.formData).then(res=>{
+            if(res.code == 0){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('editCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
+
+     //取消
+     $scope.cancel = () =>{
+        $scope.$emit('cancel');
+    }
+
+});

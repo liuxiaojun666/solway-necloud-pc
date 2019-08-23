@@ -1,0 +1,116 @@
+ajaxData({
+    measureDeviceType:{
+        name: 'GETmeasureDeviceType',
+        data: {},
+    },
+    measurePointList:{
+        name: 'GETmeasurePointList',
+        data: {},
+        later: true
+    },
+    deleteStandardPoint:{
+        name: 'POSTdeleteStandardPoint',
+        data: {},
+        later: true,
+        onlyLatest: true,
+        saveParam:false
+    },
+}, {})('standardizationManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '数据标准化';
+    
+    //查询
+    $scope.search = () =>{
+        $scope.measurePointList.getData({deviceType:$scope.deviceType,keyword:$scope.keyword});
+    }
+
+    $scope.measureDeviceType.subscribe(res => {
+        $scope.deviceType = res.body[res.body.length-2].deviceValue;
+        $scope.search();
+    })
+
+    $scope.column = [
+        {
+            title: '序号',
+            dataIndex: 'id',
+            align: 'left',
+            sort: true
+        }, {
+            title: '设备类型',
+            dataIndex: 'deviceType',
+            align: 'center'
+        }, {
+            title: '标准点字段名',
+            dataIndex: 'stdName',
+            align: 'center'
+        }, {
+            title: '标准点名',
+            dataIndex: 'stdField',
+            align: 'center'
+        }, {
+            title: '数据类型',
+            dataIndex: 'pointType',
+            align: 'center'
+        }, {
+            title: '数据单位',
+            dataIndex: 'pointUnit',
+            align: 'center',
+            sort: true
+        },{
+            title: '操作',
+            align: 'center',
+            dataIndex:'id',
+            render(text,item,index) {
+                return `
+                <div class="clearfix">
+                    <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                </div>
+                `
+            },
+        }
+    ]
+
+    //删除
+    const deleteData = id =>{
+        $scope.deleteStandardPoint.getData({id}).then(res=>{
+            if (res.code == '0'){
+                toaster.pop('success','','删除成功');
+                $scope.search();
+            }else{
+                toaster.pop('error', '','删除失败')
+            }
+        });
+    }
+
+    $scope.trClick = (item, index, event) => {
+        if(event.target.className.includes('icon-bianji-copy')) {
+            $scope.showAddModel = true;
+            $scope.$broadcast('editDataBroad',item);
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此条数据？' }, () => {
+                deleteData(item.id)
+            });
+        }
+    };
+
+    //新增
+    $scope.newModal = ()=>{
+        $scope.showAddModel = true;
+        $scope.$broadcast('editDataBroad','');
+    }
+
+    //编辑成功回调
+    $scope.$on('editCallback',function(){
+        $scope.showAddModel = false;
+        $scope.search();
+    })
+
+    //编辑取消回调
+    $scope.$on("cancel",function(){
+        $scope.showAddModel = false;
+    })
+   
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});

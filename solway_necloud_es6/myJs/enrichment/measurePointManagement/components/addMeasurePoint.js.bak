@@ -1,0 +1,144 @@
+
+ajaxData({
+    measureDeviceType:{
+        name: 'GETmeasureDeviceType',
+        data: {},
+        later:true
+    },
+    selectAllStation:{
+        name:'GETselectAllStation',
+        data: {},
+        // later: true,
+    },
+    devicesByDeviceType:{
+        name: 'GETdevicesByDeviceType',
+        data: {},
+        later: true
+    },
+    saveDeviceBasePoint:{
+        name:'POSTsaveDeviceBasePoint',
+        data: {},
+        later: true,
+        onlyLatest: true,
+        saveParam:false
+    },
+    dataTypeSelectAll:{
+        name:'GETdataTypeSelectAll',
+        data: {dictType:'BASE_DATA_TYPE'},
+        onlyLatest: true
+    },
+}, {
+    __serviceName__: 'editMeasurePointTplService',
+})('editMeasurePointTplModelCtrl', ['$scope', 'editMeasurePointTplService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+    
+    // 初始
+    $scope.$on('editMeasurePointBroad',async(e,data)=>{
+        $scope.measureDeviceType.getData(); //设备类型列表
+        $scope.selectAllStation.getData() ;//电站列表
+
+        $scope.showStationFlag = false;
+
+        $scope.requiredData = {} // 组合显示元素和需要校验的数据
+        for(let i=0,arr = $scope.pointsList;i<arr.length;i++){
+            $scope.requiredData[arr[i].field] = arr[i].required
+        }
+        $scope.lableKeys = Object.keys($scope.requiredData)
+
+        $scope.formData = {};
+        $scope.devicesList = [];
+        await myAjaxData.timeout(0);
+        $scope.$apply();
+
+        if(data){
+            $scope.formData = {
+                id: data.id,
+                device_type:data.device_type_id,
+                eqid: data.deviceId,
+                point_desc: data.point_desc,
+                point_field: data.point_field,
+                point_name: data.point_name,
+                point_script: data.point_script,
+                point_type: data.point_type,
+                point_unit: data.point_unit,
+                stid: data.stationId,
+                std_point_id:data.std_point_id
+            };
+
+            $scope.stationName = data.stid;
+            if($scope.formData.device_type && $scope.formData.stid){
+                $scope.getEquipmentList();
+            }
+       
+            await myAjaxData.timeout(0);
+            $scope.$apply();    
+        }
+    });
+    
+    $scope.selectAllStation.subscribe(res => {
+        if(res.body && res.body.length){
+            const defaultArr = [{stName: "", stId: "",stClass:""}]
+            $scope.stationListSource = angular.copy(defaultArr.concat(res.body))
+            $scope.stationsList = defaultArr.concat(res.body)
+        }
+    });
+
+    //获取设备名称列表
+    $scope.getEquipmentList = () =>{
+        if(!$scope.formData.device_type){
+            // toaster.pop('error','','请选择设备类型'); 
+            return;
+        }
+        if(!$scope.formData.stid){
+            // toaster.pop('error','','请选择电站');
+             return;
+        }
+        for(let i=0;i<$scope.stationsList.length;i++){
+            if($scope.formData.stid === $scope.stationsList[i].stId){
+                $scope.stClass = $scope.stationsList[i].stClass;
+                break;
+            }
+        }
+        $scope.devicesByDeviceType.getData({deviceTypes:$scope.formData.device_type, stIds:$scope.formData.stid, stClass:$scope.stClass}).then(res => {
+            if(res.body && res.body.length){
+                const defaultArr = [{ deviceSerialNnumber: "", deviceName: '' }]
+                $scope.devicesList = defaultArr.concat(res.body)
+            }else{
+                $scope.devicesList = [];
+            }
+        })
+    }
+
+    //oninput 快速检索电站名称
+    $scope.filterStation = () =>{
+        $scope.stationsList = $scope.stationListSource.filter((cur)=>{
+            return cur.stName.includes($scope.stationName)
+        });
+    }
+
+    //选择一个电站
+    $scope.selectStation = item =>{
+        $scope.formData.stid = item.stId;
+        $scope.stationName = item.stName;
+        $scope.showStationFlag = false;
+        $scope.getEquipmentList();
+    }
+
+     //保存
+    $scope.save = () =>{
+        if (!$solway.formValidation($scope.formData, '.editMeasurePointTpl', toaster)) return;//校验非空
+        $scope.saveDeviceBasePoint.getData($scope.formData).then(res=>{
+            if(res.code == 0){
+                toaster.pop('success','','保存成功');
+                $scope.$emit('editCallback');
+            }else{
+                toaster.pop('error', '','保存失败')
+            }
+        });
+    }
+
+     //取消
+     $scope.cancel = () =>{
+        $scope.$emit('cancel');
+    }
+
+});

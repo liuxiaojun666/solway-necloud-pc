@@ -1,0 +1,180 @@
+ajaxData({
+    measureDeviceType:{
+        name: 'GETmeasureDeviceType',
+        data: {},
+    },
+    stationsByDeviceType:{
+        name: 'GETstationsByDeviceType',
+        data: {},
+        later: true
+    },
+    devicesByDeviceType:{
+        name: 'GETdevicesByDeviceType',
+        data: {},
+        later: true
+    },
+    getPointByDeviceType:{
+        name: 'GETgetPointByDeviceType',
+        data: {},
+        later: true
+    },
+    getPointList:{
+        name: 'GETgetPointList',
+        data: {},
+        later: true
+    },
+    measurePointList:{
+        name: 'GETmeasurePointList',
+        data: {},
+        later: true
+    },
+    deleteDeviceBasePoint:{
+        name: 'POSTdeleteDeviceBasePoint',
+        data: {},
+        later: true
+    }
+}, {})('measureManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+    $scope.moduleName = '测点配置列表';
+    
+    //改变所选电站
+    $scope.changeStation = () =>{
+        $scope.stClass = $scope.selectedStation.stClass;
+        $scope.stId = $scope.selectedStation.stId;
+        getDeviceList();
+    }
+
+    //根据设备类型获取-电站列表
+    const getStationList = () =>{
+        $scope.stationsByDeviceType.getData({deviceType:$scope.deviceType})
+    }
+
+    $scope.stationsByDeviceType.subscribe(res => {
+        if(res.body && res.body.length){
+            const defaultArr = [{ stClass: "", stId: "", stName: '' }]
+            $scope.stationsList = defaultArr.concat(res.body)
+            $scope.selectedStation = $scope.stationsList[0];
+            $scope.changeStation();
+        }
+    });
+
+    //获取-设备列表
+    const getDeviceList = () =>{
+        $scope.devicesByDeviceType.getData({deviceTypes:$scope.deviceType, stIds:$scope.stId, stClass:$scope.stClass}).then(res => {
+            if(res.body && res.body.length){
+                const defaultArr = [{deviceId: "", deviceName: '' }] 
+                $scope.devicesList = defaultArr.concat(res.body)
+            }
+        })
+    }
+    
+    //根据设备类型获取-标准点列表
+    const getColumnData = () =>{
+        $scope.getPointByDeviceType.getData({ruleClass:$scope.ruleClass});
+    }
+
+    $scope.getPointByDeviceType.subscribe(res => {
+        if(res.body && res.body.length){
+            const defaultArr = [{ classify: "", field: "", name: '',required:'' }];
+            $scope.pointsList = defaultArr.concat(res.body);
+            $scope.pointId = $scope.pointsList.field;
+
+
+            $scope.column = res.body.reduce((total,current) => {
+                total.push({
+                    title: current.name,
+                    dataIndex: current.field,
+                    align: 'center'
+                })
+                return total
+            },[]);
+            $scope.column = $scope.column.concat([{
+                title: '操作',
+                dataIndex: '',
+                align: 'center',
+                render(text, item, index) {
+                    return `
+                    <div class="clearfix">
+                        <i class="iconfont edit icon-bianji-copy" style="font-size: 18px;color:#1ddabe;margin-right:15px;" ></i>
+                        <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                    </div>
+                    `
+                },
+            }])
+        }
+    });
+
+    const getStandardPointList = () =>{
+        $scope.measurePointList.getData({pageIndex :0, pageSize:500, deviceType:$scope.deviceType});
+    }
+
+    //改变设备类型
+    $scope.changeDeviceType = () =>{
+        $scope.deviceType = $scope.selectedDeviceType.deviceValue;
+        $scope.ruleClass = $scope.selectedDeviceType.ruleClass;
+        getStationList();
+        getStandardPointList();
+        getColumnData();
+    }
+
+    // init ---- 获取设备类型
+    $scope.measureDeviceType.subscribe(res => {
+        if(res.body && res.body.length){
+            $scope.selectedDeviceType =  res.body[res.body.length-1];
+            $scope.changeDeviceType();
+        }
+    })
+
+    $scope.search = () =>{
+        $scope.getPointList.getData({
+            deviceType:$scope.deviceType,
+            stId: $scope.stId,
+            deviceId :$scope.deviceId,
+            pointId: $scope.pointId ,
+            keyword:$scope.keyword
+        })
+    }
+
+    //删除
+    const deleteData = id =>{
+        $scope.deleteDeviceBasePoint.getData({id}).then(res=>{
+            if (res.code == '0'){
+                toaster.pop('success','','删除成功');
+                $scope.search();
+            }else{
+                toaster.pop('error', '','删除失败')
+            }
+        });
+    }
+
+    $scope.trClick = (item, index, event) => {
+        if(event.target.className.includes('icon-bianji-copy')) {
+            $scope.showAddModel = true;
+            $scope.$broadcast('editMeasurePointBroad',item);
+        }else if(event.target.className.includes('icon-shanchu1')) {
+            $solway.confirm({ message: '确定删除此条数据？' }, () => {
+                deleteData(item.id)
+            });
+        }
+    };
+
+    //新增
+    $scope.newModal = ()=>{
+        $scope.showAddModel = true;
+        $scope.$broadcast('editMeasurePointBroad',{});
+    }
+
+    //编辑成功回调
+    $scope.$on('editCallback',function(){
+        $scope.showAddModel = false;
+        $scope.search();
+    })
+
+    //编辑取消回调
+    $scope.$on("cancel",function(){
+        $scope.showAddModel = false;
+    })
+   
+    $timeout(() => {
+        $('.ng-clock').removeClass('ng-clock');
+    },2000);
+});

@@ -81,11 +81,15 @@
 
 
     $scope.saveSparePartsSn = (fdIndex, grsIndex) => {
-        const roomId = $scope.workedObj[fdIndex].grs[grsIndex].roomId = $scope.workedObj[fdIndex].roomList.find(v => {
+        const roomId = $scope.workedObj[fdIndex].grs[grsIndex].roomId = ($scope.workedObj[fdIndex].roomList.find(v => {
             return v.fsn === $scope.workedObj[fdIndex].grs[grsIndex].fsn;
-        }).id;
+        }) || {}).id;
         $scope.workedObj[fdIndex].grs[grsIndex].max = 1;
         $scope.workedObj[fdIndex].grs[grsIndex].num = roomId ? 1 : 0;
+        
+        $scope.workedObj[fdIndex].roomList.forEach(v => {
+            v.disabled = $scope.workedObj[fdIndex].grs.find(xv => v.fsn === xv.fsn);
+        });
     };
 
 

@@ -158,15 +158,18 @@ ajaxData(
     };
 
 
-    $scope.changeRoomId_position = (fdIndex, grsIndex, roomId_positon) => {
-        const [roomId, positon] = roomId_positon.split('_');
+    $scope.changeRoomId_position = (fdIndex, grsIndex, roomId_position) => {
+        const [roomId, position] = roomId_position.split('_');
         $scope.workedObj[fdIndex].grs[grsIndex].roomId = roomId;
-        $scope.workedObj[fdIndex].grs[grsIndex].positon = positon;
+        $scope.workedObj[fdIndex].grs[grsIndex].position = position;
     };
 
 
     $scope.changeFsn = (fdIndex, grsIndex, fsn) => {
         $scope.workedObj[fdIndex].grs[grsIndex].num = fsn ? 1 : 0;
+        $scope.workedObj[fdIndex].fgrs.forEach(v => {
+            v.disabled = $scope.workedObj[fdIndex].grs.find(xv => xv.fsn === v.fsn);
+        });
     };
 
 
@@ -200,10 +203,10 @@ ajaxData(
                 fgId,
                 fdPt: pt,
                 grs: grs.filter(v => v.roomId && v.num && (pt ? v.fsn : true)).map(xv => {
-                    const { num, max, roomId, positon, fsn } = xv;
+                    const { num, max, roomId, position, fsn } = xv;
                     // if (!grs[0]) noRoom = true;
                     if (num > max) beyond = true;
-                    return { num, roomId, positon, fsn };
+                    return { num, roomId, position, fsn };
                 })
             };
         });
