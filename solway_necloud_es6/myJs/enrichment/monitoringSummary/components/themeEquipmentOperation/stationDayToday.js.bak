@@ -161,7 +161,12 @@ ajaxData(
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
-        let { showShape, currentDeviceType = '2', tabIndex = 0, checkboxStatus = [true, true, true, true, true, true, true] } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
+        let { 
+            showShape, 
+            currentDeviceType = '2', 
+            tabIndex = 0, 
+            checkboxStatus = [false, true, true, true, true, true, false] 
+        } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
         $scope.changeShowShape((tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'chart'));
         const { dateType, dateTime } = historicalRecord.get();
         $scope.dateType = dateType;
@@ -372,20 +377,20 @@ ajaxData(
             }
             if (!$scope.getDeviceType.res) {
                 const res = await $scope.getDeviceType.getData();
-                $scope.deviceRunList.deviceType = res.data[0].devid;
+                $scope.deviceRunList.deviceType = ''; //res.data[0].devid;
             }
             if (!$scope.queryDeviceWithType.res) {
                 if (showShape === 'list') {
                     $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
                 } else if (showShape === 'chart2') {
-                    $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
+                    $scope.deviceRunList.deviceType = $scope.deviceRunList.deviceType;
                     $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
                 } else {
                     // if (myChart) {
                     //     echarts.dispose(myChart);
                     //     myChart = null;
                     // }
-                    $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
+                    $scope.deviceRunList.deviceType = $scope.deviceRunList.deviceType;
                     $scope.deviceHisRiver.getData({
                         date: dateTime.showDate,
                         deviceType: $scope.deviceRunList.deviceType
@@ -405,7 +410,7 @@ ajaxData(
                     });
                 } else if (showShape === 'chart2') {
                     if (!$scope.deviceRunList.deviceType) {
-                        $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
+                        $scope.deviceRunList.deviceType = $scope.deviceRunList.deviceType;
                         $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
                     } else {
                         if (!$scope.deviceRunList.deviceId) {

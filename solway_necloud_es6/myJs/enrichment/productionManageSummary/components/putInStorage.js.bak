@@ -111,6 +111,7 @@ ajaxData(
 
     $scope.opFittingsDictRoomValidFsn.beforGetData = (obj, index) => {
         if (!obj.pt) return obj.edit = false;
+        if (!obj.fsn) return toaster.pop('error', '', '备件编号必填');
 
         $scope.opFittingsDictRoomValidFsn.getData({
             fsn: obj.fsn

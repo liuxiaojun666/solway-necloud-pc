@@ -32,6 +32,8 @@ ajaxData({
     
     // 初始
     $scope.$on('editWindTowerBroad',async(e,data)=>{
+        $scope.endDate = new Date('2099');
+
         $scope.getManufacturerList();
         if(data){
             $scope.formData = {};
@@ -40,13 +42,18 @@ ajaxData({
 
             $scope.formData = angular.copy(data);
 
-            if(data.manufid){
+            if(data.longitude) $scope.formData['longitude'] = Number(data.longitude);
+            if(data.latitude) $scope.formData['latitude'] = Number(data.latitude);
+
+            if(data.manuFID){
                 $scope.changemanufacturer();
             }
             $scope.formData['beginDate'] = data.beginDate?new Date(data.beginDate):new Date();
             $scope.formData['endDate'] = data.endDate?new Date(data.endDate):new Date();
             if(!data.beginDate) $scope.formData['beginDate'].showDate = '';
             if(!data.endDate) $scope.formData['endDate'].showDate = '';
+
+            
 
             await myAjaxData.timeout(0);
             $scope.$apply();
@@ -95,10 +102,18 @@ ajaxData({
     $scope.saveWindTower = () =>{
         if (!$solway.formValidation($scope.formData, '.editWindTowerTpl', toaster)) return;//校验非空
 
-        $scope.formData['beginDate'] = $scope.formData['beginDate'].showDate ;
-        $scope.formData['endDate']   = $scope.formData['endDate'].showDate;
-        // $scope.formData['status'] = $("input[name='status']:checked").val();
+        if($scope.formData.longitude && $scope.formData.longitude.toString().length>11){
+            toaster.pop('error', '','经度位数不能超过11位（含小数点）');
+            return;
+        }
+        if($scope.formData.latitude && $scope.formData.latitude.toString().length>11){
+            toaster.pop('error', '','纬度位数不能超过11位（含小数点）')
+            return;
+        }
 
+        $scope.formData['beginDate'] = $scope.formData['beginDate']? $scope.formData['beginDate'].showDate:'' ;
+        $scope.formData['endDate']   = $scope.formData['endDate']? $scope.formData['endDate'].showDate:'';
+        
         $scope.updateDeviceWindTower.getData($scope.formData).then(res=>{
             if(res.code == '0'){
                 toaster.pop('success','','保存成功');

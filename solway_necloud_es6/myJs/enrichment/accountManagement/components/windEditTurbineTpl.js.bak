@@ -25,6 +25,8 @@ ajaxData({
     
     // 初始
     $scope.$on('editTurbineBroad',async(e,data)=>{
+        $scope.endDate = new Date('2099');
+
         $scope.getManufacturerList();
         if(data){
             $scope.formData = {};
@@ -33,7 +35,7 @@ ajaxData({
 
             $scope.formData = angular.copy(data);
 
-            if(data.manufid){
+            if(data.manuFID){
                 $scope.changemanufacturer();
             }
             $scope.formData['beginDate'] = data.beginDate?new Date(data.beginDate):new Date();

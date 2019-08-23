@@ -78,7 +78,6 @@ ajaxData({
             $scope.pointsList = defaultArr.concat(res.body);
             $scope.pointId = $scope.pointsList.field;
 
-
             $scope.column = res.body.reduce((total,current) => {
                 total.push({
                     title: current.name,
@@ -104,7 +103,10 @@ ajaxData({
     });
 
     const getStandardPointList = () =>{
-        $scope.measurePointList.getData({pageIndex :0, pageSize:500, deviceType:$scope.deviceType});
+        $scope.measurePointList.getData({pageIndex :0, pageSize:500, deviceType:$scope.deviceType}).then(res=>{
+            //????
+        });
+        
     }
 
     //改变设备类型
@@ -125,6 +127,7 @@ ajaxData({
     })
 
     $scope.search = () =>{
+        $scope.loading = true;
         $scope.getPointList.getData({
             deviceType:$scope.deviceType,
             stId: $scope.stId,
@@ -133,6 +136,10 @@ ajaxData({
             keyword:$scope.keyword
         })
     }
+
+    $scope.getPointList.subscribe(res=>{
+        $scope.loading = false;
+    })
 
     //删除
     const deleteData = id =>{

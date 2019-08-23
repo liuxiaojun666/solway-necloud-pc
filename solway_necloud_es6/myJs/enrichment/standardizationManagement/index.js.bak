@@ -24,8 +24,15 @@ ajaxData({
     }
 
     $scope.measureDeviceType.subscribe(res => {
-        $scope.deviceType = res.body[res.body.length-2].deviceValue;
-        $scope.search();
+        if(res.code == 0 && res.body && res.body.length){
+            $scope.deviceTypeMap = {} // 组合显示元素和需要校验的数据
+            for(let i=0,arr = res.body;i<arr.length;i++){
+                $scope.deviceTypeMap[arr[i].deviceValue] = arr[i].deviceName
+            }
+
+            $scope.deviceType = res.body[res.body.length-2].deviceValue;
+            $scope.search();
+        }
     })
 
     $scope.column = [
@@ -37,7 +44,10 @@ ajaxData({
         }, {
             title: '设备类型',
             dataIndex: 'deviceType',
-            align: 'center'
+            align: 'center',
+            render(text,item,index){
+                return  $scope.deviceTypeMap[text]
+            }
         }, {
             title: '标准点字段名',
             dataIndex: 'stdName',

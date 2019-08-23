@@ -662,16 +662,20 @@ ajaxData({
                                     $scope['ydatas' + $scope.checkChart].push($scope.tableData.data[key]);
                                 } else {
                                     $scope['xdata' + $scope.checkChart] = [];
-                                    if (myAjaxData.config.dmsType == 5) {
-                                        $scope.tableData.data['deptid'].map((item) => {
-                                            $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
-                                        })
-                                    } else if (myAjaxData.config.dmsType.substr(0, 1) == 4) {
+                                     if (myAjaxData.config.dmsType.substr(0, 1) == 4) {
                                         $scope.tableData.data['st_eqid'].map((item) => {
                                             $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
                                         })
                                     } else if (myAjaxData.config.dmsType == 1) {
                                         $scope.tableData.data['companyid'].map((item) => {
+                                            $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
+                                        })
+                                    } else if (myAjaxData.config.dmsType == 3) {
+                                        $scope.tableData.data['stid'].map((item) => {
+                                            $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
+                                        }) 
+                                    } else if (myAjaxData.config.dmsType == 5) {
+                                        $scope.tableData.data['deptid'].map((item) => {
                                             $scope['xdata' + $scope.checkChart].push(myAjaxData.config.bIdToName[myAjaxData.config.checkChart][item]);
                                         })
                                     } else {

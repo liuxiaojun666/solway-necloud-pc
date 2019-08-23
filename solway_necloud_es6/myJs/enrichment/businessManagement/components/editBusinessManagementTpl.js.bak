@@ -32,13 +32,6 @@ ajaxData({
 
     $scope.endDate = new Date('2099');
 
-    const clearData = () =>{
-        $scope.formData = {};
-        $scope.customConfig = {};
-        $scope.admintime = null;
-
-    }
-
     const initShowImages = (data,customConfig) =>{
         if(data && data.logo){
             $("#showLogo").attr("src", data.logo);
@@ -52,7 +45,9 @@ ajaxData({
     }
 
     const getData = () =>{
-        clearData();
+        $scope.formData = {};
+        $scope.customConfig = {};
+
         $scope.businessManagementData.getData({}).then(res=>{
             if (res.key==2) {
                 const data = res.data;
@@ -60,10 +55,14 @@ ajaxData({
                 initShowImages(data,customConfig);
 
                 data.insureTel = +data.insureTel;
-                $scope.formData = data;
+                $scope.formData = angular.copy(data);
                 $scope.customConfig = customConfig?customConfig:{};
-                
-                $scope.admintime = new Date(data.admintime);
+
+                $scope.formData['admintime'] = data.admintime?new Date(data.admintime):new Date();
+                if(!data.admintime) $scope.formData['admintime'].showDate = '';
+                $scope.formData['safeRunDate'] = data.safeRunDate?new Date(data.safeRunDate):new Date();
+                if(!data.safeRunDate) $scope.formData['safeRunDate'].showDate = '';
+
                 getProvence();
             }
         });
@@ -179,6 +178,8 @@ ajaxData({
         })
         $scope.formData['comType'] = checkedArr.join(",");
 
+        $scope.formData['admintime'] = $scope.formData['admintime'].showDate ;
+        $scope.formData['safeRunDate'] = $scope.formData['safeRunDate'].showDate;
         $scope.update.getData({
             data:  JSON.stringify($scope.formData),
             customConfig : JSON.stringify($scope.customConfig)
