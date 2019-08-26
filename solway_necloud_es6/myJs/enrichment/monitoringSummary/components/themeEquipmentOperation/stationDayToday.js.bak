@@ -150,6 +150,10 @@ ajaxData(
             later: true,
             onlyLatest: true
         },
+        checkStationSomeSvg: {
+            name: 'GETcheckStationSomeSvg',
+            data: {}
+        }
     },
     {
         __serviceName__: 'themeEquipmentOperationStationDayTodayService'
@@ -165,7 +169,8 @@ ajaxData(
             showShape, 
             currentDeviceType = '2', 
             tabIndex = 0, 
-            checkboxStatus = [false, true, true, true, true, true, false] 
+            checkboxStatus = [true, true, true, true, true, true],
+            shadowFlag = false
         } = historicalRecord.get().themeEquipmentOperationStationDayToday || {};
         $scope.changeShowShape((tabIndex === 1 && $scope.currentClass === 'CompanyDayToday') ? 'list' : (showShape || 'chart'));
         const { dateType, dateTime } = historicalRecord.get();
@@ -174,6 +179,7 @@ ajaxData(
         $scope.currentDeviceType = currentDeviceType;
         await $scope.dateUpdated();
         $scope.checkboxStatus = checkboxStatus;
+        $scope.shadowFlag = shadowFlag;
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
         $scope.initComplete = true;
@@ -184,6 +190,7 @@ ajaxData(
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         if ($scope.currentClass !== 'StationDayToday') return;
+        $scope.checkStationSomeSvg.getData();
         $scope.getDeviceType.res = null;
         $scope.$broadcast("switchPowerCallback");
         setDataNull();
@@ -248,7 +255,8 @@ ajaxData(
     };
 
     // 复选框状态改变
-    $scope.changeCheckboxStatus = index => {
+    $scope.changeCheckboxStatus = (index, shadowFlag) => {
+        if (shadowFlag) $scope.shadowFlag = false;
         if (index === 0) $scope.checkboxStatus.fill($scope.checkboxStatus[0]);
         else if (!$scope.checkboxStatus[index]) $scope.checkboxStatus[0] = false;
         else if ($scope.checkboxStatus.slice(1).every(v => v)) $scope.checkboxStatus[0] = true;
@@ -273,7 +281,7 @@ ajaxData(
     $scope.diffDeviceTypeGetData = () => {
         const status = $scope.checkboxStatus.map((v, i) => v ? (
             '0' + (i > 2 ? i - 1 : i === 2 ? 7 : i)
-        ) : v).filter(v => v !== false).join();
+        ) : v).filter(v => v !== false).join() + ($scope.shadowFlag ? ',05' : '');
         
         switch ($scope.currentDeviceType) {
             case '1':
@@ -429,6 +437,28 @@ ajaxData(
 
         $scope.$apply();
     };
+
+
+    // 判断接线图，布局视图是否存在
+    $scope.checkStationSomeSvg.subscribe(res => {
+        if (!res.body.hasWiringDiagramSvg) {
+            if ($scope.tabIndex === 2) $scope.changeTab(1);
+            setTimeout(() => {
+                $('#m-fdnl-hide').find('td').eq(2).hide();
+            }, 200);
+        } else {
+            $('#m-fdnl-hide').find('td').eq(2).show();
+        }
+
+        if (!res.body.hasLayoutSvg) {
+            if (tabIndex === 1 && showShape === 'chart2') $scope.changeShowShape('chart');
+            setTimeout(() => {
+                $('i.iconfont.icon-yuanxingbuju').hide();
+            }, 200);
+        } else {
+            $('i.iconfont.icon-yuanxingbuju').show();
+        }
+    });
 
     // 电站 今日 设备 列表视图
     $scope.getDeviceType.getDataCallback = async (success, res) => {

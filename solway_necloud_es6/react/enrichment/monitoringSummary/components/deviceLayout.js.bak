@@ -100,9 +100,18 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
                     $scope.status[statu] = !$scope.status[statu];
                     if (statu === 'statusAll') {
                         Object.keys($scope.status).forEach(v => $scope.status[v] = $scope.status[statu]);
+                        $scope.status.status5 = false;
                     } else {
-                        const { statusAll, ...other } = $scope.status;
-                        $scope.status.statusAll = Object.values(other).every(e => e);
+                        const { statusAll, status5, ...other } = $scope.status;
+                        if (statu === 'status5') {
+                            Object.keys(other).forEach(v => {
+                                $scope.status[v] = false;
+                            });
+                            $scope.status.statusAll = false;
+                        } else {
+                            $scope.status.status5 = false;
+                            $scope.status.statusAll = Object.values(other).every(e => e);
+                        }
                     }
                     this.dataFilter();
                 };
@@ -200,7 +209,7 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
             status2: true,
             status3: true,
             status4: true,
-            status5: true,
+            status5: false,
             statusAll: true,
         };
 
