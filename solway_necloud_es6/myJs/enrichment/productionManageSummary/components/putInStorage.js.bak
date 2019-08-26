@@ -6,6 +6,21 @@ ajaxData(
             data: {},
             later: true,
         },
+        opFittingsCategorySelectByCondition: {
+            name: 'GETopFittingsCategorySelectByCondition',
+            later: true,
+            data: {}
+        },
+        opFittingsDictSelectCtg1: {
+            name: 'GETopFittingsDictSelectCtg1',
+            later: true,
+            data: {},
+        },
+        opFittingsDictSelectCtg2: {
+            name: 'GETopFittingsDictSelectCtg2',
+            later: true,
+            data: {},
+        },
         // 设备型号列表
         opFittingsDictSelectCurrData: {
             name: 'GETopFittingsDictSelectCurrData',
@@ -49,7 +64,13 @@ ajaxData(
         const {tabIndex} = $scope;
         if (tabIndex !== 1) return;
         $scope.opFittingsRoomSelectByCondition.getData({ isMe: 1 });
-        $scope.opFittingsDictSelectCurrData.getData();
+        $scope.opFittingsDictSelectCurrData.getData().then(res => $scope.opFittingsDictSelectCurrData._res = res);
+        $scope.opFittingsCategorySelectByCondition.getData().then(res => $scope.opFittingsCategorySelectByCondition._res = res);
+        $scope.opFittingsDictSelectCtg1.getData().then(res => $scope.opFittingsDictSelectCtg1._res = res);
+        $scope.opFittingsDictSelectCtg2.getData().then(res => $scope.opFittingsDictSelectCtg2._res = res);
+        $scope.categoryId = '';
+        $scope.ctg1 = '';
+        $scope.ctg2 = '';
         $scope.down = true;
 
         $scope.createDate = (new Date).Format('yyyy-MM-dd');
@@ -75,6 +96,10 @@ ajaxData(
 
     $scope.upload = async ele => {
         const res = await $scope.opFittingsDictImportTemplate.getData({ file: ele.files[0] });
+        if (res.code !== 0) {
+            toaster.pop('error', '', res.msg);
+            return $scope.$apply();
+        }
         ele.value = '';
         $scope.putList = $scope.putList.concat(res.body.map(v => ({
             fdId: v.id,
@@ -83,14 +108,33 @@ ajaxData(
             pt: v.pt,
             position: v.position,
             // money: v.fpa.toFixed(2),
-            edit: false
+            edit: true,
+            category: { ...$scope.opFittingsCategorySelectByCondition._res },
+            ctg1: { ...$scope.opFittingsDictSelectCtg1._res },
+            ctg2: { ...$scope.opFittingsDictSelectCtg2._res },
+            sparePartsList: { ...$scope.opFittingsDictSelectCurrData._res }
         })));
         $scope.$apply();
     };
 
 
     $scope.insert = () => {
-        $scope.putList.unshift({ edit: true, num: 0, fsn: ''});
+        // if ($scope.putList.some(v => v.edit)) return toaster.pop('info', '', '同时只能编辑一条');
+        // $scope.opFittingsDictSelectCurrData.getData({ categoryId: '', ctg1: '', ctg2: '' })
+        $scope.putList.unshift({ 
+            edit: true, 
+            num: 0, 
+            fsn: '', 
+            category: {...$scope.opFittingsCategorySelectByCondition._res},
+            ctg1: {...$scope.opFittingsDictSelectCtg1._res},
+            ctg2: {...$scope.opFittingsDictSelectCtg2._res},
+            sparePartsList: {...$scope.opFittingsDictSelectCurrData._res}
+        });
+    };
+
+    $scope.editRow = (obj) => {
+        // if ($scope.putList.some(v => v.edit)) return toaster.pop('info', '', '同时只能编辑一条');
+        obj.edit = true;
     };
 
 
@@ -105,12 +149,33 @@ ajaxData(
 
 
     $scope.getPt = (id, index) => {
-        $scope.putList[index].pt = ($scope.opFittingsDictSelectCurrData.res.body.find(v => v.id == id).pt);
+        $scope.putList[index].pt = (($scope.opFittingsDictSelectCurrData.res.body.find(v => v.id == id) || {}).pt);
+    };
+
+
+    $scope.rowCategoryChange = (categoryId, obj) => {
+        $scope.opFittingsDictSelectCurrData.getData({ categoryId, ctg1: obj.ctg1.ctg1, ctg2: obj.ctg2.ctg2 }).then(res => obj.sparePartsList = res);
+    };
+
+
+    $scope.rowCtg1Change = (ctg1, obj) => {
+        $scope.opFittingsDictSelectCtg2.getData({ ctg1 }).then(res => obj.ctg2 = res);
+        $scope.opFittingsDictSelectCurrData.getData({ ctg1, categoryId: obj.category.id, ctg2: obj.ctg2.ctg2 }).then(res => obj.sparePartsList = res);
+    };
+
+
+    $scope.rowCtg2Change = (ctg2, obj) => {
+        $scope.opFittingsDictSelectCurrData.getData({ ctg2, categoryId: obj.category.id, ctg1: obj.ctg1.ctg1 }).then(res => obj.sparePartsList = res);
     };
 
 
     $scope.opFittingsDictRoomValidFsn.beforGetData = (obj, index) => {
-        if (!obj.pt) return obj.edit = false;
+        if (!obj.fdId) return toaster.pop('error', '', '请选择备件');
+        if (!obj.position) return toaster.pop('error', '', '库位必填');
+        if (!obj.pt) {
+            if (!obj.num) return toaster.pop('error', '', '填写数量');
+            return obj.edit = false;
+        }
         if (!obj.fsn) return toaster.pop('error', '', '备件编号必填');
 
         $scope.opFittingsDictRoomValidFsn.getData({
@@ -139,6 +204,10 @@ ajaxData(
             delete v.edit;
             delete v.money;
             delete v.pt;
+            delete v.ctg1;
+            delete v.ctg2;
+            delete v.category;
+            delete v.sparePartsList;
             return { ...v, fdPt };
         });
 

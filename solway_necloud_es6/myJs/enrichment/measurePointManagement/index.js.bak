@@ -49,22 +49,24 @@ ajaxData({
     }
 
     $scope.stationsByDeviceType.subscribe(res => {
-        if(res.body && res.body.length){
-            const defaultArr = [{ stClass: "", stId: "", stName: '' }]
-            $scope.stationsList = defaultArr.concat(res.body)
-            $scope.selectedStation = $scope.stationsList[0];
-            $scope.changeStation();
-        }
+        const defaultArr = [{ stClass: "", stId: "", stName: '全部' }]
+        $scope.stationsList = res.body ? defaultArr.concat(res.body) : defaultArr;
+        $scope.selectedStation = $scope.stationsList[0];
+        $scope.changeStation();
     });
 
     //获取-设备列表
     const getDeviceList = () =>{
-        $scope.devicesByDeviceType.getData({deviceTypes:$scope.deviceType, stIds:$scope.stId, stClass:$scope.stClass}).then(res => {
-            if(res.body && res.body.length){
-                const defaultArr = [{deviceId: "", deviceName: '' }] 
-                $scope.devicesList = defaultArr.concat(res.body)
-            }
-        })
+        const defaultArr = [{deviceId: "", deviceName: '全部' }]
+        if($scope.deviceType && $scope.stId && $scope.stClass){
+            $scope.devicesByDeviceType.getData({deviceTypes:$scope.deviceType, stIds:$scope.stId, stClass:$scope.stClass}).then(res => {
+                $scope.devicesList = res.body? defaultArr.concat(res.body) :defaultArr;
+                $scope.deviceId = $scope.devicesList[0].deviceId
+            })
+        }else{
+            $scope.devicesList = defaultArr;
+            $scope.deviceId = $scope.devicesList[0].deviceId
+        }
     }
     
     //根据设备类型获取-标准点列表
@@ -73,8 +75,8 @@ ajaxData({
     }
 
     $scope.getPointByDeviceType.subscribe(res => {
-        if(res.body && res.body.length){
-            const defaultArr = [{ classify: "", field: "", name: '',required:'' }];
+        if(res.body){
+            const defaultArr = [{ classify: "", field: "", name: '全部',required:'' }];
             $scope.pointsList = defaultArr.concat(res.body);
             $scope.pointId = $scope.pointsList.field;
 
@@ -103,16 +105,21 @@ ajaxData({
     });
 
     const getStandardPointList = () =>{
-        $scope.measurePointList.getData({pageIndex :0, pageSize:500, deviceType:$scope.deviceType}).then(res=>{
-            //????
-        });
-        
+        $scope.measurePointList.getData({pageIndex :0, pageSize:500, deviceType:$scope.deviceType})
     }
+
+    $scope.measurePointList.subscribe(res=>{
+        const defaultArr = [{id: "", stdName: '全部' }]
+        $scope.pointList = res.data ? defaultArr.concat(res.data): defaultArr;
+        $scope.pointId = $scope.pointList[0].id;
+    })
 
     //改变设备类型
     $scope.changeDeviceType = () =>{
         $scope.deviceType = $scope.selectedDeviceType.deviceValue;
         $scope.ruleClass = $scope.selectedDeviceType.ruleClass;
+        $scope.search();
+
         getStationList();
         getStandardPointList();
         getColumnData();
@@ -120,7 +127,7 @@ ajaxData({
 
     // init ---- 获取设备类型
     $scope.measureDeviceType.subscribe(res => {
-        if(res.body && res.body.length){
+        if(res.body){
             $scope.selectedDeviceType =  res.body[res.body.length-1];
             $scope.changeDeviceType();
         }

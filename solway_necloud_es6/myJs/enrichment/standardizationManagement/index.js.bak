@@ -20,17 +20,20 @@ ajaxData({
     
     //查询
     $scope.search = () =>{
-        $scope.measurePointList.getData({deviceType:$scope.deviceType,keyword:$scope.keyword});
+        $scope.loading = true;
+        $scope.measurePointList.getData({deviceType:$scope.deviceType,keyword:$scope.keyword}).then(res=>{
+            $scope.loading = false;
+        });
     }
 
     $scope.measureDeviceType.subscribe(res => {
-        if(res.code == 0 && res.body && res.body.length){
+        if(res.code == 0 && res.body){
             $scope.deviceTypeMap = {} // 组合显示元素和需要校验的数据
             for(let i=0,arr = res.body;i<arr.length;i++){
                 $scope.deviceTypeMap[arr[i].deviceValue] = arr[i].deviceName
             }
 
-            $scope.deviceType = res.body[res.body.length-2].deviceValue;
+            $scope.deviceType = res.body[0].deviceValue;
             $scope.search();
         }
     })
