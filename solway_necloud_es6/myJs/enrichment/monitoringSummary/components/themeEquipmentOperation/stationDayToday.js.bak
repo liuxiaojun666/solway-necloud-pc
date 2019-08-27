@@ -451,7 +451,7 @@ ajaxData(
         }
 
         if (!res.body.hasLayoutSvg) {
-            if (tabIndex === 1 && showShape === 'chart2') $scope.changeShowShape('chart');
+            if ($scope.tabIndex === 1 && $scope.showShape === 'chart2') $scope.changeShowShape('chart');
             setTimeout(() => {
                 $('i.iconfont.icon-yuanxingbuju').hide();
             }, 200);
@@ -494,13 +494,13 @@ ajaxData(
                     else return `<span>${text}</span>`;
                 }
             },
-            {
-                dataIndex: 'did',
-                title: '编号',
-                width: '60px',
-                fixed: 'left',
-                sort: true,
-            },
+            // {
+            //     dataIndex: 'did',
+            //     title: '编号',
+            //     width: '60px',
+            //     fixed: 'left',
+            //     sort: true,
+            // },
             {
                 dataIndex: 'name',
                 title: '名称',
@@ -516,11 +516,27 @@ ajaxData(
                 title: '时间',
                 width: '130px',
                 align: 'center',
+                fixed: 'left',
                 sort: true,
                 render(text) {
                     return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>`: '';
                 }
-            }, {
+            }, 
+
+        ].concat(new Array(20).fill('c').map((v, i) => ({
+            dataIndex: v + (i + 1),
+            title: `<span>${i + 1}</span>`,
+            width: '80px',
+            align: 'right',
+            render(text, item, index) {
+                return item.hasJB === '0' ? '' : `
+                        <div style="background: ${item.shadowFlags && item.shadowFlags[i] ? 'rgba(72,125,176,.8)' : ''}">
+                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags && item.statuFlags[i]) ? text.toFixed(2) : '-')}</span>
+                        </div>
+                        `
+            }
+        }))).concat([
+            {
                 dataIndex: 'dcu',
                 title: 'DC电压(V)',
                 width: '80px',
@@ -640,20 +656,7 @@ ajaxData(
                 //     return `<span>${text.toFixed(2)}</span>`
                 // }
             },
-
-        ].concat(new Array(20).fill('c').map((v, i) => ({
-            dataIndex: v + (i + 1),
-            title: `<span>${i + 1}</span>`,
-            width: '80px',
-            align: 'right',
-            render(text, item, index) {
-                return item.hasJB === '0' ? '' : `
-                        <div style="background: ${item.shadowFlags && item.shadowFlags[i] ? 'rgba(72,125,176,.8)' : ''}">
-                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags && item.statuFlags[i]) ? text.toFixed(2) : '-')}</span>
-                        </div>
-                        `
-            }
-        })));
+        ]);
     };
     // 电站 今日 设备 列表视图 箱变 列表
     $scope.getRunRealDataBBoxChange.getDataCallback = (success, res) => {
@@ -673,13 +676,13 @@ ajaxData(
                     else return `<span>${text}</span>`;
                 }
             },
-            {
-                dataIndex: 'did',
-                title: '编号',
-                width: '60px',
-                fixed: 'left',
-                sort: true,
-            },
+            // {
+            //     dataIndex: 'did',
+            //     title: '编号',
+            //     width: '60px',
+            //     fixed: 'left',
+            //     sort: true,
+            // },
             {
                 dataIndex: 'name',
                 title: '名称',
@@ -695,6 +698,7 @@ ajaxData(
                 title: '时间',
                 width: '140px',
                 align: 'center',
+                fixed: 'left',
                 sort: true,
                 render(text) {
                     return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
@@ -1060,17 +1064,17 @@ ajaxData(
                     else return `<span>${text}</span>`;
                 }
             },
-            {
-                dataIndex: 'did',
-                title: '编号',
-                width: '50px',
-                fixed: 'left',
-                sort: true,
-            },
+            // {
+            //     dataIndex: 'did',
+            //     title: '编号',
+            //     width: '50px',
+            //     fixed: 'left',
+            //     sort: true,
+            // },
             {
                 dataIndex: 'name',
                 title: '名称',
-                width: '120px',
+                width: '80px',
                 fixed: 'left',
                 sort: true,
                 render(text, item) {
@@ -1087,13 +1091,26 @@ ajaxData(
                 render(text) {
                     return text ? `<text>${new Date(text * 1000).Format('yyyy-MM-dd hh:mm:ss')}</text>` : '';
                 }
-            },
+            }
+        ].concat(new Array(20).fill('c').map((v, i) => ({
+            dataIndex: v + (i + 1),
+            title: `<span>${i + 1}</span>`,
+            width: '60px',
+            align: 'right',
+            render(text, item, index) {
+                return item.hasJB === '0' ? '' : `
+                        <div style="background: ${item.shadowFlags && item.shadowFlags[i] ? 'rgba(72,125,176,.8)' : ''}">
+                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags && item.statuFlags[i]) ? text.toFixed(2) : '-')}</span>
+                        </div>
+                        `
+            }
+        }))).concat([
             {
                 dataIndex: 'k',
                 title: '开关',
                 width: '60px',
                 align: 'center',
-                fixed: 'left',
+                // fixed: 'left',
                 sort: true,
                 render(text) {
                     return `
@@ -1106,7 +1123,7 @@ ajaxData(
                 title: '防雷器',
                 width: '60px',
                 align: 'center',
-                fixed: 'left',
+                // fixed: 'left',
                 sort: true,
                 render(text) {
                     return `
@@ -1164,19 +1181,7 @@ ajaxData(
                     return text && `<span>${(text * 100).toFixed(2)}</span>`
                 }
             }
-        ].concat(new Array(20).fill('c').map((v, i) => ({
-            dataIndex: v + (i + 1),
-            title: `<span>${i + 1}</span>`,
-            width: '80px',
-            align: 'right',
-            render(text, item, index) {
-                return item.hasJB === '0' ? '' : `
-                        <div style="background: ${item.shadowFlags && item.shadowFlags[i] ? 'rgba(72,125,176,.8)' : ''}">
-                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags && item.statuFlags[i]) ? text.toFixed(2) : '-')}</span>
-                        </div>
-                        `
-            }
-        })));
+        ]);
     };
     // 电站 今日 设备 列表视图 电表 列表
     $scope.getRunRealDataMeter.getDataCallback = (success, res) => {
@@ -1196,13 +1201,13 @@ ajaxData(
                     else return `<span>${text}</span>`;
                 }
             },
-            {
-                dataIndex: 'did',
-                title: '编号',
-                width: '50px',
-                fixed: 'left',
-                sort: true,
-            },
+            // {
+            //     dataIndex: 'did',
+            //     title: '编号',
+            //     width: '50px',
+            //     fixed: 'left',
+            //     sort: true,
+            // },
             {
                 dataIndex: 'name',
                 title: '名称',
@@ -1384,13 +1389,13 @@ ajaxData(
                     else return `<span>${text}</span>`;
                 }
             },
-            {
-                dataIndex: 'did',
-                title: '编号',
-                width: '50px',
-                fixed: 'left',
-                sort: true,
-            },
+            // {
+            //     dataIndex: 'did',
+            //     title: '编号',
+            //     width: '50px',
+            //     fixed: 'left',
+            //     sort: true,
+            // },
             {
                 dataIndex: 'name',
                 title: '名称',

@@ -154,12 +154,14 @@ ajaxData(
 
 
     $scope.rowCategoryChange = (categoryId, obj) => {
+        $scope.opFittingsDictSelectCtg1.getData({ categoryId }).then(res => obj.ctg1 = res);
+        $scope.opFittingsDictSelectCtg2.getData({ categoryId, ctg1: obj.ctg1.ctg1 }).then(res => obj.ctg2 = res);
         $scope.opFittingsDictSelectCurrData.getData({ categoryId, ctg1: obj.ctg1.ctg1, ctg2: obj.ctg2.ctg2 }).then(res => obj.sparePartsList = res);
     };
 
 
     $scope.rowCtg1Change = (ctg1, obj) => {
-        $scope.opFittingsDictSelectCtg2.getData({ ctg1 }).then(res => obj.ctg2 = res);
+        $scope.opFittingsDictSelectCtg2.getData({ ctg1, categoryId: obj.category.id }).then(res => obj.ctg2 = res);
         $scope.opFittingsDictSelectCurrData.getData({ ctg1, categoryId: obj.category.id, ctg2: obj.ctg2.ctg2 }).then(res => obj.sparePartsList = res);
     };
 
