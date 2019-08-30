@@ -419,6 +419,8 @@ ajaxData({
 
         //保存
         $scope.save = noCallback => {
+            if($scope.saveLoading) return;
+
             if (!$solway.formValidation($scope.formData, '.editProtocolTple', toaster)) return;//校验非空
 
             if($scope.stationType == 'wind'){
@@ -459,7 +461,10 @@ ajaxData({
             }
             $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
             $scope.formData['isdefault'] = $('input[name="isdefault"]:checked').val();
+            
+            $scope.saveLoading = true;
             $scope.updateProtocol.getData($scope.formData).then(res => {
+                $scope.saveLoading = false;
                 if (res.id) {
                     if(noCallback) return;
                     toaster.pop('success', '', '保存成功');

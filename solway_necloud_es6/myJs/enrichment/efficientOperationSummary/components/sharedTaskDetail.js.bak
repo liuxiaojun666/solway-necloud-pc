@@ -32,6 +32,7 @@ ajaxData({
 
             $scope.id = obj.id;
             $scope.distMan = obj.distMan;
+            $scope.checkMan = obj.checkMan;
             getShareList();
             getUserID();
         });
@@ -120,7 +121,20 @@ ajaxData({
             $scope.$broadcast('shareTaskDetailBro', { id: id, taskStatus: 'detail'});
         }
 
+        //审核任务
+        $scope.examineTask = id =>{
+            $scope.shareTaskDetailShow = true;
+            $scope.$broadcast('shareTaskDetailBro', { id: id, taskStatus: 'examineTask'});
+        }
+
+        //去编辑
+        $scope.editShareTask = id =>{
+            $scope.editReleaseTaskFlag = true;
+            $scope.$broadcast('releaseTask', { id});
+        }
+
         $scope.getSendList = arr =>{
+            if(!arr) return null;
             return arr.replace(/,/g, "   ")
         }
 
@@ -128,6 +142,12 @@ ajaxData({
         $scope.examine = id => {
             $scope.shareTaskDetailShow = true;
             $scope.$broadcast('shareTaskDetailBro',{id:id,taskStatus:'examine'});
+        }
+
+         //确认
+        $scope.confirmTask = id =>{
+            $scope.shareTaskDetailShow = true;
+            $scope.$broadcast('shareTaskDetailBro',{id:id,taskStatus:'confirm'});
         }
 
         //发红包

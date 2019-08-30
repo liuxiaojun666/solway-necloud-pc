@@ -9,13 +9,56 @@ ajaxData({
         data: {},
         later: true
     },
+    manufacturerList: {
+        name: 'GETmanufacturerList',
+        data: {},
+        onlyLatest: true
+    },
+    selectByManuList: {
+        name: 'GETselectByManuList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    }
 }, {})('protocolConfigurationCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
     $scope.moduleName = '协议配置';
     
+    //生产厂商
+    $scope.manufacturerList.subscribe(res => {
+        if(res){
+            $scope.deviceManufacturerList = [{ id: null, manufname: '-请选择-' }].concat(res);
+        }else{
+            $scope.deviceManufacturerList = [{ id: null, manufname: '-请选择-' }];
+        }
+        $scope.manufid = $scope.deviceManufacturerList[0].id;
+
+        $scope.productList =  [{ id: null, productname: '-请选择-' }];
+        $scope.productid = null;
+    });
+
+    //产品型号
+    $scope.changemanufacturer = () => {
+        if(!$scope.manufid){
+            $scope.productList =  [{ id: null, productname: '-请选择-' }];
+            $scope.productid = null;
+            return;
+        } 
+        $scope.selectByManuList.getData({
+            manufid: $scope.manufid,
+        }).then(res => {
+            if(res){
+                $scope.productList = [{ id: null, productname: '-请选择-' }].concat(res);
+            }
+            $scope.productid = null
+        });
+    }
+
+
     $scope.getListData = () =>{
         $scope.protocolList.getData({
-            pageIndex : 0,
             keyWords : $scope.keyWords,
+            manufid:$scope.manufid,
+            productid:$scope.productid
         })
     }
 

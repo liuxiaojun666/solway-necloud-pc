@@ -1,108 +1,152 @@
-ajaxData({
-    // 该角色 电站列表
-    allSTListForPCBySession: {
-        name: 'GETAllSTListForPCBySession',
-        data: {}
-    },
-    // 发布任务
-    opShareTimeTaskUpdate: {
-        name: 'opShareTimeTaskUpdateV2',
-        data: {},
-        later: true
-    },
-    // 发布任务 可推送人员 列表
-    opShareUserStationRelSelectByCondition: {
-        name: 'GETopShareUserStationRelSelectByCondition',
-        data: {},
-        later: true,
-        onlyLatest: true
-    },
-}, {
-        __serviceName__: 'sharedTaskReleaseService'
-    })('sharedTaskReleaseCtrl', ['$scope', 'sharedTaskReleaseService', 'toaster'], ($scope, myAjaxData, toaster) => {
-        $scope.$on('releaseTask', (e, obj = {}) => {
-            const { taskId = null, stationId } = obj;
-            if (stationId) {
-                $scope.disabledSlecetStation = true;
-                $scope.opShareUserStationRelSelectByCondition.getData({ stationId });
-            }
-            $scope.releaseTaskParame = {
-                timerType: '0',
-                userIds: {},
-                taskImgs: [],
-                ...($scope.releaseTaskParame || {}),
-                taskId,
-                stationId: stationId || ($scope.releaseTaskParame || {}).stationId
-            };
-        });
-
-        $scope.allSTListForPCBySession.blur = async () => {
-            await myAjaxData.timeout(200);
-            $scope.allSTListForPCBySession.slideDown = false;
-            $scope.allSTListForPCBySession.stationnameFilter = $scope.allSTListForPCBySession._stationname || '';
-            $scope.$apply();
-        };
-
-        $scope.allSTListForPCBySession.filter = (text = '', str = '') => str && str.includes(text);
-
-
-
-        // 发布任务 提交
-        $scope.releaseTaskSubmit = () => {
-            const { taskImgs, timerType, timerDate, userIds, taskId } = $scope.releaseTaskParame;
-            const obj = {
-                ...$scope.releaseTaskParame,
-                taskId,
-                autoPub: 1,
-                taskImgs: taskImgs.join(','),
-                timerDate: timerType == '0' ? null : timerDate,
-                userIds: Object.keys(userIds).filter(v => userIds[v]).join(',')
-            };
-            if (!$solway.formValidation(obj, '.releaseTask .parames', toaster)) return;
-            $scope.releaseTask = false;
-            $scope.opShareTimeTaskUpdate.getData({ ...obj, dateArr: null }).then((res) => {
-                if (res.code === 0) {
-                    toaster.pop('success', '', res.msg || '发布任务成功');
-                    // getBaseMessageList();
-                    $scope.$emit('releaseTaskCallback', true);
-                }
-                else return toaster.pop('error', '', res.msg || '发布任务失败');
-                $scope.releaseTaskParame.taskContent = '';
-            });
-        };
-
-        // 时间选择 回调
-        $scope.releaseTaskDateUpdate = dateStr => $scope.releaseTaskParame.timerDate = dateStr;
-
-        // 发布任务 接收人接口列表
-        $scope.opShareUserStationRelSelectByCondition.getDataCallback = (success, res) => {
-            if (!success) return;
-            if (res.code !== 0) return;
-            $scope.releaseTaskParame.userIds = res.body.reduce((a, b) => ({ ...a, [b.userId]: false }), {});
-        };
-
-
+ajaxData(
+    {
+        // 该角色 电站列表
+        allSTListForPCBySession: {
+            name: 'GETAllSTListForPCBySession',
+            data: {}
+        },
+        // 请求审核任务的人员列表
+        getTaskExamineList: {
+            name: 'GETgetTaskExamineList',
+            data: {},
+            later: true
+        },
+        // 发布任务
+        opShareTimeTaskUpdate: {
+            name: 'opShareTimeTaskUpdateV2',
+            data: {},
+            later: true
+        },
+        // 编辑任务
+        wxaTaskDoCreate: {
+            name: 'wxaTaskDoCreate',
+            data: {},
+            later: true
+        },
+        // 发布任务 可推送人员 列表
+        opShareUserStationRelSelectByCondition: {
+            name: 'GETopShareUserStationRelSelectByCondition',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 任务id查任务详情  编辑用
+        taskDetailPC: {
+            name: 'GETTaskDetailPC',
+            data: {},
+            later: true
+        },
         // 上传图片
-        $(".sharedTaskRelease").on('change', '#fileaaa', () => {
-            $.ajaxFileUpload({
-                url: window.baseUrl + '/wxa/img.htm',
-                secureuri: false,
-                fileElementId: 'fileaaa',
-                type: "POST",
-                formName: "file",
-                dataType: 'json',
-                data: {
-                    classify: 'task',
-                },
-                success(data) {
-                    if (data && data.length >= 0) {
-                        $scope.releaseTaskParame.taskImgs.push(data[0]);
-                        $scope.$apply()
-                    }
-                },
-                error(e) {
-                    toaster.pop('error', '', '上传失败')
-                }
-            });
-        });
+        wxaImg: {
+            name: 'wxaImg',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        }
+    }, {
+        __serviceName__: 'sharedTaskReleaseService'
+    }
+)('sharedTaskReleaseCtrl', ['$scope', 'sharedTaskReleaseService', 'toaster'], ($scope, myAjaxData, toaster) => {
+    $scope.$on('releaseTask', async (e, obj = {}) => {
+        if (!$scope.getTaskExamineList.res) $scope.getTaskExamineList.getData();
+
+        const { taskId = null, id } = obj;
+        let { stationId } = obj;
+
+        if (id) {
+            const res = await $scope.taskDetailPC.getData({ id });
+            stationId = res.body.stationId;
+        }
+
+        if (stationId) {
+            $scope.disabledSlecetStation = true;
+            $scope.allSTListForPCBySession.stationnameFilter = $scope.allSTListForPCBySession.res.find(v => v.id === stationId).stationname
+            $scope.opShareUserStationRelSelectByCondition.getData({ stationId });
+        }
+
+        $scope.releaseTaskParame = {
+            timerType: '0',
+            userIds: {},
+            taskImgs: [],
+            checkMan: '',
+            ...($scope.releaseTaskParame || {}),
+            taskId,
+            stationId: stationId || ($scope.releaseTaskParame || {}).stationId
+        };
+        if (id) {
+            const { handleMans, bouns1, bouns2, bouns3, bounsT1, bounsT2, bounsT3, taskImgs, taskContent, checkMan } = $scope.taskDetailPC.res.body;
+            $scope.releaseTaskParame = {
+                ...$scope.releaseTaskParame,
+                id,
+                stationId,
+                userIds: handleMans.split(',').reduce((a, b) => {
+                    a[b] = true;
+                    return a;
+                }, {}),
+                bouns1, bouns2, bouns3, bounsT1, bounsT2, bounsT3,
+                taskImgs: taskImgs.split(','),
+                taskContent,
+                checkMan
+            }
+            $scope.$apply();
+        }
     });
+
+    $scope.allSTListForPCBySession.blur = async () => {
+        await myAjaxData.timeout(200);
+        $scope.allSTListForPCBySession.slideDown = false;
+        $scope.allSTListForPCBySession.stationnameFilter = $scope.allSTListForPCBySession._stationname || '';
+        $scope.$apply();
+    };
+
+    $scope.allSTListForPCBySession.filter = (text = '', str = '') => str && str.includes(text);
+
+    // 发布任务 提交
+    $scope.releaseTaskSubmit = () => {
+        const { taskImgs, timerType, timerDate, userIds, taskId, id } = $scope.releaseTaskParame;
+        const obj = {
+            ...$scope.releaseTaskParame,
+            taskId,
+            autoPub: 1,
+            taskImgs: taskImgs.join(','),
+            timerDate: timerType == '0' ? null : timerDate,
+            userIds: Object.keys(userIds).filter(v => userIds[v]).join(',')
+        };
+        if (!$solway.formValidation(obj, '.releaseTask .parames', toaster)) return;
+        $scope.releaseTask = false;
+        $scope[id ? 'wxaTaskDoCreate' : 'opShareTimeTaskUpdate'].getData({ ...obj, dateArr: null }).then((res) => {
+            if (res.code === 0) {
+                toaster.pop('success', '', res.msg || '发布任务成功');
+                // getBaseMessageList();
+                $scope.$emit('releaseTaskCallback', true);
+                $scope.$parent.$parent.editReleaseTaskFlag = false;
+            }
+            else return toaster.pop('error', '', res.msg || '发布任务失败');
+            $scope.releaseTaskParame.taskContent = '';
+        });
+    };
+
+    // 时间选择 回调
+    $scope.releaseTaskDateUpdate = dateStr => $scope.releaseTaskParame.timerDate = dateStr;
+
+    // 发布任务 接收人接口列表
+    $scope.opShareUserStationRelSelectByCondition.getDataCallback = (success, res) => {
+        if (!success) return;
+        if (res.code !== 0) return;
+        $scope.releaseTaskParame.userIds = { ...res.body.reduce((a, b) => ({ ...a, [b.userId]: false }), {}), ...$scope.releaseTaskParame.userIds };
+    };
+
+
+    // 上传图片
+    $scope.wxaImg.beforGetData = (e) => {
+        $scope.wxaImg.getData({
+            classify: 'task',
+            file: e.files[0]
+        }).then(res => {
+            if (res && res.length >= 0) {
+                $scope.releaseTaskParame.taskImgs.push(res[0]);
+                $('#fileaaa').val('');
+            }
+        });
+    }
+});

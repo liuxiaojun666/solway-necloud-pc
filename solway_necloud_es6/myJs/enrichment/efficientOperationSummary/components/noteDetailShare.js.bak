@@ -1,0 +1,230 @@
+app.controller('noteDetailShareCtrl', function ($scope, $http, $state, toaster) {
+
+    var passMap = { '0': '不通过', '1': '通过' };
+
+    $scope.$on('shareTaskDetailBro', function (e, v) {
+        $scope.id = v.id;
+        $scope.taskStatus = v.taskStatus;
+
+        if ($scope.taskStatus == 'examine') {
+            $scope.examineModel = '';
+            getSuggestMoney();
+            getConfirmPersonData();
+        }
+
+        $scope.formData = {};
+        $scope.taskImageList = [];
+        $scope.imageList = [];
+        getTaskDetail();
+
+    })
+
+    var getSuggestMoney = function () {
+        $http({
+            method: "GET",
+            url: window.interface['GETTaskBonusNum'],
+            params: {
+                'id': $scope.id
+            }
+        }).success(function (res) {
+            $scope.bounsModel = res.body ? res.body : 0;
+            $scope.pointModel = $scope.bounsModel;
+        })
+    }
+
+    function getConfirmPersonData(){
+        $http({
+            method: "GET",
+            url: window.interface['GETgetConfirmPersonList'],
+            params: {}
+        }).success(function (res) {
+            if(res.code == 0){
+                $scope.confirmPersonList = res.body;
+            }
+        })
+    }
+
+    function getTaskDetail() {
+        $http.get(window.interface['GETTaskDetailPC'], {
+            params: {
+                'id': $scope.id
+            }
+        }).success(function (result) {
+            var data = result.body;
+            $scope.handleMan = data.handleMan;
+            $scope.formData = result.body;
+
+            $scope.taskImageList = data.taskImgs ? data.taskImgs.split(",").map(function (v) { return window.baseUrl + '/' + v }) : []
+            $scope.imageList = data.handleImg ? data.handleImg.split(",").map(function (v) { return window.baseUrl + '/' + v }) : []
+
+            $scope.showHisContent = JSON.parse(data.reviewContent || '[]')
+
+        })
+    }
+
+    // 审核任务，是否可以正式发布
+    $scope.ifPassExamineTask = yesOrNot =>{
+        $scope.getUserInfo(function (data) {
+            let time = new Date().getTime();
+            let result = passMap[yesOrNot];
+            let content = [{ 'id': data.id, 'name': data.realName, 'time': time, 'phone': data.userName, 'content': $scope.examineTaskcontent, 'result': result,'examineType':1 }];
+            if ($scope.showHisContent.length) {
+                content = $scope.showHisContent.concat(content)
+            }
+            $http({
+                method: "POST",
+                url: window.interface['POSTdoCheck'],
+                params: {
+                    'id': $scope.id,
+                    'opType': yesOrNot,
+                    'content': JSON.stringify(content)
+                }
+            }).success(function (res) {
+                if (res.code == 0) {
+                    toaster.pop('success', '', res.msg ? res.msg : "审核任务完成");
+                    $scope.$emit('clickBtnTaskCallback', true);
+                    $scope.$emit('initShareTaskList', { 'refresh': true })
+                } else {
+                    toaster.pop('error', '', res.msg ? res.msg : "审核任务失败");
+                }
+            });
+        })
+       
+    }
+
+    // 任务完成情况审核
+    $scope.ifPass = function (yesOrNot) {
+        if(!$scope.confirmMan){
+            toaster.pop('error','','请选择确认人')
+            return
+        }
+        $scope.getUserInfo(function (data) {
+            var time = new Date().getTime();
+            var curContent = $("#examineModel").val();
+            var result = passMap[yesOrNot];
+            var content = [{ 'id': data.id, 'name': data.realName, 'time': time, 'phone': data.userName, 'content': curContent, 'result': result ,'examineType':2}];
+            if ($scope.showHisContent.length) {
+                content = $scope.showHisContent.concat(content)
+            }
+
+            $http({
+                method: "POST",
+                url: window.interface['POSTTaskExamine'],
+                params: {
+                    'id': $scope.id,
+                    'opType': yesOrNot,
+                    'content': JSON.stringify(content),
+                    'bonus': $("#bounsModel").val(),
+                    'points': $("#pointModel").val(),
+                    'confirmMan':$scope.confirmMan
+                }
+            }).success(function (res) {
+                if (res.code == 0) {
+                    toaster.pop('success', '', res.msg ? res.msg : "初次审核成功");
+                    $scope.$emit('clickBtnTaskCallback', true);
+                    $scope.$emit('initShareTaskList', { 'refresh': true })
+                } else {
+                    toaster.pop('error', '', res.msg ? res.msg : "审核失败");
+                }
+            });
+        });
+    }
+
+    //最终确认
+    $scope.ifPassConfirmTask = yesOrNot =>{
+        $scope.getUserInfo(function (data) {
+            let time = new Date().getTime();
+            let result = passMap[yesOrNot];
+            let content = [{ 'id': data.id, 'name': data.realName, 'time': time, 'phone': data.userName, 'content': $scope.confirmTaskcontent, 'result': result,'examineType':3 }];
+            if ($scope.showHisContent.length) {
+                content = $scope.showHisContent.concat(content)
+            }
+
+            $http({
+                method: "POST",
+                url: window.interface['POSTtaskDoConfirm'],
+                params: {
+                    'id': $scope.id,
+                    'opType': yesOrNot,
+                    'content': JSON.stringify(content),
+                    'bonus': $scope.formData.bounsFinal,
+                    'points': $scope.formData.pointsFinal
+                }
+            }).success(function (res) {
+                if (res.code == 0) {
+                    toaster.pop('success', '', res.msg ? res.msg : "确认完成");
+                    $scope.$emit('clickBtnTaskCallback', true);
+                    $scope.$emit('initShareTaskList', { 'refresh': true })
+                } else {
+                    toaster.pop('error', '', res.msg ? res.msg : "确认失败");
+                }
+            });
+        })
+    }
+
+    $scope.getUserInfo = function (callback) {
+        $http({
+            method: "GET",
+            url: window.interface['GETcurrInfo'],
+            params: {
+
+            }
+        }).success(function (res) {
+            if (!res.id) {
+                toaster.pop('error', '', "当前用户信息未获取到");
+                return;
+            }
+            res.id && callback && callback(res);
+        });
+    }
+
+    $scope.handOutMoney = function () {
+        $solway.confirm({ message: '确认发红包？' }, function () {
+            $http({
+                method: "GET",
+                url: window.interface['GETbounsFinalMaxVerify'],
+                params: {
+                    handleMan: $scope.handleMan,
+                    bounsFinal: $scope.formData.bounsFinal
+                }
+            }).success(function (res) {
+                if (res.code == 0 && res.body.status == 1) { //超出自然月内，红包的上限
+                    toaster.pop('error', '', "本月该任务处理人最多还可以收" + res.body.different + '元');
+                    return
+                } else if (res.code == 0 && res.body.status != 1) {
+                    $http({
+                        method: "POST",
+                        url: window.interface['POSTRedPacket'],
+                        params: {
+                            'id': $scope.id,
+                            'opType': 1,
+                        }
+                    }).success(function (res) {
+                        if (res.code == 0) {
+                            toaster.pop('success', '', res.msg ? res.msg : "发放成功");
+                            $scope.$emit('clickBtnTaskCallback', true);
+                            $scope.$emit('initShareTaskList', { 'refresh': true })
+                        } else {
+                            toaster.pop('error', '', res.msg ? res.msg : "发放失败");
+                        }
+                    });
+                } else {
+                    toaster.pop('error', '', 'error');
+                }
+            })
+        });
+    }
+
+    $(".noteDetailShare").on('click', '.enlargeAble', function () {
+        $(".bigImg").show()
+        var imgUrl = $(this).attr('src')
+        $("#big_img").attr('src', imgUrl);
+    })
+
+    $(".noteDetailShare").on('click', '.icon-close', function () {
+        $(".bigImg").hide()
+    })
+    $scope.closeModal = function () {
+        $scope.shareTaskDetailShow = false;
+    }
+});

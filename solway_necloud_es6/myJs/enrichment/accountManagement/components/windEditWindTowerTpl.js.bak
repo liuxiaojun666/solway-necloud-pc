@@ -88,7 +88,7 @@ ajaxData({
     //选择某一厂商，获取产品型号列表
     $scope.changemanufacturer = () =>{
 		$scope.selectByManuList.getData({
-            manufid : $scope.formData.manufid,
+            manufid : $scope.formData.manuFID,
         }).then(res=>{
             $scope.productList = res;
             if(res && res.length){
@@ -100,14 +100,17 @@ ajaxData({
 
      //保存
     $scope.saveWindTower = () =>{
+        let latReg = /^([0-8]?\d{1}\.\d{1,9})$/;
+        let longReg = /^((\d|[1-9]\d|1[0-7]\d)\.\d{1,9})$/;
+        
         if (!$solway.formValidation($scope.formData, '.editWindTowerTpl', toaster)) return;//校验非空
 
-        if($scope.formData.longitude && $scope.formData.longitude.toString().length>11){
-            toaster.pop('error', '','经度位数不能超过11位（含小数点）');
+        if($scope.formData.longitude && (!longReg.test($scope.formData.longitude) || $scope.formData.longitude.toString().length>11)){
+            toaster.pop('error', '','请输入正确的经度格式，且总位数不能超过11位（含小数点）');
             return;
         }
-        if($scope.formData.latitude && $scope.formData.latitude.toString().length>11){
-            toaster.pop('error', '','纬度位数不能超过11位（含小数点）')
+        if($scope.formData.latitude && (!latReg.test($scope.formData.latitude) || $scope.formData.latitude.toString().length>11)){
+            toaster.pop('error', '','请输入正确的纬度格式，且总位数不能超过11位（含小数点）')
             return;
         }
 

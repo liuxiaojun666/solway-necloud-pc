@@ -85,6 +85,10 @@ ajaxData({
                     '05': true,
                     '06': true,
                     '07': true,
+                    '11': true,
+                    '12': true,
+                    '21': true,
+                    '22': true
                 },
                 searchKey = '',
                 isDefaultList = true
@@ -166,14 +170,18 @@ ajaxData({
             const { data: { id }, index } = $scope.listActiveItem;
             $scope.taskDetailPC.getData({ id }).then(res => {
                 const str = {
-                    '00': "未发布",
-                    '01': "已发布",
+                    '00': "草稿",
+                    '01': "已创建",
                     '02': "处理中",
                     '03': "处理未完成",
                     '04': "审核中",
                     '05': "审核通过",
                     '06': "审核未通过",
                     '07': "已完成",
+                    '11': "审核任务通过",
+                    '12': "审核任务未通过",
+                    '21': "确认通过",
+                    '22': "确认未通过",
                     '99': "已作废"
                 }[res.body.publishStatus];
                 $('#shareTaskList .my-table-body').eq(1).find('tr').eq(index + 1).find('td span.status').text(str);
@@ -199,6 +207,10 @@ ajaxData({
                 '05': true,
                 '06': true,
                 '07': true,
+                '11': true,
+                '12': true,
+                '21': true,
+                '22': true,
             };
             Array.from(document.querySelectorAll('#searchParams input'), v => v.value = '');
             const { startDate, endDate, searchKey, isHis, handStatus, pStationId } = $scope;
@@ -235,21 +247,23 @@ ajaxData({
                 },
                 {
                     title: '发布时间',
+                    width:'160px',
                     dataIndex: 'distDate',
                     align: 'center',
                     // sort: true,
-                    width: '14%',
                     render(text) {
                         return `<span>${new Date(text).Format('yyyy-MM-dd hh:mm')}</span>`
                     }
                 },
                 {
                     title: '发布人',
+                    width:'100px',
                     dataIndex: 'distManName',
                     // sort: true,
                 },
                 {
                     title: '处理人',
+                    width:'100px',
                     dataIndex: 'handleManName',
                     // sort: true,
                 },
@@ -261,6 +275,7 @@ ajaxData({
                 },
                 {
                     title: '红包金额',
+                    width:'100px',
                     dataIndex: 'bounsFinal',
                     // sort: true,
                     align: 'right'
@@ -270,27 +285,32 @@ ajaxData({
                     dataIndex: 'bounsTime',
                     // sort: true,
                     align: 'center',
-                    width: '14%',
+                    width:'160px',
                     render(text) {
                         return text && new Date(text).Format('yyyy-MM-dd hh:mm:ss');
                     }
                 },
                 {
                     title: '状态',
+                    width:'140px',
                     dataIndex: 'publishStatus',
                     // sort: true,
                     render(text) {
                         return `<span class="status">
                     ${
                             {
-                                '00': "未发布",
-                                '01': "已发布",
+                                '00': "草稿",
+                                '01': "已创建",
                                 '02': "处理中",
                                 '03': "处理未完成",
                                 '04': "审核中",
                                 '05': "审核通过",
                                 '06': "审核未通过",
                                 '07': "已完成",
+                                '11': "审核任务通过",
+                                '12': "审核任务未通过",
+                                '21': "确认通过",
+                                '22': "确认未通过",
                                 '99': "已作废"
                             }[text]
                             }
@@ -329,7 +349,7 @@ ajaxData({
             await myAjaxData.timeout(100);
             $scope.messagePopUp = true;
             // const res = await $scope.shareTaskDetailList.getData({id: item.id});
-            $scope.$broadcast("chatPanelObj2", { id: item.id, distMan: item.distMan });
+            $scope.$broadcast("chatPanelObj2", { id: item.id, distMan: item.distMan,checkMan:item.checkMan });
             $('.my-table tbody tr').eq(index + 1).addClass('active').find('.unread').css('display', 'none');
             $scope.$apply();
         };

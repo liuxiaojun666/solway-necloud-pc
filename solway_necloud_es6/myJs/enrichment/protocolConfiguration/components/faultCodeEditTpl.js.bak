@@ -169,6 +169,8 @@ ajaxData({
 
         //保存
         $scope.save = () => {
+            if($scope.saveLoading) return;
+
             if (!$solway.formValidation($scope.faultformData, '.editFaultCodeTpl', toaster)) return;//校验非空
 
             if($scope.suggestList.length){
@@ -177,7 +179,11 @@ ajaxData({
                 })
             }
             $scope.faultformData['adviceStr'] = JSON.stringify($scope.suggestList);
+
+            $scope.saveLoading = true;
             $scope.faultCodeUpdate.getData($scope.faultformData).then(res => {
+                $scope.saveLoading = false;
+                
                 if (res.code == 0) {
                     toaster.pop('success', '', '保存成功');
                     $scope.$emit('editFaultCodeCallback');

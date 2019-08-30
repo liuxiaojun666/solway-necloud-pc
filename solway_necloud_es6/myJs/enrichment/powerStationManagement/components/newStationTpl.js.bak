@@ -53,6 +53,8 @@ ajaxData({
 })('newStationTplCtrl', ['$scope', 'newStationTplService', 'actionRecord','$timeout','toaster'], ($scope, myAjaxData, historicalRecord,$timeout,toaster) => {
 
     $scope.endDate = new Date('2099');
+    let latReg = /^([0-8]?\d{1}\.\d{1,8})$/;
+    let longReg = /^((\d|[1-9]\d|1[0-7]\d)\.\d{1,8})$/;
 
     //电站分类
     $scope.stationClass = [
@@ -136,8 +138,8 @@ ajaxData({
                 'cityid':data.cityid,
                 'countyid':data.countyid,
                 'address':data.address,
-                'longitude':data.longitude,
-                'latitude':data.latitude,
+                'longitude':data.longitude?Number(data.longitude):null,
+                'latitude':data.latitude?Number(data.latitude):null,
                 'stationtel':data.stationtel,
                 'stationzip':data.stationzip,
                 'status':data.status,
@@ -264,8 +266,8 @@ ajaxData({
         $scope.getLatAndLong.getData({
             "add":add
         }).then(res =>{
-            $scope.formData['longitude'] = res[0];
-            $scope.formData['latitude'] = res[1]
+            $scope.formData['longitude'] = res[0]?Number(res[0]):null;
+            $scope.formData['latitude'] = res[1]?Number(res[1]):null;
         })
     }
 
@@ -274,14 +276,14 @@ ajaxData({
     $scope.save = () =>{
         if (!$solway.formValidation($scope.formData, '.newStationTpl', toaster)) return;//校验非空
 
-        // let  paramsArr = ['id','depid','companyid','stationcode','stationname','stationfullname','stationClass','stationType','managerid','buildcapacity',
-        //     'closedate','provinceid','cityid','countyid','address','longitude','latitude','stationtel','stationzip'];
-        // let formData = {}
-        // for(let key in $scope.formData){
-        //    if(paramsArr.includes(key)){
-        //         formData[key] = $scope.formData[key]
-        //    }
-        // }
+        if($scope.formData.longitude && (!longReg.test($scope.formData.longitude) || $scope.formData.longitude.toString().length>10)){
+            toaster.pop('error', '','请输入正确的经度格式，且总位数不能超过11位（含小数点）');
+            return;
+        }
+        if($scope.formData.latitude && (!latReg.test($scope.formData.latitude) || $scope.formData.latitude.toString().length>10)){
+            toaster.pop('error', '','请输入正确的纬度格式，且总位数不能超过11位（含小数点）')
+            return;
+        }
 
         let formData = $scope.formData;
         formData['productiondate'] = $scope.formData['productiondate']?$scope.formData['productiondate'].showDate:'';

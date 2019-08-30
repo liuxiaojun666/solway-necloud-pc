@@ -419,7 +419,7 @@ ajaxData(
                 } else if (showShape === 'chart2') {
                     if (!$scope.deviceRunList.deviceType) {
                         $scope.deviceRunList.deviceType = $scope.deviceRunList.deviceType;
-                        $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType || $scope.getDeviceType.res.data[0].devid });
+                        $scope.queryDeviceWithType.getData({ type: $scope.getDeviceType.res.data[0].devid });
                     } else {
                         if (!$scope.deviceRunList.deviceId) {
                             $scope.deviceRunList.deviceId = $scope.queryDeviceWithType.res.body[0].serialNumber
@@ -514,7 +514,7 @@ ajaxData(
             {
                 dataIndex: 'dtime',
                 title: '时间',
-                width: '130px',
+                width: '110px',
                 align: 'center',
                 fixed: 'left',
                 sort: true,
@@ -523,19 +523,7 @@ ajaxData(
                 }
             }, 
 
-        ].concat(new Array(20).fill('c').map((v, i) => ({
-            dataIndex: v + (i + 1),
-            title: `<span>${i + 1}</span>`,
-            width: '80px',
-            align: 'right',
-            render(text, item, index) {
-                return item.hasJB === '0' ? '' : `
-                        <div style="background: ${item.shadowFlags && item.shadowFlags[i] ? 'rgba(72,125,176,.8)' : ''}">
-                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags && item.statuFlags[i]) ? text.toFixed(2) : '-')}</span>
-                        </div>
-                        `
-            }
-        }))).concat([
+        ].concat([
             {
                 dataIndex: 'dcu',
                 title: 'DC电压(V)',
@@ -656,7 +644,19 @@ ajaxData(
                 //     return `<span>${text.toFixed(2)}</span>`
                 // }
             },
-        ]);
+        ]).concat(new Array(20).fill('c').map((v, i) => ({
+            dataIndex: v + (i + 1),
+            title: `<span>${i + 1}</span>`,
+            width: '40px',
+            align: 'right',
+            render(text, item, index) {
+                return item.hasJB === '0' ? '' : `
+                        <div style="background: ${item.shadowFlags && item.shadowFlags[i] ? 'rgba(72,125,176,.8)' : ''}">
+                            <span class="${['handle3', 'data-red', 'data-yellow'][item.statuFlags && item.statuFlags[i]]}">${((item.statuFlags && item.statuFlags[i]) ? text.toFixed(2) : '-')}</span>
+                        </div>
+                        `
+            }
+        })));
     };
     // 电站 今日 设备 列表视图 箱变 列表
     $scope.getRunRealDataBBoxChange.getDataCallback = (success, res) => {
@@ -1095,7 +1095,7 @@ ajaxData(
         ].concat(new Array(20).fill('c').map((v, i) => ({
             dataIndex: v + (i + 1),
             title: `<span>${i + 1}</span>`,
-            width: '60px',
+            width: '40px',
             align: 'right',
             render(text, item, index) {
                 return item.hasJB === '0' ? '' : `
@@ -1627,6 +1627,7 @@ ajaxData(
     $scope.queryDeviceWithType.subscribe(res => {
         if ($scope.showShape === 'chart2') {
             $scope.deviceRunList.deviceId = res.body[0].serialNumber
+            if (!$scope.deviceRunList.deviceType) $scope.deviceRunList.deviceType = $scope.getDeviceType.res.data[0].devid;
             $scope.deviceHisTrendChart.getData({
                 date: $scope.dateTime.showDate,
                 deviceType: $scope.deviceRunList.deviceType,
