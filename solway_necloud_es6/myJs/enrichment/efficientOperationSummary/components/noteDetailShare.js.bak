@@ -13,11 +13,20 @@ app.controller('noteDetailShareCtrl', function ($scope, $http, $state, toaster) 
         }
 
         $scope.formData = {};
-        $scope.taskImageList = [];
-        $scope.imageList = [];
+        clearData()
         getTaskDetail();
 
     })
+
+    function clearData(){
+        $scope.taskImageList = [];
+        $scope.imageList = [];
+        $scope.examineTaskcontent = null;
+        $scope.examineModel = null;
+        $scope.bounsModel = null;
+        $scope.confirmMan = '';
+        $scope.confirmTaskcontent = null;
+    }
 
     var getSuggestMoney = function () {
         $http({
@@ -53,6 +62,8 @@ app.controller('noteDetailShareCtrl', function ($scope, $http, $state, toaster) 
             var data = result.body;
             $scope.handleMan = data.handleMan;
             $scope.formData = result.body;
+
+            if(result.body.confirmMan) $scope.confirmMan = result.body.confirmMan;
 
             $scope.taskImageList = data.taskImgs ? data.taskImgs.split(",").map(function (v) { return window.baseUrl + '/' + v }) : []
             $scope.imageList = data.handleImg ? data.handleImg.split(",").map(function (v) { return window.baseUrl + '/' + v }) : []

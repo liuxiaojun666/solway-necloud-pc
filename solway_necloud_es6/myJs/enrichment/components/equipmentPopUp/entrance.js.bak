@@ -41,6 +41,7 @@ ajaxData(
     }
 )('equipmentPopUpCtrl', ['$scope', 'equipmentPopUpService', '$ocLazyLoad', '$interval'], function ($scope, currentService, $ocLazyLoad, $interval) {
     $scope.display = false;
+    $scope.fullScreen = false;
     let timer;
 
     $scope.$on('equipmentPopUp', async(e, eqObj) => {
@@ -128,6 +129,21 @@ ajaxData(
 
         await currentService.timeout(0);
         $scope.$apply();
+    };
+
+
+    $scope.changeFullScreen = () => {
+        $scope.fullScreen = !$scope.fullScreen;
+        $scope.chartResize();
+    };
+    
+    
+    $scope.chartResize = () => {
+        setTimeout(() => {
+            $('#equipmentPopUp [_echarts_instance_]').each(function (i) {
+                echarts.getInstanceByDom(this).resize();
+            });
+        }, 400);
     };
 
 
