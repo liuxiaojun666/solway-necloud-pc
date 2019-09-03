@@ -230,8 +230,7 @@ ajaxData({
         function chartOption(i, legend, series) {
             echarts.init(document.getElementById('container' + i)).setOption({
                 color: [
-                    '#dd4444', '#fec42c', '#80F1BE', '#ff0000', '#ff6a00', '#d8ff00', '#7aff00', '#00ffdc', '#00ffff', '#7a00ff', '#c000ff', '#ff00e0', '#ff008d', '#ff0023'
-                ],
+                    '#8B85DD', '#C93EF3', '#36E4A0', '#33D2EF', '#5B6AFC', '#4CF5D3', '#71FD55', '#F6ADB9', '#00ADD8', '#F7942A', '#43A0FF', '#F6F831', '#FF6AE8', '#FD5555'],
                 legend: legend,
                 tooltip: {
                     trigger: 'item',
@@ -307,7 +306,7 @@ ajaxData({
                     //设置轴线的属性
                     axisLine: {
                         lineStyle: {
-                            color: 'rgba(68, 150, 255, 1)'
+                            color: 'rgba(68,150,255,0.8)'
                         }
                     }
                 },
@@ -329,7 +328,7 @@ ajaxData({
                     //设置y轴分隔线
                     splitLine: {
                         lineStyle: {
-                            color: 'rgba(68, 150, 255, 1)'
+                            color: 'rgba(68,150,255,0.8)'
                         }
                     },
                     //设置轴线的属性
@@ -379,6 +378,7 @@ ajaxData({
         //调接口前 判空
         function judgeBeforeAjax() {
             if ((($scope.queryData.analysisObjectK == 1 || $scope.queryData.analysisObjectK == 2 || $scope.queryData.analysisObjectK == 3 || $scope.queryData.analysisObjectK == 5) && myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart].length == 0) || ($scope.queryData.analysisObjectK == 99 && myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart].length == 0) || (($scope.queryData.analysisObjectK == 101 || $scope.queryData.analysisObjectK == 102) && (myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart].length == 0 && myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart].length == 0))) {
+                // debugger
                 toaster.pop('error', '', '请选择分析对象');
                 return false;
             } else if (myAjaxData.config.alsRlist == 0) {
@@ -636,7 +636,7 @@ ajaxData({
                     $scope['yname' + $scope.checkChart] = [];
                     $scope['series' + $scope.checkChart] = [];
                     //图表 颜色的预设
-                    var colorsAry = ['#D2E058', '#F29958', '#71cf53', '#35c4ee', '#FF7070', '#70C7FF', '#FF0072', '#3c763d', '#a94442', '#777777', '#7266ba', '#fad733', '#a733ff', '#e033ff', '#ff33c0', '#ff3362'];
+                    var colorsAry = ['#8B85DD', '#C93EF3', '#36E4A0', '#33D2EF', '#5B6AFC', '#4CF5D3', '#71FD55', '#F6ADB9', '#00ADD8', '#F7942A', '#43A0FF', '#F6F831', '#FF6AE8', '#FD5555'];
                     if ($scope.queryData.analysisType == 3) {
                         //----------------------------------------------------对标分析 数据处理
                         $scope['ydatas' + $scope.checkChart] = [];
@@ -685,7 +685,7 @@ ajaxData({
                                     }
                                 }
                             })
-                        }  
+                        }
                         // $scope['tableType' + $scope.checkChart].push(tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle]);
                         // $scope['colors' + $scope.checkChart].push('#D2E058');
                         // $scope['newArrName' + $scope.checkChart].push('对标分析');
@@ -713,14 +713,14 @@ ajaxData({
                                     splitLine: {
                                         show: false,
                                         lineStyle: {
-                                            color: 'rgba(68, 150, 255, 1)'
+                                            color: 'rgba(68,150,255,0.8)'
                                         }
                                     },
                                     //设置轴线的属性
                                     axisLine: {
                                         show: true,
                                         lineStyle: {
-                                            color: 'rgba(68, 150, 255, 1)'
+                                            color: 'rgba(68,150,255,0.8)'
                                         }
                                     },
                                     //去掉刻度线
@@ -771,9 +771,15 @@ ajaxData({
 
                         //初始化echarts 并 塞入数据
                         echarts.init(document.getElementById('line' + $scope.checkChart)).setOption({
-                            color: [
-                                '#dd4444', '#fec42c', '#80F1BE', '#ff0000', '#ff6a00', '#d8ff00', '#7aff00', '#00ffdc', '#00ffff', '#7a00ff', '#c000ff', '#ff00e0', '#ff008d', '#ff0023'
-                            ],
+                            toolbox: {
+                                feature: {
+                                    saveAsImage: {
+                                        backgroundColor: '#166f9a'
+                                    }
+                                },
+                                right: 40
+                            },
+                            color: ['#8B85DD', '#C93EF3', '#36E4A0', '#33D2EF', '#5B6AFC', '#4CF5D3', '#71FD55', '#F6ADB9', '#00ADD8', '#F7942A', '#43A0FF', '#F6F831', '#FF6AE8', '#FD5555'],
                             tooltip: {
                                 trigger: 'axis',
                             },
@@ -809,7 +815,7 @@ ajaxData({
                                 //设置轴线的属性
                                 axisLine: {
                                     lineStyle: {
-                                        color: 'rgba(68, 150, 255, 1)'
+                                        color: 'rgba(68,150,255,0.8)'
                                     }
                                 }
                             },
@@ -1058,14 +1064,14 @@ ajaxData({
                                     splitLine: {
                                         show: false,
                                         lineStyle: {
-                                            color: 'rgba(68, 150, 255, 1)'
+                                            color: 'rgba(68,150,255,0.8)'
                                         }
                                     },
                                     //设置轴线的属性
                                     axisLine: {
                                         show: true,
                                         lineStyle: {
-                                            color: 'rgba(68, 150, 255, 1)'
+                                            color: 'rgba(68,150,255,0.8)'
                                         }
                                     },
                                     //去掉刻度线
@@ -1164,7 +1170,10 @@ ajaxData({
                                     height: 20,
                                     lineHeight: 20,
                                     padding: [3, 0, 0, 0]
-                                }
+                                },
+                                orient: 'vertical',  //垂直显示
+                                y: 'center',    //延Y轴居中
+                                x: 'right' //居右显示
                             },
                             xAxis: {
                                 type: 'category',
@@ -1187,7 +1196,7 @@ ajaxData({
                                 //设置轴线的属性
                                 axisLine: {
                                     lineStyle: {
-                                        color: 'rgba(68, 150, 255, 1)'
+                                        color: 'rgba(68,150,255,0.8)'
                                     }
                                 }
                             },
@@ -1287,21 +1296,21 @@ ajaxData({
                     $('.table1').each((index, item) => {
                         $(item).css({
                             'width': '100%',
-                            'height': '49%'
+                            'height': '49.3%'
                         })
                     })
                 } else if ($scope.chartSortCopy == 3) {
                     $('.table1').each((index, item) => {
                         $(item).css({
-                            'width': '49.6%',
+                            'width': '49.7%',
                             'height': '100%'
                         })
                     })
                 } else if ($scope.chartSortCopy == 4) {
                     $('.table1').each((index, item) => {
                         $(item).css({
-                            'width': '49.6%',
-                            'height': '49%'
+                            'width': '49.7%',
+                            'height': '49.3%'
                         })
                     })
                 }
@@ -1316,11 +1325,11 @@ ajaxData({
             if ($scope.chartSortIndex == 1) {
                 $scope.chartStyle = { 'width': '100%', 'height': '100%' }
             } else if ($scope.chartSortIndex == 2) {
-                $scope.chartStyle = { 'width': '100%', 'height': '49%' }
+                $scope.chartStyle = { 'width': '100%', 'height': '49.3%' }
             } else if ($scope.chartSortIndex == 3) {
-                $scope.chartStyle = { 'width': '49.6%', 'height': '100%' }
+                $scope.chartStyle = { 'width': '49.7%', 'height': '100%' }
             } else if ($scope.chartSortIndex == 4) {
-                $scope.chartStyle = { 'width': '49.6%', 'height': '49%' }
+                $scope.chartStyle = { 'width': '49.7%', 'height': '49.3%' }
             }
         }
 
@@ -1601,6 +1610,7 @@ ajaxData({
                 // 分析类型下拉框 选中处理数据
                 analysisObjFun();
                 $scope.$broadcast('clearTime');
+                $scope.$broadcast('clearAlsObj');
                 $scope.haveData3 = false;
             } else if (param == 7) {
                 // 分析指标弹出

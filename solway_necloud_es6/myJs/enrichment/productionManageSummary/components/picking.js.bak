@@ -1,5 +1,20 @@
 ajaxData(
     {
+        opFittingsCategorySelectByCondition: {
+            name: 'GETopFittingsCategorySelectByCondition',
+            later: true,
+            data: {}
+        },
+        opFittingsDictSelectCtg1: {
+            name: 'GETopFittingsDictSelectCtg1',
+            later: true,
+            data: {},
+        },
+        opFittingsDictSelectCtg2: {
+            name: 'GETopFittingsDictSelectCtg2',
+            later: true,
+            data: {},
+        },
         // 设备型号列表
         opFittingsDictSelectCurrData: {
             name: 'GETopFittingsDictSelectCurrData',
@@ -29,7 +44,11 @@ ajaxData(
     $scope.$on('popUp', (event, obj) => {
         const { tabIndex } = $scope;
         if (tabIndex !== 2) return;
-        $scope.opFittingsDictSelectCurrData.getData();
+        // $scope.opFittingsDictSelectCurrData.getData();
+        $scope.opFittingsDictSelectCurrData.getData().then(res => $scope.opFittingsDictSelectCurrData._res = res);
+        $scope.opFittingsCategorySelectByCondition.getData().then(res => $scope.opFittingsCategorySelectByCondition._res = res);
+        $scope.opFittingsDictSelectCtg1.getData().then(res => $scope.opFittingsDictSelectCtg1._res = res);
+        $scope.opFittingsDictSelectCtg2.getData().then(res => $scope.opFittingsDictSelectCtg2._res = res);
         $scope.down = true;
 
         $scope.summary = void 0;
@@ -48,7 +67,15 @@ ajaxData(
 
 
     $scope.insert = () => {
-        $scope.putList.unshift({ edit: true, num: 1, /* busiHd: '01' */ });
+        $scope.putList.unshift({ 
+            edit: true, 
+            num: 1, 
+            /* busiHd: '01' */ 
+            category: { ...$scope.opFittingsCategorySelectByCondition._res },
+            ctg1: { ...$scope.opFittingsDictSelectCtg1._res },
+            ctg2: { ...$scope.opFittingsDictSelectCtg2._res },
+            sparePartsList: { ...$scope.opFittingsDictSelectCurrData._res }
+        });
     };
 
 
@@ -59,6 +86,23 @@ ajaxData(
 
     $scope.computerMoney = (id, num, index) => {
         $scope.putList[index].money = ($scope.opFittingsDictSelectCurrData.res.body.filter(v => v.id == id)[0].fp * num).toFixed(2);
+    };
+
+    $scope.rowCategoryChange = (categoryId, obj) => {
+        $scope.opFittingsDictSelectCtg1.getData({ categoryId }).then(res => obj.ctg1 = res);
+        $scope.opFittingsDictSelectCtg2.getData({ categoryId, ctg1: obj.ctg1.ctg1 }).then(res => obj.ctg2 = res);
+        $scope.opFittingsDictSelectCurrData.getData({ categoryId, ctg1: obj.ctg1.ctg1, ctg2: obj.ctg2.ctg2 }).then(res => obj.sparePartsList = res);
+    };
+
+
+    $scope.rowCtg1Change = (ctg1, obj) => {
+        $scope.opFittingsDictSelectCtg2.getData({ ctg1, categoryId: obj.category.id }).then(res => obj.ctg2 = res);
+        $scope.opFittingsDictSelectCurrData.getData({ ctg1, categoryId: obj.category.id, ctg2: obj.ctg2.ctg2 }).then(res => obj.sparePartsList = res);
+    };
+
+
+    $scope.rowCtg2Change = (ctg2, obj) => {
+        $scope.opFittingsDictSelectCurrData.getData({ ctg2, categoryId: obj.category.id, ctg1: obj.ctg1.ctg1 }).then(res => obj.sparePartsList = res);
     };
 
 
@@ -77,6 +121,10 @@ ajaxData(
         const goods = putList.map(v => {
             delete v.edit;
             delete v.money;
+            delete v.category
+            delete v.ctg1
+            delete v.ctg2
+            delete v.sparePartsList
             return v;
         });
 
