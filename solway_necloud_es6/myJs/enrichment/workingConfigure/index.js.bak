@@ -409,6 +409,10 @@ ajaxData({
     //消息详情
     const getNoteDetailData = () => {
         $scope.powerStationDetail.getData({ id: $scope.pstationid }).then(res => {
+            if(!res.ismessage){
+                $("input[name='noteConfigure'][value='1']").prop("checked", true);
+                return;
+            }  
             $("input[name='noteConfigure'][value='" + res.ismessage + "']").prop("checked", true);
         });
     }

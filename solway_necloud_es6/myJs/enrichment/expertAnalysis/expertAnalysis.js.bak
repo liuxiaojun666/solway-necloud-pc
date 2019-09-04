@@ -227,10 +227,10 @@ ajaxData({
 
         }
         //图表的setOption
+        $scope.colors = ['#8B85DD', '#C93EF3', '#36E4A0', '#33D2EF', '#5B6AFC', '#4CF5D3', '#71FD55', '#F6ADB9', '#00ADD8', '#F7942A', '#43A0FF', '#F6F831', '#FF6AE8', '#FD5555']
         function chartOption(i, legend, series) {
             echarts.init(document.getElementById('container' + i)).setOption({
-                color: [
-                    '#8B85DD', '#C93EF3', '#36E4A0', '#33D2EF', '#5B6AFC', '#4CF5D3', '#71FD55', '#F6ADB9', '#00ADD8', '#F7942A', '#43A0FF', '#F6F831', '#FF6AE8', '#FD5555'],
+                color: $scope.colors,
                 legend: legend,
                 tooltip: {
                     trigger: 'item',
@@ -378,7 +378,6 @@ ajaxData({
         //调接口前 判空
         function judgeBeforeAjax() {
             if ((($scope.queryData.analysisObjectK == 1 || $scope.queryData.analysisObjectK == 2 || $scope.queryData.analysisObjectK == 3 || $scope.queryData.analysisObjectK == 5) && myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart].length == 0) || ($scope.queryData.analysisObjectK == 99 && myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart].length == 0) || (($scope.queryData.analysisObjectK == 101 || $scope.queryData.analysisObjectK == 102) && (myAjaxData.config.dmsTypeCs[myAjaxData.config.checkChart].length == 0 && myAjaxData.config.dmsTypeDs[myAjaxData.config.checkChart].length == 0))) {
-                // debugger
                 toaster.pop('error', '', '请选择分析对象');
                 return false;
             } else if (myAjaxData.config.alsRlist == 0) {
@@ -422,7 +421,7 @@ ajaxData({
             return dataJ;
         }
 
-        //另存一份 params 参数
+        //深拷贝一份 params 参数
         function storeAnotherParams() {
             myAjaxData.config.paramsData[$scope.checkChart].dmsTypeAs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart]));
             myAjaxData.config.paramsData[$scope.checkChart].dmsTypeBs = JSON.parse(JSON.stringify(myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart]));
@@ -622,8 +621,6 @@ ajaxData({
                     //图表的 setoption
                     chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart]);
                 } else {
-                    // 获取y轴的名字
-                    // $scope['yname' + $scope.checkChart] = $scope['yunits' + $scope.checkChart] ? $scope['analysfdName' + $scope.checkChart] + '(' + $scope['yunits' + $scope.checkChart] + ')' : $scope['analysfdName' + $scope.checkChart];
                     // 获取各项数据
                     var key;
                     var key2;
@@ -686,10 +683,7 @@ ajaxData({
                                 }
                             })
                         }
-                        // $scope['tableType' + $scope.checkChart].push(tableStyle[myAjaxData.config.tableData[$scope.checkChart].fdStyle]);
-                        // $scope['colors' + $scope.checkChart].push('#D2E058');
-                        // $scope['newArrName' + $scope.checkChart].push('对标分析');
-
+ 
                         //-------------------------------------------------------------------重写
                         var yAxis = [];
                         $scope['yname' + $scope.checkChart].forEach((item, i) => {
@@ -746,14 +740,10 @@ ajaxData({
                         $scope['fileName' + $scope.checkChart] = '对标分析';
                         var headData = ['分析对象'];
                         var arr = [];
-                        $scope['xdata' + $scope.checkChart].forEach((v, i) => {
-                            arr[i] = [v];
-                        })
+                        $scope['xdata' + $scope.checkChart].forEach((v, i) => arr[i] = [v])
                         $scope['series' + $scope.checkChart].forEach((v, i) => {
                             headData.push(v.name);
-                            v.data.forEach((xv, xi) => {
-                                arr[xi].push(xv);
-                            })
+                            v.data.forEach((xv, xi) => arr[xi].push(xv))
                         })
                         arr.splice(0, 0, headData);
                         $scope['tableData' + $scope.checkChart] = arr;
@@ -779,7 +769,7 @@ ajaxData({
                                 },
                                 right: 40
                             },
-                            color: ['#8B85DD', '#C93EF3', '#36E4A0', '#33D2EF', '#5B6AFC', '#4CF5D3', '#71FD55', '#F6ADB9', '#00ADD8', '#F7942A', '#43A0FF', '#F6F831', '#FF6AE8', '#FD5555'],
+                            color: $scope.colors,
                             tooltip: {
                                 trigger: 'axis',
                             },
@@ -839,12 +829,7 @@ ajaxData({
                         $scope['ydatas' + $scope.checkChart] = [];
                         $scope['newArrName' + $scope.checkChart] = [];
                         delete $scope.tableData.data.dtime;
-                        //获取 yunits
-                        // for (key in $scope.tableData.units) {
-                        //     if (key == myAjaxData.config.analysFds[0]['fdKey']) {
-                        //         $scope['yunits' + $scope.checkChart] = $scope.tableData.units[key];
-                        //     }
-                        // }
+
                         var ydatalen = myAjaxData.config.analysFds[myAjaxData.config.checkChart].length;
                         for (var i = 0; i < ydatalen; i++) {
                             $scope['ydatas' + $scope.checkChart].push([]);
@@ -857,9 +842,7 @@ ajaxData({
                             var topKey = item.fdKey;
                             var topName;
                             $scope['analysfdName' + $scope.checkChart].forEach((v) => {
-                                if (v.fdKey == topKey) {
-                                    topName = v.fdName;
-                                }
+                                if (v.fdKey == topKey) topName = v.fdName
                             })
                             switch (judge) {
                                 case '10':
@@ -1030,13 +1013,13 @@ ajaxData({
                         $scope.endPercent = dataLen < 30 ? 100 : (30 / dataLen) * 100;
 
                         //曲线或者柱状图 颜色 的获取
-                        $scope['newArrName' + $scope.checkChart].forEach((item, i) => {
+                        $scope['newArrName' + $scope.checkChart].forEach(item => {
                             item.forEach((xitem, xi) => {
                                 if (colorsAry[xi]) {
-                                    $scope['colors' + $scope.checkChart].push(colorsAry[xi]);
+                                    $scope.colors.push(colorsAry[xi]);
                                 } else {
                                     colorsAry[xi] = '#' + ('00000' + (Math.random() * 0x1000000 << 0).toString(16)).substr(-6);
-                                    $scope['colors' + $scope.checkChart].push(colorsAry[xi]);
+                                    $scope.colors.push(colorsAry[xi]);
                                 }
                             })
                         })
@@ -1091,7 +1074,8 @@ ajaxData({
                                     data: xv.map((xxv, xxi) => {
                                         return xxv === null ? '-' : xxv;
                                     }),
-                                    barWidth: 15
+                                    barWidth: 15,
+                                    lineStyle: {normal: { width: 2 }}
                                 })
                             })
                         })
@@ -1100,25 +1084,19 @@ ajaxData({
                         $scope['fileName' + $scope.checkChart] = '趋势分析';
                         var headData = ['统计时间'];
                         var arr = [];
-                        $scope['xdata' + $scope.checkChart].forEach((v, i) => {
-                            arr[i] = [v];
-                        })
+                        $scope['xdata' + $scope.checkChart].forEach((v, i) => arr[i] = [v])
                         $scope['series' + $scope.checkChart].forEach((v, i) => {
                             headData.push(v.name);
-                            v.data.forEach((xv, xi) => {
-                                arr[xi].push(xv);
-                            })
+                            v.data.forEach((xv, xi) => arr[xi].push(xv))
                         })
                         arr.splice(0, 0, headData);
                         $scope['tableData' + $scope.checkChart] = arr;
 
-                        var str = ``;
-                        arr.forEach((v, i) => {
-                            str += `<tr>`;
-                            v.forEach((xv, xi) => {
-                                str += `<td>${xv}</td>`;
-                            })
-                            str += `</tr>`;
+                        var str = ``
+                        arr.forEach(v => {
+                            str += `<tr>`
+                            v.forEach(xv => str += `<td>${xv}</td>`)
+                            str += `</tr>`
                         })
 
                         $('.chartTable' + $scope.checkChart).html(str);
@@ -1126,7 +1104,7 @@ ajaxData({
                         //-------------------------------------------------------------------重写
                         //初始化echarts 并 塞入数据
                         echarts.init(document.getElementById('line' + $scope.checkChart)).setOption({
-                            color: $scope['colors' + $scope.checkChart],
+                            color: $scope.colors,
                             tooltip: {
                                 trigger: 'axis',
                                 position: function (point, params, dom, rect, size) {
@@ -1158,6 +1136,21 @@ ajaxData({
                                     }
 
                                     return [x, y];
+                                },
+                                formatter: function (params) {
+                                    let newParams = []
+                                    let tooltipString = []
+                                    newParams = [...params]
+                                    newParams.forEach(v => v.value = v.value === '-' ? -999 : v.value)
+                                    newParams.sort((a,b) => {return b.value - a.value})
+                                    newParams.forEach(v => v.value = v.value === -999 ? '-' : v.value)
+
+                                    newParams.forEach((p) => {
+                                        const cont = p.marker + ' ' + p.seriesName + ': ' + p.value + '<br/>'
+                                        tooltipString.push(cont)
+                                    })
+                                    tooltipString.unshift(params[0].axisValue + '<br/>')
+                                    return tooltipString.join('')
                                 }
                             },
                             legend: {
@@ -1171,6 +1164,7 @@ ajaxData({
                                     lineHeight: 20,
                                     padding: [3, 0, 0, 0]
                                 },
+                                top: 40,
                                 orient: 'vertical',  //垂直显示
                                 y: 'center',    //延Y轴居中
                                 x: 'right' //居右显示
@@ -1212,7 +1206,7 @@ ajaxData({
                             ],
                             grid: {
                                 top: "26%",
-                                right: "14%",
+                                right: "30%",
                                 bottom: "18%"
                             }
                         }, true)
@@ -1232,7 +1226,6 @@ ajaxData({
             excelIo.save(json, function (blob) {
                 saveAs(blob, '关联分析' + ".xlsx");
             }, function (e) {
-                console.log(e);
             });
         }
 
@@ -1551,11 +1544,169 @@ ajaxData({
                 line1.resize();
                 line2.resize();
                 line3.resize();
-                // if ($scope['fdStyle' + $scope.checkChart] != 4 && $scope['fdStyle' + $scope.checkChart] && $scope['xdata' + $scope.checkChart] && $scope['ydatas' + $scope.checkChart]) {
-                //     echarts.getInstanceByDom(document.getElementById("line" + $scope.checkChart)).resize();
-                // }
             }, 500)
         });
+
+        // 自定义图例点击事件
+        var colorIndex
+        $scope.colorShow = false
+        echarts.getInstanceByDom(document.getElementById('line' + $scope.checkChart)).on('legendselectchanged', function(obj) {
+            let option = this.getOption()
+            $scope.colorShow = true
+            var lineArr = $scope['newArrName' + $scope.checkChart].reduce((a, b) => a.concat(b), [])
+            lineArr.forEach((v,i) => {if (v === obj.name) colorIndex = i})
+
+            option.legend[0].selected[obj.name] = true
+            this.setOption(option)
+        })
+
+        document.getElementsByClassName('color')[0].onchange = function () {
+            $scope['colors'][colorIndex] = this.value
+            var yAxis = []
+            $scope['yname' + $scope.checkChart].forEach((item, i) => {
+                var offset = i == 2 ? 60 : 0
+                yAxis.push(
+                    {
+                        name: item,
+                        offset: offset,
+                        nameTextStyle: {
+                            color: '#fff',
+                            fontSize: 12
+                        },
+                        //改变y轴字体颜色为白色
+                        axisLabel: {
+                            show: true,
+                            textStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        //设置y轴分隔线
+                        splitLine: {
+                            show: false,
+                            lineStyle: {
+                                color: 'rgba(68,150,255,0.8)'
+                            }
+                        },
+                        //设置轴线的属性
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: 'rgba(68,150,255,0.8)'
+                            }
+                        },
+                        //去掉刻度线
+                        axisTick: {
+                            show: false
+                        }
+                    })
+            })
+            echarts.init(document.getElementById('line' + $scope.checkChart)).setOption({
+                color: $scope.colors,
+                tooltip: {
+                    trigger: 'axis',
+                    position: function (point, params, dom, rect, size) {
+                        // 鼠标坐标和提示框位置的参考坐标系是：以外层div的左上角那一点为原点，x轴向右，y轴向下
+                        // 提示框位置
+                        var x = 0; // x坐标位置
+                        var y = 0; // y坐标位置
+
+                        // 当前鼠标位置
+                        var pointX = point[0];
+                        var pointY = point[1];
+
+                        // 提示框大小
+                        var boxWidth = size.contentSize[0];
+                        var boxHeight = size.contentSize[1];
+
+                        // boxWidth > pointX 说明鼠标左边放不下提示框
+                        if (boxWidth > pointX) {
+                            x = 5;
+                        } else { // 左边放的下
+                            x = pointX - boxWidth;
+                        }
+
+                        // boxHeight > pointY 说明鼠标上边放不下提示框
+                        if (boxHeight > pointY) {
+                            y = 5;
+                        } else { // 上边放得下
+                            y = pointY - boxHeight;
+                        }
+
+                        return [x, y];
+                    },
+                    formatter: function (params) {
+                        let newParams = []
+                        let tooltipString = []
+                        newParams = [...params]
+                        newParams.forEach(v => v.value = v.value === '-' ? -999 : v.value)
+                        newParams.sort((a,b) => {return b.value - a.value})
+                        newParams.forEach(v => v.value = v.value === -999 ? '-' : v.value)
+
+                        newParams.forEach((p) => {
+                            const cont = p.marker + ' ' + p.seriesName + ': ' + p.value + '<br/>'
+                            tooltipString.push(cont)
+                        })
+                        tooltipString.unshift(params[0].axisValue + '<br/>')
+                        return tooltipString.join('')
+                    }
+                },
+                legend: {
+                    type: 'scroll',
+                    width: 450,
+                    data: $scope['newArrName' + $scope.checkChart].reduce((a, b) => a.concat(b), []),
+                    textStyle: {
+                        color: '#fff',
+                        fontSize: 12,
+                        height: 20,
+                        lineHeight: 20,
+                        padding: [3, 0, 0, 0]
+                    },
+                    orient: 'vertical',  //垂直显示
+                    y: 'center',    //延Y轴居中
+                    x: 'right' //居右显示
+                },
+                xAxis: {
+                    type: 'category',
+                    data: $scope['xdata' + $scope.checkChart],
+                    nameTextStyle: {
+                        color: '#fff',
+                        fontSize: 12
+                    },
+                    //改变x轴字体颜色为白色
+                    axisLabel: {
+                        show: true,
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    //去掉x轴分隔线
+                    splitLine: {
+                        show: false
+                    },
+                    //设置轴线的属性
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(68,150,255,0.8)'
+                        }
+                    }
+                },
+                yAxis: yAxis,
+                series: $scope['series' + $scope.checkChart],
+                dataZoom: [
+                    {
+                        type: 'slider',
+                        show: true,
+                        start: 0,
+                        end: $scope.endPercent
+                    },
+                ],
+                grid: {
+                    top: "26%",
+                    right: "14%",
+                    bottom: "18%"
+                }
+            }, true)
+        }
 
         //点击 弹出框
         $scope.analysisObjectModel = true;
