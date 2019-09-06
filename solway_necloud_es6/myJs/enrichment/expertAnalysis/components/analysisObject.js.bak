@@ -795,7 +795,6 @@ ajaxData({
         }
 
         //成组添加
-        // $scope.groupNameMaps = [{},{},{},{}]
         $scope.groupNameMaps = {}
         for (var i = 0; i < 4; i++) {
             $scope['groupResult1' + i] = []    //电站
@@ -804,17 +803,15 @@ ajaxData({
             $scope['groupResult101' + i] = []  //机型
             $scope['groupResult102' + i] = []  //故障类型
             $scope['groupResultDevice' + i] = [] //设备
-            for (var j = 1; j < 4; j++) {
-                $scope['groupNum1' + i + j] = 0 //组合名
-                $scope['groupNum5' + i + j] = 0
-                $scope['groupNum3' + i + j] = 0
-                $scope['groupNum101' + i + j] = 0
-                $scope['groupNum102' + i + j] = 0
-                $scope['groupNum990' + i + j] = 0
-                $scope['groupNum991' + i + j] = 0
-            }
-
-            // $scope.groupNameMaps[i].Maps1 = $scope.groupNameMaps[i].Maps5 = $scope.groupNameMaps[i].Maps3 = $scope.groupNameMaps[i].Maps101 = $scope.groupNameMaps[i].Maps102 = $scope.groupNameMaps[i].Maps990 = $scope.groupNameMaps[i].Maps991 = {}
+            // for (var j = 1; j < 4; j++) {
+            //     $scope['groupNum1' + i + j] = 0 //组合名
+            //     $scope['groupNum5' + i + j] = 0
+            //     $scope['groupNum3' + i + j] = 0
+            //     $scope['groupNum101' + i + j] = 0
+            //     $scope['groupNum102' + i + j] = 0
+            //     $scope['groupNum990' + i + j] = 0
+            //     $scope['groupNum991' + i + j] = 0
+            // }
         }
         $scope.groupAdd = () => {
             checkChangeFn();
@@ -833,29 +830,27 @@ ajaxData({
             }
 
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5) {
-                var groupName = '组合' + ++$scope['groupNum' + $scope.analysisObjectK + parentmyAjaxData.config.checkChart + parentmyAjaxData.config.anlsType]
+                var groupName = '组合' + ($scope[key[$scope.analysisObjectK]].length + 1)
                 //组装接口需要的数据 (电站|区域(部门)|集团)
                 var groupItem = {
                     "isGroup": 1,
-                    'groupName': 'gp' + parseInt(Math.random() * 10000),
+                    'groupName': 'gp' + parseInt(Math.random() * 10000000),
                     "ids": []
                 }
-                $scope.groupNameMaps[groupItem.groupName] = groupName
-                // $scope.groupNameMaps[$scope.checkChart]['Maps' + $scope.analysisObjectK][groupItem.groupName] = groupName
-                // $scope['groupNameMaps' + $scope.analysisObjectK + parentmyAjaxData.config.checkChart][groupItem.groupName] = groupName
-                var newArr = JSON.parse(JSON.stringify(FTmiddleArr));
+                $scope.groupNameMaps[groupItem.groupName] = parentmyAjaxData.config.groupNameMaps[groupItem.groupName] = groupName
+                var newArr = JSON.parse(JSON.stringify(FTmiddleArr))
                 newArr.forEach((item) => {
-                    item.isgroup = true;
-                    item.groupName = groupItem.groupName;
-                    groupItem.ids.push(item.busiId);
+                    item.isgroup = true
+                    item.groupName = groupItem.groupName
+                    groupItem.ids.push(item.busiId)
                 })
-                $scope['groupResult' + $scope.analysisObjectK + parentmyAjaxData.config.checkChart].push(groupItem);
-                $scope[key[$scope.analysisObjectK]].push(newArr);
+                $scope['groupResult' + $scope.analysisObjectK + parentmyAjaxData.config.checkChart].push(groupItem)
+                $scope[key[$scope.analysisObjectK]].push(newArr)
             } else if ($scope.analysisObjectK == 99) {
                 //组装接口需要的数据 (设备)
                 var groupItem = {
                     "isGroup": 1,
-                    'groupName': 'gp' + parseInt(Math.random() * 10000),
+                    'groupName': 'gp' + parseInt(Math.random() * 10000000),
                     "st_eqids": []
                 }
 
@@ -892,7 +887,7 @@ ajaxData({
                 })
                 //组装接口需要的数据 (机型/故障类型)
                 var groupItem = {
-                    'groupName': 'gp' + parseInt(Math.random() * 10000),
+                    'groupName': 'gp' + parseInt(Math.random() * 10000000),
                     'cdts': [],
                 }
                 typeArr.map((item) => {
@@ -994,7 +989,7 @@ ajaxData({
                     $scope.$emit('noChecked', 'analysisObj');
                 }
             }
-            --$scope['groupNum' + $scope.analysisObjectK + parentmyAjaxData.config.checkChart + parentmyAjaxData.config.anlsType]
+            // --$scope['groupNum' + $scope.analysisObjectK + parentmyAjaxData.config.checkChart + parentmyAjaxData.config.anlsType]
         }
 
         //全部删除
@@ -1027,7 +1022,7 @@ ajaxData({
                     $scope.$apply();
                 });
             }
-            $scope['groupNum' + $scope.analysisObjectK + parentmyAjaxData.config.checkChart + parentmyAjaxData.config.anlsType] = 0
+            // $scope['groupNum' + $scope.analysisObjectK + parentmyAjaxData.config.checkChart + parentmyAjaxData.config.anlsType] = 0
         }
 
         //按需加载ztree文件
@@ -1097,7 +1092,8 @@ ajaxData({
                     }
                 })
             }
-            parentmyAjaxData.config.bIdToName[parentmyAjaxData.config.checkChart] = analyOjName;
+            parentmyAjaxData.config.bIdToName[parentmyAjaxData.config.checkChart] = analyOjName
+            debugger
         }
 
         //取消按钮

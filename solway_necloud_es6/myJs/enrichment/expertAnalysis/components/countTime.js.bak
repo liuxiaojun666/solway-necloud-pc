@@ -185,24 +185,23 @@ ajaxData({
         }
 
         //确定按钮
-        var arr = [];
-        $scope.allDate = 0;
+        $scope.timeGroupUserArr = [];
         $scope.oneAdd = () => {
             //页面显示用的json
             var groupJson = {
                 startDate: $scope.GroupUser.startDate.showDate,
                 endDate: $scope.GroupUser.endDate.showDate
             }
-            var date = ($scope.GroupUser.endDate.getTime() - $scope.GroupUser.startDate.getTime()) / (1000 * 60 * 60 * 24);
-            date = Math.ceil(date);
-            $scope.allDate += date;
+            // var date = ($scope.GroupUser.endDate.getTime() - $scope.GroupUser.startDate.getTime()) / (1000 * 60 * 60 * 24);
+            // date = Math.ceil(date);
+            // $scope.allDate += date;
             // 未去重的数据
             $scope.timeGroupUser.push(groupJson);
             // 数组格式转换 (后台要的数据格式)
             var i = `${groupJson.startDate},${groupJson.endDate}`;
-            arr.push(i);
+            $scope.timeGroupUserArr.push(i);
             // 数组去重
-            $scope.newtimeGroupUser = [...new Set(arr)];
+            $scope.newtimeGroupUser = [...new Set($scope.timeGroupUserArr)];
             //整理 显示到页面的数据格式
             $scope.timeGroupUser = [];
             $scope.newtimeGroupUser.map((item) => {
@@ -221,6 +220,7 @@ ajaxData({
         //右侧删除小按钮
         $scope.delRight = (id, index) => {
             $scope[key[$scope.radioIndex]].splice(index, 1);
+            $scope.timeGroupUserArr.splice(index, 1);
             if ($scope[key[$scope.radioIndex]].length == 0) {
                 parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
                 $scope.$emit('noChecked', 'countTime');
@@ -234,6 +234,7 @@ ajaxData({
             } else {
                 $solway.confirm({ message: '确定全部删除吗？' }, () => {
                     $scope[key[$scope.radioIndex]] = [];
+                    $scope.timeGroupUserArr = [];
                     parentmyAjaxData.config.dmsTimeDates[parentmyAjaxData.config.checkChart] = [];
                     $scope.$emit('noChecked', 'countTime');
                     $scope.$apply();
@@ -248,6 +249,13 @@ ajaxData({
 
         //确定
         $scope.confirm = () => {
+            if ($scope.radioIndex == 4) {
+                $scope.allDate = 0
+                $scope.timeGroupUser.forEach(v => {
+                    var timeLen = (new Date(v.endDate).getTime() - new Date(v.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1
+                    $scope.allDate += timeLen
+                })
+            }
             if ($scope[key[$scope.radioIndex]].length == 0) {
                 toaster.pop('error', '', '所选数据不能为空');
                 return;
