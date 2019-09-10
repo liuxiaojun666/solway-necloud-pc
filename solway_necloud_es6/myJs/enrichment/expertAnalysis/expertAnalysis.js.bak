@@ -661,6 +661,7 @@ ajaxData({
 
                     //图表的 setoption
                     chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart]);
+                    debugger
                 } else {
                     // 获取各项数据
                     var key;
@@ -857,8 +858,7 @@ ajaxData({
                                 },
                                 tooltip: {
                                     show: true
-                                },
-                                backgroundColor: '#000'
+                                }
                             },
                             xAxis: {
                                 data: $scope['xdata' + $scope.checkChart],
@@ -1266,9 +1266,9 @@ ajaxData({
                                     let newParams = []
                                     let tooltipString = []
                                     newParams = [...params]
-                                    newParams.forEach(v => v.value = v.value === '-' ? -999 : v.value)
+                                    newParams.forEach(v => v.value = v.value === '-' ? -9999 : v.value)
                                     newParams.sort((a,b) => {return b.value - a.value})
-                                    newParams.forEach(v => v.value = v.value === -999 ? '-' : v.value)
+                                    newParams.forEach(v => v.value = v.value === -9999 ? '-' : v.value)
 
                                     newParams.forEach((p) => {
                                         const cont = p.marker + ' ' + p.seriesName + ': ' + p.value + '<br/>'
@@ -1683,8 +1683,8 @@ ajaxData({
                 let option = this.getOption()
 
                 // 随着点击位置 移动弹框位置
-                document.getElementsByClassName('editLine-con')[i].style.top = window.event.clientY - 120 + 'px'
-                document.getElementsByClassName('editLine-con')[i].style.left = window.event.clientX - 50 + 'px'
+                document.getElementsByClassName('editLine-con')[i].style.top = window.event.clientY + 'px'
+                document.getElementsByClassName('editLine-con')[i].style.left = window.event.clientX - 130 + 'px'
 
                 // 赋值name
                 $scope.legendName = obj.name
@@ -1711,6 +1711,8 @@ ajaxData({
 
                 // 给颜色选择器 赋默认值
                 document.getElementsByClassName('color')[i].value = $scope['colors'][colorIndex]
+                debugger
+
             })
 
             // 选择颜色事件 (趋势分析、对标分析)
@@ -1809,9 +1811,9 @@ ajaxData({
                         let newParams = []
                         let tooltipString = []
                         newParams = [...params]
-                        newParams.forEach(v => v.value = v.value === '-' ? -999 : v.value)
+                        newParams.forEach(v => v.value = v.value === '-' ? -9999 : v.value)
                         newParams.sort((a,b) => {return b.value - a.value})
-                        newParams.forEach(v => v.value = v.value === -999 ? '-' : v.value)
+                        newParams.forEach(v => v.value = v.value === -9999 ? '-' : v.value)
 
                         newParams.forEach((p) => {
                             const cont = p.marker + ' ' + p.seriesName + ': ' + p.value + '<br/>'
@@ -2138,6 +2140,7 @@ ajaxData({
             }
             $scope.timeLat = v.ll;
             $scope.$broadcast('clearTime');
+            $scope.haveData2 = false;
             $scope.haveData3 = false;
             $scope.haveData5 = false;
             $scope.haveData6 = false;

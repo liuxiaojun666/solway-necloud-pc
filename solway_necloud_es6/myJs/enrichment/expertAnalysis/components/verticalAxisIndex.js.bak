@@ -58,6 +58,8 @@ AddbaseDictionary: {
                     break
                 }
             }
+        } else {
+            $scope.objGroup = false
         }
     })
 
@@ -67,12 +69,22 @@ AddbaseDictionary: {
     }
 
     //单选框选中-> 更改select的值
+    $scope.noFdAgg = false
     $scope.radioToSelect = (item, index) => {
         $scope.verticAxisK = item.k
-        $scope.$emit('radioToFather', { 'type': 'vertical', 'k': item.k, 'value': item.v })
+        $scope.$emit('radioToFather', { 'type': 'vertical', 'k': item.k, 'value': '指标' })
         $scope.verticalBottom = item.ll
         $scope.verticItem = item
         $scope.radioIndex = index
+
+        for (var i=0; i < $scope.verticalBottom.length; i++) {
+            var item = $scope.verticalBottom[i]
+            if (!item.fdAgg) {
+                $scope.noFdAgg = true
+                break
+            }
+            $scope.noFdAgg = false
+        }
     }
 
     $scope.verticalCheckData = []
@@ -207,7 +219,7 @@ AddbaseDictionary: {
             toaster.pop('error', '', '所选数据不能为空')
             return
         }
-        if ($scope.objGroup) {
+        if ($scope.objGroup && !$scope.noFdAgg) {
             var json = {
                 fdKey: $scope.verticalCheckData[0].fdKey,
                 isx: 0,

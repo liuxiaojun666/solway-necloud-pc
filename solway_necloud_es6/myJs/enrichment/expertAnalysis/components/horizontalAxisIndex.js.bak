@@ -16,24 +16,24 @@ HighAnalysis_selectFds: {
             anlsType: parentmyAjaxData.config.anlsType,
             dmsType: parentmyAjaxData.config.dmsType,
             dmsTime: parentmyAjaxData.config.dmsTime
+        }).then(res => {
+            if (!res.body) {
+                toaster.pop('error', '', res.msg)
+                $scope.$emit('horizonNan', { data: 1})
+                return
+            }
+            $scope.$emit('horizonNan', { data: 0})
+            $scope.herizonData = res.body
+            debugger
+    
+            $scope.herizonData.ctg1.ll = [...$scope.herizonData.ctg1.ll,...$scope.herizonData.ctg2.ll]
+            $scope.horizonCheckData = []
+            parentmyAjaxData.config.fdX.name = parentmyAjaxData.config.fdX.key = ''
+            $scope.radioToSelect($scope.herizonData.ctg1, 0)
+            $scope.$emit('noChecked', 'horizontalAxisIndex')
         })
     })
 
-    $scope.HighAnalysis_selectFds.subscribe(res => {
-        if (!res.body) {
-            toaster.pop('error', '', res.msg)
-            $scope.$emit('horizonNan', { data: 1})
-            return
-        }
-        $scope.$emit('horizonNan', { data: 0})
-        $scope.herizonData = res.body
-        $scope.herizonData.ctg1.ll = [...$scope.herizonData.ctg1.ll,...$scope.herizonData.ctg2.ll]
-        $scope.horizonCheckData = []
-        parentmyAjaxData.config.fdX.name = parentmyAjaxData.config.fdX.key = ''
-        $scope.radioToSelect($scope.herizonData.ctg1, 0)
-        $scope.$emit('noChecked', 'horizontalAxisIndex')
-    });
-    
     //监听横轴指标页面打开
     $scope.$on('horizonOpen', () => {
         //获取 checked 的数据 -> 重现到左侧列表
@@ -61,6 +61,8 @@ HighAnalysis_selectFds: {
                     break
                 }
             }
+        } else {
+            $scope.objGroup = false
         }
     })
 
@@ -72,14 +74,12 @@ HighAnalysis_selectFds: {
     //单选框选中-> 更改select的值
     $scope.radioToSelect = (item, index) => {
         $scope.hrizonAxisK = item.k
-        $scope.$emit('radioToFather', { 'type': 'horizon', 'k': item.k, 'value': item.v })
+        $scope.$emit('radioToFather', { 'type': 'horizon', 'k': item.k, 'value': '指标' })
         $scope.herizonBottom = item.ll
         //给数据赋初始show值
         $scope.herizonBottom.forEach(item => item.show = true)
         $scope.hrizonItem = item
         $scope.radioIndex = index
-        //处理fdStyle 字段
-        fdStyleFun()
 
         //处理fdAgg 字段
         fdAggFun()
@@ -88,29 +88,8 @@ HighAnalysis_selectFds: {
         parentmyAjaxData.config.herizonData = $scope.herizonData
     }
 
-    //处理fdStyle 字段
-    const fdStyleFun = () => {
-        var styleKey = {
-            1: '曲线',
-            2: '折线',
-            3: '柱状图',
-            4: '散点'
-        }
-        $scope.herizonBottom.forEach(item => {
-            var result = item.fdStyle.split(",")
-            var newFdStyleCopy = []
-            item.newFdStyle = []
-            result.forEach(item => {
-                var data = {}
-                data.key = item
-                data.value = styleKey[item]
-                newFdStyleCopy.push(data)
-            })
-            item.newFdStyle = newFdStyleCopy
-        })
-    }
-
     //处理fdAgg 字段
+    $scope.noFdAgg = false
     const fdAggFun = () => {
         var aggKey = {
             1: 'sum',
@@ -118,7 +97,13 @@ HighAnalysis_selectFds: {
             3: 'max',
             4: 'min'
         }
-        $scope.herizonBottom.forEach(item => {
+        if (!$scope.herizonBottom[0].fdAgg) {
+            $scope.noFdAgg = true
+            return
+        }
+        for (var i=0; i < $scope.herizonBottom.length; i++) {
+            $scope.noFdAgg = false
+            var item = $scope.herizonBottom[i]
             item.tableAgg = 1
             var result = item.fdAgg.split(",")
             var newFdAggCopy = []
@@ -130,7 +115,7 @@ HighAnalysis_selectFds: {
                 newFdAggCopy.push(data)
             })
             item.newfdAgg = newFdAggCopy
-        })
+        }
     }
 
     $scope.horizonCheckData = [];
@@ -272,7 +257,7 @@ HighAnalysis_selectFds: {
             toaster.pop('error', '', '所选数据不能为空')
             return
         }
-        if ($scope.objGroup) {
+        if ($scope.objGroup && !$scope.noFdAgg) {
             var json = {
                 fdKey: $scope.horizonCheckData[0].fdKey,
                 isx: 1,

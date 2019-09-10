@@ -156,6 +156,8 @@ ajaxData({
                         break
                     }
                 }
+            } else {
+                $scope.objGroup = false
             }
         })
 
@@ -216,6 +218,7 @@ ajaxData({
         }
 
         //处理fdAgg 字段
+        $scope.noFdAgg = false
         const fdAggFun = () => {
             var aggKey = {
                 1: 'sum',
@@ -223,7 +226,13 @@ ajaxData({
                 3: 'max',
                 4: 'min'
             }
-            $scope.analysBottom.forEach(item => {
+            // if (!$scope.herizonBottom[0].fdAgg) {
+            //     $scope.noFdAgg = true
+            //     return
+            // }
+            for (var i=0; i < $scope.analysBottom.length; i++) {
+                $scope.noFdAgg = false
+                var item = $scope.analysBottom[i]
                 var result = item.fdAgg.split(",")
                 var newFdAggCopy = []
                 item.newfdAgg = []
@@ -234,7 +243,7 @@ ajaxData({
                     newFdAggCopy.push(data)
                 })
                 item.newfdAgg = newFdAggCopy
-            })
+            }
         }
 
         $scope.analysCheckData = []
@@ -417,7 +426,7 @@ ajaxData({
                 // 对标分析
                 $scope.analysCheckData.forEach((item) => {
                     //获取fds
-                    if ($scope.objGroup) {
+                    if ($scope.objGroup && !$scope.noFdAgg) {
                         analysFds_y1.push(
                             {
                                 fdKey: item.fdKey,
@@ -438,7 +447,7 @@ ajaxData({
             } else {
                 // 趋势分析
                 $scope.analysCheckData.forEach((item) => {
-                    if ($scope.objGroup) {
+                    if ($scope.objGroup && !$scope.noFdAgg) {
                         analysFds_y1.push(
                             {
                                 fdKey: item.fdKey,
