@@ -233,9 +233,13 @@ ajaxData({
 
     //气象仪详情
     const getAerographDetail = () => {
+        $scope.aerographNoConfigure = false;
         $scope.aerographDetail.getData({
             pstationid: $scope.pstationid
         }).then(res => {
+            if(!res){
+                $scope.aerographNoConfigure = true;
+            }
             $scope.aerographData = res;
             $scope.aerographEditId = res.id;
             $scope.weatherdetail = res.weatherdetail == ''? 0 : res.weatherdetail;

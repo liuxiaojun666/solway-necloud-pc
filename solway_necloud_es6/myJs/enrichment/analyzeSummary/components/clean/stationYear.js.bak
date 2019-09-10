@@ -75,6 +75,11 @@ ajaxData({
         data: {},
         later: true
     },
+    getDeviceLayoutSvg: {
+        name: 'GETDeviceLayoutSvg',
+        data: {},
+        later: true
+    },
 }, {
     __serviceName__: 'cleanStationYearService',
 })('cleanStationYearCtrl', ['$scope', 'cleanStationYearService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
@@ -200,7 +205,9 @@ ajaxData({
                 sort: 'clean_mark,asc',
                 date: dateTime.showDate
             });
-        } else if (tabIndex === 2) {
+        } else if (tabIndex === 1 && showShape === 'chart2') {
+            $scope.getDeviceLayoutSvg.getData({})
+        }else if (tabIndex === 2) {
             // $scope.resourceDetailStationDay.getData({
             //     date: (new Date).Format('yyyy-MM-dd'),
             //     dateType: 3,
@@ -253,6 +260,85 @@ ajaxData({
         }
         $scope.$apply();
     };
+
+    let heatmapInstance = h337.create({
+        container: document.querySelector('#heatmap'),
+        gradient: {
+            '0.3': 'blue',
+            '0.95': 'red',
+            '0.75':'yellow',
+            '0.5':'green'
+        },
+        radius: 25,       
+    });
+
+     // 渲染svg 绑定id与名称
+     $scope.getDeviceLayoutSvg.subscribe(res => {
+        $scope.analysis_station_dust_year_devicelist.getData({
+            queryCode: 'analysis_station_dust_year_devicelist',
+            queryType: 3,
+            date: $scope.dateTime.showDate
+        }).then(valData => {
+            const $svgView = $("#svgView").html(res.data);
+
+            const $svg = $svgView.find('svg');
+            res.allDevice.forEach(v => $svg.find("g[deviceid='" + v.serialNumber + "']")
+                .attr('title', v.name)
+                .attr('id', v.id)
+                .attr('data-toggle', 'tooltip')
+                .attr('data-placement', 'right')
+                .tooltip({ 'container': 'body' })
+            );
+            const viewWidth = $svgView.width();
+            const svgWidth = $svg.width();
+            const scale = (viewWidth / svgWidth) - 0.1;
+            const zoom = $solway.zoom({
+                ele: $svg[0],
+                ... (scale < 1 ? {
+                    scale,
+                    translate: [(viewWidth - svgWidth) / 2, ($svgView.height() - $svg.height()) / 2],
+                } : {}),
+                minScale: 0.01,
+                rate: 0.05
+            });
+            const drag = $solway.drag({ ele: $svgView[0] });
+            $scope.$on('$destroy', () => {
+                zoom.destroy();
+                drag.destroy();
+            });
+
+            let positionArr =[],deviceidArr = [];
+         
+            document.querySelectorAll('#svgView g[type="NBQ"],#svgView g[type="NBQHLX"]'):: [].map(v =>{
+                deviceidArr.push(Number($(v).attr('deviceid')));
+                positionArr.push( [$($(v).find('rect')[0]).attr('x'),$($(v).find('rect')[0]).attr('Y'),Number($(v).attr('deviceid'))])
+            }).join(',');
+            
+            let values = valData.body.data;
+   
+            let points = [], maxV = 0;
+            for(let i =0; i<values.length; i++){
+                for(let j =0; j<positionArr.length; j++){
+                    if(positionArr[j][2] == values[i].eqid){
+                        maxV = Math.max(Number(maxV),  Number(values[i].clean_mark));
+                        points.push({
+                            x: Number(positionArr[j][0]).toFixed(0),
+                            y: Number(positionArr[j][1]).toFixed(0),
+                            value: Number(values[i].clean_mark)
+                        })
+                    }
+                }
+            }
+
+            let data = {
+                max: maxV,
+                data: points
+            }
+
+            console.log(data)
+            heatmapInstance.setData(data)
+        });
+    });
 
     $scope.stationPreBestCleanDataLine.subscribe(res => {
         $scope.xdata = res.body.x;
@@ -310,7 +396,7 @@ ajaxData({
 
     // 设备 列表
     $scope.analysis_station_dust_year_devicelist.getDataCallback = (success, res) => {
-        if (!success) return;
+        if (!success  || $scope.showShape === 'chart2') return;
         $scope.datasource = res.body.data;
         $scope.column = [
             {

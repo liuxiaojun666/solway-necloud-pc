@@ -75,6 +75,11 @@ ajaxData({
         data: {},
         later: true
     },
+    getDeviceLayoutSvg: {
+        name: 'GETDeviceLayoutSvg',
+        data: {},
+        later: true
+    },
 }, {
     __serviceName__: 'cleanStationMonthService',
         base64str2: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAgCAMAAACrZuH4AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAABCUExURUxpcVah/1ah/1ei/1Wj/1ai/1Sk/1ai/1ai/1ai/1ei/1eo/1ai/2Kh/1ei/1ah/1ai/1ai/1Kk/1ah/1eh/1ei/2BAiUsAAAAVdFJOUwBYR9Uj9hLwMMA/B3oCpeVihRywkxGe08QAAAC2SURBVDjL1ZJJEoMgEEUZRCYFHP79rxpBYxJtqMoueQuqF6+apvmM/Rr9pBEtH6uC0ShYX+twCEBgbHbO3IwVJ2LJp7w4XuGK7j6MDnfs+9AmEQbEq8ECkuEpOEULsMckY0SVvYtAA56NoWXIbPCWAV9ZxYkqg4SGEfZPs1Uhzsd7k6SvCPOXGXPl7cmc5S1CSpb1rVsUtKSMqaxYwuRyogyt+y0FsFsZVU8ZKafBD/k7uWB/yQNS9R/qm8zvWAAAAABJRU5ErkJggg=='
@@ -202,7 +207,9 @@ ajaxData({
                 sort: 'clean_mark,asc',
                 date: dateTime.showDate
             });
-        } else if (tabIndex === 2) {
+        } else if (tabIndex === 1 && showShape === 'chart2') {
+            $scope.getDeviceLayoutSvg.getData({})
+        }else if (tabIndex === 2) {
             // $scope.resourceDetailStationDay.getData({
             //     date: (new Date).Format('yyyy-MM-dd'),
             //     dateType: 3,
@@ -255,6 +262,87 @@ ajaxData({
         }
         $scope.$apply();
     };
+
+    let heatmapInstance = h337.create({
+        container: document.querySelector('#heatmap'),
+        gradient: {
+            '0.3': 'blue',
+            '0.95': 'red',
+            '0.85':'yellow',
+            '0.5':'green'
+        },
+        radius: 25,       
+    });
+
+     // 渲染svg 绑定id与名称
+     $scope.getDeviceLayoutSvg.subscribe(res => {
+        $scope.analysis_station_dust_month_devicelist.getData({
+            queryCode: 'analysis_station_dust_month_devicelist',
+            queryType: 3,
+            date: $scope.dateTime.showDate
+        }).then(valData => {
+            const $svgView = $("#svgView").html(res.data);
+
+            const $svg = $svgView.find('svg');
+            res.allDevice.forEach(v => $svg.find("g[deviceid='" + v.serialNumber + "']")
+                .attr('title', v.name)
+                .attr('id', v.id)
+                .attr('data-toggle', 'tooltip')
+                .attr('data-placement', 'right')
+                .tooltip({ 'container': 'body' })
+            );
+            const viewWidth = $svgView.width();
+            const svgWidth = $svg.width();
+            const scale = (viewWidth / svgWidth) - 0.1;
+            const zoom = $solway.zoom({
+                ele: $svg[0],
+                ... (scale < 1 ? {
+                    scale,
+                    translate: [(viewWidth - svgWidth) / 2, ($svgView.height() - $svg.height()) / 2],
+                } : {}),
+                minScale: 0.01,
+                rate: 0.05
+            });
+            const drag = $solway.drag({ ele: $svgView[0] });
+            $scope.$on('$destroy', () => {
+                zoom.destroy();
+                drag.destroy();
+            });
+
+            let positionArr =[],deviceidArr = [];
+         
+            document.querySelectorAll('#svgView g[type="NBQ"],#svgView g[type="NBQHLX"]'):: [].map(v =>{
+                deviceidArr.push(Number($(v).attr('deviceid')));
+                positionArr.push( [$($(v).find('rect')[0]).attr('x'),$($(v).find('rect')[0]).attr('Y'),Number($(v).attr('deviceid'))])
+            }).join(',');
+            
+            let values = valData.body.data;
+   
+            let points = [], maxV = 100;
+            for(let i =0; i<values.length; i++){
+                for(let j =0; j<positionArr.length; j++){
+                    if(positionArr[j][2] == values[i].eqid){
+                        maxV = Math.max(Number(maxV),  Number((values[i].clean_mark>100) ? 100 : values[i].clean_mark));
+                        // let randomNum = Math.random()*100;
+                        // maxV = Math.max(Number(maxV),  Number(randomNum));
+                        points.push({
+                            x: Number(positionArr[j][0]).toFixed(0),
+                            y: Number(positionArr[j][1]).toFixed(0),
+                            value: Number(values[i].clean_mark)
+                            // value: Number(randomNum.toFixed(2))
+                        })
+                    }
+                }
+            }
+
+            let data = {
+                max: maxV,
+                data: points
+            }
+
+            heatmapInstance.setData(data)
+        });
+    });
 
     // 时间 列表
     $scope.analysis_station_dust_month_timelist.getDataCallback = (success, res) => {
@@ -329,7 +417,7 @@ ajaxData({
 
     // 设备 列表
     $scope.analysis_station_dust_month_devicelist.getDataCallback = (success, res) => {
-        if (!success) return;
+        if (!success || $scope.showShape === 'chart2') return;
         $scope.datasource = res.body.data;
         $scope.column = [
             {

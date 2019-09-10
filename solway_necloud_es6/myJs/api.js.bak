@@ -142,12 +142,13 @@ window.ajaxData = (b, a) => {
                         }
                         if (isEqual) {
                             N[g].getDataCallback && N[g].getDataCallback(true, l);
-                            return N[g].subscribeArr.forEach((v) => {
+                            N[g].subscribeArr.forEach((v) => {
                                 const { s, c } = v;
                                 s && s(N[g].res);
                                 c && c(N[g].res);
                             });
                         }
+                        return new Promise((resolve, reject) => resolve(N[g].res))
                     }
                     N[g].reqData = k;
                     const _number = ++N[g].getData.reqNumber;

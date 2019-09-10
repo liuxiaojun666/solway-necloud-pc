@@ -136,6 +136,12 @@ ajaxData(
             later: true,
             onlyLatest: true
         },
+        // 日志id获取调整状态
+        stateAdjustById: {
+            name: 'GETstateAdjustById',
+            data: {},
+            later: true
+        },
         // 设备日志 河流图
         deviceHisRiver: {
             name: 'GETdeviceRtmRiver',
@@ -1683,7 +1689,7 @@ ajaxData(
                 sort: true,
                 align: 'left',
                 render(text) {
-                    return `<span class="clickable">${text}</span>`;
+                    return `<span class="clickable eq">${text}</span>`;
                 }
             },
             {
@@ -1715,7 +1721,18 @@ ajaxData(
                 title: '状态',
                 dataIndex: 'handstatusStr',
                 sort: true,
+                width: '100px',
                 align: 'center'
+            },
+            {
+                title: '状态调整',
+                dataIndex: 'operatorStatus',
+                sort: true,
+                width: '100px',
+                align: 'center',
+                render (text) {
+                    return text ? '<span class="clickable look" style="color:#31d3c9;">查看</span>' : ''
+                }
             },
         ];
     });
@@ -1855,7 +1872,14 @@ ajaxData(
     // 查看设备详情
     $scope.deviceRunList.trClick = (item, index, event) => {
         if (!event.target.className.includes('clickable')) return;
-        $scope.$broadcast('equipmentPopUp', { stid: item.pstationid, eqid: item.deviceSerialNnumber })
+        if (event.target.className.includes('eq')) {
+            $scope.$broadcast('equipmentPopUp', { stid: item.stId, eqid: item.deviceSerialNnumber })
+        } else if (event.target.className.includes('look')) {
+            $scope.deviceRunList.operatorStatus = true;
+            $scope.stateAdjustById.getData({
+                id: item.id
+            })
+        }
     };
 
     $scope.$on('$destroy', () => {

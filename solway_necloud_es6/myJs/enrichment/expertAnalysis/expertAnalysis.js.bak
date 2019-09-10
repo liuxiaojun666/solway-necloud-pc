@@ -64,41 +64,43 @@ ajaxData({
         groupNameMaps: {} //成组添加的 组名 和 组序号的 映射
     })('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', '$ocLazyLoad', 'toaster'], ($scope, myAjaxData, historicalRecord, $interval, $ocLazyLoad, toaster) => {
 
+        // 销毁页面 初始化数据
         $scope.$on('$destroy', () => {
             myAjaxData.config.tableData = [{}, {}, {}, {}],
-                myAjaxData.config.dmsTypeAs = [[], [], [], []],    //设备 参数
-                myAjaxData.config.dmsTypeBs = [[], [], [], []],    //电站|区域(部门)|集团  接口需要的数据
-                myAjaxData.config.dmsTypeCs = [[], [], [], []],    //机型/故障类型 参数
-                myAjaxData.config.dmsTypeDs = [[], [], [], []],    //机型/故障类型 参数
-                myAjaxData.config.dmsTimeDates = [[], [], [], []],
-                myAjaxData.config.fds = [[], [], [], []],          //横轴、纵轴指标 参数
-                myAjaxData.config.analysFds = [[], [], [], []],    //分析指标 参数
-                myAjaxData.config.benchSort = [[], [], [], []],
-                myAjaxData.config.bIdToName = [{}, {}, {}, {}],
-                myAjaxData.config.analysObjData = [{}, {}, {}, {}], //选择的分析对象 历史数据
-                myAjaxData.config.countTime = [{}, {}, {}, {}],     //选择的统计时间 历史数据
-                myAjaxData.config.horizonHdata = [{}, {}, {}, {}],  //选择的横轴指标 历史数据
-                myAjaxData.config.verticHdata = [{}, {}, {}, {}],   //选择的纵轴指标 历史数据
-                myAjaxData.config.alysHdata = [{}, {}, {}, {}],
-                myAjaxData.config.tableDataTrue = [false, false, false, false],
-                myAjaxData.config.checkChart = null,
-                myAjaxData.config.fdX = {            //横轴指标字段 参数
-                    key: '',
-                    name: ''
-                },
-                myAjaxData.config.fdY = {            //纵轴指标字段 参数
-                    key: '',
-                    name: ''
-                },
-                myAjaxData.config.paramsData = [      //参数的历史数据
-                    {}, {}, {}, {}
-                ],
-                myAjaxData.config.alsRlist == 0
-        });
+            myAjaxData.config.dmsTypeAs = [[], [], [], []],    //设备 参数
+            myAjaxData.config.dmsTypeBs = [[], [], [], []],    //电站|区域(部门)|集团  接口需要的数据
+            myAjaxData.config.dmsTypeCs = [[], [], [], []],    //机型/故障类型 参数
+            myAjaxData.config.dmsTypeDs = [[], [], [], []],    //机型/故障类型 参数
+            myAjaxData.config.dmsTimeDates = [[], [], [], []],
+            myAjaxData.config.fds = [[], [], [], []],          //横轴、纵轴指标 参数
+            myAjaxData.config.analysFds = [[], [], [], []],    //分析指标 参数
+            myAjaxData.config.benchSort = [[], [], [], []],
+            myAjaxData.config.bIdToName = [{}, {}, {}, {}],
+            myAjaxData.config.analysObjData = [{}, {}, {}, {}], //选择的分析对象 历史数据
+            myAjaxData.config.countTime = [{}, {}, {}, {}],     //选择的统计时间 历史数据
+            myAjaxData.config.horizonHdata = [{}, {}, {}, {}],  //选择的横轴指标 历史数据
+            myAjaxData.config.verticHdata = [{}, {}, {}, {}],   //选择的纵轴指标 历史数据
+            myAjaxData.config.alysHdata = [{}, {}, {}, {}],
+            myAjaxData.config.tableDataTrue = [false, false, false, false],
+            myAjaxData.config.checkChart = null,
+            myAjaxData.config.fdX = {            //横轴指标字段 参数
+                key: '',
+                name: ''
+            },
+            myAjaxData.config.fdY = {            //纵轴指标字段 参数
+                key: '',
+                name: ''
+            },
+            myAjaxData.config.paramsData = [      //参数的历史数据
+                {}, {}, {}, {}
+            ],
+            myAjaxData.config.alsRlist = 0,
+            myAjaxData.config.groupNameMaps = {} //成组添加的 组名 和 组序号的 映射
+        })
 
-        historicalRecord.init();// 历史记录 初始化
+        historicalRecord.init(); // 历史记录 初始化
         $scope.beforeLoading = true; // 页面loading
-        $scope.moduleName = '专家分析';//当前页面名称
+        $scope.moduleName = '专家分析'; //当前页面名称
         $scope.endDate = new Date((+new Date) - 1000 * 60 * 60 * 24); // 日历可选 的截止日期
         historyInitCallback();
 
@@ -116,6 +118,10 @@ ajaxData({
         var line1 = echarts.init(document.getElementById("line1"));
         var line2 = echarts.init(document.getElementById("line2"));
         var line3 = echarts.init(document.getElementById("line3"));
+        var myChart0 = echarts.init(document.getElementById("container0"));
+        var myChart1 = echarts.init(document.getElementById("container1"));
+        var myChart2 = echarts.init(document.getElementById("container2"));
+        var myChart3 = echarts.init(document.getElementById("container3"));
 
         //初始化 excelIo
         let excelIo;
@@ -172,6 +178,7 @@ ajaxData({
                 }
             }
         }
+
         //获取最大值 最小值
         function extreme(newArr) {
             if (newArr.length > 0) {
@@ -227,6 +234,7 @@ ajaxData({
             }
 
         }
+
         //图表的setOption
         $scope.colors = ['#8B85DD', '#C93EF3', '#36E4A0', '#33D2EF', '#5B6AFC', '#4CF5D3', '#71FD55', '#F6ADB9', '#00ADD8', '#F7942A', '#43A0FF', '#F6F831', '#FF6AE8', '#FD5555']
         function chartOption(i, legend, series) {
@@ -416,8 +424,26 @@ ajaxData({
                 }
         }
 
+        // 判断分析对象是否选择 成组添加
+        function objIsGroup () {
+            $scope.objGroup = false
+            var objs = myAjaxData.config.analysObjData[myAjaxData.config.checkChart].checkData
+            if (objs) {
+                for (var i=0; i < objs.length; i++) {
+                    var flag = objs[i].every(vv => vv.isgroup)
+                    if (!flag) $scope.objGroup = false
+                    if (flag) {
+                        $scope.objGroup = true
+                        break
+                    }
+                }
+            }
+        }
+
         //查询接口 传的参数
         function ajaxParams() {
+            // 判断分析对象是否选择 成组添加
+            objIsGroup()
             var dataJ = {
                 dmsTypeAs: myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart].length > 0 ? myAjaxData.config.dmsTypeAs[myAjaxData.config.checkChart] : null,
                 dmsTypeBs: myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart].length > 0 ? myAjaxData.config.dmsTypeBs[myAjaxData.config.checkChart] : null,
@@ -429,6 +455,23 @@ ajaxData({
                 },
                 fds: $scope.queryData.analysisType == 1 ? myAjaxData.config.fds[myAjaxData.config.checkChart] : myAjaxData.config.analysFds[myAjaxData.config.checkChart],
                 sort: $scope.queryData.analysisType == 3 ? myAjaxData.config.benchSort[myAjaxData.config.checkChart] : null
+            }
+            // 分析指标 fdAgg
+            $scope.fds1 = JSON.parse(JSON.stringify(dataJ.fds))
+            $scope.fds2 = []
+            var addFlag = false
+            dataJ.fds.forEach(v => {
+                if (v.fdAgg) {
+                    addFlag = true
+                    var {fdAgg, ...param} = v
+                    $scope.fds2.push(param)
+                }
+            })
+
+            if (!$scope.objGroup) {
+                dataJ.fds = addFlag ? $scope.fds2 : dataJ.fds
+            } else {
+                dataJ.fds = $scope.fds1
             }
             return dataJ;
         }
@@ -586,40 +629,20 @@ ajaxData({
                         top: 40,
                         orient: 'vertical',  //垂直显示
                         y: 'center',    //延Y轴居中
-                        x: 'right' //居右显示
+                        x: 'right', //居右显示
+                        formatter: function (name) {
+                            return name.length > 8 ? name.substr(0, 8) + "..." : name
+                        },
+                        tooltip: {
+                            show: true
+                        }
                     }
                     //获取最大值 最小值
                     extreme(newArr)
 
-                    //------------------------------------整合echarts -> table的数据  (excel单个sheet)
-                    // $scope['fileName' + $scope.checkChart] = '关联分析';
-                    // var arr = [];
-                    // $scope['series' + myAjaxData.config.checkChart].forEach((v, i) => {
-                    //     var headData = [];
-                    //     var secondData = [];
-                    //     headData.push(v.name, '', '');
-                    //     secondData.push($scope['xname' + $scope.checkChart], $scope['yname' + $scope.checkChart], '统计时间');
-                    //     arr.push(headData);
-                    //     arr.push(secondData);
-                    //     v.data.forEach((xv, xi) => {
-                    //         arr.push(xv);
-                    //     })
-                    // })
-
-                    // var str = ``;
-                    // arr.forEach((v, i) => {
-                    //     str += `<tr>`;
-                    //     v.forEach((xv, xi) => {
-                    //         str += `<td>${xv}</td>`;
-                    //     })
-                    //     str += `</tr>`;
-                    // })
-
-                    // $('.chartTable' + $scope.checkChart).html(str);
-
                     //------------------------------------整合echarts -> table的数据  (excel多个sheet)
-                    $scope['spread' + $scope.checkChart] = new GC.Spread.Sheets.Workbook(document.getElementById('relationTable' + $scope.checkChart), { sheetCount: $scope['series' + myAjaxData.config.checkChart].length });
-                    excelIo = new GC.Spread.Excel.IO();
+                    $scope['spread' + $scope.checkChart] = new GC.Spread.Sheets.Workbook(document.getElementById('relationTable' + $scope.checkChart), { sheetCount: $scope['series' + myAjaxData.config.checkChart].length })
+                    excelIo = new GC.Spread.Excel.IO()
                     $scope['series' + myAjaxData.config.checkChart].forEach((v, i) => {
                         var arr = [];
                         var secondData = [];
@@ -652,6 +675,7 @@ ajaxData({
                     $scope['series' + $scope.checkChart] = [];
                     //图表 颜色的预设
                     var colorsAry = ['#8B85DD', '#C93EF3', '#36E4A0', '#33D2EF', '#5B6AFC', '#4CF5D3', '#71FD55', '#F6ADB9', '#00ADD8', '#F7942A', '#43A0FF', '#F6F831', '#FF6AE8', '#FD5555'];
+
                     if ($scope.queryData.analysisType == 3) {
                         //----------------------------------------------------对标分析 数据处理
                         $scope['ydatas' + $scope.checkChart] = [];
@@ -734,7 +758,7 @@ ajaxData({
                                         color: '#fff',
                                         fontSize: 12
                                     },
-                                    //改变y轴字体颜色为白色
+                                    //改变y轴字体颜色为白色 刻度标签的相关设置
                                     axisLabel: {
                                         show: true,
                                         textStyle: {
@@ -827,7 +851,14 @@ ajaxData({
                                 top: 40,
                                 orient: 'vertical',  //垂直显示
                                 y: 'center',    //延Y轴居中
-                                x: 'right' //居右显示
+                                x: 'right', //居右显示
+                                formatter: function (name) {
+                                    return name.length > 8 ? name.substr(0, 8) + "..." : name
+                                },
+                                tooltip: {
+                                    show: true
+                                },
+                                backgroundColor: '#000'
                             },
                             xAxis: {
                                 data: $scope['xdata' + $scope.checkChart],
@@ -861,7 +892,7 @@ ajaxData({
                                 bottom: "18%"
                             }
                         }, true)
-debugger
+
                         setTimeout(() => {
                             echarts.getInstanceByDom(document.getElementById('line' + $scope.checkChart)).resize();
                         }, 0)
@@ -880,6 +911,7 @@ debugger
                             $scope['newArrName' + $scope.checkChart].push([]);
                             $scope['tableType' + $scope.checkChart].push([]);
                         }
+
                         //判断 是否点击 同比 环比
                         myAjaxData.config.analysFds[myAjaxData.config.checkChart].forEach((item, i) => {
                             var judge = item.fdTb.toString() + item.fdHb.toString();
@@ -1260,7 +1292,13 @@ debugger
                                 top: 40,
                                 orient: 'vertical',  //垂直显示
                                 y: 'center',    //延Y轴居中
-                                x: 'right' //居右显示
+                                x: 'right', //居右显示
+                                formatter: function (name) {
+                                    return name.length > 8 ? name.substr(0, 8) + "..." : name
+                                },
+                                tooltip: {
+                                    show: true
+                                }
                             },
                             xAxis: {
                                 type: 'category',
@@ -1304,7 +1342,6 @@ debugger
                             }
                         }, true)
 
-                        debugger
                         setTimeout(() => {
                             echarts.getInstanceByDom(document.getElementById('line' + $scope.checkChart)).resize();
                         }, 0)
@@ -1315,7 +1352,7 @@ debugger
             })
         }
 
-        $scope.relaTableExport = (i) => {
+        $scope.relaTableExport = () => {
             var json = $scope['spread' + $scope.checkChart].toJSON();
             excelIo.save(json, function (blob) {
                 saveAs(blob, '关联分析' + ".xlsx");
@@ -1354,6 +1391,7 @@ debugger
         //双击图表 全屏
         var dblFlag = false;
         $scope.fullscreen = (i) => {
+            $scope['editLineShow' + i] = false
             if (!dblFlag) {
                 $scope.chartSortIndex = 1;
                 $('.table1').each((index, item) => {
@@ -1404,10 +1442,13 @@ debugger
                 dblFlag = false;
             }
         }
-
+ 
         //切换图表排列方式
         $scope.chartSortCopy = $scope.chartSortIndex = 4;
         $scope.chartSort = (index) => {
+            for (let i=0; i<4; i++) {
+                $scope['editLineShow' + i] = false
+            }
             $scope.chartSortCopy = $scope.chartSortIndex = index;
             if ($scope.chartSortIndex == 1) {
                 $scope.chartStyle = { 'width': '100%', 'height': '100%' }
@@ -1443,10 +1484,6 @@ debugger
 
         //散点图---图表初始化
         function chartsInit() {
-            var myChart0 = echarts.init(document.getElementById("container0"));
-            var myChart1 = echarts.init(document.getElementById("container1"));
-            var myChart2 = echarts.init(document.getElementById("container2"));
-            var myChart3 = echarts.init(document.getElementById("container3"));
             var option = null;
             option = {
                 xAxis: {
@@ -1623,10 +1660,6 @@ debugger
         //resize图表
         $('.table1').resize(function () {
             setTimeout(() => {
-                var myChart0 = echarts.getInstanceByDom(document.getElementById("container0"));
-                var myChart1 = echarts.getInstanceByDom(document.getElementById("container1"));
-                var myChart2 = echarts.getInstanceByDom(document.getElementById("container2"));
-                var myChart3 = echarts.getInstanceByDom(document.getElementById("container3"));
                 myChart0.resize();
                 myChart1.resize();
                 myChart2.resize();
@@ -1640,15 +1673,25 @@ debugger
 
         // ----------------------------------------------------------------------- 自定义图表颜色、线宽方法组
         // 自定义图例点击事件 (趋势分析、对标分析)
+        // $scope['editLineShow'] = true
+
         var colorIndex, sameLenged
-        for (var i=0; i<4; i++) {
+        for (let i=0; i<4; i++) {
             $scope['editLineShow' + i] = false
 
             echarts.getInstanceByDom(document.getElementById('line' + i)).on('legendselectchanged', function(obj) {
                 let option = this.getOption()
-                                
+
+                // 随着点击位置 移动弹框位置
+                document.getElementsByClassName('editLine-con')[i].style.top = window.event.clientY - 120 + 'px'
+                document.getElementsByClassName('editLine-con')[i].style.left = window.event.clientX - 50 + 'px'
+
+                // 赋值name
+                $scope.legendName = obj.name
+
                 var lineArr = $scope['newArrName' + $scope.checkChart].reduce((a, b) => a.concat(b), [])
-                lineArr.forEach((v,i) => {if (v === obj.name) {
+                lineArr.forEach((v,i) => {
+                    if (v === obj.name) {
                       sameLenged = colorIndex === i ? true : false
                       colorIndex = i
                     }
@@ -1665,6 +1708,9 @@ debugger
                 option.legend[0].selected[obj.name] = true
                 $scope.lineWidth = $scope['series' + $scope.checkChart][colorIndex].lineStyle.normal.width
                 this.setOption(option)
+
+                // 给颜色选择器 赋默认值
+                document.getElementsByClassName('color')[i].value = $scope['colors'][colorIndex]
             })
 
             // 选择颜色事件 (趋势分析、对标分析)
@@ -1789,7 +1835,13 @@ debugger
                     top: 40,
                     orient: 'vertical',  //垂直显示
                     y: 'center',    //延Y轴居中
-                    x: 'right' //居右显示
+                    x: 'right', //居右显示
+                    formatter: function (name) {
+                        return name.length > 8 ? name.substr(0, 8) + "..." : name
+                    },
+                    tooltip: {
+                        show: true
+                    }
                 },
                 xAxis: {
                     type: 'category',
@@ -1840,14 +1892,21 @@ debugger
             resetTable()
         }
 
+        // $scope['editLineShow' + 0] = true
         // 自定义图例点击事件 (关联分析)
-        for (var i=0; i<4; i++) {
-            $scope['editLineShow' + i] = false
-
+        for (let i=0; i<4; i++) {
             echarts.getInstanceByDom(document.getElementById('container' + i)).on('legendselectchanged', function(obj) {
                 let option = this.getOption()
 
-                $scope['newArrKey' + $scope.checkChart].forEach((v,i) => {if (v === obj.name) {
+                // 随着点击位置 移动弹框位置
+                document.getElementsByClassName('editLine-con')[i].style.top = window.event.clientY - 120 + 'px'
+                document.getElementsByClassName('editLine-con')[i].style.left = window.event.clientX - 50 + 'px'
+                
+                // 赋值name
+                $scope.legendName = obj.name
+
+                $scope['newArrKey' + $scope.checkChart].forEach((v,i) => {
+                    if (v === obj.name) {
                       sameLenged = colorIndex === i ? true : false
                       colorIndex = i
                     }
@@ -1864,10 +1923,14 @@ debugger
                 option.legend[0].selected[obj.name] = true
                 $scope.lineWidth = $scope['series' + $scope.checkChart][colorIndex].symbolSize
                 this.setOption(option)
+
+                // 给颜色选择器 赋默认值
+                document.getElementsByClassName('symbolColor')[i].value = $scope['colors'][colorIndex]
             })
 
             // 选择颜色事件 (关联分析)
             document.getElementsByClassName('symbolColor')[i].onchange = function () {
+                $scope['editLineShow' + 0] = true
                 $scope['colors'][colorIndex] = this.value
                 var legend = {
                     y: 'top',
@@ -1885,7 +1948,13 @@ debugger
                     top: 40,
                     orient: 'vertical',  //垂直显示
                     y: 'center',    //延Y轴居中
-                    x: 'right' //居右显示
+                    x: 'right', //居右显示
+                    formatter: function (name) {
+                        return name.length > 8 ? name.substr(0, 8) + "..." : name
+                    },
+                    tooltip: {
+                        show: true
+                    }
                 }
                 chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart])
             }
@@ -1913,6 +1982,11 @@ debugger
                 x: 'right' //居右显示
             }
             chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart])
+        }
+
+        // 弹框确定按钮
+        $scope.closeEditLine = (i) => {
+            $scope['editLineShow' + i] = false
         }
         
         //点击 弹出框
@@ -2096,6 +2170,7 @@ debugger
         $scope.$on('addCallback', (event, v) => {
             if (v == 'analysisObj') {
                 $scope.haveData1 = true;
+                $scope.$broadcast('objGroup')
             } else if (v == 'countTime') {
                 $scope.haveData3 = true;
             } else if (v == 'analysAxisIndex') {
