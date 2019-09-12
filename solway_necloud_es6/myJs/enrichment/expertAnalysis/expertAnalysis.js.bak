@@ -138,7 +138,7 @@ ajaxData({
         }
 
         //获取分析对象的数据
-        function analysisObjFun() {
+        function analysisObjFun(preAlys, isCreated, objK, deviceIndex) {
             //获取不同分析类型的数据
             if (!$scope.selectData) return;
             var key;
@@ -157,7 +157,7 @@ ajaxData({
             })
 
             //向分析对象发送数据
-            $scope.$broadcast('analysObDataNew', { 'analysObDataNew': $scope.analysObDataNew, 'analysObDataNewDevice': $scope.analysObDataNewDevice });
+            $scope.$broadcast('analysObDataNew', { 'analysObDataNew': $scope.analysObDataNew, 'analysObDataNewDevice': $scope.analysObDataNewDevice, 'preAlys': preAlys, 'isCreated': isCreated, 'objK': objK, 'deviceIndex': deviceIndex });
 
             //向横轴指标发送anlsType
             myAjaxData.config.anlsType = $scope.queryData.analysisType;
@@ -363,7 +363,7 @@ ajaxData({
                 series: series,
                 grid: {
                     top: "26%",
-                    right: "30%",
+                    right: "25%",
                     bottom: "18%"
                 }
             },true)
@@ -661,7 +661,6 @@ ajaxData({
 
                     //图表的 setoption
                     chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart]);
-                    debugger
                 } else {
                     // 获取各项数据
                     var key;
@@ -822,6 +821,12 @@ ajaxData({
                         $('.chartTable' + $scope.checkChart).html(str);
 
                         //初始化echarts 并 塞入数据
+                        var rightGrid = '30%'
+                        if ($scope['yname' + $scope.checkChart].length == 1) {
+                            rightGrid = '15%'
+                        } else if ($scope['yname' + $scope.checkChart].length == 2) {
+                            rightGrid = '25%'
+                        }
                         echarts.init(document.getElementById('line' + $scope.checkChart)).setOption({
                             toolbox: {
                                 feature: {
@@ -888,7 +893,7 @@ ajaxData({
                             series: $scope['series' + $scope.checkChart],
                             grid: {
                                 top: "26%",
-                                right: "30%",
+                                right: rightGrid,
                                 bottom: "18%"
                             }
                         }, true)
@@ -1217,6 +1222,12 @@ ajaxData({
 
                         //-------------------------------------------------------------------重写
                         //初始化echarts 并 塞入数据
+                        var rightGrid = '30%'
+                        if ($scope['yname' + $scope.checkChart].length == 1) {
+                            rightGrid = '15%'
+                        } else if ($scope['yname' + $scope.checkChart].length == 2) {
+                            rightGrid = '25%'
+                        }
                         echarts.init(document.getElementById('line' + $scope.checkChart)).setOption({
                             toolbox: {
                                 feature: {
@@ -1337,11 +1348,10 @@ ajaxData({
                             ],
                             grid: {
                                 top: "26%",
-                                right: "30%",
+                                right: rightGrid,
                                 bottom: "18%"
                             }
                         }, true)
-
                         setTimeout(() => {
                             echarts.getInstanceByDom(document.getElementById('line' + $scope.checkChart)).resize();
                         }, 0)
@@ -1461,9 +1471,22 @@ ajaxData({
             }
         }
 
+        // 给document添加隐藏事件
+        document.addEventListener('click', function(){
+            for (let i=0; i<4; i++) {
+                $scope['editLineShow' + i] = false
+            }
+            $scope.$apply()
+        })
+
         //图表的点击
-        $scope.checkChartFun = async (index) => {
-            myAjaxData.config.checkChart = $scope.checkChart = index;
+        $scope.checkChartFun = async (index, e) => {
+            e.stopPropagation()
+            if (index === $scope.checkChart || index === 0) return
+
+            myAjaxData.config.checkChart = $scope.checkChart = index
+
+            // 判断点击的图表是否有数据
             if (myAjaxData.config.tableDataTrue[$scope.checkChart]) {
                 myAjaxData.config.anlsType = $scope.queryData.analysisType = myAjaxData.config.tableData[$scope.checkChart].analysisType;
                 await myAjaxData.timeout(200);
@@ -1472,15 +1495,98 @@ ajaxData({
                 await myAjaxData.timeout(200);
                 $scope.$broadcast('trend_dmsTime', $scope.queryData.timeLat);
                 backParams();
-
             } else {
-                $scope.queryData.analysisType = 1;
-                await myAjaxData.timeout(500);
-                analysisObjFun();
-                $scope.$broadcast('haveData', false);
+                var preAlys = $scope.queryData.analysisType
+                $scope.queryData.analysisType = 1
+                await myAjaxData.timeout(500)
+                analysisObjFun(preAlys, $scope.isCreated, $scope.queryData.analysisObjectK, $scope.deviceIndex)
+                $scope.$broadcast('haveData', false)
+            }
+
+            // 隐藏导出图片按钮
+            for (let i=0; i<4; i++) {
+                var domEle = echarts.getInstanceByDom(document.getElementById('line' + i))
+                var domEle2 = echarts.getInstanceByDom(document.getElementById('container' + i))
+                var option = domEle.getOption()
+                var option2 = domEle2.getOption()
+                
+                if (option.toolbox) {
+                    option.toolbox[0].show = false
+                    domEle.setOption(option)
+                }
+                if (option2.toolbox) {
+                    option2.toolbox[0].show = false
+                    domEle2.setOption(option2)
+                }
+            }
+            var domEle = echarts.getInstanceByDom(document.getElementById('line' + index))
+            var domEle2 = echarts.getInstanceByDom(document.getElementById('container' + index))
+            var option = domEle.getOption()
+            var option2 = domEle2.getOption()
+            if (option.toolbox) {
+                option.toolbox[0].show = true
+                domEle.setOption(option)
+            }
+            if (option2.toolbox) {
+                option2.toolbox[0].show = true
+                domEle2.setOption(option2)
             }
         }
-        $scope.checkChartFun(0);
+
+        // 默认点击第一个图表
+        $scope.isCreated = true
+        document.getElementsByClassName('table1')[0].addEventListener('click', async function(e) {
+            e.stopPropagation()
+            if ($scope.checkChart === 0) return
+            myAjaxData.config.checkChart = $scope.checkChart = 0
+
+            // 判断点击的图表是否有数据
+            if (myAjaxData.config.tableDataTrue[$scope.checkChart]) {
+                myAjaxData.config.anlsType = $scope.queryData.analysisType = myAjaxData.config.tableData[$scope.checkChart].analysisType;
+                await myAjaxData.timeout(200);
+                analysisObjFun();
+                $scope.$broadcast('haveData', true);
+                await myAjaxData.timeout(200);
+                $scope.$broadcast('trend_dmsTime', $scope.queryData.timeLat);
+                backParams();
+            } else {
+                var preAlys = $scope.queryData.analysisType
+                $scope.queryData.analysisType = 1;
+                await myAjaxData.timeout(500);
+                analysisObjFun(preAlys, $scope.isCreated, $scope.queryData.analysisObjectK, $scope.deviceIndex);
+                $scope.$broadcast('haveData', false);
+            }
+
+            // 隐藏导出图片按钮
+            for (let i=0; i<4; i++) {
+                var domEle = echarts.getInstanceByDom(document.getElementById('line' + i))
+                var domEle2 = echarts.getInstanceByDom(document.getElementById('container' + i))
+                var option = domEle.getOption()
+                var option2 = domEle2.getOption()
+                if (option.toolbox) {
+                    option.toolbox[0].show = false
+                    domEle.setOption(option)
+                }
+                if (option2.toolbox) {
+                    option2.toolbox[0].show = false
+                    domEle2.setOption(option2)
+                }
+            }
+            var domEle = echarts.getInstanceByDom(document.getElementById('line' + 0))
+            var domEle2 = echarts.getInstanceByDom(document.getElementById('container' + 0))
+            var option = domEle.getOption()
+            var option2 = domEle2.getOption()
+            if (option.toolbox) {
+                option.toolbox[0].show = true
+                domEle.setOption(option)
+            }
+            if (option2.toolbox) {
+                option2.toolbox[0].show = true
+                domEle2.setOption(option2)
+            }
+            $scope.isCreated = false
+        })
+        document.getElementsByClassName('table1')[0].click()
 
         //散点图---图表初始化
         function chartsInit() {
@@ -1653,6 +1759,9 @@ ajaxData({
             };
             if (option && typeof option === "object") {
                 line0.setOption(option, true);
+                line1.setOption(option, true);
+                line2.setOption(option, true);
+                line3.setOption(option, true);
             }
         }
         lineChartsInit();
@@ -1673,8 +1782,6 @@ ajaxData({
 
         // ----------------------------------------------------------------------- 自定义图表颜色、线宽方法组
         // 自定义图例点击事件 (趋势分析、对标分析)
-        // $scope['editLineShow'] = true
-
         var colorIndex, sameLenged
         for (let i=0; i<4; i++) {
             $scope['editLineShow' + i] = false
@@ -1683,8 +1790,8 @@ ajaxData({
                 let option = this.getOption()
 
                 // 随着点击位置 移动弹框位置
-                document.getElementsByClassName('editLine-con')[i].style.top = window.event.clientY + 'px'
-                document.getElementsByClassName('editLine-con')[i].style.left = window.event.clientX - 130 + 'px'
+                document.getElementsByClassName('editLine-con')[i].style.top = window.event.clientY + 20 + 'px'
+                document.getElementsByClassName('editLine-con')[i].style.left = window.event.clientX - 150 + 'px'
 
                 // 赋值name
                 $scope.legendName = obj.name
@@ -1692,27 +1799,33 @@ ajaxData({
                 var lineArr = $scope['newArrName' + $scope.checkChart].reduce((a, b) => a.concat(b), [])
                 lineArr.forEach((v,i) => {
                     if (v === obj.name) {
-                      sameLenged = colorIndex === i ? true : false
+                    //   sameLenged = colorIndex === i ? true : false
                       colorIndex = i
                     }
                 })
 
-                if ($scope['editLineShow' + $scope.checkChart] == true && sameLenged) {
-                    $scope['editLineShow' + $scope.checkChart] = false
+                // if ($scope['editLineShow' + $scope.checkChart] == true && sameLenged) {
+                    // $scope['editLineShow' + $scope.checkChart] = false
                     option.legend[0].selected[obj.name] = true
                     this.setOption(option)
-                    return
-                }
-                $scope['editLineShow' + $scope.checkChart] = true
+                //     return
+                // }
 
-                option.legend[0].selected[obj.name] = true
+                for (let i=0; i<4; i++) {
+                    $scope['editLineShow' + i] = false
+                }
+                $scope['editLineShow' + i] = true
+
                 $scope.lineWidth = $scope['series' + $scope.checkChart][colorIndex].lineStyle.normal.width
-                this.setOption(option)
 
                 // 给颜色选择器 赋默认值
                 document.getElementsByClassName('color')[i].value = $scope['colors'][colorIndex]
-                debugger
 
+                // 显示/隐藏 滑块
+                $scope.changeInputAbsent = () => {
+                    option.legend[0].selected[obj.name] = !option.legend[0].selected[obj.name]
+                    this.setOption(option)
+                }
             })
 
             // 选择颜色事件 (趋势分析、对标分析)
@@ -1762,6 +1875,12 @@ ajaxData({
                         }
                     })
             })
+            var rightGrid = '30%'
+            if ($scope['yname' + $scope.checkChart].length == 1) {
+                rightGrid = '15%'
+            } else if ($scope['yname' + $scope.checkChart].length == 2) {
+                rightGrid = '25%'
+            }
             echarts.init(document.getElementById('line' + $scope.checkChart)).setOption({
                 toolbox: {
                     feature: {
@@ -1882,7 +2001,7 @@ ajaxData({
                 ],
                 grid: {
                     top: "26%",
-                    right: "30%",
+                    right: rightGrid,
                     bottom: "18%"
                 }
             }, true)
@@ -1894,40 +2013,43 @@ ajaxData({
             resetTable()
         }
 
-        // $scope['editLineShow' + 0] = true
         // 自定义图例点击事件 (关联分析)
         for (let i=0; i<4; i++) {
+
             echarts.getInstanceByDom(document.getElementById('container' + i)).on('legendselectchanged', function(obj) {
                 let option = this.getOption()
 
                 // 随着点击位置 移动弹框位置
-                document.getElementsByClassName('editLine-con')[i].style.top = window.event.clientY - 120 + 'px'
-                document.getElementsByClassName('editLine-con')[i].style.left = window.event.clientX - 50 + 'px'
+                document.getElementsByClassName('editLine-con')[i].style.top = window.event.clientY + 20 + 'px'
+                document.getElementsByClassName('editLine-con')[i].style.left = window.event.clientX - 150 + 'px'
                 
                 // 赋值name
                 $scope.legendName = obj.name
 
                 $scope['newArrKey' + $scope.checkChart].forEach((v,i) => {
                     if (v === obj.name) {
-                      sameLenged = colorIndex === i ? true : false
                       colorIndex = i
                     }
                 })
 
-                if ($scope['editLineShow' + $scope.checkChart] == true && sameLenged) {
-                    $scope['editLineShow' + $scope.checkChart] = false
-                    option.legend[0].selected[obj.name] = true
-                    this.setOption(option)
-                    return
+                for (let i=0; i<4; i++) {
+                    $scope['editLineShow' + i] = false
                 }
-                $scope['editLineShow' + $scope.checkChart] = true
+                $scope['editLineShow' + i] = true
+
+                $scope.lineWidth = $scope['series' + $scope.checkChart][colorIndex].symbolSize
 
                 option.legend[0].selected[obj.name] = true
-                $scope.lineWidth = $scope['series' + $scope.checkChart][colorIndex].symbolSize
                 this.setOption(option)
 
                 // 给颜色选择器 赋默认值
                 document.getElementsByClassName('symbolColor')[i].value = $scope['colors'][colorIndex]
+
+                // 显示/隐藏 滑块
+                $scope.changeInputAbsent = () => {
+                    option.legend[0].selected[obj.name] = !option.legend[0].selected[obj.name]
+                    this.setOption(option)
+                }
             })
 
             // 选择颜色事件 (关联分析)
@@ -1986,7 +2108,7 @@ ajaxData({
             chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart])
         }
 
-        // 弹框确定按钮
+        // 弹框关闭按钮
         $scope.closeEditLine = (i) => {
             $scope['editLineShow' + i] = false
         }
@@ -2132,6 +2254,7 @@ ajaxData({
 
         // 逆变器 汇流箱 点击 特殊处理 时间纬度的数据
         $scope.$on('deviceTimeLat', (event, v) => {
+            $scope.deviceIndex = v.index
             if (!v.isHistory) {
                 $scope.queryData.timeLat = '';
                 $scope.queryData.horizonIndexV = '请选择';

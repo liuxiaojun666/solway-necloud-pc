@@ -77,14 +77,11 @@ AddbaseDictionary: {
         $scope.verticItem = item
         $scope.radioIndex = index
 
-        for (var i=0; i < $scope.verticalBottom.length; i++) {
-            var item = $scope.verticalBottom[i]
-            if (!item.fdAgg) {
-                $scope.noFdAgg = true
-                break
-            }
-            $scope.noFdAgg = false
+        if (!$scope.verticalBottom[0].fdAgg) {
+            $scope.noFdAgg = true
+            return
         }
+        $scope.noFdAgg = false
     }
 
     $scope.verticalCheckData = []

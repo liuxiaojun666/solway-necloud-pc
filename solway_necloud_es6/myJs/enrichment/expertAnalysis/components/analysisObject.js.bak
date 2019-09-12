@@ -3,15 +3,13 @@ ajaxData({
     queryStTreeWithDevices: {
         name: 'GETqueryStTreeWithDevices',
         data: {},
-        later: true,
-        cache: true
+        later: true
     },
     //分析对象 - 电站列表、区域（部门）列表、集团列表
     queryTreeWithSt: {
         name: 'GETqueryTreeWithSt',
         data: {},
-        later: true,
-        cache: true
+        later: true
     },
     //分析对象 - 机型列表
     queryStTreeWithProducts: {
@@ -139,7 +137,15 @@ ajaxData({
                     // data.analysObDataNewDevice.forEach((item, i) => {
                     //     $scope.objectDevice[i] = []
                     // })
-                    $scope.radioDevice()
+                    if (data.isCreated) {
+                        $scope.radioDevice()
+                    } else if ((data.preAlys != 1 || data.objK != 99) || (data.objK == 99 && data.deviceIndex != 0)) {
+                        // $scope.radioDevice()
+                        $scope.analysisObjectK = 99
+                        $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备' })
+                        $scope.equipChoice($scope.equipChoiceItem, 0)
+                    }
+
                     clearData()
                     $scope.$emit('noChecked', 'analysisObj')
                 } else if (parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType)) {
@@ -177,9 +183,6 @@ ajaxData({
                 $scope.equipChoice(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCIndex, true)
                 $scope.equipChoiceIndex = parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex
             }
-            // else if ($scope.analysisObjectK == 101) {
-            //     $scope.radioType(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem.k, true);
-            // }
             else if ($scope.analysisObjectK == 102) {
                 $scope.radioFault(true)
             }
@@ -195,7 +198,7 @@ ajaxData({
             $scope.deviceK = item.k
             treeData(item.k)
             $scope.equipChoiceIndex = index
-            $scope.$emit('deviceTimeLat', { 'll': item.ll, 'isHistory': isHistory })
+            $scope.$emit('deviceTimeLat', { 'll': item.ll, 'isHistory': isHistory, 'index': index })
             parentmyAjaxData.config.alsRlist = $scope.objectDevice[$scope.equipChoiceIndex].length
         }
 
