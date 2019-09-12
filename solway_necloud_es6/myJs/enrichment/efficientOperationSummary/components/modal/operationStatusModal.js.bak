@@ -91,28 +91,33 @@ ajaxData({
     }
 
     $scope.submitAdjust = () =>{
-        $scope.operationData['referenceDevice'] = $scope.stationdCT.selected? $scope.stationdCT.selected.deviceSerialNnumber : '';
-        if (!$solway.formValidation($scope.operationData, '.operationAdjust', toaster)) return;//校验非空
-
         if(!$scope.operationData.startDate.showDate){
             toaster.pop('error', '', '开始时间必选');
             return ;
         }
-
         if(!$scope.operationData.endDate.showDate){
             toaster.pop('error', '', '结束时间必选');
             return ;
         }
 
-        if(!regRatio.test($scope.operationData.dayRate)){
-            toaster.pop('error', '', '电量每日折算比例：格式不正确');
-            return;
-        }
+        $scope.operationData['referenceDevice'] = $scope.stationdCT.selected? $scope.stationdCT.selected.deviceSerialNnumber : '';
+        if (!$solway.formValidation($scope.operationData, '.operationAdjust', toaster)) return;//校验非空
 
-        let dayNum = (Math.floor((new Date($scope.operationData['endDate']).getTime() + 28800000) / 86400000) - Math.floor((new Date($scope.operationData['startDate']).getTime() + 28800000) / 86400000)) + 1
-        if($scope.operationData.dayRate.split(',').length != dayNum){
-            toaster.pop('error', '', '电量每日折算比例：跟所选日期天数不对应');
-            return;
+        if($scope.operationData.lostElecUser || $scope.operationData.dayRate){ //二者填一，则必须全填，或者都不填
+            if(!$scope.operationData.lostElecUser || !$scope.operationData.dayRate){
+                toaster.pop('error', '', '人工统计损失电量、电量每日折算比例，两者要填都填，或者可均不填');
+                return;
+            }
+            if(!regRatio.test($scope.operationData.dayRate)){
+                toaster.pop('error', '', '电量每日折算比例：格式不正确');
+                return;
+            }
+    
+            let dayNum = (Math.floor((new Date($scope.operationData['endDate']).getTime() + 28800000) / 86400000) - Math.floor((new Date($scope.operationData['startDate']).getTime() + 28800000) / 86400000)) + 1
+            if($scope.operationData.dayRate.split(',').length != dayNum){
+                toaster.pop('error', '', '电量每日折算比例：跟所选日期天数不对应');
+                return;
+            }
         }
 
         $scope.operationData['startDate'] = $scope.operationData.startDate.showDate;

@@ -134,6 +134,7 @@ ajaxData({
             if(res.code == 0){
                 $scope.operatorStatus = res.body.operatorStatus;
                 $scope.serialNumber = res.body.serialNumber;
+                $scope.deviceType = res.body.deviceType;
             }
         })
     }
@@ -149,10 +150,10 @@ ajaxData({
         $scope.parentid = obj.mid;
         $scope.isHis = obj.isHis;
 
-        if($scope.busitype == '00' || $scope.busitype == '99'){ //  当busitype 为 00 或者 99 的时候  才会有关联日志
-            judgeIfOperationAdjust(obj.busino);
-            $scope.mainBusino = obj.busino;
-        }
+        
+        judgeIfOperationAdjust(obj.busino);
+        $scope.mainBusino = obj.busino;
+
         getChatList();
     });
 
@@ -365,6 +366,7 @@ ajaxData({
         $scope.operationStatusFlag = false;
         $('#operationModalId').hide();
         getChatList();
+        judgeIfOperationAdjust($scope.mainBusino);
     });
 
     //发布共享任务回调
