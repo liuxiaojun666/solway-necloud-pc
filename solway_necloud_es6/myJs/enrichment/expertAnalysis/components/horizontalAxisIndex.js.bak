@@ -35,6 +35,13 @@ HighAnalysis_selectFds: {
 
     //监听横轴指标页面打开
     $scope.$on('horizonOpen', () => {
+        if (parentmyAjaxData.config.anlsType == 1 &&
+            parentmyAjaxData.config.dmsTime == 5 &&
+            parentmyAjaxData.config.dmsType == 402) {
+                $scope.supportTone = true
+        } else {
+                $scope.supportTone = false
+        }
         //获取 checked 的数据 -> 重现到左侧列表
         if($scope.horizonCheckData.length > 0){
             var key
@@ -65,6 +72,18 @@ HighAnalysis_selectFds: {
         }
     })
 
+    //归一 源数据
+    $scope.fdToneArr = [
+        {
+            'k': 0,
+            'v': '不归一'
+        },
+        {
+            'k': 1,
+            'v': '归一'
+        }
+    ]
+
     //搜索功能
     $scope.getList = () => {
         $scope.herizonBottom.forEach(item => item.show = item.fdName.includes($scope.keyWords))
@@ -76,7 +95,7 @@ HighAnalysis_selectFds: {
         $scope.$emit('radioToFather', { 'type': 'horizon', 'k': item.k, 'value': '指标' })
         $scope.herizonBottom = item.ll
         //给数据赋初始show值
-        $scope.herizonBottom.forEach(item => item.show = true)
+        $scope.herizonBottom.forEach(item => {item.show = true; item.fdTon = 0})
         $scope.hrizonItem = item
         $scope.radioIndex = index
 
@@ -103,7 +122,7 @@ HighAnalysis_selectFds: {
         for (var i=0; i < $scope.herizonBottom.length; i++) {
             $scope.noFdAgg = false
             var item = $scope.herizonBottom[i]
-            item.tableAgg = 1
+            item.tableAgg = 2
             var result = item.fdAgg.split(",")
             var newFdAggCopy = []
             item.newfdAgg = []
@@ -263,9 +282,18 @@ HighAnalysis_selectFds: {
                 fdAgg: $scope.horizonCheckData[0].tableAgg
             }
         } else {
-            var json = {
-                fdKey: $scope.horizonCheckData[0].fdKey,
-                isx: 1
+            // 归一化处理
+            if (!$scope.objGroup && $scope.horizonCheckData[0].fdTone == 1) {
+                var json = {
+                    fdKey: $scope.horizonCheckData[0].fdKey,
+                    isx: 1,
+                    fdTone: $scope.horizonCheckData[0].fdTon
+                }
+            } else {
+                var json = {
+                    fdKey: $scope.horizonCheckData[0].fdKey,
+                    isx: 1
+                }
             }
         }
 

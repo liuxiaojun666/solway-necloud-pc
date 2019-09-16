@@ -98,7 +98,8 @@ ajaxData({
                                 item.actFdTb = 0
                                 item.actFdHb = 0
                                 item.tableType = 1
-                                item.tableAgg = 1
+                                item.tableAgg = 2
+                                item.fdTon = 0
                                 item.sortType = 'asc'
                             })
                         }
@@ -119,7 +120,8 @@ ajaxData({
                                 item.actFdTb = 0
                                 item.actFdHb = 0
                                 item.tableType = 1
-                                item.tableAgg = 1
+                                item.tableAgg = 2
+                                item.fdTon = 0
                                 item.sortType = 'asc'
                             })
                         }
@@ -134,6 +136,14 @@ ajaxData({
 
         //监听 分析指标页面打开
         $scope.$on('analysOpen', () => {
+            if (parentmyAjaxData.config.anlsType == 2 &&
+                $scope.dmsTime == 5 &&
+                parentmyAjaxData.config.dmsType == 402) {
+                    $scope.supportTone = true
+            } else {
+                    $scope.supportTone = false
+            }
+        
             //获取 checked 的数据 -> 重现到左侧列表
             if ($scope.analysCheckData.length > 0) {
                 var key
@@ -173,6 +183,18 @@ ajaxData({
             }
         ]
 
+        //归一 源数据
+        $scope.fdToneArr = [
+            {
+                'k': 0,
+                'v': '不归一'
+            },
+            {
+                'k': 1,
+                'v': '归一'
+            }
+        ]
+
         //搜索功能
         $scope.getList = () => {
             $scope.analysBottom.forEach(item => item.show = item.fdName.includes($scope.keyWords))
@@ -186,6 +208,11 @@ ajaxData({
             $scope.analysBottom = item.ll
             //给数据赋初始show值
             $scope.analysBottom.forEach(item => item.show = true)
+            $scope.analysBottom.forEach((item, i) => {
+                if (i == 0) {
+                    item.fdTone = 0
+                }
+            })
             $scope.alysItem = item
             $scope.radioIndex = index
 
@@ -434,12 +461,23 @@ ajaxData({
                             }
                         )
                     } else {
-                        analysFds_y1.push(
-                            {
-                                fdKey: item.fdKey
-                            }
-                        )
+                        // 归一化处理
+                        if (!$scope.objGroup && item.fdTone == 1) {
+                            analysFds_y1.push(
+                                {
+                                    fdKey: item.fdKey,
+                                    fdTone: item.fdTon
+                                }
+                            )
+                        } else {
+                            analysFds_y1.push(
+                                {
+                                    fdKey: item.fdKey
+                                }
+                            )
+                        }
                     }
+                    
                     //获取sort
                     sort += item.fdKey + ',' + item.sortType + ';'
                 })
@@ -457,13 +495,25 @@ ajaxData({
                             }
                         )
                     } else {
-                        analysFds_y1.push(
-                            {
-                                fdKey: item.fdKey,
-                                fdTb: item.actFdTb,
-                                fdHb: item.actFdHb
-                            }
-                        )
+                        // 归一化处理
+                        if (!$scope.objGroup && item.fdTone == 1) {
+                            analysFds_y1.push(
+                                {
+                                    fdKey: item.fdKey,
+                                    fdTb: item.actFdTb,
+                                    fdHb: item.actFdHb,
+                                    fdTone: item.fdTon
+                                }
+                            )
+                        } else {
+                            analysFds_y1.push(
+                                {
+                                    fdKey: item.fdKey,
+                                    fdTb: item.actFdTb,
+                                    fdHb: item.actFdHb
+                                }
+                            )
+                        }
                     }
                 })
             }

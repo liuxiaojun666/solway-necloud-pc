@@ -15,8 +15,16 @@ AddbaseDictionary: {
         $scope.$emit('noChecked', 'verticalAxisIndex')
     })
 
-    // 获取纵轴指标的数据
+    // 获取纵轴指标的数据 (监听纵轴指标页面打开)
     $scope.$on('verticalData', () => {
+        if (parentmyAjaxData.config.anlsType == 1 &&
+            parentmyAjaxData.config.dmsTime == 5 &&
+            parentmyAjaxData.config.dmsType == 402) {
+                $scope.supportTone = true
+        } else {
+                $scope.supportTone = false
+        }
+
         $scope.verticalData = parentmyAjaxData.config.herizonData
         if (Object.keys($scope.verticalData).length == 0) {
             $scope.$emit('horizonNan', { data: 1 })
@@ -62,6 +70,18 @@ AddbaseDictionary: {
             $scope.objGroup = false
         }
     })
+
+    // 归一 源数据
+    $scope.fdToneArr = [
+        {
+            'k': 0,
+            'v': '不归一'
+        },
+        {
+            'k': 1,
+            'v': '归一'
+        }
+    ]
 
     //搜索功能
     $scope.getList = () => {
@@ -222,10 +242,19 @@ AddbaseDictionary: {
                 isx: 0,
                 fdAgg: $scope.verticalCheckData[0].tableAgg
             }
-        } else {
-            var json = {
-                fdKey: $scope.verticalCheckData[0].fdKey,
-                isx: 0
+        }  else {
+            // 归一化处理
+            if (!$scope.objGroup && $scope.verticalCheckData[0].fdTone == 1) {
+                var json = {
+                    fdKey: $scope.verticalCheckData[0].fdKey,
+                    isx: 0,
+                    fdTone: $scope.verticalCheckData[0].fdTon
+                }
+            } else {
+                var json = {
+                    fdKey: $scope.verticalCheckData[0].fdKey,
+                    isx: 0
+                }
             }
         }
 

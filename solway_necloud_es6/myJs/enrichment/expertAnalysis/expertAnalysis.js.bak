@@ -232,7 +232,6 @@ ajaxData({
                 $scope.maxX = 100;
                 $scope.maxY = 100;
             }
-
         }
 
         //图表的setOption
@@ -459,19 +458,42 @@ ajaxData({
             // 分析指标 fdAgg
             $scope.fds1 = JSON.parse(JSON.stringify(dataJ.fds))
             $scope.fds2 = []
-            var addFlag = false
-            dataJ.fds.forEach(v => {
-                if (v.fdAgg) {
-                    addFlag = true
-                    var {fdAgg, ...param} = v
-                    $scope.fds2.push(param)
-                }
-            })
+            // var isFdAgg = false
+            // dataJ.fds.forEach(v => {
+            //     if (v.fdAgg) {
+            //         isFdAgg = true
+            //         if (v.fdTone) {
+            //             var {fdAgg, fdTone, ...param} = v
+            //         } else if (!v.fdTone) {
+            //             var {fdAgg, ...param} = v
+            //         }
+            //         $scope.fds2.push(param)
+            //     } else {
+            //         if (v.fdTone) {
+            //             var {fdTone, ...param} = v
+            //         } else if (!v.fdTone) {
+            //             var {...param} = v
+            //         }
+            //         $scope.fds2.push(param)
+            //     }
+            // })
 
             if (!$scope.objGroup) {
-                dataJ.fds = addFlag ? $scope.fds2 : dataJ.fds
+                dataJ.fds.forEach(v => {
+                    var {fdAgg, ...param} = v
+                    $scope.fds2.push(param)
+                })
+                // dataJ.fds = isFdAgg ? $scope.fds2 : dataJ.fds
+                dataJ.fds = $scope.fds2
             } else {
-                dataJ.fds = $scope.fds1
+                dataJ.fds.forEach(v => {
+                    var {fdTone, ...param} = v
+                    if (!param.fdAgg) {
+                        param.fdAgg = 2
+                    }
+                    $scope.fds2.push(param)
+                })
+                dataJ.fds = $scope.fds2
             }
             return dataJ;
         }
@@ -1782,7 +1804,7 @@ ajaxData({
 
         // ----------------------------------------------------------------------- 自定义图表颜色、线宽方法组
         // 自定义图例点击事件 (趋势分析、对标分析)
-        var colorIndex, sameLenged
+        var colorIndex
         for (let i=0; i<4; i++) {
             $scope['editLineShow' + i] = false
 
@@ -1799,20 +1821,15 @@ ajaxData({
                 var lineArr = $scope['newArrName' + $scope.checkChart].reduce((a, b) => a.concat(b), [])
                 lineArr.forEach((v,i) => {
                     if (v === obj.name) {
-                    //   sameLenged = colorIndex === i ? true : false
                       colorIndex = i
                     }
                 })
 
-                // if ($scope['editLineShow' + $scope.checkChart] == true && sameLenged) {
-                    // $scope['editLineShow' + $scope.checkChart] = false
-                    option.legend[0].selected[obj.name] = true
-                    this.setOption(option)
-                //     return
-                // }
+                option.legend[0].selected[obj.name] = true
+                this.setOption(option)
 
-                for (let i=0; i<4; i++) {
-                    $scope['editLineShow' + i] = false
+                for (let j=0; j<4; j++) {
+                    $scope['editLineShow' + j] = false
                 }
                 $scope['editLineShow' + i] = true
 
@@ -1824,6 +1841,7 @@ ajaxData({
                 // 显示/隐藏 滑块
                 $scope.changeInputAbsent = () => {
                     option.legend[0].selected[obj.name] = !option.legend[0].selected[obj.name]
+                    option.color = $scope['colors']
                     this.setOption(option)
                 }
             })
@@ -2009,6 +2027,13 @@ ajaxData({
 
         // 输入线宽事件 (趋势分析、对标分析)
         $scope.changeLwidth = () => {
+            if ($scope.lineWidth == null) $scope.lineWidth = 1
+            $scope['series' + $scope.checkChart][colorIndex].lineStyle.normal.width = $scope.lineWidth
+            resetTable()
+        }
+
+        $scope.ScrollFunWidth = () => {
+            if ($scope.lineWidth == null) $scope.lineWidth = 1
             $scope['series' + $scope.checkChart][colorIndex].lineStyle.normal.width = $scope.lineWidth
             resetTable()
         }
@@ -2032,8 +2057,8 @@ ajaxData({
                     }
                 })
 
-                for (let i=0; i<4; i++) {
-                    $scope['editLineShow' + i] = false
+                for (let j=0; j<4; j++) {
+                    $scope['editLineShow' + j] = false
                 }
                 $scope['editLineShow' + i] = true
 
@@ -2048,13 +2073,13 @@ ajaxData({
                 // 显示/隐藏 滑块
                 $scope.changeInputAbsent = () => {
                     option.legend[0].selected[obj.name] = !option.legend[0].selected[obj.name]
+                    option.color = $scope['colors']
                     this.setOption(option)
                 }
             })
 
             // 选择颜色事件 (关联分析)
             document.getElementsByClassName('symbolColor')[i].onchange = function () {
-                $scope['editLineShow' + 0] = true
                 $scope['colors'][colorIndex] = this.value
                 var legend = {
                     y: 'top',
@@ -2086,7 +2111,30 @@ ajaxData({
 
         // 输入散点size事件 (关联分析)
         $scope.changeSsize = () => {
-            $scope['series' + $scope.checkChart][colorIndex].symbolSize = $scope.lineWidth
+            $scope['series' + $scope.checkChart][colorIndex].symbolSize = $scope.lineSize
+            var legend = {
+                y: 'top',
+                data: $scope['newArrKey' + $scope.checkChart],
+                type: 'scroll',
+                width: 450,
+                itemWidth: 12,
+                textStyle: {
+                    color: '#fff',
+                    fontSize: 12,
+                    height: 20,
+                    lineHeight: 20,
+                    padding: [3, 0, 0, 0]
+                },
+                top: 40,
+                orient: 'vertical',  //垂直显示
+                y: 'center',    //延Y轴居中
+                x: 'right' //居右显示
+            }
+            chartOption($scope.checkChart, legend, $scope['series' + myAjaxData.config.checkChart])
+        }
+
+        $scope.ScrollFunSize = () => {
+            $scope['series' + $scope.checkChart][colorIndex].symbolSize = $scope.lineSize
             var legend = {
                 y: 'top',
                 data: $scope['newArrKey' + $scope.checkChart],

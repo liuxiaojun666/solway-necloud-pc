@@ -1176,8 +1176,12 @@ ajaxData({
             parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].radioItem = $scope.radioItem
             parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex = $scope.equipChoiceIndex
 
-            parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData = [...new Set($scope[key[$scope.analysisObjectK]])]
-
+            if ($scope.analysisObjectK == 99) {
+                parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData = [...new Set($scope.objectDevice[$scope.equipChoiceIndex])]
+            } else {
+                parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData = [...new Set($scope[key[$scope.analysisObjectK]])]
+            }
+            
             busiIdToName()
             $scope.$emit('addCallback', 'analysisObj')
         }
