@@ -461,7 +461,13 @@ ajaxData({
             }
             $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
             $scope.formData['isdefault'] = $('input[name="isdefault"]:checked').val();
-            
+
+            let faultCodeArr = $scope.statusdata.map(item => item.faultcode)
+            if(new Set(faultCodeArr).size !== faultCodeArr.length){
+                toaster.pop('error','','状态码值不可以重复');
+                return;
+            }
+
             $scope.saveLoading = true;
             $scope.updateProtocol.getData($scope.formData).then(res => {
                 $scope.saveLoading = false;

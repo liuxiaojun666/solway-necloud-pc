@@ -26,6 +26,7 @@ AddbaseDictionary: {
         }
 
         $scope.verticalData = parentmyAjaxData.config.herizonData
+        $scope.showOne = $scope.verticalData.ctg1.ll.some(v => v.fdTone != 0)
         if (Object.keys($scope.verticalData).length == 0) {
             $scope.$emit('horizonNan', { data: 1 })
         }
@@ -85,7 +86,7 @@ AddbaseDictionary: {
 
     //搜索功能
     $scope.getList = () => {
-        $scope.verticalBottom.forEach(item => item.show = item.fdName.includes($scope.keyWords))
+        $scope.verticalBottom.forEach(item => item.showV = item.fdName.includes($scope.keyWords))
     }
 
     //单选框选中-> 更改select的值

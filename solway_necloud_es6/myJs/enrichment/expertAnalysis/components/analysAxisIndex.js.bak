@@ -46,12 +46,19 @@ ajaxData({
                     }
                     else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)) {
                         //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
+                        for (key in $scope.analysData) {
+                            $scope.analysData[key].ll.map((item) => {
+                                item.actFdTb = 0
+                                item.actFdHb = 0
+                                item.tableType = 1
+                                item.tableAgg = 1
+                                item.sortType = 'asc'
+                            })
+                        }
+                        $scope.radioToSelect($scope.analysData.ctg1, 0)
                         return
                     }
-                    else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType) && ($scope.dmsTime == parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)) {
-                        //趋势分析 图表有数据 分析类型不重新选 分析对象不重新选 时间纬度不重新选
-                        return
-                    } else {
+                    else {
                         for (key in $scope.analysData) {
                             $scope.analysData[key].ll.map((item) => {
                                 item.actFdTb = 0
@@ -89,6 +96,8 @@ ajaxData({
                     }
                     $scope.analysData = res.body
                     $scope.analysData.ctg1.ll = [...$scope.analysData.ctg1.ll,...$scope.analysData.ctg2.ll]
+                    $scope.showOne = $scope.analysData.ctg1.ll.some(v => v.fdTone != 0)
+
                     $scope.$emit('analysNan', { data: 0 })
                     var key
                     if (!parentmyAjaxData.config.tableDataTrue[$scope.checkChart]) {
@@ -107,12 +116,19 @@ ajaxData({
                         $scope.radioToSelect($scope.analysData.ctg1, 0)
                         $scope.$emit('noChecked', 'analysAxisIndex')
                     }
-                    else if ($scope.anlsType == 3 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType)) {
-                        //对标分析 图表有数据 分析类型不重新选 分析对象不重新选
-                        return
-                    }
                     else if ($scope.anlsType == 2 && parentmyAjaxData.config.tableDataTrue[$scope.checkChart] && (parentmyAjaxData.config.anlsType == parentmyAjaxData.config.tableData[$scope.checkChart].analysisType) && (parentmyAjaxData.config.dmsType == parentmyAjaxData.config.tableData[$scope.checkChart].alsObj.dmsType) && ($scope.dmsTime == parentmyAjaxData.config.tableData[$scope.checkChart].timeLat)) {
                         //趋势分析 图表有数据 分析类型不重新选 分析对象不重新选 时间纬度不重新选
+                        for (key in $scope.analysData) {
+                            $scope.analysData[key].ll.map((item) => {
+                                item.actFdTb = 0
+                                item.actFdHb = 0
+                                item.tableType = 1
+                                item.tableAgg = 2
+                                item.fdTon = 0
+                                item.sortType = 'asc'
+                            })
+                        }
+                        $scope.radioToSelect($scope.analysData.ctg1, 0)
                         return
                     } else {
                         for (key in $scope.analysData) {
@@ -208,11 +224,11 @@ ajaxData({
             $scope.analysBottom = item.ll
             //给数据赋初始show值
             $scope.analysBottom.forEach(item => item.show = true)
-            $scope.analysBottom.forEach((item, i) => {
-                if (i == 0) {
-                    item.fdTone = 0
-                }
-            })
+            // $scope.analysBottom.forEach((item, i) => {
+            //     if (i == 0) {
+            //         item.fdTone = 0
+            //     }
+            // })
             $scope.alysItem = item
             $scope.radioIndex = index
 

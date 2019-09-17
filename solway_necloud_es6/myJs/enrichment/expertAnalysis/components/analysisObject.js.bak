@@ -140,7 +140,6 @@ ajaxData({
                     if (data.isCreated) {
                         $scope.radioDevice()
                     } else if ((data.preAlys != 1 || data.objK != 99) || (data.objK == 99 && data.deviceIndex != 0)) {
-                        // $scope.radioDevice()
                         $scope.analysisObjectK = 99
                         $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备' })
                         $scope.equipChoice($scope.equipChoiceItem, 0)
@@ -174,11 +173,12 @@ ajaxData({
 
             $scope.$emit('addCallback', 'analysisObj')
             $scope.analysisObjectK = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.alsObjk
-            $scope[key[$scope.analysisObjectK]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.checkData
 
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5 || $scope.analysisObjectK == 101) {
+                $scope[key[$scope.analysisObjectK]] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.checkData
                 $scope.radioToSelect(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.radioItem, true)
             } else if ($scope.analysisObjectK == 99) {
+                $scope.objectDevice[parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCIndex] = parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.checkData
                 $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 99, 'value': '设备', 'isHistory': true })
                 $scope.equipChoice(parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCItem, parentmyAjaxData.config.tableData[parentmyAjaxData.config.checkChart].alsObj.equipCIndex, true)
                 $scope.equipChoiceIndex = parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].equipChoiceIndex
@@ -186,9 +186,11 @@ ajaxData({
             else if ($scope.analysisObjectK == 102) {
                 $scope.radioFault(true)
             }
+
         })
 
         //点击单个设备
+        $scope.loading = false
         $scope.equipChoice = (item, index, isHistory) => {
             //默认获取第一项的数据
             var item = item ? item : $scope.analysObDataNewDevice[0]
@@ -196,7 +198,13 @@ ajaxData({
             $scope.equipChoiceItem = item
             parentmyAjaxData.config.dmsType = item.k
             $scope.deviceK = item.k
-            treeData(item.k)
+            var time = setInterval(() => {
+                if (!$scope.loading) {
+                    treeData(item.k)
+                    clearInterval(time)
+                }
+            }, 100)
+            
             $scope.equipChoiceIndex = index
             $scope.$emit('deviceTimeLat', { 'll': item.ll, 'isHistory': isHistory, 'index': index })
             parentmyAjaxData.config.alsRlist = $scope.objectDevice[$scope.equipChoiceIndex].length
@@ -470,15 +478,21 @@ ajaxData({
 
         //处理点击故障类型radio
         $scope.radioFault = (isHistory) => {
-            $scope.analysisObjectK = 102;
-            parentmyAjaxData.config.dmsType = 102;
-            $scope.zNodes = [];
-            treeData('102');
-            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 102, 'value': '故障类型', 'isHistory': isHistory });
-            selectArea();
-            $scope.selectPowerStation = [];
-            $scope.selectMachineType = [];
-            $scope.selectDevice = [];
+            $scope.analysisObjectK = 102
+            parentmyAjaxData.config.dmsType = 102
+            $scope.zNodes = []
+            var time = setInterval(() => {
+                if (!$scope.loading) {
+                    treeData('102')
+                    clearInterval(time)
+                }
+            }, 100)
+            
+            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': 102, 'value': '故障类型', 'isHistory': isHistory })
+            selectArea()
+            $scope.selectPowerStation = []
+            $scope.selectMachineType = []
+            $scope.selectDevice = []
             $scope.multiLevel = {
                 'area': null,
                 'powerStation': '',
@@ -489,18 +503,23 @@ ajaxData({
 
         //单选框选中-> 更改父级的值
         $scope.radioToSelect = (item, isHistory) => {
-            parentmyAjaxData.config.dmsType = $scope.analysisObjectK = item.k;
-            parentmyAjaxData.config.alsRlist = $scope[key[$scope.analysisObjectK]].length;
+            parentmyAjaxData.config.dmsType = $scope.analysisObjectK = item.k
+            parentmyAjaxData.config.alsRlist = $scope[key[$scope.analysisObjectK]].length
             $scope.radioItem = item
-            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': item.k, 'value': item.v, 'isHistory': isHistory });
-            if (item.k.substr(0, 1) !=4) {
-                treeData(item.k);
+            $scope.$emit('radioToFather', { 'type': 'analysisObject', 'k': item.k, 'value': item.v, 'isHistory': isHistory })
+            if (item.k.substr(0, 1) != 4) {
+                var time = setInterval(() => {
+                    if (!$scope.loading) {
+                        treeData(item.k)
+                        clearInterval(time)
+                    }
+                }, 100)
             }
             if (item.k == 101) {
-                selectArea();
-                $scope.selectPowerStation = [];
-                $scope.selectMachineType = [];
-                $scope.selectDevice = [];
+                selectArea()
+                $scope.selectPowerStation = []
+                $scope.selectMachineType = []
+                $scope.selectDevice = []
                 $scope.multiLevel = {
                     'area': null,
                     'powerStation': '',
@@ -532,12 +551,13 @@ ajaxData({
                 $scope.loading = true
                 $scope.zNodes = []
                 $.fn.zTree.init($("#tree"), $scope.setting, [])
+
                 $scope.queryTreeWithSt.getData({
                     busiType: st[k]
                 }).then(res => {
                     $scope.zNodes = res.body
-                    $scope.loading = false
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes)
+                    $scope.loading = false
 
                     $scope[key[$scope.analysisObjectK]].forEach(v => {
                         v.forEach(vv => {
@@ -554,9 +574,9 @@ ajaxData({
                     deviceType: devices[k]
                 }).then(res => {
                     $scope.zNodes = res.body
-                    $scope.loading = false
-                    setTimeout(() => {
+                    // setTimeout(() => {
                         $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes)
+                        $scope.loading = false
                         if ($scope.objectDevice[$scope.equipChoiceIndex].length > 0) {
                             $scope.objectDevice[$scope.equipChoiceIndex].forEach(v => {
                                 v.forEach(vv => {
@@ -564,7 +584,7 @@ ajaxData({
                                 })
                             })
                         }
-                    }, 600)
+                    // }, 600)
                 })
 
             } else if (k == 101) {
@@ -577,8 +597,8 @@ ajaxData({
                     var treeObj = $.fn.zTree.getZTreeObj("tree")
                     treeObj.refresh()
                     $scope.zNodes = res.body
-                    $scope.loading = false
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes)
+                    $scope.loading = false
                     $scope[key[$scope.analysisObjectK]].forEach(v => {
                         v.forEach(vv => {
                             zTree.checkNode(zTree.getNodeByParam("id", vv.id), true, true)
@@ -592,8 +612,8 @@ ajaxData({
                     type: '01'
                 }).then(res => {
                     $scope.zNodes = res.body
-                    $scope.loading = false
                     $.fn.zTree.init($("#tree"), $scope.setting, $scope.zNodes)
+                    $scope.loading = false
 
                     $scope[key[$scope.analysisObjectK]].forEach(v => {
                         v.forEach(vv => {
@@ -915,7 +935,7 @@ ajaxData({
                 //组装接口需要的数据 (机型/故障类型)
                 var groupItem = {
                     'groupName': 'gp' + parseInt(Math.random() * 100000000),
-                    'cdts': [],
+                    'cdts': []
                 }
                 var newArr = JSON.parse(JSON.stringify(typeArr))
                 newArr.map((item) => {
@@ -924,13 +944,13 @@ ajaxData({
                 })
                 $scope.groupNameMaps[groupItem.groupName] = parentmyAjaxData.config.groupNameMaps[groupItem.groupName] = groupName
                 $scope[key[$scope.analysisObjectK]].push(newArr)
-                newArr.forEach(item => {
+                newArr.forEach(v => {
                     var cdtsItem = {
                         'id': 0,
                         "st_eqids": []
                     }
-                    cdtsItem.id = item.busiId
-                    item['devices'].forEach(son => cdtsItem.st_eqids.push(`${son.stids}-${son.busiId}`))
+                    cdtsItem.id = v.busiId
+                    v['devices'].forEach(vv => cdtsItem.st_eqids.push(`${vv.stids}-${vv.busiId}`))
                     groupItem['cdts'].push(cdtsItem)
                 })
                 $scope['groupResult' + $scope.analysisObjectK + parentmyAjaxData.config.checkChart].push(groupItem)
@@ -1075,8 +1095,8 @@ ajaxData({
         function checkChangeFn(event, treeId, treeNode) {
             $scope['checkedNode' + parentmyAjaxData.config.checkChart] = zTree.getCheckedNodes(true)
             $scope.middleArr = []
-            $scope['checkedNode' + parentmyAjaxData.config.checkChart].forEach(item => {
-                if (!item.children) $scope.middleArr.push(item)
+            $scope['checkedNode' + parentmyAjaxData.config.checkChart].forEach(v => {
+                if (!v.children) $scope.middleArr.push(v)
             })
         }
 
@@ -1089,28 +1109,28 @@ ajaxData({
         function busiIdToName() {
             var analyOjName = {}
             if ($scope.analysisObjectK == 1 || $scope.analysisObjectK == 3 || $scope.analysisObjectK == 5 || $scope.analysisObjectK == 100 || $scope.analysisObjectK == 101) {
-                $scope[key[$scope.analysisObjectK]].map(item => {
+                $scope[key[$scope.analysisObjectK]].forEach(item => {
                     if (!item[0].isgroup) {
                         analyOjName[item[0].busiId] = item[0].name
                     } else {
-                        item.map((son, i) => {
-                            if (i == 0) {
-                                analyOjName[son.groupName] = ''
+                        item.forEach((vv, ii) => {
+                            if (ii == 0) {
+                                analyOjName[vv.groupName] = ''
                             }
-                            analyOjName[son.groupName] += son.name + '\xa0'
+                            analyOjName[vv.groupName] += vv.name + '\xa0'
                         })
                     }
                 })
             } else if ($scope.analysisObjectK == 99) {
-                $scope.objectDevice[$scope.equipChoiceIndex].map(item => {
+                $scope.objectDevice[$scope.equipChoiceIndex].forEach(item => {
                     if (!item[0].isgroup) {
                         analyOjName[item[0].stids + '-' + item[0].busiId] = item[0].name
                     } else {
-                        item.map((son, i) => {
-                            if (i == 0) {
-                                analyOjName[son.groupName] = ''
+                        item.forEach((vv, ii) => {
+                            if (ii == 0) {
+                                analyOjName[vv.groupName] = ''
                             }
-                            analyOjName[son.groupName] += son.name + '\xa0'
+                            analyOjName[vv.groupName] += vv.name + '\xa0'
                         })
                     }
                 })
@@ -1181,7 +1201,6 @@ ajaxData({
             } else {
                 parentmyAjaxData.config.analysObjData[parentmyAjaxData.config.checkChart].checkData = [...new Set($scope[key[$scope.analysisObjectK]])]
             }
-            
             busiIdToName()
             $scope.$emit('addCallback', 'analysisObj')
         }

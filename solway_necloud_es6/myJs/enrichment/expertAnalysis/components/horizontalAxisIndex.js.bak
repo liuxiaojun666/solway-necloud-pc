@@ -26,6 +26,12 @@ HighAnalysis_selectFds: {
             $scope.herizonData = res.body
     
             $scope.herizonData.ctg1.ll = [...$scope.herizonData.ctg1.ll,...$scope.herizonData.ctg2.ll]
+            $scope.herizonData.ctg1.ll.forEach(v => {
+                v.showH = true
+                v.showV = true
+                v.fdTon = 0
+            })
+            $scope.showOne = $scope.herizonData.ctg1.ll.some(v => v.fdTone != 0)
             $scope.horizonCheckData = []
             parentmyAjaxData.config.fdX.name = parentmyAjaxData.config.fdX.key = ''
             $scope.radioToSelect($scope.herizonData.ctg1, 0)
@@ -86,7 +92,7 @@ HighAnalysis_selectFds: {
 
     //搜索功能
     $scope.getList = () => {
-        $scope.herizonBottom.forEach(item => item.show = item.fdName.includes($scope.keyWords))
+        $scope.herizonBottom.forEach(item => item.showH = item.fdName.includes($scope.keyWords))
     }
 
     //单选框选中-> 更改select的值
@@ -94,8 +100,8 @@ HighAnalysis_selectFds: {
         $scope.hrizonAxisK = item.k
         $scope.$emit('radioToFather', { 'type': 'horizon', 'k': item.k, 'value': '指标' })
         $scope.herizonBottom = item.ll
-        //给数据赋初始show值
-        $scope.herizonBottom.forEach(item => {item.show = true; item.fdTon = 0})
+        //给数据赋初始值
+        // $scope.herizonBottom.forEach(item => {item.fdTon = 0})
         $scope.hrizonItem = item
         $scope.radioIndex = index
 
