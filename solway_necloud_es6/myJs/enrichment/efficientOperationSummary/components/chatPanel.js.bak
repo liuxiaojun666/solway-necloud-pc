@@ -341,11 +341,9 @@ ajaxData({
         const stationType = chatList.stationClass;
 
         if(stationType == '01'){  //solar
-            let deviceTypeNow = chatList.deviceType;
             let pstationid = chatList.pStationId;
-            const {deviceSerialNnumber, deviceId,hasJB} = chatList;
-            const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, defaultShowPage: '1', hasJB };
-            $scope.$broadcast("equipmentPopUp", res);
+            const {deviceSerialNnumber} = chatList;
+            $scope.$broadcast("equipmentPopUp", { stid: pstationid, eqid: deviceSerialNnumber });
         }else if(stationType == '02'){  //wind
             let stid = chatList.pStationId;
             let eqid = chatList.deviceSerialNnumber;

@@ -428,42 +428,43 @@ ajaxData({
                 $scope.formData['statusdiagnosistype'] = 1;
             }
 
-            for(let i=0;i<$scope.statusdata.length;i++){
+            let statusdata = angular.copy($scope.statusdata);
+            for(let i=0;i<statusdata.length;i++){
                 if($scope.formData['statusdiagnosistype'] == '1'){  //整型
-                    if(!$scope.statusdata[i].faultcode || !$scope.statusdata[i].faultlevel) {
+                    if(!statusdata[i].faultcode || !statusdata[i].faultlevel) {
                         toaster.pop('error', '', '状态码和状态分类均不能为空')
                         return;
                     }
-                    if(reg.test($scope.statusdata[i].faultcode)){//16进制
-                        $scope.statusdata[i].faultcode = parseInt($scope.statusdata[i].faultcode,16)
-                    }else if(regWord.test($scope.statusdata[i].faultcode)){
+                    if(reg.test(statusdata[i].faultcode)){//16进制
+                        statusdata[i].faultcode = parseInt(statusdata[i].faultcode,16)
+                    }else if(regWord.test(statusdata[i].faultcode)){
                         toaster.pop('error','','状态码必须是一个数字');
                         return;
                     }
-                    $scope.statusdata[i].faultcodeindex = '0';
+                    statusdata[i].faultcodeindex = '0';
                 }else if($scope.formData['statusdiagnosistype'] == '2'){ //按位
-                    if(!$scope.statusdata[i].faultlevel) {
+                    if(!statusdata[i].faultlevel) {
                         toaster.pop('error', '', '状态分类均不能为空')
                         return;
                     }
-                    if(!integerReg1.test(Number($scope.statusdata[i].faultcodeindex))){
+                    if(!integerReg1.test(Number(statusdata[i].faultcodeindex))){
                         toaster.pop('error','','索引位置必须是一个整数');
                         return;
                     }
-                    if($scope.statusdata[i].faultcodeindex == '-1'){
-                        $scope.statusdata[i].faultcodeindex = '0';
-                        $scope.statusdata[i].faultcode = '0';
+                    if(statusdata[i].faultcodeindex == '-1'){
+                        statusdata[i].faultcodeindex = '0';
+                        statusdata[i].faultcode = '0';
                     }else{
-                        $scope.statusdata[i].faultcode = '1';
+                        statusdata[i].faultcode = '1';
                     }
                     
                 }
             }
-            $scope.formData['statusdata'] = JSON.stringify($scope.statusdata);
+            $scope.formData['statusdata'] = JSON.stringify(statusdata);
             $scope.formData['isdefault'] = $('input[name="isdefault"]:checked').val();
 
-            let faultCodeArr = $scope.statusdata.map(item => item.faultcode)
-            if(new Set(faultCodeArr).size !== faultCodeArr.length){
+            let noRepeatCodeArr = statusdata.map(item => item.faultcode+item.faultcodeindex)
+            if(new Set(noRepeatCodeArr).size !== noRepeatCodeArr.length){
                 toaster.pop('error','','状态码值不可以重复');
                 return;
             }

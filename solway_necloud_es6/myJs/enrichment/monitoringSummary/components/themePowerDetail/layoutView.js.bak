@@ -152,7 +152,10 @@ ajaxData({
         // 事件处理函数   弹出窗
         function showHistoryData_byRTMDeviceLogId(pstationid, deviceid, deviceSerialNnumber, deviceType, hasJB) {
             var res = { deviceSerialNnumber: deviceSerialNnumber, deviceId: deviceid, pstationid: pstationid, deviceTypeNow: deviceType, hasJB};
-            $scope.$broadcast("equipmentPopUp", res);
+            $scope.$broadcast("equipmentPopUp", {
+                stid: pstationid,
+                eqid: deviceSerialNnumber
+            });
         };
 
         // 视频 处理  获取视频列表

@@ -217,8 +217,11 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
 
         //双击事件
         $scope.dblclick = function (pstationid, deviceId, deviceSerialNnumber, deviceTypeNow, hasJB) {
-            const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, hasJB };
-            $scope.$broadcast("equipmentPopUp", res);
+            // const res = { deviceSerialNnumber, deviceId, pstationid, deviceTypeNow, hasJB };
+            $scope.$broadcast("equipmentPopUp", {
+                stid: pstationid,
+                eqid: deviceSerialNnumber
+            });
             $scope.$apply();
             return false;
         };

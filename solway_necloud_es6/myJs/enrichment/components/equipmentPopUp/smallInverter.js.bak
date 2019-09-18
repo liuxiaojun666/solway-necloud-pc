@@ -168,13 +168,13 @@ ajaxData(
     $scope.singleRealDataBInverter.getData({
         id: eqService.config.eqObj.deviceId,
         serialnumber: eqService.config.eqObj.deviceSerialNnumber,
-        pstationid: eqService.config.eqObj.pstationid
+        stid: eqService.config.eqObj.pstationid
     });
 
     // 实时数据 处理
     $scope.singleRealDataBInverter.subscribe(res => {
         const { getOption, getAVWMaxValueData } = currentService.config;
-        const {acu, acc, acp, acc_kw} = res.data;
+        const {acu, acc, acp, acc_kw} = res.body;
         const ucp = getAVWMaxValueData(acc_kw, acu);
         const { chart1, chart2, chart3 } = charts || currentService.config.initChart();
         chart1.setOption(getOption(ucp[0], acu, 'V', '电压', 'AC电压(V)'));
