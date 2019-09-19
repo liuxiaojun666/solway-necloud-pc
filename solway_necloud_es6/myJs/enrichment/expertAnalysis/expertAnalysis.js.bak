@@ -821,6 +821,20 @@ ajaxData({
                             })
                         })
 
+                        //计算endPercent
+                        var dataLen = 0, allLine
+                        $scope.endPercent = 0
+                        $scope['ydatas' + $scope.checkChart].forEach(v => {
+                            v.forEach((xv) => {
+                                dataLen += xv.length
+                            })
+                        })
+                        $scope.endPercent = dataLen < 30 ? 100 : (30 / dataLen) * 100
+
+                        allLine = $scope['tableType' + $scope.checkChart].every(v => v === 'line')
+
+                        $scope.endPercent = allLine === true ? 100 : $scope.endPercent
+
                         //整合echarts -> table的数据
                         $scope['fileName' + $scope.checkChart] = '对标分析'
                         var headData = ['分析对象']
@@ -913,6 +927,14 @@ ajaxData({
                             },
                             yAxis: yAxis,
                             series: $scope['series' + $scope.checkChart],
+                            dataZoom: [
+                                {
+                                    type: 'slider',
+                                    show: true,
+                                    start: 0,
+                                    end: $scope.endPercent
+                                },
+                            ],
                             grid: {
                                 top: "26%",
                                 right: rightGrid,
@@ -1138,7 +1160,7 @@ ajaxData({
                         })
 
                         //计算endPercent
-                        var dataLen = 0
+                        var dataLen = 0, allLine
                         $scope.endPercent = 0
                         $scope['ydatas' + $scope.checkChart].forEach(v => {
                             v.forEach((xv) => {
@@ -1146,12 +1168,12 @@ ajaxData({
                             })
                         })
                         $scope.endPercent = dataLen < 30 ? 100 : (30 / dataLen) * 100
-                        var allLine
+
                         for(var i=0; i < $scope['tableType' + $scope.checkChart].length; i++) {
                             allLine = $scope['tableType' + $scope.checkChart][i].every(vv => vv === 'line')
                             if (allLine == false) break
                         }
-                        $scope.endPercent = allLine === true ? $scope.endPercent = 100 : $scope.endPercent
+                        $scope.endPercent = allLine === true ? 100 : $scope.endPercent
 
                         //曲线或者柱状图 颜色 的获取
                         $scope['newArrName' + $scope.checkChart].forEach(item => {
@@ -1898,12 +1920,36 @@ ajaxData({
                         }
                     })
             })
+
+            // 计算右侧grid
             var rightGrid = '30%'
             if ($scope['yname' + $scope.checkChart].length == 1) {
                 rightGrid = '15%'
             } else if ($scope['yname' + $scope.checkChart].length == 2) {
                 rightGrid = '25%'
             }
+
+            //计算endPercent
+            var dataLen = 0, allLine
+            $scope.endPercent = 0
+            $scope['ydatas' + $scope.checkChart].forEach(v => {
+                v.forEach(xv => {
+                    dataLen += xv.length
+                })
+            })
+            $scope.endPercent = dataLen < 30 ? 100 : (30 / dataLen) * 100
+
+            if (Array.isArray($scope['tableType' + $scope.checkChart][0])) {
+                for(var i=0; i < $scope['tableType' + $scope.checkChart].length; i++) {
+                    allLine = $scope['tableType' + $scope.checkChart][i].every(vv => vv === 'line')
+                    if (allLine == false) break
+                }
+            } else {
+                allLine = $scope['tableType' + $scope.checkChart].every(v => v === 'line')
+            }
+            
+            $scope.endPercent = allLine === true ? 100 : $scope.endPercent
+
             echarts.init(document.getElementById('line' + $scope.checkChart)).setOption({
                 toolbox: {
                     feature: {
@@ -2298,7 +2344,7 @@ ajaxData({
             $scope.$broadcast('clearTime')
             $scope.haveData2 = false
             $scope.haveData3 = false
-            $scope.haveData4 = false
+            // $scope.haveData4 = false
             $scope.haveData5 = false
             $scope.haveData6 = false
             //对标分析-> 取dmsType

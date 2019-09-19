@@ -29,6 +29,8 @@ ajaxData(
             'theme/js/dist/enrichment/components/equipmentPopUp/boxChange.js' + stamp,
             'theme/js/dist/enrichment/components/equipmentPopUp/electricMeter.js' + stamp,
             'theme/js/dist/enrichment/components/equipmentPopUp/weather.js' + stamp,
+            'theme/js/dist/enrichment/components/equipmentPopUp/smallSuperInverter.js' + stamp, 
+            'theme/js/dist/enrichment/components/equipmentPopUp/bigSuperInverter.js' + stamp, 
         ],
         templateUrl: [
             'tpl/enrichment/components/equipmentPopUp/bigInverter.html' + stamp,
@@ -37,6 +39,8 @@ ajaxData(
             'tpl/enrichment/components/equipmentPopUp/boxChange.html' + stamp,
             'tpl/enrichment/components/equipmentPopUp/electricMeter.html' + stamp,
             'tpl/enrichment/components/equipmentPopUp/weather.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/smallSuperInverter.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUp/bigSuperInverter.html' + stamp,
         ]
     }
 )('equipmentPopUpCtrl', ['$scope', 'equipmentPopUpService', '$ocLazyLoad', '$interval'], function ($scope, currentService, $ocLazyLoad, $interval) {
@@ -51,12 +55,13 @@ ajaxData(
         if (!eqObj.deviceSerialNnumber && eqObj.stid && eqObj.eqid) {
             const {stid, eqid} = eqObj;
             const res = await $scope.deviceInfo.getData({stid, eqid});
-            const { hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow } = res.body;
+            const { version, hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow } = res.body;
             eqObj.deviceSerialNnumber = deviceSerialNnumber;
             eqObj.hasJB = hasJB;
             eqObj.pstationid = pstationid;
             eqObj.deviceId = deviceId;
             eqObj.deviceTypeNow = deviceTypeNow;
+            eqObj.version = version;
         }
 
         $scope.queryDeviceWithType.getData({ type: eqObj.deviceTypeNow })
@@ -66,8 +71,11 @@ ajaxData(
         $scope.templateLoading = true;
         $scope.display = true;
         $scope.templateUrl = '';
-        const dataIndex = eqObj.hasJB === '0' ? 0 : eqObj.deviceTypeNow;
-        if (eqObj.type === '2' && eqObj.version === '2') { }
+        let dataIndex = eqObj.hasJB === '0' ? 0 : eqObj.deviceTypeNow;
+        if (eqObj.deviceTypeNow === '2' && eqObj.version === '2') {
+            dataIndex = 6
+            // dataIndex = eqObj.hasJB === '1' ? 6 : 7
+        }
 
         $ocLazyLoad.load([
             'theme/js/dist/components/calendar.js' + stamp,
@@ -107,19 +115,23 @@ ajaxData(
 
         const eqObj = {};
         const res = await $scope.deviceInfo.getData({ stid, eqid });
-        const { hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow } = res.body;
+        const { version, hasJB, stid: pstationid, id: deviceId, sn: deviceSerialNnumber, type: deviceTypeNow } = res.body;
         eqObj.deviceSerialNnumber = deviceSerialNnumber;
         eqObj.hasJB = hasJB;
         eqObj.pstationid = pstationid;
         eqObj.deviceId = deviceId;
         eqObj.deviceTypeNow = deviceTypeNow;
+        eqObj.version = version;
 
         currentService.config.eqObj = eqObj;
         $scope.templateLoading = true;
         $scope.display = true;
         $scope.templateUrl = '';
-        const dataIndex = eqObj.hasJB === '0' ? 0 : eqObj.deviceTypeNow;
-        if (eqObj.type === '2' && eqObj.version === '2') {}
+        let dataIndex = eqObj.hasJB === '0' ? 0 : eqObj.deviceTypeNow;
+        if (eqObj.deviceTypeNow === '2' && eqObj.version === '2') {
+            dataIndex = 6
+            // dataIndex = eqObj.hasJB === '1' ? 6 : 7
+        }
 
         $ocLazyLoad.load([
             'theme/js/dist/components/calendar.js' + stamp,

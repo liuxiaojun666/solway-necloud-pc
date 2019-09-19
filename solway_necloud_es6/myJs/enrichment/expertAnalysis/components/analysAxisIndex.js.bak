@@ -159,13 +159,15 @@ ajaxData({
             } else {
                     $scope.supportTone = false
             }
-        
+
             //获取 checked 的数据 -> 重现到左侧列表
             if ($scope.analysCheckData.length > 0) {
                 var key
                 for (key in $scope.analysData) {
-                    $scope.analysData[key].ll.forEach(son => {
-                        if (son.fdKey == $scope.analysCheckData[0].fdKey) son.checked = true
+                    $scope.analysData[key].ll.forEach(v => {
+                        $scope.analysCheckData.forEach(vv => {
+                            if (v.fdKey == vv.fdKey) v.checked = true
+                        })
                     })
                 }
             }

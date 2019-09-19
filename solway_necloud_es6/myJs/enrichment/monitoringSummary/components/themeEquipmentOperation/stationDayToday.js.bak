@@ -489,7 +489,7 @@ ajaxData(
             {
                 dataIndex: 'statusDesc',
                 title: '状态',
-                width: '80px',
+                width: '100px',
                 sort: true,
                 fixed: 'left',
                 render(text, item, index) {
@@ -520,7 +520,7 @@ ajaxData(
             {
                 dataIndex: 'dtime',
                 title: '时间',
-                width: '110px',
+                width: '150px',
                 align: 'center',
                 fixed: 'left',
                 sort: true,
@@ -650,10 +650,10 @@ ajaxData(
                 //     return `<span>${text.toFixed(2)}</span>`
                 // }
             },
-        ]).concat(new Array(20).fill('c').map((v, i) => ({
+        ]).concat(new Array(32).fill('c').map((v, i) => ({
             dataIndex: v + (i + 1),
             title: `<span>${i + 1}</span>`,
-            width: '40px',
+            width: '50px',
             align: 'right',
             render(text, item, index) {
                 return item.hasJB === '0' ? '' : `
@@ -1621,8 +1621,10 @@ ajaxData(
         $scope.deviceRunList.deviceId = '';
         if ($scope.showShape === 'chart') {
             $scope.deviceHisRiver.getData({ deviceType: $scope.deviceRunList.deviceType }); 
+            if (!$scope.deviceRunList.deviceType) return
             $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
         } else {
+            if (!$scope.deviceRunList.deviceType) return
             $scope.queryDeviceWithType.getData({ type: $scope.deviceRunList.deviceType });
         }
     };
