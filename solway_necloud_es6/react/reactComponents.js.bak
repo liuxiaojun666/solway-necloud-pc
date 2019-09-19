@@ -134,7 +134,7 @@ win.reactComponent = (() => {
             <svg
                 onClick={dblClick.bind(this, data.stid, data.id, data.serialNumber, '2', data.hasJB)}
                 style={{ verticalAlign: 'middle', cursor: 'pointer' }}
-                xmlns="http://www.w3.org/2000/svg" version="1.1" height="63" width="56">
+                xmlns="http://www.w3.org/2000/svg" version="1.1" height="103" width="56">
                 {hover && <rect name="select" height="100%" width="100%" fill="rgba(6, 190, 189, .3)" />}
                 <g type='nbq'>
                     <rect stroke={deviceStatusColorMap[data.status]} x="5" y="5" width="46" height="14" fillOpacity='0.1' fill={deviceStatusColorMap[data.status]} />
@@ -154,6 +154,18 @@ win.reactComponent = (() => {
                         data.statusData.statuFlags.slice(10, 20).map((v, i) => [
                             <rect key={i + '1'} fill={groupStringColorMap[v]} strokeOpacity='null' x={5 + 5 * i} y='44' width='1' height='14' stroke={groupStringColorMap[v]} name="zuchuan" />,
                             data.statusData.shadowFlags[10 + i] && <rect key={i + '2'} name='shadow' fillOpacity='0.5' sz='0' x={3 + 3 * i} y='42' width='5' height='18' fill="#CCCCCC" />
+                        ])
+                    }
+                    {
+                        data.statusData.statuFlags.slice(20, 30).map((v, i) => [
+                            <rect key={i + '1'} fill={groupStringColorMap[v]} strokeOpacity='null' x={5 + 5 * i} y='64' width='1' height='14' stroke={groupStringColorMap[v]} name="zuchuan" />,
+                            data.statusData.shadowFlags[20 + i] && <rect key={i + '2'} name='shadow' fillOpacity='0.5' sz='0' x={3 + 3 * i} y='62' width='5' height='18' fill="#CCCCCC" />
+                        ])
+                    }
+                    {
+                        data.statusData.statuFlags.slice(30, 32).map((v, i) => [
+                            <rect key={i + '1'} fill={groupStringColorMap[v]} strokeOpacity='null' x={5 + 5 * i} y='84' width='1' height='14' stroke={groupStringColorMap[v]} name="zuchuan" />,
+                            data.statusData.shadowFlags[30 + i] && <rect key={i + '2'} name='shadow' fillOpacity='0.5' sz='0' x={3 + 3 * i} y='82' width='5' height='18' fill="#CCCCCC" />
                         ])
                     }
                 </g>
