@@ -73,6 +73,18 @@ ajaxData(
             taskId,
             stationId: stationId || ($scope.releaseTaskParame || {}).stationId
         };
+
+        if (!id) {
+            $scope.releaseTaskParame = {
+                timerType: '0',
+                userIds: {},
+                taskImgs: [],
+                checkMan: '',
+                taskId,
+                stationId: stationId || ($scope.releaseTaskParame || {}).stationId
+            };
+        }
+
         if (id) {
             const { handleMans, bouns1, bouns2, bouns3, bounsT1, bounsT2, bounsT3, taskImgs, taskContent, checkMan } = $scope.taskDetailPC.res.body;
             $scope.releaseTaskParame = {

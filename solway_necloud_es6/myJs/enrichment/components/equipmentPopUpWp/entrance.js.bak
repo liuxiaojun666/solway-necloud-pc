@@ -24,9 +24,11 @@ ajaxData(
         __serviceName__: 'equipmentPopUpWpService',
         depend: [
             'theme/js/dist/enrichment/components/equipmentPopUpWp/windGenerator.js' + stamp,
+            'theme/js/dist/enrichment/components/equipmentPopUpWp/windTower.js' + stamp,
         ],
         templateUrl: [
             'tpl/enrichment/components/equipmentPopUpWp/windGenerator.html' + stamp,
+            'tpl/enrichment/components/equipmentPopUpWp/windTower.html' + stamp,
         ]
     }
 )('equipmentPopUpWpCtrl', ['$scope', 'equipmentPopUpWpService', '$ocLazyLoad', '$interval'], function ($scope, currentService, $ocLazyLoad, $interval) {
@@ -54,7 +56,7 @@ ajaxData(
         $scope.display = true;
         $scope.templateUrl = '';
         
-        const dataIndex = {'18': '0'}[eqObj.deviceTypeNow];
+        const dataIndex = {'18': '0', '17': '1'}[eqObj.deviceTypeNow];
         $ocLazyLoad.load([
             'theme/js/dist/components/calendar.js' + stamp,
             'theme/js/dist/components/myTable.js' + stamp,
@@ -103,7 +105,7 @@ ajaxData(
         $scope.templateLoading = true;
         $scope.display = true;
         $scope.templateUrl = '';
-        const dataIndex = { '18': '0' }[eqObj.deviceTypeNow];
+        const dataIndex = { '18': '0', '17': '1' }[eqObj.deviceTypeNow];
 
         $ocLazyLoad.load([
             'theme/js/dist/components/calendar.js' + stamp,
