@@ -134,7 +134,9 @@ win.reactComponent = (() => {
             <svg
                 onClick={dblClick.bind(this, data.stid, data.id, data.serialNumber, '2', data.hasJB)}
                 style={{ verticalAlign: 'middle', cursor: 'pointer' }}
-                xmlns="http://www.w3.org/2000/svg" version="1.1" height="103" width="56">
+                xmlns="http://www.w3.org/2000/svg" version="1.1" height={
+                    ((data.version === 2) && (data.statusData.statuFlags.length > 20)) ? '103' : '63'
+                } width="56">
                 {hover && <rect name="select" height="100%" width="100%" fill="rgba(6, 190, 189, .3)" />}
                 <g type='nbq'>
                     <rect stroke={deviceStatusColorMap[data.status]} x="5" y="5" width="46" height="14" fillOpacity='0.1' fill={deviceStatusColorMap[data.status]} />

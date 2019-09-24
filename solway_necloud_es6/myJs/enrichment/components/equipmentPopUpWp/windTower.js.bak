@@ -21,13 +21,18 @@ ajaxData(
             name: 'GETwpFaultAlarmList',
             data: {},
             later: true
+        },
+        singleRealtimeWindTower: {
+            name: 'GETsingleRealtimeWindTower',
+            data: {},
+            later: true
         }
     },
     {
-        __serviceName__: 'windGeneratorService',
+        __serviceName__: 'windTowerService',
     }
-)('windGeneratorCtrl', ['$scope', 'windGeneratorService', 'equipmentPopUpWpService', '$interval', '$ocLazyLoad'], function ($scope, currentService, eqService, $interval, $ocLazyLoad) {
-    $('.windGenerator.ng-clock').removeClass('ng-clock');
+)('windTowerCtrl', ['$scope', 'windTowerService', 'equipmentPopUpWpService', '$interval', '$ocLazyLoad'], function ($scope, currentService, eqService, $interval, $ocLazyLoad) {
+    $('.windTower.ng-clock').removeClass('ng-clock');
     $scope.tabIndex = 0; //初始化 tab 标签页   0：实时数据  1：历史数据   2：故障信息
     $scope.pstationid = eqService.config.eqObj.pstationid;
     $scope.serialnumber = eqService.config.eqObj.deviceSerialNnumber;
@@ -51,17 +56,21 @@ ajaxData(
     }).then(res => $scope.deviceName = res.body.device.name);
 
     // 实时数据获取
-    // $scope.selectWindTurbineSubSystemRunData.getData({
-    //     deviceId: eqService.config.eqObj.deviceId,
-    //     level: 2,
-    //     stid: eqService.config.eqObj.pstationid
-    // });
+    $scope.singleRealtimeWindTower.getData({
+        id: eqService.config.eqObj.deviceId,
+        serialnumber: eqService.config.eqObj.deviceSerialNnumber,
+        pstationid: eqService.config.eqObj.pstationid
+    });
 
     // 状态刷新
     const timer = $interval(() => {
         if ($scope.tabIndex !== 0) return;
         if ($scope.rtmSingleStationComm.res.comm === 1) return;
-        
+        $scope.singleRealtimeWindTower.getData({
+            id: eqService.config.eqObj.deviceId,
+            serialnumber: eqService.config.eqObj.deviceSerialNnumber,
+            pstationid: eqService.config.eqObj.pstationid
+        });
     }, 5 * 1000);
 
     // 历史数据 列表 接口请求
