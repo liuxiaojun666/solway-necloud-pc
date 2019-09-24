@@ -92,13 +92,15 @@ ajaxData(
         historicalRecord.set({ tab2Index: index });
         $scope.timeType = [null, 1, 2, 3, 4][$scope.tab.res.body[$scope.timeRange].reportType];
         const { timeType, _dateTime, dataType, _weekTimeStart, _weekTimeEnd } = $scope;
-        return $scope.view.getData({
+        const o = {
             dateType: timeType,
             subTabId: $scope.tab.res.body[$scope.timeRange].subTabs[index].id,
             style: 0,
             useSt: dataType === 0 ? 1 : 0,
             date: timeType === 3 ? _weekTimeStart.showDate + ',' + _weekTimeEnd.showDate : _dateTime.showDate
-        });
+        };
+        // $scope.iframSrc = window.interface.GETreportShowView + '?' + $.param(o);
+        $scope.view.getData(o);
     };
 
     // view 处理

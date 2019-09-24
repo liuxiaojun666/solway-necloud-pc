@@ -826,7 +826,7 @@ ajaxData({
                         $scope.endPercent = 0
                         $scope['ydatas' + $scope.checkChart].forEach(v => {
                             v.forEach((xv) => {
-                                dataLen += xv.length
+                                dataLen += xv == null ? 0 : xv.length
                             })
                         })
                         $scope.endPercent = dataLen < 30 ? 100 : (30 / dataLen) * 100
@@ -1164,7 +1164,7 @@ ajaxData({
                         $scope.endPercent = 0
                         $scope['ydatas' + $scope.checkChart].forEach(v => {
                             v.forEach((xv) => {
-                                dataLen += xv.length
+                                dataLen += xv == null ? 0 : xv.length
                             })
                         })
                         $scope.endPercent = dataLen < 30 ? 100 : (30 / dataLen) * 100
@@ -1413,7 +1413,7 @@ ajaxData({
             }, function (e) {
             })
         }
-
+ 
         $ocLazyLoad.load([
             'vendor/spreadjs/scripts/gc.spread.sheets.all.11.0.0.min.js'
         ]).then(() => {
@@ -1433,7 +1433,7 @@ ajaxData({
                     headings: true,
                     footers: true,
                     formats: ["xls", "csv", "txt"],
-                    fileName: $scope['fileName' + i] ? $scope['fileName' + i] : '未命名',
+                    fileName: $scope['fileName' + i] || '未命名',
                     bootstrap: true,
                     position: "bottom",
                     ignoreRows: null,
