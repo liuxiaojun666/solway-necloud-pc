@@ -46,7 +46,26 @@ ajaxData(
     // 滚动数字
     const od = new Odometer({ el: document.getElementById('odometer'), value: 100000000 });
 
-    $scope.pvwpStationOverview.subscribe(res => od.update(10000000000 + (+res.body.ov.real_kwh_chk.toFixed()) + ''));
+    $scope.pvwpStationOverview.subscribe(res => {
+        od.update(10000000000 + (+res.body.ov.real_kwh_chk.toFixed()) + '');
+        hideNum0();
+        setTimeout(hideNum0, 2500);
+    });
+
+    function hideNum0() {
+        let has = false;
+        let styleText = '';
+        $('#odometer .odometer-value').each(function (index) {
+            const $this = $(this);
+            if (!has && $this.text() === '0') {
+                styleText += `#odometer .odometer-digit:nth-child(${index + 1}) .odometer-value{color: transparent;}`;
+            } else {
+                styleText += `#odometer .odometer-digit:nth-child(${index + 1}) .odometer-value{color: #61FF4F;}`;
+                has = true
+            }
+        });
+        $('#odometerStyle').html(styleText);
+    }
 
 
     // 电站类型列表
