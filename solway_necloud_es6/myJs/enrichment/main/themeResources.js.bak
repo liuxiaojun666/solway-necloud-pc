@@ -99,5 +99,22 @@ ajaxData(
         await myAjaxData.timeout(0);
         od = new Odometer({ el: document.getElementById('odometer'), value: 100000 });
         od && od.update('1' + ('00000000' + (+res.body.ov.co2).toFixed()).substr(-6));
+        hideNum0();
+        setTimeout(hideNum0, 2500);
     });
+
+    function hideNum0() {
+        let has = false;
+        let styleText = '';
+        $('#odometer .odometer-value').each(function (index) {
+            const $this = $(this);
+            if (!has && $this.text() === '0') {
+                styleText += `#odometer .odometer-digit:nth-child(${index + 1}) .odometer-value{color: transparent;}`;
+            } else {
+                styleText += `#odometer .odometer-digit:nth-child(${index + 1}) .odometer-value{color: #067b40;}`;
+                has = true
+            }
+        });
+        $('#odometerStyle').html(styleText);
+    }
 });

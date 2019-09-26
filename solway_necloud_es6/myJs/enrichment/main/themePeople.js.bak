@@ -28,7 +28,26 @@ ajaxData(
     $('.themePeople.ng-clock').removeClass('ng-clock');
     // 滚动数字
     const od = new Odometer({ el: document.getElementById('odometer'), value: 10000 });
-    $scope.safeRunDayCount.promise.then(res => od.update(10000 + res.body + ''));
+    $scope.safeRunDayCount.promise.then(res => {
+        od.update(10000 + res.body + '');
+        hideNum0();
+        setTimeout(hideNum0, 2500);
+    });
+
+    function hideNum0() {
+        let has = false;
+        let styleText = '';
+        $('#odometer .odometer-value').each(function (index) {
+            const $this = $(this);
+            if (!has && $this.text() === '0') {
+                styleText += `#odometer .odometer-digit:nth-child(${index + 1}) .odometer-value{color: transparent;}`;
+            } else {
+                styleText += `#odometer .odometer-digit:nth-child(${index + 1}) .odometer-value{color: #FF4B4B;}`;
+                has = true
+            }
+        });
+        $('#odometerStyle').html(styleText);
+    }
 
     $scope.goThisStation = async ({ stid, stClass, router, pageData }) => {
         const falsify = historicalRecord.falsify(router, pageData, (!stid || !stClass));

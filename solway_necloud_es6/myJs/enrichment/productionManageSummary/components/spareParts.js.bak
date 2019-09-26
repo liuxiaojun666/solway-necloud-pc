@@ -176,9 +176,13 @@ ajaxData(
         } else if (str.includes('icon-bianji-copy')) {
             $scope.opFittingsDictUpdate.edit = true;
             const { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark, attachments, categoryId, pt } = item;
-            attachments && $scope.fileUploadSelectFiles.getData({ ids: attachments, targetType: 'FITTING_FILE'}).then(res => {
-                $scope.fileUploadUploadFile.fileNames = res.body.map(v => v.originalFileName);
-            });
+            if (attachments) {
+                $scope.fileUploadSelectFiles.getData({ ids: attachments, targetType: 'FITTING_FILE' }).then(res => {
+                    $scope.fileUploadUploadFile.fileNames = res.body.map(v => v.originalFileName);
+                });
+            } else {
+                $scope.fileUploadUploadFile.fileNames = [];
+            }
             $scope.opFittingsDictUpdate.formData = { ctg1, ctg2, code, name, manuf, ft, fu, fp, numMin, id, remark, attachments, categoryId, pt };
             $scope.opFittingsDictSelectManuf.getData();
         }
