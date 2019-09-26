@@ -1,0 +1,263 @@
+ajaxData(
+    {
+        powerStationStatusDataNew2: {
+            name: 'GETpowerStationStatusDataNew2',
+            data: {},
+            onlyLatest: true
+        },
+        powerStationModalShowData: {
+            name: 'GETpowerStationModalShowData',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            cache: true
+        },
+        userAuthHandleChangeDataType: {
+            name: 'GETUserAuthHandleChangeDataType',
+            data: {},
+            later: true,
+            onlyLatest: true,
+            cache: true
+        }
+    }, {
+        __serviceName__: 'mapViewService',
+        formatMapData: function formatMapData(PartObj, idx) {
+            var arrData = []
+            var symbol = "";
+
+            if (idx == 1) {
+                symbol = "rect";
+            } else if (idx == 2) {
+                symbol = "circle";
+            } else if (idx == 3) {
+                symbol = "triangle";
+            } else if (idx == 4) {
+                symbol = "image://theme/images/WindTurbine_DJ.gif";
+            }
+
+            for (var j = 0; j < PartObj.data.length; j++) {
+                var powerName = PartObj.data[j].name;
+                var status = PartObj.data[j].status;
+                var itemStyle;
+                if (status == "0") {
+                    itemStyle = {
+                        color: '#24d934',//点的颜色
+                        shadowColor: 'rgba(36, 217, 52, .5)',
+                        shadowBlur: 20
+                    };
+                } else if (status == "1") {
+                    itemStyle = {
+                        color: 'rgb(236, 67, 46)',//点的颜色
+                        shadowColor: 'rgba(236, 67, 46, .5)',
+                        shadowBlur: 20
+                    };
+                } else if (status == "2") {
+                    itemStyle = {
+                        color: 'rgb(246, 254, 57)',
+                        shadowColor: 'rgba(246, 254, 57, .5)',
+                        shadowBlur: 20
+                    };
+                } else if (status == "3") {
+                    itemStyle = {
+                        color: 'rgb(204, 204, 204)',
+                        shadowColor: 'rgba(204, 204, 204, .5)',
+                        shadowBlur: 20
+                    };
+                } else {
+                    itemStyle = {
+                        color: 'rgb(204, 204, 204)',
+                        shadowColor: 'rgba(204, 204, 204, .5)',
+                        shadowBlur: 20
+                    };
+                }
+                var normalitemStyle = { normal: itemStyle };
+                var obj = {
+                    name: powerName,
+                    id: PartObj.data[j].id,
+                    value: PartObj.data[j].value,
+                    symbol: symbol,
+                    itemStyle: normalitemStyle
+                };
+                //obj.value.push(PartObj.data[j]['value']);
+                arrData.push(obj);
+            }
+            return arrData;
+        }
+    }
+)('mapViewCtrl', ['$scope', 'mapViewService', 'actionRecord', '$interval', '$state'], ($scope, myAjaxData, historicalRecord, $interval, $state) => {
+    $('.circle1.ng-clock').removeClass('ng-clock');
+    const myChart = echarts.init(document.getElementById('chinaChart'));
+
+    $scope.powerStationStatusDataNew2.subscribe(res => {
+        const op = myChart.getOption();
+        res.data.forEach(v => {
+            if (v.name == "地面") {
+                op.series[0].data = myAjaxData.config.formatMapData(v, "1");
+            } else if (v.name == "分布") {
+                op.series[1].data = myAjaxData.config.formatMapData(v, "2");
+            } else if (v.name == "户用") {
+                op.series[2].data = myAjaxData.config.formatMapData(v, "3");
+            } else if (v.name == "风电") {
+                op.series[3].data = myAjaxData.config.formatMapData(v, "4");
+            }
+        });
+        myChart.setOption(op, true);
+    });
+
+    const timer = $interval(() => {
+        $scope.powerStationStatusDataNew2.getData();
+    }, 10 * 1000);
+
+    $scope.$on('$destroy', () => {
+        $interval.cancel(timer);
+    });
+
+
+    (async function drawMap() {
+        await myAjaxData.timeout(0);
+        myChart.resize();
+        window.addEventListener('resize', () => myChart.resize());
+        var option = {
+            backgroundColor: '#0D1F30',
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}'
+            },
+            grid: {
+                x: '5px',
+                x2: '5px',
+                y: "10px",
+                y2: "5px"
+            },
+            legend: {
+                show: false,
+                data: ["地面光伏", "分布式光伏", "户用光伏", "风电"]
+            },
+            geo: {
+                map: 'china',
+                roam: true,
+                zoom: 1.2,
+                center: [105, 38],
+                label: {
+                    normal: {
+                        show: false,
+                        textStyle: {
+                            color: "#16e6ff",//省份颜色,
+                            borderColor: 'rgb(0,211,255)'
+                        }
+                    },
+                    emphasis: {
+                        show: true,
+                        textStyle: {
+                            color: "white",//省份颜色,
+                        }
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        areaColor: 'rgba(0,0,0,0.5)',
+                        borderColor: 'rgb(0,211,255)',
+                    },
+                    emphasis: {
+                        areaColor: 'rgba(75,241,241,0.65)'
+                    }
+                },
+            },
+            series: [
+                {
+                    name: '地面光伏',
+                    //type: 'map',
+                    //mapType: 'china',
+                    type: 'scatter',
+                    coordinateSystem: 'geo',
+                    roam: false,
+                    symbolSize: 8,
+                    //symbol: 'rect',//?试下是这个吗
+                    data: [
+                        //{name: '北京',value: Math.round(Math.random()*1000)}
+
+                    ]
+                },
+                {
+                    name: '分布式光伏',
+                    type: 'scatter',
+                    coordinateSystem: 'geo',
+                    roam: false,
+                    symbolSize: 8,
+                    //symbol: 'circle',
+                    data: []
+                },
+                {
+                    name: '户用光伏',
+                    type: 'scatter',
+                    coordinateSystem: 'geo',
+                    roam: false,
+                    symbolSize: 8,
+                    //symbol: 'triangle',
+                    data: []
+                },
+                {
+                    name: '风电',
+                    type: 'scatter',
+                    coordinateSystem: 'geo',
+                    roam: false,
+                    symbolSize: 15,
+                    //symbol: 'image://url',
+                    data: []
+                },
+            ]
+        };
+        myChart.setOption(option, true);
+
+        myChart.on('click', function (param) {
+            param.data && param.data.id && clickMapArea(param, param.data.id);
+        });
+
+        myChart._dom.addEventListener('dblclick', async function (e) {
+            $scope.isMagnified = e.currentTarget.isMagnified = !e.currentTarget.isMagnified;
+            $scope.$apply();
+            await myAjaxData.timeout(100);
+            myChart.resize();
+        });
+    }());
+
+    async function clickMapArea(param, id) {
+        const e = param.event || window.event;
+        $scope.xPos = e.offsetX + document.body.scrollLeft + document.documentElement.scrollLeft - 225;
+        $scope.yPos = e.offsetY + document.body.scrollTop + document.documentElement.scrollTop - 353;
+        if ($scope.isMagnified) {
+            $scope.xPos += 15;
+            $scope.yPos += 20;
+        }
+        $scope.stationBlockDisplay = true;
+        const res = await $scope.powerStationModalShowData.getData({ id });
+        if (!res) return;
+        $scope.powerStationModalShowData.res.name = param.name;
+        $scope.powerStationModalShowData.res.id = id;
+        $scope.powerStationModalShowData.res.stClass = param.seriesName === '风电' ? '02' : '01';
+        if (res.powerData.comm == 1) {
+            $scope.powerStationModalShowData.res.statusText = `<span class="black-5">通讯中断</span>`;
+        } else if (res.powerData.comm == 2) {
+            $scope.powerStationModalShowData.res.statusText = `<span class="black-5">初始化</span>`;
+        } else {
+            if (res.powerData.status == 1) {//故障
+                $scope.powerStationModalShowData.res.statusText = `<span class="map-red">故障</span>`;
+            } else if (res.powerData.status == 2) {//报警
+                $scope.powerStationModalShowData.res.statusText = `<span class="map-yellow">报警</span>`;
+            } else {//正常
+                $scope.powerStationModalShowData.res.statusText = `<span class="map-green">正常运行</span>`;
+            }
+        }
+        $scope.$apply();
+    }
+
+
+    $scope.goStationPage = async (data) => {
+        await $scope.userAuthHandleChangeDataType.getData(data);
+        $scope.$apply();
+        if (data.stClass === '01') return $state.go('monitoringSummary');
+        else if (data.stClass === '02') return $state.go('monitoringSummaryWp');
+    };
+
+
+});
