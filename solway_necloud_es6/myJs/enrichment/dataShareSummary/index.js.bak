@@ -35,6 +35,15 @@ ajaxData({
         4: '(m/s)'
     }
 
+    $scope.$on('$destroy', () => {
+        clearInterval(timeer)
+    })
+
+    // 每隔2分钟刷新页面
+    const timeer = setInterval(() => {
+        window.location.reload()
+    }, 120000)
+
     // 当前页面行为记录初始化回调 获取行为记录
     historyInitCallback();
     async function historyInitCallback() {
@@ -457,11 +466,17 @@ ajaxData({
     var hoverTime, hoverIndex;
     $('#main div').hover(function () {
         hoverIndex = $(this).index();
+        $(this).width($(this).width() * 1.2)
+        $(this).height($(this).height() * 1.2)
+        $(this).css('line-height', $(this).height() * 1.2 + 'px')
         clearInterval(json[hoverIndex].timer);
         hoverTime = setInterval(() => {
             crash(hoverIndex);
         }, 10);
     }, function () {
+        $(this).width($(this).width() / 1.2)
+        $(this).height($(this).height() / 1.2)
+        $(this).css('line-height', $(this).height() / 1.2 + 'px')
         move(json[hoverIndex]);
         clearInterval(hoverTime);
     })
