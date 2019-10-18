@@ -68,7 +68,8 @@ ajaxData(
             showShape = 'chart', 
             currentDeviceType = '2', 
             tabIndex = 0, 
-            checkboxStatus = [true, true, true, true, true, true, true], 
+            checkboxStatus = [true, true, true, true, true, true], 
+            shadowFlag = false,
             checkboxStatus2 = [true, true, true, true, true, true, true, true] 
         } = historicalRecord.get().themeEquipmentOperationCompanyDayToday || {};
 
@@ -79,6 +80,7 @@ ajaxData(
         $scope.currentDeviceType = currentDeviceType;
         // await $scope.dateUpdated();
         $scope.checkboxStatus = checkboxStatus;
+        $scope.shadowFlag = shadowFlag;
         $scope.checkboxStatus2 = checkboxStatus2;
         $scope.changeTab(tabIndex);
         $('.ng-clock').removeClass('ng-clock');
@@ -147,7 +149,8 @@ ajaxData(
     };
 
     // 复选框状态改变
-    $scope.changeCheckboxStatus = index => {
+    $scope.changeCheckboxStatus = (index, shadowFlag) => {
+        if (shadowFlag) $scope.shadowFlag = false;
         if (index === 0) $scope.checkboxStatus.fill($scope.checkboxStatus[0]);
         else if (!$scope.checkboxStatus[index]) $scope.checkboxStatus[0] = false;
         else if ($scope.checkboxStatus.slice(1).every(v => v)) $scope.checkboxStatus[0] = true;
@@ -189,8 +192,11 @@ ajaxData(
                 $scope.runRealDataBInverter.getData({
                     search: $scope.searchKey,
                     status: $scope.checkboxStatus.map((v, i) => v ? (
+                        '0' + (i > 2 ? i - 1 : i === 2 ? 7 : i)
+                    ) : v).filter(v => v !== false).join() + ($scope.shadowFlag ? ',05' : '')
+                    /* $scope.checkboxStatus.map((v, i) => v ? (
                                 '0' + (i > 2 ? i - 1 : i === 2 ? 7 : i)
-                            ) : v).filter(v => v !== false).join()
+                            ) : v).filter(v => v !== false).join() */
                 });
                 break;
 

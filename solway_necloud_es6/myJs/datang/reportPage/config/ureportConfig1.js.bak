@@ -32,7 +32,7 @@ ajaxData({
         name: 'GETloadReportProviders',
         data: {}
     },
-}, {})('ureportConfig1Ctrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+}, {})('ureportConfig1Ctrl', ['$scope', 'myAjaxData', 'toaster'], ($scope, myAjaxData, toaster) => {
     $scope.moduleName = '报表配置';//当前页面名称；
     // edit-form 模板 显示配置
     $scope.visibilityConfig = {
@@ -98,8 +98,8 @@ ajaxData({
     $scope.saveOrSubmit = () => {
         if (!app.lxj_validation($scope.formData, '.edit-form')) return;
         $scope.saveOrUpdate.getData($scope.formData).then(res => {
-            if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
-            promptObj("success", "", res.msg);
+            if (res.code !== 0) return toaster.pop("error", "", "error:" + res.msg);
+            toaster.pop("success", "", res.msg);
             $scope.isEdit = false;
             $scope.toEdit = false;
             $scope.newRecord = false;

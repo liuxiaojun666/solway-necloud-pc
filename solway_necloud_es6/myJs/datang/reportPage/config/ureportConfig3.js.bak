@@ -10,7 +10,7 @@ ajaxData({
         data: {},
         later: true
     }
-}, {})('ureportConfig3Ctrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+}, {})('ureportConfig3Ctrl', ['$scope', 'myAjaxData', toaster], ($scope, myAjaxData, toaster) => {
 
     // 编辑对应tab 的 内容
     $scope.edit = index => $scope.pageList1.getData({ useSt: index });
@@ -46,8 +46,8 @@ ajaxData({
             sendDate: (v.reportType === 3 ? v.sendDate + ',' + v.week : v.sendDate), 
             mailAble: v.mailAble ? 1 : 0
         }))).then(res => {
-            if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
-            promptObj("success", "", res.msg);
+            if (res.code !== 0) return toaster.pop("error", "", "error:" + res.msg);
+            toaster.pop("success", "", res.msg);
             $scope.pageList1.getData({});
         });
     };

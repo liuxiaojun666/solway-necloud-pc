@@ -6,7 +6,7 @@ ajaxData(
             onlyLatest: true
         },
         powerStationModalShowData: {
-            name: 'GETpowerStationModalShowData',
+            name: 'GETpvwpStationRtOverviewDay',
             data: {},
             later: true,
             onlyLatest: true,
@@ -230,19 +230,20 @@ ajaxData(
             $scope.yPos += 20;
         }
         $scope.stationBlockDisplay = true;
-        const res = await $scope.powerStationModalShowData.getData({ id });
+        const stClass = param.seriesName === '风电' ? '02' : '01';
+        const res = await $scope.powerStationModalShowData.getData({ stid: id, stcls: stClass });
         if (!res) return;
         $scope.powerStationModalShowData.res.name = param.name;
         $scope.powerStationModalShowData.res.id = id;
-        $scope.powerStationModalShowData.res.stClass = param.seriesName === '风电' ? '02' : '01';
-        if (res.powerData.comm == 1) {
+        $scope.powerStationModalShowData.res.stClass = stClass;
+        if (res.body.day.data.comm == 1) {
             $scope.powerStationModalShowData.res.statusText = `<span class="black-5">通讯中断</span>`;
-        } else if (res.powerData.comm == 2) {
+        } else if (res.body.day.data.comm == 2) {
             $scope.powerStationModalShowData.res.statusText = `<span class="black-5">初始化</span>`;
         } else {
-            if (res.powerData.status == 1) {//故障
+            if (res.body.day.data.status == 1) {//故障
                 $scope.powerStationModalShowData.res.statusText = `<span class="map-red">故障</span>`;
-            } else if (res.powerData.status == 2) {//报警
+            } else if (res.body.day.data.status == 2) {//报警
                 $scope.powerStationModalShowData.res.statusText = `<span class="map-yellow">报警</span>`;
             } else {//正常
                 $scope.powerStationModalShowData.res.statusText = `<span class="map-green">正常运行</span>`;

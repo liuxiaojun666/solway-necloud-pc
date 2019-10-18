@@ -28,7 +28,7 @@ ajaxData({
         name: 'POSTCompanyListData',
         data: {}
     }
-}, {})('ureportConfig2Ctrl', ['$scope', 'myAjaxData'], ($scope, myAjaxData) => {
+}, {})('ureportConfig2Ctrl', ['$scope', 'myAjaxData', 'toaster'], ($scope, myAjaxData, toaster) => {
     $scope.moduleName = '报表配置';//当前页面名称；
     // edit-form 模板 显示配置
     $scope.visibilityConfig = {
@@ -163,8 +163,8 @@ ajaxData({
             week2: null,
             name: $scope.formData.layName
         }).then(res => {
-            if (res.code !== 0) return promptObj("error", "", "error:" + res.msg);
-            promptObj("success", "", res.msg);
+            if (res.code !== 0) return toaster.pop("error", "", "error:" + res.msg);
+            toaster.pop("success", "", res.msg);
             $scope.secondaryConfig = true;
             $scope.formData.id = res.body.id;
             $scope.formData.isEdit = true;
