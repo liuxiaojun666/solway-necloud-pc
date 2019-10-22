@@ -1,7 +1,54 @@
 ajaxData(
-    {}, {
+    {
+        getLoginUser: {
+            name: 'GETloginUserInfo',
+            data: {},
+            later: true
+        },
+        getBaseRemindByCondition: {
+            name: 'GETBaseRemindByCondition',
+            data: {},
+            later: true
+        },
+        getreadBaseRemind: {
+            name: 'GETreadBaseRemind',
+            data: {},
+            later: true
+        },
+    }, {
         __serviceName__: 'remindPopService',
     }
 )('remindPopCtrl', ['$scope', 'remindPopService', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
-    
+   
+    $scope.getLoginUser.getData().then(res => {
+        $scope.userId = res.userId
+        $scope.getBaseRemindByCondition.getData({userId: res.userId}).then(async res => {
+            if (res.body.length <= 0) return
+            res.body[0].show = true
+            $scope.remindList = res.body
+            if (res.body[0].type == 0) {
+                await myAjaxData.timeout(1000 * res.body[0].second)
+                if (res.body[0].show) $scope.close(res.body[0], 0)
+            }
+        })
+    })
+
+    // 关闭按钮
+    $scope.close = async (item, i) => {
+        $scope.getreadBaseRemind.getData({
+            userId: $scope.userId,
+            remindId: item.id
+        }).then(() => {
+            item.show = false
+        })
+
+        if (i + 1 >= $scope.remindList.length) return
+        $scope.remindList[i + 1].show = true
+
+        if ($scope.remindList[i + 1].type == 0) {
+            await myAjaxData.timeout(1000 * $scope.remindList[i + 1].second)
+            if ($scope.remindList[i + 1].show) $scope.close($scope.remindList[i + 1], i + 1)
+        }
+    }
+
 });
