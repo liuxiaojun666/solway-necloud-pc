@@ -23,22 +23,22 @@ $(function () {
     if ((window.PROCESS_EVN === 'production') || (window.PROCESS_EVN === 'test')) {
         if (!window.localStorage.stamp) window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
 
-        const oReq = new XMLHttpRequest();
-        oReq.open("GET", '/stamp.txt?_=' + Math.random(), true);
-        oReq.responseType = "blob";
-        oReq.onload = function (oEvent) {
-            const _blob = new Blob([oReq.response]);
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const stamp = reader.result;
-                if (stamp !== window.localStorage.stamp) {
-                    alert('页面缓存或受非正常访问，请刷新登录页面后重新登录！');
-                    return window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
-                }
-            };
-            reader.readAsText(_blob);
-        };
-        oReq.send();
+        // const oReq = new XMLHttpRequest();
+        // oReq.open("GET", '/stamp.txt?_=' + Math.random(), true);
+        // oReq.responseType = "blob";
+        // oReq.onload = function (oEvent) {
+        //     const _blob = new Blob([oReq.response]);
+        //     const reader = new FileReader();
+        //     reader.onload = function (event) {
+        //         const stamp = reader.result;
+        //         if (stamp !== window.localStorage.stamp) {
+        //             alert('页面缓存或受非正常访问，请刷新登录页面后重新登录！');
+        //             return window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+        //         }
+        //     };
+        //     reader.readAsText(_blob);
+        // };
+        // oReq.send();
     }
 
     // 单窗口校验

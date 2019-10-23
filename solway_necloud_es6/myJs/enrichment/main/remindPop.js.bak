@@ -18,12 +18,17 @@ ajaxData(
     }, {
         __serviceName__: 'remindPopService',
     }
-)('remindPopCtrl', ['$scope', 'remindPopService', 'actionRecord', '$state'], ($scope, myAjaxData, historicalRecord, $state) => {
+)('remindPopCtrl', ['$scope', 'remindPopService', 'actionRecord', '$state', 'toaster'], ($scope, myAjaxData, historicalRecord, $state, toaster) => {
    
+    $scope.conShow = false
     $scope.getLoginUser.getData().then(res => {
         $scope.userId = res.userId
         $scope.getBaseRemindByCondition.getData({userId: res.userId}).then(async res => {
-            if (res.body.length <= 0) return
+            if (res.body.length <= 0) {
+                $scope.conShow = false
+                return
+            }
+            $scope.conShow = true
             res.body[0].show = true
             $scope.remindList = res.body
             if (res.body[0].type == 0) {
@@ -38,11 +43,18 @@ ajaxData(
         $scope.getreadBaseRemind.getData({
             userId: $scope.userId,
             remindId: item.id
-        }).then(() => {
-            item.show = false
+        }).then(res => {
+            if (res.code == 0) {
+                item.show = false
+            } else {
+                toaster.pop('error', '', res.msg)
+            }
         })
 
-        if (i + 1 >= $scope.remindList.length) return
+        if (i + 1 >= $scope.remindList.length) {
+            $scope.conShow = false
+            return
+        }
         $scope.remindList[i + 1].show = true
 
         if ($scope.remindList[i + 1].type == 0) {

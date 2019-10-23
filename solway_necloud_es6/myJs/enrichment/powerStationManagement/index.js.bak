@@ -1,35 +1,49 @@
-ajaxData({
-    powerStationList:{
-        name: 'GETpowerStationList',
-        data: {},
-        later: true
-    },
-    deleteStation:{
-        name: 'POSTdeleteStation',
-        data: {},
-        later: true
-    }
-}, {})('powerStationManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout','toaster'], ($scope, myAjaxData, historicalRecord, $timeout,toaster) => {
+ajaxData(
+    {
+        powerStationList: {
+            name: 'GETpowerStationList',
+            data: {},
+            later: true
+        },
+        deleteStation: {
+            name: 'POSTdeleteStation',
+            data: {},
+            later: true
+        },
+        stationExcelImportStationBatchData: {
+            name: 'stationExcelImportStationBatchData',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+        stationExcelImportDeviceBatchData: {
+            name: 'stationExcelImportDeviceBatchData',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        }
+    }, {}
+)('powerStationManagementCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$timeout', 'toaster'], ($scope, myAjaxData, historicalRecord, $timeout, toaster) => {
     $scope.moduleName = '电站管理';//当前页面名称；
 
-    $scope.getStationList = () =>{
+    $scope.getStationList = () => {
         $scope.powerStationList.getData({
-            parentIsNull:1,
-            keyWords : $scope.keyWords,
+            parentIsNull: 1,
+            keyWords: $scope.keyWords,
         })
     }
 
     $scope.getStationList();
-    
+
     $scope.column = [
         {
             title: '电站编号',
             dataIndex: 'stationcode',
             align: 'center',
             sort: !0
-        },{
+        }, {
             title: '电站名称',
-            width:'25%',
+            width: '25%',
             dataIndex: 'stationname',
             sort: !0,
             align: 'center'
@@ -53,7 +67,7 @@ ajaxData({
             align: 'center'
         }, {
             title: '操作',
-            width:'220px',
+            width: '220px',
             dataIndex: '',
             align: 'center',
             sort: !0,
@@ -70,55 +84,84 @@ ajaxData({
         }
     ]
 
+    $scope.uploadFile = (ele, type) => {
+        $scope[{ station: 'stationExcelImportStationBatchData', 2: 'stationExcelImportDeviceBatchData' }[type]].getData({
+            file: ele.files[0],
+            deviceType: type
+        }).then(res => {
+            ele.value = '';
+            if (res.cole === 0) toaster.pop('success', '', res.msg || res.body);
+            else toaster.pop('error', '', res.msg || res.body);
+            $scope.getStationList();
+        })
+    }
+
+    $scope.downloadTpl = url => {
+        if ($solway.isDownloading) {
+            $solway.confirm({ message: '已有一个下载任务，确定继续下载吗？' }, () => downloadFile(url))
+        } else {
+            downloadFile(url)
+        }
+    }
+
+    function downloadFile(url) {
+        $solway.isDownloading = ($solway.isDownloading || 0) + 1;
+        $solway.download({
+            url, callback() {
+                $solway.isDownloading--;
+            }
+        })
+    }
+
     //新增
-    $scope.newStation = () =>{
+    $scope.newStation = () => {
         $scope.newStationModel = true;
         $scope.$broadcast('broadAddStation', '');
     }
 
     //删除电站
-    const deleteStationFun = id =>{
-        $scope.deleteStation.getData({id:id}).then(res=>{
-            if(res.type == "success"){
-                toaster.pop('success','','删除成功');
+    const deleteStationFun = id => {
+        $scope.deleteStation.getData({ id: id }).then(res => {
+            if (res.type == "success") {
+                toaster.pop('success', '', '删除成功');
                 $scope.getStationList();
-            }else{
-                toaster.pop('error','','删除失败');
+            } else {
+                toaster.pop('error', '', '删除失败');
             }
         });
     }
 
     $scope.trClick = (item, index, event) => {
-        if(event.target.className.includes('editDevice')) {
-            if(item.stationClass == '01'){ //光伏
+        if (event.target.className.includes('editDevice')) {
+            if (item.stationClass == '01') { //光伏
                 $scope.accountSolar = true;
-                $scope.$broadcast('solarBroad',item);
-            }else if(item.stationClass == '02'){ //风电
+                $scope.$broadcast('solarBroad', item);
+            } else if (item.stationClass == '02') { //风电
                 $scope.accountWind = true;
-                $scope.$broadcast('windBroad',item);
+                $scope.$broadcast('windBroad', item);
             }
-        }else if(event.target.className.includes('editStation')) {
+        } else if (event.target.className.includes('editStation')) {
             $scope.newStationModel = true;
             $scope.$broadcast('broadAddStation', item);
-        }else if(event.target.className.includes('download')){ //下载
-            window.location.href = window.baseUrl+'/PowerStation/exportExcelData.htm?stationid='+item.id;
-        }else if(event.target.className.includes('icon-shanchu1')) {
+        } else if (event.target.className.includes('download')) { //下载
+            window.location.href = window.baseUrl + '/PowerStation/exportExcelData.htm?stationid=' + item.id;
+        } else if (event.target.className.includes('icon-shanchu1')) {
             $solway.confirm({ message: '确定删除此电站？删除电站，相关配置信息将一起被删除,请谨慎操作 ! ! !' }, () => {
                 deleteStationFun(item.id)
             });
         }
     };
 
-    $scope.$on('cancelCallback',()=>{
+    $scope.$on('cancelCallback', () => {
         $scope.newStationModel = false;
     });
 
-    $scope.$on('addCallback',()=>{
+    $scope.$on('addCallback', () => {
         $scope.newStationModel = false;
         $scope.getStationList();
     });
 
     $timeout(() => {
         $('.ng-clock').removeClass('ng-clock');
-    },2000);
+    }, 2000);
 });

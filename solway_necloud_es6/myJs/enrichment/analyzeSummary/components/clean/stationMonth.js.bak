@@ -83,12 +83,15 @@ ajaxData({
 }, {
     __serviceName__: 'cleanStationMonthService',
         base64str2: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAgCAMAAACrZuH4AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAABCUExURUxpcVah/1ah/1ei/1Wj/1ai/1Sk/1ai/1ai/1ai/1ei/1eo/1ai/2Kh/1ei/1ah/1ai/1ai/1Kk/1ah/1eh/1ei/2BAiUsAAAAVdFJOUwBYR9Uj9hLwMMA/B3oCpeVihRywkxGe08QAAAC2SURBVDjL1ZJJEoMgEEUZRCYFHP79rxpBYxJtqMoueQuqF6+apvmM/Rr9pBEtH6uC0ShYX+twCEBgbHbO3IwVJ2LJp7w4XuGK7j6MDnfs+9AmEQbEq8ECkuEpOEULsMckY0SVvYtAA56NoWXIbPCWAV9ZxYkqg4SGEfZPs1Uhzsd7k6SvCPOXGXPl7cmc5S1CSpb1rVsUtKSMqaxYwuRyogyt+y0FsFsZVU8ZKafBD/k7uWB/yQNS9R/qm8zvWAAAAABJRU5ErkJggg=='
-})('cleanStationMonthCtrl', ['$scope', 'cleanStationMonthService', 'actionRecord'], ($scope, myAjaxData, historicalRecord) => {
+})('cleanStationMonthCtrl', ['$scope', 'cleanStationMonthService', 'actionRecord','$timeout'], ($scope, myAjaxData, historicalRecord,$timeout) => {
+    
     /// 初始化 scope
     $scope.initChildScope($scope, myAjaxData);
 
     // 主页面初始化完成 回调
     $scope.mainPageInitComplete = async () => {
+        // $scope.heatmapWidth = $scope.winWidth;
+    // $scope.heatmapHeight = $scope.winHeight-100;
         let { showShape, tabIndex = 0} = historicalRecord.get().themeCleanStationMonth || {};
         $scope.changeShowShape(showShape || 'list');
         const { dateType, dateTime } = historicalRecord.get();
@@ -263,16 +266,7 @@ ajaxData({
         $scope.$apply();
     };
 
-    let heatmapInstance = h337.create({
-        container: document.querySelector('#heatmap'),
-        gradient: {
-            '0.3': 'blue',
-            '0.95': 'red',
-            '0.85':'yellow',
-            '0.5':'green'
-        },
-        radius: 25,       
-    });
+    
 
      // 渲染svg 绑定id与名称
      $scope.getDeviceLayoutSvg.subscribe(res => {
@@ -293,9 +287,13 @@ ajaxData({
             );
             const viewWidth = $svgView.width();
             const svgWidth = $svg.width();
+            const svgHeight = $svg.height();
+            $scope.heatmapWidth = svgWidth;
+            $scope.heatmapHeight = svgHeight;
+            // $scope.$apply()
             const scale = (viewWidth / svgWidth) - 0.1;
             const zoom = $solway.zoom({
-                ele: $svg[0],
+                ele: document.getElementById('svgView'),
                 ... (scale < 1 ? {
                     scale,
                     translate: [(viewWidth - svgWidth) / 2, ($svgView.height() - $svg.height()) / 2],
@@ -317,19 +315,16 @@ ajaxData({
             }).join(',');
             
             let values = valData.body.data;
-   
             let points = [], maxV = 100;
             for(let i =0; i<values.length; i++){
                 for(let j =0; j<positionArr.length; j++){
                     if(positionArr[j][2] == values[i].eqid){
                         maxV = Math.max(Number(maxV),  Number((values[i].clean_mark>100) ? 100 : values[i].clean_mark));
-                        // let randomNum = Math.random()*100;
-                        // maxV = Math.max(Number(maxV),  Number(randomNum));
                         points.push({
                             x: Number(positionArr[j][0]).toFixed(0),
                             y: Number(positionArr[j][1]).toFixed(0),
                             value: Number(values[i].clean_mark)
-                            // value: Number(randomNum.toFixed(2))
+                            // value: 50 // 测试
                         })
                     }
                 }
@@ -339,8 +334,18 @@ ajaxData({
                 max: maxV,
                 data: points
             }
-
+            let heatmapInstance = h337.create({
+                container: document.querySelector('#svgView'),
+                gradient: {
+                    '0.3': 'blue',
+                    '0.95': 'red',
+                    '0.85':'yellow',
+                    '0.5':'green'
+                },
+                radius: 20,       
+            });
             heatmapInstance.setData(data)
+            $(".heatmap-canvas").css('pointer-events','none')
         });
     });
 

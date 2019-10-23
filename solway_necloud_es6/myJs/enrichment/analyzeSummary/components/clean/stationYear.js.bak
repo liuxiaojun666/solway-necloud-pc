@@ -261,17 +261,6 @@ ajaxData({
         $scope.$apply();
     };
 
-    let heatmapInstance = h337.create({
-        container: document.querySelector('#heatmap'),
-        gradient: {
-            '0.3': 'blue',
-            '0.95': 'red',
-            '0.75':'yellow',
-            '0.5':'green'
-        },
-        radius: 25,       
-    });
-
      // 渲染svg 绑定id与名称
      $scope.getDeviceLayoutSvg.subscribe(res => {
         $scope.analysis_station_dust_year_devicelist.getData({
@@ -291,9 +280,12 @@ ajaxData({
             );
             const viewWidth = $svgView.width();
             const svgWidth = $svg.width();
+            const svgHeight = $svg.height();
+            $scope.heatmapWidth = svgWidth;
+            $scope.heatmapHeight = svgHeight;
             const scale = (viewWidth / svgWidth) - 0.1;
             const zoom = $solway.zoom({
-                ele: $svg[0],
+                ele:  document.getElementById('svgView'),
                 ... (scale < 1 ? {
                     scale,
                     translate: [(viewWidth - svgWidth) / 2, ($svgView.height() - $svg.height()) / 2],
@@ -315,12 +307,11 @@ ajaxData({
             }).join(',');
             
             let values = valData.body.data;
-   
-            let points = [], maxV = 0;
+            let points = [], maxV = 100;
             for(let i =0; i<values.length; i++){
                 for(let j =0; j<positionArr.length; j++){
                     if(positionArr[j][2] == values[i].eqid){
-                        maxV = Math.max(Number(maxV),  Number(values[i].clean_mark));
+                        maxV = Math.max(Number(maxV),  Number((values[i].clean_mark>100) ? 100 : values[i].clean_mark));
                         points.push({
                             x: Number(positionArr[j][0]).toFixed(0),
                             y: Number(positionArr[j][1]).toFixed(0),
@@ -335,8 +326,18 @@ ajaxData({
                 data: points
             }
 
-            console.log(data)
+            let heatmapInstance = h337.create({
+                container: document.querySelector('#svgView'),
+                gradient: {
+                    '0.3': 'blue',
+                    '0.95': 'red',
+                    '0.75':'yellow',
+                    '0.5':'green'
+                },
+                radius: 25,       
+            });
             heatmapInstance.setData(data)
+            $(".heatmap-canvas").css('pointer-events','none')
         });
     });
 
