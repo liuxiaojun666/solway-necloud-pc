@@ -34,7 +34,7 @@ ajaxData({
         data: {},
         later: true,
         saveParam: false,
-        onlyLatest: true
+        sameTimeOnce:true
     },
     statusCodeListByProduct: {
         name: 'GETstatusCodeListByProduct',
@@ -52,7 +52,7 @@ ajaxData({
         name: 'POSTdeleteBatchFaultCode',
         data: {},
         later: true,
-        onlyLatest: true
+        sameTimeOnce:true
     },
     hasFaultCode: {
         name: 'GEThasFaultCode',
@@ -64,7 +64,7 @@ ajaxData({
         name: 'POSTdeleteHasFaultCode',
         data: {},
         later: true,
-        onlyLatest: true
+        sameTimeOnce:true
     },
     measurePointTemplates: {
         name: 'GETmeasurePointTemplates',
@@ -77,7 +77,7 @@ ajaxData({
         data: {},
         later: true,
         saveParam: false,
-        onlyLatest: true
+        sameTimeOnce:true
     },
     existMeasurePoints: {
         name: 'GETexistMeasurePoints',
@@ -390,7 +390,6 @@ ajaxData({
             });
         }
 
-
         //增加一行
         $scope.addLine = () => {
             $scope.statusdata.push({ 'serNum': $scope.count, "faultcodeindex": "", "faultcode": "", "faultlevel": "", "faultdesc": "" });
@@ -429,6 +428,7 @@ ajaxData({
             }
 
             let statusdata = angular.copy($scope.statusdata);
+            
             for(let i=0;i<statusdata.length;i++){
                 if($scope.formData['statusdiagnosistype'] == '1'){  //整型
                     if(!statusdata[i].faultcode || !statusdata[i].faultlevel) {
@@ -460,6 +460,13 @@ ajaxData({
                     
                 }
             }
+
+            // 对故障码或者索引，若两边空格，要去掉，以免使用时报错
+            statusdata.map(v => {
+                v.faultcode = v.faultcode.trim()
+                v.faultcodeindex = v.faultcodeindex.trim()
+            })
+            
             $scope.formData['statusdata'] = JSON.stringify(statusdata);
             $scope.formData['isdefault'] = $('input[name="isdefault"]:checked').val();
 
@@ -475,14 +482,6 @@ ajaxData({
                 if (res.id) {
                     if(noCallback) return;
                     toaster.pop('success', '', '保存成功');
-                    // if($scope.formData.id){
-                    //     getStatusCodeList($scope.formData.id);
-                    // }else{
-                    //     getStatusCodeList(res.protocalId);
-                    // }
-                    
-                    // $scope.showFaultTab = true;
-                    // $scope.editDisabled = true;
                     $scope.$emit('editCallback');
                 } else {
                     toaster.pop('error', '', '保存失败')

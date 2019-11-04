@@ -36,6 +36,7 @@ ajaxData({
         data: {},
         later: true,
         saveParam:false,
+        sameTimeOnce:true,
         onlyLatest: true
     },
     rightListForPCNew:{
@@ -117,6 +118,10 @@ ajaxData({
         getStationInTypeList();
 
         $scope.formData = {};
+        $("#picture0").attr("src", 'theme/images/uploadImg.png');
+        $("#picture1").attr("src", 'theme/images/uploadImg.png');
+        $("#picture2").attr("src", 'theme/images/uploadImg.png');
+
         await myAjaxData.timeout(0);
         $scope.$apply();
 
@@ -148,6 +153,13 @@ ajaxData({
                 'insureCont':data.insureCont,
                 'insureTel':data.insureTel
             };
+           
+            if(data.scenepictures){
+                data.scenepictures.split(',').map((v,i) => {
+                    $("#picture"+i).attr("src", '/document/powerStationPicture/'+v);
+                    $scope.formData['oldFile'+i] = v;
+                })
+            }
             $scope.getDepListByCompany(data.companyid);//获取当前公司的部门列表
 
             $scope.formData['productiondate'] = data.productiondate?new Date(data.productiondate):new Date();
@@ -271,6 +283,16 @@ ajaxData({
         })
     }
 
+     // 上传图片
+     $(".newStationTpl").on('change', '.file', function(e) {
+        var inputName = e.target.name;
+        var f = e.target.files[0]
+        $scope.formData[inputName] = f
+
+        var url = URL.createObjectURL(f);
+        $("#"+inputName).attr("src", url);
+        $scope.$apply();
+    });
 
     //保存
     $scope.save = () =>{
@@ -288,11 +310,14 @@ ajaxData({
         let formData = $scope.formData;
         formData['productiondate'] = $scope.formData['productiondate']?$scope.formData['productiondate'].showDate:'';
         formData['closedate']   = $scope.formData['closedate']?$scope.formData['closedate'].showDate:'';
-
+        for(let i in formData){
+            if(!formData[i]) formData[i] = ''
+        }
         $scope.saveStation.getData(formData).then(res=>{
             if(res.type == 'success'){
                 toaster.pop('success','','保存成功');
                 $scope.$emit('addCallback');
+                URL.revokeObjectURL()
             }else{
                 toaster.pop('error','','保存失败');
             }
@@ -302,5 +327,9 @@ ajaxData({
     //取消
     $scope.cancel = () =>{
         $scope.$emit('cancelCallback');
+        URL.revokeObjectURL()
     }
+    $scope.$on('$destroy', () => {
+        URL.revokeObjectURL()
+    });
 });

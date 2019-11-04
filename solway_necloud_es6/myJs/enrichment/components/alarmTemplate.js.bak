@@ -6,14 +6,25 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
     },
     templateUrl: 'tpl/enrichment/components/alarmTemplate.html' + window.stamp,
-    link($scope, $element) {
+    link($scope, $element) {  
+        // 本地存储，语音、铃声等 按钮的启用状态
+        const getCheckboxStatus = () =>{
+            if ($solway.getStore().alarmCheckboxStored.hasRecorded) {
+                $scope.alarmCheckboxStored = $solway.getStore().alarmCheckboxStored
+            }else {
+                $scope.alarmCheckboxStored = {'hasRecorded':true,'absent':true,'voice':true,'bell':true}
+                $solway.setStore('alarmCheckboxStored',$scope.alarmCheckboxStored ); 
+            }
+        }
 
+        getCheckboxStatus()
+        
         $ocLazyLoad.load([
             window.baseUrl + "/theme/js/dist/components/confirm.js" + window.stamp,
             window.baseUrl + "/theme/css/enrichment/blocks/alarmTemplate.css" + window.stamp,
-			// window.baseUrl+'/theme/js/dist/components/myTable.js', // table 列表组件
         ]).then(()=>{
             $scope.maxUpdateTime = 0;
+            $scope.ifFirstTime = true;
             $scope.initColumns();
             $scope.pendding = false;
             $timeout(()=>{
@@ -23,6 +34,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
         $scope.$on('broadcastSwitchStation',(e,v)=>{
             $scope.maxUpdateTime = 0;
+            $scope.ifFirstTime = true;
             $scope.initColumns();
             $solway.setStore('alarm', {'voiceTime':0}); 
             $scope.pendding = false;
@@ -33,19 +45,18 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
         //报警状态,初始化参数
         $scope.currentStatus = 'normal'; //abnormal,normal
-        $scope.ifVoiced = true;
-        $scope.notShowFinish = 1;
 
         var newUtterance = new SpeechSynthesisUtterance();
         newUtterance.lang = 'zh-cn';
 
-        //测试
-        document.addEventListener('dblclick',function(e){
+        let testSpeek = e =>{
             if (e.ctrlKey && $scope.ifVoiced) { 
                 newUtterance.text = '2018年09月8日6点6分28秒 金峰财富HL0118告警';
                 window.speechSynthesis.speak(newUtterance);
             }
-        },false);
+        }
+        //测试
+        document.addEventListener('dblclick',(e) => testSpeek(e),false);
 
         const judgeIfAlarm = () =>{
             if(!$scope.alarmListPageShow){
@@ -77,14 +88,32 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         window.addEventListener('resize', calculateListHeight);
 
         //控制是否可以语音播放
-        $scope.changeInput = (e) =>{
-            $scope.ifVoiced = e.target.checked;
+        $scope.changeInputVoice = e =>{
+            $solway.setStore('alarmCheckboxStored', {
+                ...$solway.getStore().alarmCheckboxStored,
+                voice: e.target.checked
+            })
+            getCheckboxStatus()
+        }
+
+        //控制是否可以铃声播报
+        $scope.changeInputBell = e => {
+            $solway.setStore('alarmCheckboxStored', {
+                ...$solway.getStore().alarmCheckboxStored,
+                bell: e.target.checked
+            })
+            getCheckboxStatus()
         }
 
         //控制是否显示已消缺
         $scope.changeInputAbsent = e =>{
-            $scope.notShowFinish = e.target.checked?1:0;
+            $solway.setStore('alarmCheckboxStored', {
+                ...$solway.getStore().alarmCheckboxStored,
+                absent: e.target.checked
+            })
+            getCheckboxStatus()
             $scope.maxUpdateTime = 0;
+            $scope.ifFirstTime = true;
             $scope.datalist = [];
             $scope.initData();
         }
@@ -107,6 +136,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                         if(res.code == 0){
                             toaster.pop('success', '', res.msg);
                             $scope.maxUpdateTime = 0;
+                            $scope.ifFirstTime = true;
                             $scope.initData();
                         }else{
                             toaster.pop('error', '', res.msg);
@@ -117,10 +147,6 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                 toaster.pop('info', '', '请选择要确认的消息');
             }
         }
-
-        // $scope.trClick = (item, index, e) => {
-        //     $scope.voiceContent = item.voiceContent;
-        // };
         
         $scope.initData = (flag) =>{
             if($scope.pendding) return;
@@ -129,6 +155,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
             if(flag) {
                 $scope.maxUpdateTime = 0;
+                $scope.ifFirstTime = true;
                 $scope.datalist = [];
             }
 
@@ -153,11 +180,10 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                     maxUpdateTime:$scope.maxUpdateTime,
                     voiceTime:voiceTime,
                     eventTypes:checkedCondition.join(','),
-                    notShowFinish:$scope.notShowFinish
+                    notShowFinish:$scope.alarmCheckboxStored.absent ? 1 : 0
                 }
             }).success(function (res) {
                 $scope.pendding = false;
-
                 if(res.code == 0){
                     const alarmList = res.body.alarmList;
                     const alarmInfo = res.body.alarmTotalInfo;
@@ -169,10 +195,18 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
 
                     $solway.setStore('alarm', {'voiceTime':alarmInfo.voiceTime}); 
 
-                    if($.trim(alarmInfo.voiceContent)){
-                        newUtterance.text = alarmInfo.voiceContent;
-                        window.speechSynthesis.speak(newUtterance);
+                    if($.trim(alarmInfo.voiceContent) && !$scope.ifFirstTime){ // 首次进入页面，或者切换电站后，不用报警，第二次开始报警
+                        if($scope.alarmCheckboxStored.bell){
+                            $("#alarmVoice")[0].play();
+                        }
+                        if($scope.alarmCheckboxStored.voice){
+                            $timeout(()=>{
+                                newUtterance.text = alarmInfo.voiceContent;
+                                window.speechSynthesis.speak(newUtterance);
+                            },3000)
+                        }
                     }
+                    $scope.ifFirstTime = false;
 
                     if($scope.unCloseTotal){
                         $scope.currentStatus = 'abnormal';
@@ -180,16 +214,14 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
                         $scope.currentStatus = 'normal';
                     }
                     if(alarmList.length) $scope.datalist = alarmList;
-                    // else $scope.datalist = [];
-
                     judgeIfAlarm();
                 }else{
                     toaster.pop('error', '', '请求报警列表失败');
                 }
             });
 
-        }     
-        
+        }   
+ 
         $scope.initColumns = () =>{
             $scope.column = [
                 {
@@ -270,6 +302,7 @@ app.directive('alarmTemplate', ['$ocLazyLoad', '$http', '$state', '$timeout','$r
         },60000);
 
         $scope.$on('$destroy', () => {
+            document.removeEventListener('dblclick', testSpeek)
             window.removeEventListener('resize', calculateListHeight);
             $interval.cancel(interval);
             $scope.voiceContent = '';

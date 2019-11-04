@@ -139,9 +139,28 @@ ajaxData({
         name: 'POSTplanPowerDelete',
         data: {},
         later: true
+    },
+    selectInvByStationId: {
+        name: 'GETselectInvByStationId',
+        data: {},
+        later: true
+    },
+    saveInvExpirtw: {
+        name: 'POSTsaveInvExpirtw',
+        data: {},
+        later: true
+    },
+    saveStationAndInvExpirtw: {
+        name: 'POSTsaveStationAndInvExpirtw',
+        data: {},
+        later: true
+    },
+    autoCalculation: {
+        name: 'GETautoCalculation',
+        data: {},
+        later: true
     }
-
-
+    
 }, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, toaster, $http) => {
 
     $scope.moduleName = '运行配置';
@@ -456,7 +475,7 @@ ajaxData({
 
     $scope.endDate = new Date('2099');
 
-    //初始电量详情
+    // 初始电量详情、逆变器列表
     const getInitialPowerDetailData = async () => {
         $scope.formData = {};
         $scope.temporaryObj = {};
@@ -471,7 +490,13 @@ ajaxData({
             if (!data.expirydate) $scope.temporaryObj['expirydate'].showDate = '';
             // if (!data.endDate) $scope.temporaryObj['endDate'].showDate = '';
         });
+
+        $scope.selectInvByStationId.getData({ pstationid: $scope.pstationid }).then(res => {
+            $scope.initialPowerListData = res.body
+        });
     }
+
+    // 编辑按钮
     $scope.initialPowerEditShow = () => {
         $scope.initialPowerEditDisabled = false;
     }
@@ -485,6 +510,10 @@ ajaxData({
     //保存
     $scope.saveInitialPower = () => {
         if ($scope.saveInitPowerLoading) return;
+        if (!$scope.temporaryObj['expirydate'].showDate) {
+            toaster.pop('error', '', '接入日期必填')
+            return
+        }
         if (!$solway.formValidation($scope.initialPowerData, '.initial-power', toaster)) return;//校验非空
 
         $scope.initialPowerData['expirydate'] = $scope.temporaryObj['expirydate'] ? $scope.temporaryObj['expirydate'].showDate : '';
@@ -494,19 +523,118 @@ ajaxData({
 
         $scope.saveInitPowerLoading = true;
 
-        $scope.initialPowerSave.getData($scope.initialPowerData).then(res => {
-            $scope.saveInitPowerLoading = false;
+        // $scope.initialPowerSave.getData($scope.initialPowerData).then(res => {
+        //     $scope.saveInitPowerLoading = false
 
-            if (res.type == 'success') {
-                toaster.pop('success', '', '保存成功');
-                $scope.cancelInitialPower();
+        //     if (res.type == 'success') {
+        //         toaster.pop('success', '', '保存成功')
+        //         $scope.cancelInitialPower()
+        //     } else {
+        //         toaster.pop('error', '', '保存失败')
+        //     }
+        // });
+        $scope.saveStationAndInvExpirtw.getData({...$scope.initialPowerData, bInverterExpirytwList: JSON.stringify($scope.initialPowerListData)}).then(res => {
+            $scope.saveInitPowerLoading = false
+            if (res.code == 0) {
+                toaster.pop('success', '', res.msg)
+                $scope.cancelInitialPower()
             } else {
-                toaster.pop('error', '', '保存失败')
+                toaster.pop('error', '', res.msg)
             }
-        });
+        })
     }
 
-    /****************************************  视频监控点   *********************************************** */
+    // 清空电站
+    $scope.clearStation = async () => {
+        $scope.initialPowerData = {}
+        $scope.temporaryObj.expirydate = null
+        await myAjaxData.timeout(0)
+        $scope.temporaryObj.expirydate = new Date()
+        $scope.temporaryObj['expirydate'].showDate = ''
+        $scope.$apply()
+    }
+
+    // 清空逆变器
+    var clearArr = ['invName', 'pstationidInv', 'invSerialNumber', 'idInv']
+    $scope.clearInverter = () => {
+        $scope.initialPowerListData.forEach(v => {
+            Object.keys(v).forEach(vv => {
+                if (!clearArr.includes(vv)) v[vv] = null
+            })
+        })
+    }
+
+    //切换到编辑状态
+    // let flag = false
+    // $scope.showEdit = (v, i) => {
+    //     if ($scope.initialPowerListData.some(v => v.edit)) {
+    //         toaster.pop('error', '', '每次只能编辑一条')
+    //         flag = true
+    //         return
+    //     }
+    //     if (!flag) v.edit = true
+    // }
+
+    //编辑的确定按钮
+    // $scope.editItem = item => {
+    //     $scope.saveInvExpirtw.getData({
+    //         idInv: item.idInv,
+    //         pstationidInv: item.pstationidInv,
+    //         invSerialNumber: item.invSerialNumber,
+    //         totaltwInv: item.totaltwInv,
+    //         yeartwInv: item.yeartwInv,
+    //         monthtwInv: item.monthtwInv,
+    //         totalHourInv: item.totalHourInv,
+    //         yearHourInv: item.yearHourInv,
+    //         monthHourInv: item.monthHourInv
+    //     }).then(res => {
+    //         if (res.code == 0) {
+    //             item.edit = false
+    //             flag = false
+    //             toaster.pop('success', '', '编辑成功')
+    //             $scope.selectInvByStationId.getData({ pstationid: $scope.pstationid }).then(res => {
+    //                 $scope.initialPowerListData = res.body
+    //             })
+    //         } else {
+    //             toaster.pop('error', '', '编辑失败')
+    //         }
+    //     })
+    // }
+
+    //取消编辑按钮
+    // $scope.cancelEdit = (item) => {
+    //     item.edit = false
+    //     flag = false
+    //     $scope.selectInvByStationId.getData({ pstationid: $scope.pstationid }).then(res => {
+    //         $scope.initialPowerListData = res.body
+    //     })
+    // }
+
+    // 自动计算
+    $scope.autoCount = () => {
+        if (!$scope.temporaryObj['expirydate'].showDate) {
+            toaster.pop('error', '', '接入日期必填')
+            return
+        }
+        $scope.autoCalculation.getData({ 
+                pstationid: $scope.pstationid,
+                expiryDate: $scope.temporaryObj['expirydate'].showDate
+             }).then(async res => {
+                if (res.code == 0) {
+                    $scope.initialPowerData = res.body.stInfo
+                    $scope.temporaryObj.expirydate = null
+                    await myAjaxData.timeout(0)
+                    $scope.temporaryObj.expirydate = new Date(res.body.stInfo.expirydate)
+        
+                    $scope.initialPowerListData = res.body.invList
+                    toaster.pop('success', '', '自动计算成功')
+                } else {
+                    toaster.pop('error', '', '自动计算失败')
+                }
+        })
+    }
+
+    /****************************************  视频监控点  ************************************************/
 
     $scope.columnVideo = [
         {
@@ -576,8 +704,7 @@ ajaxData({
             pageIndex: 0,
             pageSize: 10,
             stId: $scope.pstationid,
-            monitorPointName: $scope.monitorPointName,
-            monitorPointIP: $scope.monitorPointIP
+            keyWords: $scope.keyWords
         })
     }
 

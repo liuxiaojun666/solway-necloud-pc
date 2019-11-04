@@ -11,7 +11,7 @@ ajaxData({
         data: {},
         later: true,
         saveParam:false,
-        onlyLatest: true
+        sameTimeOnce:true
     }
 }, {
     __serviceName__: 'addVideoModelService',
@@ -24,17 +24,23 @@ ajaxData({
             $scope.formData = data.detail;
         }else{
             $scope.formData = {};
+            $scope.formData['ctrl'] = '02';
             $scope.formData['stId'] = $scope.pstationid;
+            $scope.formData['destUrl'] = 'rtmp://netest.solway.cn/myapp';
         }
     });
 
     // //保存
     $scope.saveVideo = () =>{
         if($scope.saveVideoLoading) return;
-
-        $scope.saveVideoLoading = true;
         if (!$solway.formValidation($scope.formData, '.addVideoModelTpl', toaster)) return;//校验非空
-
+        
+        if($scope.formData['ctrl'] == '01'){
+            $scope.formData['monitorPointDest'] = null;
+            $scope.formData['monitorPointIP'] = null;
+            $scope.formData['monitorPointSource'] = null;
+        }
+        $scope.saveVideoLoading = true;
         $scope.videoConfigureSave.getData($scope.formData).then(res=>{
             $scope.saveVideoLoading = false;
 
@@ -47,7 +53,7 @@ ajaxData({
         });
     }
 
-    // //取消
+    //取消
     $scope.cancelVideo = () =>{
         $scope.$emit('cancelCallback');
     }

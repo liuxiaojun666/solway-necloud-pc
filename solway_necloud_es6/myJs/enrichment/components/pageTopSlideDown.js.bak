@@ -137,6 +137,18 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
         historicalRecord.init();
 
         $scope.stamp = window.stamp;
+        
+        $http({
+            method: "GET",
+            url: window.interface['GETContractManageAuth'],
+            params: {}
+        }).success(function (res) {
+            if (res.body && res.body.enable) {
+                $scope.isContract = true
+            } else {
+                $scope.isContract = false
+            }
+        });
 
         $http({
             method: "GET",
