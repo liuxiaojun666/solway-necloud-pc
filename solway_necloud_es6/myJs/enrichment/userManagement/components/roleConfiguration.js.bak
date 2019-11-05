@@ -62,6 +62,27 @@ ajaxData(
             later: true,
             sameTimeOnce: true
         },
+        // 状态调整查询
+        opUserBusiConfigMult06getCurrData: {
+            name: 'GETopUserBusiConfigMult06getCurrData',
+            data: {},
+            later: true,
+            onlyLatest: true
+        },
+        // 状态调整更新
+        opUserBusiConfigMult06updateCurrData: {
+            name: 'POSTopUserBusiConfigMult06updateCurrData',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
+        // 状态调整删除
+        opUserBusiConfigMult06DelCurrData: {
+            name: 'opUserBusiConfigMult06DelCurrData',
+            data: {},
+            later: true,
+            sameTimeOnce: true
+        },
     }, {
         __serviceName__: 'roleConfigurationService',
     }
@@ -83,6 +104,10 @@ ajaxData(
         
             case 1:
                 $scope.opUserBusiConfigSingle01getCurrData.getData();
+                break;
+
+            case 2:
+                $scope.opUserBusiConfigMult06getCurrData.getData();
                 break;
         
             default:
@@ -166,6 +191,15 @@ ajaxData(
         }
         $scope.userList.getData();
     });
+
+    // 状态调整  人员查看
+    $scope.opUserBusiConfigMult06getCurrData.subscribe(() => $scope.userList.getData());
+
+    // 状态调整 保存 或 删除
+    $scope.opUserBusiConfigSingle01updateCurrData.itemChange = item => {
+        if (item.checked) return $scope.opUserBusiConfigSingle01updateCurrData.getData({ userId: item.userid });
+        $scope.opUserBusiConfigDelete.getData({ id: item.id });
+    };
 
     // 删除  操作结果处理
     $scope.opUserBusiConfigDelete.subscribe(res => {

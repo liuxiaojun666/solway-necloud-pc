@@ -149,7 +149,7 @@ ajaxData(
     // 实时数据 处理
     $scope.singleRealDataBJunction.subscribe(res => {
         const { getOption } = currentService.config;
-        const { u, c, p } = res.data;
+        const { u, c, p } = res.body;
         const { chart1, chart2, chart3 } = charts || currentService.config.initChart();
         chart1.setOption(getOption(1000, u, 'V', '电压', '电压(V)'));
         chart2.setOption(getOption(200, c, 'A', '电流', '电流(A)'));
@@ -277,10 +277,10 @@ ajaxData(
                     return `<span>${text.toFixed(2)}</span>`
                 }
             }
-        ].concat(new Array(20).fill('c').map((v, i) => ({
+        ].concat(new Array(32).fill('c').map((v, i) => ({
             dataIndex: v + (i + 1),
             title: `<span>${i + 1}</span>`,
-            width: '80px',
+            width: '50px',
             align: 'right',
             render(text) {
                 if (typeof text !== 'number') return '-';
