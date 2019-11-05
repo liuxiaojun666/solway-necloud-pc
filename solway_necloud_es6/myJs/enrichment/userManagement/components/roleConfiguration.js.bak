@@ -75,14 +75,7 @@ ajaxData(
             data: {},
             later: true,
             sameTimeOnce: true
-        },
-        // 状态调整删除
-        opUserBusiConfigMult06DelCurrData: {
-            name: 'opUserBusiConfigMult06DelCurrData',
-            data: {},
-            later: true,
-            sameTimeOnce: true
-        },
+        }
     }, {
         __serviceName__: 'roleConfigurationService',
     }
@@ -196,10 +189,20 @@ ajaxData(
     $scope.opUserBusiConfigMult06getCurrData.subscribe(() => $scope.userList.getData());
 
     // 状态调整 保存 或 删除
-    $scope.opUserBusiConfigSingle01updateCurrData.itemChange = item => {
-        if (item.checked) return $scope.opUserBusiConfigSingle01updateCurrData.getData({ userId: item.userid });
+    $scope.opUserBusiConfigMult06updateCurrData.itemChange = item => {
+        if (item.checked) return $scope.opUserBusiConfigMult06updateCurrData.getData({ userId: item.userid });
         $scope.opUserBusiConfigDelete.getData({ id: item.id });
     };
+
+    // 状态调整 保存更新后操作
+    $scope.opUserBusiConfigMult06updateCurrData.subscribe(res => {
+        if (res.code !== 0) toaster.pop('error', '', res.msg);
+        else {
+            toaster.pop('success', '', res.msg);
+            $scope.opUserBusiConfigMult06getCurrData.getData();
+        }
+        $scope.userList.getData();
+    });
 
     // 删除  操作结果处理
     $scope.opUserBusiConfigDelete.subscribe(res => {
@@ -215,6 +218,11 @@ ajaxData(
 
             case 1:
                 $scope.opUserBusiConfigSingle01getCurrData.getData();
+                $scope.userList.getData();
+                break;
+
+            case 2:
+                $scope.opUserBusiConfigMult06getCurrData.getData();
                 $scope.userList.getData();
                 break;
         
@@ -234,6 +242,10 @@ ajaxData(
             case 1:
                 $scope.userList.checkedArr = [$scope.opUserBusiConfigSingle01getCurrData.res.body];
                 break;
+
+            case 2:
+                $scope.userList.checkedArr = [...$scope.opUserBusiConfigMult06getCurrData.res.body];
+                break;
         
             default:
                 break;
@@ -242,7 +254,7 @@ ajaxData(
 
     // 集团所有人员列表 处理
     $scope.userList.subscribe(res => {
-        if (!$scope.userList.checkedArr[0].userId) return;
+        if (!$scope.userList.checkedArr.length || !$scope.userList.checkedArr[0].userId) return;
         $scope.userList.res = res.map(v => {
             let _v = { ...v };
             $scope.userList.checkedArr.forEach(xv => {
