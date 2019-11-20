@@ -491,7 +491,7 @@ ajaxData({
         getNoteDetailData()
     }
 
-    //消息配置  保存
+    //消息配置 保存
     $scope.saveNote = () => {
         if ($scope.saveNoteLoading) return;
 
@@ -563,7 +563,7 @@ ajaxData({
     // 选择设备类型 -- 新增、编辑
     $scope.changeDevType = (v, handle) => {
         $scope[handle + 'FormMessage'].serialNumber = ''
-        if (!v) $scope[handle + 'FormMessage'].deviceName = ''
+        $scope[handle + 'FormMessage'].deviceName = ''
         $scope[handle + 'DeviceList'] = []
         if (!$scope[handle + 'FormMessage'].deviceType) return $scope[handle + 'DeviceList'] = []
         $scope.getdevicesByDeviceType.getData({
@@ -613,6 +613,23 @@ ajaxData({
         }
     })
 
+    // 切换到编辑状态
+    $scope.showEditMessage = v => {
+        if ($scope.getDeviceIsMessage.res.body.data.some(v => v.edit)) {
+            toaster.pop('error', '', '每次只能编辑一条')
+        } else {
+            $scope.addLineMessage = false
+            $scope.oneShow = true
+            $scope.editFormMessage.deviceType = v.deviceType
+            $scope.editFormMessage.deviceName = v.Name
+            $scope.editFormMessage.ismessage = +v.ismessage
+            $scope.editFormMessage.serialNumber = +v.SerialNumber
+            // $scope.changeDevType(v, 'edit')
+            // $scope.getdevicesByDeviceType.filter('edit')
+            v.edit = true
+        }
+    }
+
     // 确定按钮 -- 新增、编辑
     $scope.updateDevMessageLoading = false
     $scope.updateDevMessage = (item, handle) => {
@@ -625,6 +642,7 @@ ajaxData({
             toaster.pop('error', '', '请选择设备')
             return
         }
+
         $scope.updateDevMessageLoading = true
         $scope.updateDeviceIsMessage.getData({
             stId: $scope.pstationid,
@@ -649,23 +667,6 @@ ajaxData({
         })
     }
 
-    //切换到编辑状态
-    $scope.showEditMessage = v => {
-        if ($scope.getDeviceIsMessage.res.body.data.some(v => v.edit)) {
-            toaster.pop('error', '', '每次只能编辑一条')
-        } else {
-            $scope.addLineMessage = false
-            $scope.oneShow = true
-            $scope.editFormMessage.deviceType = v.deviceType
-            $scope.editFormMessage.deviceName = v.Name
-            $scope.editFormMessage.ismessage = +v.ismessage
-            $scope.editFormMessage.serialNumber = +v.SerialNumber
-            // $scope.changeDevType(v, 'edit')
-            // $scope.getdevicesByDeviceType.filter('edit')
-            v.edit = true
-        }
-    }
-
     // 删除按钮
     $scope.deleteMessage = v => {
         if ($scope.deleteMessageLoading) return
@@ -686,12 +687,6 @@ ajaxData({
                 toaster.pop('error', '', '删除失败')
             }
         })
-    }
-
-    //取消编辑按钮
-    $scope.cancelEditMessage = (item) => {
-        item.edit = false
-        getDeviceIsMessageList()
     }
 
 

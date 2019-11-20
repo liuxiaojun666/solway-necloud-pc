@@ -282,11 +282,16 @@
         border: 1px solid #ccc;
         text-indent: 1em;
     }
-    .initial-power {
+    .table-style {
         .tableHead {
             width: 100%;
             max-width: 100%;
             text-align: center;
+            // &.no-backColor thead tr td {
+            //     background: none;
+            //     color: rgba(255, 255, 255, 0.6);
+            //     font-weight: bold;
+            // }
             & thead tr td {
                 padding: 15px 0px;
                 background: #0d2d4f;
@@ -303,7 +308,7 @@
               }
         }
         .tableBody {
-            max-height: 230px;
+            max-height: 350px;
             overflow-y: auto;
             &::-webkit-scrollbar {
                 width: 0px;
@@ -314,7 +319,7 @@
             &::-webkit-scrollbar-thumb {
                 /*滚动条里面小方块*/
                 -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-                background: rgba(33, 80, 136, 1);
+                background: #215088;
                 border-radius: 5px;
                 display: none;
             }
@@ -328,9 +333,18 @@
                 word-wrap: break-word;
                 word-break: break-all;
                 font-size: 14px;
-                color: rgb(178, 216, 255);
+                color: #b2d8ff;
                 & tbody tr {
                     background-color: rgba(18,66,113,0.3);
+                    &.add-tr {
+                        background-color: #031A34;
+                        &:hover {
+                            background-color: #031A34;
+                          }
+                          td {
+                            cursor: auto;
+                          }
+                    }
                     &:hover {
                       background-color: #1b4980;
                     }
@@ -340,6 +354,11 @@
                         border: 1px solid #0a1c2c;
                         padding: 12px 0px;
                         border-bottom: 0;
+                        select {
+                            background: #10345d;
+                            border: none;
+                            color: #fff;
+                        }
                         &:first-child {
                             border-left: 0;
                         }
@@ -355,19 +374,53 @@
                             height: 28px;
                             line-height: 28px;
                             cursor: pointer;
-                            background: rgba(41, 189, 180, 1);
+                            background: #29bdb4;
                             float: left;
                             font-size: 13px;
+                            color: #fff;
                         }
                         .button-cancel {
                             width: 45%;
                             height: 28px;
                             line-height: 28px;
                             cursor: pointer;
-                            background: rgba(48, 86, 134, 1);
-                            border: 1px solid rgba(22, 55, 97, 1);
+                            background: #305686;
+                            border: 1px solid #163761;
                             float: right;
                             font-size: 13px;
+                            color: #fff;
+                        }
+                        .filterSelect-con {
+                            position: relative;
+                            input {
+                                width: 156px;
+                                height: 20px;
+                                background: transparent;
+                                border: 1px solid rgba(255,255,255,0.8);
+                                color: #fff;
+                            }
+                            ul {
+                                width: 156px;
+                                min-height: 24px;
+                                max-height: 180px;
+                                overflow: auto;
+                                position: absolute;
+                                z-index: 111111;
+                                top: 20px;
+                                left: 50%;
+                                transform: translateX(-78px);
+                                list-style: none;
+                                background: #10345d;
+                                color: #fff;
+                                border: 1px solid rgba(255, 255, 255, .5);
+                                border-top: none;
+                                li {
+                                    padding: 2px 0;
+                                    &:hover {
+                                        background-color: #255999;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
