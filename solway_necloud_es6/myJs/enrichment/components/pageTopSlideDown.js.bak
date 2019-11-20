@@ -152,6 +152,18 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
 
         $http({
             method: "GET",
+            url: window.interface['GETBusinessManageAuth'],
+            params: {}
+        }).success(function (res) {
+            if (res.body && res.body.enable) {
+                $scope.isRunstatus = true
+            } else {
+                $scope.isRunstatus = false
+            }
+        });
+
+        $http({
+            method: "GET",
             url: window.interface['GETstClassLIst'],
             params: {}
         }).success(res => {

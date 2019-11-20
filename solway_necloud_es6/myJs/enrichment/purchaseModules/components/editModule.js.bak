@@ -36,6 +36,7 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
+        if($scope.saveLoading) return;
         if($scope.mcssServiceStatus == '01'){
             clearDateTime();
         }
@@ -57,7 +58,7 @@ ajaxData({
             'mcssEndDate':$scope.mcssEndDate?$scope.mcssEndDate.Format('yyyy-MM-dd'):'',
             'mcssServiceStatus':$scope.mcssServiceStatus
         };
-
+        $scope.saveLoading = true;
         $http({
             method : "POST",
             url: window.interface['POSTupdateBuyModule'],
@@ -70,14 +71,14 @@ ajaxData({
             }
         }).success(function(res) {
             if(res.code == 0){
+                $scope.$emit('addPurchaseModuleCallback');
                 toaster.pop('success','',res.msg);
                 clearDateTime();
-                $scope.$emit('addPurchaseModuleCallback');
             }else{
                 toaster.pop('error', '','配置失败')
             }
+            $scope.saveLoading = false;
         })
-        
     }
 
     //取消

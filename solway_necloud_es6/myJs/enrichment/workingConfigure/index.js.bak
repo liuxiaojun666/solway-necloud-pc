@@ -159,6 +159,31 @@ ajaxData({
         name: 'GETautoCalculation',
         data: {},
         later: true
+    },
+    getDevicesByDeviceType: {
+        name: 'GETdevicesByDeviceType',
+        data: {},
+        later: true
+    },
+    getDeviceTypeByStIds: {
+        name: 'GETDeviceTypeByStIds',
+        later: true
+    },
+    getDeviceIsMessage: {
+        name: 'GETDeviceIsMessage',
+        data: {},
+        later: true
+    },
+    updateDeviceIsMessage: {
+        name: 'POSTupdateDeviceIsMessage',
+        data: {},
+        saveParam: false,
+        later: true
+    },
+    getdevicesByDeviceType: {
+        name: 'GETdevicesByDeviceType',
+        data: {},
+        later: true
     }
     
 }, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, toaster, $http) => {
@@ -220,6 +245,7 @@ ajaxData({
         getCleanTimeList();
         getAssessmentList();
         getPlanPowerList();
+        getDeviceIsMessageList()
 
         //状态均未编辑
         $scope.aerographEdit = false;
@@ -231,6 +257,18 @@ ajaxData({
         $scope.addLineOverhaul = false;
         $scope.assessmentDisabled = true;
 
+        // 获取电站下所有设备类型
+        $scope.getDeviceTypeByStIds.getData({
+            stIds: $scope.pstationid,
+            stClass: $scope.stClass
+        }).then(res => {
+            if (!res.body.length) return
+            // $scope.addFormMessage.deviceType = res.body[0].devid
+            // $scope.getdevicesByDeviceType.getData({
+            //     deviceTypes: $scope.addFormMessage.deviceType,
+            //     stClass: $scope.stClass
+            // })
+        })
     }
 
     $scope.initPageParams();
@@ -429,6 +467,8 @@ ajaxData({
         });
     }
 
+    /****************************************  消息日志配置   *********************************************** */
+
     //消息详情
     const getNoteDetailData = () => {
         $scope.powerStationDetail.getData({ id: $scope.pstationid }).then(res => {
@@ -439,15 +479,16 @@ ajaxData({
             $("input[name='noteConfigure'][value='" + res.ismessage + "']").prop("checked", true);
         });
     }
+
     //消息配置
     $scope.noteEditShow = () => {
-        $scope.noteDisabled = false;
+        $scope.noteDisabled = false
     }
 
     //消息配置 取消
     $scope.noteEditCancel = () => {
-        $scope.noteDisabled = true;
-        getNoteDetailData();
+        $scope.noteDisabled = true
+        getNoteDetailData()
     }
 
     //消息配置  保存
@@ -455,10 +496,9 @@ ajaxData({
         if ($scope.saveNoteLoading) return;
 
         $scope.saveNoteLoading = true;
-        let ismessage = $("input[name='noteConfigure']:checked").val();
         $scope.updateNoteSave.getData({
             id: $scope.pstationid,
-            ismessage: ismessage
+            ismessage: $("input[name='noteConfigure']:checked").val()
         }).then(res => {
             $scope.saveNoteLoading = false;
 
@@ -470,6 +510,190 @@ ajaxData({
             }
         });
     }
+
+    // 新增按钮
+    $scope.aLMessage = () => {
+        if ($scope.getDeviceIsMessage.res &&
+            $scope.getDeviceIsMessage.res.body && 
+            $scope.getDeviceIsMessage.res.body.data && 
+            $scope.getDeviceIsMessage.res.body.data.length) {
+            $scope.getDeviceIsMessage.res.body.data.forEach(v => v.edit = false)
+        }
+        $scope.addFormMessage = {
+            deviceType: '',
+            serialNumber: '',
+            deviceName: '',
+            ismessage: 0
+        }
+        $scope.addDeviceList = []
+        $scope.oneShow = true
+        $scope.addLineMessage = true
+    }
+
+    $scope.addFormMessage = {
+        deviceType: '',
+        serialNumber: '',
+        deviceName: '',
+        ismessage: 0
+    }
+
+    $scope.editFormMessage = {
+        deviceType: '',
+        serialNumber: '',
+        deviceName: '',
+        ismessage: 0
+    }
+    
+    $scope.messageConfigList = [
+        {key: 0, value: '不产生日志及消息'},
+        {key: 1, value: '产生日志及消息'},
+        {key: 2, value: '产生日志不产生消息'}
+    ]
+
+    const devTypeMap = {
+        1: '汇流箱',
+        2: '逆变器',
+        3: '箱变',
+        4: '电表',
+        5: '气象站',
+        17: '测风塔',
+        18: '风机机组'
+    }
+
+    // 选择设备类型 -- 新增、编辑
+    $scope.changeDevType = (v, handle) => {
+        $scope[handle + 'FormMessage'].serialNumber = ''
+        if (!v) $scope[handle + 'FormMessage'].deviceName = ''
+        $scope[handle + 'DeviceList'] = []
+        if (!$scope[handle + 'FormMessage'].deviceType) return $scope[handle + 'DeviceList'] = []
+        $scope.getdevicesByDeviceType.getData({
+            stIds: $scope.pstationid,
+            deviceTypes: $scope[handle + 'FormMessage'].deviceType,
+            stClass: $scope.stClass
+        }).then(res => {
+            $scope.oneShow = true
+            res.body.forEach(v => v.show = true)
+            $scope[handle + 'DeviceList'] = res.body
+            // if (handle == 'edit' && v) {
+            //     $scope.editFormMessage.serialNumber = +v.SerialNumber
+            //     $scope.getdevicesByDeviceType.filter('edit')
+            // }
+        })
+    }
+
+    // 下拉框筛选过滤
+    $scope.oneShow = true
+    $scope.getdevicesByDeviceType.filter = handle => {
+        if (!$scope[handle + 'DeviceList'].length) return
+        $scope[handle + 'DeviceList'].forEach(v => v.show = v['deviceName'].includes($scope[handle + 'FormMessage'].deviceName))
+        $scope.oneShow = $scope[handle + 'DeviceList'].some(v => v.show)
+    }
+
+    // 输入框 失去焦点
+    $scope.getdevicesByDeviceType.blur = async () => {
+        await myAjaxData.timeout(200)
+        $scope.getdevicesByDeviceType.slideDown = false
+        $scope.$apply()
+    }
+
+    // 消息列表
+    const getDeviceIsMessageList = () => {
+        $scope.getDeviceIsMessageLoading = true
+        $scope.getDeviceIsMessage.getData({
+            stId: $scope.pstationid
+        })
+    }
+
+    $scope.getDeviceIsMessage.subscribe(res => {
+        $scope.getDeviceIsMessageLoading = false
+        if (res.body.data && res.body.data.length) {
+            res.body.data.forEach(v => {
+                v.devTypeName = devTypeMap[v.deviceType]
+            })
+        }
+    })
+
+    // 确定按钮 -- 新增、编辑
+    $scope.updateDevMessageLoading = false
+    $scope.updateDevMessage = (item, handle) => {
+        if ($scope.updateDevMessageLoading) return
+        const {deviceType, serialNumber, ismessage} = $scope[handle + 'FormMessage']
+        if (!deviceType) {
+            toaster.pop('error', '', '请选择设备类型')
+            return
+        } else if (!serialNumber) {
+            toaster.pop('error', '', '请选择设备')
+            return
+        }
+        $scope.updateDevMessageLoading = true
+        $scope.updateDeviceIsMessage.getData({
+            stId: $scope.pstationid,
+            deviceType: deviceType,
+            serialNumber: serialNumber,
+            ismessage: ismessage
+        }).then(res => {
+            $scope.updateDevMessageLoading = false
+            if (res.code == 0) {
+                if (handle == 'add') {
+                    toaster.pop('success', '', '新增成功')
+                    $scope.addLineMessage = false
+                } else {
+                    toaster.pop('success', '', '编辑成功')
+                    item.edit = false
+                }
+                getDeviceIsMessageList()
+            } else {
+                if (handle == 'add') toaster.pop('error', '', '新增失败')
+                else toaster.pop('error', '', '编辑失败')
+            }
+        })
+    }
+
+    //切换到编辑状态
+    $scope.showEditMessage = v => {
+        if ($scope.getDeviceIsMessage.res.body.data.some(v => v.edit)) {
+            toaster.pop('error', '', '每次只能编辑一条')
+        } else {
+            $scope.addLineMessage = false
+            $scope.oneShow = true
+            $scope.editFormMessage.deviceType = v.deviceType
+            $scope.editFormMessage.deviceName = v.Name
+            $scope.editFormMessage.ismessage = +v.ismessage
+            $scope.editFormMessage.serialNumber = +v.SerialNumber
+            // $scope.changeDevType(v, 'edit')
+            // $scope.getdevicesByDeviceType.filter('edit')
+            v.edit = true
+        }
+    }
+
+    // 删除按钮
+    $scope.deleteMessage = v => {
+        if ($scope.deleteMessageLoading) return
+        $scope.deleteMessageLoading = true
+        let param = {
+            stId: $scope.pstationid,
+            serialNumber: v.SerialNumber,
+            deviceType: v.deviceType
+        }
+
+        $scope.updateDeviceIsMessage.getData(param).then(res => {
+            $scope.deleteMessageLoading = false
+            if (res.code == 0) {
+                toaster.pop('success', '', '删除成功')
+                $scope.addLineMessage = false
+                getDeviceIsMessageList()
+            } else {
+                toaster.pop('error', '', '删除失败')
+            }
+        })
+    }
+
+    //取消编辑按钮
+    $scope.cancelEditMessage = (item) => {
+        item.edit = false
+        getDeviceIsMessageList()
+    }
+
 
     /****************************************  初始电量   *********************************************** */
 
