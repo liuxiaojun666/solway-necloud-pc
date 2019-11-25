@@ -48,6 +48,12 @@ ajaxData({
         name:'GETstationInType',
         data: {},
         later:true
+    },
+    uploadImgRealScene:{
+        name:'uploadImgRealScene',
+        data: {},
+        sameTimeOnce: true,
+        later:true
     }
 }, {
     __serviceName__: 'newStationTplService',
@@ -118,10 +124,7 @@ ajaxData({
         getStationInTypeList();
 
         $scope.formData = {};
-        $("#picture0").attr("src", 'theme/images/uploadImg.png');
-        $("#picture1").attr("src", 'theme/images/uploadImg.png');
-        $("#picture2").attr("src", 'theme/images/uploadImg.png');
-
+        
         await myAjaxData.timeout(0);
         $scope.$apply();
 
@@ -151,13 +154,13 @@ ajaxData({
                 'lineInType':data.lineInType,
                 'insureName':data.insureName,
                 'insureCont':data.insureCont,
-                'insureTel':data.insureTel
+                'insureTel':data.insureTel,
+                'scenepictures': []
             };
            
             if(data.scenepictures){
-                data.scenepictures.split(',').map((v,i) => {
-                    $("#picture"+i).attr("src", '/document/powerStationPicture/'+v);
-                    $scope.formData['oldFile'+i] = v;
+                data.scenepictures.split(',').map((v) => {
+                    $scope.formData['scenepictures'].push(v)
                 })
             }
             $scope.getDepListByCompany(data.companyid);//获取当前公司的部门列表
@@ -174,8 +177,7 @@ ajaxData({
 
         }else{
             $scope.tplTitle = '新增';
-            $scope.formData = {};
-           
+            $scope.formData['scenepictures'] = [];
             $scope.formData['productiondate'] = new Date();
             $scope.formData['closedate'] = new Date();
             $scope.formData['productiondate'].showDate = '';
@@ -283,16 +285,22 @@ ajaxData({
         })
     }
 
-     // 上传图片
-     $(".newStationTpl").on('change', '.file', function(e) {
-        var inputName = e.target.name;
-        var f = e.target.files[0]
-        $scope.formData[inputName] = f
+    //上传实景图
+    $scope.uploadImgRealScene.beforGetData = (e) => {
+        $scope.uploadImgRealScene.getData({
+            classify: 'task',
+            file: e.files[0]
+        }).then(res => {
+            if (res.code === 0 && res.body) {
+                $scope.formData.scenepictures.push(res.body.file);
+            }
+        });
+    }
 
-        var url = URL.createObjectURL(f);
-        $("#"+inputName).attr("src", url);
-        $scope.$apply();
-    });
+    // 删除图
+    $scope.deleteCurrentImg = index =>{
+        $scope.formData.scenepictures.splice(index,1)
+    }
 
     //保存
     $scope.save = () =>{
@@ -313,11 +321,13 @@ ajaxData({
         for(let i in formData){
             if(!formData[i]) formData[i] = ''
         }
+        if (formData.scenepictures.length) {
+            formData.scenepictures = formData.scenepictures.join()
+        }
         $scope.saveStation.getData(formData).then(res=>{
             if(res.type == 'success'){
                 toaster.pop('success','','保存成功');
                 $scope.$emit('addCallback');
-                // URL.revokeObjectURL()
             }else{
                 toaster.pop('error','','保存失败');
             }
@@ -327,9 +337,5 @@ ajaxData({
     //取消
     $scope.cancel = () =>{
         $scope.$emit('cancelCallback');
-        // URL.revokeObjectURL()
     }
-    $scope.$on('$destroy', () => {
-        // URL.revokeObjectURL()
-    });
 });
