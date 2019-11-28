@@ -98,6 +98,9 @@ ajaxData(
     // 切换电站 回调
     $scope.switchPowerCallback = () => {
         if ($scope.currentClass !== 'StationDayToday') return;
+        if ($scope.showShape === 'chart2' && $scope.tabIndex === 1) {
+            $('#layoutViewBaiduMap')[0].src += ('?_=' + Date.now());
+        }
         $scope.$broadcast("switchPowerCallback");
         setDataNull();
         diffGetData();
@@ -143,6 +146,9 @@ ajaxData(
         if ($scope.tabIndex === 1 && $scope.showShape === 'chart') {
             // $scope.getDeviceLayout.getData({});
             $scope.rtmSingleStationComm.getData({ dateString: new Date().Format("yyyy-MM-dd") });
+        }
+        if ($scope.tabIndex === 1 && $scope.showShape === 'list') {
+            
         }
         setDataNull();
         diffGetData();
@@ -194,6 +200,7 @@ ajaxData(
             case '2':
                 $scope.realtimeWindTurbine.getData({
                     search: $scope.searchKey,
+                    pageSize: ($scope.realtimeWindTurbine.res || {}).pageSize === 999 ? 10 : ($scope.realtimeWindTurbine.res || {}).pageSize,
                     status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
                                                 .filter(v => v !== false)
                                                 .join()
@@ -238,12 +245,16 @@ ajaxData(
         } else if (tabIndex === 1 && showShape === 'chart') {
             $scope.realtimeWindTurbine.getData({
                 search: '',
+                // status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
+                //     .filter(v => v !== false)
+                //     .join()
+                //     .replace('06', '099')
+                //     .replace('05', '06')
+                //     .replace('01', '01,05'),
                 status: $scope.checkboxStatus.map((v, i) => v ? '0' + i : v)
                     .filter(v => v !== false)
                     .join()
-                    .replace('06', '099')
-                    .replace('05', '06')
-                    .replace('01', '01,05'),
+                    .replace('07', '099'),
                 pageIndex: 0,
                 pageSize: 999
             });

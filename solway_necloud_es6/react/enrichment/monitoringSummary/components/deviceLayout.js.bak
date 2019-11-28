@@ -85,14 +85,17 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
 
             componentDidMount() {
                 this.bindEvents();
-                $scope.$on('$destroy', () => this.setState({ data: null, loop: false }));
+                this.timer = setInterval(() => this.getData(), 10 * 1000);
+                $scope.$on('$destroy', () => {
+                    $scope.$off("switchPowerCallback", this.switchPowerCallback);
+                    clearInterval(this.timer);
+                    this.setState({ data: null, loop: false })
+                });
             }
 
             switchPowerCallback() {
-                $scope.$on("switchPowerCallback", (e, m) => {
-                    this.setState({ data: [], loop: false });
-                    this.getData(true);
-                });
+                this.setState({ data: [], loop: false });
+                this.getData(true);
             }
 
             bindEvents() {
@@ -124,7 +127,8 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
 
             async bindData() {
                 const data = await $scope.getDeviceLayout.promise;
-                this.switchPowerCallback();
+                $scope.$on("switchPowerCallback", this.switchPowerCallback.bind(this));
+                // this.switchPowerCallback();
                 this.getData();
                 this.setState({ data });
             }
@@ -144,8 +148,6 @@ app.directive('deviceLayout', ['myAjaxData', '$ocLazyLoad', '$timeout', (myAjaxD
                 } else {
                     this.setState({ data });
                 }
-                await myAjaxData.timeout(10000);
-                this.getData();
             }
 
             toggleHover(e, ref, isHover) {
