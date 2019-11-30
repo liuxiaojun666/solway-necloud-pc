@@ -4,6 +4,12 @@ ajaxData(
             name: 'GETPowerStationMonitorSelectVideos',
             data: {}
         },
+        videoToken: {
+            name: 'GETvideoToken',
+            data: {},
+            later: true,
+            saveParam: false
+        }
     }, {
         __serviceName__: 'themeBasicSituationVedioService'
     }
@@ -12,6 +18,26 @@ ajaxData(
     $scope.EnableFlash = navigator.plugins['Shockwave Flash'];
     $scope.isFirefox = navigator.userAgent.indexOf('Firefox') >= 0;
     const createImg = createCanvas();
+    // let ws;
+    // openWs();
+    // async function openWs() {
+    //     const res = await $scope.selectVideos.promise;
+    //     let _ws = new WebSocket(res.onlineUrl);
+    //     _ws.onopen = function () {
+    //         toaster.pop('success', '', 'ws连接成功');
+    //         $scope.$apply();
+    //     };
+    //     _ws.onmessage = function (evt) {
+    //         console.log('websocket error: ' + evt.data);
+    //         // $scope.$apply();
+    //     };
+    //     _ws.onclose = function () {
+    //         $scope.$apply();
+    //         if (wsReOpen) ws = openWs();
+    //     };
+    //     return _ws;
+    // }
+
     $ocLazyLoad.load([
         "/vendor/videojs/video-js-5.19.2/video-js.min.css",
         "/vendor/videojs/video-js-5.19.2/video.min.js",
