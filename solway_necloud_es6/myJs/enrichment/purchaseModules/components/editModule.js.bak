@@ -36,7 +36,9 @@ ajaxData({
 
     //保存
     $scope.save = () =>{
-        if($scope.saveLoading) return;
+        if($scope.saveLoading) {
+            return false;
+        }
         if($scope.mcssServiceStatus == '01'){
             clearDateTime();
         }
@@ -71,13 +73,16 @@ ajaxData({
             }
         }).success(function(res) {
             if(res.code == 0){
+                $scope.$parent.$parent.showEditModule = false
                 $scope.$emit('addPurchaseModuleCallback');
                 toaster.pop('success','',res.msg);
                 clearDateTime();
             }else{
                 toaster.pop('error', '','配置失败')
             }
-            $scope.saveLoading = false;
+            $timeout(()=>{
+                $scope.saveLoading = false;
+            },2000)
         })
     }
 
