@@ -137,6 +137,19 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
         historicalRecord.init();
 
         $scope.stamp = window.stamp;
+
+        // 运行配置查看权限
+        $http({
+            method: "GET",
+            url: window.interface['GETcheckModuleAuth'],
+            params: {codes: 631}
+        }).success(function (res) {
+            if (res.body[631].userStatus !== '00') {
+                $scope.hasAuthorityWorkConf = false
+            } else {
+                $scope.hasAuthorityWorkConf = true
+            }
+        });
         
         $http({
             method: "GET",

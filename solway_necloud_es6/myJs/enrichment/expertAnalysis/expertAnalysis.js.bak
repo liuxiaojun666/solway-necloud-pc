@@ -63,7 +63,6 @@ ajaxData({
         alsRlist: null,  //分析对象右侧选择的数量
         groupNameMaps: {} //成组添加的 组名 和 组序号的 映射
     })('expertAnalysisCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$interval', '$ocLazyLoad', 'toaster'], ($scope, myAjaxData, historicalRecord, $interval, $ocLazyLoad, toaster) => {
-
         // 销毁页面 初始化数据
         $scope.$on('$destroy', () => {
             myAjaxData.config.tableData = [{}, {}, {}, {}],
@@ -823,6 +822,7 @@ ajaxData({
                                 type: $scope['tableType' + $scope.checkChart][i],
                                 name: $scope['newArrName' + $scope.checkChart][i],
                                 yAxisIndex: i,
+                                connectNulls: true,
                                 data: v.map(xv => {
                                     return xv === null ? '-' : xv
                                 }),
@@ -1254,6 +1254,7 @@ ajaxData({
                                     type: $scope['tableType' + $scope.checkChart][i][xi],
                                     name: $scope['newArrName' + $scope.checkChart][i][xi],
                                     yAxisIndex: i,
+                                    connectNulls: true,
                                     data: xv.map(xxv => {
                                         return xxv === null ? '-' : xxv
                                     }),
@@ -1342,6 +1343,7 @@ ajaxData({
                                     let newParams = []
                                     let tooltipString = []
                                     newParams = [...params]
+                                    // newParams.forEach(v => v.value = v.value == undefined ? '-' : v.value)
                                     newParams.forEach(v => v.value = v.value === '-' ? -9999 : v.value)
                                     newParams.sort((a,b) => {return b.value - a.value})
                                     newParams.forEach(v => v.value = v.value === -9999 ? '-' : v.value)

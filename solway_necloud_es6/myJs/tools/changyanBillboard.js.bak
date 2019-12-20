@@ -3,10 +3,14 @@
     style.type = 'text/css';
     style.innerHTML = '#pop_ad{ display: none !important; }';
     document.getElementsByTagName('HEAD').item(0).appendChild(style);
+    setTimeout(() => {
+        document.getElementById('feedAv').style.cssText = 'display: none !important';
+    }, 2000);
 
     var __observe = window.MutationObserver.prototype.observe;
     window.MutationObserver.prototype.observe = function (target, options) {
-        if (target.id !== "cy-cmt-list") return __observe();
+        console.log(target.id)
+        if (target.id !== "cy-cmt-list") return __observe(target, options);
         return setTimeout(function () {
             document.getElementById('feedAv').style.cssText = 'display: none !important';
         }, 0);

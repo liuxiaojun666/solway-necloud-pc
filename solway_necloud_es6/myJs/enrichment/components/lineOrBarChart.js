@@ -15,6 +15,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
         backgroundColor: '=',
         fontColor: '=',
         axisColor: '=',
+        legendFontSize: '=',
         barWidth: '=',
         splitLine: '=',
         datazoom: '=',
@@ -77,6 +78,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                 barWidth = 20,
                 axisColor,
                 fontColor,
+                legendFontSize,
                 linenames = [],
                 ynames = [],
                 xname = '',
@@ -129,7 +131,7 @@ app.directive('commonChartLineOrBar', ['myAjaxData', '$timeout', (myAjaxData, $t
                     left: 200,
                     top: 30,
                     textStyle: {
-                        fontSize: 12,
+                        fontSize: legendFontSize || 12,
                         color: fontColor
                     },
                     ...legend,

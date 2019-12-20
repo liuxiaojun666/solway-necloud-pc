@@ -1749,12 +1749,11 @@ ajaxData(
         }
         myChart = echarts.init(document.getElementById('themeRiver'));
         const types = res.data.slice(0, 9).map(v => v[2]);
-        const colorMap = ["故障", "报警", "正常运行", "待机", "启动中", "关机中", "停机", "通讯中断", "未知"].reduce((pre, curr, index) => (
+        const colorMap = res.legend.reduce((pre, curr, index) => (
             { ...pre, [curr]: ['#F75454', '#FFC939', '#58C471', '#34BFED', '#97B385', '#636363', '#000000', '#6E869E', '#E7E7E7'][index] }
         ), {});
         const color = types.map(v => colorMap[v]);
         color.push(color.shift());
-        // debugger
         const option = {
             tooltip: {
                 trigger: 'axis',
