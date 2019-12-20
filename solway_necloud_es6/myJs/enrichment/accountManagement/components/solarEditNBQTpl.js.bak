@@ -62,6 +62,7 @@ ajaxData({
                 realcapacity:data.realcapacity,
                 hasJBN: data.hasJBN,
                 hasJB:data.hasJB,
+                version:data.version ? data.version : 1,
                 inverterroom: data.inverterroom,
                 invertergid: data.invertergid,
                 begindate: data.begindate,
@@ -90,10 +91,17 @@ ajaxData({
             $scope.formData['begindate'].showDate = '';
             $scope.formData['enddate'].showDate = '';
             $scope.formData['pstationid'] = $scope.stationId;
+            $scope.formData['hasJB'] = '否';
+            $scope.formData['version'] = 1;
             await myAjaxData.timeout(0);
             $scope.$apply();
         }
     });
+
+    // 选择是否小逆
+    $scope.radioCheckChange = () =>{
+        $scope.formData['hasJB'] = $("input[name='ifSmallNBQ']:checked").val() == 1 ? '是' : '否';
+    }
 
     //获取厂商列表
     $scope.getManufacturerList = ()=>{
@@ -120,7 +128,6 @@ ajaxData({
         });
     }
     
-
      //保存
     $scope.saveNBQ = () =>{
         if (!$solway.formValidation($scope.formData, '.editNBQTpl', toaster)) return;//校验非空
@@ -129,6 +136,9 @@ ajaxData({
         $scope.formData['enddate']   = $scope.formData['enddate'].showDate;
         $scope.formData['hasJB'] = $("input[name='ifSmallNBQ']:checked").val();
         $scope.formData['hasJBN'] = $("input[name='ifSmallNBQ']:checked").val();
+        if($scope.formData['hasJB'] == 1){
+            $scope.formData['version'] = $("input[name='mppt']:checked").val();
+        }
 
         $scope.updateDeviceNBQ.getData($scope.formData).then(res=>{
             if(res.type == 'success'){
