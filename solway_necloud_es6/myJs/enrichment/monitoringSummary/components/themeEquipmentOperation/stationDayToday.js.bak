@@ -285,13 +285,14 @@ ajaxData(
         const status = $scope.checkboxStatus.map((v, i) => v ? (
             '0' + (i > 2 ? i - 1 : i === 2 ? 7 : i)
         ) : v).filter(v => v !== false).join() + ($scope.shadowFlag ? ',05' : '');
-        
+
         switch ($scope.currentDeviceType) {
             case '1':
                 if ($scope.getRunRealDataBJunction.isLoding) return
                 $scope.getRunRealDataBJunction.getData({
                     search: $scope.searchKey,
-                    status
+                    status,
+                    pageIndex: $scope.searchKey === ($scope.getRunRealDataBJunction.reqData || {}).search ? ($scope.getRunRealDataBJunction.reqData || {}).pageIndex : 0
                 });
                 break;
 
@@ -299,7 +300,8 @@ ajaxData(
                 if ($scope.getRunRealDataBInverter.isLoding) return
                 $scope.getRunRealDataBInverter.getData({
                     search: $scope.searchKey,
-                    status
+                    status,
+                    pageIndex: $scope.searchKey === ($scope.getRunRealDataBInverter.reqData || {}).search ? ($scope.getRunRealDataBInverter.reqData || {}).pageIndex : 0
                 });
                 break;
 
@@ -307,7 +309,8 @@ ajaxData(
                 if ($scope.getRunRealDataBBoxChange.isLoding) return
                 $scope.getRunRealDataBBoxChange.getData({
                     search: $scope.searchKey,
-                    status
+                    status,
+                    pageIndex: $scope.searchKey === ($scope.getRunRealDataBBoxChange.reqData || {}).search ? ($scope.getRunRealDataBBoxChange.reqData || {}).pageIndex : 0
                 });
                 break;
 
@@ -315,7 +318,8 @@ ajaxData(
                 if ($scope.getRunRealDataMeter.isLoding) return
                 $scope.getRunRealDataMeter.getData({
                     search: $scope.searchKey,
-                    status
+                    status,
+                    pageIndex: $scope.searchKey === $scope.getRunRealDataMeter.reqData.search ? $scope.getRunRealDataMeter.reqData.pageIndex : 0
                 });
                 break;
 
@@ -323,7 +327,8 @@ ajaxData(
                 if ($scope.runRealDataWeather.isLoding) return
                 $scope.runRealDataWeather.getData({
                     search: $scope.searchKey,
-                    status: '00'
+                    status: '00',
+                    pageIndex: $scope.searchKey === $scope.runRealDataWeather.reqData.search ? $scope.runRealDataWeather.reqData.pageIndex : 0
                 });
                 break;
 

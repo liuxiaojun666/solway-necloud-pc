@@ -118,7 +118,6 @@ ajaxData(
         myChart.resize();
         window.addEventListener('resize', () => myChart.resize());
         var option = {
-            backgroundColor: '#0D1F30',
             tooltip: {
                 trigger: 'item',
                 formatter: '{b}'
@@ -129,45 +128,77 @@ ajaxData(
                 y: "10px",
                 y2: "5px"
             },
-            legend: {
-                show: false,
-                data: ["地面光伏", "分布式光伏", "户用光伏", "风电"]
-            },
+            // visualMap: {
+            //     min: 0,
+            //     max: 500,
+            //     show: false,
+            //     splitNumber: 5,
+            //     inRange: {
+            //         color: ['#d94e5d', '#eac736', '#50a3ba'].reverse()
+            //     },
+            //     textStyle: {
+            //         color: '#fff'
+            //     }
+            // },
             geo: {
                 map: '江苏',
-                roam: true,
-                zoom: 1.1,
-                // center: [105, 38],
                 label: {
                     normal: {
-                        show: false,
-                        textStyle: {
-                            color: "#16e6ff",//省份颜色,
-                            borderColor: 'rgb(0,211,255)'
-                        }
+                        show: true,
+                        color: 'rgba(255,255,255,0.5)'
                     },
                     emphasis: {
                         show: true,
-                        textStyle: {
-                            color: "white",//省份颜色,
-                        }
+                        color: '#fff'
                     }
                 },
+                roam: true,
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
                 itemStyle: {
                     normal: {
                         areaColor: 'rgba(0,0,0,0.5)',
-                        borderColor: 'rgb(0,211,255)',
+                        borderColor: 'rgba(0,211,255,1)',
+                        borderWidth: 1
                     },
                     emphasis: {
                         areaColor: 'rgba(75,241,241,0.65)'
                     }
                 },
+                // itemStyle: {
+                //     normal: {
+                //         borderColor: 'rgba(147, 235, 248, 1)',
+                //         borderWidth: 1,
+                //         areaColor: {
+                //             type: 'radial',
+                //             x: 0.5,
+                //             y: 0.5,
+                //             r: 0.8,
+                //             colorStops: [{
+                //                 offset: 0,
+                //                 color: 'rgba(147, 235, 248, 0)' // 0% 处的颜色
+                //             }, {
+                //                 offset: 1,
+                //                 color: 'rgba(147, 235, 248, .2)' // 100% 处的颜色
+                //             }],
+                //             globalCoord: false
+                //         },
+                //         shadowColor: 'rgba(128, 217, 248, 1)',
+                //         shadowOffsetX: -2,
+                //         shadowOffsetY: 2,
+                //         shadowBlur: 10
+                //     },
+                //     emphasis: {
+                //         areaColor: 'rgba(75,241,241,0.65)',
+                //         borderWidth: 0
+                //     }
+                // }
             },
             series: [
                 {
                     name: '地面光伏',
-                    //type: 'map',
-                    //mapType: 'china',
                     type: 'scatter',
                     coordinateSystem: 'geo',
                     roam: false,
@@ -175,7 +206,6 @@ ajaxData(
                     //symbol: 'rect',//?试下是这个吗
                     data: [
                         //{name: '北京',value: Math.round(Math.random()*1000)}
-
                     ]
                 },
                 {
@@ -205,6 +235,15 @@ ajaxData(
                     //symbol: 'image://url',
                     data: []
                 },
+                {
+                    name: '公司',
+                    type: 'scatter',
+                    coordinateSystem: 'geo',
+                    roam: false,
+                    symbolSize: 20,
+                    symbol: 'image://theme/images/enrichment/main/zxpsd/star.png',
+                    data: [{'value': [120.731982,31.327046]}]
+                }
             ]
         };
         myChart.setOption(option, true);
@@ -251,7 +290,6 @@ ajaxData(
         }
         $scope.$apply();
     }
-
 
     $scope.goStationPage = async (data) => {
         await $scope.userAuthHandleChangeDataType.getData(data);

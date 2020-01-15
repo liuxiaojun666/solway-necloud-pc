@@ -26,7 +26,12 @@ ajaxData(
             name: 'GETselectWindTurbineSubSystemRunData',
             data: {},
             later: true,
-            sameTimeOnce: true,
+            onlyLatest: true
+        },
+        deviceRunStatus: {
+            name: 'GETdeviceRunStatus',
+            data: {},
+            later: true,
             onlyLatest: true
         },
         windTurbineSubSystem: {
@@ -77,6 +82,12 @@ ajaxData(
         deviceId: eqService.config.eqObj.deviceId,
         level: 2,
         stid: eqService.config.eqObj.pstationid
+    });
+
+    // 获取实时状态
+    $scope.deviceRunStatus.getData({
+        eqid: eqService.config.eqObj.deviceSerialNnumber,
+        type: 18
     });
 
     ;(() => {
@@ -172,6 +183,7 @@ ajaxData(
         if ($scope.rtmSingleStationComm.res.comm === 1) return;
         if ($scope.activeId === -9999) {
             $scope.selectWindTurbineSubSystemRunData.getData();
+            $scope.deviceRunStatus.getData()
         } else {
             $scope.windTurbineSubSystemRunData.getData({
                 deviceId: eqService.config.eqObj.deviceId,

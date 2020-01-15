@@ -127,6 +127,7 @@ ajaxData({
                 batteryprodid: data.batteryprodid,
                 batterypower: data.batterypower,
                 batterycount: data.batterycount,
+                version:data.version ? data.version : 1,
                 cycle: data.cycle,
                 timeout: data.timeout,
                 mainparameter: data.mainparameter,
@@ -164,6 +165,7 @@ ajaxData({
             $scope.formData['begindate'].showDate = '';
             $scope.formData['enddate'].showDate = '';
             $scope.formData['pstationid'] = $scope.stationId;
+            $scope.formData['version'] = 1;
             for(let i=0;i<16;i++){
                 $("input[name='maskCodeCheckJB'][value='"+i+"']").prop("checked", true);
             }
@@ -185,6 +187,7 @@ ajaxData({
 			maskCodeCheckedArr.push(this.value)
         });
         $scope.formData['maskCodeCheckJB'] = maskCodeCheckedArr.join(',');
+        $scope.formData['version'] = $("input[name='mpptHLX']:checked").val();
 
         let relist = maskCodeParseJBRe();
         $scope.formData['batterygcount'] = relist[0];

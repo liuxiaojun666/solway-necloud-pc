@@ -22,34 +22,86 @@ ajaxData(
             onlyLatest: true,
             sameTimeOnce: true,
         },
-        deviceStatusFromRedis: {
-            name: 'GETdeviceStatusFromRedis',
-            data: {},
-            onlyLatest: true,
-            sameTimeOnce: true,
-        },
         pvwpStationOverview: {
             name: 'GETpvwpStationOverview',
             data: {},
             onlyLatest: true,
             sameTimeOnce: true,
         },
+        powerStationStatusDataNew2: {
+            name: 'GETpowerStationStatusDataNew2',
+            data: {},
+            onlyLatest: true
+        },
     }, {
         __serviceName__: 'mainMonitoringService',
         companyDayTodayTimeLineData: { xdata: [], line1: [], line2: [] },
         companyDayTodayTimeLineDataWp: { xdata: [], line1: [], line2: [] },
+        jiangsuJson:[{
+            "cityid": 811,
+            "city_name": "南京"
+        }, {
+            "cityid": 823,
+            "city_name": "无锡"
+        }, {
+            "cityid": 832,
+            "city_name": "徐州"
+        }, {
+            "cityid": 843,
+            "city_name": "常州"
+        }, {
+            "cityid": 851,
+            "city_name": "苏州"
+        }, {
+            "cityid": 861,
+            "city_name": "南通"
+        }, {
+            "cityid": 870,
+            "city_name": "连云港"
+        }, {
+            "cityid": 877,
+            "city_name": "淮安"
+        }, {
+            "cityid": 886,
+            "city_name": "盐城"
+        }, {
+            "cityid": 896,
+            "city_name": "扬州"
+        }, {
+            "cityid": 903,
+            "city_name": "镇江"
+        }, {
+            "cityid": 910,
+            "city_name": "泰州"
+        }, {
+            "cityid": 917,
+            "city_name": "宿迁"
+        }, {
+            "cityid": 1399,
+            "city_name": "烟台"
+        }]
     }
 )('mainMonitoringCtrl', ['$scope', 'mainMonitoringService', 'actionRecord', '$interval', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $interval, $ocLazyLoad) => {
     myAjaxData.config.companyDayTodayTimeLineData = { xdata: [], line1: [], line2: [] };
     myAjaxData.config.companyDayTodayTimeLineDataWp = { xdata: [], line1: [], line2: [] };
+    
     $('.themeMonitoring.ng-clock').removeClass('ng-clock');
     // 滚动数字
-    const od = new Odometer({ el: document.getElementById('odometer'), value: 100000000 });
+    const od = new Odometer({ el: document.getElementById('odometer'), value: 10000000 });
+    const od1 = new Odometer({ el: document.getElementById('odometer1'), value: 10000000 });
+    
 
+    const getAverageHours = data =>{
+        let monthHours = data.m_h_pv[0]
+        let currentDate = new Date().getDate()
+        $scope.averageHour = (monthHours / currentDate).toFixed(1)
+    }
     $scope.pvwpStationOverview.subscribe(res => {
-        od.update(10000000000 + (+res.body.ov.real_kwh_chk.toFixed()) + '');
+        od.update(res.body.ov.real_kwh_chk ? (10000000 + (+res.body.ov.real_kwh_chk.toFixed()) + '') : '10000000');
+        od1.update(res.body.ov.elecCharge ? (10000000 + (+res.body.ov.elecCharge.toFixed()) + '') : '10000000');
         hideNum0();
         setTimeout(hideNum0, 2500);
+        getAverageHours(res.body.uv)
     });
 
     function hideNum0() {
@@ -64,9 +116,18 @@ ajaxData(
                 has = true
             }
         });
+        let has1 = false;
+        $('#odometer1 .odometer-value').each(function (index) {
+            const $this = $(this);
+            if (!has1 && $this.text() === '0') {
+                styleText += `#odometer1 .odometer-digit:nth-child(${index + 1}) .odometer-value{color: transparent;}`;
+            } else {
+                styleText += `#odometer1 .odometer-digit:nth-child(${index + 1}) .odometer-value{color: #61FF4F;}`;
+                has1 = true
+            }
+        });
         $('#odometerStyle').html(styleText);
     }
-
 
     // 电站类型列表
     $scope.stClassLIst.subscribe(res => {
@@ -74,91 +135,26 @@ ajaxData(
         $scope.stClassLIst.res.stClass02 = res.data.some(v => v.id === '02');
     });
 
-
-    // 基本信息 装机容量
-    const myPieChart = echarts.init(document.getElementById('pieChart'));
-    $scope.runTimeMonitor.subscribe(res => {
-        const option = {
-            color: ['#FFCC51', 'rgba(115,199,223,0.9)'],
-            tooltip: {
-                show: true,
-                trigger: 'item',
-                formatter: `{a}-{b}-{c}-{d}-{e}`
-            },
-            series: [
-                {
-                    type: 'pie',
-                    radius: ['49.2%', '50%'],
-                    tooltip: {
-                        show: false
-                    },
-                    data: [
-                        {
-                            value: 0,
-                            name: '总装机\n\n' + res.classInstalledCapacity['00'].join('')
-                        }
-                    ],
-                    hoverAnimation: false,
-                    label: {
-                        normal: {
-                            position: 'center',
-                            fontSize: 16 * (window.innerWidth / 1366)
-                        },
-                    },
-                },
-                {
-                    name: '装机容量',
-                    type: 'pie',
-                    radius: ['60%', '75%'],
-                    tooltip: {
-                        show: false,
-                        formatter: `{a}<br/>{b}`
-                    },
-                    label: {
-                        normal: {
-                            show: false
-                        }
-                    },
-                    labelLine: {
-                        normal: {
-                            show: false,
-                            length: 20,
-                            length2: 30
-                        }
-                    },
-                    data: [
-                        res.classInstalledCapacity['02'] ? {
-                            value: (res.classInstalledCapacity['02'] || [0, 0])[0],
-                            name: '\n\n风电装机\n' + (res.classInstalledCapacity['02'] || [0, 0]).join('')
-                        } : {},
-                        {
-                            value: (res.classInstalledCapacity['01'] || [0, 0])[0],
-                            name: '光伏装机\n' + (res.classInstalledCapacity['01'] || [0, 0]).join('')
-                        }
-                    ]
-                },
-                {
-                    type: 'pie',
-                    radius: ['83.2%', '84%'],
-                    tooltip: {
-                        show: false
-                    },
-                    label: {
-                        normal: {
-                            show: false,
-                        }
-                    },
-                    data: [
-                        { value: 0, name: '' }
-                    ],
-                    hoverAnimation: false
-                },
-            ]
-        };
-        myPieChart.setOption(option, true);
+    // 1、基本信息 装机容量
+    $scope.jiangsuList = myAjaxData.config.jiangsuJson
+    $scope.distributeCityNum = [];
+    $scope.powerStationStatusDataNew2.subscribe(res => {
+        $scope.jiangsuList.map(outV => {
+            outV.stationNum = 0
+            $scope.stationNum = res.data[1].sum
+            res.data[1].data.map(insideV => {
+                if(outV.cityid == insideV.cityId){
+                    outV.stationNum = outV.stationNum ? outV.stationNum +1 : 1
+                    if(!$scope.distributeCityNum.includes(insideV.cityId)) $scope.distributeCityNum.push(insideV.cityId)
+                }
+            })
+        })
+        $scope.jiangsuList.sort(function(a,b){
+            return a.stationNum < b.stationNum ?1:-1
+        });
     });
-
-    // 功率曲线
+    
+    // 2、功率曲线
     $scope.companyDayTodayTime.subscribe(res => {
         if (!($scope.stClassLIst.res.stClass01 && !$scope.stClassLIst.res.stClass02)) return;
         const { companyDayTodayTimeLineData } = myAjaxData.config;
@@ -204,96 +200,15 @@ ajaxData(
         myAjaxData.config.companyDayTodayTimeLineDataWp = companyDayTodayTimeLineDataWp;
     });
 
-
-    // 设备运行情况 台数
-    const myPieChart1 = echarts.init(document.getElementById('pieChart1'));
-    const myPieChart2 = echarts.init(document.getElementById('pieChart2'));
-    const myPieChart3 = echarts.init(document.getElementById('pieChart3'));
-    const myPieChart4 = echarts.init(document.getElementById('pieChart4'));
-    const myPieChart5 = echarts.init(document.getElementById('pieChart5'));
-    const myPieChart6 = echarts.init(document.getElementById('pieChart6'));
-    $scope.deviceStatusFromRedis.subscribe(res => {
-        const class01 = res['01'] || {
-            comm: 0,
-            fault: 0,
-            maintain: 0,
-            run: 0,
-            wait: 0,
-            alarm: 0,
-        };
-        const class02 = res['02'] || {
-            comm: 0,
-            fault: 0,
-            maintain: 0,
-            run: 0,
-            wait: 0,
-            alarm: 0
-        };
-        const class01Total = Object.values(class01).reduce((a, b) => a + b, 0);
-        const class02Total = Object.values(class02).reduce((a, b) => a + b, 0);
-        function getOption(index, name, color) {
-            return {
-                color,
-                series: [
-                    {
-                        type: 'pie',
-                        radius: ['75%', '85%'],
-                        hoverAnimation: false,
-                        label: { normal: { show: false } },
-                        data: [{ value: (class02Total - class02[index]) || 1, }, { value: class02[index] }]
-                    },
-                    {
-                        type: 'pie',
-                        radius: ['90%', '100%'],
-                        hoverAnimation: false,
-                        label: {
-                            normal: {
-                                position: 'center',
-                                fontSize: 14
-                            },
-                        },
-                        data: [{ value: (class01Total - class01[index]) || 1, }, { value: class01[index], name }]
-                    },
-                ]
-            };
-        }
-        myPieChart1.setOption(getOption('comm', '离线', ['#08436F', '#7B00C4', '#08436F', '#a06cd5']), true);
-        myPieChart2.setOption(getOption('maintain', '维护', ['#08436F', '#4472EC', '#08436F', '#5eb7da']), true);
-        myPieChart3.setOption(getOption('fault', '故障', ['#08436F', '#F29958', '#08436F', '#FF6767']), true);
-        myPieChart4.setOption(getOption('wait', '待机', ['#08436F', '#8ADCF7', '#08436F', '#fff']), true);
-        myPieChart5.setOption(getOption('run', '运行', ['#08436F', '#D2E058', '#08436F', '#58C471']), true);
-        myPieChart6.setOption(getOption('alarm', '报警', ['#08436F', '#FF7474', '#08436F', '#FFCC51']), true);
-    });
-
-    $scope.openRunDetail = (state, stClass) => {
-        $scope.openRunDetail.isLoading = true;
-        $scope.openRunDetail.state = state;
-        $scope.openRunDetail.stClass = stClass || '01';
-        $ocLazyLoad.load([
-            'theme/js/dist/enrichment/main/equipmentRunDetail.js' + stamp, 
-            'theme/js/dist/components/myTable.js' + stamp,
-            'theme/js/dist/components/myPagin.js' + stamp,
-        ]).then(() => {
-            $scope.equipmentRunDetail = 'tpl/enrichment/main/equipmentRunDetail.html' + stamp;
-        });
-    };
-
     // 监听窗口改变，重绘图标
     window.addEventListener('resize', chartResize);
     function chartResize() {
-        myPieChart.resize();
-        myPieChart1.resize();
-        myPieChart2.resize();
-        myPieChart3.resize();
-        myPieChart4.resize();
-        myPieChart5.resize();
-        myPieChart6.resize();
+       
     }
 
     // 定时刷新数据
     const timer = $interval(() => {
         $scope.pvwpStationOverview.getData();
-        $scope.deviceStatusFromRedis.getData();
 
         if ($scope.companyDayTodayTime.res) {
             let variable;
