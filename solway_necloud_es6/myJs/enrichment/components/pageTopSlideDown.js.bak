@@ -144,10 +144,10 @@ app.directive('pageSlideDown', ['$ocLazyLoad', '$http', '$state', '$stateParams'
             url: window.interface['GETcheckModuleAuth'],
             params: {codes: 631}
         }).success(function (res) {
-            if (res.body[631].userStatus !== '00') {
-                $scope.hasAuthorityWorkConf = false
-            } else {
+            if (res.body && res.body[631] && res.body[631].userStatus === '00') {
                 $scope.hasAuthorityWorkConf = true
+            } else {
+                $scope.hasAuthorityWorkConf = false
             }
         });
         

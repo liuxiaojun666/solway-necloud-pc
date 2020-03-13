@@ -21,7 +21,10 @@ $(function () {
 
     // 版本校验
     if ((window.PROCESS_EVN === 'production') || (window.PROCESS_EVN === 'test')) {
-        if (!window.localStorage.stamp) window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+        if (!window.localStorage.stamp) {
+            if (window.top !== window) window.localStorage.stamp = '?_=' + Date.now()
+            else window.location.href = 'http://' + window.location.host + '/Login/logout.htm';
+        }
 
         // const oReq = new XMLHttpRequest();
         // oReq.open("GET", '/stamp.txt?_=' + Math.random(), true);
@@ -43,6 +46,7 @@ $(function () {
 
     // 单窗口校验
     ;(function () {
+        if (window.top !== window) return
         var xx = function () {
             window.opener = null;
             window.open("", "_self", "");
