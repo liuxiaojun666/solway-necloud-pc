@@ -131,8 +131,8 @@ ajaxData(
             'vendor/jquery/ztree/jsCopy/jquery.ztree.exhide.js', //ztree
             'vendor/jquery/ztree/jsCopy/jquery.ztree.excheck.js', //ztree        
         ])).then(() => {
-            res.body['01'] && $.fn.zTree.init($("#tree_pv"), settings, res.body['01']).expandAll(true);
-            res.body['02'] && $.fn.zTree.init($("#tree_wp"), settings, res.body['02']).expandAll(true);
+            res.body['01'] && $.fn.zTree.init($("#tree_pv"), settings, res.body['01'].filter(v => !v.sn)).expandAll(true);
+            res.body['02'] && $.fn.zTree.init($("#tree_wp"), settings, res.body['02'].filter(v => !v.sn)).expandAll(true);
             if (!res.body['01'][0] && res.body['02'][0]) $scope.tabIndex = '02'
         });
     });

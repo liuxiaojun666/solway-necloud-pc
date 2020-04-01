@@ -132,13 +132,13 @@ ajaxData({
         $scope.secondaryConfig = true;
         $scope.formData = {};
         $scope.detail.getData({ id }).then(res => {
-            const { reportType, startDate, sendDate} = res.body;
+            const { reportType, startDate, sendDate, mailAble} = res.body;
             $scope.formData = {
                 ...res.body,
                 week: reportType === 3 ? startDate.substr(-1) : '1',
-                week2: reportType === 3 ? sendDate.substr(-1) : '1',
+                week2: mailAble ? (reportType === 3 ? sendDate.substr(-1) : '1') : null,
                 dateArr: getDateArr(reportType, startDate),
-                dateArr2: getDateArr(reportType, sendDate),
+                dateArr2: mailAble ? getDateArr(reportType, sendDate) : null,
                 isEdit: true
             };
         });

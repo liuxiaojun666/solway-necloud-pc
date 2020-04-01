@@ -70,6 +70,12 @@ $(function () {
         }
     })();
 
+    if (window.top !== window) {
+        window.addEventListener('hashchange', function (e) {
+            window.parent.postMessage({hashchange: this.location.href}, '*')
+        })
+    }
+
     // 埋点统计
     if (window.PROCESS_EVN === 'production') {
         $body.append('<script type="text/javascript" src="//s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"><\/script>');
