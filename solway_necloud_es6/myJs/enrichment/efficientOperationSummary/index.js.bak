@@ -41,6 +41,9 @@ ajaxData(
     };
 
     $scope.checkModuleAuth.subscribe(res => {
+        if ((res.code !== 0) && ($scope.theme === 'Share')) {
+            return $scope.changeTheme('Profession');
+        }
         if ((res.body['620'].userStatus !== '00') && ($scope.theme === 'Share')) {
             $scope.changeTheme('Profession');
         }
