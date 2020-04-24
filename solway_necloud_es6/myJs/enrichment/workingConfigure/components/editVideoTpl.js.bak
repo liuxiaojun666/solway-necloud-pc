@@ -16,30 +16,51 @@ ajaxData({
 }, {
     __serviceName__: 'addVideoModelService',
 })('addVideoModelCtrl', ['$scope', 'addVideoModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
-    
     // //初始
     $scope.$on('broadAddVideo',function(e,data){
+        $scope.isGuobiao = 1
         $scope.id = data.id;
         if($scope.id){
             $scope.formData = data.detail;
+            let sn = $scope.formData.sn
+            if (sn) {
+                $scope.isGuobiao = 1
+                if (sn.includes('-')) {
+                    $scope.formData.sn1 = sn.split('-')[0]
+                    $scope.formData.sn2 = sn.split('-')[1]
+                } else {
+                    $scope.formData.sn1 = sn
+                    $scope.formData.sn2 = ''
+                }
+            } else {
+                $scope.isGuobiao = 0
+            }
         }else{
-            $scope.formData = {};
-            $scope.formData['ctrl'] = '02';
-            $scope.formData['stId'] = $scope.pstationid;
-            $scope.formData['destUrl'] = 'rtmp://netest.solway.cn/myapp';
+            $scope.formData = {
+                ctrl: '01',
+                stId: $scope.pstationid,
+                destUrl: 'rtmp://netest.solway.cn/myapp',
+                sn1: '',
+                sn2: '',
+                sn: ''
+            };
         }
     });
+
+    $scope.changeRadioType = type => {
+        $scope.isGuobiao = type
+    }
 
     // //保存
     $scope.saveVideo = () =>{
         if($scope.saveVideoLoading) return;
         if (!$solway.formValidation($scope.formData, '.addVideoModelTpl', toaster)) return;//校验非空
-        
-        // if($scope.formData['ctrl'] == '01'){
-        //     $scope.formData['monitorPointDest'] = null;
-        //     $scope.formData['monitorPointIP'] = null;
-        //     $scope.formData['monitorPointSource'] = null;
-        // }
+        $scope.formData['sn'] = $scope.formData.sn2 ? ($scope.formData.sn1 + '-' + $scope.formData.sn2) : $scope.formData.sn1
+        if($scope.formData['ctrl'] == '01'){
+            $scope.formData['monitorPointDest'] = null;
+            $scope.formData['monitorPointIP'] = null;
+            $scope.formData['monitorPointSource'] = null;
+        }
         $scope.saveVideoLoading = true;
         $scope.videoConfigureSave.getData($scope.formData).then(res=>{
             $scope.saveVideoLoading = false;

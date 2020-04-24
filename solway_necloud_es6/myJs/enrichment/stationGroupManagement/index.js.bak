@@ -69,6 +69,16 @@ ajaxData({
 
     $scope.column = [
         {
+            title: '<label class="i-checks m-b-none"><input type="checkbox"><i style="background:transparent;"></i></label>',
+            dataIndex: '',
+            width: '60px',
+            align: 'center',
+            checkboxName: 'batchprocessing',
+            render(text, record, index) {
+                return `<label class="i-checks m-b-none"><input data-identifies="${record.id}" name="batchprocessing" type="checkbox" /><i style="background:transparent;"></i></label>`
+            }
+        },
+        {
             title: '电站名称',
             width:'30%',
             dataIndex: 'name',
@@ -142,7 +152,7 @@ ajaxData({
             }).then(res=>{
                 if(res.type == "success"){
                     toaster.pop('success','','删除成功');
-                    $scope.initGroupList();
+                    $scope.initGroupList()
                 }else{
                     toaster.pop('error','','删除失败');
                 }
@@ -162,6 +172,7 @@ ajaxData({
             groupId:$scope.currentGroupId
         }).then(res=>{
             $scope.authStationsList = res;
+            $scope.allAuthStationsList = JSON.parse(JSON.stringify(res));
 
             $('input[name="stationCheckAll"]').prop('checked',false);
             $('input[name="ids"]').prop('checked',false);
@@ -178,6 +189,22 @@ ajaxData({
             })
             
         });
+    }
+
+    // 搜索电站名、地址
+    $scope.searchNewStation = () => {
+        $scope.authStationsList = $scope.allAuthStationsList.filter(v => {
+            return (v.name.indexOf($scope.newStationFormData.keyword) != -1 || v.address.indexOf($scope.newStationFormData.keyword) != -1)
+        })
+    }
+
+    // 批量删除电站
+    $scope.deleteGroupStation = () => {
+        const ids = document.querySelectorAll('[name=batchprocessing]'):: [].filter(v => v.checked).map(v => v.dataset.identifies)
+        if (!ids.length) return toaster.pop('error', '', '请至少选择一条')
+        $solway.confirm({ message: '确定删除吗？' }, () => {
+            deleteStation(ids.join())
+        })
     }
 
     //保存电站
@@ -202,12 +229,13 @@ ajaxData({
     //删除分组中的电站
     const deleteStation = (id) =>{
         $scope.deleteStationFromGroup.getData({
-            id:id,
+            ids: id,
             groupid:$scope.currentGroupId
         }).then(res=>{
             if(res.type == "success"){
                 toaster.pop('success','','删除成功');
-                $scope.initGroupList();
+                // $scope.initGroupList();
+                getStationListData($scope.currentGroupId)
             }else{
                 toaster.pop('error','','删除失败');
             }
@@ -217,7 +245,7 @@ ajaxData({
     $scope.trClick = (item, index, event) => {
         if(event.target.className.includes('icon-shanchu1')) {
             $solway.confirm({ message: '确定删除此电站' }, () => {
-                deleteStation(item.id)
+                deleteStation(item.id.toString())
             });
         }
     };
