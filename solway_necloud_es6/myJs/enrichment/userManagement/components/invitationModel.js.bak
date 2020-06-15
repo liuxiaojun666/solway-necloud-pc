@@ -12,6 +12,12 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    organizationTreeList: {
+        name:'GETorganizationTreeList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     update:{
         name:'POSTupdateInvitation',
         data: {},
@@ -22,6 +28,27 @@ ajaxData({
 }, {
     __serviceName__: 'invitationModelService',
 })('invitationModelCtrl', ['$scope', 'invitationModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    const setting = {
+        view: { showLine: false }, //不显示连线
+        data: {
+            simpleData: {
+                enable: true,
+                pIdKey: "parentId"
+            }
+        },
+        callback: {
+            onClick: onClick
+        }
+    };
+
+    function onClick(event, treeId, treeNode, clickFlag) {
+        let id = treeNode.id
+        let treeIdNum = treeId.split('_')[1]
+        $scope.inviteList.map(v => {
+            if (v.serNum == treeIdNum) v.orgId = id
+        })
+    };
 
     //角色信息
     const getRoleData = () =>{
@@ -45,12 +72,30 @@ ajaxData({
         });
     }
 
+    const initTree = (data, id) => {
+        let zTreeObj = $.fn.zTree.init($("#"+id), setting, data);
+        zTreeObj.expandNode(zTreeObj.getNodes()[0], true)
+        let node = zTreeObj.getNodeByParam('id', data[0].id)
+        zTreeObj.selectNode(node)
+    }
+
+    // 组织机构列表
+    const getOrganizationData = index =>{
+        $scope.organizationTreeList.getData().then(res => {
+            if (res.code === 200) {
+                $scope.treeData = res.data
+                initTree(res.data, 'tree_'+index)
+            }
+        })
+    }
+
     const initSelectData = () =>{
         $scope.count = 1;
-        $scope.inviteList = [{'serNum':$scope.count,'deptid':$scope.depId,'authUserRoleGroupStationRels':[],'aursrs':[] }]
+        $scope.inviteList = [{'serNum':$scope.count,'deptid':$scope.depId, 'orgId': 1, 'authUserRoleGroupStationRels':[],'aursrs':[] }]
         $scope.showRoles = false;
         getRoleData();
         getStationData();
+        getOrganizationData($scope.count);
     }
 
     //初始
@@ -62,7 +107,10 @@ ajaxData({
     //增加一行
     $scope.addLine = () =>{
         $scope.count++;
-        $scope.inviteList.push({'serNum':$scope.count,'deptid':$scope.depId,'authUserRoleGroupStationRels':[],'aursrs':[]})
+        $scope.inviteList.push({'serNum':$scope.count,'deptid':$scope.depId, 'orgId': 1, 'authUserRoleGroupStationRels':[],'aursrs':[]})
+        $timeout(() => {
+            initTree($scope.treeData, 'tree_' + $scope.count)
+        })
     }
 
     //删除一行

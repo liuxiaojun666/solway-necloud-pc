@@ -80,7 +80,7 @@ ajaxData(
             align: 'center'
         }, {
             title: '操作',
-            width: '180px',
+            width: '230px',
             dataIndex: '',
             align: 'center',
             sort: !0,
@@ -90,7 +90,8 @@ ajaxData(
                     <i class="iconfont editDevice icon-shebeiguanli" style="font-size: 20px;color:#1ddabe;margin-right:15px;" title="编辑设备台账"></i>
                     <i class="iconfont editStation icon-bianji-copy " style="font-size: 18px;color:#1ddabe;margin-right:15px;" title="编辑电站信息"></i>
                     <i class="iconfont download icon-xiazai" style="font-size: 20px;color:#1ddabe;margin-right:15px;" title="下载"></i>
-                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;"></i>
+                    <i class="iconfont edit icon-shanchu1" style="font-size: 18px;color:#ff8080;margin-right:15px;"></i>
+                    <i class="iconfont inverterSubarray icon-rizhi" style="font-size: 20px;color:#1ddabe;" title="逆变器子阵"></i>
                 </div>
                 `
             },
@@ -162,8 +163,18 @@ ajaxData(
             $solway.confirm({ message: '确定删除此电站？删除电站，相关配置信息将一起被删除,请谨慎操作 ! ! !' }, () => {
                 deleteStationFun(item.id)
             });
+        } else if (event.target.className.includes('inverterSubarray')) {
+            if (!window.location.href.includes('iframe')) {
+                window.open('/module/inverterSubarray/#/inverterSubarray?stationid=' + item.id)
+            } else {
+                window.open('/module/newEnergyCloud/#/inverterSubarray?stationid=' + item.id)
+            }
         }
     };
+
+    // $scope.turnStsijh = () => {
+    //     window.top.location.href = '/module/newEnergyCloud/#/inverterSubarray?stationid=' + 3002
+    // }
 
     $scope.$on('cancelCallback', () => {
         $scope.newStationModel = false;

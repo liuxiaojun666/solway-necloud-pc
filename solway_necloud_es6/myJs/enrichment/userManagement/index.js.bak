@@ -80,51 +80,53 @@ ajaxData({
     
     $scope.getUserList = () =>{
         $scope.userList.getData({
-            depid: $scope.depid,
+            // depid: $scope.depid,
             keyWords:$scope.keyWords
         })
     }
 
-    function onClick(event, treeId, treeNode, clickFlag) {
-        $scope.depid = treeNode.id;
-        $scope.depName = treeNode.name;
-        $scope.getUserList();
-    };
+    $scope.getUserList();
 
-    let zTreeObj;
-    const setting = {
-        check: {
-            enable: true,
-            chkStyle: "radio",
-            radioType: "all"
-        },
-        data: {
-            simpleData: {
-                enable: true,
-                idKey: "id",
-                pIdKey: "pId",
-                rootPId: 0
-            }
-        },
-        callback: {
-            onClick: onClick
-        }
-    };
+    // function onClick(event, treeId, treeNode, clickFlag) {
+    //     $scope.depid = treeNode.id;
+    //     $scope.depName = treeNode.name;
+    //     $scope.getUserList();
+    // };
 
-    const initDepartmentList = () => {
-        $scope.departmentList.getData({
-        }).then(res => {
-            if (res.key == 1) {
-                let zNodes = res.data;
-                $.fn.zTree.init($("#departmentTree"), setting, zNodes);
-                zTreeObj = $.fn.zTree.getZTreeObj("departmentTree")
-                $('#departmentTree li:first > a').trigger('click');
-                $('#departmentTree li:first > a').trigger('dblclick');
-            }
-        })
-    }
+    // let zTreeObj;
+    // const setting = {
+    //     check: {
+    //         enable: true,
+    //         chkStyle: "radio",
+    //         radioType: "all"
+    //     },
+    //     data: {
+    //         simpleData: {
+    //             enable: true,
+    //             idKey: "id",
+    //             pIdKey: "pId",
+    //             rootPId: 0
+    //         }
+    //     },
+    //     callback: {
+    //         onClick: onClick
+    //     }
+    // };
 
-    initDepartmentList();
+    // const initDepartmentList = () => {
+    //     $scope.departmentList.getData({
+    //     }).then(res => {
+    //         if (res.key == 1) {
+    //             let zNodes = res.data;
+    //             $.fn.zTree.init($("#departmentTree"), setting, zNodes);
+    //             zTreeObj = $.fn.zTree.getZTreeObj("departmentTree")
+    //             $('#departmentTree li:first > a').trigger('click');
+    //             $('#departmentTree li:first > a').trigger('dblclick');
+    //         }
+    //     })
+    // }
+
+    // initDepartmentList();
 
     //邀请人员
     $scope.invitation = () =>{

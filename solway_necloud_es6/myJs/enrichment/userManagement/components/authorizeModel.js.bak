@@ -18,6 +18,12 @@ ajaxData({
         later: true,
         onlyLatest: true
     },
+    organizationTreeList: {
+        name:'GETorganizationTreeList',
+        data: {},
+        later: true,
+        onlyLatest: true
+    },
     authoritySave:{
         name:'POSTauthoritySave',
         data: {},
@@ -28,6 +34,44 @@ ajaxData({
 }, {
     __serviceName__: 'authorizeModelService',
 })('authorizeModelCtrl', ['$scope', 'authorizeModelService', 'actionRecord','$timeout','toaster','$http'], ($scope, myAjaxData, historicalRecord,$timeout,toaster,$http) => {
+
+    $scope.treeId = 'ztree_' + parseInt(Math.random() * 1e10);
+    const setting = {
+        view: { showLine: false }, //不显示连线
+        data: {
+            simpleData: {
+                enable: true,
+                pIdKey: "parentId"
+            }
+        },
+        callback: {
+            onClick: onClick
+        }
+    };
+    function onClick(event, treeId, treeNode, clickFlag) {
+        $scope.orgId = treeNode.id
+        $scope.treeName = treeNode.name
+        $scope.showTree = false
+    };
+    const initTree = (orgId, id) => {
+        if ($scope.treeData && $scope.treeData.length) {
+            let zTreeObj = $.fn.zTree.init($("#"+id), setting, $scope.treeData);
+            zTreeObj.expandNode(zTreeObj.getNodes()[0], true)
+            let node = zTreeObj.getNodeByParam('id', orgId ? orgId : $scope.treeData[0].id)
+            zTreeObj.selectNode(node)
+            setting.callback.onClick(null, zTreeObj.setting.treeId, node)
+        }
+    }
+    $scope.showTree = false
+
+    // 组织机构列表
+    const getOrganizationData = () =>{
+        $scope.organizationTreeList.getData().then(res => {
+            if (res.code === 200) {
+                $scope.treeData = res.data
+            }
+        })
+    }
 
     //角色信息
     const getRoleData = () =>{
@@ -60,6 +104,7 @@ ajaxData({
         }).then(res=>{
             if(res.key == 1){
                 $scope.data = res.data;
+                initTree(res.data.orgId, $scope.treeId)
                 if(res.data.aursrRoles){
                     $scope.aursrRoles = res.data.aursrRoles;
                     for(let i=0;i<$scope.aursrRoles.length;i++){
@@ -95,7 +140,11 @@ ajaxData({
         $scope.id = data.id;
         $scope.aursrRoles = [];
         $scope.data = [];
+        $scope.treeName = null
+        $scope.orgId = null
+        $scope.showTree = false
         getRoleData();
+        getOrganizationData();
     });
 
     //增加一行
@@ -168,11 +217,11 @@ ajaxData({
             aursrRoles.push({'roleid':roleid+'','aursrs':stationArr,'authUserRoleGroupStationRels':groupArr})
         }
         const data = $scope.data;
-        let formData = {'id':data.id+'','phone':data.phone,'realname':data.realname,'aursrRoles':aursrRoles};
+        let formData = {'id':data.id+'','phone':data.phone,'realname':data.realname, 'orgId': $scope.orgId, 'aursrRoles':aursrRoles};
 
         $scope.authoritySave.getData({data: JSON.stringify(formData)}).then(res=>{
             if(res.key==2){
-                toaster.pop('success', '', '保存成功');
+                toaster.pop('success', '', '保存成功'); 
                 $scope.$emit('addCallback');
             } else{
                 toaster.pop('error', '', '保存失败');
