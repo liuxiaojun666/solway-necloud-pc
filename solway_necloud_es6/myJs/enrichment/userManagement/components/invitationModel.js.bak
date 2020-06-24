@@ -75,6 +75,7 @@ ajaxData({
     const initTree = (data, id) => {
         let zTreeObj = $.fn.zTree.init($("#"+id), setting, data);
         zTreeObj.expandNode(zTreeObj.getNodes()[0], true)
+        $scope.defaultOrgId = data[0].id
         let node = zTreeObj.getNodeByParam('id', data[0].id)
         zTreeObj.selectNode(node)
     }
@@ -84,14 +85,21 @@ ajaxData({
         $scope.organizationTreeList.getData().then(res => {
             if (res.code === 200) {
                 $scope.treeData = res.data
-                initTree(res.data, 'tree_'+index)
+                if (res.data.length) {
+                    $scope.inviteList = [{'serNum':$scope.count, 'orgId': res.data[0].id, 'authUserRoleGroupStationRels':[],'aursrs':[] }]
+                } else {
+                    $scope.inviteList = [{'serNum':$scope.count, 'orgId': '', 'authUserRoleGroupStationRels':[],'aursrs':[] }]
+                }
+                $timeout(() => {
+                    initTree(res.data, 'tree_'+index)
+                },0)
             }
         })
     }
 
     const initSelectData = () =>{
+        $scope.defaultOrgId = ''
         $scope.count = 1;
-        $scope.inviteList = [{'serNum':$scope.count,'deptid':$scope.depId, 'orgId': 1, 'authUserRoleGroupStationRels':[],'aursrs':[] }]
         $scope.showRoles = false;
         getRoleData();
         getStationData();
@@ -100,14 +108,17 @@ ajaxData({
 
     //初始
     $scope.$on('broadInvitation',function(e,data){
-        $scope.depId = data.depId;
         initSelectData();
     });
 
     //增加一行
     $scope.addLine = () =>{
         $scope.count++;
-        $scope.inviteList.push({'serNum':$scope.count,'deptid':$scope.depId, 'orgId': 1, 'authUserRoleGroupStationRels':[],'aursrs':[]})
+        if ($scope.defaultOrgId || $scope.defaultOrgId === 0) {
+            $scope.inviteList.push({'serNum':$scope.count, 'orgId': $scope.defaultOrgId, 'authUserRoleGroupStationRels':[],'aursrs':[]})
+        } else {
+            $scope.inviteList.push({'serNum':$scope.count, 'orgId': '', 'authUserRoleGroupStationRels':[],'aursrs':[]})
+        }
         $timeout(() => {
             initTree($scope.treeData, 'tree_' + $scope.count)
         })

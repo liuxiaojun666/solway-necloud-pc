@@ -47,10 +47,32 @@ ajaxData({
         $scope.$apply();
     };
 
+    // 大屏心跳监测
+    const timer2 = setInterval(() => {
+        const xhr = new XMLHttpRequest()
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    console.log('心跳响应：ok')
+                } else {
+                    console.log('心跳响应：err')
+                    clearInterval(timer2)
+                    return 'request is unsucessful ' + xhr.status
+                }
+            }
+        }
+        xhr.open('GET', 'http://127.0.0.1:3000/heartbeat')
+        xhr.send()
+    }, 10 * 1 * 1000)
+
     // 时间刷新
     const timer = $interval(() => $scope.dateNow = Date.now(), 1 * 1000);
     // 销毁时间刷新
-    $scope.$on('$destroy', () => $interval.cancel(timer));
+    $scope.$on('$destroy', () => {
+        $interval.cancel(timer)
+        clearInterval(timer2)
+    });
+
 
 
 

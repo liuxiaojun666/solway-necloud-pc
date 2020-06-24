@@ -45,30 +45,30 @@ $(function () {
     }
 
     // 单窗口校验
-    ;(function () {
-        if (window.top !== window) return
-        var xx = function () {
-            window.opener = null;
-            window.open("", "_self", "");
-            window.close();
-            location.href = "about:blank";
-        };
-        if (window.localStorage.hasWindow) {
-            alert('为防止未知错误，建议使用一个窗口访问系统，您已打开窗口。');
-            if (confirm('确定继续访问将重新登录系统')) {
-                window.localStorage.hasWindow = '';
-                $.post('/Login/logout.htm');
-                window.location.href = 'http://' + window.location.host + '/login.html';
-            }
-            else xx();
-        }
-        else {
-            window.addEventListener('beforeunload', function (e) {
-                window.localStorage.hasWindow = '';
-            });
-            window.localStorage.hasWindow = 'true';
-        }
-    })();
+    // ;(function () {
+    //     if (window.top !== window) return
+    //     var xx = function () {
+    //         window.opener = null;
+    //         window.open("", "_self", "");
+    //         window.close();
+    //         location.href = "about:blank";
+    //     };
+    //     if (window.localStorage.hasWindow) {
+    //         alert('为防止未知错误，建议使用一个窗口访问系统，您已打开窗口。');
+    //         if (confirm('确定继续访问将重新登录系统')) {
+    //             window.localStorage.hasWindow = '';
+    //             $.post('/Login/logout.htm');
+    //             window.location.href = 'http://' + window.location.host + '/login.html';
+    //         }
+    //         else xx();
+    //     }
+    //     else {
+    //         window.addEventListener('beforeunload', function (e) {
+    //             window.localStorage.hasWindow = '';
+    //         });
+    //         window.localStorage.hasWindow = 'true';
+    //     }
+    // })();
 
     if (window.top !== window) {
         window.addEventListener('hashchange', function (e) {
