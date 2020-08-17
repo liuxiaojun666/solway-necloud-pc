@@ -17,9 +17,6 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval',
         }).success(function (res) {
             $scope.rolelist = res.rolelist;	//用户列表
             $scope.currentRoleID = res.currentRole;//当前用户的ID‘
-            $scope.roleType = res.roleType;//当前角色类型
-            const currentRoleNum = getArrAtrNum($scope.rolelist, 'roleId', $scope.currentRoleID);
-            $scope.currentRoleName = $scope.rolelist[currentRoleNum].roleDisplayName;//当前角色名
         });
 
         //切换角色,默认跳到各角色的首页
@@ -34,15 +31,12 @@ app.directive('personalCenter', ['myAjaxData', '$timeout', '$http', '$interval',
                 if(localStorage.getItem('switchStationData')){
                     localStorage.removeItem('switchStationData');
                 }
-                $scope.roleType = response.roleType;
                 
                 $scope.currentRoleID = Id;//当前角色Id
-                var currentRoleNum = getArrAtrNum($scope.rolelist, 'roleId', $scope.currentRoleID);
-                $scope.currentRoleName = $scope.rolelist[currentRoleNum].roleDisplayName;//当前角色名
 
                 var res = {};
-                res.currCompanyName = response.comName;
-                res.currCompanyLogo = response.comLogo;
+                res.currCompanyName = response.company.comName;
+                res.currCompanyLogo = response.company.logo;
                 $scope.$emit("chCompanyInfo", res);
                 $http({
                     method: "GET",

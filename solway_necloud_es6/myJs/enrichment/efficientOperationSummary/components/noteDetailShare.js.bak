@@ -79,7 +79,7 @@ app.controller('noteDetailShareCtrl', function ($scope, $http, $state, toaster) 
         $scope.getUserInfo(function (data) {
             let time = new Date().getTime();
             let result = passMap[yesOrNot];
-            let content = [{ 'id': data.id, 'name': data.realName, 'time': time, 'phone': data.userName, 'content': $scope.examineTaskcontent, 'result': result,'examineType':1 }];
+            let content = [{ 'id': data.currentUserId, 'name': data.realname, 'time': time, 'phone': data.username, 'content': $scope.examineTaskcontent, 'result': result,'examineType':1 }];
             if ($scope.showHisContent.length) {
                 content = $scope.showHisContent.concat(content)
             }
@@ -114,7 +114,7 @@ app.controller('noteDetailShareCtrl', function ($scope, $http, $state, toaster) 
             var time = new Date().getTime();
             var curContent = $("#examineModel").val();
             var result = passMap[yesOrNot];
-            var content = [{ 'id': data.id, 'name': data.realName, 'time': time, 'phone': data.userName, 'content': curContent, 'result': result ,'examineType':2}];
+            var content = [{ 'id': data.currentUserId, 'name': data.realname, 'time': time, 'phone': data.username, 'content': curContent, 'result': result ,'examineType':2}];
             if ($scope.showHisContent.length) {
                 content = $scope.showHisContent.concat(content)
             }
@@ -147,7 +147,7 @@ app.controller('noteDetailShareCtrl', function ($scope, $http, $state, toaster) 
         $scope.getUserInfo(function (data) {
             let time = new Date().getTime();
             let result = passMap[yesOrNot];
-            let content = [{ 'id': data.id, 'name': data.realName, 'time': time, 'phone': data.userName, 'content': $scope.confirmTaskcontent, 'result': result,'examineType':3 }];
+            let content = [{ 'id': data.currentUserId, 'name': data.realname, 'time': time, 'phone': data.username, 'content': $scope.confirmTaskcontent, 'result': result,'examineType':3 }];
             if ($scope.showHisContent.length) {
                 content = $scope.showHisContent.concat(content)
             }
@@ -182,11 +182,11 @@ app.controller('noteDetailShareCtrl', function ($scope, $http, $state, toaster) 
 
             }
         }).success(function (res) {
-            if (!res.id) {
+            if (!res.currentUserId) {
                 toaster.pop('error', '', "当前用户信息未获取到");
                 return;
             }
-            res.id && callback && callback(res);
+            res.currentUserId && callback && callback(res);
         });
     }
 

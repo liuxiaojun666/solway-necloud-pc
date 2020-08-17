@@ -57,9 +57,12 @@ ajaxData({
         if ($scope.treeData && $scope.treeData.length) {
             let zTreeObj = $.fn.zTree.init($("#"+id), setting, $scope.treeData);
             zTreeObj.expandNode(zTreeObj.getNodes()[0], true)
-            let node = zTreeObj.getNodeByParam('id', orgId ? orgId : $scope.treeData[0].id)
-            zTreeObj.selectNode(node)
-            setting.callback.onClick(null, zTreeObj.setting.treeId, node)
+            // let node = zTreeObj.getNodeByParam('id', orgId ? orgId : $scope.treeData[0].id)
+            if (orgId) {
+                let node = zTreeObj.getNodeByParam('id', orgId)
+                zTreeObj.selectNode(node)
+                setting.callback.onClick(null, zTreeObj.setting.treeId, node)
+            }
         }
     }
     $scope.showTree = false
