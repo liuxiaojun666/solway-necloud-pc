@@ -99,7 +99,7 @@ ajaxData({
 
     // 电站 接口 处理
     $scope.allSTListForPCBySession.subscribe(res => {
-        $scope.formData.qcStid = res[0] && res[0].id;
+        $scope.formData.qcStid = res.body[0] && res.body[0].busiId;
         $scope.bigdataExportUpdate.beforeGetdata();
     });
 
@@ -272,7 +272,7 @@ ajaxData({
                 dataIndex: 'qcStid',
                 sort: 'true',
                 render(text) {
-                    return text ? ($scope.allSTListForPCBySession.res.filter(v => text === v.id)[0] || {stationname: ''}).stationname : '';
+                    return text ? ($scope.allSTListForPCBySession.res.body.filter(v => text === v.busiId)[0] || {stationname: ''}).stationname : '';
                 }
             },
             {
