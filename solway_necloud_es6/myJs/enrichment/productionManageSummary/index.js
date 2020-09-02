@@ -3,6 +3,7 @@ ajaxData(
     }, {}
 )('productionManageSummaryCtrl', ['$scope', 'myAjaxData', 'actionRecord', '$ocLazyLoad'], ($scope, myAjaxData, historicalRecord, $ocLazyLoad) => {
     historicalRecord.init();
+    $scope.isV3 = location.host.includes('com.cn') || window.top !== window
     $scope.beforeLoading = true; // 页面loading
     $scope.moduleName = '生产管理';//当前页面名称；
     // $scope.themeShareUsable = window.localStorage.wxuser;
@@ -11,7 +12,7 @@ ajaxData(
     async function historyInitCallback() {
         const historiData = historicalRecord.get();
         const {
-            theme = 'TwoVotes',
+            theme = $scope.isV3 ? 'SparePart' : 'TwoVotes',
         } = historiData;
         $scope.theme = theme;
         await myAjaxData.timeout(0);
