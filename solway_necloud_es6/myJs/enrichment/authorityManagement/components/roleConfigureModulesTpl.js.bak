@@ -69,17 +69,28 @@ ajaxData({
             'ls':parentAndChildArr
         };
 
-        $http({
-            method : "POST",
-            url: window.interface['POSTupdateCustomModules'],
-            headers: {
-                "Content-Type": "application/json"
-            },
-            data:JSON.stringify(formData),
-            transformRequest: function (g) {
-                return JSON.stringify(g)
-            }
-        }).success(function(res) {
+        // $http({
+        //     method : "POST",
+        //     url: window.interface['POSTupdateCustomModules'],
+        //     headers: {
+        //         "Content-Type": "application/json"
+        //     },
+        //     data:JSON.stringify(formData),
+        //     transformRequest: function (g) {
+        //         return JSON.stringify(g)
+        //     }
+        // }).success(function(res) {
+        //     if(res.code == 0){
+        //         toaster.pop('success','',res.msg);
+        //         $scope.$emit('roleConfigureModuleCallback');
+        //     }else{
+        //         toaster.pop('error', '','配置失败')
+        //     }
+        // })
+
+        $scope.updateCustomModules.getData({
+            param: JSON.stringify(formData)
+        }).then(res => {
             if(res.code == 0){
                 toaster.pop('success','',res.msg);
                 $scope.$emit('roleConfigureModuleCallback');

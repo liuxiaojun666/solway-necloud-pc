@@ -78,26 +78,32 @@ $(function () {
 
     // 埋点统计
     if (window.PROCESS_EVN === 'production') {
-        $body.append('<script type="text/javascript" src="//s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"><\/script>');
+        $body.append(createScript('<script type="text/javascript" src="//s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"><\/script>'));
     } else {
-        $body.append('<script type="text/javascript" src="//s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>');
+        $body.append(createScript('<script type="text/javascript" src="//s5.cnzz.com/z_stat.php?id=1277802183&web_id=1277802183"><\/script>'));
     }
 
-    // angular.js
-    $body.append('<script src="/vendor/angular/angular.all.js" ><\/script>');
+    function createScript (str) {
+        const script = $(str)
+        script[0].async = false
+        return script
+    }
+
+    // angular.
+    $body.append(createScript('<script src="/vendor/angular/angular.all.js" ><\/script>'));
 
 
     // 数据持久化
-    $body.append('<script src="/theme/js/dist/components/persist.js?_=' + window.localStorage.stamp + '" ><\/script>');
+    $body.append(createScript('<script src="/theme/js/dist/components/persist.js?_=' + window.localStorage.stamp + '" ><\/script>'));
     // 数据持久化仓库初始化
-    $body.append('<script src="/theme/js/dist/enrichment/store.js?_=' + window.localStorage.stamp + '"><\/script>');
+    $body.append(createScript('<script src="/theme/js/dist/enrichment/store.js?_=' + window.localStorage.stamp + '"><\/script>'));
 
-    $body.append('<script src="/theme/js/app.js?_=' + window.localStorage.stamp + '" ><\/script>');
-    $body.append('<script src="/theme/js/config.js?_=' + window.localStorage.stamp + '" ><\/script>');
-    $body.append('<script src="/theme/js/config.lazyload.js?_=' + window.localStorage.stamp + '" ><\/script>');
-    $body.append('<script id="routerJS" param="" src="/theme/js/config.router.js?_=' + window.localStorage.stamp + '"><\/script>');
-    $body.append('<script src="/theme/js/main.js?_=' + window.localStorage.stamp + '" ><\/script>');
-    $body.append('<script src="/theme/js/services/ui-load.js?_=' + window.localStorage.stamp + '"" ><\/script>');
+    $body.append(createScript('<script src="/theme/js/app.js?_=' + window.localStorage.stamp + '" ><\/script>'));
+    $body.append(createScript('<script src="/theme/js/config.js?_=' + window.localStorage.stamp + '" ><\/script>'));
+    $body.append(createScript('<script src="/theme/js/config.lazyload.js?_=' + window.localStorage.stamp + '" ><\/script>'));
+    $body.append(createScript('<script id="routerJS" param="" src="/theme/js/config.router.js?_=' + window.localStorage.stamp + '"><\/script>'));
+    $body.append(createScript('<script src="/theme/js/main.js?_=' + window.localStorage.stamp + '" ><\/script>'));
+    $body.append(createScript('<script src="/theme/js/services/ui-load.js?_=' + window.localStorage.stamp + '"" ><\/script>'));
 
 
     setTimeout(() => {
@@ -113,7 +119,7 @@ $(function () {
         // css 加载
         $head.append(`<link rel="stylesheet" href="/theme/css/myCss.css">`);
         // 接口 地址 文件
-        $body.append('<script src="/theme/js/dist/interface.js?_=' + window.localStorage.stamp + '" ><\/script>');
+        $body.append(createScript('<script src="/theme/js/dist/interface.js?_=' + window.localStorage.stamp + '" ><\/script>'));
         // echarts
         $body.append('<script async src="/vendor/echarts/echarts-all-3new.min.js" ><\/script>');
         // jquery 验证
