@@ -186,20 +186,20 @@ ajaxData({
         later: true
     },
     // 运行配置权限查询
-    checkModuleAuth: {
-        name: 'GETcheckModuleAuth',
-        data: {
-            codes: 631
-        }
-    }
+    // checkModuleAuth: {
+    //     name: 'GETcheckModuleAuth',
+    //     data: {
+    //         codes: 631
+    //     }
+    // }
 }, {})('workingConfigureCtrl', ['$scope', 'myAjaxData', 'actionRecord', 'toaster', '$http'], ($scope, myAjaxData, historicalRecord, toaster, $http) => {
 
     $scope.moduleName = '运行配置';
 
     $scope.$on('broadcastSwitchStation', (e, data) => {
-        if ($scope.hasAuthority) {
+        // if ($scope.hasAuthority) {
             $scope.initPageParams();
-        }
+        // }
     })
 
     $scope.menuActive = id => {
@@ -277,15 +277,18 @@ ajaxData({
     }
 
     // 先判断该用户是否有权限查看页面
-    $scope.checkModuleAuth.subscribe(res => {
-        $scope.hasAuthority = true
-        if (res.body[631].userStatus !== '00') {
-            $scope.hasAuthority = false
-            return;
-        }
-        $scope.initPageParams();
-        $scope.menuActive('a')
-    });
+    // $scope.checkModuleAuth.subscribe(res => {
+    //     $scope.hasAuthority = true
+    //     if (res.body[631].userStatus !== '00') {
+    //         $scope.hasAuthority = false
+    //         return;
+    //     }
+    //     $scope.initPageParams();
+    //     $scope.menuActive('a')
+    // });
+
+    $scope.initPageParams();
+    $scope.menuActive('a')
 
     // $('.workingConfigure').on('click','.menu-btn',function(){
     //     $(this).siblings().removeClass('active-btn');

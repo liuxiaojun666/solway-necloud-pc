@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" data-ng-app="app">
+
+<head>
+    <meta charset="utf-8" />
+    <title>分布式新能源数据归集与监测平台</title>
+    <meta name="description" content="基于大数据云平台，实现能源设备海量数据的采集、存储、监控和分析。建立多个数据分析模型，提高资产运营效益和质量。" />
+    <meta name="keyword" content="分布式新能源数据归集与监测平台,新能源,光伏,风电,电站监控,远程监视">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <link type="image/x-icon" rel="shortcut icon" href="theme/images/favicon.ico">
+    <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277657171&web_id=1277657171"></script>
+    <script src="vendor/jquery/jquery.min.js" type="text/javascript"></script>
+    <script src="vendor/zhiwen/fingerprint2.min.js" type="text/javascript"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body>a {
+            display: none;
+        }
+
+        .clearfix:before,
+        .clearfix:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .clearfix {
+            *zoom: 1;
+        }
+
+        .login .login-input {
+            width: 100%;
+            height: 40px;
+            background: rgba(248, 248, 248, 1);
+            border-radius: 4px;
+            border: none;
+            text-indent: 1em;
+        }
+
+        input:-webkit-autofill {
+            -o-box-shadow: 0 0 0px 1000px rgba(248, 248, 248, 1) inset !important;
+            -ms-box-shadow: 0 0 0px 1000px rgba(248, 248, 248, 1) inset !important;
+            -moz-box-shadow: 0 0 0px 1000px rgba(248, 248, 248, 1) inset !important;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(248, 248, 248, 1) inset !important;
+            box-shadow: 0 0 0px 1000px rgba(248, 248, 248, 1) inset !important;
+        }
+
+        .login .phone-code {
+            margin-bottom: 18px;
+            background: rgba(248, 248, 248, 1);
+            position: relative;
+            display: none;
+        }
+
+        .login .smallCompanyName {
+            font-size: 18px;
+        }
+
+        .login .bigCompanyName {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+    <script>
+        if (window._czc) {
+            window._czc.push(["_setAutoPageview", false]);
+            window._czc.push(["_setCustomVar", "访客级别", "游客", "-1"]);
+        }
+        window.reqBeforStr = location.host.split(':')[1] ? '' : '';
+    </script>
+</head>
+
+<body class="login"
+    style="background: url('./theme/images/login/login-bg-new.png') no-repeat;background-size: cover;color:rgba(69,69,69,1);">
+    <div class="logo-con clearfix"
+        style="width:790px;height:518px;margin:0 auto;position: absolute;top: 50%;margin-top: -262px;left: 50%;margin-left: -395px;box-shadow: 0px 14px 38px rgba(5,35,65,0.8);">
+        <div
+            style="width:395px;height:525px;float:left;background:url('./theme/images/login/company-bg.png') no-repeat;background-size: cover">
+        </div>
+        <div style="width:395px;height:525px;float:left;background:rgba(255,255,255,1);border-radius: 0 12px 12px 0;">
+            <div class="text-center" style="margin:100px 0 0px;height: 100px;">
+                <div style="height:50px;"><img src="" id="logo-img" style="max-height:100%;"></div>
+                <div class="smallCompanyName">分布式新能源数据归集与监测平台</div>
+				
+            </div>
+            <div style="padding:0px 36px;">
+                <div style="margin-bottom:18px;"><input type="text" placeholder="用户名" class="login-input"
+                        id="login_username"></div>
+                <div style="margin-bottom:18px;"><input type="password" placeholder="密码" class="login-input"
+                        id="login_pass"></div>
+                <!-- <div class="clearfix phone-code">
+                    <div style="width:70%;"><input type="text" placeholder="手机验证码" class="login-input" id="phoneCode">
+                    </div>
+                    <a style="color:rgb(6,190,189);position: absolute;right: 20px;top: 12px;"
+                        class="getPhoneCode">获取验证码</a>
+                </div> -->
+
+                <p id="loginMessage"
+                    style="font-size: 14px; font-family: '黑体'; color: red; text-align: center; margin-bottom: -10px; display: none;">
+                </p>
+                <div id="submit" onclick="login()"
+                    style="height:40px;line-height: 40px;margin-top: 25px;background:rgba(31,141,225,1);border-radius:4px;text-align: center;color:white;font-size:20px;cursor: pointer;">
+                    登录
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            function getLocalIPs(callback) {
+                var ips = [];
+                var RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+
+                var pc = new RTCPeerConnection({ iceServers: [] });
+                pc.createDataChannel('');
+
+                pc.onicecandidate = function (e) {
+                    if (!e.candidate) {
+                        pc.close();
+                        callback(ips);
+                        return;
+                    }
+                    var ip = /^candidate:.+ (\S+) \d+ typ/.exec(e.candidate.candidate)[1];
+                    if (ips.indexOf(ip) == -1) ips.push(ip);
+                };
+                pc.createOffer(function (sdp) {
+                    pc.setLocalDescription(sdp);
+                }, function onerror() { });
+            }
+
+            getLocalIPs(function (ips) {
+                $.ajaxSetup({
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("CIP:'" + ips.join() + "'");
+                    },
+                });
+            });
+
+        });
+    </script>
+
+    <script>
+        var pwdFlag = true; // 强类型密码标志
+
+        var platformAgent = navigator.userAgent;
+        // if (/(iPhone|iPad|iPod|iOS|android)/i.test(platformAgent)) {
+        //     if (window.screen.width < 1366) {
+        //         window.location = "http://necloud.solway.cn/necloud-m";
+        //     }
+        // }
+        if (!navigator.cookieEnabled) {
+            alert("当前浏览器禁止使用Cookie，请开启Cookie否则您将无法正常浏览本网站！谢谢合作！！！");
+        }
+
+        function download(url, callback) {
+            var oReq = new XMLHttpRequest();
+            oReq.open("GET", url, true);
+            oReq.responseType = "blob";
+            oReq.onload = function (oEvent) {
+                var _blob = new Blob([oReq.response]);
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var content = reader.result;
+                    callback && callback(content);
+                };
+                reader.readAsText(_blob);
+            };
+            oReq.send();
+        };
+
+        function diffStamp(username, password) {
+            download('/stamp.txt?_=' + Math.random(), function (str) {
+                window.stamp = window.name = str;
+                var persist = localStorage.persist;
+                var stamp = localStorage.stamp;
+                localStorage.clear();//清除角色Ids
+
+                if (stamp === window.stamp) {
+                    localStorage.stamp = str;
+                    if (persist) {
+                        var persistObj = JSON.parse(persist);
+                        persistObj.sessionKeys.map(function (v) {
+                            return persistKeys[v] = {};
+                        });
+                        localStorage.persist = JSON.stringify(persistObj);
+                    }
+                } else {
+                    localStorage.stamp = str;
+                    localStorage.loginPageUserDataUsername = username;
+                    localStorage.loginPageUserDataPassword = password;
+                    // localStorage.loginPageUserDataCode = code;
+                    /* if (!(location.host.split(':')[1]))  */return window.location.reload();
+                }
+
+                window.stampNew = true;
+                login();
+            });
+
+        }
+
+        function login(fingerprint) {
+            if ($('#submit').html() === '登录中...') return;
+            var username = $("#login_username").val();
+            var password = $("#login_pass").val();
+            var appId = 1
+
+            if (!window.stampNew && !fingerprint) return diffStamp(username, password);
+
+            $("#loginMessage").html("");
+
+            if (username == "" || null == username || null == password
+                || password == "") {
+                $("#loginMessage").html("用户名和密码不能为空");
+                $("#loginMessage").show();
+                return false;
+            }
+           
+            var formData = {
+                "userName": username,
+                "password": password,
+                "appId": appId
+            }
+            
+            if (fingerprint) {
+                // '066aa92a69ab11eabe0290b11c0321da'
+                formData.screenSn = fingerprint
+                // delete formData.randomCode
+            }
+
+            if (MD5) {
+              formData.psd_type = 1
+              formData.password = MD5(password)
+            }
+
+            $('#submit').html('登录中...');
+
+            $.ajax({
+                url: reqBeforStr + "/Login/doLogin.htm",
+                headers: {
+                    'X-Requested-With': XMLHttpRequest
+                },
+                type: "post",
+                data: formData,
+                success: function (msg) {
+                    if(msg.code === 10003003){
+                        $("#loginMessage").html(msg.msg ? msg.msg : '用户已锁定');
+                        $("#loginMessage").show();
+                        $('#submit').html('登录');
+                        return
+                    }
+                    pwdFlag = msg.pwdFlag
+                    if (pwdFlag === false) {
+                        window.location.href = 'tpl/registPage/changePassword.html?_=' + Math.random();
+                        return false;
+                    }
+
+                    if (msg.status == 2) {
+                        $('#submit').html(' 登录 ');
+                        $("#loginMessage").html("用户名或密码有误!");
+                        $("#loginMessage").show();
+                    } else if (msg.status == 4) {
+                        $('#submit').html(' 登录 ');
+                        $("#loginMessage").html("用户已被锁定，请联系管理员!");
+                        $("#loginMessage").show();
+                    } else if (msg.status == 5) {
+                        $('#submit').html(' 登录 ');
+                        $("#loginMessage").html("用户已被注销，请联系管理员!");
+                        $("#loginMessage").show();
+                    } else if (msg.status == 6) {
+                        $('#submit').html(' 登录 ');
+                        $("#loginMessage").html("用户已在其它地方登录!");
+                        $("#loginMessage").show();
+                    } else if (msg.status == 1) {
+                        var storage = window.localStorage;
+                        delCookie('remoteLogin');
+                        delCookie('phone');
+                        storage["hasComInvite"] = 1;
+                        storage["username"] = username;
+                        // 新注册用户
+                        if (msg.userLogin.currentRole === 9) {
+                            storage["newUser"] = true;
+                        } else {
+                            localStorage.removeItem('newUser');
+                        }
+
+                        $.post("/microplat/oauth/token ", {
+                            username: username,
+                            psd_type: +(!!MD5),
+                            password: MD5 ? MD5(password) : password,
+                            grant_type: 'password',
+                            client_id: 'necloud_web',
+                            client_secret: 'necloud618',
+                            tenant: location.host.indexOf(".com.cn") > 0 ? 'tenant001' : 'tenant002'
+                        }, function (msg) {
+                            if (msg.code === 200 && msg.data.access_token) {
+                                window.localStorage.token = msg.data.access_token
+                                window.localStorage.refreshToken = msg.data.refresh_token
+                                window.localStorage.tenant = msg.data.tenant
+                                window.localStorage.expiresIn = Date.now() + msg.data.expires_in * 1000
+
+                                $.ajax({
+                                    type: "get",
+                                    url: reqBeforStr + "/UserAuthHandle/getRightListForPCNew.htm",
+                                    success: function (result) {
+                                        if (!result.result) return;
+                                        var welComeUrl = '/power-index';
+                                        window._czc && window._czc.push(["_setCustomVar", "账号", username, "-1"]);
+                                        // if (result.roleType == 3) {
+                                        //     welComeUrl = '/businessManagement';
+                                        //     window._czc && window._czc.push(["_setCustomVar", "访客级别", "集团/企业管理员", "-1"]);
+                                        // } else 
+                                        if (result.roleType == 99) {
+                                            welComeUrl = '/companyManagement';
+                                            window._czc && window._czc.push(["_setCustomVar", "访客级别", "系统管理员", "-1"]);
+                                        }
+                                        else {
+                                            return window.location.href = 'http://' + location.host + "/module/newEnergyCloud" + ((window.stamp || '?_=1585213973671') + Date.now()) + '_$_' + username;
+                                        }
+                                        window.localStorage.welComeUrl = welComeUrl;
+                                        window.localStorage.currCompanyName = result.comName;
+                                        window.localStorage.currCompanyLogo = result.comLogo;
+                                        window.localStorage.stamp = window.stamp;
+                                        window.location.href = 'http://' + location.host + "/index.html" + (window.stamp || '?_=' + Date.now()) + '_$_' + username;
+                                    }
+                                });
+                                
+                            } else {
+                                return alert('请重试')
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        function setCookie(name, value) {
+            var exp = new Date();
+            exp.setTime(exp.getTime() + 30 * 60 * 1000);
+            document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString();
+        }
+
+        function getCookie(name) {
+            var value, arrCookie = document.cookie.split(";");
+            for (var i = 0; i < arrCookie.length; i++) {
+                var arr = arrCookie[i].split("=");
+                if (arr[0].trim() == name) {
+                    value = arr[1];
+                    break;
+                }
+            }
+            return value;
+        }
+
+        function delCookie(name) {
+            var exp = new Date();
+            exp.setTime(exp.getTime() - 1);
+            var cval = getCookie(name);
+            if (cval != null) {
+                document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
+            }
+        }
+
+        //点击  Enter  键  登陆
+        document.onkeydown = function (e) {
+            var e = window.event ? window.event : e;
+            if (e.keyCode == 13) {
+                login();
+            }
+        }
+
+        function getFingerprint(callback) {
+            var excludes = {
+                userAgent: true,
+                audio: true,
+                enumerateDevices: true,
+                fonts: true,
+                fontsFlash: true,
+                webgl: true,
+                canvas: true
+            }
+            Fingerprint2.get({ excludes: excludes }, function (components) {
+                var values = components.map(function (component) {
+                    return component.value
+                });
+                var murmur = Fingerprint2.x64hash128(values.join(''), 31);
+                callback(murmur);
+            });
+        }
+
+        $(function () {
+            // 地址栏获取参数  用于自动登录
+            var searchParams = {}
+            window.location.search.substr(1).split('&').forEach(function name(params) {
+                var arr = params.split('=')
+                searchParams[arr[0]] = arr[1]
+            })
+            if (searchParams.username && searchParams.password) {
+                $("#login_username").val(searchParams.username);
+                $("#login_pass").val(searchParams.password);
+                // $("#login_code").val('0000');
+                history.replaceState('login', null, 'login.html')
+                return getFingerprint(function (murmur) {
+                    login(murmur)
+                })
+            }
+
+            $.get(reqBeforStr + '/Login/getCustom.htm', function (res) {
+                var info = res.data;
+                if (info.currCompanyLogo) {
+                    $("#logo-img").attr('src', info.currCompanyLogo);
+                } else {
+                    $("#logo-img").attr('src', 'theme/images/login/logo.png')
+                }
+                if (info.customFlag) { // 1：是订制了特定域名的公司；0：新能云
+                    // $("#company-name").html(info.currCompanyName);
+                    $("#company-name").remove();
+                    $("#system-name").addClass('bigCompanyName');
+                } else {
+                    $("#company-name").html('新能云');
+                }
+                if (info.os_title) {
+                    $("#system-name").html(info.os_title);
+                } else {
+                    $("#system-name").html('新能源智能运营管理平台');
+                }
+            });
+        });
+
+        
+    </script>
+
+    <!-- 判断当前浏览器是否可以进入系统 -->
+    <script>
+        var support_css3 = (function () {
+            var div = document.createElement('div'),
+                vendors = 'Ms O Moz Webkit'.split(' '),
+                len = vendors.length;
+
+            return function (prop) {
+                if (prop in div.style) return true;
+
+                prop = prop.replace(/^[a-z]/, function (val) {
+                    return val.toUpperCase();
+                });
+
+                while (len--) {
+                    if (vendors[len] + prop in div.style) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+        })();
+        function IEVersion() {
+            var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串  
+            var isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1; //判断是否IE<11浏览器  
+            var isEdge = userAgent.indexOf("Edge") > -1 && !isIE; //判断是否IE的Edge浏览器  
+            var isIE11 = userAgent.indexOf('Trident') > -1 && userAgent.indexOf("rv:11.0") > -1;
+            if (isIE) {
+                var reIE = new RegExp("MSIE (\\d+\\.\\d+);");
+                reIE.test(userAgent);
+                var fIEVersion = parseFloat(RegExp["$1"]);
+                if (fIEVersion == 7) {
+                    return 7;
+                } else if (fIEVersion == 8) {
+                    return 8;
+                } else if (fIEVersion == 9) {
+                    return 9;
+                } else if (fIEVersion == 10) {
+                    return 10;
+                } else {
+                    return 6;//IE版本<=7
+                }
+            } else if (isEdge) {
+                return true;//edge
+            } else if (isIE11) {
+                return 11; //IE11  
+            } else {
+                if (
+                    support_css3('transform')
+                    && support_css3('boxSizing')
+                    && support_css3('flexWrap')
+                ) return true;//不是ie浏览器
+                return false;
+            }
+        }
+
+        $('body').append('<div id="useCalc" style="width: calc(100% - 50px);-moz-calc(100% - 50px);-webkit-calc(100% - 50px);"></div>');
+        if ($('#useCalc').width() === $('body').width()) disabledLogin();
+        if (IEVersion() !== true) disabledLogin();
+        if (!self.fetch) disabledLogin();
+        if (!window.WebSocket) disabledLogin();
+        function disabledLogin() {
+            // $('#loginFormBlock').hide();
+            $('body').append(
+                '<div style="font-size:16px;background-color: rgba(0,0,0,.5);color:#fff;position:fixed;left:0;right:0;top:0;bottom:0;text-align:center;padding-top:250px;">' +
+                '<div style="background: #fff url(./theme/images/login/noLogin.jpg) no-repeat;width:680px;height:350px;margin:0 auto;padding-top:50px;">' +
+                '<span>您的浏览器版本太低，部分功能无法使用。</span>' +
+                '<br/><br/>' +
+                '<span>建议升级浏览器。</span><br/>' +
+                '<br/><br/>' +
+                '<a style="background: #29799e;border-radius:20px;display:inline-block;width:140px;color:#fff;line-height:40px;margin-right:2em;" target="_blank" href="https://www.google.cn/chrome/"><u>谷歌Chrome</u></a>' +
+                '<a style="background: #29799e;border-radius:20px;display:inline-block;width:140px;color:#fff;line-height:40px;" target="_blank" href="http://www.firefox.com.cn/"><u>火狐浏览器</u></a><br/>' +
+                '</div>' +
+                '</div>'
+            );
+        }
+    </script>
+    <script src="vendor/md5/md5.min.js" type="text/javascript"></script>
+</body>
+
+</html>

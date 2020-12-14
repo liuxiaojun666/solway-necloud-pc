@@ -126,6 +126,10 @@ ajaxData(
             })
     }
 
+    $scope.radioCheckChange = () =>{
+        $scope.formData['releaseScope'] = $("input[name='shareArea']:checked").val();
+    }
+
     // 获取类别option
     $scope.shareRepositoryDict
         .getData({ dictType: 'REPOSITORY_CLASS' })
@@ -204,6 +208,7 @@ ajaxData(
         let formData = {
             id: $scope.id,
             title: $scope.formData.title,
+            releaseScope: $scope.formData.releaseScope,
             type: $scope.formData.typeId,
             repclass: $scope.formData.repclass ? $scope.formData.repclass : '',
             productId: $scope.formData.productId ? $scope.formData.productId : '',
