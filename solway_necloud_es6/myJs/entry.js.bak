@@ -101,7 +101,11 @@ $(function () {
     $body.append(createScript('<script src="/theme/js/app.js?_=' + window.localStorage.stamp + '" ><\/script>'));
     $body.append(createScript('<script src="/theme/js/config.js?_=' + window.localStorage.stamp + '" ><\/script>'));
     $body.append(createScript('<script src="/theme/js/config.lazyload.js?_=' + window.localStorage.stamp + '" ><\/script>'));
-    $body.append(createScript('<script id="routerJS" param="" src="/theme/js/config.router.js?_=' + window.localStorage.stamp + '"><\/script>'));
+    if (window.isAdmin) {
+      $body.append(createScript('<script id="routerJS" param="" src="/theme/js/config.admin.router.js?_=' + window.localStorage.stamp + '"><\/script>'));
+    } else {
+      $body.append(createScript('<script id="routerJS" param="" src="/theme/js/config.router.js?_=' + window.localStorage.stamp + '"><\/script>'));
+    }
     $body.append(createScript('<script src="/theme/js/main.js?_=' + window.localStorage.stamp + '" ><\/script>'));
     $body.append(createScript('<script src="/theme/js/services/ui-load.js?_=' + window.localStorage.stamp + '"" ><\/script>'));
 

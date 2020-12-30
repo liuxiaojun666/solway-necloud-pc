@@ -62,6 +62,7 @@ app.directive('pageSlideDownAdmin', ['$ocLazyLoad', '$http', '$state', '$statePa
         }).then(res => {
             $scope.adminPages = res.body[0].children.map(v => ({state: v.uiState, name: v.name}));
             $scope.productLibrary = res.body[1] && res.body[1].children.map(v => ({state: v.uiState, name: v.name}));
+            localStorage.adminPages = JSON.stringify([...$scope.adminPages, ...$scope.productLibrary])
         });
         $scope.changeUrl = (url) =>{
             if(url.includes(':module')){
